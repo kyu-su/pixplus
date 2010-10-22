@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.0.0
+// @version     0.1.0
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
@@ -2659,8 +2659,8 @@
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
 
      function init() {
-       alltags = getAllTags();
-       tag_chk($('input_tag').value.split(/\s+|\u3000+/));
+       alltags = window.getAllTags();
+       window.tag_chk($('input_tag').value.split(/\s+|\u3000+/));
        if (autotag) autoinput_from_tag();
 
        if (conf.bm_tag_order.length) {
@@ -3156,18 +3156,12 @@
        if (cb_load) cb_load(imgcache[url]);
      } else {
        var img = new Image();
-       /*
        img.addEventListener(
          'load',
          function() {
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);
-        */
-       img.onload = function() {
-         imgcache[url] = img;
-         if (cb_load) cb_load(img);
-       };
        if (cb_error && !cb_abort) cb_abort = cb_error;
        if (cb_error) img.addEventListener('error', function() { cb_error(); }, false);
        if (cb_abort) img.addEventListener('abort', function() { cb_abort(); }, false);

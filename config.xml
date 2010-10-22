@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets">
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://crckyl.pa.land.to/pixiv.js/" version="0.1.0">
   <name>pixplus</name>
   <description>pixivでイラストをページ遷移せずにポップアップ表示し、概ねキーボードのみでイラストの移動や評価などを行う。その他雑多な機能いろいろ。</description>
   <author href="http://my.opera.com/crckyl/">wowo</author>
   <access origin="http://pixiv.net" subdomains="true" />
-  <icon src="pixplus_128.png" />
+  <icon src="pixplus.png" />
+  <license>Public domain</license>
 </widget>
