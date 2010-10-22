@@ -314,6 +314,7 @@
    var options = parseopts(window.location.href);
 
    if (conf.debug) {
+     /*
      window.opera.addEventListener(
        'BeforeScript',
        function(e) {
@@ -330,6 +331,7 @@
            }
          }
        }, false);
+      */
    }
    if (window.location.pathname.match(/^\/stacc/)) {
      /* スタックページで評価とタグ編集出来ないのをなんとかする */
@@ -344,7 +346,7 @@
        }, false);
    }
 
-   document.addEventListener('DOMContentLoaded', init_pixplus, false);
+   window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
    function addillustlink(id) {
      var anc = $c('a', document.body);
@@ -1235,19 +1237,6 @@
      evt.initEvent('pixplusInitialize', true, true);
      document.dispatchEvent(evt);
 
-     if (conf.stacc_link) {
-       var stacc_anc;
-       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
-         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
-       } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
-         if (conf.stacc_link == 'all') {
-           stacc_anc.href = '/stacc/p/all';
-         } else {
-           stacc_anc.href = '/stacc/my/home/' + conf.stacc_link + '/all';
-         }
-       }
-     }
-
      init_config_ui();
      init_galleries();
      init_recommend();
@@ -1398,6 +1387,19 @@
          effect.loop(effect.startOn);
          effect.loop(effect.finishOn);
        };
+     }
+
+     if (conf.stacc_link) {
+       var stacc_anc;
+       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
+         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
+       } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
+         if (conf.stacc_link == 'all') {
+           stacc_anc.href = '/stacc/p/all';
+         } else {
+           stacc_anc.href = '/stacc/my/home/' + conf.stacc_link + '/all';
+         }
+       }
      }
 
      if (conf.default_manga_type) {
@@ -3161,25 +3163,15 @@
        if (cb_load) cb_load(imgcache[url]);
      } else {
        var img = new Image();
-       opera.postError('load: ' + url);
        img.addEventListener(
          'load',
          function() {
-           opera.postError('complete: ' + url);
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);
        if (cb_error && !cb_abort) cb_abort = cb_error;
-       if (cb_error) img.addEventListener('error', error, false);
-       if (cb_abort) img.addEventListener('abort', abort, false);
-       function error() {
-         opera.postError('error: ' + url);
-         cb_error();
-       }
-       function abort() {
-         opera.postError('abort: ' + url);
-         cb_abort();
-       }
+       if (cb_error) img.addEventListener('error', cb_error, false);
+       if (cb_abort) img.addEventListener('abort', cb_abort, false);
        img.src = url;
      }
    }
