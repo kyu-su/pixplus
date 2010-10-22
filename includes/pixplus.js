@@ -140,8 +140,6 @@
      mod_bookmark_add_page:  [false, 'ブックマーク編集ページにも変更を加える。'],
      tag_separator_style:    ['border-top:2px solid #dae1e7;', 'ブックマーク編集ページでのセパレータのスタイル。'],
      stacc_link:             ['',    '上部メニューの「スタックフィード」のリンク先。空白/all/mypixiv/favorite/self'],
-     open_newer:             [false, '「↑」ボタンを表示する。そのイラストより上にあるものをすべて開く。'],
-     invert_open_newer:      [false, 'イラストを一括で開く順番を反転する。'],
      default_manga_type:     ['',    'デフォルトのマンガ表示タイプ。scroll/slide'],
      rate_confirm:           [true,  'イラストを評価する時に確認をとる。'],
      popup_manga_tb:         [true,  'マンガサムネイルページでポップアップを使用する。'],
@@ -1458,9 +1456,6 @@
      if (this.thumb) this.parse_img_url(this.thumb.src);
      return this;
    }
-   GalleryItem.openitems = function(items) {
-     each(items, function(item) { item.open(); });
-   };
    GalleryItem.prototype.parse_img_url = function(url) {
      // 冒頭メモ参照
      if (url.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)$/)) {
@@ -1480,26 +1475,6 @@
          new Popup.MangaLoader(self, 0);
        }
      }
-   };
-   GalleryItem.prototype.open = function() {
-     var anc = $c('a');
-     anc.href = this.medium;
-     var evt = document.createEvent('MouseEvent');
-     if (opera.version() >= 10.5) {
-       evt.initMouseEvent('click', false, false, document.defaultView, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, null);
-     } else {
-       evt.initMouseEvent('mousedown', false, false, document.defaultView, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, null);
-     }
-     anc.dispatchEvent(evt);
-   };
-   GalleryItem.prototype.opennewer = function() {
-     var item = this;
-     var items = [];
-     do {
-       items.push(item);
-     } while((item = item.prev))
-     if (!conf.invert_open_newer) items.reverse();
-     GalleryItem.openitems(items);
    };
    function Gallery(args, filter, filter_col) {
      this.args = args;
@@ -1577,20 +1552,6 @@
          }
 
          var item;
-         if (conf.open_newer) {
-           var a_opennewer = $c('a', null, 'opennewer');
-           a_opennewer.href = url;
-           a_opennewer.addEventListener(
-             'click',
-             function(ev) {
-               ev.preventDefault();
-               item.opennewer();
-             }, false);
-           a_opennewer.innerText = '\u2191';
-           cap.style.display = 'inline';
-           cap.parentNode.insertBefore(a_opennewer, cap);
-         }
-
          var pbtn = thumb;
          if (!pbtn) {
            pbtn = $c('a');
@@ -1625,9 +1586,6 @@
            self.onadditem.emit(self, item);
          }
        });
-   };
-   Gallery.prototype.openall = function() {
-     GalleryItem.openitems(this.items);
    };
 
    function Popup(item, manga_page) {
