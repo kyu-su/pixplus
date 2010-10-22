@@ -1319,7 +1319,7 @@
      load_js('http://source.pixiv.net/source/js/lib/prototype.js?20100720');
      load_js('http://source.pixiv.net/source/js/lib/scriptaculous/effects.js', conf.disable_effect ? disable_effect : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
-     load_js('http://source.pixiv.net/source/js/tag_edit.js??20100720');
+     load_js('http://source.pixiv.net/source/js/tag_edit.js??20100720', trap_tag_edit);
      if ($x('//script[contains(@src, "rating_manga.js")]')) {
        trap_rating();
      } else {
