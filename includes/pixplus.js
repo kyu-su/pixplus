@@ -212,43 +212,6 @@
      return (pp.rpc_state & f) == f;
    }
 
-   var options = parseopts(window.location.href);
-
-   if (conf.debug) {
-     /*
-     window.opera.addEventListener(
-       'BeforeScript',
-       function(e) {
-         if (e.element.src.match(/^http:\/\/(?:im\.ecnavi\.ov\.yahoo\.co\.jp\/js_flat\/|.*\.ads\.)/)) {
-           e.element.text = '';
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
-           // Event.addMethodsの件のテスト
-           e.element.text = e.element.text
-             .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
-           ;
-         } else if (!e.element.src) {
-           if (e.element.text.indexOf('UA-1830249-3') >= 0) {
-             e.element.text = '';
-           }
-         }
-       }, false);
-      */
-   }
-   if (window.location.pathname.match(/^\/stacc/)) {
-     /* スタックページで評価とタグ編集出来ないのをなんとかする */
-     window.opera.addEventListener(
-       'BeforeScript',
-       function(e) {
-         if (e.element.src == 'http://source.pixiv.net/source/js/tag_edit.js??20100720') {
-           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/rating.js??20100720') {
-           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
-         }
-       }, false);
-   }
-
-   window.addEventListener('DOMContentLoaded', init_pixplus, false);
-
    var LS = {
      prefix: '__pixplus_',
      s: window.localStorage,
@@ -340,13 +303,43 @@
                 data:  [conf_schema[name], conf[name]]});
      LS.init_section(name, conf_schema[name], conf[name]);
    };
-   each(LS.l, function(c) { LS.init_section(c.name, c.data[0], c.data[1]); });
-   if (LS.s) {
-     var order = LS.get('bookmark', 'tag_order');
-     if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
-     var aliases = LS.get('bookmark', 'tag_aliases');
-     if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+
+   var options = parseopts(window.location.href);
+
+   if (conf.debug) {
+     /*
+     window.opera.addEventListener(
+       'BeforeScript',
+       function(e) {
+         if (e.element.src.match(/^http:\/\/(?:im\.ecnavi\.ov\.yahoo\.co\.jp\/js_flat\/|.*\.ads\.)/)) {
+           e.element.text = '';
+         } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
+           // Event.addMethodsの件のテスト
+           e.element.text = e.element.text
+             .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
+           ;
+         } else if (!e.element.src) {
+           if (e.element.text.indexOf('UA-1830249-3') >= 0) {
+             e.element.text = '';
+           }
+         }
+       }, false);
+      */
    }
+   if (window.location.pathname.match(/^\/stacc/)) {
+     /* スタックページで評価とタグ編集出来ないのをなんとかする */
+     window.opera.addEventListener(
+       'BeforeScript',
+       function(e) {
+         if (e.element.src == 'http://source.pixiv.net/source/js/tag_edit.js??20100720') {
+           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
+         } else if (e.element.src == 'http://source.pixiv.net/source/js/rating.js??20100720') {
+           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+         }
+       }, false);
+   }
+
+   window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
    function addillustlink(id) {
      var anc = $c('a', document.body);
@@ -861,10 +854,20 @@
            locate_right();
          } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
                     $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-           if (window.AutoPagerize) {
+           if (window.AutoPagerize || window.AutoPatchWork) {
              locate_right();
            } else {
-             document.addEventListener('GM_AutoPagerizeLoaded', locate_right, false);
+             conn('GM_AutoPagerizeLoaded');
+             conn('AutoPatchWork.request');
+             function conn(name) {
+               document.addEventListener(
+                 name,
+                 function() {
+                   locate_right();
+                   document.removeEventListener(name, arguments.callee, false);
+                 }, false);
+               
+             }
            }
          }
        }
@@ -1196,6 +1199,13 @@
    }
    function init_pixplus() {
      document.body.setAttribute('pixplus', '');
+     each(LS.l, function(c) { LS.init_section(c.name, c.data[0], c.data[1]); });
+     if (LS.s) {
+       var order = LS.get('bookmark', 'tag_order');
+       if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
+       var aliases = LS.get('bookmark', 'tag_aliases');
+       if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+     }
      each(
        ['auto_manga', 'reverse'],
        function(key) {
@@ -2658,7 +2668,7 @@
            'click',
            function(e) {
              e.preventDefault();
-             add_form(tag);
+             window.add_form(tag);
            }, false);
          it.onclick = '';
          it.href = '/tags.php?tag=' + tag;
@@ -2667,11 +2677,9 @@
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
 
      function init() {
-       var tags = $('input_tag').value.split(/\s+|\u3000+/);
-       // magic 11.00.1029
-       tags.without = window.Array.prototype.without;
        window.alltags = window.getAllTags();
-       window.tag_chk(tags);
+       // magic 11.00.1029
+       window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
        if (autotag) autoinput_from_tag();
 
        if (conf.bm_tag_order.length) {
@@ -2907,20 +2915,20 @@
    }
 
    function Floater(wrap, cont) {
-     if (!Floater.instances) {
-       Floater.instances = [];
-       window.addEventListener('load', Floater.init, false);
-     }
+     if (!Floater.instances) Floater.instances = [];
      Floater.instances.push(this);
      this.wrap = wrap;
      this.cont = cont;
+     if (Floater.initialized) this.init();
    }
    Floater.init = function() {
+     if (Floater.initialized) return;
      each(Floater.instances, function(inst) { inst.init(); });
      window.addEventListener('scroll', Floater.update_float, false);
      window.addEventListener('resize', Floater.force_update, false);
      document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
      document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
+     Floater.initialized = true;
    };
    Floater.update_float = function() {
      each(Floater.instances, function(inst) { inst.update_float(); });
@@ -2978,6 +2986,7 @@
      }
      this.update_height();
    };
+   window.addEventListener('load', Floater.init, false);
 
    function Signal(def, parent) {
      this.def    = def;
