@@ -3,10 +3,10 @@ OEX = pixplus.oex
 all: $(OEX)
 dist: $(OEX)
 
-pixplus_60.png: pixplus.svg
-	rsvg-convert $< -w 60 -o $@
+pixplus_128.png: pixplus.svg
+	rsvg-convert $< -w 128 -o $@
 
-$(OEX): config.xml includes pixplus_60.png pixplus_200.png
+$(OEX): config.xml includes pixplus_128.png
 	zip -r $@ $^ --exclude '*/.svn/*'
 
 clean:
