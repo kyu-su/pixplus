@@ -60,9 +60,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.627418"
-     inkscape:cx="42.938434"
-     inkscape:cy="16.600762"
+     inkscape:zoom="32.000001"
+     inkscape:cx="42.853185"
+     inkscape:cy="10.370686"
      inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:grid-bbox="true"
@@ -209,8 +209,9 @@
      style="display:inline">
     <path
        style="fill:#0096db;fill-opacity:1;stroke:none"
-       d="m 33.5,43.5 0,5 10,0 0,10 5,0 0,-10 10,0 0,-5 -10,0 0,-10 -5,0 0,10 -10,0 z"
-       id="path3733" />
+       d="m 32.75,42.75 0,5.5 10,0 0,10 5.5,0 0,-10 10,0 0,-5.5 -10,0 0,-10 -5.5,0 0,10 -10,0 z"
+       id="path3733"
+       sodipodi:nodetypes="ccccccccccccc" />
   </g>
   <g
      inkscape:groupmode="layer"
