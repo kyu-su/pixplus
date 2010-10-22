@@ -183,6 +183,72 @@
    var XMLNS_SVG = "http://www.w3.org/2000/svg";
    var XMLNS_XLINK = "http://www.w3.org/1999/xlink";
 
+   var pp = {
+     conf_schema:   conf_schema,
+     conf:          conf,
+
+     galleries:     [],
+     Popup:         Popup,
+     Gallery:       Gallery,
+     GalleryItem:   GalleryItem,
+
+     geturl:        geturl,
+     uncache:       uncache,
+     parseimgurl:   parseimgurl,
+
+     load_js:       load_js,
+     load_css:      load_css,
+     write_css:     write_css,
+
+     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8},
+     rpc_usable:    false,
+     rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
+     rpc_req_tag:   7,  // i|u|e
+     rpc_req_rate:  13, // i|e|qr
+     rpc_req_qrate: 13
+   };
+   window.opera.pixplus = pp;
+   function rpc_chk(f) {
+     return (pp.rpc_state & f) == f;
+   }
+
+   var options = parseopts(window.location.href);
+
+   if (conf.debug) {
+     /*
+     window.opera.addEventListener(
+       'BeforeScript',
+       function(e) {
+         if (e.element.src.match(/^http:\/\/(?:im\.ecnavi\.ov\.yahoo\.co\.jp\/js_flat\/|.*\.ads\.)/)) {
+           e.element.text = '';
+         } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
+           // Event.addMethodsの件のテスト
+           e.element.text = e.element.text
+             .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
+           ;
+         } else if (!e.element.src) {
+           if (e.element.text.indexOf('UA-1830249-3') >= 0) {
+             e.element.text = '';
+           }
+         }
+       }, false);
+      */
+   }
+   if (window.location.pathname.match(/^\/stacc/)) {
+     /* スタックページで評価とタグ編集出来ないのをなんとかする */
+     window.opera.addEventListener(
+       'BeforeScript',
+       function(e) {
+         if (e.element.src == 'http://source.pixiv.net/source/js/tag_edit.js??20100720') {
+           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
+         } else if (e.element.src == 'http://source.pixiv.net/source/js/rating.js??20100720') {
+           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+         }
+       }, false);
+   }
+
+   window.addEventListener('DOMContentLoaded', init_pixplus, false);
+
    var LS = {
      prefix: '__pixplus_',
      s: window.localStorage,
@@ -281,72 +347,6 @@
      var aliases = LS.get('bookmark', 'tag_aliases');
      if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
    }
-
-   var pp = {
-     conf_schema:   conf_schema,
-     conf:          conf,
-
-     galleries:     [],
-     Popup:         Popup,
-     Gallery:       Gallery,
-     GalleryItem:   GalleryItem,
-
-     geturl:        geturl,
-     uncache:       uncache,
-     parseimgurl:   parseimgurl,
-
-     load_js:       load_js,
-     load_css:      load_css,
-     write_css:     write_css,
-
-     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8},
-     rpc_usable:    false,
-     rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
-     rpc_req_tag:   7,  // i|u|e
-     rpc_req_rate:  13, // i|e|qr
-     rpc_req_qrate: 13
-   };
-   window.opera.pixplus = pp;
-   function rpc_chk(f) {
-     return (pp.rpc_state & f) == f;
-   }
-
-   var options = parseopts(window.location.href);
-
-   if (conf.debug) {
-     /*
-     window.opera.addEventListener(
-       'BeforeScript',
-       function(e) {
-         if (e.element.src.match(/^http:\/\/(?:im\.ecnavi\.ov\.yahoo\.co\.jp\/js_flat\/|.*\.ads\.)/)) {
-           e.element.text = '';
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
-           // Event.addMethodsの件のテスト
-           e.element.text = e.element.text
-             .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
-           ;
-         } else if (!e.element.src) {
-           if (e.element.text.indexOf('UA-1830249-3') >= 0) {
-             e.element.text = '';
-           }
-         }
-       }, false);
-      */
-   }
-   if (window.location.pathname.match(/^\/stacc/)) {
-     /* スタックページで評価とタグ編集出来ないのをなんとかする */
-     window.opera.addEventListener(
-       'BeforeScript',
-       function(e) {
-         if (e.element.src == 'http://source.pixiv.net/source/js/tag_edit.js??20100720') {
-           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/rating.js??20100720') {
-           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
-         }
-       }, false);
-   }
-
-   window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
    function addillustlink(id) {
      var anc = $c('a', document.body);
@@ -889,6 +889,7 @@
              locate_right_real();
            }
          };
+         // magic 11.00.1029
          ir.prototype.switchVisibility.bindAsEventListener = _switchVisibility.bindAsEventListener;
          if (window.getCookie('recommendationVisible') != 'no') locate_right_real();
        }
@@ -2666,8 +2667,11 @@
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
 
      function init() {
-       alltags = window.getAllTags();
-       window.tag_chk($('input_tag').value.split(/\s+|\u3000+/));
+       var tags = $('input_tag').value.split(/\s+|\u3000+/);
+       // magic 11.00.1029
+       tags.without = window.Array.prototype.without;
+       window.alltags = window.getAllTags();
+       window.tag_chk(tags);
        if (autotag) autoinput_from_tag();
 
        if (conf.bm_tag_order.length) {
