@@ -8,8 +8,10 @@
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.1.0
- * Initial release
+/** 0.1.0(pixiv.js 1.12からの変更点)
+ * Opera11のExtensionに対応。
+ * ブックマーク管理ページでレコメンドを右側に並べる機能が動作しなくなっていたのを修正。
+ * AutoPatchWorkに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -135,7 +137,7 @@
      scroll:                 [1,     'イラストページを開いた時にスクロールする。0:なし/1:キャプション/2:イラスト'],
      bookmark_hide:          [false, 'ブックマーク非公開をデフォルトにする。'],
      float_tag_list:         [true,  'タグリストをフロート表示する。'],
-     locate_recommend_right: [2,     'レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerizeが動作している時のみ有効'],
+     locate_recommend_right: [2,     'レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerizeなどが動作している時のみ有効'],
      extagedit:              [true,  'ブックマーク編集時にアローキーでのタグ選択を有効にする。'],
      mod_bookmark_add_page:  [false, 'ブックマーク編集ページにも変更を加える。'],
      tag_separator_style:    ['border-top:2px solid #dae1e7;', 'ブックマーク編集ページでのセパレータのスタイル。'],
