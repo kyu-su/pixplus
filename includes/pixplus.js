@@ -1728,7 +1728,7 @@
            }
            if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
              var r = c == 126 ? 1 : 43 - c;
-             send_rating(r);
+             window.send_rating(r);
              return;
            }
          }
@@ -3156,12 +3156,18 @@
        if (cb_load) cb_load(imgcache[url]);
      } else {
        var img = new Image();
+       /*
        img.addEventListener(
          'load',
          function() {
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);
+        */
+       img.onload = function() {
+         imgcache[url] = img;
+         if (cb_load) cb_load(img);
+       };
        if (cb_error && !cb_abort) cb_abort = cb_error;
        if (cb_error) img.addEventListener('error', function() { cb_error(); }, false);
        if (cb_abort) img.addEventListener('abort', function() { cb_abort(); }, false);
