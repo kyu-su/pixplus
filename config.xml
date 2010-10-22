@@ -5,4 +5,5 @@
   <author href="http://my.opera.com/crckyl/">wowo</author>
   <access origin="http://pixiv.net" subdomains="true" />
   <icon src="pixplus_60.png" />
+  <icon src="pixplus_200.png" />
 </widget>
