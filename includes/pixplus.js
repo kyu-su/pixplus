@@ -307,7 +307,6 @@
    var options = parseopts(window.location.href);
 
    if (conf.debug) {
-     /*
      window.opera.addEventListener(
        'BeforeScript',
        function(e) {
@@ -324,7 +323,6 @@
            }
          }
        }, false);
-      */
    }
    if (window.location.pathname.match(/^\/stacc/)) {
      /* スタックページで評価とタグ編集出来ないのをなんとかする */
@@ -799,6 +797,7 @@
      var float_wrap = null;
      if (r_container) {
        if (conf.debug) {
+         // trap
          var _show = window.IllustRecommender.prototype.show;
          var _error = window.IllustRecommender.error;
          window.IllustRecommender.prototype.show = function(res) {
@@ -814,39 +813,49 @@
          };
        }
 
-       r_container.addEventListener(
-         'DOMNodeInserted',
-         function(e) {
-           var t = e.target;
-           if (t && t.nodeType == 1 && t.className.indexOf('illusts') >= 0) {
-             var g = add_gallery({container: t,
-                                  colpath:   'li',
-                                  cappath:   'a[img]/following-sibling::text()[1]',
-                                  thumbpath: 'preceding-sibling::a/img'},
-                                 null, unpack_captions);
-             if (float_wrap) {
-               var floater = new Floater(float_wrap, t);
-
-               var timer;
-               g.onadditem.connect(function() { if (!timer) timer = setTimeout(init_pager, 100); });
-               function init_pager() {
-                 var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
-                 if (more) {
-                   t.addEventListener(
-                     'scroll',
-                     function() {
-                       if (t.scrollHeight - t.scrollTop < t.clientHeight * 2) {
-                         clickelem(more);
-                         t.removeEventListener('scroll', arguments.callee, false);
-                       }
-                     }, false);
-                 }
-                 floater.update_height();
-                 timer = null;
-               }
+       var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
+       var gallery;
+       if (illusts) {
+         init_illusts();
+       } else {
+         r_container.addEventListener(
+           'DOMNodeInserted',
+           function(e) {
+             var t = e.target;
+             if (t && t.nodeType == 1 && t.className.split(/\s+/).indexOf('illusts') >= 0) {
+               init_illusts(t);
+               r_container.removeEventListener('DOMNodeInserted', arguments.callee, true);
              }
+           }, true);
+       }
+       function init_illusts() {
+         gallery = add_gallery({container: illusts,
+                                colpath:   'li',
+                                cappath:   'a[img]/following-sibling::text()[1]',
+                                thumbpath: 'preceding-sibling::a/img'},
+                               null, unpack_captions);
+         if (float_wrap) init_right_gallery();
+       }
+       function init_right_gallery() {
+         var floater = new Floater(float_wrap, illusts);
+         var timer;
+         gallery.onadditem.connect(function() { if (!timer) timer = setTimeout(init_pager, 100); });
+         function init_pager() {
+           var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
+           if (more) {
+             illusts.addEventListener(
+               'scroll',
+               function() {
+                 if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
+                   clickelem(more);
+                   illusts.removeEventListener('scroll', arguments.callee, false);
+                 }
+               }, false);
            }
-         }, true);
+           floater.update_height();
+           timer = null;
+         }
+       }
 
        var de = document.documentElement;
        if (!window.location.href.match(/\/bookmark_add\.php/)) {
@@ -866,34 +875,32 @@
                    locate_right();
                    document.removeEventListener(name, arguments.callee, false);
                  }, false);
-               
+
              }
            }
          }
        }
        var switch_wrap;
        function locate_right() {
-         var ir = window.IllustRecommender;
-         var _switchVisibility = ir.prototype.switchVisibility;
-         ir.prototype.switchVisibility = function() {
-           _switchVisibility.apply(this, arguments);
-           if (float_wrap) {
-             r_switch.parentNode.removeChild(r_switch);
-             if (this.visible) {
-               $('wrapper').style.width = '1160px';
-               $('recom_wrap').style.display = 'block';
-               switch_wrap.appendChild(r_switch);
+         $('switchButton').addEventListener(
+           'click',
+           function() {
+             alert();
+             if (float_wrap) {
+               r_switch.parentNode.removeChild(r_switch);
+               if (this.visible) {
+                 $('wrapper').style.width = '1160px';
+                 $('recom_wrap').style.display = 'block';
+                 switch_wrap.appendChild(r_switch);
+               } else {
+                 $('wrapper').style.width = '970px';
+                 $('recom_wrap').style.display = 'none';
+                 r_switch_p.appendChild(r_switch);
+               }
              } else {
-               $('wrapper').style.width = '970px';
-               $('recom_wrap').style.display = 'none';
-               r_switch_p.appendChild(r_switch);
+               locate_right_real();
              }
-           } else {
-             locate_right_real();
-           }
-         };
-         // magic 11.00.1029
-         ir.prototype.switchVisibility.bindAsEventListener = _switchVisibility.bindAsEventListener;
+           }, false);
          if (window.getCookie('recommendationVisible') != 'no') locate_right_real();
        }
        function locate_right_real() {
@@ -935,6 +942,8 @@
                    // オートビューモード/もっと見る
                    '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
                    '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
+
+         if (gallery) init_right_gallery();
        }
      }
    }
@@ -1049,6 +1058,7 @@
           */
        } else if (bm_tag_list && !options.id) {
          if (conf.bm_tag_order.length) {
+           // trap
            var _bookmarkToggle = window.bookmarkToggle;
            window.bookmarkToggle = function(container_id, type) {
              if (!options.id && conf.bm_tag_order.length) {
@@ -1079,7 +1089,7 @@
 
                set_cookie('bookToggle', type, 30, window.location.hostname.replace(/^(\w+)\./, '.'));
              } else {
-               _bookmarkToggle(container_id, type);
+               _bookmarkToggle.apply(window, [container_id, type]);
              }
              var evt = document.createEvent('Event');
              evt.initEvent('pixplusBMTagToggled', true, true);
@@ -1328,21 +1338,23 @@
      }
 
      function trap_rating() {
+       // trap
        var _send_rating = window.send_rating;
        var _send_quality_rating = window.send_quality_rating;
        window.send_rating = function(rate) {
          if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + rate + '\u70b9')) return;
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_rating(rate);
+         _send_rating.apply(window, [rate]);
        };
        window.send_quality_rating = function(rate) {
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_quality_rating(rate);
+         _send_quality_rating.apply(window, [rate]);
        };
        trap_qrate();
      }
 
      function trap_tag_edit() {
+       // trap
        var _startTagEdit = window.startTagEdit;
        var _ef4 = window.ef4;
        window.startTagEdit = function() {
@@ -1350,7 +1362,7 @@
            Popup.instance.tag_editing = true;
            Popup.instance.locate();
          }
-         _startTagEdit();
+         _startTagEdit.apply(window);
        };
        window.ef4 = function() {
          new Effect.BlindDown(
@@ -1372,6 +1384,7 @@
      }
 
      function trap_qrate() {
+       // trap
        var _rating_ef = window.rating_ef;
        var _rating_ef2 = window.rating_ef2;
        window.rating_ef = function() {
@@ -1389,7 +1402,7 @@
        };
        window.rating_ef2 = function() {
          if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-         _rating_ef2();
+         _rating_ef2.apply(window);
        };
      }
 
@@ -2915,20 +2928,20 @@
    }
 
    function Floater(wrap, cont) {
-     if (!Floater.instances) Floater.instances = [];
-     Floater.instances.push(this);
      this.wrap = wrap;
      this.cont = cont;
-     if (Floater.initialized) this.init();
+     if (!Floater.instances) Floater.instances = [];
+     Floater.instances.push(this);
+     if (Floater.loaded) this.init();
    }
-   Floater.init = function() {
-     if (Floater.initialized) return;
+   Floater.load = function() {
+     if (Floater.loaded) return;
      each(Floater.instances, function(inst) { inst.init(); });
      window.addEventListener('scroll', Floater.update_float, false);
      window.addEventListener('resize', Floater.force_update, false);
      document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
      document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
-     Floater.initialized = true;
+     Floater.loaded = true;
    };
    Floater.update_float = function() {
      each(Floater.instances, function(inst) { inst.update_float(); });
@@ -2986,7 +2999,7 @@
      }
      this.update_height();
    };
-   window.addEventListener('load', Floater.init, false);
+   window.addEventListener('load', Floater.load, false);
 
    function Signal(def, parent) {
      this.def    = def;
