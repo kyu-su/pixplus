@@ -8,7 +8,7 @@
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 1.0.0
+/** 0.1.0
  * Initial release
  */
 
@@ -145,6 +145,7 @@
      popup_manga_tb:         [true,  'マンガサムネイルページでポップアップを使用する。'],
      disable_effect:         [false, 'アニメーションなどのエフェクトを無効化する。'],
      popup: {
+       preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
        caption_height:       [0.4,   '画像を基準としたキャプションの高さ上限。コメントにスクロールバーが付く。'],
        caption_opacity:      [0.9,   'キャプションの不透明度。'],
@@ -1467,12 +1468,14 @@
      Popup.run(this);
    };
    GalleryItem.prototype.preload = function() {
-     var self = this;
-     if (!this.loaded) {
-       this.loaded = true;
-       new Popup.Loader(this, conf.popup.auto_manga_p && (conf.popup.auto_manga & 4) ? preload_manga : null);
-       function preload_manga() {
-         new Popup.MangaLoader(self, 0);
+     if (conf.popup.preload) {
+       var self = this;
+       if (!this.loaded) {
+         this.loaded = true;
+         new Popup.Loader(this, conf.popup.auto_manga_p && (conf.popup.auto_manga & 4) ? preload_manga : null);
+         function preload_manga() {
+           new Popup.MangaLoader(self, 0);
+         }
        }
      }
    };
@@ -1667,9 +1670,11 @@
          this.preload_map = {};
        },
        preload: function() {
-         var page = this.page + 1;
-         if (page < this.page_count && !this.preload_map[page]) {
-           new Popup.MangaLoader(self.item, page);
+         if (conf.popup.preload) {
+           var page = this.page + 1;
+           if (page < this.page_count && !this.preload_map[page]) {
+             new Popup.MangaLoader(self.item, page);
+           }
          }
        },
        get_url: function(page) {
@@ -3156,15 +3161,25 @@
        if (cb_load) cb_load(imgcache[url]);
      } else {
        var img = new Image();
+       opera.postError('load: ' + url);
        img.addEventListener(
          'load',
          function() {
+           opera.postError('complete: ' + url);
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);
        if (cb_error && !cb_abort) cb_abort = cb_error;
-       if (cb_error) img.addEventListener('error', function() { cb_error(); }, false);
-       if (cb_abort) img.addEventListener('abort', function() { cb_abort(); }, false);
+       if (cb_error) img.addEventListener('error', error, false);
+       if (cb_abort) img.addEventListener('abort', abort, false);
+       function error() {
+         opera.postError('error: ' + url);
+         cb_error();
+       }
+       function abort() {
+         opera.postError('abort: ' + url);
+         cb_abort();
+       }
        img.src = url;
      }
    }
