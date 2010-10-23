@@ -1093,7 +1093,7 @@
 
                set_cookie('bookToggle', type, 30, window.location.hostname.replace(/^(\w+)\./, '.'));
              } else {
-               _bookmarkToggle.apply(window, [container_id, type]);
+               _bookmarkToggle(container_id, type);
              }
              var evt = document.createEvent('Event');
              evt.initEvent('pixplusBMTagToggled', true, true);
@@ -1348,11 +1348,11 @@
        window.send_rating = function(rate) {
          if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + rate + '\u70b9')) return;
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_rating.apply(window, [rate]);
+         _send_rating(rate);
        };
        window.send_quality_rating = function(rate) {
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_quality_rating.apply(window, [rate]);
+         _send_quality_rating(rate);
        };
        trap_qrate();
      }
@@ -1366,7 +1366,7 @@
            Popup.instance.tag_editing = true;
            Popup.instance.locate();
          }
-         _startTagEdit.apply(window);
+         _startTagEdit();
        };
        window.ef4 = function() {
          new window.Effect.BlindDown(
@@ -1406,7 +1406,7 @@
        };
        window.rating_ef2 = function() {
          if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-         _rating_ef2.apply(window);
+         _rating_ef2();
        };
      }
 
