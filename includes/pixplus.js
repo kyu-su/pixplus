@@ -316,9 +316,11 @@
            e.element.text = '';
          } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
            // Event.addMethodsの件のテスト
+           /*
            e.element.text = e.element.text
              .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
            ;
+            */
          } else if (!e.element.src) {
            if (e.element.text.indexOf('UA-1830249-3') >= 0) {
              e.element.text = '';
@@ -1367,7 +1369,7 @@
          _startTagEdit.apply(window);
        };
        window.ef4 = function() {
-         new Effect.BlindDown(
+         new window.Effect.BlindDown(
            'tag_area', {
 	     delay:0.2,
 	     duration:0.2,
@@ -1390,7 +1392,7 @@
        var _rating_ef = window.rating_ef;
        var _rating_ef2 = window.rating_ef2;
        window.rating_ef = function() {
-         new Effect.BlindDown(
+         new window.Effect.BlindDown(
            'quality_rating', {
 	     delay: 0.2,
 	     duration: 0.2,
