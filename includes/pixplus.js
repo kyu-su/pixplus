@@ -136,7 +136,7 @@
      debug:                  [false, 'デバッグモード。'],
      scroll:                 [1,     'イラストページを開いた時にスクロールする。0:なし/1:キャプション/2:イラスト'],
      bookmark_hide:          [false, 'ブックマーク非公開をデフォルトにする。'],
-     float_tag_list:         [true,  'タグリストをフロート表示する。'],
+     float_tag_list:         [1,     'タグリストをフロート表示する。0:無効/1:有効/2:AutoPagerizeなどが動作している時のみ有効'],
      locate_recommend_right: [2,     'レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerizeなどが動作している時のみ有効'],
      extagedit:              [true,  'ブックマーク編集時にアローキーでのタグ選択を有効にする。'],
      mod_bookmark_add_page:  [false, 'ブックマーク編集ページにも変更を加える。'],
@@ -291,7 +291,7 @@
        var len = Math.floor(lines.length / 2);
        for(var i = 0; i < len; ++i) {
          var tag = lines[i * 2], alias = lines[i * 2 + 1];
-         if (tag && alias) aliases[tag] = alias.split(',');
+         if (tag && alias) aliases[tag] = alias.split(/\s+/);
        }
        return aliases;
      }
@@ -470,8 +470,8 @@
          }
 
          var tacont = create_section('Tag alias', div);
-         tacont.innerText = '","\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af' +
-           '\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
+         tacont.innerText = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
+           '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
          tag_alias_table = $c('table', tacont);
          var btaadd = $c('button', tacont);
          btaadd.innerText = 'Add';
@@ -549,7 +549,7 @@
          var itag = $c('input', ctag);
          itag.value = key;
          var ialiases = $c('input', caliases);
-         if (key) ialiases.value = conf.bm_tag_aliases[key].join(',');
+         if (key) ialiases.value = conf.bm_tag_aliases[key].join(' ');
        }
        function check_conf() {
          LS.each(
@@ -771,17 +771,6 @@
                             cappath:   'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
                             thumbpath: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
                             skip_dups: true});
-       /* AutoPagerizeが対応したので廃止。
-       if (g) {
-         Popup.onsetitem.connect(
-           function() {
-             if (this.item.gallery === g && !this.item.next) {
-               var more = $x('.//span[@id="insert_next_status"]/div[contains(concat(" ", @class, " "), " bt_more ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]');
-               if (more) clickelem(more);
-             }
-           });
-       }
-        */
      }
 
      // 汎用
@@ -867,21 +856,7 @@
            locate_right();
          } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
                     $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-           if (window.AutoPagerize || window.AutoPatchWork) {
-             locate_right();
-           } else {
-             conn('GM_AutoPagerizeLoaded');
-             conn('AutoPatchWork.request');
-             function conn(name) {
-               document.addEventListener(
-                 name,
-                 function() {
-                   locate_right();
-                   document.removeEventListener(name, arguments.callee, false);
-                 }, false);
-
-             }
-           }
+           with_pager_func(locate_right);
          }
        }
        var switch_wrap;
@@ -974,7 +949,12 @@
        }
      }
 
-     if (conf.float_tag_list) {
+     if (conf.float_tag_list == 1) {
+       make_float();
+     } else if (conf.float_tag_list == 2) {
+       with_pager_func(make_float);
+     }
+     function make_float() {
        var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
        if (cont) {
          var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
@@ -3045,6 +3025,28 @@
      if (!this.disconnected) this.signal.disconnect(this.id);
    };
 
+   function with_pager_func(func) {
+     if (window.AutoPagerize || window.AutoPatchWork) {
+       func();
+     } else {
+       if (!with_pager_func.funcs) {
+         with_pager_func.funcs = [];
+         connect_event('GM_AutoPagerizeLoaded');
+         connect_event('AutoPatchWork.request');
+       }
+       with_pager_func.funcs.push(func);
+     }
+     function connect_event(name) {
+       document.addEventListener(
+         name,
+         function() {
+           each(with_pager_func.funcs, function(func) { func(); });
+           with_pager_func.funcs = null;
+           document.removeEventListener(name, arguments.callee, false);
+         }, false);
+     }
+   }
+
    // 汎用
    function $(id, elem) {
      return document.getElementById(id);
@@ -3162,22 +3164,22 @@
    }
 
    var urlcache = new Object();
-   function geturl(url, cb, error, reload) {
+   function geturl(url, cb_load, cb_error, reload) {
      if (!reload && urlcache[url]) {
-       cb(urlcache[url]);
+       cb_load(urlcache[url]);
      } else {
-       var http = new window.XMLHttpRequest();
-       http.open('GET', url, true);
-       http.onload  = function() {
-         urlcache[url] = http.responseText;
-         cb(http.responseText);
+       var xhr = new window.XMLHttpRequest();
+       xhr.open('GET', url, true);
+       xhr.onload  = function() {
+         urlcache[url] = xhr.responseText;
+         cb_load(xhr.responseText);
        };
-       if (error) {
-         http.onerror = function() {
-           error(http);
+       if (cb_error) {
+         xhr.onerror = function() {
+           cb_error(xhr);
          };
        }
-       http.send(null);
+       xhr.send(null);
      }
      return null;
    }
