@@ -1,17 +1,15 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.1.0
+// @version     0.2.0
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.1.0(pixiv.js 1.12からの変更点)
- * Opera11のExtensionに対応。
- * ブックマーク管理ページでレコメンドを右側に並べる機能が動作しなくなっていたのを修正。
- * AutoPatchWorkに対応。
+/** 0.2.0
+ * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
