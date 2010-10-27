@@ -691,7 +691,7 @@
      unpack_captions(col, 'ul/li/a[img]/label');
    }
    function init_galleries() {
-     function process_area_right() {
+     function area_right() {
        each(
          $xa('//div[contains(concat(" ", @class, " "), " area_right ")]'),
          function(col) {
@@ -701,8 +701,7 @@
                         allow_nothumb: 3});
          });
      }
-
-     if (window.location.href.match(/\/(?:mypage|cate_r18)\.php/)) {
+     function mypage() {
        each(
          $xa('//div[contains(concat(" ", @class, " "), " baseTop")]'),
          function(top) {
@@ -713,7 +712,11 @@
                           cappath:    'li/text()[last()]'});
            }
          });
-       process_area_right();
+       area_right();
+     }
+
+     if (window.location.href.match(/\/(?:mypage|cate_r18)\.php/)) {
+       mypage();
      } else if (window.location.href.match(/\/member\.php/)) {
        each(
          $xa('//div[contains(concat(" ", @class, " "), " worksListOthers ")]/*[contains(concat(" ", @class, " "), " worksListOthersImg ")]'),
@@ -743,7 +746,7 @@
      } else if (window.location.href.match(/\/ranking(_r18g?|_rookie|_log|_tag|_area)?\.php/)) {
        if (RegExp.$1 == '_tag' || RegExp.$1 == '_area' && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
-         process_area_right();
+         area_right();
        } else {
          // その他ランキング
          add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " rankingBox ")]'),
@@ -779,12 +782,17 @@
 
      // 汎用
      if (pp.galleries.length == 0) {
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
-                    colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]'},
-                   null, unpack_captions);
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " one_column_body ") and div[contains(concat(" ", @class, " "), " search_a2_result ")]]'),
-                    colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
-                   null, unpack_captions);
+       if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
+           $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
+         mypage();
+       } else {
+         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
+                      colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]'},
+                     null, unpack_captions);
+         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " one_column_body ") and div[contains(concat(" ", @class, " "), " search_a2_result ")]]'),
+                      colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
+                     null, unpack_captions);
+       }
      }
    }
    function init_recommend() {
