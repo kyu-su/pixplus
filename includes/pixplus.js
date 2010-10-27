@@ -207,7 +207,19 @@
      rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
      rpc_req_tag:   7,  // i|u|e
      rpc_req_rate:  13, // i|e|qr
-     rpc_req_qrate: 13
+     rpc_req_qrate: 13,
+
+     recommender: {
+       loaded:      false,
+       funcs:       [],
+       attach:      function(func) {
+         if (this.loaded) {
+           func();
+         } else {
+           this.funcs.push(func);
+         }
+       }
+     }
    };
    window.opera.pixplus = pp;
    function rpc_chk(f) {
@@ -308,26 +320,6 @@
 
    var options = parseopts(window.location.href);
 
-   if (conf.debug) {
-     window.opera.addEventListener(
-       'BeforeScript',
-       function(e) {
-         if (e.element.src.match(/^http:\/\/(?:im\.ecnavi\.ov\.yahoo\.co\.jp\/js_flat\/|.*\.ads\.)/)) {
-           e.element.text = '';
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/lib/prototype.js?20100720') {
-           // Event.addMethodsの件のテスト
-           /*
-           e.element.text = e.element.text
-             .replace(/(F\s*=\s*Prototype.BrowserFeatures),\s*T\s*=/, '$1;var T=')
-           ;
-            */
-         } else if (!e.element.src) {
-           if (e.element.text.indexOf('UA-1830249-3') >= 0) {
-             e.element.text = '';
-           }
-         }
-       }, false);
-   }
    if (window.location.pathname.match(/^\/stacc/)) {
      /* スタックページで評価とタグ編集出来ないのをなんとかする */
      window.opera.addEventListener(
@@ -340,6 +332,18 @@
          }
        }, false);
    }
+   window.opera.addEventListener(
+     'AfterScript',
+     function(e) {
+       if (e.element.src.indexOf('illust_recommender.js') >= 0) {
+         var _load = window.IllustRecommender.prototype.load;
+         window.IllustRecommender.prototype.load = function() {
+           _load.apply(this, [].slice.apply(arguments));
+           pp.recommender.loaded = true;
+           each(pp.recommender.funcs, function(func) { func(); });
+         };
+       }
+     }, false);
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
@@ -789,47 +793,51 @@
      var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
      var float_wrap = null;
      if (r_container) {
+       var ir = window.IllustRecommender;
        if (conf.debug) {
          // trap
-         var _show = window.IllustRecommender.prototype.show;
-         var _error = window.IllustRecommender.error;
-         window.IllustRecommender.prototype.show = function(res) {
+         var _show = ir.prototype.show;
+         var _error = ir.error;
+         ir.prototype.show = function(res) {
            try {
              _show.apply(this, arguments);
            } catch(ex) {
              this.error(ex);
            }
          };
-         window.IllustRecommender.prototype.error = function(msg) {
+         ir.prototype.error = function(msg) {
            alert(msg);
            _error.apply(this, arguments);
          };
        }
-
-       var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
+       var de = document.documentElement;
        var gallery;
-       if (illusts) {
-         init_illusts();
-       } else {
-         r_container.addEventListener(
-           'DOMNodeInserted',
-           function(e) {
-             var t = e.target;
-             if (t && t.nodeType == 1 && t.className.split(/\s+/).indexOf('illusts') >= 0) {
-               init_illusts(t);
-               r_container.removeEventListener('DOMNodeInserted', arguments.callee, true);
+       pp.recommender.attach(
+         function() {
+           var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
+           var gallery;
+           if (!window.location.href.match(/\/bookmark_add\.php/)) {
+             if (conf.locate_recommend_right == 1) {
+               locate_right();
+             } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
+                        $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
+               with_pager_func(function() {
+                                 locate_right();
+                                 if (gallery) init_right_gallery(illusts);
+                               });
              }
-           }, true);
-       }
-       function init_illusts() {
+           }
+           init_gallery(illusts);
+         });
+       function init_gallery(illusts) {
          gallery = add_gallery({container: illusts,
                                 colpath:   'li',
                                 cappath:   'a[img]/following-sibling::text()[1]',
                                 thumbpath: 'preceding-sibling::a/img'},
                                null, unpack_captions);
-         if (float_wrap) init_right_gallery();
+         if (float_wrap) init_right_gallery(illusts);
        }
-       function init_right_gallery() {
+       function init_right_gallery(illusts) {
          var floater = new Floater(float_wrap, illusts);
          var timer;
          gallery.onadditem.connect(function() { if (!timer) timer = setTimeout(init_pager, 100); });
@@ -850,37 +858,24 @@
          }
        }
 
-       var de = document.documentElement;
-       if (!window.location.href.match(/\/bookmark_add\.php/)) {
-         if (conf.locate_recommend_right == 1) {
-           locate_right();
-         } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
-                    $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-           with_pager_func(locate_right);
-         }
-       }
        var switch_wrap;
        function locate_right() {
-         $('switchButton').addEventListener(
-           'click',
-           function() {
-             alert();
-             if (float_wrap) {
-               r_switch.parentNode.removeChild(r_switch);
-               if (this.visible) {
-                 $('wrapper').style.width = '1160px';
-                 $('recom_wrap').style.display = 'block';
-                 switch_wrap.appendChild(r_switch);
-               } else {
-                 $('wrapper').style.width = '970px';
-                 $('recom_wrap').style.display = 'none';
-                 r_switch_p.appendChild(r_switch);
-               }
-             } else {
-               locate_right_real();
-             }
-           }, false);
-         if (window.getCookie('recommendationVisible') != 'no') locate_right_real();
+         var _show = r_container.show, _hide = r_container.hide;
+         r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
+         r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
+         function sv(show) {
+           r_switch.parentNode.removeChild(r_switch);
+           if (show) {
+             $('wrapper').style.width = '1160px';
+             $('recom_wrap').style.display = 'block';
+             switch_wrap.appendChild(r_switch);
+           } else {
+             $('wrapper').style.width = '970px';
+             $('recom_wrap').style.display = 'none';
+             r_switch_p.appendChild(r_switch);
+           }
+         }
+         locate_right_real();
        }
        function locate_right_real() {
          var anc = $x('a[contains(@href, "bookmark.php?tag=")]', r_caption);
@@ -921,8 +916,6 @@
                    // オートビューモード/もっと見る
                    '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
                    '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
-
-         if (gallery) init_right_gallery();
        }
      }
    }
@@ -1311,7 +1304,7 @@
                'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}');
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
-     load_js('http://source.pixiv.net/source/js/lib/prototype.js?20100720');
+     load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
      load_js('http://source.pixiv.net/source/js/lib/scriptaculous/effects.js', conf.disable_effect ? disable_effect : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
      load_js('http://source.pixiv.net/source/js/tag_edit.js??20100720', trap_tag_edit);
@@ -3233,11 +3226,13 @@
        }
      }
    }
-   function chk_ext_src(url) {
-     return $x('//*[@src="' + url + '" or starts-with(@href, "' + url.replace(/\?.*$/, '') + '")]');
+   function chk_ext_src(elem, url) {
+     var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
+     var attr = name == 'link' ? 'href' : 'src';
+     return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
    }
    function load_js(url, onload) {
-     if (chk_ext_src(url)) {
+     if (chk_ext_src('script', url)) {
        if (onload) onload();
        return false;
      } else {
@@ -3250,7 +3245,7 @@
      }
    }
    function load_css(url) {
-     if (chk_ext_src(url)) {
+     if (chk_ext_src('link', url)) {
        return false;
      } else {
        var css  = $c('link');
