@@ -2670,7 +2670,23 @@
          it.href = '/tags.php?tag=' + tag;
        });
 
-     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028', init);
+     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
+     // 20101028版は最初にjQuery(function)でdocumentのload(DOMContentLoaded?)にひっかけているのだけど、
+     // ページがロード済みの場合は同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+     /*
+     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028', init,
+             function() {
+               var jq = jQuery.fn.init;
+               jQuery.fn.init = function(selector) {
+                 if (jQuery.isFunction(selector) && jQuery.isReady) {
+                   setTimeout(function() { jq.apply(this, [].slice.apply(arguments)); }, 0);
+                 } else {
+                   return jq.apply(this, [].slice.apply(arguments));
+                 }
+                 return void(0);
+               };
+             });
+      */
 
      function init() {
        window.alltags = window.getAllTags();
@@ -3236,14 +3252,15 @@
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
      return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
    }
-   function load_js(url, onload) {
+   function load_js(url, cb_load, cb_add) {
      if (chk_ext_src('script', 'src', url)) {
-       if (onload) onload();
+       if (cb_load) cb_load();
        return false;
      } else {
        var js  = $c('script');
        js.type = 'text/javascript';
-       if (onload) js.addEventListener('load', onload, false);
+       if (cb_load) js.addEventListener('load', cb_load, false);
+       if (cb_add) cb_add();
        js.src  = url;
        document.body.appendChild(js);
        return true;
