@@ -10,7 +10,7 @@
 
 /** 0.2.0
  * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
- * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。 
+ * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -1317,7 +1317,7 @@
      if ($x('//script[contains(@src, "rating_manga.js")]')) {
        trap_rating();
      } else {
-       load_js('http://source.pixiv.net/source/js/rating.js??20100720', trap_rating);
+       load_js('http://source.pixiv.net/source/js/rating.js??20101022', trap_rating);
      }
 
      function trap_rating() {
@@ -2670,7 +2670,7 @@
          it.href = '/tags.php?tag=' + tag;
        });
 
-     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
+     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028', init);
 
      function init() {
        window.alltags = window.getAllTags();
@@ -3232,13 +3232,12 @@
        }
      }
    }
-   function chk_ext_src(elem, url) {
+   function chk_ext_src(elem, attr, url) {
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
-     var attr = name == 'link' ? 'href' : 'src';
      return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
    }
    function load_js(url, onload) {
-     if (chk_ext_src('script', url)) {
+     if (chk_ext_src('script', 'src', url)) {
        if (onload) onload();
        return false;
      } else {
@@ -3251,7 +3250,7 @@
      }
    }
    function load_css(url) {
-     if (chk_ext_src('link', url)) {
+     if (chk_ext_src('link', 'href', url)) {
        return false;
      } else {
        var css  = $c('link');
