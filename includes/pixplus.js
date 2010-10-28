@@ -743,7 +743,7 @@
                     colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
                    null, unpack_captions);
      } else if (window.location.href.match(/\/ranking(_r18g?|_rookie|_log|_tag|_area)?\.php/)) {
-       if (RegExp.$1 == '_tag' || RegExp.$1 == '_area' && !options.type) {
+       if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
          area_right();
        } else {
