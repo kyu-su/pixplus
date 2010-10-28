@@ -10,6 +10,7 @@
 
 /** 0.2.0
  * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
+ * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。 
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -821,7 +822,6 @@
        pp.recommender.attach(
          function() {
            var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
-           var gallery;
            if (!window.location.href.match(/\/bookmark_add\.php/)) {
              if (conf.locate_recommend_right == 1) {
                locate_right();
