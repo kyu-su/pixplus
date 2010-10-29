@@ -11,6 +11,7 @@
 /** 0.2.0
  * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
  * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。
+ * pixivの変更(評価の表示が変になる)に対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -1312,13 +1313,13 @@
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
      load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js');
-     load_js('http://source.pixiv.net/source/js/lib/scriptaculous/effects.js', conf.disable_effect ? disable_effect : null);
+     load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js', conf.disable_effect ? disable_effect : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
-     load_js('http://source.pixiv.net/source/js/tag_edit.js??20100720', trap_tag_edit);
-     if ($x('//script[contains(@src, "rating_manga.js")]')) {
+     load_js('http://source.pixiv.net/source/js/tag_edit.js', trap_tag_edit);
+     if ($x('//script[contains(@src, "/rating")]')) {
        trap_rating();
      } else {
-       load_js('http://source.pixiv.net/source/js/rating.js??20101022', trap_rating);
+       load_js('http://source.pixiv.net/source/js/modules/rating_20101030.js', trap_rating);
      }
 
      function trap_rating() {
@@ -2079,10 +2080,15 @@
      this.has_qrate = false;
      this.rating_enabled = false;
      this.rating.style.display = 'none';
+     var re_rtv, re_rtc, re_rtt;
      if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-         loader.text.match(/<div[^>]+id=\"rating\"[^>]*>(?:[\s\r\n]*<div[^>]*>)?(?:[\s\r\n]*<h4>)?([^>]+)/i)) {
-       var html = '<div id="rating"><div id="unit"><span>' + RegExp.$1.replace(/\uff1a/g, ':')
-         .split('\u3000').join('</span><span>') + '</span>';
+         (re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
+         (re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
+         (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
+       var html = '<div id="rating"><div id="unit">' +
+         '<span>\u95b2\u89a7\u6570: ' + re_rtv[0] + '</span>' +
+         '<span>\u8a55\u4fa1\u56de\u6570: ' + re_rtc[0] + '</span>' +
+         '<span>\u7dcf\u5408\u70b9: ' + re_rtt[0] + '</span>';
        if (loader.text.match(/(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i)) html += RegExp.$1;
        html += '</div>';
        if (rpc_chk(pp.rpc_req_qrate)) {
