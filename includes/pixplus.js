@@ -1311,6 +1311,7 @@
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
+     load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js');
      load_js('http://source.pixiv.net/source/js/lib/scriptaculous/effects.js', conf.disable_effect ? disable_effect : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
      load_js('http://source.pixiv.net/source/js/tag_edit.js??20100720', trap_tag_edit);
