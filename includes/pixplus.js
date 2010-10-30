@@ -1324,16 +1324,16 @@
 
      function trap_rating() {
        // trap
-       var _send_rating = window.send_rating;
+       var _countup_rating = window.countup_rating;
        var _send_quality_rating = window.send_quality_rating;
-       window.send_rating = function(rate) {
-         if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + rate + '\u70b9')) return;
+       window.countup_rating = function(score) {
+         if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9')) return;
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_rating(rate);
+         _countup_rating(score);
        };
-       window.send_quality_rating = function(rate) {
+       window.send_quality_rating = function(score) {
          if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_quality_rating(rate);
+         _send_quality_rating(score);
        };
        trap_qrate();
      }
@@ -1743,8 +1743,8 @@
            case 79: case 111: if (m())  q(e, zoom,  1);                   return; // o
            }
            if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
-             var r = c == 126 ? 1 : 43 - c;
-             window.send_rating(r);
+             var score = c == 126 ? 1 : 43 - c;
+             window.countup_rating(score);
              return;
            }
          }
