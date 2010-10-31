@@ -11,7 +11,7 @@
 /** 0.2.0
  * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
  * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。
- * pixivの変更(評価の表示が変になる)に対応。
+ * pixivの変更に対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
