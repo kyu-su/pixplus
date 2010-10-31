@@ -773,11 +773,17 @@
      } else if (window.location.href.match(/\/bookmark_detail\.php/)) {
        add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " bookmark_works ")]')});
      } else if (window.location.href.match(/\/stacc/)) {
-       var g = add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]'),
-                            colpath:   'div[contains(concat(" ", @class, " "), " post ")]',
-                            cappath:   'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
-                            thumbpath: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
-                            skip_dups: true});
+       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]'),
+                    colpath:   'div[contains(concat(" ", @class, " "), " post ")]',
+                    cappath:   'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
+                    thumbpath: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
+                    skip_dups: true});
+       /*
+     } else if (window.location.href.match(/\/event_detail\.php/)) {
+       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " event-cont ")]/div[contains(concat(" ", @class, " "), " thumbContainer ")]'),
+                    colpath:   'ul[contains(concat(" ", @class, " "), " thu ")]',
+                    thumbpath: 'li/a[contains(@href, "mode=medium")]/img'});
+        */
      }
 
      // 汎用
@@ -1312,8 +1318,10 @@
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
-     load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js');
-     load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js', conf.disable_effect ? disable_effect : null);
+     load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js',
+             conf.disable_effect ? disable_effect_jq : null);
+     load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
+             conf.disable_effect ? disable_effect_se : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
      load_js('http://source.pixiv.net/source/js/tag_edit.js', trap_tag_edit);
      if ($x('//script[contains(@src, "/rating")]')) {
@@ -1373,25 +1381,22 @@
        var _rating_ef = window.rating_ef;
        var _rating_ef2 = window.rating_ef2;
        window.rating_ef = function() {
-         new window.Effect.BlindDown(
-           'quality_rating', {
-	     delay: 0.2,
-	     duration: 0.2,
-             afterFinish: function() {
-               if (Popup.instance) {
-                 var f = $x('.//input[@id="qr_kw1"]', Popup.instance.rating);
-                 if (f) f.focus();
-               }
-             }
-           });
+         window.jQuery('#quality_rating').slideDown('fast', after_show);
        };
        window.rating_ef2 = function() {
          if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
          _rating_ef2();
        };
+       function after_show() {
+         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
+         if (f) f.focus();
+       }
      }
 
-     function disable_effect() {
+     function disable_effect_jq() {
+       window.jQuery.fx.off = true;
+     }
+     function disable_effect_se() {
        window.Effect.ScopedQueue.prototype.add = function(effect) {
          effect.loop(effect.startOn);
          effect.loop(effect.finishOn);
@@ -1753,7 +1758,7 @@
            switch(c) {
            case 38: if (m()) q(e, sel_qr, e.qrate.previousSibling); return; // up
            case 40: if (m()) q(e, sel_qr, e.qrate.nextSibling);     return; // down
-           case 27: if (m()) q(e, rating_ef2);                      return; // esc
+           case 27: if (m()) q(e, window.rating_ef2);               return; // esc
            }
            function sel_qr(node) {
              if (Popup.is_qrate_button(node)) node.focus();
@@ -2108,6 +2113,18 @@
        this.rating.innerHTML = html;
        this.rating.style.display = 'block';
        this.rating_enabled = true;
+
+       var anc = $x('div[@id="rating"]/h4/a', this.rating);
+       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') {
+         anc.onclick = '';
+         anc.addEventListener(
+           'click',
+           function(ev) {
+             var qr = $x('div[@id="quality_rating"]', self.rating);
+             window[qr && qr.visible() ? 'rating_ef2' : 'rating_ef']();
+             ev.preventDefault();
+           }, false);
+       }
      }
 
      this.bm_edit.innerHTML = '';
@@ -2311,19 +2328,9 @@
      }
    };
    Popup.prototype.toggle_qrate = function() {
-     var qr;
      if (this.has_qrate) {
-       var anc = $x('div[@id="rating"]/h4/a', this.rating);
-       if ((qr = $x('div[@id="quality_rating"]', this.rating))) {
-         if (qr.style.display == 'none') {
-           if (anc) {
-             this.caption.setAttribute('show', '');
-             clickelem(anc);
-           }
-         } else {
-           rating_ef2();
-         }
-       } else if ((qr = $x('div[@id="result"]', this.rating)) && anc) {
+       var anc = $x('div[@id="rating"]/h4/a', this.rating), qr;
+       if (anc) {
          this.caption.setAttribute('show', '');
          clickelem(anc);
        }
