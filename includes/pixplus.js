@@ -2684,28 +2684,24 @@
          it.href = '/tags.php?tag=' + tag;
        });
 
-     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727', init);
-     // 20101028版は最初にjQuery(function)でdocumentのload(DOMContentLoaded?)にひっかけているのだけど、
-     // ページがロード済みの場合は同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
-     /*
-     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028', init,
+     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
+             init,
              function() {
-               var jq = jQuery.fn.init;
-               jQuery.fn.init = function(selector) {
-                 if (jQuery.isFunction(selector) && jQuery.isReady) {
-                   setTimeout(function() { jq.apply(this, [].slice.apply(arguments)); }, 0);
-                 } else {
-                   return jq.apply(this, [].slice.apply(arguments));
-                 }
-                 return void(0);
+               // jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
+               // 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+               //var _ready = window.jQuery.fn.ready;
+               window.jQuery.fn.ready = function(fn) {
+                 setTimeout(fn, 10);
                };
              });
-      */
 
      function init() {
-       window.alltags = window.getAllTags();
-       // magic 11.00.1029
-       window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
+       /** fix http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727
+        * window.alltags = window.getAllTags();
+        * // magic 11.00.1029
+        * window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
+        */
+
        if (autotag) autoinput_from_tag();
 
        if (conf.bm_tag_order.length) {
