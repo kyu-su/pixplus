@@ -749,7 +749,9 @@
          area_right();
        } else {
          // その他ランキング
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " rankingPager ")]/..'),
+         var cont = ($x('//div[contains(concat(" ", @class, " "), " rankingPager ")]/..') ||
+                     $x('//div[contains(concat(" ", @class, " "), " rankingBox ")]'));
+         add_gallery({container: cont,
                       colpath:   './/div[contains(concat(" ", @class, " "), " rankingZone ")]',
                       cappath:   'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
                       thumbpath: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
