@@ -697,7 +697,7 @@
          function(col) {
            add_gallery({collection:    col,
                         cappath:       './/p/a[contains(@href, "mode=medium")]',
-                        thumbpath:     'ancestor::div[contains(concat(" ", @class, " "), " ran_pd ")]/div[contains(concat(" ", @class, " "), " ran_img ")]/a/img',
+                        thumbpath:     'ancestor::div[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::div[contains(concat(" ", @class, " "), " ran_img ")]/a/img',
                         allow_nothumb: 3});
          });
      }
@@ -749,8 +749,8 @@
          area_right();
        } else {
          // その他ランキング
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " rankingBox ")]'),
-                      colpath:   'div[contains(concat(" ", @class, " "), " rankingCenter ")]/div[contains(concat(" ", @class, " "), " rankingZone ")]',
+         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " rankingPager ")]/..'),
+                      colpath:   './/div[contains(concat(" ", @class, " "), " rankingZone ")]',
                       cappath:   'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
                       thumbpath: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
        }
