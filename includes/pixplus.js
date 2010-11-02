@@ -1,17 +1,14 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.1.1
+// @version     0.1.2
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.1.1
- * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
- * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。
- * pixivの変更(評価、ランキング、etc)に対応。
+/** 0.1.2
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -103,8 +100,8 @@
  * ブックマーク詳細ページ
 
  ** 人気タグ別ランキングについて
- * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログで
- * 「何らかの方法で数ヶ月以内に再開します」とあるので一応対応コードは残したまま放置。
+ * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログに「何らかの方法で数ヶ月以内に再開します」とある。
+ * http://dev.pixiv.net/archives/892022.html
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402 やっちゃうらしい。
 
  ** ギャラリーに含まれないイラストへのリンクをクリックした場合の挙動
