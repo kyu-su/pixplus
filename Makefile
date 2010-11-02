@@ -3,6 +3,7 @@ ZIP          ?= zip
 ICON_SIZE_D  ?= 60
 ICON_SIZE    ?= 18 60 128
 OEX           = pixplus.oex
+VERSION       = $(shell grep '^// @version' includes/pixplus.js | sed -e 's/.*@version\s*//')
 
 CONFIG_XML    = config.xml
 ICON_PREFIX   = icons/pixplus_
@@ -13,7 +14,7 @@ all: $(OEX)
 dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in
-	sed -e '/@ICONS@/,$$d' < $< > $@
+	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' < $< > $@
 	echo '  <icon src="$(ICON_PREFIX)$(ICON_SIZE_D)$(ICON_SUFFIX)" />' >> $@
 	@for size in $(ICON_SIZE);do \
            test $$size != $(ICON_SIZE_D) && \
