@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.2.0
+// @version     0.1.1
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.2.0
+/** 0.1.1
  * イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。
  * conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。
  * pixivの変更(評価、ランキング、etc)に対応。
