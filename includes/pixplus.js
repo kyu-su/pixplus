@@ -1308,7 +1308,7 @@
                // rating
                'div.popup .rating.works_area{padding:0px !important;}' +
                'div.popup .rating.works_area input{display:block;}' +
-               'div.popup .rating span + span{margin-left:0.8em;}' +
+               'div.popup .rating span + span{margin-left:0.4em;}' +
                'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
                'div.popup .rating #quality_rating{float:none !important;}' +
                'div.popup .rating h4{margin:0px;}' +
@@ -1393,6 +1393,24 @@
          var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
          if (f) f.focus();
        }
+
+       /*
+       var _send_quality_rating = window.send_quality_rating;
+       window.send_quality_rating = function() {
+         var _sendRequest = window.sendRequest;
+         window.sendRequest = function(url, method, params, callback) {
+           _sendRequest(url, method, params,
+                        function() {
+                          callback.apply(this, [].slice.apply(arguments));
+                          alert(window.jQuery('#rating').is(':visible'));
+                          if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+                        });
+         };
+         alert();
+         _send_quality_rating.apply(this, [].slice.apply(arguments));
+         window.sendRequest = _sendRequest;
+       };
+        */
      }
 
      function disable_effect_jq() {
@@ -2087,15 +2105,26 @@
      this.has_qrate = false;
      this.rating_enabled = false;
      this.rating.style.display = 'none';
-     var re_rtv, re_rtc, re_rtt;
+     //var re_rtv, re_rtc, re_rtt;
      if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
+         /*
          (re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
          (re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
-         (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
-       var html = '<div id="rating"><div id="unit">' +
+         (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))
+          */
+         loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>[\r\n]<h\d>.*<\/h\d>)/i)) {
+       /*
+       var html = '<div id="rating"><div id="unit"><h4>' +
          '<span>\u95b2\u89a7\u6570: ' + re_rtv[0] + '</span>' +
          '<span>\u8a55\u4fa1\u56de\u6570: ' + re_rtc[0] + '</span>' +
          '<span>\u7dcf\u5408\u70b9: ' + re_rtt[0] + '</span>';
+       if (loader.text.match(/(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i)) {
+         // add '/' for staccfeed
+         html += '<span>' + RegExp.$1 + '/' + RegExp.$2 + '</span>';
+       }
+       html += '</h4>';
+        */
+       var html = '<div id="rating">' + RegExp.$1;
        if (loader.text.match(/(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i)) html += RegExp.$1;
        html += '</div>';
        if (rpc_chk(pp.rpc_req_qrate)) {
