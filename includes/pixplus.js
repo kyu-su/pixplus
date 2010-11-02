@@ -2717,30 +2717,24 @@
 
      var initialized = false, jq_ready;
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
+             init,
              function() {
-               if (window.alltags) init();
-             },
-             function() {
-               // jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
-               // 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+               /* jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
+                * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+                * エラー回避のみ。
+                */
                if (jq_ready) return;
                jq_ready = window.jQuery.fn.ready;
                window.jQuery.fn.ready = function(func) {
-                 setTimeout(function() {
-                              func();
-                              init();
-                            }, 10);
+                 setTimeout(func, 10);
                };
              });
 
      function init() {
-       if (initialized) return;
-       initialized = true;
-       /** fix http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727
-        * window.alltags = window.getAllTags();
-        * // magic 11.00.1029
-        * window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
-        */
+       // 二回目以降のmod_edit_bookmark()でbookmark_add_v4.jsの初期化関数が呼ばれない
+       window.alltags = window.getAllTags();
+       // magic 11.00.1029
+       window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
 
        if (autotag) autoinput_from_tag();
 
@@ -3302,15 +3296,16 @@
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
      return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
    }
-   function load_js(url, cb_load, cb_add) {
+   function load_js(url, cb_load, cb_add, cb_noadd) {
      if (chk_ext_src('script', 'src', url)) {
        if (cb_load) cb_load();
+       if (cb_noadd) cb_noadd();
        return false;
      } else {
+       if (cb_add) cb_add();
        var js  = $c('script');
        js.type = 'text/javascript';
        if (cb_load) js.addEventListener('load', cb_load, false);
-       if (cb_add) cb_add();
        js.src  = url;
        document.body.appendChild(js);
        return true;
