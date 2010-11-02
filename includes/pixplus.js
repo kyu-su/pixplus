@@ -345,6 +345,78 @@
        }
      }, false);
 
+   // tag edit
+   window.opera.defineMagicFunction(
+     'startTagEdit',
+     function(real, othis) {
+       if (Popup.instance) {
+         Popup.instance.tag_editing = true;
+         Popup.instance.locate();
+       }
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   window.opera.defineMagicFunction(
+     'ef4',
+     function(real, othis) {
+       new window.Effect.BlindDown(
+         'tag_area', {
+	   delay:0.2,
+	   duration:0.2,
+           afterFinish: function() {
+             if (Popup.instance) {
+               Popup.instance.tag_editing = false;
+               Popup.instance.locate();
+               Popup.instance.reload();
+             }
+             if (lc(document.activeElement.tagName || '') == 'input') {
+               document.activeElement.blur();
+             }
+           }
+	 });
+     });
+
+   // rating
+   window.opera.defineMagicFunction(
+     'countup_rating',
+     function(real, othis, score) {
+       if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9')) return;
+       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   window.opera.defineMagicFunction(
+     'send_quality_rating',
+     function(real, othis) {
+       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+
+   // quality_rating
+   window.opera.defineMagicFunction(
+     'rating_ef',
+     function(real, othis) {
+       window.jQuery('#quality_rating').slideDown('fast', after_show);
+       function after_show() {
+         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
+         if (f) f.focus();
+       }
+     });
+   window.opera.defineMagicFunction(
+     'rating_ef2',
+     function(real, othis) {
+       if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   window.opera.defineMagicFunction(
+     'send_quality_rating',
+     function(real, othis) {
+       try {
+         alert(othis);
+         alert(othis.on_loaded_save2);
+         alert(on_loaded_save2);
+       } catch(ex) {}
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
    function addillustlink(id) {
@@ -1325,92 +1397,9 @@
      load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
              conf.disable_effect ? disable_effect_se : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
-     load_js('http://source.pixiv.net/source/js/tag_edit.js', trap_tag_edit);
-     if ($x('//script[contains(@src, "/rating")]')) {
-       trap_rating();
-     } else {
-       load_js('http://source.pixiv.net/source/js/modules/rating_20101030.js', trap_rating);
-     }
-
-     function trap_rating() {
-       // trap
-       var _countup_rating = window.countup_rating;
-       var _send_quality_rating = window.send_quality_rating;
-       window.countup_rating = function(score) {
-         if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9')) return;
-         if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _countup_rating(score);
-       };
-       window.send_quality_rating = function(score) {
-         if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-         _send_quality_rating(score);
-       };
-       trap_qrate();
-     }
-
-     function trap_tag_edit() {
-       // trap
-       var _startTagEdit = window.startTagEdit;
-       var _ef4 = window.ef4;
-       window.startTagEdit = function() {
-         if (Popup.instance) {
-           Popup.instance.tag_editing = true;
-           Popup.instance.locate();
-         }
-         _startTagEdit();
-       };
-       window.ef4 = function() {
-         new window.Effect.BlindDown(
-           'tag_area', {
-	     delay:0.2,
-	     duration:0.2,
-             afterFinish: function() {
-               if (Popup.instance) {
-                 Popup.instance.tag_editing = false;
-                 Popup.instance.locate();
-                 Popup.instance.reload();
-               }
-               if (lc(document.activeElement.tagName || '') == 'input') {
-                 document.activeElement.blur();
-               }
-             }
-	   });
-       };
-     }
-
-     function trap_qrate() {
-       // trap
-       var _rating_ef = window.rating_ef;
-       var _rating_ef2 = window.rating_ef2;
-       window.rating_ef = function() {
-         window.jQuery('#quality_rating').slideDown('fast', after_show);
-       };
-       window.rating_ef2 = function() {
-         if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-         _rating_ef2();
-       };
-       function after_show() {
-         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
-         if (f) f.focus();
-       }
-
-       /*
-       var _send_quality_rating = window.send_quality_rating;
-       window.send_quality_rating = function() {
-         var _sendRequest = window.sendRequest;
-         window.sendRequest = function(url, method, params, callback) {
-           _sendRequest(url, method, params,
-                        function() {
-                          callback.apply(this, [].slice.apply(arguments));
-                          alert(window.jQuery('#rating').is(':visible'));
-                          if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-                        });
-         };
-         alert();
-         _send_quality_rating.apply(this, [].slice.apply(arguments));
-         window.sendRequest = _sendRequest;
-       };
-        */
+     load_js('http://source.pixiv.net/source/js/tag_edit.js');
+     if (!$x('//script[contains(@src, "/rating")]')) {
+       load_js('http://source.pixiv.net/source/js/modules/rating_20101030.js');
      }
 
      function disable_effect_jq() {
@@ -2037,12 +2026,13 @@
                           ? urlmode(this.item.medium, 'manga', conf.default_manga_type)
                           : loader.image.src.replace(/_[sm](\.\w+)$/, '$1'));
 
-     if (loader.text.match(/<a\s+href=\"(\/member.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
+     if (loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
        this.a_img.src            = RegExp.$3;
-       this.a_profile.innerHTML  = trim(RegExp.$4);
        this.a_profile.href       = RegExp.$1;
        this.a_illust.href        = '/member_illust.php?id=' + RegExp.$2;
        this.a_bookmark.href      = '/bookmark.php?id=' + RegExp.$2;
+       // trim() uses regexp
+       this.a_profile.innerHTML  = trim(RegExp.$4);
        if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"[^>]+title=\"\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\"/i)) {
          this.a_stacc.href       = RegExp.$1;
          this.a_stacc.style.display = 'inline';
