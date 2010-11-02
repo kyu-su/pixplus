@@ -2715,18 +2715,27 @@
          it.href = '/tags.php?tag=' + tag;
        });
 
+     var initialized = false, jq_ready;
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
-             init,
+             function() {
+               if (window.alltags) init();
+             },
              function() {
                // jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
                // 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
-               //var _ready = window.jQuery.fn.ready;
-               window.jQuery.fn.ready = function(fn) {
-                 setTimeout(fn, 10);
+               if (jq_ready) return;
+               jq_ready = window.jQuery.fn.ready;
+               window.jQuery.fn.ready = function(func) {
+                 setTimeout(function() {
+                              func();
+                              init();
+                            }, 10);
                };
              });
 
      function init() {
+       if (initialized) return;
+       initialized = true;
        /** fix http://source.pixiv.net/source/js/bookmark_add_v4.js?20100727
         * window.alltags = window.getAllTags();
         * // magic 11.00.1029
