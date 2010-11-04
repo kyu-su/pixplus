@@ -9,6 +9,8 @@
 // ==/UserScript==
 
 /** 0.1.2
+ * 一部のページでアンケート結果を表示出来なくなっていたのを修正。
+ * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -319,6 +321,7 @@
 
    if (window.location.pathname.match(/^\/stacc/)) {
      /* スタックページで評価とタグ編集出来ないのをなんとかする */
+     /*
      window.opera.addEventListener(
        'BeforeScript',
        function(e) {
@@ -328,6 +331,7 @@
            e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
          }
        }, false);
+      */
    }
    window.opera.addEventListener(
      'AfterScript',
@@ -406,12 +410,17 @@
    window.opera.defineMagicFunction(
      'send_quality_rating',
      function(real, othis) {
-       try {
-         alert(othis);
-         alert(othis.on_loaded_save2);
-         alert(on_loaded_save2);
-       } catch(ex) {}
+       var _ajax = jQuery.ajax;
+       jQuery.ajax = function(obj) {
+         var success = obj.success;
+         obj.success = function() {
+           success.apply(othis, [].slice.apply(arguments));
+           if (jQuery('#rating').is(':visible')) rating_ef2();
+         };
+         return _ajax.apply(this, [obj]);
+       };
        real.apply(othis, [].slice.apply(arguments, [2]));
+       jQuery.ajax = _ajax;
      });
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
@@ -1396,7 +1405,7 @@
      load_js('http://source.pixiv.net/source/js/rpc.js');
      load_js('http://source.pixiv.net/source/js/tag_edit.js');
      if (!$x('//script[contains(@src, "/rating")]')) {
-       load_js('http://source.pixiv.net/source/js/modules/rating_20101030.js');
+       load_js('http://source.pixiv.net/source/js/modules/rating.js?2010-11-04');
      }
 
      function disable_effect_jq() {
