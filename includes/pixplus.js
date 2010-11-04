@@ -11,6 +11,7 @@
 /** 0.1.2
  * 一部のページでアンケート結果を表示出来なくなっていたのを修正。
  * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
+ * スタックフィード上で評価やタグ編集が出来なかったバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -321,17 +322,15 @@
 
    if (window.location.pathname.match(/^\/stacc/)) {
      /* スタックページで評価とタグ編集出来ないのをなんとかする */
-     /*
      window.opera.addEventListener(
        'BeforeScript',
        function(e) {
-         if (e.element.src == 'http://source.pixiv.net/source/js/tag_edit.js??20100720') {
+         if (e.element.src.indexOf('/tag_edit.js') > 0) {
            e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-         } else if (e.element.src == 'http://source.pixiv.net/source/js/rating.js??20100720') {
+         } else if (e.element.src.indexOf('/rating.js') > 0) {
            e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
          }
        }, false);
-      */
    }
    window.opera.addEventListener(
      'AfterScript',
