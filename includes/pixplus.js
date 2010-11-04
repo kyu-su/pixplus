@@ -3252,6 +3252,7 @@
        img.addEventListener(
          'load',
          function() {
+           document.body.removeChild(img);
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);
@@ -3259,6 +3260,8 @@
        if (cb_error) img.addEventListener('error', cb_error, false);
        if (cb_abort) img.addEventListener('abort', cb_abort, false);
        img.src = url;
+       img.style.display = 'none';
+       document.body.appendChild(img);
      }
    }
    function parseimgurl(text, big) {
