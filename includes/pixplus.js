@@ -2302,7 +2302,7 @@
        var ph = this.caption.offsetHeight + 48;
        if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
        if (conf.popup.overlay_control) {
-         var width = Math.floor(this.root_div.clientWidth / 4);
+         var width = Math.floor(this.root_div.clientWidth * 0.35);
          this.olc_prev.style.pixelWidth  = width;
          this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
          this.olc_next.style.pixelWidth  = width;
