@@ -1379,10 +1379,15 @@
                'div.popup .bm_edit{margin-top:2px;}' +
                'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
                'div.popup .img_div img{border:1px solid silver;}' +
-               'div.popup .img_div .olc{' +
-               '  position:absolute;width:64px;cursor:pointer;' +
-               '  background-color:gainsboro;opacity:0;z-index:1004;}' +
-               'div.popup .img_div .olc:hover{opacity:0.6;}' +
+               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;}' +
+               'div.popup .olc:hover{opacity:1;}' +
+               'div.popup .olc-prev{left:3px;}' +
+               'div.popup .olc-next{right:3px;}' +
+               'div.popup .olc-prev:before, div.popup .olc-next:before{display:block;position:absolute;bottom:0;' +
+               '  background-color:white;border:1px solid silver;border-bottom-width:0px;font-size:120%;font-weight:bold;' +
+               '  padding:0.2em 0.6em;text-decoration:none;line-height:1em;background-color:white;color:gray;}' +
+               'div.popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
+               'div.popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
                (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
                // rating
                'div.popup .rating.works_area{padding:0px !important;}' +
@@ -1675,10 +1680,8 @@
      this.image_scaled          = this.image;
 
      if (conf.popup.overlay_control) {
-       this.olc_prev              = $c('span',    this.img_div,       'olc');
-       this.olc_next              = $c('span',    this.img_div,       'olc');
-       this.olc_prev.style.left   = '0px';
-       this.olc_next.style.right  = '0px';
+       this.olc_prev              = $c('span',    this.img_div,       'olc olc-prev');
+       this.olc_next              = $c('span',    this.img_div,       'olc olc-next');
        this.olc_prev.addEventListener('click', bind_event(this.prev, this, false, false, true), false);
        this.olc_next.addEventListener('click', bind_event(this.next, this, false, false, true), false);
      }
@@ -2274,6 +2277,7 @@
      var tg = this.is_bookmark_editing() ? this.bm_edit : this.image_scaled;
      var mw = de.clientWidth  + tg.offsetWidth  - this.root_div.offsetWidth  - 32;
      var mh = de.clientHeight + tg.offsetHeight - this.root_div.offsetHeight - 32;
+     this.root_div.style.minHeight = '';
      if (this.tag_editing) {
        this.root_div.style.minWidth = '746px';
      } else {
@@ -2289,10 +2293,19 @@
        this.caption.style.pixelWidth = this.header.offsetWidth;
        var ch = this.img_div.offsetHeight * conf.popup.caption_height - this.tags.offsetHeight - this.author.offsetHeight;
        this.comment.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
+       /*
+       if (this.caption.offsetHeight * 2 > this.img_div.offsetHeight) {
+         var o = this.root_div.offsetHeight - this.img_div.offsetHeight;
+         this.root_div.style.minHeight = (this.caption.offsetHeight * 2 + o) + 'px';
+       }
+        */
        var ph = this.caption.offsetHeight + 48;
        if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
        if (conf.popup.overlay_control) {
+         var width = Math.floor(this.root_div.clientWidth / 4);
+         this.olc_prev.style.pixelWidth  = width;
          this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
+         this.olc_next.style.pixelWidth  = width;
          this.olc_next.style.pixelHeight = this.img_div.offsetHeight;
        }
      }
