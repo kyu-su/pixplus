@@ -163,7 +163,8 @@
                               'reverseに2を指定した場合に使用する正規表現。'],
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
-       auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。']
+       auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
+       overlay_control:      [true,  '移動用のクリックインターフェースを使用する。']
      }
    };
    var conf = {
@@ -1671,12 +1672,16 @@
      this.img_anc.addEventListener('click', function(e) { e.preventDefault(); self.close(); }, false);
      this.image                 = $c('img',     this.img_anc);
      this.image_scaled          = this.image;
-     this.olc_prev              = $c('span',    this.img_div,       'olc');
-     this.olc_next              = $c('span',    this.img_div,       'olc');
-     this.olc_prev.style.left   = '0px';
-     this.olc_next.style.right  = '0px';
-     this.olc_prev.addEventListener('click', function(e) { e.preventDefault(); self.prev(false, false, true); }, false);
-     this.olc_next.addEventListener('click', function(e) { e.preventDefault(); self.next(false, false, true); }, false);
+
+     if (conf.popup.overlay_control) {
+       this.olc_prev              = $c('span',    this.img_div,       'olc');
+       this.olc_next              = $c('span',    this.img_div,       'olc');
+       this.olc_prev.style.left   = '0px';
+       this.olc_next.style.right  = '0px';
+       this.olc_prev.addEventListener('click', bind_event(this.prev, this, false, false, true), false);
+       this.olc_next.addEventListener('click', bind_event(this.next, this, false, false, true), false);
+     }
+
      this.init_display();
 
      this.bm_loading = false;
@@ -2285,16 +2290,20 @@
        this.comment.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
        var ph = this.caption.offsetHeight + 48;
        if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
-       this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
-       this.olc_next.style.pixelHeight = this.img_div.offsetHeight;
+       if (conf.popup.overlay_control) {
+         this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
+         this.olc_next.style.pixelHeight = this.img_div.offsetHeight;
+       }
      }
      this.root_div.style.pixelLeft = (de.clientWidth  - this.root_div.offsetWidth)  / 2;
      this.root_div.style.pixelTop  = (de.clientHeight - this.root_div.offsetHeight) / 2;
    };
    Popup.prototype.update_olc = function(page) {
-     var m = this.manga.usable && this.manga.enabled;
-     this.olc_prev.style.display = m || this.item.prev ? 'inline' : 'none';
-     this.olc_next.style.display = m || this.item.next ? 'inline' : 'none';
+     if (conf.popup.overlay_control) {
+       var m = this.manga.usable && this.manga.enabled;
+       this.olc_prev.style.display = m || this.item.prev ? 'inline' : 'none';
+       this.olc_next.style.display = m || this.item.next ? 'inline' : 'none';
+     }
    };
    Popup.prototype.reload = function() {
      this.set(this.item, null, null, true);
@@ -3326,6 +3335,20 @@
      css.setAttribute('type', 'text/css');
      css.innerText = source;
      document.body.appendChild(css);
+   }
+
+   function bind(func, obj) {
+     var args = [].slice.apply(arguments, [2]);
+     return function() {
+       func.apply(obj, args.concat(arguments));
+     };
+   }
+   function bind_event(func, obj) {
+     var args = [].slice.apply(arguments, [2]);
+     return function(ev) {
+       ev.preventDefault();
+       func.apply(obj, args.concat(arguments));
+     };
    }
 
    function create_post_data(form) {
