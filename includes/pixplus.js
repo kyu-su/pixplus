@@ -164,7 +164,8 @@
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
-       overlay_control:      [true,  '移動用のクリックインターフェースを使用する。']
+       overlay_control:      [true,  '移動用のクリックインターフェースを使用する。'],
+       mouse_button1:        [1,     '画像をクリックした時の動作。0:なし/1:閉じる/2:次/3:前']
      }
    };
    var conf = {
@@ -1634,13 +1635,13 @@
      this.status                = $c('span',    this.header_right,  'status');
      this.status.style.display  = 'none';
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
-     this.manga_btn.addEventListener('click', function(e) { e.preventDefault(); self.toggle_manga_mode(); }, false);
+     this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = $c('a',       this.header_right,     'res_btn');
      this.res_btn.innerText     = '[R]';
      this.bm_btn                = $c('a',       this.header_right,  'bm_btn');
      this.bm_btn.href           = 'javascript:void(0)';
      this.bm_btn.innerText      = '[B]';
-     this.bm_btn.addEventListener('click', function(e) { e.preventDefault(); self.edit_bookmark(); }, false);
+     this.bm_btn.addEventListener('click', bind_event(this.edit_bookmark, this), false);
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
      this.comment               = $c('div',     this.caption,       'comment');
@@ -1669,7 +1670,7 @@
      this.bm_edit               = $c('div',     this.root_div,      'bm_edit');
      this.img_div               = $c('div',     this.root_div,      'img_div');
      this.img_anc               = $c('a',       this.img_div);
-     this.img_anc.addEventListener('click', function(e) { e.preventDefault(); self.close(); }, false);
+     this.img_anc.addEventListener('click', bind(this.mouse, this, 1), false);
      this.image                 = $c('img',     this.img_anc);
      this.image_scaled          = this.image;
 
@@ -2362,6 +2363,15 @@
        this.onkeypress.emit(this, e);
      }
    };
+   Popup.prototype.mouse = function(button, ev) {
+     if (button == 1) {
+       var func = [bind(this.close, this),
+                   bind(this.next, this, true),
+                   bind(this.prev, this, true)][conf.popup.mouse_button1 - 1];
+       ev.preventDefault();
+       if (func) func();
+     }
+   };
    Popup.prototype.toggle_qrate = function() {
      if (this.has_qrate) {
        var anc = $x('div[@id="rating"]/h4/a', this.rating), qr;
@@ -2447,7 +2457,7 @@
      }
    };
    Popup.prototype.toggle_manga_mode = function(page) {
-     if (this.manga.usable) this.set_manga_mode(!this.manga.enabled);
+     if (this.manga.usable) this.set_manga_mode(!this.manga.enabled, page);
    };
    Popup.prototype.open_url = function(url, same_page) {
      if (same_page) {
@@ -3340,14 +3350,14 @@
    function bind(func, obj) {
      var args = [].slice.apply(arguments, [2]);
      return function() {
-       func.apply(obj, args.concat(arguments));
+       func.apply(obj, args.concat([].slice.apply(arguments)));
      };
    }
    function bind_event(func, obj) {
      var args = [].slice.apply(arguments, [2]);
      return function(ev) {
        ev.preventDefault();
-       func.apply(obj, args.concat(arguments));
+       func.apply(obj, args);
      };
    }
 
