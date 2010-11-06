@@ -1406,8 +1406,10 @@
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
-     load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js',
-             conf.disable_effect ? disable_effect_jq : null);
+     if (!window.location.href.match(/\/member_illust\.php/) || options.mode != 'manga') {
+       load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js',
+               conf.disable_effect ? disable_effect_jq : null);
+     }
      load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
              conf.disable_effect ? disable_effect_se : null);
      load_js('http://source.pixiv.net/source/js/rpc.js');
