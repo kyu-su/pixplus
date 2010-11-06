@@ -168,7 +168,7 @@
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
        overlay_control:      [true,  '移動用クリックインターフェースを使用する。'],
-       overlay_control_size: [0.3,   '移動用クリックインターフェースのサイズ']
+       overlay_control_size: [0.2,   '移動用クリックインターフェースのサイズ']
      }
    };
    var conf = {
