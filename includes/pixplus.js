@@ -166,7 +166,8 @@
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
-       overlay_control:      [true,  '移動用のクリックインターフェースを使用する。'],
+       overlay_control:      [true,  '移動用クリックインターフェースを使用する。'],
+       overlay_control_size: [0.3,   '移動用クリックインターフェースのサイズ'],
        mouse_button1:        [1,     '画像をクリックした時の動作。0:なし/1:閉じる/2:次/3:前']
      }
    };
@@ -2045,10 +2046,9 @@
      if (loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
        this.a_img.src            = RegExp.$3;
        this.a_profile.href       = RegExp.$1;
+       this.a_profile.innerHTML  = RegExp.$4; // 属性を使うのでtrimしない。
        this.a_illust.href        = '/member_illust.php?id=' + RegExp.$2;
        this.a_bookmark.href      = '/bookmark.php?id=' + RegExp.$2;
-       // trim() uses regexp
-       this.a_profile.innerHTML  = trim(RegExp.$4);
        if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"[^>]+title=\"\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\"/i)) {
          this.a_stacc.href       = RegExp.$1;
          this.a_stacc.style.display = 'inline';
@@ -2304,7 +2304,7 @@
        var ph = this.caption.offsetHeight + 48;
        if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
        if (conf.popup.overlay_control) {
-         var width = Math.floor(this.root_div.clientWidth * 0.35);
+         var width = Math.floor(this.root_div.clientWidth * conf.popup.overlay_control_size);
          this.olc_prev.style.pixelWidth  = width;
          this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
          this.olc_next.style.pixelWidth  = width;
