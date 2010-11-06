@@ -13,7 +13,7 @@
  * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
  * スタックフィード上で評価やタグ編集が出来なかったバグを修正。
  * マウス操作用UIの表示を変更。
- * conf.popup.overlay_control/conf.popup.overlay_control_size/conf.popup.mouse_button1追加。
+ * conf.popup.overlay_control/conf.popup.overlay_control_size追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -167,8 +167,7 @@
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
        overlay_control:      [true,  '移動用クリックインターフェースを使用する。'],
-       overlay_control_size: [0.3,   '移動用クリックインターフェースのサイズ'],
-       mouse_button1:        [1,     '画像をクリックした時の動作。0:なし/1:閉じる/2:次/3:前']
+       overlay_control_size: [0.3,   '移動用クリックインターフェースのサイズ']
      }
    };
    var conf = {
@@ -1678,7 +1677,6 @@
      this.bm_edit               = $c('div',     this.root_div,      'bm_edit');
      this.img_div               = $c('div',     this.root_div,      'img_div');
      this.img_anc               = $c('a',       this.img_div);
-     this.img_anc.addEventListener('click', bind(this.mouse, this, 1), false);
      this.image                 = $c('img',     this.img_anc);
      this.image_scaled          = this.image;
 
@@ -1728,7 +1726,10 @@
      this.onsetitem = new Signal(null, Popup.onsetitem);
      this.onload = new Signal(null, Popup.onload);
      this.onkeypress = new Signal(null, Popup.onkeypress);
+     this.onclick = new Signal(null, Popup.onclick);
      this.onclose = new Signal(close, Popup.onclose);
+
+     this.onclick.bind_event(this, this.img_anc, 'click', false);
 
      //document.body.insertBefore(this.root_div, document.body.firstChild);
      document.body.appendChild(this.root_div);
@@ -1739,6 +1740,7 @@
      function close() {
        window.removeEventListener('keypress', keypress, false);
        window.removeEventListener('resize',   locate,   false);
+       this.onclick.unbind_events();
      }
      function keypress(e) {
        self.keypress(e);
@@ -1824,6 +1826,11 @@
          if (!alt   && e.altKey)   return false;
          return true;
        }
+     });
+   Popup.onclick = new Signal(
+     function(ev) {
+       ev.preventDefault();
+       this.close();
      });
    Popup.onclose = new Signal();
    Popup.run = function(item, manga_page) {
@@ -2376,15 +2383,6 @@
        }
      } else {
        this.onkeypress.emit(this, e);
-     }
-   };
-   Popup.prototype.mouse = function(button, ev) {
-     if (button == 1) {
-       var func = [bind(this.close, this),
-                   bind(this.next, this, true),
-                   bind(this.prev, this, true)][conf.popup.mouse_button1 - 1];
-       ev.preventDefault();
-       if (func) func();
      }
    };
    Popup.prototype.toggle_qrate = function() {
@@ -3074,10 +3072,11 @@
    window.addEventListener('load', Floater.load, false);
 
    function Signal(def, parent) {
-     this.def    = def;
+     this.def = def;
      this.parent = parent;
-     this.funcs  = [];
-     this.id     = 1;
+     this.funcs = [];
+     this.id = 1;
+     this.bind_events = [];
      return this;
    }
    Signal.prototype.connect = function(f) {
@@ -3103,6 +3102,20 @@
      if (this.def    && (res = this.def.apply(inst, args))) return res;
      if (this.parent && (res = Signal.prototype.emit.apply(this.parent, arguments))) return res;
      return false;
+   };
+   Signal.prototype.bind_event = function(inst, obj, name, capture) {
+     var self = this;
+     var func = function(ev) {
+       self.emit(inst, ev);
+     };
+     obj.addEventListener(name, func, capture);
+     this.bind_events.push([obj, name, func, capture]);
+   };
+   Signal.prototype.unbind_events = function() {
+     each(this.bind_events,
+          function(ent) {
+            ent[0].removeEventListener(ent[1], ent[2]);
+          });
    };
    Signal.Connection = function(signal, id) {
      this.signal = signal;
