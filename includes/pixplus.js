@@ -249,6 +249,9 @@
      set: function(s, n, v) {
        return this.s.setItem(this.create_name(s, n), v);
      },
+     remove: function(s, n) {
+       return this.s.removeItem(this.create_name(s, n));
+     },
      conv: {
        'string':  String,
        'boolean': function(s) { return s == 'true'; },
@@ -526,6 +529,7 @@
                  } else {
                    cs[key].input.value = cs[key][0];
                  }
+                 cs[key]._set_default = true;
                }, false);
              var cdes = row.insertCell(-1);
              cdes.innerText = cs[key][1];
@@ -673,7 +677,11 @@
              } else {
                val = LS.conv[cs[key].type](cs[key].input.value);
              }
-             if (val != cf[key]) LS.set(c.name, key, val);
+             if (val != cf[key]) {
+               LS.set(c.name, key, val);
+             } else if (cs[key]._set_default) {
+               LS.remove(c.name, key);
+             }
            });
          window.location.reload();
        }
