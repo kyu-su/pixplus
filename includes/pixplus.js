@@ -13,7 +13,7 @@
  * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
  * スタックフィード上で評価やタグ編集が出来なかったバグを修正。
  * マウス操作用UIの表示を変更。
- * conf.popup.overlay_control/conf.popup.overlay_control_size追加。
+ * conf.popup.overlay_control追加。
  * マンガページ(mode=manga)で改ページ出来なくなっていた不具合を修正。
  */
 
@@ -168,8 +168,7 @@
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
-       overlay_control:      [true,  '移動用クリックインターフェースを使用する。'],
-       overlay_control_size: [0.2,   '移動用クリックインターフェースのサイズ']
+       overlay_control:      [0.2,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル']
      }
    };
    var conf = {
@@ -1411,15 +1410,17 @@
                'div.popup .bm_edit{margin-top:2px;}' +
                'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
                'div.popup .img_div img{border:1px solid silver;}' +
-               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;}' +
-               'div.popup .olc:hover{opacity:1;}' +
+               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
+               'div.popup .olc:hover{opacity:0.6;}' +
                'div.popup .olc-prev{left:3px;}' +
                'div.popup .olc-next{right:3px;}' +
+               /*
                'div.popup .olc-prev:before, div.popup .olc-next:before{display:block;position:absolute;bottom:0;' +
                '  background-color:white;border:1px solid silver;border-bottom-width:0px;font-size:120%;font-weight:bold;' +
                '  padding:0.2em 0.6em;text-decoration:none;line-height:1em;background-color:white;color:gray;}' +
                'div.popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
                'div.popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
+                */
                (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
                // rating
                'div.popup .rating.works_area{padding:0px !important;}' +
@@ -1712,7 +1713,7 @@
      this.image                 = $c('img',     this.img_anc);
      this.image_scaled          = this.image;
 
-     if (conf.popup.overlay_control) {
+     if (conf.popup.overlay_control > 0) {
        this.olc_prev              = $c('span',    this.img_div,       'olc olc-prev');
        this.olc_next              = $c('span',    this.img_div,       'olc olc-next');
        this.olc_prev.addEventListener('click', bind_event(this.prev, this, false, false, true), false);
@@ -2342,8 +2343,13 @@
         */
        var ph = this.caption.offsetHeight + 48;
        if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
-       if (conf.popup.overlay_control) {
-         var width = Math.floor(this.root_div.clientWidth * conf.popup.overlay_control_size);
+       if (conf.popup.overlay_control > 0) {
+         var width;
+         if (conf.popup.overlay_control < 1) {
+           width = Math.floor(this.root_div.clientWidth * conf.popup.overlay_control);
+         } else {
+           width = Math.floor(conf.popup.overlay_control);
+         }
          this.olc_prev.style.pixelWidth  = width;
          this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
          this.olc_next.style.pixelWidth  = width;
@@ -2354,7 +2360,7 @@
      this.root_div.style.pixelTop  = (de.clientHeight - this.root_div.offsetHeight) / 2;
    };
    Popup.prototype.update_olc = function(page) {
-     if (conf.popup.overlay_control) {
+     if (conf.popup.overlay_control > 0) {
        var m = this.manga.usable && this.manga.enabled;
        this.olc_prev.style.display = m || this.item.prev ? 'inline' : 'none';
        this.olc_next.style.display = m || this.item.next ? 'inline' : 'none';
