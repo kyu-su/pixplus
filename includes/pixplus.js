@@ -149,6 +149,7 @@
      rate_confirm:           [true,  'イラストを評価する時に確認をとる。'],
      popup_manga_tb:         [true,  'マンガサムネイルページでポップアップを使用する。'],
      disable_effect:         [false, 'アニメーションなどのエフェクトを無効化する。'],
+     workaround:             [false, 'Operaやpixivのバグ回避のための機能を使用する。'],
      popup: {
        preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
@@ -899,23 +900,43 @@
      var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
      var float_wrap = null;
      if (r_container) {
-       var ir = window.IllustRecommender;
-       if (conf.debug) {
-         // trap
-         var _show = ir.prototype.show;
-         var _error = ir.error;
-         ir.prototype.show = function(res) {
-           try {
-             _show.apply(this, arguments);
-           } catch(ex) {
-             this.error(ex);
-           }
-         };
-         ir.prototype.error = function(msg) {
-           alert(msg);
-           _error.apply(this, arguments);
-         };
-       }
+       (function() {
+          if (conf.debug) {
+            // trap
+            var ir = window.IllustRecommender;
+            var _show = ir.prototype.show;
+            var _error = ir.error;
+            ir.prototype.show = function(res) {
+              try {
+                _show.apply(this, arguments);
+              } catch(ex) {
+                this.error(ex);
+              }
+            };
+            ir.prototype.error = function(msg) {
+              alert(msg);
+              _error.apply(this, arguments);
+            };
+          }
+          if (conf.workaround) {
+            var il = window.IllustList;
+            il.prototype.createPreloader = function(image) {
+              var img = window.jQuery(image), src = img.src;
+              img.src = this.LOADING_IMAGE_ICON_URL;
+              var preloader = new Image();
+              preloader.addEventListener(
+                'load',
+                function() {
+                  document.body.removeChild(preloader);
+                  img.src = src;
+                }, false);
+              preloader.src = src;
+              preloader.style.display = 'none';
+              document.body.appendChild(preloader);
+              this.preloaders.set(image, preloader);
+            };
+          }
+        })();
        var de = document.documentElement;
        var gallery;
        pp.recommender.attach(
@@ -1424,7 +1445,7 @@
      load_js('http://source.pixiv.net/source/js/rpc.js');
      load_js('http://source.pixiv.net/source/js/tag_edit.js');
      if (!$x('//script[contains(@src, "/rating")]')) {
-       load_js('http://source.pixiv.net/source/js/modules/rating.js?2010-11-04');
+       load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
      }
 
      function disable_effect_jq() {
