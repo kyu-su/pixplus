@@ -168,7 +168,7 @@
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
-       overlay_control:      [0.2,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル']
+       overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル']
      }
    };
    var conf = {
@@ -530,6 +530,7 @@
                    cs[key].input.value = cs[key][0];
                  }
                  cs[key]._set_default = true;
+                 if (conf.debug) cs[key].input.style.color = 'gray';
                }, false);
              var cdes = row.insertCell(-1);
              cdes.innerText = cs[key][1];
@@ -677,10 +678,11 @@
              } else {
                val = LS.conv[cs[key].type](cs[key].input.value);
              }
-             if (val != cf[key]) {
-               LS.set(c.name, key, val);
-             } else if (cs[key]._set_default) {
+             if (val === cs[key][0] && cs[key]._set_default) {
+               if (conf.debug) opera.postError('remove LS key - ' + [c.name, key].join(':'));
                LS.remove(c.name, key);
+             } else if (val != cf[key]) {
+               LS.set(c.name, key, val);
              }
            });
          window.location.reload();
