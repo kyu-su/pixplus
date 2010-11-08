@@ -1434,7 +1434,7 @@
                'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
                //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
                'div.popup .rating dl.ra_a dt{width:auto;}' +
-               'div.popup .rating dl.ra_a dd{margin-top:-1em;}' +
+               'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
                'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}');
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
