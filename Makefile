@@ -9,6 +9,9 @@ CONFIG_XML    = config.xml
 ICON_PREFIX   = icons/pixplus_
 ICON_SUFFIX   = .png
 ICON_FILES    = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
+SIGNATURE     = signature1.xml
+SIGN_FILES    = $(CONFIG_XML) includes/pixplus.js $(ICON_FILES)
+DIST_FILES    = $(SIGN_FILES) $(SIGNATURE)
 
 all: $(OEX)
 dist: $(OEX)
@@ -25,8 +28,11 @@ $(CONFIG_XML): $(CONFIG_XML).in
 $(ICON_FILES): icons/pixplus.svg
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
 
-$(OEX): $(CONFIG_XML) includes/pixplus.js $(ICON_FILES)
+$(SIGNATURE): $(SIGN_FILES)
+	./create_signature.sh $^ > $@
+
+$(OEX): $(DIST_FILES)
 	$(ZIP) -r $@ $^
 
 clean:
-	rm -f $(CONFIG_XML) $(ICON_FILES) $(OEX)
+	rm -f $(CONFIG_XML) $(ICON_FILES) $(SIGNATURE) $(OEX)
