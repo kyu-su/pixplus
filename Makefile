@@ -11,7 +11,7 @@ ICON_SUFFIX   = .png
 ICON_FILES    = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
 SIGNATURE     = signature1.xml
 SIGN_FILES    = $(CONFIG_XML) includes/pixplus.js $(ICON_FILES)
-DIST_FILES    = $(SIGN_FILES) $(SIGNATURE)
+DIST_FILES    = $(SIGN_FILES)
 
 all: $(OEX)
 dist: $(OEX)

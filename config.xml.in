@@ -4,7 +4,6 @@
   <description>pixivでイラストをページ遷移せずにポップアップ表示し、概ねキーボードのみでイラストの移動や評価などを行う。その他雑多な機能いろいろ。</description>
   <author href="http://my.opera.com/crckyl/">wowo</author>
   <license>Public domain</license>
-  <update-description href="http://crckyl.ath.cx/pixplus/update.php?version=@VERSION@" />
   <access origin="http://pixiv.net" subdomains="true" />
 @ICONS@
 </widget>
