@@ -3,15 +3,18 @@ ZIP          ?= zip
 ICON_SIZE_D  ?= 60
 ICON_SIZE    ?= 18 60 128
 OEX           = pixplus.oex
-VERSION       = $(shell grep '^// @version' includes/pixplus.js | sed -e 's/.*@version\s*//')
 
 CONFIG_XML    = config.xml
 ICON_PREFIX   = icons/pixplus_
 ICON_SUFFIX   = .png
 ICON_FILES    = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
 SIGNATURE     = signature1.xml
-SIGN_FILES    = $(CONFIG_XML) includes/pixplus.js $(ICON_FILES)
+SRC_USERJS    = includes/pixplus.js
+SIGN_FILES    = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
 DIST_FILES    = $(SIGN_FILES)
+VERSION       = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
+
+WARN_KEYWORDS = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender
 
 all: $(OEX)
 dist: $(OEX)
@@ -32,6 +35,9 @@ $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
 
 $(OEX): $(DIST_FILES)
+	@for kw in $(WARN_KEYWORDS);do \
+           grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v '/\* WARN \*/' || : ; \
+         done
 	$(ZIP) -r $@ $^
 
 clean:

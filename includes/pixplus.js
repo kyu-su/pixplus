@@ -9,6 +9,7 @@
 // ==/UserScript==
 
 /** 0.1.3
+ * Extension版でアンケートに答えられなくなっていたバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -379,22 +380,31 @@
 
    // rating
    window.opera.defineMagicFunction(
-     'countup_rating',
+     'countup_rating', /* WARN */
      function(real, othis, score) {
        if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9')) return;
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
        real.apply(othis, [].slice.apply(arguments, [2]));
      });
    window.opera.defineMagicFunction(
-     'send_quality_rating',
+     'send_quality_rating', /* WARN */
      function(real, othis) {
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-       real.apply(othis, [].slice.apply(arguments, [2]));
-     });
 
-   // quality_rating
+       var _ajax = window.jQuery.ajax;
+       window.jQuery.ajax = function(obj) {
+         var success = obj.success;
+         obj.success = function() {
+           success.apply(othis, [].slice.apply(arguments));
+           if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+         };
+         return _ajax.apply(this, [obj]);
+       };
+       real.apply(othis, [].slice.apply(arguments, [2]));
+       window.jQuery.ajax = _ajax;
+     });
    window.opera.defineMagicFunction(
-     'rating_ef',
+     'rating_ef', /* WARN */
      function(real, othis) {
        window.jQuery('#quality_rating').slideDown('fast', after_show);
        function after_show() {
@@ -403,25 +413,10 @@
        }
      });
    window.opera.defineMagicFunction(
-     'rating_ef2',
+     'rating_ef2', /* WARN */
      function(real, othis) {
        if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
        real.apply(othis, [].slice.apply(arguments, [2]));
-     });
-   window.opera.defineMagicFunction(
-     'send_quality_rating',
-     function(real, othis) {
-       var _ajax = jQuery.ajax;
-       jQuery.ajax = function(obj) {
-         var success = obj.success;
-         obj.success = function() {
-           success.apply(othis, [].slice.apply(arguments));
-           if (jQuery('#rating').is(':visible')) rating_ef2();
-         };
-         return _ajax.apply(this, [obj]);
-       };
-       real.apply(othis, [].slice.apply(arguments, [2]));
-       jQuery.ajax = _ajax;
      });
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
@@ -2188,13 +2183,13 @@
        this.rating_enabled = true;
 
        var anc = $x('div[@id="rating"]/h4/a', this.rating);
-       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') {
+       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
          anc.onclick = '';
          anc.addEventListener(
            'click',
            function(ev) {
              var qr = $x('div[@id="quality_rating"]', self.rating);
-             window[qr && qr.visible() ? 'rating_ef2' : 'rating_ef']();
+             window[qr && qr.visible() ? 'rating_ef2' : 'rating_ef'](); /* WARN */
              ev.preventDefault();
            }, false);
        }
@@ -2780,7 +2775,7 @@
      load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
              init,
              function() {
-               /* jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
+               /* window.jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
                 * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
                 * エラー回避のみ。
                 */
