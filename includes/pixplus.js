@@ -1,21 +1,14 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.1.2
+// @version     0.1.3
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.1.2
- * 一部のページでアンケート結果を表示出来なくなっていた不具合を修正。
- * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
- * スタックフィード上で評価やタグ編集が出来なかったバグを修正。
- * マウス操作用UIの表示を変更。
- * conf.popup.overlay_control追加。
- * マンガページ(mode=manga)で改ページ出来なくなっていた不具合を修正。
- * 評価出来なくなっていた不具合を修正。
+/** 0.1.3
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
