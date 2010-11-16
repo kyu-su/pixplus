@@ -562,6 +562,29 @@
            create_button('Cancel', tabtns, cancel);
          }
 
+         if (LS.s) {
+           (function() {
+              var mpcont = create_section('MyPage', div);
+              var now = window.jQuery.cookie('pixiv_mypage');
+              var saved = LS.get('cookie', 'pixiv_mypage');
+              mpcont.innerHTML = 'Now: ' + now + '<br />' + 'Saved: ' + saved;
+              var mpbtns = $c('div', mpcont);
+              create_button('Save', mpbtns, save_mypage);
+              var btn_restore = create_button('Restore', mpbtns, restore_mypage);
+
+              if (!saved) btn_restore.setAttribute('disabled', '');
+
+              function save_mypage() {
+                LS.set('cookie', 'pixiv_mypage', now);
+                window.location.reload();
+              }
+              function restore_mypage() {
+                window.jQuery.cookie('pixiv_mypage', saved, {expires: 30});
+                window.location.reload();
+              }
+            })();
+         }
+
          var wrap = $('manga_top') || $('pageHeader');
          if (wrap) wrap.appendChild(div);
          init();
@@ -1180,7 +1203,8 @@
 	       toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
 	       toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
 
-               set_cookie('bookToggle', type, 30, window.location.hostname.replace(/^(\w+)\./, '.'));
+               window.jQuery.cookie('bookToggle', type,
+                                    {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
              } else {
                _bookmarkToggle(container_id, type);
              }
@@ -3435,16 +3459,5 @@
        res += encodeURIComponent(name) + '=' + encodeURIComponent(data[name]);
      }
      return res;
-   }
-
-   /* ブックマーク管理ページでのタグの表示切り替えにのみ使用。 */
-   function set_cookie(key, value, expday, domain, path) {
-     var exp = new Date();
-     exp.setTime(exp.getTime() + 1000 * 60 * 60 * 24 * expday);
-     document.cookie =
-       key + '=' + value + ';' +
-       'expires=' + exp.toGMTString() + ';' +
-       'domain=' + domain + ';' +
-       'path=' + (path || '/');
    }
  })();
