@@ -1062,7 +1062,7 @@
    function init_taglist() {
      var bm_tag_list = $('bookmark_list');
      if (bm_tag_list) {
-       write_css('#bookmark_list{padding:0px !important;}' +
+       write_css('.area_bookmark, #bookmark_list{padding:0px !important;}' +
                  '#bookmark_list > ul{display:block;}' +
                  '#bookmark_list > ul > li{padding:0px;}' +
                  '#bookmark_list.flat > ul + ul{' + conf.tag_separator_style + '}' +
