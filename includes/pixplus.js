@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.1.3
+// @version     0.2.0
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.1.3
+/** 0.2.0
  * Extension版でアンケートに答えられなくなっていたバグを修正。
  * トップページのレイアウトをバックアップする機能追加。
  * Extension版の自動アップデートに対応。
@@ -26,7 +26,7 @@
  * Escape               閉じる。
  * e                    プロフィールを開く。
  * r                    作品一覧を開く。
- * Shift+r              作品に対するイメージレスポンスを開く。
+ * Shift+r              イメージレスポンス一覧を開く。
  * t                    ブックマークを開く。
  * y                    スタックフィードを開く。
  * b                    ブックマーク編集モードに移行。
