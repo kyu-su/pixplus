@@ -12,12 +12,15 @@
  * Extension版でアンケートに答えられなくなっていたバグを修正。
  * トップページのレイアウトをバックアップする機能追加。
  * Extension版の自動アップデートに対応。
+ * 上下キーでキャプションをスクロールするように変更。
+ * 画像を拡大/縮小するキーをo/iから+/-に変更。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
  ** 通常
- * BackSapace/Left/Up   前のイラストに移動。
- * Space/Right/Down     次のイラストに移動。
+ * BackSapace/Left      前のイラストに移動。
+ * Space/Right          次のイラストに移動。
+ * Up/Down              キャプションをスクロールする。
  * Home/End             最初/最後のイラストに移動。
  * Escape               閉じる。
  * e                    プロフィールを開く。
@@ -35,7 +38,7 @@
  * v                    マンガモードに移行。
  * Shift+v              マンガサムネイルページを開く。
  * Shift+数字           イラストを評価する。デフォルト設定では無効。1=10点/0=1点
- * i/o                  画像を縮小/拡大する。
+ * +/-                  画像を縮小/拡大する。
 
  ** ブックマーク編集モード
  * Escape               ブックマーク編集モードを終了。
@@ -165,7 +168,8 @@
        auto_zoom:            [0,     '自動ズームする最大サイズ。0で無効。'],
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
-       overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル']
+       overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル'],
+       scroll_height:        [32,    '上下キーでキャプションをスクロールする高さ。']
      }
    };
    var conf = {
@@ -1836,14 +1840,18 @@
            case 71: case 103: if (m())  q(e, p.reload);                   return; // g
            case 67: case  99: if (m(1)) q(e, caption, s);                 return; // c
            case 86: case 118: if (m(1)) q(e, manga, s);                   return; // v
-           case 73: case 105: if (m())  q(e, zoom, -1);                   return; // i
-           case 79: case 111: if (m())  q(e, zoom,  1);                   return; // o
+           case 45:           if (m())  q(e, zoom, -1);                   return; // -
+           case 43:           if (m())  q(e, zoom,  1);                   return; // +
            }
            if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
              var score = c == 126 ? 1 : 43 - c;
              window.countup_rating(score);
              return;
            }
+         }
+         switch(c) {
+         case 38: if (m()) q(e, p.scroll_caption, -conf.popup.scroll_height); return; // up
+         case 40: if (m()) q(e, p.scroll_caption,  conf.popup.scroll_height); return; // down
          }
          if (e.qrate) {
            var n;
@@ -1857,11 +1865,11 @@
            }
          } else {
            switch(c) {
-           case  8: case 37: case 38: if (m()) q(e, p.prev, c == 8,  c == 38); break; // bs/left/up
-           case 32: case 39: case 40: if (m()) q(e, p.next, c == 32, c == 40); break; // space/right/down
-           case 35: if (m()) q(e, p.last);                                     break; // end
-           case 36: if (m()) q(e, p.first);                                    break; // home
-           case 27: if (m()) q(e, m_e ? p.toggle_manga_mode : p.close);        break; // escape
+           case  8: case 37: if (m()) q(e, p.prev, c == 8,  c == 38);   break; // bs/left
+           case 32: case 39: if (m()) q(e, p.next, c == 32, c == 40);   break; // space/right
+           case 35: if (m()) q(e, p.last);                              break; // end
+           case 36: if (m()) q(e, p.first);                             break; // home
+           case 27: if (m()) q(e, m_e ? p.toggle_manga_mode : p.close); break; // escape
            }
          }
        }
@@ -2564,6 +2572,9 @@
      } else {
        window.open(url);
      }
+   };
+   Popup.prototype.scroll_caption = function(pos) {
+     this.comment.scrollTop += pos;
    };
 
    Popup.Loader = function(item, load_cb, error_cb, reload) {
