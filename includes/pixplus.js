@@ -14,11 +14,12 @@
  * Extension版の自動アップデートに対応。
  * 上下キーでキャプションをスクロールするように変更。conf.popup.scroll_height追加。
  * 画像を拡大/縮小するキーをo/iから+/-に変更。
+ * dキー(前のイラストに戻る)を追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
  ** 通常
- * BackSapace/Left      前のイラストに移動。
+ * d/BackSapace/Left    前のイラストに移動。
  * Space/Right          次のイラストに移動。
  * Up/Down              キャプションをスクロールする。
  * Home/End             最初/最後のイラストに移動。
@@ -1836,6 +1837,7 @@
            case 84: case 116: if (m())  q(e, p.open_author_bookmark,  s); return; // t
            case 89: case 121: if (m())  q(e, p.open_author_staccfeed, s); return; // y
            case 66: case  98: if (m(1)) q(e, bookmark, s);                return; // b
+           case 68: case 100: if (m())  q(e, p.prev, true);               return; // d
            case 70: case 102: if (m(1)) q(e, p.open, !s);                 return; // f
            case 71: case 103: if (m())  q(e, p.reload);                   return; // g
            case 67: case  99: if (m(1)) q(e, caption, s);                 return; // c
