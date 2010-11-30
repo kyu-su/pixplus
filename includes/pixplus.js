@@ -11,6 +11,7 @@
 /** 0.1.3
  * Extension版でアンケートに答えられなくなっていたバグを修正。
  * トップページのレイアウトをバックアップする機能追加。
+ * Extension版の自動アップデートに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -1395,6 +1396,7 @@
                'div.popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
                'div.popup .header{line-height:1.1em;}' +
+               //'div.popup .page_counter{font-size:smaller;color:gray;line-height:1em;}' +
                'div.popup .title{font-size:larger;font-weight:bold;}' +
                'div.popup .title:hover{text-decoration:none;}' +
                'div.popup .right{float:right;font-size:smaller;}' +
@@ -1540,6 +1542,14 @@
      this.img_med = null;
      this.img_big = null;
 
+     if (gallery) {
+       this.page_item = ++gallery.page_item;
+       this.page_col  = gallery.page_col;
+     } else {
+       this.page_item = 0;
+       this.page_col  = 0;
+     }
+
      this.img_url_base = null;
      this.img_url_ext  = null;
      if (this.thumb) this.parse_img_url(this.thumb.src);
@@ -1579,6 +1589,8 @@
      this.first     = null;
      this.last      = null;
      this.prev_dups = [];
+     this.page_item = 0;
+     this.page_col  = 0;
 
      this.onadditem = new Signal();
 
@@ -1618,7 +1630,9 @@
      if (!caps.length) return;
 
      var self = this;
-     var prev = self.last;
+     var prev = this.last;
+     this.page_item = 0;
+     ++this.page_col;
      each(
        caps,
        function(cap, cnt) {
@@ -1685,6 +1699,7 @@
      this.header                = $c('div',     this.root_div,      'header');
      // 文字によってはキャプションの幅計算が壊れるのでタイトルをblockなエレメントでラップする
      this.title_div             = $c('div',     this.header,        'title_wrapper');
+     //this.page_counter          = $c('span',    this.title_div,     'page_counter');
      this.title                 = $c('a',       this.title_div,     'title');
      this.title.setAttribute('nopopup', '');
      this.header_right          = $c('span',    this.title_div,     'right');
@@ -1988,6 +2003,21 @@
      if (!item && loop && g) item = r ? g.last : g.first;
      this.set(item, true, close);
    };
+   /*
+   Popup.prototype.update_page_counter = function(item) {
+     if (item.gallery && item.page_item && item.page_col) {
+       var text = '';
+       if (item.gallery.page_col < item.gallery.page_item) {
+         text += item.page_col + '+';
+       }
+       text += item.page_item;
+       this.page_counter.innerText = '[' + text + ']';
+       this.page_counter.style.display = 'inline';
+     } else {
+       this.page_counter.style.display = 'none';
+     }
+   };
+    */
    Popup.prototype.set = function(item, scroll, close, reload, manga_page) {
      if (!item) {
        if (close) this.close();
@@ -1995,6 +2025,7 @@
      }
      if (this.loader) this.loader.cancel();
      if (!this.item && item.caption) {
+       //this.update_page_counter(item);
        this.title.innerText = trim(item.caption.innerText);
        this.title.href = item.medium;
      }
@@ -2023,6 +2054,7 @@
      var self = this;
      //this.root_div.style.visibility = 'hidden';
      this.complete();
+     //this.update_page_counter(this.item);
 
      if (scroll) scrollelem(this.item.thumb || this.item.caption);
 
