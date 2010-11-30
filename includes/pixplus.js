@@ -1460,7 +1460,7 @@
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
      if (!window.location.href.match(/\/member_illust\.php/) || options.mode != 'manga') {
-       load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js',
+       load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
                conf.disable_effect ? disable_effect_jq : null);
      }
      load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
