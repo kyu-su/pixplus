@@ -1417,7 +1417,7 @@
                'div.popup .tags > * + *{margin-left:0.6em;}' +
                'div.popup .tags > span > a + a{margin-left:0.2em;}' +
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
-               //'div.popup .post_cap{line-height:1.1em;}' +
+               'div.popup .post_cap{line-height:1.1em;}' +
                'div.popup .post_cap img.author_img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
                'div.popup .post_cap img.author_img:hover{max-height:100%;}' +
