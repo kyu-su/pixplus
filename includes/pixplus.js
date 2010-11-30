@@ -50,8 +50,8 @@
  * Left/Right           左右のタグを選択。
 
  ** マンガモード
- * BackSapace/Left/Up   次のページに移動。
- * Space/Right/Down     次のページに移動。
+ * BackSapace/Left      前のページに移動。
+ * Space/Right          次のページに移動。
  * Home/End             最初/最後のページに移動。
  * Escape               マンガモードを終了。
  * f                    表示しているページの画像を開く。
