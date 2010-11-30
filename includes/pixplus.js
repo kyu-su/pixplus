@@ -1850,8 +1850,6 @@
            }
          }
          switch(c) {
-         case 38: if (m()) q(e, p.scroll_caption, -conf.popup.scroll_height); return; // up
-         case 40: if (m()) q(e, p.scroll_caption,  conf.popup.scroll_height); return; // down
          }
          if (e.qrate) {
            var n;
@@ -1865,11 +1863,13 @@
            }
          } else {
            switch(c) {
-           case  8: case 37: if (m()) q(e, p.prev, c == 8,  c == 38);   break; // bs/left
-           case 32: case 39: if (m()) q(e, p.next, c == 32, c == 40);   break; // space/right
-           case 35: if (m()) q(e, p.last);                              break; // end
-           case 36: if (m()) q(e, p.first);                             break; // home
-           case 27: if (m()) q(e, m_e ? p.toggle_manga_mode : p.close); break; // escape
+           case  8: case 37: if (m()) q(e, p.prev, c == 8);                     return; // bs/left
+           case 32: case 39: if (m()) q(e, p.next, c == 32);                    return; // space/right
+           case 38: if (m()) q(e, p.scroll_caption, -conf.popup.scroll_height); return; // up
+           case 40: if (m()) q(e, p.scroll_caption,  conf.popup.scroll_height); return; // down
+           case 35: if (m()) q(e, p.last);                                      return; // end
+           case 36: if (m()) q(e, p.first);                                     return; // home
+           case 27: if (m()) q(e, m_e ? p.toggle_manga_mode : p.close);         return; // escape
            }
          }
        }
