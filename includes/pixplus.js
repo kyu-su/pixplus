@@ -1103,7 +1103,7 @@
          var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
          if (wrap) {
            write_css('.ui-layout-east{float:right;}' +
-                     '.ui-layout-west .areaBottom{margin:0px;}');
+                     '.ui-layout-west .area_new{margin:0px;}');
            new Floater(wrap, cont);
          }
        }
