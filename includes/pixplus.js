@@ -1,21 +1,15 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.2.0
+// @version     0.2.1
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.2.0
- * Extension版でアンケートに答えられなくなっていたバグを修正。
- * トップページのレイアウトをバックアップする機能追加。
- * Extension版の自動アップデートに対応。
- * 上下キーでキャプションをスクロールするように変更。conf.popup.scroll_height追加。
- * 画像を拡大/縮小するキーをo/iから+/-に変更。
- * dキー(前のイラストに戻る)をキーバインドに追加。
- * Opera11.00.1094以降にExtension版をインストール出来なくなっていた不具合を修正。
+/** 0.2.1
+ * conf.fast_user_bookmark追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -151,6 +145,7 @@
      popup_manga_tb:         [true,  'マンガサムネイルページでポップアップを使用する。'],
      disable_effect:         [false, 'アニメーションなどのエフェクトを無効化する。'],
      workaround:             [false, 'Operaやpixivのバグ回避のための機能を使用する。'],
+     fast_user_bookmark:     [false, 'お気に入りユーザーの追加をワンクリックで行う。'],
      popup: {
        preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
@@ -1513,6 +1508,42 @@
              }
            });
        }
+     }
+
+     if (conf.fast_user_bookmark) {
+       (function() {
+          var _open = window.pixiv.Favorite.prototype.open;
+          window.pixiv.Favorite.prototype.open = function() {
+            var btn = $('favorite-button');
+            var form = this.preference.find('form[action*="bookmark_add.php"]');
+            if (btn && form.length) {
+              var xhr = new window.XMLHttpRequest();
+              xhr.open('POST', form[0].getAttribute('action'), true);
+              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+              xhr.onload = function() {
+                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=171329\"[^>]*>/i)) {
+                  window.jQuery('#favorite-button')
+		    .addClass('added')
+		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+	          window.jQuery('form', this.preference)
+		    .attr('action', '/bookmark_setting.php')
+                    .find('div.action').append('<input type="button" value="\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664" class="button remove"/>')
+                    .find('input[name="mode"]').remove();
+                  btn.style.opacity = '1';
+                } else {
+                  alert('Error!');
+                }
+              };
+              xhr.onerror = function() {
+                alert('Error!');
+              };
+              xhr.send(create_post_data(form[0]));
+              btn.style.opacity = '0.2';
+            } else {
+              _open.apply(this, [].slice.apply(arguments));
+            }
+          };
+        })();
      }
 
      evt = document.createEvent('Event');
