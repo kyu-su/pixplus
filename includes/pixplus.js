@@ -1425,17 +1425,19 @@
                'div.popup .tags > span > a + a{margin-left:0.2em;}' +
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
                'div.popup .post_cap{line-height:1.1em;position:relative;}' +
-               'div.popup .post_cap img.author_img{box-sizing:border-box;' +
+               'div.popup .post_cap .author_img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
-               'div.popup .post_cap img.author_img:hover{max-height:100%;}' +
+               'div.popup .post_cap .author_img:hover{max-height:100%;}' +
                'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
                'div.popup .post_cap .date_repost:before{content:"(\u518d ";}' +
                'div.popup .post_cap .date_repost:after{content:")";}' +
                'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
-               'div.popup .post_cap .author_status{position:absolute;left:2px;top:1px;width:14px;height:14px;' +
+               'div.popup .post_cap .author_status{position:absolute;left:2px;top:1px;' +
+               '  display:inline-block;width:14px;height:14px;' +
                '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
                'div.popup .post_cap .author a{font-weight:bold;}' +
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
                'div.popup .bm_edit{margin-top:2px;}' +
@@ -2210,7 +2212,7 @@
          this.a_stacc.style.display = 'inline';
        }
        if (conf.popup.author_status_icon && loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
-         this.a_status.style.display = 'inline-block';
+         this.a_status.style.display = '';
        } else {
          this.a_status.style.display = 'none';
        }
