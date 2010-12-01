@@ -228,6 +228,10 @@
        }
      }
    };
+   if (window.opera.pixplus) {
+     window.opera.postError('pixplus is already loaded');
+     return;
+   }
    window.opera.pixplus = pp;
    function rpc_chk(f) {
      return (pp.rpc_state & f) == f;
