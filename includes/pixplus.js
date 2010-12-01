@@ -145,7 +145,7 @@
      popup_manga_tb:         [true,  'マンガサムネイルページでポップアップを使用する。'],
      disable_effect:         [false, 'アニメーションなどのエフェクトを無効化する。'],
      workaround:             [false, 'Operaやpixivのバグ回避のための機能を使用する。'],
-     fast_user_bookmark:     [false, 'お気に入りユーザーの追加をワンクリックで行う。'],
+     fast_user_bookmark:     [0,     'お気に入りユーザーの追加をワンクリックで行う。0:無効/1:有効(公開)/2:有効(非公開)'],
      popup: {
        preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
@@ -165,7 +165,8 @@
        auto_zoom_size:       [800,   '自動ズーム後のサイズ上限。'],
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
        overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル'],
-       scroll_height:        [32,    '上下キーでキャプションをスクロールする高さ。']
+       scroll_height:        [32,    '上下キーでキャプションをスクロールする高さ。'],
+       author_status_icon:   [true,  'プロフィール画像の左上にステータスアイコン(チェック:お気に入りユーザー)を表示する。']
      }
    };
    var conf = {
@@ -210,6 +211,8 @@
      rpc_req_tag:   7,  // i|u|e
      rpc_req_rate:  13, // i|e|qr
      rpc_req_qrate: 13,
+
+     sprite_image:  'http://source.pixiv.net/source/images/sprite_20101101.png',
 
      recommender: {
        loaded:      false,
@@ -885,11 +888,15 @@
      } else if (window.location.href.match(/\/bookmark_detail\.php/)) {
        add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " bookmark_works ")]')});
      } else if (window.location.href.match(/\/stacc/)) {
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]'),
-                    colpath:   'div[contains(concat(" ", @class, " "), " post ")]',
+       var cont = $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]');
+       var colpath = 'div[contains(concat(" ", @class, " "), " post ")]';
+       add_gallery({container: cont, colpath: colpath,
                     cappath:   'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
                     thumbpath: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
                     skip_dups: true});
+       add_gallery({container:  cont, colpath: colpath,
+                    thumbpath:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
+                    thumb_only: true});
        /*
      } else if (window.location.href.match(/\/event_detail\.php/)) {
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " event-cont ")]/div[contains(concat(" ", @class, " "), " thumbContainer ")]'),
@@ -1417,7 +1424,7 @@
                'div.popup .tags > * + *{margin-left:0.6em;}' +
                'div.popup .tags > span > a + a{margin-left:0.2em;}' +
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
-               'div.popup .post_cap{line-height:1.1em;}' +
+               'div.popup .post_cap{line-height:1.1em;position:relative;}' +
                'div.popup .post_cap img.author_img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
                'div.popup .post_cap img.author_img:hover{max-height:100%;}' +
@@ -1427,6 +1434,8 @@
                'div.popup .post_cap .date_repost:after{content:")";}' +
                'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
+               'div.popup .post_cap .author_status{position:absolute;left:2px;top:1px;width:14px;height:14px;' +
+               '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
                'div.popup .post_cap .author a{font-weight:bold;}' +
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
                'div.popup .bm_edit{margin-top:2px;}' +
@@ -1515,10 +1524,11 @@
           var _open = window.pixiv.Favorite.prototype.open;
           window.pixiv.Favorite.prototype.open = function() {
             var btn = $('favorite-button');
-            var form = this.preference.find('form[action*="bookmark_add.php"]');
-            if (btn && form.length) {
+            var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
+            var restrict = $xa('.//input[@name="restrict"]', form);
+            if (btn && form && restrict.length == 2) {
               var xhr = new window.XMLHttpRequest();
-              xhr.open('POST', form[0].getAttribute('action'), true);
+              xhr.open('POST', form.getAttribute('action'), true);
               xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
               xhr.onload = function() {
                 if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=171329\"[^>]*>/i)) {
@@ -1537,7 +1547,8 @@
               xhr.onerror = function() {
                 alert('Error!');
               };
-              xhr.send(create_post_data(form[0]));
+              each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
+              xhr.send(create_post_data(form));
               btn.style.opacity = '0.2';
             } else {
               _open.apply(this, [].slice.apply(arguments));
@@ -1664,54 +1675,65 @@
    };
    Gallery.prototype.add_collection = function(col) {
      if (this.filter_col) this.filter_col(col);
+     var elements = $xa(this.args.thumb_only ? this.args.thumbpath : this.args.cappath, col);
+     if (!elements.length) return;
      col.setAttribute('pixplus_loaded', 'true');
-
-     var caps = $xa(this.args.cappath, col);
-     if (!caps.length) return;
 
      var self = this;
      var prev = this.last;
      this.page_item = 0;
      ++this.page_col;
      each(
-       caps,
-       function(cap, cnt) {
-         var thumb = $x(self.args.thumbpath, cap);
+       elements,
+       function(elem, cnt) {
+         var thumb, cap;
+         if (self.args.thumb_only) {
+           thumb = elem;
+         } else {
+           thumb = $x(self.args.thumbpath, elem);
+           cap = elem;
+         }
          var thumb_anc = $x('ancestor-or-self::a', thumb);
          if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
-         var url = cap.href || (thumb_anc && thumb_anc.href);
+
+         var url = (cap && cap.href) || (thumb_anc && thumb_anc.href);
          if (!url || !url.match(/[\?&]illust_id=(\d+)/)) return;
-         if (cap.nodeType == 3) {
-           var new_caption = $c('a');
-           new_caption.href = url;
-           new_caption.innerText = trim(cap.nodeValue);
-           new_caption.setAttribute('nopopup', '');
-           cap.parentNode.replaceChild(new_caption, cap);
-           cap = new_caption;
-         } else if (lc(cap.tagName) == 'a') {
-           cap.setAttribute('nopopup', '');
-         } else if (!$x('ancestor::a', cap)) {
-           if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
-             cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
+
+         if (cap) {
+           if (cap.nodeType == 3) {
+             var new_caption = $c('a');
+             new_caption.href = url;
+             new_caption.innerText = trim(cap.nodeValue);
+             new_caption.setAttribute('nopopup', '');
+             cap.parentNode.replaceChild(new_caption, cap);
+             cap = new_caption;
+           } else if (lc(cap.tagName) == 'a') {
+             cap.setAttribute('nopopup', '');
+           } else if (!$x('ancestor::a', cap)) {
+             if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
+               cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
+             }
            }
          }
 
          var item;
          var pbtn = thumb;
-         if (!pbtn) {
+         if (!thumb && cap) {
            pbtn = $c('a');
            pbtn.href = url;
            pbtn.innerText = '\u25a0';
            pbtn.style.marginRight = '4px';
            cap.parentNode.insertBefore(pbtn, cap);
          }
-         pbtn.addEventListener(
-           'click',
-           function(e) {
-             if (e.shiftKey || e.ctrlKey) return;
-             e.preventDefault();
-             Popup.run(item);
-           }, false);
+         if (pbtn) {
+           pbtn.addEventListener(
+             'click',
+             function(e) {
+               if (e.shiftKey || e.ctrlKey) return;
+               e.preventDefault();
+               Popup.run(item);
+             }, false);
+         }
 
          item = new GalleryItem(url, thumb, cap, prev, self);
          if (!self.first) self.first = item;
@@ -1747,7 +1769,7 @@
      this.status.style.display  = 'none';
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
-     this.res_btn               = $c('a',       this.header_right,     'res_btn');
+     this.res_btn               = $c('a',       this.header_right,  'res_btn');
      this.res_btn.innerText     = '[R]';
      this.bm_btn                = $c('a',       this.header_right,  'bm_btn');
      this.bm_btn.href           = 'javascript:void(0)';
@@ -1763,6 +1785,7 @@
      this.rating                = $c('div',     this.caption,       'rating separator works_area');
      this.post_cap              = $c('div',     this.caption,       'post_cap');
      this.a_img                 = $c('img',     this.post_cap,      'author_img');
+     this.a_status              = $c('span',    this.post_cap,      'author_status');
      this.date_wrap             = $c('div',     this.post_cap,      'date_wrap');
      this.date                  = $c('span',    this.date_wrap,     'date');
      this.date_repost           = $c('span',    this.date_wrap,     'date_repost');
@@ -2185,6 +2208,11 @@
        if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"[^>]+title=\"\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\"/i)) {
          this.a_stacc.href       = RegExp.$1;
          this.a_stacc.style.display = 'inline';
+       }
+       if (conf.popup.author_status_icon && loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
+         this.a_status.style.display = 'inline-block';
+       } else {
+         this.a_status.style.display = 'none';
        }
        this.a_img.style.display  = 'block';
        this.author.style.display = 'block';
