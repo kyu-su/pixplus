@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.2.1
+// @version     0.3.0
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
-/** 0.2.1
+/** 0.3.0
  * conf.fast_user_bookmark追加。
+ * プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -166,7 +167,7 @@
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
        overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル'],
        scroll_height:        [32,    '上下キーでキャプションをスクロールする高さ。'],
-       author_status_icon:   [true,  'プロフィール画像の左上にステータスアイコン(チェック:お気に入りユーザー)を表示する。']
+       author_status_icon:   [true,  'プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する。']
      }
    };
    var conf = {
@@ -1434,9 +1435,13 @@
                'div.popup .post_cap .date_repost:after{content:")";}' +
                'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
-               'div.popup .post_cap .author_status{position:absolute;left:2px;top:1px;' +
-               '  display:inline-block;width:14px;height:14px;' +
+               'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
+               'div.popup .post_cap .author_status.fav{width:14px;height:14px;' +
                '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_status.heart{width:16px;height:14px;' +
+               '  background-position:-1701px -480px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_status.mypix{width:14px;height:16px;' +
+               '  background-position:-1701px -1px;background-image:url("' + pp.sprite_image + '");}' +
                'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
                'div.popup .post_cap .author a{font-weight:bold;}' +
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
@@ -2204,6 +2209,7 @@
                           : loader.image.src.replace(/_[sm](\.\w+)$/, '$1'));
 
      if (loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
+       var a_status_class;
        this.a_img.src            = RegExp.$3;
        this.a_profile.href       = RegExp.$1;
        this.a_profile.innerHTML  = RegExp.$4; // 属性を使うのでtrimしない。
@@ -2213,7 +2219,17 @@
          this.a_stacc.href       = RegExp.$1;
          this.a_stacc.style.display = 'inline';
        }
-       if (conf.popup.author_status_icon && loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
+       if (conf.popup.author_status_icon) {
+         if (loader.text.match(/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i)) {
+           a_status_class = 'mypix';
+         } else if (loader.text.match(/<span[^>]+class=\"list_fav\">/i)) {
+           a_status_class = 'heart';
+         } else if (loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
+           a_status_class = 'fav';
+         }
+       }
+       if (a_status_class) {
+         this.a_status.className = 'author_status ' + a_status_class;
          this.a_status.style.display = '';
        } else {
          this.a_status.style.display = 'none';
