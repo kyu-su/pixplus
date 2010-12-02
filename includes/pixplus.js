@@ -1542,6 +1542,8 @@
                     .find('div.action').append('<input type="button" value="\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664" class="button remove"/>')
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
+                } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
+                  alert(RegExp.$1);
                 } else {
                   alert('Error!');
                 }
@@ -2677,7 +2679,7 @@
      geturl(
        this.url,
        function(text) {
-         if (text.match(/<span[^>]+class="error"[^>]*>(.+)<\/span>/i)) {
+         if (text.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
            self.onerror(RegExp.$1.replace(/<[^>]*>/g, ''));
          } else {
            self.text = text;
