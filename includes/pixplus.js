@@ -1533,7 +1533,7 @@
               xhr.open('POST', form.getAttribute('action'), true);
               xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
               xhr.onload = function() {
-                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=171329\"[^>]*>/i)) {
+                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
                   window.jQuery('#favorite-button')
 		    .addClass('added')
 		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
