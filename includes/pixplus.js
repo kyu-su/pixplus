@@ -1918,8 +1918,6 @@
              return;
            }
          }
-         switch(c) {
-         }
          if (e.qrate) {
            var n;
            switch(c) {
