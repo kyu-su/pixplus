@@ -1473,7 +1473,7 @@
                'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
                'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
                // comments
-               'div.popup .viewer_comments{padding-left:1em;}' +
+               'div.popup .viewer_comments{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
                'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
                'div.popup .viewer_comments .worksComment:last-child{border:none;}'
               );
@@ -1916,7 +1916,7 @@
            case 84: case 116: if (m())  q(e, p.open_author_bookmark,  s); return; // t
            case 89: case 121: if (m())  q(e, p.open_author_staccfeed, s); return; // y
            case 66: case  98: if (m(1)) q(e, bookmark, s);                return; // b
-           case 68: case 100: if (m())  q(e, p.prev, true);               return; // d
+           case 68: case 100: if (m(1)) q(e, prev, s);                    return; // d
            case 70: case 102: if (m(1)) q(e, p.open, !s);                 return; // f
            case 71: case 103: if (m())  q(e, p.reload);                   return; // g
            case 67: case  99: if (m(1)) q(e, caption, s);                 return; // c
@@ -1957,6 +1957,14 @@
        }
        function bookmark(detail) {
          detail ? p.open_bookmark_detail() : p.toggle_edit_bookmark();
+       }
+       function prev(comments) {
+         if (comments) {
+           this.caption.setAttribute('show', '');
+           window.one_comment_view();
+         } else {
+           p.prev(true);
+         }
        }
        function caption(qrate) {
          qrate ? p.toggle_qrate() : p.toggle_caption();
@@ -2030,6 +2038,7 @@
           });
    };
    Popup.prototype.init_comments = function(msg) {
+     this.comment_wrapper.scrollTop = 0;
      this.comments_show_btn.style.display = '';
      this.comments_hide_btn.style.display = 'none';
      this.viewer_comments.style.display = 'none';
@@ -2684,7 +2693,7 @@
      }
    };
    Popup.prototype.scroll_caption = function(pos) {
-     this.comment.scrollTop += pos;
+     this.comment_wrapper.scrollTop += pos;
    };
 
    Popup.Loader = function(item, load_cb, error_cb, reload) {
