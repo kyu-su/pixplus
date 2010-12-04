@@ -1421,7 +1421,7 @@
                'div.popup .header:hover .caption{opacity:' + conf.popup.caption_opacity + ';}' +
                'div.popup .header .caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                'div.popup .caption .separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-               'div.popup .comment{overflow:auto;line-height:1.2em;}' +
+               'div.popup .comment_wrapper{overflow:auto;line-height:1.2em;}' +
                'div.popup .tags > * + *{margin-left:0.6em;}' +
                'div.popup .tags > span > a + a{margin-left:0.2em;}' +
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
@@ -1471,7 +1471,12 @@
                //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
                'div.popup .rating dl.ra_a dt{width:auto;}' +
                'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
-               'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}');
+               'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
+               // comments
+               'div.popup .viewer_comments{padding-left:1em;}' +
+               'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
+               'div.popup .viewer_comments .worksComment:last-child{border:none;}'
+              );
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
@@ -1486,6 +1491,7 @@
      if (!$x('//script[contains(@src, "/rating")]')) {
        load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
      }
+     load_js('http://source.pixiv.net/source/js/member_illust.js?20101110');
 
      function disable_effect_jq() {
        window.jQuery.fx.off = true;
@@ -1778,15 +1784,20 @@
      this.status.style.display  = 'none';
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
-     this.res_btn               = $c('a',       this.header_right,  'res_btn');
-     this.res_btn.innerText     = '[R]';
-     this.bm_btn                = $c('a',       this.header_right,  'bm_btn');
-     this.bm_btn.href           = 'javascript:void(0)';
-     this.bm_btn.innerText      = '[B]';
-     this.bm_btn.addEventListener('click', bind_event(this.edit_bookmark, this), false);
+     this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
+     this.comments_show_btn     = Popup.create_button('[C]', this.header_right, 'comments_show_btn', window.one_comment_view);
+     this.comments_show_btn.id  = 'one_comment_view';
+     this.comments_hide_btn     = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', window.one_comment_view);
+     this.comments_hide_btn.id  = 'one_comment_view2';
+     this.comments_hide_btn.setAttribute('enable', '');
+     this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
+                                                      bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
-     this.comment               = $c('div',     this.caption,       'comment');
+     this.comment_wrapper       = $c('div',     this.caption,       'comment_wrapper');
+     this.comment               = $c('div',     this.comment_wrapper, 'comment');
+     this.viewer_comments       = $c('div',     this.comment_wrapper, 'viewer_comments');
+     this.viewer_comments.id    = 'one_comment_area';
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
      this.tag_edit              = $c('div',     this.caption);
@@ -1824,6 +1835,7 @@
      }
 
      this.init_display();
+     this.init_comments();
 
      this.bm_loading = false;
      this.rating_enabled = false;
@@ -1990,6 +2002,14 @@
      Popup.instant_prev = item;
      return Popup.run(item);
    };
+   Popup.create_button = function(text, parent, cls, cb_click) {
+     var btn = $c('a', parent, cls);
+     btn.href = 'javascript:void(0)';
+     btn.innerText = text;
+     if (cb_click) btn.addEventListener('click', cb_click, false);
+     return btn;
+   };
+
    Popup.prototype.init_display = function(msg) {
      each([this.manga_btn,
            this.res_btn,
@@ -2008,6 +2028,12 @@
           function(elem) {
             elem.style.display = 'none';
           });
+   };
+   Popup.prototype.init_comments = function(msg) {
+     this.comments_show_btn.style.display = '';
+     this.comments_hide_btn.style.display = 'none';
+     this.viewer_comments.style.display = 'none';
+     this.viewer_comments.innerHTML = '';
    };
    Popup.prototype.set_status = function(msg) {
      this.status.innerText = msg;
@@ -2133,6 +2159,7 @@
 
      if (scroll) scrollelem(this.item.thumb || this.item.caption);
 
+     this.init_comments();
      this.manga.init();
 
      if (pp.rpc_usable) {
@@ -2473,7 +2500,7 @@
        tg.style.maxHeight = mh;
        this.caption.style.pixelWidth = this.header.offsetWidth;
        var ch = this.img_div.offsetHeight * conf.popup.caption_height - this.tags.offsetHeight - this.author.offsetHeight;
-       this.comment.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
+       this.comment_wrapper.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
        /*
        if (this.caption.offsetHeight * 2 > this.img_div.offsetHeight) {
          var o = this.root_div.offsetHeight - this.img_div.offsetHeight;
