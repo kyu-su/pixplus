@@ -1478,7 +1478,7 @@
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
                'div.popup .bm_edit{margin-top:2px;}' +
                'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
-               'div.popup .img_div img{border:1px solid silver;}' +
+               'div.popup .img_div img, div.popup .img_div svg{border:1px solid silver;}' +
                'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
                'div.popup .olc:hover{opacity:0.6;}' +
                'div.popup .olc-prev{left:3px;}' +
