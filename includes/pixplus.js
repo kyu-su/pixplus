@@ -1433,7 +1433,7 @@
                'div.popup .header:hover .caption{opacity:' + conf.popup.caption_opacity + ';}' +
                'div.popup .header .caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                'div.popup .caption .separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-               'div.popup .comment_wrapper{overflow:auto;line-height:1.2em;}' +
+               'div.popup .comment_wrap{overflow:auto;line-height:1.2em;}' +
                'div.popup .tags > * + *{margin-left:0.6em;}' +
                'div.popup .tags > span > a + a{margin-left:0.2em;}' +
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
@@ -1809,9 +1809,9 @@
                                                       bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
-     this.comment_wrapper       = $c('div',     this.caption,       'comment_wrapper');
-     this.comment               = $c('div',     this.comment_wrapper, 'comment');
-     this.viewer_comments       = $c('div',     this.comment_wrapper, 'viewer_comments');
+     this.comment_wrap          = $c('div',     this.caption,       'comment_wrap');
+     this.comment               = $c('div',     this.comment_wrap,  'comment');
+     this.viewer_comments       = $c('div',     this.comment_wrap,  'viewer_comments');
      this.viewer_comments.id    = 'one_comment_area';
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
@@ -2053,7 +2053,7 @@
           });
    };
    Popup.prototype.init_comments = function(msg) {
-     this.comment_wrapper.scrollTop = 0;
+     this.comment_wrap.scrollTop = 0;
      this.comments_show_btn.style.display = '';
      this.comments_hide_btn.style.display = 'none';
      this.viewer_comments.style.display = 'none';
@@ -2524,7 +2524,7 @@
        tg.style.maxHeight = mh;
        this.caption.style.pixelWidth = this.header.offsetWidth;
        var ch = this.img_div.offsetHeight * conf.popup.caption_height - this.tags.offsetHeight - this.author.offsetHeight;
-       this.comment_wrapper.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
+       this.comment_wrap.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
        /*
        if (this.caption.offsetHeight * 2 > this.img_div.offsetHeight) {
          var o = this.root_div.offsetHeight - this.img_div.offsetHeight;
@@ -2708,7 +2708,7 @@
      }
    };
    Popup.prototype.scroll_caption = function(pos) {
-     this.comment_wrapper.scrollTop += pos;
+     this.comment_wrap.scrollTop += pos;
    };
 
    Popup.Loader = function(item, load_cb, error_cb, reload) {
