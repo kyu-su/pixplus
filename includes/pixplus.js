@@ -409,7 +409,7 @@
          var success = obj.success;
          obj.success = function() {
            success.apply(othis, [].slice.apply(arguments));
-           if (Popup.instance && this.has_qrate) {
+           if (Popup.instance && Popup.instance.has_qrate) {
              if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
              each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
                   function(item) {
@@ -439,6 +439,25 @@
      function(real, othis) {
        if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
        real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+
+   // viewer comments
+   window.opera.defineMagicFunction(
+     'on_loaded_one_comment_view',
+     function(real, othis) {
+       real.apply(othis, [].slice.apply(arguments, [2]));
+       if (Popup.instance && Popup.instance.viewer_comments_enabled) {
+         each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', Popup.instance.viewer_comments_a),
+              function(btn) {
+                btn.addEventListener(
+                  'click',
+                  function(ev) {
+                    ev.preventDefault();
+                    geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
+                           function() { alert('Error!'); }, true);
+                  }, false);
+              });
+       }
      });
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
@@ -1802,7 +1821,7 @@
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
      if (pp.rpc_usable) {
-       var cb = bind(this, this.toggle_viewer_comments);
+       var cb = bind(this.toggle_viewer_comments, this);
        this.comments_show_btn    = Popup.create_button('[C]', this.header_right, 'comments_show_btn', cb);
        this.comments_show_btn.id = 'one_comment_view';
        this.comments_hide_btn    = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', cb);
