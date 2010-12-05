@@ -365,7 +365,7 @@
    window.opera.defineMagicFunction(
      'startTagEdit',
      function(real, othis) {
-       if (Popup.instance) {
+       if (Popup.instance && Popup.Popup.instance.tag_edit_enabled) {
          Popup.instance.tag_editing = true;
          Popup.instance.locate();
        }
@@ -379,7 +379,7 @@
 	   delay:0.2,
 	   duration:0.2,
            afterFinish: function() {
-             if (Popup.instance) {
+             if (Popup.instance && Popup.instance.tag_editing) {
                Popup.instance.tag_editing = false;
                Popup.instance.locate();
                Popup.instance.reload();
@@ -409,7 +409,7 @@
          var success = obj.success;
          obj.success = function() {
            success.apply(othis, [].slice.apply(arguments));
-           if (Popup.instance) {
+           if (Popup.instance && this.has_qrate) {
              if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
              each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
                   function(item) {
@@ -1862,7 +1862,9 @@
 
      this.bm_loading = false;
      this.rating_enabled = false;
+     this.viewer_comments_enabled = false;
      this.tag_editing = false;
+     this.tag_edit_enabled = false;
      this.has_qrate = false;
      this.has_image_response = false;
      this.zoom_scale = 1;
@@ -2295,6 +2297,7 @@
        this.a_img.style.display  = 'none';
        this.author.style.display = 'none';
      }
+
      this.has_image_response = false;
      this.res_btn.style.display = 'none';
      // レスポンスする方とされる方に両対応
@@ -2308,6 +2311,7 @@
        }
        this.res_btn.style.display = 'inline';
      }
+
      this.bm_btn.style.display = 'none';
      if (loader.text.match(/<div[^>]+class=\"works_iconsBlock\"[^>]*>([\s\S]*?)<\/div>/i)) {
        if (RegExp.$1.match(/bookmark_detail\.php\?/i)) {
@@ -2323,6 +2327,8 @@
          (this.comment.innerHTML = edit_comment(RegExp.$1))) {
        this.comment.style.display = 'block';
      }
+
+     this.tag_edit_enabled = false;
      this.tags.style.display = 'none';
      if (loader.text.match(/<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i)) {
        var html = '';
@@ -2338,6 +2344,7 @@
          if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
              loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
            html += '<a href="javascript:void(0)" class="tageditbtn" onclick="startTagEdit()">[E]</a>';
+           this.tag_edit_enabled = true;
          }
          this.tags.innerHTML = html;
          this.tags.style.display = 'block';
@@ -2399,6 +2406,7 @@
        }
      }
 
+     this.viewer_comments_enabled = false;
      this.viewer_comments_c.innerHTML = '';
      this.viewer_comments_c.style.display = 'none';
      if (pp.rpc_usable && loader.text.match(/(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i)) {
@@ -2427,26 +2435,31 @@
               'submit',
               function(ev) {
                 ev.preventDefault();
-
-                var xhr = new window.XMLHttpRequest();
-                xhr.open('POST', form.getAttribute('action'), true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-                xhr.onload = function() {
-                  self.reload_viewer_comments();
-                  comment.removeAttribute('disabled');
-                  comment.value = '';
-                  submit.removeAttribute('disabled');
-                };
-                xhr.onerror = function() {
-                  alert('Error!');
-                };
-                xhr.send(create_post_data(form));
-                comment.setAttribute('disabled', '');
-                submit.setAttribute('disabled', '');
+                if (trim(comment.value)) {
+                  var xhr = new window.XMLHttpRequest();
+                  xhr.open('POST', form.getAttribute('action'), true);
+                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+                  xhr.onload = function() {
+                    self.reload_viewer_comments();
+                    comment.removeAttribute('disabled');
+                    comment.value = '';
+                    submit.removeAttribute('disabled');
+                  };
+                  xhr.onerror = function() {
+                    alert('Error!');
+                  };
+                  xhr.send(create_post_data(form));
+                  comment.setAttribute('disabled', '');
+                  submit.setAttribute('disabled', '');
+                } else {
+                  alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+                }
               }, false);
 
             self.viewer_comments_c.appendChild(form);
             self.viewer_comments_c.style.display = 'block';
+
+            self.viewer_comments_enabled = true;
           }
         })();
      }
@@ -2680,18 +2693,21 @@
      }
    };
    Popup.prototype.toggle_viewer_comments = function() {
-     if (pp.rpc_usable) {
+     if (this.viewer_comments_enabled) {
        if (this.viewer_comments_a.empty() || !this.viewer_comments_a.visible()) {
+         var comment = $x('form/input[@name="comment"]', this.viewer_comments_c);
          this.caption.setAttribute('show', '');
          this.viewer_comments.style.display = 'block';
+         window.one_comment_view();
+         if (comment) comment.focus();
        } else {
          this.viewer_comments.style.display = 'none';
+         window.one_comment_view();
        }
-       window.one_comment_view();
      }
    };
    Popup.prototype.reload_viewer_comments = function() {
-     if (pp.rpc_usable) {
+     if (this.viewer_comments_enabled) {
        this.viewer_comments_a.innerHTML = '';
        this.viewer_comments.style.display = 'none';
        this.toggle_viewer_comments();
