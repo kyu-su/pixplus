@@ -1489,6 +1489,7 @@
                'div.popup .rating #result div[highlight]{background-color:#efefef;}' +
                // comments
                'div.popup .viewer_comments{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
+               'div.popup .viewer_comments input + input{margin-left:0.4em;}' +
                'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
                'div.popup .viewer_comments .worksComment:last-child{border:none;}'
               );
@@ -1801,9 +1802,10 @@
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
      if (pp.rpc_usable) {
-       this.comments_show_btn    = Popup.create_button('[C]', this.header_right, 'comments_show_btn', window.one_comment_view);
+       var cb = bind(this, this.toggle_viewer_comments);
+       this.comments_show_btn    = Popup.create_button('[C]', this.header_right, 'comments_show_btn', cb);
        this.comments_show_btn.id = 'one_comment_view';
-       this.comments_hide_btn    = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', window.one_comment_view);
+       this.comments_hide_btn    = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', cb);
        this.comments_hide_btn.id = 'one_comment_view2';
        this.comments_hide_btn.setAttribute('enable', '');
      }
@@ -1815,7 +1817,9 @@
      this.comment               = $c('div',     this.comment_wrap,  'comment');
      if (pp.rpc_usable) {
        this.viewer_comments     = $c('div',     this.comment_wrap,  'viewer_comments');
-       this.viewer_comments.id  = 'one_comment_area';
+       this.viewer_comments_c   = $c('div',     this.viewer_comments);
+       this.viewer_comments_a   = $c('div',     this.viewer_comments);
+       this.viewer_comments_a.id = 'one_comment_area';
      }
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
@@ -1978,12 +1982,7 @@
          detail ? p.open_bookmark_detail() : p.toggle_edit_bookmark();
        }
        function prev(comments) {
-         if (comments) {
-           this.caption.setAttribute('show', '');
-           window.one_comment_view();
-         } else {
-           p.prev(true);
-         }
+         comments ? p.toggle_viewer_comments() : p.prev(true);
        }
        function caption(qrate) {
          qrate ? p.toggle_qrate() : p.toggle_caption();
@@ -2062,7 +2061,7 @@
        this.comments_show_btn.style.display = '';
        this.comments_hide_btn.style.display = 'none';
        this.viewer_comments.style.display = 'none';
-       this.viewer_comments.innerHTML = '';
+       this.viewer_comments_a.innerHTML = '';
      }
    };
    Popup.prototype.set_status = function(msg) {
@@ -2400,6 +2399,58 @@
        }
      }
 
+     this.viewer_comments_c.innerHTML = '';
+     this.viewer_comments_c.style.display = 'none';
+     if (pp.rpc_usable && loader.text.match(/(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i)) {
+       (function() {
+          var form = RegExp.$1, html = '';
+          each(form.match(/<input[^>]+type=\"hidden\"[^>]+>/ig),
+               function(hidden) { html += hidden; });
+          if (html) {
+            var comment = $c('input'), submit = $c('input');
+            comment.setAttribute('type', 'text');
+            comment.setAttribute('name', 'comment');
+            comment.setAttribute('maxlength', '255');
+            submit.setAttribute('type', 'submit');
+            submit.setAttribute('name', 'submit');
+            submit.className = 'btn_type04';
+            submit.value     = 'Send';
+
+            form = $c('form');
+            form.setAttribute('action', '/member_illust.php');
+            form.setAttribute('method', 'POST');
+            form.innerHTML = html;
+            form.appendChild(comment);
+            form.appendChild(submit);
+
+            form.addEventListener(
+              'submit',
+              function(ev) {
+                ev.preventDefault();
+
+                var xhr = new window.XMLHttpRequest();
+                xhr.open('POST', form.getAttribute('action'), true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+                xhr.onload = function() {
+                  self.reload_viewer_comments();
+                  comment.removeAttribute('disabled');
+                  comment.value = '';
+                  submit.removeAttribute('disabled');
+                };
+                xhr.onerror = function() {
+                  alert('Error!');
+                };
+                xhr.send(create_post_data(form));
+                comment.setAttribute('disabled', '');
+                submit.setAttribute('disabled', '');
+              }, false);
+
+            self.viewer_comments_c.appendChild(form);
+            self.viewer_comments_c.style.display = 'block';
+          }
+        })();
+     }
+
      this.bm_edit.innerHTML = '';
 
      if (this.manga.usable && this.init_manga_page >= 0) {
@@ -2626,6 +2677,24 @@
          this.caption.setAttribute('show', '');
          clickelem(anc);
        }
+     }
+   };
+   Popup.prototype.toggle_viewer_comments = function() {
+     if (pp.rpc_usable) {
+       if (this.viewer_comments_a.empty() || !this.viewer_comments_a.visible()) {
+         this.caption.setAttribute('show', '');
+         this.viewer_comments.style.display = 'block';
+       } else {
+         this.viewer_comments.style.display = 'none';
+       }
+       window.one_comment_view();
+     }
+   };
+   Popup.prototype.reload_viewer_comments = function() {
+     if (pp.rpc_usable) {
+       this.viewer_comments_a.innerHTML = '';
+       this.viewer_comments.style.display = 'none';
+       this.toggle_viewer_comments();
      }
    };
    Popup.prototype.edit_bookmark = function() {
