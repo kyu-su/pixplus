@@ -1382,7 +1382,7 @@
        });
 
      pp.rpc_usable = true;
-     if (!conf.debug) {
+     if (true || !conf.debug) {
        /* イラストページで誤爆防止のためにタグ編集と評価機能を無効化。 */
        for(var id in pp.rpc_ids) {
          if ($(id)) {
@@ -1800,19 +1800,23 @@
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
-     this.comments_show_btn     = Popup.create_button('[C]', this.header_right, 'comments_show_btn', window.one_comment_view);
-     this.comments_show_btn.id  = 'one_comment_view';
-     this.comments_hide_btn     = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', window.one_comment_view);
-     this.comments_hide_btn.id  = 'one_comment_view2';
-     this.comments_hide_btn.setAttribute('enable', '');
+     if (pp.rpc_usable) {
+       this.comments_show_btn    = Popup.create_button('[C]', this.header_right, 'comments_show_btn', window.one_comment_view);
+       this.comments_show_btn.id = 'one_comment_view';
+       this.comments_hide_btn    = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', window.one_comment_view);
+       this.comments_hide_btn.id = 'one_comment_view2';
+       this.comments_hide_btn.setAttribute('enable', '');
+     }
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
                                                       bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
      this.comment_wrap          = $c('div',     this.caption,       'comment_wrap');
      this.comment               = $c('div',     this.comment_wrap,  'comment');
-     this.viewer_comments       = $c('div',     this.comment_wrap,  'viewer_comments');
-     this.viewer_comments.id    = 'one_comment_area';
+     if (pp.rpc_usable) {
+       this.viewer_comments     = $c('div',     this.comment_wrap,  'viewer_comments');
+       this.viewer_comments.id  = 'one_comment_area';
+     }
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
      this.tag_edit              = $c('div',     this.caption);
@@ -2054,10 +2058,12 @@
    };
    Popup.prototype.init_comments = function(msg) {
      this.comment_wrap.scrollTop = 0;
-     this.comments_show_btn.style.display = '';
-     this.comments_hide_btn.style.display = 'none';
-     this.viewer_comments.style.display = 'none';
-     this.viewer_comments.innerHTML = '';
+     if (pp.rpc_usable) {
+       this.comments_show_btn.style.display = '';
+       this.comments_hide_btn.style.display = 'none';
+       this.viewer_comments.style.display = 'none';
+       this.viewer_comments.innerHTML = '';
+     }
    };
    Popup.prototype.set_status = function(msg) {
      this.status.innerText = msg;
