@@ -1467,11 +1467,13 @@
                'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
                'div.popup .rating #quality_rating{float:none !important;}' +
                'div.popup .rating h4{margin:0px;}' +
-               'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
+               //'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
+               'div.popup .rating #result{font-size:inherit !important;width:100%;}' +
                //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
-               'div.popup .rating dl.ra_a dt{width:auto;}' +
+               'div.popup .rating dl.ra_a dt{width:100%;}' +
                'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
                'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
+               'div.popup .rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
                // comments
                'div.popup .viewer_comments{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
                'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
