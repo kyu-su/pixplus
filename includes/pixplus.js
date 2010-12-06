@@ -365,7 +365,7 @@
    window.opera.defineMagicFunction(
      'startTagEdit',
      function(real, othis) {
-       if (Popup.instance && Popup.Popup.instance.tag_edit_enabled) {
+       if (Popup.instance && Popup.instance.tag_edit_enabled) {
          Popup.instance.tag_editing = true;
          Popup.instance.locate();
        }
@@ -1836,6 +1836,7 @@
      this.comment               = $c('div',     this.comment_wrap,  'comment');
      if (pp.rpc_usable) {
        this.viewer_comments     = $c('div',     this.comment_wrap,  'viewer_comments');
+       this.viewer_comments.id  = 'pp_viewer_comments';
        this.viewer_comments_w   = $c('div',     this.viewer_comments);
        this.viewer_comments_c   = $c('div',     this.viewer_comments_w);
        this.viewer_comments_a   = $c('div',     this.viewer_comments_w);
@@ -2066,7 +2067,7 @@
      return btn;
    };
 
-   Popup.prototype.init_display = function(msg) {
+   Popup.prototype.init_display = function() {
      each([this.manga_btn,
            this.res_btn,
            this.bm_btn,
@@ -2085,14 +2086,15 @@
             elem.style.display = 'none';
           });
    };
-   Popup.prototype.init_comments = function(msg) {
+   Popup.prototype.init_comments = function(keep_form) {
      this.comment_wrap.scrollTop = 0;
      if (pp.rpc_usable) {
        this.comments_show_btn.style.display = '';
        this.comments_hide_btn.style.display = 'none';
        this.viewer_comments.style.display = 'none';
+       this.viewer_comments_a.style.display = 'none';
        this.viewer_comments_a.innerHTML = '';
-       if (LS.s) {
+       if (!keep_form && LS.s) {
          var visible = LS.get('popup', 'viewer_comment_form_enabled') == 'true';
          this.viewer_comments_c.style.display = visible ? 'block' : 'none';
        }
@@ -2439,8 +2441,6 @@
      }
 
      this.viewer_comments_enabled = false;
-     this.viewer_comments_a.innerHTML = '';
-     this.viewer_comments_a.style.display = 'none';
      if (pp.rpc_usable && loader.text.match(/(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i)) {
        (function() {
           var form = RegExp.$1, html = '';
@@ -2724,13 +2724,41 @@
    };
    Popup.prototype.toggle_viewer_comments = function() {
      if (this.viewer_comments_enabled) {
-       if (this.viewer_comments_a.empty() || !this.viewer_comments_a.visible()) {
+       if (this.viewer_comments_a.empty() || !this.viewer_comments.visible()) {
          this.caption.setAttribute('show', '');
-         this.viewer_comments.style.display = 'block';
-         window.one_comment_view();
-       } else {
-         this.viewer_comments.style.display = 'none';
-         window.one_comment_view();
+       }
+       if (window.Effect) {
+         var self = this;
+         var _blind_down = window.Effect.BlindDown;
+         var _blind_up = window.Effect.BlindUp;
+         if (self.viewer_comments_a.empty() && window.on_loaded_one_comment_view) {
+           window.Effect.BlindDown = function(element, opts) {
+             var _on_loaded_one_comment_view = window.on_loaded_one_comment_view;
+             window.on_loaded_one_comment_view = function(obj) {
+               (new showOneComment()).display(obj);
+               //_on_loaded_one_comment_view(obj);
+               window.on_loaded_one_comment_view = _on_loaded_one_comment_view;
+               self.viewer_comments_a.style.display = 'block';
+               window.Effect.BlindDown('pp_viewer_comments', opts);
+             };
+           };
+         } else {
+           window.Effect.BlindDown = function(element, opts) {
+             self.viewer_comments_a.style.display = 'block';
+             _blind_down('pp_viewer_comments', opts);
+           };
+         }
+         window.Effect.BlindUp = function(element, opts) {
+           opts.afterFinish = function(opts) {
+             self.viewer_comments_a.style.display = 'none';
+           };
+           _blind_up('pp_viewer_comments', opts);
+         };
+       }
+       window.one_comment_view();
+       if (window.Effect) {
+         window.Effect.BlindDown = _blind_down;
+         window.Effect.BlindUp = _blind_up;
        }
      }
    };
@@ -2742,8 +2770,7 @@
    };
    Popup.prototype.reload_viewer_comments = function() {
      if (this.viewer_comments_enabled) {
-       this.viewer_comments_a.innerHTML = '';
-       this.viewer_comments.style.display = 'none';
+       this.init_comments(true);
        this.toggle_viewer_comments();
      }
    };
