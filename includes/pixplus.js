@@ -1821,8 +1821,8 @@
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
-     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
-                                                      bind(this.toggle_viewer_comments, this));
+     //this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
+     //                                                 bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
                                                       bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
@@ -2084,16 +2084,17 @@
    Popup.prototype.init_comments = function(keep_form) {
      this.comment_wrap.scrollTop = 0;
      this.viewer_comments.style.display = 'none';
+     this.viewer_comments_c.innerHTML = '';
      this.viewer_comments_a.innerHTML = '';
      if (pp.rpc_usable) {
-       this.comments_btn.style.display = '';
-       this.comments_btn.removeAttribute('enable');
+       //this.comments_btn.style.display = '';
+       //this.comments_btn.removeAttribute('enable');
        if (!keep_form && LS.s) {
          var visible = LS.get('popup', 'viewer_comment_form_enabled') == 'true';
          this.viewer_comments_c.style.display = visible ? 'block' : 'none';
        }
      } else {
-       this.comments_btn.style.display = 'none';
+       //this.comments_btn.style.display = 'none';
      }
    };
    Popup.prototype.set_status = function(msg) {
@@ -2732,26 +2733,32 @@
      }
      var self = this;
      var area = $('one_comment_area');
-     var show = true;
+     //var show = true;
      if (this.viewer_comments_a.empty()) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
        sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
                    function(obj) {
                      window.on_loaded_one_comment_view(obj);
-                     window.jQuery(self.viewer_comments).slideDown(200);
+                     show();
                    });
      } else if (!this.viewer_comments.visible()) {
-       window.jQuery(self.viewer_comments).slideDown(200);
+       show();
      }else{
-       window.jQuery(self.viewer_comments).slideUp(200);
-       show = false;
+       window.jQuery(this.viewer_comments).slideUp(200);
+       //show = false;
      }
+     function show() {
+       window.jQuery(self.viewer_comments).slideDown(200);
+       window.jQuery(self.comment_wrap).animate({scrollTop: self.comment.offsetHeight}, 200);
+     }
+     /*
      if (show) {
        this.comments_btn.setAttribute('enable', '');
      } else {
        this.comments_btn.removeAttribute('enable');
      }
+      */
    };
 
    Popup.prototype.toggle_viewer_comment_form = function() {
