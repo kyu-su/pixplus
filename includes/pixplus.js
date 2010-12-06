@@ -1821,36 +1821,20 @@
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
-     if (pp.rpc_usable) {
-       var cb = bind(this.toggle_viewer_comments, this);
-       this.comments_show_btn    = Popup.create_button('[C]', this.header_right, 'comments_show_btn', cb);
-       this.comments_show_btn.id = 'one_comment_view';
-       this.comments_hide_btn    = Popup.create_button('[C]', this.header_right, 'comments_hide_btn', cb);
-       this.comments_hide_btn.id = 'one_comment_view2';
-       this.comments_hide_btn.setAttribute('enable', '');
-     }
+     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
+                                                      bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
                                                       bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
      this.comment_wrap          = $c('div',     this.caption,       'comment_wrap');
      this.comment               = $c('div',     this.comment_wrap,  'comment');
-     if (pp.rpc_usable) {
-       this.viewer_comments     = $c('div',     this.comment_wrap,  'viewer_comments');
-       this.viewer_comments.id  = 'pp_viewer_comments';
-       this.viewer_comments_w   = $c('div',     this.viewer_comments);
-       this.viewer_comments_c   = $c('div',     this.viewer_comments_w);
-       this.viewer_comments_a   = $c('div',     this.viewer_comments_w);
-       this.viewer_comments_a.id = 'one_comment_area';
-       this.viewer_comments.addEventListener(
-         'click',
-         function(ev) {
-           if (ev.target === self.viewer_comments ||
-               ev.target === self.viewer_comments_w) {
-             self.toggle_viewer_comment_form();
-           }
-         }, false);
-     }
+     this.viewer_comments       = $c('div',     this.comment_wrap,  'viewer_comments');
+     this.viewer_comments.id    = 'pp_viewer_comments';
+     this.viewer_comments_w     = $c('div',     this.viewer_comments);
+     this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
+     this.viewer_comments_a     = $c('div',     this.viewer_comments_w);
+     this.viewer_comments_a.id  = 'one_comment_area';
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
      this.tag_edit              = $c('div',     this.caption);
@@ -1933,6 +1917,16 @@
      this.onclose = new Signal(close, Popup.onclose);
 
      this.onclick.bind_event(this, this.img_anc, 'click', false);
+
+     this.viewer_comments.addEventListener(
+       'click',
+       function(ev) {
+         if (ev.target === self.viewer_comments ||
+             ev.target === self.viewer_comments_w) {
+           self.toggle_viewer_comment_form();
+         }
+       }, false);
+
 
      //document.body.insertBefore(this.root_div, document.body.firstChild);
      document.body.appendChild(this.root_div);
@@ -2089,16 +2083,17 @@
    };
    Popup.prototype.init_comments = function(keep_form) {
      this.comment_wrap.scrollTop = 0;
+     this.viewer_comments.style.display = 'none';
+     this.viewer_comments_a.innerHTML = '';
      if (pp.rpc_usable) {
-       this.comments_show_btn.style.display = '';
-       this.comments_hide_btn.style.display = 'none';
-       this.viewer_comments.style.display = 'none';
-       //this.viewer_comments_a.style.display = 'none';
-       this.viewer_comments_a.innerHTML = '';
+       this.comments_btn.style.display = '';
+       this.comments_btn.removeAttribute('enable');
        if (!keep_form && LS.s) {
          var visible = LS.get('popup', 'viewer_comment_form_enabled') == 'true';
          this.viewer_comments_c.style.display = visible ? 'block' : 'none';
        }
+     } else {
+       this.comments_btn.style.display = 'none';
      }
    };
    Popup.prototype.set_status = function(msg) {
@@ -2744,16 +2739,19 @@
        sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
                    function(obj) {
                      window.on_loaded_one_comment_view(obj);
-                     window.jQuery(self.viewer_comments).slideDown('fast');
+                     window.jQuery(self.viewer_comments).slideDown(200);
                    });
      } else if (!this.viewer_comments.visible()) {
-       window.jQuery(self.viewer_comments).slideDown('fast');
+       window.jQuery(self.viewer_comments).slideDown(200);
      }else{
-       window.jQuery(self.viewer_comments).slideUp('fast');
+       window.jQuery(self.viewer_comments).slideUp(200);
        show = false;
      }
-     this.comments_show_btn[show ? 'hide' : 'show']();
-     this.comments_hide_btn[show ? 'show' : 'hide']();
+     if (show) {
+       this.comments_btn.setAttribute('enable', '');
+     } else {
+       this.comments_btn.removeAttribute('enable');
+     }
    };
 
    Popup.prototype.toggle_viewer_comment_form = function() {
