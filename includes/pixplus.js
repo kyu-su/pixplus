@@ -2737,11 +2737,11 @@
      if (this.viewer_comments_a.empty()) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
-       sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
-                   function(obj) {
-                     window.on_loaded_one_comment_view(obj);
-                     show();
-                   });
+       window.sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
+                          function(obj) {
+                            window.on_loaded_one_comment_view(obj);
+                            show();
+                          });
      } else if (!this.viewer_comments.visible()) {
        show();
      }else{
