@@ -14,7 +14,7 @@ SIGN_FILES    = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
 DIST_FILES    = $(SIGN_FILES) index.html
 VERSION       = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
 
-WARN_KEYWORDS = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect
+WARN_KEYWORDS = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 
 all: $(OEX)
 dist: $(OEX)
