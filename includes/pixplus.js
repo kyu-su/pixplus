@@ -170,7 +170,8 @@
        auto_zoom_scale:      [4,     '自動ズーム後の拡大率上限。'],
        overlay_control:      [0.3,   '移動用クリックインターフェースの幅。0:使用しない/<1:画像に対する割合/>1:ピクセル'],
        scroll_height:        [32,    '上下キーでキャプションをスクロールする高さ。'],
-       author_status_icon:   [true,  'プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する。']
+       author_status_icon:   [true,  'プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する。'],
+       show_comment_form:    [true,  'コメントの投稿フォームを表示する。']
      }
    };
    var conf = {
@@ -249,21 +250,22 @@
           label: 'Popup',
           data:  [conf_schema.popup, conf.popup]}],
      create_name: function(s, n) {
-       return this.prefix + s + '_' + n;
+       return LS.prefix + s + '_' + n;
      },
      get: function(s, n) {
-       return this.s.getItem(this.create_name(s, n));
+       return LS.s.getItem(LS.create_name(s, n));
      },
      set: function(s, n, v) {
-       return this.s.setItem(this.create_name(s, n), v);
+       return LS.s.setItem(LS.create_name(s, n), v);
      },
      remove: function(s, n) {
-       return this.s.removeItem(this.create_name(s, n));
+       return LS.s.removeItem(LS.create_name(s, n));
      },
      conv: {
-       'string':  String,
-       'boolean': function(s) { return s == 'true'; },
-       'number':  parseFloat
+       'string':  [String, String],
+       'boolean': [function(s) { return s == 'true'; },
+                   function(v) { return v ? 'true' : 'false'; }],
+       'number':  [parseFloat, String]
      },
      each: function(cb_key, cb_sec, cb_sec_after) {
        each(
@@ -282,13 +284,14 @@
        var keys = [];
        for(var key in cs) {
          var type = typeof(cs[key][0]);
-         var func = this.conv[type];
+         if (!LS.conv[type]) continue;
+         var func = LS.conv[type][0];
          if (func) {
            cs[key].type = type;
            keys.push(key);
            cf[key] = cs[key][0];
-           if (this.s) {
-             var v = this.get(name, key);
+           if (LS.s) {
+             var v = LS.get(name, key);
              if (v) cf[key] = func(v);
            }
          }
@@ -729,13 +732,14 @@
              if (cs[key].type == 'boolean') {
                val = cs[key].input.checked;
              } else {
-               val = LS.conv[cs[key].type](cs[key].input.value);
+               val = LS.conv[cs[key].type][0](cs[key].input.value);
              }
              if (val === cs[key][0] && cs[key]._set_default) {
                if (conf.debug) opera.postError('remove LS key - ' + [c.name, key].join(':'));
                LS.remove(c.name, key);
              } else if (val != cf[key]) {
-               LS.set(c.name, key, val);
+               cf[key] = val;
+               //LS.set(c.name, key, val);
              }
            });
          window.location.reload();
@@ -770,7 +774,7 @@
              if (cs[key].type == 'boolean') {
                val = cs[key].input.checked;
              } else {
-               val = LS.conv[cs[key].type](cs[key].input.value);
+               val = LS.conv[cs[key].type][0](cs[key].input.value);
              }
              if (val !== cs[key][0]) {
                var ns = 'opera.pixplus.conf';
@@ -1821,8 +1825,8 @@
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
      this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
-     //this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
-     //                                                 bind(this.toggle_viewer_comments, this));
+     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
+                                                      bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
                                                       bind_event(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
@@ -2087,14 +2091,11 @@
      this.viewer_comments_c.innerHTML = '';
      this.viewer_comments_a.innerHTML = '';
      if (pp.rpc_usable) {
-       //this.comments_btn.style.display = '';
-       //this.comments_btn.removeAttribute('enable');
-       if (!keep_form && LS.s) {
-         var visible = LS.get('popup', 'viewer_comment_form_enabled') == 'true';
-         this.viewer_comments_c.style.display = visible ? 'block' : 'none';
-       }
+       this.comments_btn.style.display = '';
+       this.comments_btn.removeAttribute('enable');
+       if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
      } else {
-       //this.comments_btn.style.display = 'none';
+       this.comments_btn.style.display = 'none';
      }
    };
    Popup.prototype.set_status = function(msg) {
@@ -2733,7 +2734,6 @@
      }
      var self = this;
      var area = $('one_comment_area');
-     //var show = true;
      if (this.viewer_comments_a.empty()) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
@@ -2745,27 +2745,21 @@
      } else if (!this.viewer_comments.visible()) {
        show();
      }else{
+       this.comments_btn.removeAttribute('enable');
        window.jQuery(this.viewer_comments).slideUp(200);
-       //show = false;
      }
      function show() {
+       self.comments_btn.setAttribute('enable', '');
        window.jQuery(self.viewer_comments).slideDown(200);
        window.jQuery(self.comment_wrap).animate({scrollTop: self.comment.offsetHeight}, 200);
      }
-     /*
-     if (show) {
-       this.comments_btn.setAttribute('enable', '');
-     } else {
-       this.comments_btn.removeAttribute('enable');
-     }
-      */
    };
 
    Popup.prototype.toggle_viewer_comment_form = function() {
      var hidden = this.viewer_comments_c.style.display == 'none', comment;
      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
      if (hidden && (comment = $x('form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
-     if (LS.s) LS.set('popup', 'viewer_comment_form_enabled', hidden ? 'true' : 'false');
+     if (LS.s) LS.set('popup', 'show_comment_form', hidden ? 'true' : 'false');
    };
    Popup.prototype.reload_viewer_comments = function() {
      if (this.viewer_comments_enabled) {
