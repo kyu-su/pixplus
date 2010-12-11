@@ -13,6 +13,7 @@
  * プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。
  * コメント表示機能を追加。Shift+dで切り替え。
  * アンケート結果の表示を変更。
+ * 閲覧・評価・コメント履歴ページに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -103,6 +104,7 @@
  * 検索
  * 投稿イラスト管理ページ
  * ブックマーク詳細ページ
+ * 閲覧・評価・コメント履歴
 
  ** 人気タグ別ランキングについて
  * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログに「何らかの方法で数ヶ月以内に再開します」とある。
@@ -939,6 +941,11 @@
                     colpath:   'ul[contains(concat(" ", @class, " "), " thu ")]',
                     thumbpath: 'li/a[contains(@href, "mode=medium")]/img'});
         */
+     } else if (window.location.href.match(/\/(?:view|rating|comment)_all\.php/)) {
+       add_gallery({container:     $x('//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]'),
+                    colpath:       'dl',
+                    cappath:       'dd/a[contains(@href, "mode=medium")]',
+                    allow_nothumb: -1});
      }
 
      // 汎用
