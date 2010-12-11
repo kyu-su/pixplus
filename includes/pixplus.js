@@ -1521,7 +1521,10 @@
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
      if (!window.location.href.match(/\/member_illust\.php/) || options.mode != 'manga') {
        load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-               conf.disable_effect ? disable_effect_jq : null);
+               function() {
+                 conf.disable_effect && disable_effect_jq();
+                 window.jQuery.noConflict();
+               });
      }
      load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
              conf.disable_effect ? disable_effect_se : null);
@@ -1530,8 +1533,6 @@
      if (!$x('//script[contains(@src, "/rating")]')) {
        load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
      }
-     if (!window.pixiv.context) window.pixiv.context = {};
-     load_js('http://source.pixiv.net/source/js/member_illust.js?20101110');
 
      function disable_effect_jq() {
        window.jQuery.fx.off = true;
@@ -1572,7 +1573,7 @@
        }
      }
 
-     if (conf.fast_user_bookmark) {
+     if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
        (function() {
           var _open = window.pixiv.Favorite.prototype.open;
           window.pixiv.Favorite.prototype.open = function() {
@@ -2733,13 +2734,13 @@
        this.caption.setAttribute('show', '');
      }
      var self = this;
-     var area = $('one_comment_area');
      if (this.viewer_comments_a.empty()) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
        window.sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
                           function(obj) {
-                            window.on_loaded_one_comment_view(obj);
+                            //window.on_loaded_one_comment_view(obj);
+                            self.viewer_comments_a.innerHTML = obj.responseText;
                             show();
                           });
      } else if (!this.viewer_comments.visible()) {
