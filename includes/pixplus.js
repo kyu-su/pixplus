@@ -3427,7 +3427,9 @@
      this.wrap_pos = getpos(this.wrap);
    };
    Floater.prototype.unfloat = function () {
+     this.scroll_save();
      this.wrap.removeAttribute('float');
+     this.scroll_restore();
      /*
      if (this.cont) {
        this.cont.style.overflowX = '';
@@ -3448,12 +3450,20 @@
    Floater.prototype.update_float = function () {
      var de = document.documentElement;
      if (this.floating !== true && de.scrollTop > this.wrap_pos.top) {
+       this.scroll_save();
        this.wrap.setAttribute('float', '');
+       this.scroll_restore();
        this.floating = true;
      } else if (this.floating !== false && de.scrollTop < this.wrap_pos.top) {
        this.unfloat();
      }
      this.update_height();
+   };
+   Floater.prototype.scroll_save = function () {
+     if (this.cont) this.scroll_pos = this.cont.scrollTop;
+   };
+   Floater.prototype.scroll_restore = function () {
+     if (this.cont) this.cont.scrollTop = this.scroll_pos;
    };
    window.addEventListener('load', Floater.load, false);
 
