@@ -11,14 +11,15 @@
 /** 0.3.0
  * conf.fast_user_bookmark追加。
  * プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。
- * コメント表示機能を追加。Shift+dで切り替え。
+ * コメント表示機能を追加。
  * アンケート結果の表示を変更。
  * 閲覧・評価・コメント履歴ページに対応。
+ * キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
  ** 通常
- * d/BackSapace/Left    前のイラストに移動。
+ * a/BackSapace/Left    前のイラストに移動。
  * Space/Right          次のイラストに移動。
  * Up/Down              キャプションをスクロールする。
  * Home/End             最初/最後のイラストに移動。
@@ -34,8 +35,8 @@
  * Shift+f              イラストページを開く。
  * g                    リロードする。
  * c                    キャプションの常時表示/自動表示を切り替える。
- * Shift+c              アンケートに答える。
- * Shift+d              コメント表示を切り替え。
+ * Shift+c              コメント表示を切り替え。
+ * d                    アンケートに答える。
  * v                    マンガモードに移行。
  * Shift+v              マンガサムネイルページを開く。
  * Shift+数字           イラストを評価する。デフォルト設定では無効。1=10点/0=1点
@@ -740,8 +741,7 @@
                if (conf.debug) opera.postError('remove LS key - ' + [c.name, key].join(':'));
                LS.remove(c.name, key);
              } else if (val != cf[key]) {
-               cf[key] = val;
-               //LS.set(c.name, key, val);
+               LS.set(c.name, key, val);
              }
            });
          window.location.reload();
@@ -1517,6 +1517,7 @@
                'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
                'div.popup .rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
                'div.popup .rating #result div[highlight]{background-color:#efefef;}' +
+               'div.popup .rating #quality_rating{width:100% !important;}' +
                // comments
                'div.popup .viewer_comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
                'div.popup .viewer_comments input + input{margin-left:0.4em;}' +
@@ -1972,12 +1973,14 @@
        } else {
          if (c == e.which) {
            switch(c) {
+           case 65: case  97: if (m())  q(e, move, true, true);           return; // a
+           //case 83: case 115: if (m())  q(e, move, false, true);          return; // s
            case 69: case 101: if (m())  q(e, p.open_author_profile,   s); return; // e
            case 82: case 114: if (m(1)) q(e, a_illust,                s); return; // r
            case 84: case 116: if (m())  q(e, p.open_author_bookmark,  s); return; // t
            case 89: case 121: if (m())  q(e, p.open_author_staccfeed, s); return; // y
            case 66: case  98: if (m(1)) q(e, bookmark, s);                return; // b
-           case 68: case 100: if (m(1)) q(e, prev, s);                    return; // d
+           case 68: case 100: if (m())  q(e, p.toggle_qrate);             return; // d
            case 70: case 102: if (m(1)) q(e, p.open, !s);                 return; // f
            case 71: case 103: if (m())  q(e, p.reload);                   return; // g
            case 67: case  99: if (m(1)) q(e, caption, s);                 return; // c
@@ -2013,17 +2016,20 @@
            }
          }
        }
+       function move(prev, close) {
+         prev ? p.prev(close) : p.next(close);
+       }
        function a_illust(response) {
          response ? p.open_image_response() : p.open_author_illust();
        }
        function bookmark(detail) {
          detail ? p.open_bookmark_detail() : p.toggle_edit_bookmark();
        }
-       function prev(comments) {
-         comments ? p.toggle_viewer_comments() : p.prev(true);
-       }
-       function caption(qrate) {
-         qrate ? p.toggle_qrate() : p.toggle_caption();
+       //function prev(comments) {
+       //  comments ? p.toggle_viewer_comments() : p.prev(true);
+       //}
+       function caption(comments) {
+         comments ? p.toggle_viewer_comments() : p.toggle_caption();
        }
        function manga(tb) {
          tb ? p.open_manga_tb() : p.toggle_manga_mode();
