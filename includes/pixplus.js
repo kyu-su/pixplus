@@ -153,6 +153,7 @@
      disable_effect:         [false, 'アニメーションなどのエフェクトを無効化する。'],
      workaround:             [false, 'Operaやpixivのバグ回避のための機能を使用する。'],
      fast_user_bookmark:     [0,     'お気に入りユーザーの追加をワンクリックで行う。0:無効/1:有効(公開)/2:有効(非公開)'],
+     expand_novel:           [false, '小説ページのロード時に全ページを表示する。'],
      popup: {
        preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
@@ -444,7 +445,7 @@
      'rating_ef2', /* WARN */
      function(real, othis) {
        if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       return real.apply(othis, [].slice.apply(arguments, [2]));
      });
 
    // viewer comments
@@ -464,6 +465,22 @@
                   }, false);
               });
        }
+     });
+
+   // novel
+   window.opera.defineMagicFunction(
+     'parseNovel',
+     function(real, othis) {
+       var _onload = othis.onLoad, ret;
+       alert();
+       othis.onLoad = function() {
+         alert();
+         _onload.apply(this, [].slice.apply(arguments));
+         setTimeout(init_novel, 100);
+       };
+       ret = real.apply(othis, [].slice.apply(arguments, [2]));
+       othis.onLoad = _onload;
+       return ret;
      });
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
@@ -866,16 +883,16 @@
        area_right();
      }
 
-     if (window.location.href.match(/\/(?:mypage|cate_r18)\.php/)) {
+     if (window.location.pathname.match(/^\/(?:mypage|cate_r18)\.php/)) {
        mypage();
-     } else if (window.location.href.match(/\/member\.php/)) {
+     } else if (window.location.pathname.match(/^\/member\.php/)) {
        each(
          $xa('//div[contains(concat(" ", @class, " "), " worksListOthers ")]/*[contains(concat(" ", @class, " "), " worksListOthersImg ")]'),
          function(col) {
            unpack_captions(col);
            add_gallery({collection: col});
          });
-     } else if (window.location.href.match(/\/member_illust\.php/)) {
+     } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
        if (options.illust_id) {
          add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " worksImageresponse ")]'),
                       cappath:    'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'});
@@ -890,11 +907,11 @@
                       cappath:   'ul/li/label'},
                      null, unpack_captions_label);
        }
-     } else if (window.location.href.match(/\/response\.php/) && !options.mode) {
+     } else if (window.location.pathname.match(/^\/response\.php/) && !options.mode) {
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " response ") and h3]'),
                     colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
                    null, unpack_captions);
-     } else if (window.location.href.match(/\/ranking(_r18g?|_rookie|_log|_tag|_area)?\.php/)) {
+     } else if (window.location.pathname.match(/^\/ranking(_r18g?|_rookie|_log|_tag|_area)?\.php/)) {
        if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
          area_right();
@@ -907,7 +924,7 @@
                       cappath:   'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
                       thumbpath: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
        }
-     } else if (window.location.href.match(/\/bookmark\.php/) && !options.id &&
+     } else if (window.location.pathname.match(/^\/bookmark\.php/) && !options.id &&
                 (!options.type || options.type.match(/^illust(?:_all)?$/))) {
        // ブックマーク管理
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
@@ -923,9 +940,9 @@
            item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
          }
        }
-     } else if (window.location.href.match(/\/bookmark_detail\.php/)) {
+     } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
        add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " bookmark_works ")]')});
-     } else if (window.location.href.match(/\/stacc/)) {
+     } else if (window.location.pathname.match(/^\/stacc/)) {
        var cont = $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]');
        var colpath = 'div[contains(concat(" ", @class, " "), " post ")]';
        add_gallery({container: cont, colpath: colpath,
@@ -936,12 +953,12 @@
                     thumbpath:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
        /*
-     } else if (window.location.href.match(/\/event_detail\.php/)) {
+     } else if (window.location.pathname.match(/^\/event_detail\.php/)) {
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " event-cont ")]/div[contains(concat(" ", @class, " "), " thumbContainer ")]'),
                     colpath:   'ul[contains(concat(" ", @class, " "), " thu ")]',
                     thumbpath: 'li/a[contains(@href, "mode=medium")]/img'});
         */
-     } else if (window.location.href.match(/\/(?:view|rating|comment)_all\.php/)) {
+     } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
        add_gallery({container:     $x('//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]'),
                     colpath:       'dl',
                     cappath:       'dd/a[contains(@href, "mode=medium")]',
@@ -1011,7 +1028,7 @@
        pp.recommender.attach(
          function() {
            var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
-           if (!window.location.href.match(/\/bookmark_add\.php/)) {
+           if (!window.location.pathname.match(/^\/bookmark_add\.php/)) {
              if (conf.locate_recommend_right == 1) {
                locate_right();
              } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
@@ -1207,7 +1224,7 @@
    }
    function init_per_page() {
      var bm_tag_list = $('bookmark_list');
-     if (window.location.href.match(/\/bookmark(?:_tag_setting)?\.php/)) {
+     if (window.location.pathname.match(/^\/bookmark(?:_tag_setting)?\.php/)) {
        if (options.type && options.type.match(/^(?:reg_)?user$/)) {
          // http://www.pixiv.net/bookmark.php?type=user
          /* oAutoPagerizeと衝突する。
@@ -1298,7 +1315,7 @@
            new Floater(msgbox);
          }
        }
-     } else if (window.location.href.match(/\/member_illust\.php/)) {
+     } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
        switch(options.mode) {
        case 'medium':
          init_illust_page_bookmark();
@@ -1372,12 +1389,44 @@
          }
          break;
        }
-     } else if (window.location.href.match(/\/bookmark_add\.php/)) {
+     } else if (window.location.pathname.match(/^\/bookmark_add\.php/)) {
        if (conf.mod_bookmark_add_page && options.type == 'illust') {
          var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
          var autotag = $x('//h2[contains(text(), "\u8ffd\u52a0")]') ? true : false;
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
+     }
+   }
+   function init_novel() {
+     if (conf.expand_novel) {
+       var cont = $('preview_area'), after = cont.nextSibling;
+       each($xa('div[starts-with(@id, "page_")]', cont),
+            function(page, idx) {
+              if (idx > 0) {
+                var newcont = cont.cloneNode(false);
+                cont.removeChild(page);
+
+                page.style.display = '';
+                if (page.className.split(/\s+/).indexOf('parsed') < 0) {
+		  page.innerHTML = window.parse_page(page.innerHTML);
+		  page.className += ' parsed';
+	        }
+                each($xa('.//*[contains(concat(" ", @class, " "), " novelimage ")]', page),
+                     function(img) {
+                       if (img.className.split(/\s+/).indexOf('added') < 0) {
+                         var id = img.readAttribute('illust_id');
+                         if (id && window.illust_html_list[id]) {
+                           img.innerHTML = window.illust_html_list[id];
+		           img.className += 'added';
+                         }
+                       }
+                     });
+
+                newcont.appendChild(page);
+                newcont.style.marginTop = '1em';
+                cont.parentNode.insertBefore(newcont, after);
+              }
+            });
      }
    }
    function init_pixplus() {
@@ -1527,7 +1576,7 @@
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
-     if (!window.location.href.match(/\/member_illust\.php/) || options.mode != 'manga') {
+     if (!window.location.pathname.match(/^\/member_illust\.php/) || options.mode != 'manga') {
        load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
                function() {
                  conf.disable_effect && disable_effect_jq();
