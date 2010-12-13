@@ -15,6 +15,7 @@
  * アンケート結果の表示を変更。
  * 閲覧・評価・コメント履歴ページに対応。
  * キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る
+ * ポップアップのイベントAPIをPopup.on*のみに変更。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -471,15 +472,14 @@
    window.opera.defineMagicFunction(
      'parseNovel',
      function(real, othis) {
-       var _onload = othis.onLoad, ret;
-       alert();
-       othis.onLoad = function() {
-         alert();
+       var _onload = window.onLoad, ret;
+       window.onLoad = function() {
          _onload.apply(this, [].slice.apply(arguments));
          setTimeout(init_novel, 100);
        };
        ret = real.apply(othis, [].slice.apply(arguments, [2]));
-       othis.onLoad = _onload;
+       if (window.illust_id_list.length <= 0) setTimeout(init_novel, 100);
+       window.onLoad = _onload;
        return ret;
      });
 
@@ -1972,13 +1972,12 @@
        }
      };
 
-     this.onsetitem = new Signal(null, Popup.onsetitem);
-     this.onload = new Signal(null, Popup.onload);
-     this.onkeypress = new Signal(null, Popup.onkeypress);
-     this.onclick = new Signal(null, Popup.onclick);
-     this.onclose = new Signal(close, Popup.onclose);
-
-     this.onclick.bind_event(this, this.img_anc, 'click', false);
+     this.img_anc.addEventListener(
+       'click',
+       function(ev) {
+         ev.preventDefault();
+         Popup.onclick.emit(self, ev);
+       }, false);
 
      this.viewer_comments.addEventListener(
        'click',
@@ -1989,28 +1988,30 @@
          }
        }, false);
 
-
-     //document.body.insertBefore(this.root_div, document.body.firstChild);
-     document.body.appendChild(this.root_div);
-     this.locate();
-     Popup.oncreate.emit(this);
-     window.addEventListener('keypress', keypress, false);
-     window.addEventListener('resize',   locate,   false);
-     function close() {
-       window.removeEventListener('keypress', keypress, false);
-       window.removeEventListener('resize',   locate,   false);
-       this.onclick.unbind_events();
-     }
-     function keypress(e) {
-       self.keypress(e);
-     }
-     function locate() {
-       self.locate();
-     }
-     this.set(item, false, false, false, typeof manga_page == 'number' ? manga_page : -1);
-     return this;
+     Popup.oncreate.emit(this, item, manga_page);
    }
-   Popup.oncreate = new Signal();
+   Popup._keypress = function(ev) {
+     Popup.instance.keypress(ev);
+   };
+   Popup._locate = function() {
+     Popup.instance.locate();
+   };
+   Popup.set_event_handler = function() {
+     window.addEventListener('keypress', Popup._keypress, false);
+     window.addEventListener('resize',   Popup._locate,   false);
+   };
+   Popup.unset_event_handler = function() {
+     window.removeEventListener('keypress', Popup._keypress, false);
+     window.removeEventListener('resize',   Popup._locate,   false);
+   };
+   Popup.oncreate = new Signal(
+     function(item, manga_page) {
+       //document.body.insertBefore(this.root_div, document.body.firstChild);
+       document.body.appendChild(this.root_div);
+       this.locate();
+       this.set(item, false, false, false, typeof manga_page == 'number' ? manga_page : -1);
+       Popup.set_event_handler();
+     });
    Popup.onsetitem = new Signal();
    Popup.onload = new Signal();
    Popup.onkeypress = new Signal(
@@ -2102,16 +2103,16 @@
        ev.preventDefault();
        this.close();
      });
-   Popup.onclose = new Signal();
+   Popup.onclose = new Signal(
+     function() {
+       Popup.unset_event_handler();
+       Popup.instance = null;
+     });
    Popup.run = function(item, manga_page) {
      if (Popup.instance) {
        Popup.instance.set(item, false, false, false, manga_page);
      } else {
        Popup.instance = new Popup(item, manga_page);
-       Popup.instance.onclose.connect(
-         function() {
-           Popup.instance = null;
-         });
      }
      return Popup.instance;
    };
@@ -2270,7 +2271,7 @@
          //if (this.image && this.image.complete) self.set_image(this.image);
        },
        reload);
-     this.onsetitem.emit(this);
+     Popup.onsetitem.emit(this);
      if (this.conn_g_add_item) {
        this.conn_g_add_item.disconnect();
        this.conn_g_add_item = null;
@@ -2566,7 +2567,7 @@
      } else {
        this.set_image(loader.image, img_size, this.manga.usable);
        this.update_olc();
-       this.onload.emit(this);
+       Popup.onload.emit(this);
        if (this.manga.usable) this.manga.preload();
      }
      if (this.item.prev) this.item.prev.preload();
@@ -2727,7 +2728,7 @@
      this.set(this.item, null, null, true);
    };
    Popup.prototype.close = function() {
-     if (this.onclose.emit(this)) return;
+     if (Popup.onclose.emit(this)) return;
      if (this.loader) this.loader.cancel();
      if (this.conn_g_add_item) this.conn_g_add_item.disconnect();
      document.body.removeChild(this.root_div);
@@ -2774,10 +2775,10 @@
      if (ae && lc(ae.tagName || '') == 'input') {
        if (Popup.is_qrate_button(ae)) {
          e.qrate = ae;
-         this.onkeypress.emit(this, e);
+         Popup.onkeypress.emit(this, e);
        }
      } else {
-       this.onkeypress.emit(this, e);
+       Popup.onkeypress.emit(this, e);
      }
    };
    Popup.prototype.toggle_qrate = function() {
@@ -3522,12 +3523,10 @@
    };
    window.addEventListener('load', Floater.load, false);
 
-   function Signal(def, parent) {
+   function Signal(def) {
      this.def = def;
-     this.parent = parent;
      this.funcs = [];
      this.id = 1;
-     this.bind_events = [];
      return this;
    }
    Signal.prototype.connect = function(f) {
@@ -3550,23 +3549,8 @@
        res = this.funcs[i].cb.apply(inst, args);
        if (res) return res;
      }
-     if (this.def    && (res = this.def.apply(inst, args))) return res;
-     if (this.parent && (res = Signal.prototype.emit.apply(this.parent, arguments))) return res;
+     if (this.def && (res = this.def.apply(inst, args))) return res;
      return false;
-   };
-   Signal.prototype.bind_event = function(inst, obj, name, capture) {
-     var self = this;
-     var func = function(ev) {
-       self.emit(inst, ev);
-     };
-     obj.addEventListener(name, func, capture);
-     this.bind_events.push([obj, name, func, capture]);
-   };
-   Signal.prototype.unbind_events = function() {
-     each(this.bind_events,
-          function(ent) {
-            ent[0].removeEventListener(ent[1], ent[2]);
-          });
    };
    Signal.Connection = function(signal, id) {
      this.signal = signal;
