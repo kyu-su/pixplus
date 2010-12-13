@@ -16,6 +16,7 @@
  * 閲覧・評価・コメント履歴ページに対応。
  * キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る
  * ポップアップのイベントAPIをPopup.on*のみに変更。
+ * conf.expand_novel追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -1560,6 +1561,7 @@
                'div.popup .rating h4{margin:0px;}' +
                //'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
                'div.popup .rating #result{font-size:inherit !important;width:100% !important;}' +
+               'div.popup .rating #result > div{width:auto !important;}' +
                //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
                'div.popup .rating dl.ra_a dt{width:100%;}' +
                'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
@@ -3325,16 +3327,15 @@
            var tag = t.firstChild.nodeValue;
            if (tags.indexOf(tag) < 0) {
              var aliases = conf.bm_tag_aliases[tag];
-             each(
-               aliases ? [tag].concat(aliases) : [tag],
-               function(tag) {
-                 if (func(t, tag)) {
-                   toggle_tag(t);
-                   return true;
-                 } else {
-                   return false;
-                 }
-               });
+             each(aliases ? [tag].concat(aliases) : [tag],
+                  function(tag) {
+                    if (func(t, tag)) {
+                      toggle_tag(t);
+                      return true;
+                    } else {
+                      return false;
+                    }
+                  });
            }
          });
      }
