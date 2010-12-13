@@ -20,7 +20,7 @@
            bg_div.style.cssText = 'position:fixed;top:0px;left:0px;width:100%;height:100%;' +
              'background-color:black;opacity:0.4;z-index:9999;';
            bg_div.addEventListener( 'click', function() { self.close(); }, false);
-           document.body.insertBefore(bg_div, this.root_div);
+           document.body.appendChild(bg_div);
          });
        window.opera.pixplus.Popup.onclose.connect(
          function() {
