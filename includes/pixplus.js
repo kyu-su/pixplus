@@ -212,7 +212,6 @@
      uncache:       uncache,
      parseimgurl:   parseimgurl,
 
-     load_js:       load_js,
      load_css:      load_css,
      write_css:     write_css,
 
@@ -1577,31 +1576,26 @@
               );
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
-     load_js('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js');
-     if (!window.location.pathname.match(/^\/member_illust\.php/) || options.mode != 'manga') {
-       load_js('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-               function() {
-                 conf.disable_effect && disable_effect_jq();
-                 window.jQuery.noConflict();
-               });
-     }
-     load_js('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
-             conf.disable_effect ? disable_effect_se : null);
-     load_js('http://source.pixiv.net/source/js/rpc.js');
-     load_js('http://source.pixiv.net/source/js/tag_edit.js');
-     if (!$x('//script[contains(@src, "/rating")]')) {
-       load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
-     }
-
-     function disable_effect_jq() {
-       window.jQuery.fx.off = true;
-     }
-     function disable_effect_se() {
-       window.Effect.ScopedQueue.prototype.add = function(effect) {
-         effect.loop(effect.startOn);
-         effect.loop(effect.finishOn);
-       };
-     }
+     $js
+       .script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js') // member_illust.php?mode=manga
+       .wait(function() { window.jQuery.noConflict(); })
+       .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
+       .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
+       .wait(function() {
+               if (conf.disable_effect) {
+                 window.jQuery.fx.off = true;
+                 window.Effect.ScopedQueue.prototype.add = function(effect) {
+                   effect.loop(effect.startOn);
+                   effect.loop(effect.finishOn);
+                 };
+               }
+             })
+       .script('http://source.pixiv.net/source/js/rpc.js')
+       .script('http://source.pixiv.net/source/js/tag_edit.js')
+       .script('http://source.pixiv.net/source/js/modules/rating.js?20101107');
+     //if (!$x('//script[contains(@src, "/rating")]')) {
+     //  load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
+     //}
 
      if (conf.stacc_link) {
        var stacc_anc;
@@ -3186,20 +3180,20 @@
          it.href = '/tags.php?tag=' + tag;
        });
 
-     var initialized = false, jq_ready;
-     load_js('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
-             init,
-             function() {
-               /* window.jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
-                * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
-                * エラー回避のみ。
-                */
-               if (jq_ready) return;
-               jq_ready = window.jQuery.fn.ready;
-               window.jQuery.fn.ready = function(func) {
-                 setTimeout(func, 10);
-               };
-             });
+     var initialized = false;
+     (function() {
+        /* window.jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
+         * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+         * エラー回避のみ。
+         */
+        var jq_ready = window.jQuery.fn.ready;
+        window.jQuery.fn.ready = function(func) {
+          setTimeout(func, 10);
+        };
+      })();
+     $js
+       .script('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028')
+       .wait(init);
 
      function init() {
        // 二回目以降のmod_edit_bookmark()でbookmark_add_v4.jsの初期化関数が呼ばれない
@@ -3777,21 +3771,54 @@
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
      return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
    }
-   function load_js(url, cb_load, cb_add, cb_noadd) {
-     if (chk_ext_src('script', 'src', url)) {
-       if (cb_load) cb_load();
-       if (cb_noadd) cb_noadd();
-       return false;
-     } else {
-       if (cb_add) cb_add();
-       var js  = $c('script');
-       js.type = 'text/javascript';
-       if (cb_load) js.addEventListener('load', cb_load, false);
-       js.src  = url;
-       document.body.appendChild(js);
-       return true;
-     }
-   }
+
+   var $js = new function() {
+     this.script = function(url) {
+       return new ctx().script(url);
+     };
+     function ctx(block) {
+       this.urls     = [];
+       this.scripts  = [];
+       this.load_cnt = 0;
+       this.block    = block;
+     };
+     ctx.prototype.script = function(url) {
+       log('$js#script: ' + url);
+       this.urls.push(url);
+       if (!this.block) this.add_load(url);
+       return this;
+     };
+     ctx.prototype.wait = function(func) {
+       log('$js#wait');
+       var new_obj = new ctx(this.load_cnt > 0);
+       this.wait = {ctx: new_obj, func: func};
+       return new_obj;
+     };
+     ctx.prototype.add_load = function(url) {
+       if (!chk_ext_src('script', 'src', url)) {
+         log('$js#load: ' + url);
+         var js  = $c('script'), self = this;
+         ++this.load_cnt;
+         js.type = 'text/javascript';
+         js.addEventListener('load', function() { if (--self.load_cnt < 1) self.unblock(); }, false);
+         js.src  = url;
+         document.body.appendChild(js);
+       }
+     };
+     ctx.prototype.fire = function() {
+       log('$js#fire');
+       this.block = false;
+       each(this.urls, bind(this.add_load, this));
+     };
+     ctx.prototype.unblock = function() {
+       log('$js#unblock');
+       if (this.wait) {
+         if (this.wait.func) this.wait.func();
+         if (this.wait.ctx)  this.wait.ctx.fire();
+       }
+     };
+   };
+
    function load_css(url) {
      if (chk_ext_src('link', 'href', url)) {
        return false;
@@ -3823,6 +3850,10 @@
        ev.preventDefault();
        func.apply(obj, args);
      };
+   }
+
+   function log(msg) {
+     if (conf.debug) console.log(msg);
    }
 
    function create_post_data(form) {
