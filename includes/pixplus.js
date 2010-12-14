@@ -1957,7 +1957,7 @@
        }
      };
 
-     $ev(this.img_anc).click(bind(Popup.onclick.emit, Popup.onclick, this));
+     $ev(this.img_anc).click(bind(function(ev) { Popup.onclick.emit(this, ev); }, this));
      $ev(this.viewer_comments).click(
        bind(function(ev) {
               if (ev.target === this.viewer_comments ||
