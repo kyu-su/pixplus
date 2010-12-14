@@ -461,13 +461,11 @@
        if (Popup.instance && Popup.instance.viewer_comments_enabled) {
          each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', Popup.instance.viewer_comments_a),
               function(btn) {
-                btn.addEventListener(
-                  'click',
-                  function(ev) {
-                    ev.preventDefault();
+                $ev(btn).click(
+                  function() {
                     geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
                            function() { alert('Error!'); }, true);
-                  }, false);
+                  });
               });
        }
      });
@@ -1182,7 +1180,14 @@
      if (!bm_add_anc || !display) return;
      var bm_form_div, loader;
      var autotag = $x('preceding-sibling::a[contains(@href, "bookmark_detail.php")]', bm_add_anc) ? false : true;
-     bm_add_anc.addEventListener('click', toggle, false);
+     $ev(bm_add_anc).click(
+       function() {
+         if (bm_form_div) {
+           hide();
+         } else {
+           show();
+         }
+       });
 
      function Loader(url, wrap) {
        var cancelled = false;
@@ -1216,14 +1221,6 @@
        if (loader) loader.cancel();
        bm_form_div.parentNode.removeChild(bm_form_div);
        bm_form_div = null;
-     }
-     function toggle(e) {
-       e.preventDefault();
-       if (bm_form_div) {
-         hide();
-       } else {
-         show();
-       }
      }
    }
    function init_per_page() {
@@ -1380,12 +1377,7 @@
              function(img) {
                if (img.src.match(/_p(\d+)\.\w+$/)) {
                  var page = parseInt(RegExp.$1);
-                 img.addEventListener(
-                   'click',
-                   function(ev) {
-                     ev.preventDefault();
-                     Popup.run(item, page);
-                   }, false);
+                 $ev(img).click(function() { Popup.run(item, page); });
                }
              });
            document.documentElement.style.minHeight = '100%';
@@ -1839,15 +1831,7 @@
            pbtn.style.marginRight = '4px';
            cap.parentNode.insertBefore(pbtn, cap);
          }
-         if (pbtn) {
-           pbtn.addEventListener(
-             'click',
-             function(e) {
-               if (e.shiftKey || e.ctrlKey) return;
-               e.preventDefault();
-               Popup.run(item);
-             }, false);
-         }
+         if (pbtn) $ev(pbtn).click(function() { Popup.run(item); });
 
          item = new GalleryItem(url, thumb, cap, prev, self);
          if (!self.first) self.first = item;
@@ -1870,7 +1854,6 @@
    };
 
    function Popup(item, manga_page) {
-     var self = this;
      this.root_div              = $c('div',     null,               'popup');
      this.header                = $c('div',     this.root_div,      'header');
      // 文字によってはキャプションの幅計算が壊れるのでタイトルをblockなエレメントでラップする
@@ -1882,7 +1865,7 @@
      this.status                = $c('span',    this.header_right,  'status');
      this.status.style.display  = 'none';
      this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
-     this.manga_btn.addEventListener('click', bind_event(this.toggle_manga_mode, this), false);
+     $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); }, this));
      this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
      this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
                                                       bind(this.toggle_viewer_comments, this));
@@ -1930,8 +1913,8 @@
      if (conf.popup.overlay_control > 0) {
        this.olc_prev              = $c('span',    this.img_div,       'olc olc-prev');
        this.olc_next              = $c('span',    this.img_div,       'olc olc-next');
-       this.olc_prev.addEventListener('click', bind_event(this.prev, this, false, false, true), false);
-       this.olc_next.addEventListener('click', bind_event(this.next, this, false, false, true), false);
+       $ev(this.olc_prev).click(bind(function() { this.prev(false, false, true); }, this));
+       $ev(this.olc_next).click(bind(function() { this.next(false, false, true); }, this));
      }
 
      this.init_display();
@@ -1946,6 +1929,7 @@
      this.has_image_response = false;
      this.zoom_scale = 1;
 
+     var self = this;
      this.manga = {
        usable:      false,
        enabled:     false,
@@ -1973,21 +1957,14 @@
        }
      };
 
-     this.img_anc.addEventListener(
-       'click',
-       function(ev) {
-         ev.preventDefault();
-         Popup.onclick.emit(self, ev);
-       }, false);
-
-     this.viewer_comments.addEventListener(
-       'click',
-       function(ev) {
-         if (ev.target === self.viewer_comments ||
-             ev.target === self.viewer_comments_w) {
-           self.toggle_viewer_comment_form();
-         }
-       }, false);
+     $ev(this.img_anc).click(bind(function() { Popup.onclick.emit(this); }, this));
+     $ev(this.viewer_comments).click(
+       bind(function(ev) {
+              if (ev.target === this.viewer_comments ||
+                  ev.target === this.viewer_comments_w) {
+                this.toggle_viewer_comment_form();
+              }
+            }, this));
 
      Popup.oncreate.emit(this, item, manga_page);
    }
@@ -3782,6 +3759,22 @@
      return ret;
    }
 
+   function $ev(ctx) {
+     var obj = {
+       ctx:   ctx,
+       click: function(func) {
+         obj.ctx.addEventListener(
+           'click',
+           function(ev) {
+             if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+             ev.preventDefault();
+             func(ev);
+           }, false);
+       }
+     };
+     return ctx;
+   };
+
    var $js = new function() {
      this.script = function(url) {
        return new ctx().script(url);
@@ -3851,7 +3844,7 @@
    function bind(func, obj) {
      var args = [].slice.apply(arguments, [2]);
      return function() {
-       func.apply(obj, args.concat([].slice.apply(arguments)));
+       func.apply(obj || window, args.concat([].slice.apply(arguments)));
      };
    }
    function bind_event(func, obj) {
