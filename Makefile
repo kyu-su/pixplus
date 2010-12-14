@@ -1,7 +1,6 @@
 RSVG_CONVERT ?= rsvg-convert
 ZIP          ?= zip
-ICON_SIZE_D  ?= 60
-ICON_SIZE    ?= 18 60 128
+ICON_SIZE    ?= 64 16
 OEX           = pixplus.oex
 
 CONFIG_XML    = config.xml
@@ -22,10 +21,8 @@ dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' < $< > $@
-	echo '  <icon src="$(ICON_PREFIX)$(ICON_SIZE_D)$(ICON_SUFFIX)" />' >> $@
 	@for size in $(ICON_SIZE);do \
-           test $$size != $(ICON_SIZE_D) && \
-             echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
+           echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
 	sed -e '1,/@ICONS@/d' < $< >> $@
 
