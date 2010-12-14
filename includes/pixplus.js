@@ -1957,7 +1957,7 @@
        }
      };
 
-     $ev(this.img_anc).click(bind(function() { Popup.onclick.emit(this); }, this));
+     $ev(this.img_anc).click(bind(Popup.onclick.emit, Popup.onclick, this));
      $ev(this.viewer_comments).click(
        bind(function(ev) {
               if (ev.target === this.viewer_comments ||
@@ -2078,6 +2078,7 @@
      });
    Popup.onclick = new Signal(
      function(ev) {
+       if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
        ev.preventDefault();
        this.close();
      });
@@ -3772,7 +3773,7 @@
            }, false);
        }
      };
-     return ctx;
+     return obj;
    };
 
    var $js = new function() {
