@@ -1426,6 +1426,101 @@
             });
      }
    }
+   function init_pixplus_real() {
+     var evt = document.createEvent('Event');
+     evt.initEvent('pixplusInitialize', true, true);
+     document.dispatchEvent(evt);
+
+     init_config_ui();
+     init_galleries();
+     init_recommend();
+     init_taglist();
+     init_per_page();
+
+     if (conf.bookmark_hide) {
+       each($xa('.//a[contains(@href, "bookmark.php")]'),
+            function(anc) {
+              if (!anc.href.match(/[\?&]rest=/) &&
+                  (anc.href.match(/[\?&]type=illust/) ||
+                   !anc.href.match(/[\?&]type=/))) {
+                anc.href += (anc.href.match(/\?/) ? "&" : "?") + "rest=hide";
+              }
+            });
+     }
+
+     if (conf.stacc_link) {
+       var stacc_anc;
+       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
+         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
+       } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
+         if (conf.stacc_link == 'all') {
+           stacc_anc.href = '/stacc/p/all';
+         } else {
+           stacc_anc.href = '/stacc/my/home/' + conf.stacc_link + '/all';
+         }
+       }
+     }
+
+     if (conf.default_manga_type) {
+       if (['scroll', 'slide'].indexOf(conf.default_manga_type) < 0) {
+         alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
+       } else {
+         // http://www.pixiv.net/member_illust.php?mode=manga&illust_id=00000000&type=scroll
+         each(
+           $xa('//a[contains(@href, "member_illust.php?mode=manga")]'),
+           function(anc) {
+             if (!anc.innerText.match(/^(?:\u30b9\u30af\u30ed\u30fc\u30eb|\u30b9\u30e9\u30a4\u30c9)\u5f0f/)) {
+               var o = parseopts(anc.href);
+               if (!o.type) anc.href += '&type=' + conf.default_manga_type;
+             }
+           });
+       }
+     }
+
+     if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
+       (function() {
+          var _open = window.pixiv.Favorite.prototype.open;
+          window.pixiv.Favorite.prototype.open = function() {
+            var btn = $('favorite-button');
+            var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
+            var restrict = $xa('.//input[@name="restrict"]', form);
+            if (btn && form && restrict.length == 2) {
+              var xhr = new window.XMLHttpRequest();
+              xhr.open('POST', form.getAttribute('action'), true);
+              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+              xhr.onload = function() {
+                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
+                  window.jQuery('#favorite-button')
+		    .addClass('added')
+		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+	          window.jQuery('form', this.preference)
+		    .attr('action', '/bookmark_setting.php')
+                    .find('div.action').append('<input type="button" value="\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664" class="button remove"/>')
+                    .find('input[name="mode"]').remove();
+                  btn.style.opacity = '1';
+                } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
+                  alert(RegExp.$1);
+                } else {
+                  alert('Error!');
+                }
+              };
+              xhr.onerror = function() {
+                alert('Error!');
+              };
+              each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
+              xhr.send(create_post_data(form));
+              btn.style.opacity = '0.2';
+            } else {
+              _open.apply(this, [].slice.apply(arguments));
+            }
+          };
+        })();
+     }
+
+     evt = document.createEvent('Event');
+     evt.initEvent('pixplusLoaded', true, true);
+     document.dispatchEvent(evt);
+   }
    function init_pixplus() {
      document.body.setAttribute('pixplus', '');
      each(LS.l, function(c) { LS.init_section(c.name, c.data[0], c.data[1]); });
@@ -1472,18 +1567,6 @@
        pp.rpc_div.style.display = 'none';
        document.body.insertBefore(pp.rpc_div, document.body.firstChild);
      }
-
-     var evt = document.createEvent('Event');
-     evt.initEvent('pixplusInitialize', true, true);
-     document.dispatchEvent(evt);
-
-     init_config_ui();
-     init_galleries();
-     init_recommend();
-     init_taglist();
-     init_per_page();
-
-     set_bookmark_anc_href();
 
      write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
                '#header .header_otehrs_ul li + li{margin-left:16px;}' +
@@ -1573,113 +1656,31 @@
               );
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
-     $js
-       .script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js') // member_illust.php?mode=manga
-       .wait(function() { window.jQuery.noConflict(); })
-       .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
-       .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
-       .wait(function() {
-               if (conf.disable_effect) {
-                 window.jQuery.fx.off = true;
-                 window.Effect.ScopedQueue.prototype.add = function(effect) {
-                   effect.loop(effect.startOn);
-                   effect.loop(effect.finishOn);
-                 };
-               }
-             })
-       .script('http://source.pixiv.net/source/js/rpc.js')
-       .script('http://source.pixiv.net/source/js/tag_edit.js')
-       .script('http://source.pixiv.net/source/js/modules/rating.js?20101107');
-     //if (!$x('//script[contains(@src, "/rating")]')) {
-     //  load_js('http://source.pixiv.net/source/js/modules/rating.js?20101107');
-     //}
-
-     if (conf.stacc_link) {
-       var stacc_anc;
-       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
-         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
-       } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
-         if (conf.stacc_link == 'all') {
-           stacc_anc.href = '/stacc/p/all';
-         } else {
-           stacc_anc.href = '/stacc/my/home/' + conf.stacc_link + '/all';
-         }
-       }
-     }
-
-     if (conf.default_manga_type) {
-       if (['scroll', 'slide'].indexOf(conf.default_manga_type) < 0) {
-         alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
-       } else {
-         // http://www.pixiv.net/member_illust.php?mode=manga&illust_id=00000000&type=scroll
-         each(
-           $xa('//a[contains(@href, "member_illust.php?mode=manga")]'),
-           function(anc) {
-             if (!anc.innerText.match(/^(?:\u30b9\u30af\u30ed\u30fc\u30eb|\u30b9\u30e9\u30a4\u30c9)\u5f0f/)) {
-               var o = parseopts(anc.href);
-               if (!o.type) anc.href += '&type=' + conf.default_manga_type;
-             }
-           });
-       }
-     }
-
-     if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
-       (function() {
-          var _open = window.pixiv.Favorite.prototype.open;
-          window.pixiv.Favorite.prototype.open = function() {
-            var btn = $('favorite-button');
-            var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
-            var restrict = $xa('.//input[@name="restrict"]', form);
-            if (btn && form && restrict.length == 2) {
-              var xhr = new window.XMLHttpRequest();
-              xhr.open('POST', form.getAttribute('action'), true);
-              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-              xhr.onload = function() {
-                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
-                  window.jQuery('#favorite-button')
-		    .addClass('added')
-		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
-	          window.jQuery('form', this.preference)
-		    .attr('action', '/bookmark_setting.php')
-                    .find('div.action').append('<input type="button" value="\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664" class="button remove"/>')
-                    .find('input[name="mode"]').remove();
-                  btn.style.opacity = '1';
-                } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
-                  alert(RegExp.$1);
-                } else {
-                  alert('Error!');
-                }
-              };
-              xhr.onerror = function() {
-                alert('Error!');
-              };
-              each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
-              xhr.send(create_post_data(form));
-              btn.style.opacity = '0.2';
-            } else {
-              _open.apply(this, [].slice.apply(arguments));
-            }
-          };
-        })();
-     }
-
-     evt = document.createEvent('Event');
-     evt.initEvent('pixplusLoaded', true, true);
-     document.dispatchEvent(evt);
-   }
-
-   function set_bookmark_anc_href(root) {
-     if (conf.bookmark_hide) {
-       each(
-         $xa('.//a[contains(@href, "bookmark.php")]', root),
-         function(anc) {
-           if (!anc.href.match(/[\?&]rest=/) &&
-               (anc.href.match(/[\?&]type=illust/) ||
-                !anc.href.match(/[\?&]type=/))) {
-             anc.href += (anc.href.match(/\?/) ? "&" : "?") + "rest=hide";
-           }
-         });
-     }
+     (function($js) {
+        if (!$x('//script[contains(@src, "/rating")]')) {
+          $js.script('http://source.pixiv.net/source/js/modules/rating.js?20101107');
+        }
+        return $js;
+      })($js
+         .script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js')
+         .wait(function() {
+                 window.jQuery.noConflict();
+                 init_pixplus_real();
+               })
+         .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
+         .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
+         .wait(function() {
+                 if (conf.disable_effect) {
+                   window.jQuery.fx.off = true;
+                   window.Effect.ScopedQueue.prototype.add = function(effect) {
+                     effect.loop(effect.startOn);
+                     effect.loop(effect.finishOn);
+                   };
+                 }
+               })
+         .script('http://source.pixiv.net/source/js/rpc.js')
+         .script('http://source.pixiv.net/source/js/tag_edit.js')
+        );
    }
 
    function GalleryItem(url, thumb, caption, prev, gallery) {
@@ -3794,9 +3795,14 @@
      };
      ctx.prototype.wait = function(func) {
        log('$js#wait');
-       var new_obj = new ctx(this.load_cnt > 0);
-       this.wait = {ctx: new_obj, func: func};
-       return new_obj;
+       if (this.load_cnt > 0) {
+         var new_obj = new ctx(true);
+         this.wait = {ctx: new_obj, func: func};
+         return new_obj;
+       } else {
+         if (func) func();
+         return this;
+       }
      };
      ctx.prototype.add_load = function(url) {
        if (!chk_ext_src('script', 'src', url)) {
