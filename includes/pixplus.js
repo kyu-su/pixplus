@@ -224,6 +224,10 @@
 
      sprite_image:  'http://source.pixiv.net/source/images/sprite_20101101.png',
 
+     js: {
+       bookmark_add_v4: 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028'
+     },
+
      recommender: {
        loaded:      false,
        funcs:       [],
@@ -1395,6 +1399,7 @@
          var autotag = $x('//h2[contains(text(), "\u8ffd\u52a0")]') ? true : false;
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
+       conf.debug && chk_ext_src('script', 'src', pp.js.bookmark_add_v4);
      }
    }
    function init_novel() {
@@ -3769,7 +3774,12 @@
    }
    function chk_ext_src(elem, attr, url) {
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
-     return $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
+     var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
+     if (conf.debug && ret) {
+       var attr_f = ret.getAttribute(attr);
+       if (attr_f != url) alert('New one?\n' + attr_f);
+     }
+     return ret;
    }
 
    var $js = new function() {
