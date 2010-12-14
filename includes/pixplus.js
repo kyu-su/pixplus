@@ -1411,7 +1411,7 @@
                 each($xa('.//*[contains(concat(" ", @class, " "), " novelimage ")]', page),
                      function(img) {
                        if (img.className.split(/\s+/).indexOf('added') < 0) {
-                         var id = img.readAttribute('illust_id');
+                         var id = img.getAttribute('illust_id');
                          if (id && window.illust_html_list[id]) {
                            img.innerHTML = window.illust_html_list[id];
 		           img.className += 'added';
@@ -1665,13 +1665,14 @@
          .script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js')
          .wait(function() {
                  window.jQuery.noConflict();
+                 if (conf.disable_effect) window.jQuery.fx.off = true;
                  init_pixplus_real();
                })
          .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
+         .wait()
          .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
          .wait(function() {
                  if (conf.disable_effect) {
-                   window.jQuery.fx.off = true;
                    window.Effect.ScopedQueue.prototype.add = function(effect) {
                      effect.loop(effect.startOn);
                      effect.loop(effect.finishOn);
@@ -2477,7 +2478,7 @@
            'click',
            function(ev) {
              var qr = $x('div[@id="quality_rating"]', self.rating);
-             window[qr && qr.visible() ? 'rating_ef2' : 'rating_ef'](); /* WARN */
+             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
              ev.preventDefault();
            }, false);
        }
@@ -2773,11 +2774,11 @@
 
    Popup.prototype.toggle_viewer_comments = function() {
      if (!this.viewer_comments_enabled) return;
-     if (this.viewer_comments_a.empty() || !this.viewer_comments.visible()) {
+     if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
        this.caption.setAttribute('show', '');
      }
      var self = this;
-     if (this.viewer_comments_a.empty()) {
+     if (!this.viewer_comments_a.innerHTML) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
        window.sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
@@ -2786,7 +2787,7 @@
                             self.viewer_comments_a.innerHTML = obj.responseText;
                             show();
                           });
-     } else if (!this.viewer_comments.visible()) {
+     } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
        show();
      }else{
        this.comments_btn.removeAttribute('enable');
