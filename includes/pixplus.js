@@ -1617,27 +1617,25 @@
        var aliases = LS.get('bookmark', 'tag_aliases');
        if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
      }
-     each(
-       ['auto_manga', 'reverse'],
-       function(key) {
-         try {
-           if (!conf.popup[key + '_regexp']) throw 1;
-           var v = conf.popup[key], r = new RegExp(conf.popup[key + '_regexp']);
-           conf.popup[key + '_p'] = v & 2 ? !!window.location.href.match(r) : !!(v & 1);
-         } catch(ex) {
-           conf.popup[key + '_p'] = false;
-         }
-       });
+     each(['auto_manga', 'reverse'],
+          function(key) {
+            try {
+              if (!conf.popup[key + '_regexp']) throw 1;
+              var v = conf.popup[key], r = new RegExp(conf.popup[key + '_regexp']);
+              conf.popup[key + '_p'] = v & 2 ? !!window.location.href.match(r) : !!(v & 1);
+            } catch(ex) {
+              conf.popup[key + '_p'] = false;
+            }
+          });
 
-     each(
-       $xa('//a[contains(@href, "jump.php")]'),
-       function(anc) {
-         if (anc.href.match(/^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/)) {
-           var url = RegExp.$1;
-           if (url.match(/^\w+%3a%2f%2f/i)) url = decodeURIComponent(url);
-           anc.href = url;
-         }
-       });
+     each($xa('//a[contains(@href, "jump.php")]'),
+          function(anc) {
+            if (anc.href.match(/^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/)) {
+              var url = RegExp.$1;
+              if (url.match(/^\w+%3a%2f%2f/i)) url = decodeURIComponent(url);
+              anc.href = url;
+            }
+          });
 
      pp.rpc_usable = true;
      if (true || !conf.debug) {
