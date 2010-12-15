@@ -98,7 +98,7 @@
 /** 対応しているページ一覧
  * マイページ(ログイン時のトップページ/R-18)
  * メンバーイラスト/作品一覧/ブックマーク
- * 新着イラスト(みんな/お気に入りユーザー/R-18)
+ * 新着作品(みんな/お気に入りユーザー/マイピク/R-18)
  * ランキング(デイリー/ルーキー/ウィークリー/マンスリー/各R-18/R-18G)
  * ランキングカレンダー
  * ブックマーク管理
@@ -844,96 +844,99 @@
        }
      }
    }
-   function unpack_captions(col, cappath) {
-     each(
-       $xa(cappath || './/a[img]/text()', col),
-       function(node) {
-         remove_node_if_tag_name(node.previousSibling, 'br');
-         var p = node.parentNode;
-         p.removeChild(node);
-         if (p.nextSibling) {
-           p.parentNode.insertBefore(node, p.nextSibling);
-         } else {
-           p.parentNode.appendChild(node);
-         }
-       });
+   function unpack_captions(col, xpath_cap) {
+     each($xa(xpath_cap || './/a[img]/text()', col),
+          function(node) {
+            remove_node_if_tag_name(node.previousSibling, 'br');
+            var p = node.parentNode;
+            p.removeChild(node);
+            if (p.nextSibling) {
+              p.parentNode.insertBefore(node, p.nextSibling);
+            } else {
+              p.parentNode.appendChild(node);
+            }
+          });
    }
    function unpack_captions_label(col) {
      unpack_captions(col, 'ul/li/a[img]/label');
    }
    function init_galleries() {
      function area_right() {
-       each(
-         $xa('//div[contains(concat(" ", @class, " "), " area_right ")]'),
-         function(col) {
-           add_gallery({collection:    col,
-                        cappath:       './/p/a[contains(@href, "mode=medium")]',
-                        thumbpath:     'ancestor::div[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::div[contains(concat(" ", @class, " "), " ran_img ")]/a/img',
-                        allow_nothumb: 3});
-         });
+       each($xa('//div[contains(concat(" ", @class, " "), " area_right ")]'),
+            function(root) {
+              add_gallery({root:          root,
+                           xpath_col:     '.',
+                           xpath_cap:     './/p/a[contains(@href, "mode=medium")]',
+                           xpath_tmb:     'ancestor::div[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::div[contains(concat(" ", @class, " "), " ran_img ")]/a/img',
+                           allow_nothumb: 3});
+            });
      }
      function mypage() {
-       each(
-         $xa('//div[contains(concat(" ", @class, " "), " baseTop")]'),
-         function(top) {
-           var col = $x('ul[contains(concat(" ", @class, " "), " top_display_works ")]', top);
-           if (col) {
-             unpack_captions(col);
-             add_gallery({collection: col,
-                          cappath:    'li/text()[last()]'});
-           }
-         });
+       each($xa('//div[contains(concat(" ", @class), " baseTop")]'),
+            function(root) {
+              add_gallery({root:      root,
+                           xpath_col: './/ul[contains(concat(" ", @class, " "), " top_display_works ")]',
+                           xpath_cap: 'li/text()[last()]'},
+                          unpack_captions);
+            });
        area_right();
      }
 
      if (window.location.pathname.match(/^\/(?:mypage|cate_r18)\.php/)) {
+       // http://www.pixiv.net/mypage.php
+       // http://www.pixiv.net/cate_r18.php
        mypage();
      } else if (window.location.pathname.match(/^\/member\.php/)) {
-       each(
-         $xa('//div[contains(concat(" ", @class, " "), " worksListOthers ")]/*[contains(concat(" ", @class, " "), " worksListOthersImg ")]'),
-         function(col) {
-           unpack_captions(col);
-           add_gallery({collection: col});
-         });
+       // http://www.pixiv.net/member.php?id=11
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthers ")]/*[contains(concat(" ", @class, " "), " worksListOthersImg ")]'},
+                   unpack_captions);
      } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
        if (options.illust_id) {
-         add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " worksImageresponse ")]'),
-                      cappath:    'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'});
+         // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
+         // 下部のイメージレスポンス
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
+                      xpath_cap: 'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'});
        } else if (options.id) {
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
-                      colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]'},
-                     null, unpack_captions);
+         // http://www.pixiv.net/member_illust.php?id=11
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'},
+                     unpack_captions);
        } else {
          // 自分のイラスト管理
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
-                      colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]',
-                      cappath:   'ul/li/label'},
-                     null, unpack_captions_label);
+         // http://www.pixiv.net/member_illust.php
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+                      xpath_cap: 'ul/li/label'},
+                     unpack_captions_label);
        }
      } else if (window.location.pathname.match(/^\/response\.php/) && !options.mode) {
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " response ") and h3]'),
-                    colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
-                   null, unpack_captions);
-     } else if (window.location.pathname.match(/^\/ranking(_r18g?|_rookie|_tag|_area)?\.php/)) {
+       // http://www.pixiv.net/response.php?illust_id=15092961
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " response ") and h3]/div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
+                   unpack_captions);
+     } else if (window.location.pathname.match(/^\/ranking(?:_tag|_area)?\.php/)) {
        if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
+         // http://www.pixiv.net/ranking_area.php
          area_right();
        } else {
          // その他ランキング
-         var cont = ($x('//div[contains(concat(" ", @class, " "), " rankingPager ")]/..') ||
-                     $x('//div[contains(concat(" ", @class, " "), " rankingBox ")]'));
-         add_gallery({container: cont,
-                      colpath:   './/div[contains(concat(" ", @class, " "), " rankingZone ")]',
-                      cappath:   'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
-                      thumbpath: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
+         // http://www.pixiv.net/ranking.php?mode=day
+         // http://www.pixiv.net/ranking.php?mode=rookie
+         // http://www.pixiv.net/ranking.php?mode=weekly
+         // http://www.pixiv.net/ranking.php?mode=monthly
+         // http://www.pixiv.net/ranking.php?mode=daily_r18
+         // http://www.pixiv.net/ranking.php?mode=weekly_r18
+         // http://www.pixiv.net/ranking.php?mode=r18g
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
+                      xpath_cap: 'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
+                      xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
        }
      } else if (window.location.pathname.match(/^\/bookmark\.php/) && !options.id &&
                 (!options.type || options.type.match(/^illust(?:_all)?$/))) {
        // ブックマーク管理
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
-                    colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]',
-                    cappath:   'ul/li/label'},
-                   conf.debug ? debug_filter : null, unpack_captions_label);
+       // http://www.pixiv.net/bookmark.php
+       // http://www.pixiv.net/bookmark.php?type=illust_all
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+                    xpath_cap: 'ul/li/label'},
+                   unpack_captions_label, conf.debug ? debug_filter : null);
        function debug_filter(item) {
          var c = $x('input[@name="book_id[]"]', item.caption.parentNode);
          if (c) {
@@ -944,32 +947,34 @@
          }
        }
      } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
-       add_gallery({collection: $x('//div[contains(concat(" ", @class, " "), " bookmark_works ")]')});
+       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'});
      } else if (window.location.pathname.match(/^\/stacc/)) {
-       var cont = $x('//div[contains(concat(" ", @class, " "), " contents-main ")]/span[@id="insert_status"]');
-       var colpath = 'div[contains(concat(" ", @class, " "), " post ")]';
-       add_gallery({container: cont, colpath: colpath,
-                    cappath:   'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
-                    thumbpath: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
+       // http://www.pixiv.net/stacc/
+       add_gallery({xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
+                    xpath_cap: 'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
+                    xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
                     skip_dups: true});
-       add_gallery({container:  cont, colpath: colpath,
-                    thumbpath:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
+       add_gallery({xpath_col:  '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
+                    xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
      } else if (window.location.pathname.match(/^\/event_detail\.php/)) {
-       add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " event-cont ")]/div[contains(concat(" ", @class, " "), " thumbContainer ")]'),
-                    colpath:    'ul[contains(concat(" ", @class, " "), " thu ")]',
-                    thumbpath:  'li/a[contains(@href, "mode=medium")]/img',
+       // http://www.pixiv.net/event_detail.php?event_id=805
+       add_gallery({xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
+                    xpath_tmb:  'li/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
      } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
-       add_gallery({container:     $x('//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]'),
-                    colpath:       'dl',
-                    cappath:       'dd/a[contains(@href, "mode=medium")]',
+       // http://www.pixiv.net/view_all.php
+       // http://www.pixiv.net/rating_all.php
+       // http://www.pixiv.net/comment_all.php
+       add_gallery({xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
+                    xpath_cap:     'dd/a[contains(@href, "mode=medium")]',
                     allow_nothumb: -1});
      } else if (window.location.pathname.match(/^\/ranking_log\.php/)) {
+       // http://www.pixiv.net/ranking_log.php
        if (conf.popup_ranking_log) {
-         add_gallery({container:  $x('//table[contains(concat(" ", @class, " "), " calender_ranking ")]/../..'),
-                      colpath:    './/table[contains(concat(" ", @class, " "), " calender_ranking ")]',
-                      thumbpath:  './/a[contains(@href, "ranking.php")]//img',
+         add_gallery({xpath_col:  '//table[contains(concat(" ", @class, " "), " calender_ranking ")]',
+                      xpath_tmb:  './/a[contains(@href, "ranking.php")]//img',
                       thumb_only: true,
                       skip_dups:  true,
                       get_url:    function(cap, thumb) {
@@ -986,14 +991,19 @@
      if (pp.galleries.length == 0) {
        if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
            $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
+         // http://www.pixiv.net/event_christmas2010.php
          mypage();
        } else {
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " display_works ")]/..'),
-                      colpath:   'div[contains(concat(" ", @class, " "), " display_works ")]'},
-                     null, unpack_captions);
-         add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " one_column_body ") and div[contains(concat(" ", @class, " "), " search_a2_result ")]]'),
-                      colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
-                     null, unpack_captions);
+         alert();
+         // http://www.pixiv.net/new_illust.php
+         // http://www.pixiv.net/mypixiv_new_illust.php
+         // http://www.pixiv.net/bookmark_new_illust.php
+         // http://www.pixiv.net/new_illust_r18.php
+         // http://www.pixiv.net/bookmark_new_illust_r18.php
+         // http://www.pixiv.net/bookmark.php?id=11
+         // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
        }
      }
    }
@@ -1059,11 +1069,11 @@
            init_gallery(illusts);
          });
        function init_gallery(illusts) {
-         gallery = add_gallery({container: illusts,
-                                colpath:   'li',
-                                cappath:   'a[img]/following-sibling::text()[1]',
-                                thumbpath: 'preceding-sibling::a/img'},
-                               null, unpack_captions);
+         gallery = add_gallery({root:      illusts,
+                                xpath_col: 'li',
+                                xpath_cap: 'a[img]/following-sibling::text()[1]',
+                                xpath_tmb: 'preceding-sibling::a/img'},
+                               unpack_captions);
          if (float_wrap) init_right_gallery(illusts);
        }
        function init_right_gallery(illusts) {
@@ -1750,12 +1760,12 @@
        }
      }
    };
-   function Gallery(args, filter, filter_col) {
+   function Gallery(args, filter_col, filter) {
      this.args = args;
-     this.args.cappath = this.args.cappath || 'ul/li/text()[1]';
-     this.args.thumbpath = this.args.thumbpath || 'preceding-sibling::a[position()=1 and contains(@href, "mode=medium")]/img';
-     this.filter = filter;
+     this.args.xpath_cap = this.args.xpath_cap || 'ul/li/text()[1]';
+     this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[position()=1 and contains(@href, "mode=medium")]/img';
      this.filter_col = filter_col;
+     this.filter = filter;
 
      this.items     = [];
      this.idmap     = {};
@@ -1767,17 +1777,14 @@
 
      this.onadditem = new Signal();
 
-     if (this.args.container && this.args.colpath) {
+     if (this.args.xpath_col) {
        var self = this;
        this.detect_new_collection();
-       this.args.container.addEventListener(
+       document.body.addEventListener(
          'DOMNodeInserted',
          function() {
            setTimeout(function() { self.detect_new_collection(); }, 100);
          }, false);
-       Gallery.oncreate.emit(this);
-     } else if (this.args.collection) {
-       this.add_collection(this.args.collection);
        Gallery.oncreate.emit(this);
      } else {
        throw 1;
@@ -1791,7 +1798,7 @@
    Gallery.oncreate = new Signal();
    Gallery.prototype.detect_new_collection = function() {
      var self = this;
-     each($xa(this.args.colpath, this.args.container),
+     each($xa(this.args.xpath_col, this.args.root),
           function(col) {
             if (!col.hasAttribute('pixplus_loaded')) {
               self.add_collection(col);
@@ -1800,7 +1807,7 @@
    };
    Gallery.prototype.add_collection = function(col) {
      if (this.filter_col) this.filter_col(col);
-     var elements = $xa(this.args.thumb_only ? this.args.thumbpath : this.args.cappath, col);
+     var elements = $xa(this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap, col);
      if (!elements.length) return;
      log('collection detected - ' + elements.length);
      col.setAttribute('pixplus_loaded', 'true');
@@ -1815,7 +1822,7 @@
             if (self.args.thumb_only) {
               thumb = elem;
             } else {
-              thumb = $x(self.args.thumbpath, elem);
+              thumb = $x(self.args.xpath_tmb, elem);
               cap = elem;
             }
             if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
@@ -3372,9 +3379,9 @@
      }
    }
 
-   function add_gallery(args, filter, filter_col) {
+   function add_gallery(args, filter_col, filter) {
      try {
-       var g = new Gallery(args, filter, filter_col);
+       var g = new Gallery(args, filter_col, filter);
        pp.galleries.push(g);
        return g;
      } catch(ex) {
