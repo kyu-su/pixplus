@@ -907,10 +907,6 @@
                       xpath_cap: 'ul/li/label'},
                      unpack_captions_label);
        }
-     } else if (window.location.pathname.match(/^\/response\.php/) && !options.mode) {
-       // http://www.pixiv.net/response.php?illust_id=15092961
-       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " response ") and h3]/div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
-                   unpack_captions);
      } else if (window.location.pathname.match(/^\/ranking(?:_tag|_area)?\.php/)) {
        if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
@@ -994,7 +990,6 @@
          // http://www.pixiv.net/event_christmas2010.php
          mypage();
        } else {
-         alert();
          // http://www.pixiv.net/new_illust.php
          // http://www.pixiv.net/mypixiv_new_illust.php
          // http://www.pixiv.net/bookmark_new_illust.php
@@ -1002,6 +997,7 @@
          // http://www.pixiv.net/bookmark_new_illust_r18.php
          // http://www.pixiv.net/bookmark.php?id=11
          // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
+         // http://www.pixiv.net/response.php?illust_id=15092961
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
        }
