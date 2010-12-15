@@ -1431,6 +1431,93 @@
      evt.initEvent('pixplusInitialize', true, true);
      document.dispatchEvent(evt);
 
+     write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
+               '#header .header_otehrs_ul li + li{margin-left:16px;}' +
+               '*[float]{position:fixed;top:0px;}' +
+               // コメント
+               (conf.popup.font_size ? 'div.popup{font-size:' + conf.popup.font_size + ';}' : '') +
+               '.works_caption hr, div.popup hr{display:block;border:none;height:1px;background-color:silver;}' +
+               'hr + br, hr ~ br{display:none;}' +
+               // ポップアップ/検索欄がz-index:1000なので
+               'div.popup{background-color:white;position:fixed;padding:3px;' +
+               '  border:2px solid gray;z-index:10000;}' +
+               'div.popup .header{line-height:1.1em;}' +
+               //'div.popup .page_counter{font-size:smaller;color:gray;line-height:1em;}' +
+               'div.popup .title{font-size:larger;font-weight:bold;}' +
+               'div.popup .title:hover{text-decoration:none;}' +
+               'div.popup .right{float:right;font-size:smaller;}' +
+               'div.popup .right > * + *{margin-left:0.4em;}' +
+               'div.popup .right a{color:#258fb8;font-weight:bold;}' +
+               'div.popup .right a[enable]{color:gray;font-weight:normal;}' +
+               'div.popup .header{background-color:white;}' +
+               'div.popup .header .caption{padding-top:2px;position:absolute;' +
+               '  background-color:white;z-index:10010;opacity:0;padding-bottom:1px;}' +
+               'div.popup .header:hover .caption{opacity:' + conf.popup.caption_opacity + ';}' +
+               'div.popup .header .caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
+               'div.popup .caption .separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
+               'div.popup .comment_wrap{overflow:auto;line-height:1.2em;}' +
+               'div.popup .tags > * + *{margin-left:0.6em;}' +
+               'div.popup .tags > span > a + a{margin-left:0.2em;}' +
+               'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
+               'div.popup .post_cap{line-height:1.1em;position:relative;}' +
+               'div.popup .post_cap .author_img{box-sizing:border-box;' +
+               '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
+               'div.popup .post_cap .author_img:hover{max-height:100%;}' +
+               'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
+               'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
+               'div.popup .post_cap .date_repost:before{content:"(\u518d ";}' +
+               'div.popup .post_cap .date_repost:after{content:")";}' +
+               'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
+               'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
+               'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
+               'div.popup .post_cap .author_status.fav{width:14px;height:14px;' +
+               '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_status.heart{width:16px;height:14px;' +
+               '  background-position:-1701px -480px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_status.mypix{width:14px;height:16px;' +
+               '  background-position:-1701px -1px;background-image:url("' + pp.sprite_image + '");}' +
+               'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
+               'div.popup .post_cap .author a{font-weight:bold;}' +
+               'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
+               'div.popup .bm_edit{margin-top:2px;}' +
+               'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
+               'div.popup .img_div img, div.popup .img_div svg{border:1px solid silver;}' +
+               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
+               'div.popup .olc:hover{opacity:0.6;}' +
+               'div.popup .olc-prev{left:3px;}' +
+               'div.popup .olc-next{right:3px;}' +
+               /*
+               'div.popup .olc-prev:before, div.popup .olc-next:before{display:block;position:absolute;bottom:0;' +
+               '  background-color:white;border:1px solid silver;border-bottom-width:0px;font-size:120%;font-weight:bold;' +
+               '  padding:0.2em 0.6em;text-decoration:none;line-height:1em;background-color:white;color:gray;}' +
+               'div.popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
+               'div.popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
+                */
+               (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
+               // rating
+               'div.popup .rating.works_area{padding:0px !important;}' +
+               'div.popup .rating.works_area input{display:block;}' +
+               'div.popup .rating span + span{margin-left:0.4em;}' +
+               'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
+               'div.popup .rating #quality_rating{float:none !important;}' +
+               'div.popup .rating h4{margin:0px;}' +
+               //'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
+               'div.popup .rating #result{font-size:inherit !important;width:100% !important;}' +
+               'div.popup .rating #result > div{width:auto !important;}' +
+               //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
+               'div.popup .rating dl.ra_a dt{width:100%;}' +
+               'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
+               'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
+               'div.popup .rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
+               'div.popup .rating #result div[highlight]{background-color:#efefef;}' +
+               'div.popup .rating #quality_rating{width:100% !important;}' +
+               // comments
+               'div.popup .viewer_comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
+               'div.popup .viewer_comments input + input{margin-left:0.4em;}' +
+               'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
+               'div.popup .viewer_comments .worksComment:last-child{border:none;}'
+              );
+
      init_config_ui();
      init_galleries();
      init_recommend();
@@ -1568,92 +1655,6 @@
        document.body.insertBefore(pp.rpc_div, document.body.firstChild);
      }
 
-     write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
-               '#header .header_otehrs_ul li + li{margin-left:16px;}' +
-               '*[float]{position:fixed;top:0px;}' +
-               // コメント
-               (conf.popup.font_size ? 'div.popup{font-size:' + conf.popup.font_size + ';}' : '') +
-               '.works_caption hr, div.popup hr{display:block;border:none;height:1px;background-color:silver;}' +
-               'hr + br, hr ~ br{display:none;}' +
-               // ポップアップ/検索欄がz-index:1000なので
-               'div.popup{background-color:white;position:fixed;padding:3px;' +
-               '  border:2px solid gray;z-index:10000;}' +
-               'div.popup .header{line-height:1.1em;}' +
-               //'div.popup .page_counter{font-size:smaller;color:gray;line-height:1em;}' +
-               'div.popup .title{font-size:larger;font-weight:bold;}' +
-               'div.popup .title:hover{text-decoration:none;}' +
-               'div.popup .right{float:right;font-size:smaller;}' +
-               'div.popup .right > * + *{margin-left:0.4em;}' +
-               'div.popup .right a{color:#258fb8;font-weight:bold;}' +
-               'div.popup .right a[enable]{color:gray;font-weight:normal;}' +
-               'div.popup .header{background-color:white;}' +
-               'div.popup .header .caption{padding-top:2px;position:absolute;' +
-               '  background-color:white;z-index:10010;opacity:0;padding-bottom:1px;}' +
-               'div.popup .header:hover .caption{opacity:' + conf.popup.caption_opacity + ';}' +
-               'div.popup .header .caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
-               'div.popup .caption .separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-               'div.popup .comment_wrap{overflow:auto;line-height:1.2em;}' +
-               'div.popup .tags > * + *{margin-left:0.6em;}' +
-               'div.popup .tags > span > a + a{margin-left:0.2em;}' +
-               'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
-               'div.popup .post_cap{line-height:1.1em;position:relative;}' +
-               'div.popup .post_cap .author_img{box-sizing:border-box;' +
-               '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
-               'div.popup .post_cap .author_img:hover{max-height:100%;}' +
-               'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
-               'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
-               'div.popup .post_cap .date_repost:before{content:"(\u518d ";}' +
-               'div.popup .post_cap .date_repost:after{content:")";}' +
-               'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
-               'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
-               'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
-               'div.popup .post_cap .author_status.fav{width:14px;height:14px;' +
-               '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
-               'div.popup .post_cap .author_status.heart{width:16px;height:14px;' +
-               '  background-position:-1701px -480px;background-image:url("' + pp.sprite_image + '");}' +
-               'div.popup .post_cap .author_status.mypix{width:14px;height:16px;' +
-               '  background-position:-1701px -1px;background-image:url("' + pp.sprite_image + '");}' +
-               'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
-               'div.popup .post_cap .author a{font-weight:bold;}' +
-               'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
-               'div.popup .bm_edit{margin-top:2px;}' +
-               'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
-               'div.popup .img_div img, div.popup .img_div svg{border:1px solid silver;}' +
-               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
-               'div.popup .olc:hover{opacity:0.6;}' +
-               'div.popup .olc-prev{left:3px;}' +
-               'div.popup .olc-next{right:3px;}' +
-               /*
-               'div.popup .olc-prev:before, div.popup .olc-next:before{display:block;position:absolute;bottom:0;' +
-               '  background-color:white;border:1px solid silver;border-bottom-width:0px;font-size:120%;font-weight:bold;' +
-               '  padding:0.2em 0.6em;text-decoration:none;line-height:1em;background-color:white;color:gray;}' +
-               'div.popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
-               'div.popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
-                */
-               (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
-               // rating
-               'div.popup .rating.works_area{padding:0px !important;}' +
-               'div.popup .rating.works_area input{display:block;}' +
-               'div.popup .rating span + span{margin-left:0.4em;}' +
-               'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
-               'div.popup .rating #quality_rating{float:none !important;}' +
-               'div.popup .rating h4{margin:0px;}' +
-               //'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
-               'div.popup .rating #result{font-size:inherit !important;width:100% !important;}' +
-               'div.popup .rating #result > div{width:auto !important;}' +
-               //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
-               'div.popup .rating dl.ra_a dt{width:100%;}' +
-               'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
-               'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
-               'div.popup .rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
-               'div.popup .rating #result div[highlight]{background-color:#efefef;}' +
-               'div.popup .rating #quality_rating{width:100% !important;}' +
-               // comments
-               'div.popup .viewer_comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
-               'div.popup .viewer_comments input + input{margin-left:0.4em;}' +
-               'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
-               'div.popup .viewer_comments .worksComment:last-child{border:none;}'
-              );
      load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
 
      (function($js) {
@@ -1872,7 +1873,7 @@
      this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
                                                       bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
-                                                      bind_event(this.edit_bookmark, this));
+                                                      bind(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'caption');
      this.err_msg               = $c('div',     this.caption,       'error separator');
      this.comment_wrap          = $c('div',     this.caption,       'comment_wrap');
@@ -2107,7 +2108,7 @@
      var btn = $c('a', parent, cls);
      btn.href = 'javascript:void(0)';
      btn.innerText = text;
-     if (cb_click) btn.addEventListener('click', cb_click, false);
+     if (cb_click) $ev(btn).click(cb_click);
      return btn;
    };
 
@@ -2928,7 +2929,7 @@
      } else if (this.item.img_url_base && !getcache(this.url)) {
        // conf.popup.big_image = trueの時、イラストがマンガなら大きな画像は存在しないので、失敗したらHTMLソースをパースする。
        // キャッシュを持ってる時は同期的にコールバックするのでやらない。推定したURLが404の時に余分なリクエストが発生するため。
-       //if (conf.debug) console.log('trying parallel load - ' + this.item.img_url_base);
+       log('trying parallel load - ' + this.item.img_url_base);
        this.parallel = true;
        this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
      }
@@ -2966,7 +2967,7 @@
        },
        function() {
          if (self.parallel && conf.popup.big_image) {
-           //if (conf.debug) console.log('parallel load failed - ' + self.item.img_url_base);
+           log('parallel load failed - ' + self.item.img_url_base);
            self.parallel = false;
            if (self.text_cmp) self.parse_text();
          } else {
@@ -3864,7 +3865,7 @@
    }
 
    function log(msg) {
-     if (conf.debug) console.log(msg);
+     if (conf.debug) (window.console && window.console.log || opera.postError)(msg);
    }
 
    function create_post_data(form) {
