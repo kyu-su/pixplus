@@ -18,6 +18,7 @@
  * ポップアップのイベントAPIをPopup.on*のみに変更。
  * conf.expand_novel追加。
  * ランキングカレンダーに対応。conf.popup_ranking_log追加。
+ * イベント詳細ページに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -94,11 +95,7 @@
  * aタグのhref属性の先頭のjump.phpは削除される。
  */
 
-/** ギャラリーの仕様
- * イラストの一覧をギャラリーと呼ぶ。pixiv的には「コレクション」？
- * ギャラリーの画像をクリックするとポップアップが開く。ポップアップ内で次/前のイラストに移動出来る。
-
- ** 対応しているページ一覧
+/** 対応しているページ一覧
  * マイページ(ログイン時のトップページ/R-18)
  * メンバーイラスト/作品一覧/ブックマーク
  * 新着イラスト(みんな/お気に入りユーザー/R-18)
@@ -110,6 +107,7 @@
  * 投稿イラスト管理ページ
  * ブックマーク詳細ページ
  * 閲覧・評価・コメント履歴
+ * イベント詳細ページ
 
  ** 人気タグ別ランキングについて
  * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログに「何らかの方法で数ヶ月以内に再開します」とある。
@@ -957,12 +955,11 @@
        add_gallery({container:  cont, colpath: colpath,
                     thumbpath:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
-       /*
      } else if (window.location.pathname.match(/^\/event_detail\.php/)) {
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " event-cont ")]/div[contains(concat(" ", @class, " "), " thumbContainer ")]'),
-                    colpath:   'ul[contains(concat(" ", @class, " "), " thu ")]',
-                    thumbpath: 'li/a[contains(@href, "mode=medium")]/img'});
-        */
+                    colpath:    'ul[contains(concat(" ", @class, " "), " thu ")]',
+                    thumbpath:  'li/a[contains(@href, "mode=medium")]/img',
+                    thumb_only: true});
      } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
        add_gallery({container:     $x('//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]'),
                     colpath:       'dl',
@@ -975,9 +972,8 @@
                       thumbpath:  './/a[contains(@href, "ranking.php")]//img',
                       thumb_only: true,
                       skip_dups:  true,
-                      get_url:    function(anc) {
-                        var img = $t('img', anc)[0];
-                        if (img && img.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/mobile\/(\d+)_128x128/i)) {
+                      get_url:    function(cap, thumb) {
+                        if (thumb && thumb.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/mobile\/(\d+)_128x128/i)) {
                           return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + RegExp.$1;
                         } else {
                           return null;
@@ -1788,8 +1784,9 @@
      }
      return this;
    }
-   Gallery.get_url = function(anc) {
-     return anc.href;
+   Gallery.get_url = function(cap, thumb) {
+     var thumb_anc = thumb && $x('ancestor-or-self::a', thumb);
+     return (cap && cap.href) || (thumb_anc && thumb_anc.href);
    };
    Gallery.oncreate = new Signal();
    Gallery.prototype.detect_new_collection = function() {
@@ -1823,8 +1820,7 @@
             }
             if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
 
-            var thumb_anc = $x('ancestor-or-self::a', thumb);
-            var url = (self.args.get_url || Gallery.get_url)(cap || thumb_anc);
+            var url = (self.args.get_url || Gallery.get_url)(cap, thumb);
             if (!url || !url.match(/[\?&]illust_id=(\d+)/)) return;
 
             if (cap) {
