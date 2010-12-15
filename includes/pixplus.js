@@ -1672,6 +1672,7 @@
          .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
          .wait()
          .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
+         .script('http://source.pixiv.net/source/js/rpc.js')
          .wait(function() {
                  if (conf.disable_effect) {
                    window.Effect.ScopedQueue.prototype.add = function(effect) {
@@ -1680,7 +1681,6 @@
                    };
                  }
                })
-         .script('http://source.pixiv.net/source/js/rpc.js')
          .script('http://source.pixiv.net/source/js/tag_edit.js')
         );
    }
