@@ -17,6 +17,7 @@
  * キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る
  * ポップアップのイベントAPIをPopup.on*のみに変更。
  * conf.expand_novel追加。
+ * ランキングカレンダーに対応。conf.popup_ranking_log追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -102,6 +103,7 @@
  * メンバーイラスト/作品一覧/ブックマーク
  * 新着イラスト(みんな/お気に入りユーザー/R-18)
  * ランキング(デイリー/ルーキー/ウィークリー/マンスリー/各R-18/R-18G)
+ * ランキングカレンダー
  * ブックマーク管理
  * イメージレスポンス
  * 検索
@@ -156,6 +158,7 @@
      workaround:             [false, 'Operaやpixivのバグ回避のための機能を使用する。'],
      fast_user_bookmark:     [0,     'お気に入りユーザーの追加をワンクリックで行う。0:無効/1:有効(公開)/2:有効(非公開)'],
      expand_novel:           [false, '小説ページのロード時に全ページを表示する。'],
+     popup_ranking_log:      [true,  'ランキングカレンダーでポップアップを使用する。'],
      popup: {
        preload:              [true,  '先読みを使用する。'],
        big_image:            [false, '原寸の画像を表示する。'],
@@ -913,7 +916,7 @@
        add_gallery({container: $x('//div[contains(concat(" ", @class, " "), " response ") and h3]'),
                     colpath:   'div[contains(concat(" ", @class, " "), " search_a2_result ")]'},
                    null, unpack_captions);
-     } else if (window.location.pathname.match(/^\/ranking(_r18g?|_rookie|_log|_tag|_area)?\.php/)) {
+     } else if (window.location.pathname.match(/^\/ranking(_r18g?|_rookie|_tag|_area)?\.php/)) {
        if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
          area_right();
@@ -965,6 +968,22 @@
                     colpath:       'dl',
                     cappath:       'dd/a[contains(@href, "mode=medium")]',
                     allow_nothumb: -1});
+     } else if (window.location.pathname.match(/^\/ranking_log\.php/)) {
+       if (conf.popup_ranking_log) {
+         add_gallery({container:  $x('//table[contains(concat(" ", @class, " "), " calender_ranking ")]/../..'),
+                      colpath:    './/table[contains(concat(" ", @class, " "), " calender_ranking ")]',
+                      thumbpath:  './/a[contains(@href, "ranking.php")]//img',
+                      thumb_only: true,
+                      skip_dups:  true,
+                      get_url:    function(anc) {
+                        var img = $t('img', anc)[0];
+                        if (img && img.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/mobile\/(\d+)_128x128/i)) {
+                          return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + RegExp.$1;
+                        } else {
+                          return null;
+                        }
+                      }});
+       }
      }
 
      // 汎用
@@ -1769,89 +1788,91 @@
      }
      return this;
    }
+   Gallery.get_url = function(anc) {
+     return anc.href;
+   };
    Gallery.oncreate = new Signal();
    Gallery.prototype.detect_new_collection = function() {
      var self = this;
-     each(
-       $xa(this.args.colpath, this.args.container),
-       function(col) {
-         if (!col.hasAttribute('pixplus_loaded')) {
-           self.add_collection(col);
-         }
-       });
+     each($xa(this.args.colpath, this.args.container),
+          function(col) {
+            if (!col.hasAttribute('pixplus_loaded')) {
+              self.add_collection(col);
+            }
+          });
    };
    Gallery.prototype.add_collection = function(col) {
      if (this.filter_col) this.filter_col(col);
      var elements = $xa(this.args.thumb_only ? this.args.thumbpath : this.args.cappath, col);
      if (!elements.length) return;
+     log('collection detected - ' + elements.length);
      col.setAttribute('pixplus_loaded', 'true');
 
      var self = this;
      var prev = this.last;
      this.page_item = 0;
      ++this.page_col;
-     each(
-       elements,
-       function(elem, cnt) {
-         var thumb, cap;
-         if (self.args.thumb_only) {
-           thumb = elem;
-         } else {
-           thumb = $x(self.args.thumbpath, elem);
-           cap = elem;
-         }
-         var thumb_anc = $x('ancestor-or-self::a', thumb);
-         if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
+     each(elements,
+          function(elem, cnt) {
+            var thumb, cap;
+            if (self.args.thumb_only) {
+              thumb = elem;
+            } else {
+              thumb = $x(self.args.thumbpath, elem);
+              cap = elem;
+            }
+            if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
 
-         var url = (cap && cap.href) || (thumb_anc && thumb_anc.href);
-         if (!url || !url.match(/[\?&]illust_id=(\d+)/)) return;
+            var thumb_anc = $x('ancestor-or-self::a', thumb);
+            var url = (self.args.get_url || Gallery.get_url)(cap || thumb_anc);
+            if (!url || !url.match(/[\?&]illust_id=(\d+)/)) return;
 
-         if (cap) {
-           if (cap.nodeType == 3) {
-             var new_caption = $c('a');
-             new_caption.href = url;
-             new_caption.innerText = trim(cap.nodeValue);
-             new_caption.setAttribute('nopopup', '');
-             cap.parentNode.replaceChild(new_caption, cap);
-             cap = new_caption;
-           } else if (lc(cap.tagName) == 'a') {
-             cap.setAttribute('nopopup', '');
-           } else if (!$x('ancestor::a', cap)) {
-             if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
-               cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
-             }
-           }
-         }
+            if (cap) {
+              if (cap.nodeType == 3) {
+                var new_caption = $c('a');
+                new_caption.href = url;
+                new_caption.innerText = trim(cap.nodeValue);
+                new_caption.setAttribute('nopopup', '');
+                cap.parentNode.replaceChild(new_caption, cap);
+                cap = new_caption;
+              } else if (lc(cap.tagName) == 'a') {
+                cap.setAttribute('nopopup', '');
+              } else if (!$x('ancestor::a', cap)) {
+                if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
+                  cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
+                }
+              }
+            }
 
-         var item;
-         var pbtn = thumb;
-         if (!thumb && cap) {
-           pbtn = $c('a');
-           pbtn.href = url;
-           pbtn.innerText = '\u25a0';
-           pbtn.style.marginRight = '4px';
-           cap.parentNode.insertBefore(pbtn, cap);
-         }
-         if (pbtn) $ev(pbtn).click(function() { Popup.run(item); });
+            var item;
+            var pbtn = thumb;
+            if (!thumb && cap) {
+              pbtn = $c('a');
+              pbtn.href = url;
+              pbtn.innerText = '\u25a0';
+              pbtn.style.marginRight = '4px';
+              cap.parentNode.insertBefore(pbtn, cap);
+            }
+            if (pbtn) $ev(pbtn).click(function() { Popup.run(item); });
 
-         item = new GalleryItem(url, thumb, cap, prev, self);
-         if (!self.first) self.first = item;
-         if (self.filter) self.filter(item);
+            item = new GalleryItem(url, thumb, cap, prev, self);
+            if (!self.first) self.first = item;
+            if (self.filter) self.filter(item);
 
-         if (self.args.skip_dups && self.idmap[item.id]) {
-           self.prev_dups.push(item);
-         } else {
-           if (prev) prev.next = item;
-           if (self.prev_dups.length) {
-             each(self.prev_dups, function(p) { p.next = item; });
-             self.prev_dups = [];
-           }
-           self.last = prev = item;
-           self.items.push(item);
-           self.idmap[item.id] = item;
-           self.onadditem.emit(self, item);
-         }
-       });
+            if (self.args.skip_dups && self.idmap[item.id]) {
+              self.prev_dups.push(item);
+            } else {
+              if (prev) prev.next = item;
+              if (self.prev_dups.length) {
+                each(self.prev_dups, function(p) { p.next = item; });
+                self.prev_dups = [];
+              }
+              self.last = prev = item;
+              self.items.push(item);
+              self.idmap[item.id] = item;
+              self.onadditem.emit(self, item);
+            }
+          });
    };
 
    function Popup(item, manga_page) {
