@@ -944,6 +944,7 @@
        }
      } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
        // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
+       // 下部の「****の他の作品」
        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'});
      } else if (window.location.pathname.match(/^\/stacc/)) {
        // http://www.pixiv.net/stacc/
