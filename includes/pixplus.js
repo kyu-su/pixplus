@@ -18,7 +18,7 @@
  * ポップアップのイベントAPIをPopup.on*のみに変更。
  * conf.expand_novel追加。
  * ランキングカレンダーに対応。conf.popup_ranking_log追加。
- * イベント詳細ページに対応。
+ * イベント詳細/参加者ページに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -107,7 +107,7 @@
  * 投稿イラスト管理ページ
  * ブックマーク詳細ページ
  * 閲覧・評価・コメント履歴
- * イベント詳細ページ
+ * イベント(詳細/参加者)
 
  ** 人気タグ別ランキングについて
  * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログに「何らかの方法で数ヶ月以内に再開します」とある。
@@ -959,6 +959,12 @@
        add_gallery({xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
                     xpath_tmb:  'li/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
+     } else if (window.location.pathname.match(/^\/event_member\.php/)) {
+       // http://www.pixiv.net/event_member.php?event_id=805
+       add_gallery({xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
+                    xpath_tmb:  'li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
+                    thumb_only: true,
+                    get_url:    get_url_from_image});
      } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
        // http://www.pixiv.net/view_all.php
        // http://www.pixiv.net/rating_all.php
@@ -973,13 +979,7 @@
                       xpath_tmb:  './/a[contains(@href, "ranking.php")]//img',
                       thumb_only: true,
                       skip_dups:  true,
-                      get_url:    function(cap, thumb) {
-                        if (thumb && thumb.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/mobile\/(\d+)_128x128/i)) {
-                          return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + RegExp.$1;
-                        } else {
-                          return null;
-                        }
-                      }});
+                      get_url:    get_url_from_image});
        }
      }
 
@@ -1000,6 +1000,14 @@
          // http://www.pixiv.net/response.php?illust_id=15092961
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
+       }
+     }
+
+     function get_url_from_image(cap, thumb) {
+       if (thumb && thumb.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i)) {
+         return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + RegExp.$1;
+       } else {
+         return null;
        }
      }
    }
