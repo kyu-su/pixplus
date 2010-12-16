@@ -225,7 +225,16 @@
 
      url: {
        js: {
+         jquery:          'http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
+         prototypejs:     'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
+         effects:         'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
+         rpc:             'http://source.pixiv.net/source/js/rpc.js',
+         rating:          'http://source.pixiv.net/source/js/modules/rating.js?20101107',
+         tag_edit:        'http://source.pixiv.net/source/js/tag_edit.js',
          bookmark_add_v4: 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028'
+       },
+       css: {
+         bookmark_add: 'http://source.pixiv.net/source/css/bookmark_add.css?20100720'
        },
        img: {
          sprite: 'http://source.pixiv.net/source/images/sprite_20101101.png'
@@ -1467,6 +1476,13 @@
      write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
                '#header .header_otehrs_ul li + li{margin-left:16px;}' +
                '*[float]{position:fixed;top:0px;}' +
+               // アイコン
+               '.pixplus-check{width:14px;height:14px;background-position:-1701px -547px;' +
+               '  background-image:url("' + pp.url.img.sprite + '");}' +
+               '.pixplus-heart{width:16px;height:14px;background-position:-1701px -480px;' +
+               '  background-image:url("' + pp.url.img.sprite + '");}' +
+               '.pixplus-flag{width:14px;height:16px;background-position:-1701px -1px;' +
+               '  background-image:url("' + pp.url.img.sprite + '");}' +
                // コメント
                (conf.popup.font_size ? 'div.popup{font-size:' + conf.popup.font_size + ';}' : '') +
                '.works_caption hr, div.popup hr{display:block;border:none;height:1px;background-color:silver;}' +
@@ -1503,12 +1519,6 @@
                'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
                'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
-               'div.popup .post_cap .author_status.fav{width:14px;height:14px;' +
-               '  background-position:-1701px -547px;background-image:url("' + pp.url.img.sprite + '");}' +
-               'div.popup .post_cap .author_status.heart{width:16px;height:14px;' +
-               '  background-position:-1701px -480px;background-image:url("' + pp.url.img.sprite + '");}' +
-               'div.popup .post_cap .author_status.mypix{width:14px;height:16px;' +
-               '  background-position:-1701px -1px;background-image:url("' + pp.url.img.sprite + '");}' +
                'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
                'div.popup .post_cap .author a{font-weight:bold;}' +
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
@@ -1686,24 +1696,24 @@
        document.body.insertBefore(pp.rpc_div, document.body.firstChild);
      }
 
-     load_css('http://source.pixiv.net/source/css/bookmark_add.css?20100720');
+     load_css(pp.url.css.bookmark_add);
 
      (function($js) {
         if (!$x('//script[contains(@src, "/rating")]')) {
-          $js.script('http://source.pixiv.net/source/js/modules/rating.js?20101107');
+          $js.script(pp.url.js.rating);
         }
         return $js;
       })($js
-         .script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js')
+         .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
                  if (conf.disable_effect) window.jQuery.fx.off = true;
                  init_pixplus_real();
                })
-         .script('http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js')
+         .script(pp.url.js.prototypejs)
          .wait()
-         .script('http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js')
-         .script('http://source.pixiv.net/source/js/rpc.js')
+         .script(pp.url.js.effects)
+         .script(pp.url.js.rpc)
          .wait(function() {
                  if (conf.disable_effect) {
                    window.Effect.ScopedQueue.prototype.add = function(effect) {
@@ -1712,7 +1722,7 @@
                    };
                  }
                })
-         .script('http://source.pixiv.net/source/js/tag_edit.js')
+         .script(pp.url.js.tag_edit)
         );
    }
 
@@ -2271,7 +2281,7 @@
      }
      var self = this;
      this.set_status('Loading');
-     this.item   = Popup.lastitem = item;
+     this.item = Popup.lastitem = item;
      this.init_manga_page = manga_page;
      this.loader = new Popup.Loader(
        this.item,
@@ -2283,7 +2293,7 @@
          //if (this.image && this.image.complete) self.set_image(this.image);
        },
        reload);
-     Popup.onsetitem.emit(this);
+     Popup.onsetitem.emit(this, this.item);
      if (this.conn_g_add_item) {
        this.conn_g_add_item.disconnect();
        this.conn_g_add_item = null;
@@ -2374,7 +2384,7 @@
                           : loader.image.src.replace(/_[sm](\.\w+)$/, '$1'));
 
      if (loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
-       var a_status_class;
+       var a_status_class = '';
        this.a_img.src            = RegExp.$3;
        this.a_profile.href       = RegExp.$1;
        this.a_profile.innerHTML  = RegExp.$4; // 属性を使うのでtrimしない。
@@ -2386,15 +2396,15 @@
        }
        if (conf.popup.author_status_icon) {
          if (loader.text.match(/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i)) {
-           a_status_class = 'mypix';
+           a_status_class = ' pixplus-flag';
          } else if (loader.text.match(/<span[^>]+class=\"list_fav\">/i)) {
-           a_status_class = 'heart';
+           a_status_class = ' pixplus-heart';
          } else if (loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
-           a_status_class = 'fav';
+           a_status_class = ' pixplus-check';
          }
        }
        if (a_status_class) {
-         this.a_status.className = 'author_status ' + a_status_class;
+         this.a_status.className = 'author_status' + a_status_class;
          this.a_status.style.display = '';
        } else {
          this.a_status.style.display = 'none';
