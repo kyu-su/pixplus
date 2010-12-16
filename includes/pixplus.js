@@ -223,10 +223,13 @@
      rpc_req_rate:  13, // i|e|qr
      rpc_req_qrate: 13,
 
-     sprite_image:  'http://source.pixiv.net/source/images/sprite_20101101.png',
-
-     js: {
-       bookmark_add_v4: 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028'
+     url: {
+       js: {
+         bookmark_add_v4: 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028'
+       },
+       img: {
+         sprite: 'http://source.pixiv.net/source/images/sprite_20101101.png'
+       }
      },
 
      recommender: {
@@ -1421,7 +1424,7 @@
          var autotag = $x('//h2[contains(text(), "\u8ffd\u52a0")]') ? true : false;
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
-       conf.debug && chk_ext_src('script', 'src', pp.js.bookmark_add_v4);
+       conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
      }
    }
    function init_novel() {
@@ -1501,11 +1504,11 @@
                'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
                'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
                'div.popup .post_cap .author_status.fav{width:14px;height:14px;' +
-               '  background-position:-1701px -547px;background-image:url("' + pp.sprite_image + '");}' +
+               '  background-position:-1701px -547px;background-image:url("' + pp.url.img.sprite + '");}' +
                'div.popup .post_cap .author_status.heart{width:16px;height:14px;' +
-               '  background-position:-1701px -480px;background-image:url("' + pp.sprite_image + '");}' +
+               '  background-position:-1701px -480px;background-image:url("' + pp.url.img.sprite + '");}' +
                'div.popup .post_cap .author_status.mypix{width:14px;height:16px;' +
-               '  background-position:-1701px -1px;background-image:url("' + pp.sprite_image + '");}' +
+               '  background-position:-1701px -1px;background-image:url("' + pp.url.img.sprite + '");}' +
                'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
                'div.popup .post_cap .author a{font-weight:bold;}' +
                'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
@@ -3204,9 +3207,7 @@
           setTimeout(func, 10);
         };
       })();
-     $js
-       .script('http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028')
-       .wait(init);
+     $js.script(pp.url.js.bookmark_add_v4).wait(init);
 
      function init() {
        // 二回目以降のmod_edit_bookmark()でbookmark_add_v4.jsの初期化関数が呼ばれない
