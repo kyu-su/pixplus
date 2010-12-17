@@ -23,10 +23,12 @@
          this.items.forEach(bind(add_item, this));
          this.onadditem.connect(bind(add_item, this));
        });
+     /*
      window.opera.pixplus.Popup.onsetitem.connect(
        function(item) {
          if (item.thumb) prefocus(item.thumb);
        });
+      */
 
      function add_item(item) {
        if (!item.thumb) return;
@@ -50,14 +52,18 @@
        this.spnav.rows[row].push(item);
        if (cell > 0) {
          set_spnav(this.spnav.rows[row][cell - 1], item, true);
-         set_spnav(item, this.spnav.rows[row][0], true);
+         //set_spnav(item, this.spnav.rows[row][0], true);
        }
        if (row > 0) {
          if (cell < this.spnav.rows[row - 1].length) set_spnav(this.spnav.rows[row - 1][cell], item, false);
          //if (cell < this.spnav.rows[0].length) set_spnav(item, this.spnav.rows[0][cell], false);
        }
 
-       item.thumb.addEventListener('focus', function() { window.opera.pixplus.lazy_scroll(document.activeElement); }, false);
+       item.thumb.addEventListener(
+         'focus',
+         function() {
+           window.opera.pixplus.lazy_scroll(document.activeElement);
+         }, false);
      }
    }
    function load() {
@@ -75,6 +81,7 @@
    }
    document.addEventListener('pixplusInitialize', init, false);
    document.addEventListener('pixplusLoaded', load, false);
+   //window.addEventListener('Load', load, false);
 
    var num = 0;
    function set_spnav(item1, item2, side) {
@@ -93,7 +100,10 @@
    }
    function prefocus(elem) {
      var ae, save;
-     document.moveFocusRight();
+     if (!document.activeElement || document.activeElement.nodeType != 1 ||
+         !$x('ancestor::body', document.activeElement)) {
+       document.moveFocusRight();
+     }
      ae = document.activeElement;
      save = ae.style.navRight;
      ae.style.navRight = '#' + elem.id;
