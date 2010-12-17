@@ -3637,7 +3637,7 @@
      return {left: left, top: top};
    }
    function lazy_scroll(elem, offset, root) {
-     if (!elem) return;
+     if (!elem || elem == arguments.callee.last) return;
      offset = parseFloat(typeof offset == 'undefined' ? 0.2 : offset);
      if (root) {
        var pos = getpos(elem, root);
@@ -3648,6 +3648,7 @@
        } else if (pos.top + elem.offsetHeight > bot) {
          window.jQuery(root).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
        }
+       arguments.callee.last = elem;
      } else {
        var p = elem.parentNode;
        while(p) {

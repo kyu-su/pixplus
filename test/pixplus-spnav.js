@@ -13,7 +13,7 @@
    function init() {
      var css = window.opera.pixplus.write_css;
      css('.' + _p + '_item{padding:3px !important;}' +
-         '.' + _p + '_item:focus{' +
+         '.' + _p + '_item:focus,.' + _p + '_item:focus:hover{' +
          '  padding:4px !important;border:none !important;' +
          '  outline:0px solid;background-image:-o-skin("Active element inside");}'
      );
@@ -22,6 +22,10 @@
        function() {
          this.items.forEach(bind(add_item, this));
          this.onadditem.connect(bind(add_item, this));
+       });
+     window.opera.pixplus.Popup.onsetitem.connect(
+       function(item) {
+         if (item.thumb) prefocus(item.thumb);
        });
 
      function add_item(item) {
@@ -53,7 +57,7 @@
          //if (cell < this.spnav.rows[0].length) set_spnav(item, this.spnav.rows[0][cell], false);
        }
 
-       item.thumb.addEventListener('focus', function() { window.opera.pixplus.lazy_scroll(item.thumb); }, false);
+       item.thumb.addEventListener('focus', function() { window.opera.pixplus.lazy_scroll(document.activeElement); }, false);
      }
    }
    function load() {
