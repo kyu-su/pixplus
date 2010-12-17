@@ -53,7 +53,7 @@
          //if (cell < this.spnav.rows[0].length) set_spnav(item, this.spnav.rows[0][cell], false);
        }
 
-       item.thumb.addEventListener('focus', function() { scrollelem(item.thumb); }, false);
+       item.thumb.addEventListener('focus', function() { window.opera.pixplus.lazy_scroll(item.thumb); }, false);
      }
    }
    function load() {
@@ -68,15 +68,6 @@
                           return false;
                         }) >= 0;
           });
-   }
-   function prefocus(elem) {
-     var ae, save;
-     document.moveFocusRight();
-     ae = document.activeElement;
-     save = ae.style.navRight;
-     ae.style.navRight = '#' + elem.id;
-     document.moveFocusRight();
-     ae.style.navRight = save;
    }
    document.addEventListener('pixplusInitialize', init, false);
    document.addEventListener('pixplusLoaded', load, false);
@@ -95,6 +86,15 @@
        a1.style.navDown = '#' + a2.id;
        a2.style.navUp = '#' + a1.id;
      }
+   }
+   function prefocus(elem) {
+     var ae, save;
+     document.moveFocusRight();
+     ae = document.activeElement;
+     save = ae.style.navRight;
+     ae.style.navRight = '#' + elem.id;
+     document.moveFocusRight();
+     ae.style.navRight = save;
    }
 
    function $x(xpath, root) {
@@ -122,18 +122,5 @@
        top += element.offsetTop;
      }
      return {left: left, top: top};
-   }
-   function scrollelem(element, pos) {
-     if (!element) return;
-     pos = parseFloat(typeof pos == 'undefined' ? 0.5 : pos);
-     var p = element.parentNode;
-     while(p) {
-       if (p.scrollHeight > p.offsetHeight) {
-         p.scrollTop = getpos(element, p).top - p.clientHeight * pos;
-         return;
-       }
-       p = p.parentNode;
-     }
-     window.scroll(0, getpos(element).top - window.innerHeight * pos);
    }
  })();

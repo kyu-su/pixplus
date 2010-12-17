@@ -212,6 +212,7 @@
      geturl:        geturl,
      uncache:       uncache,
      parseimgurl:   parseimgurl,
+     lazy_scroll:   lazy_scroll,
 
      load_css:      load_css,
      write_css:     write_css,
@@ -1368,21 +1369,15 @@
              anc.setAttribute('nopopup', '');
            });
 
-         var xpath, pos;
-         switch(conf.scroll) {
-         case 1:
-           xpath = '//div[contains(concat(" ", @class, " "), " works_area ")]';
+         var elem, pos, de = document.documentElement;
+         if (conf.scroll == 1) {
+           elem = $x('//div[contains(concat(" ", @class, " "), " works_area ")]');
            pos = 0;
-           break;
-         case 2:
-           xpath = '//div[contains(concat(" ", @class, " "), " works_display ")]';
+         } else if (conf.scroll == 2) {
+           elem = $x('//div[contains(concat(" ", @class, " "), " works_display ")]');
            pos = 1;
-           break;
          }
-         if (xpath) {
-           var elem = $x(xpath);
-           if (elem) window.addEventListener('load', function() { scrollelem(elem, pos); }, false);
-         }
+         if (elem) window.scroll(0, getpos(elem).top - (de.clientHeight - elem.offsetHeight) * pos);
 
          var works_caption = $x('//p[contains(concat(" ", @class, " "), " works_caption ")]');
          if (works_caption) {
@@ -2131,10 +2126,12 @@
        Popup.instance = null;
      });
    Popup.run = function(item, manga_page) {
-     if (Popup.instance) {
-       Popup.instance.set(item, false, false, false, manga_page);
-     } else {
-       Popup.instance = new Popup(item, manga_page);
+     if (item) {
+       if (Popup.instance) {
+         Popup.instance.set(item, false, false, false, manga_page);
+       } else {
+         Popup.instance = new Popup(item, manga_page);
+       }
      }
      return Popup.instance;
    };
@@ -2307,7 +2304,7 @@
      this.complete();
      //this.update_page_counter(this.item);
 
-     if (scroll) scrollelem(this.item.thumb || this.item.caption);
+     if (scroll) lazy_scroll(this.item.thumb || this.item.caption);
 
      this.init_comments();
      this.manga.init();
@@ -3639,18 +3636,29 @@
      }
      return {left: left, top: top};
    }
-   function scrollelem(element, pos) {
-     if (!element) return;
-     pos = parseFloat(typeof pos == 'undefined' ? 0.5 : pos);
-     var p = element.parentNode;
-     while(p) {
-       if (p.scrollHeight > p.offsetHeight) {
-         p.scrollTop = getpos(element, p).top - p.clientHeight * pos;
-         return;
+   function lazy_scroll(elem, offset, root) {
+     if (!elem) return;
+     offset = parseFloat(typeof offset == 'undefined' ? 0.2 : offset);
+     if (root) {
+       var pos = getpos(elem, root);
+       var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
+       var top = Math.floor(root.scrollTop + bt), bot = Math.floor(root.scrollTop + bb);
+       if (pos.top < top) {
+         window.jQuery(root).animate({scrollTop: pos.top - bt}, 200);
+       } else if (pos.top + elem.offsetHeight > bot) {
+         window.jQuery(root).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
        }
-       p = p.parentNode;
+     } else {
+       var p = elem.parentNode;
+       while(p) {
+         if (p.scrollHeight > p.offsetHeight) {
+           lazy_scroll(elem, offset, p);
+           return;
+         }
+         p = p.parentNode;
+       }
+       lazy_scroll(elem, offset, document.documentElement);
      }
-     window.scroll(0, getpos(element).top - window.innerHeight * pos);
    }
    function remove_node_if_tag_name(node, tag) {
      if (node && node.tagName && lc(node.tagName) == tag && node.parentNode) {
