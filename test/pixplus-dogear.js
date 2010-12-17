@@ -47,8 +47,8 @@
            icon.style.position = 'absolute';
          }
          if (icon.parentNode) icon.parentNode.removeChild(icon);
-         icon.style.pixelLeft = item.thumb.offsetLeft + 2;
-         icon.style.pixelTop = item.thumb.offsetTop + 2;
+         icon.style.pixelLeft = item.thumb.offsetLeft - 12;
+         icon.style.pixelTop = item.thumb.offsetTop - 12;
          item.thumb.offsetParent.appendChild(icon);
        }
      }
