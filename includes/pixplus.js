@@ -3753,7 +3753,7 @@
        img.addEventListener(
          'load',
          function() {
-           document.body.removeChild(img);
+           img.parentNode.removeChild(img);
            imgcache[url] = img;
            if (cb_load) cb_load(img);
          }, false);

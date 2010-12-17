@@ -8,6 +8,8 @@
 // ==/UserScript==
 
 (function() {
+   if (!window.localStorage) return;
+
    var LS = {
      s: window.localStorage,
      prefix: '__pp_dogear_',
