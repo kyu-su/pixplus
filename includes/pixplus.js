@@ -173,11 +173,16 @@
        "scroll_height":        [32,    "上下キーでキャプションをスクロールする高さ。"],
        "author_status_icon":   [true,  "プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する。"],
        "show_comment_form":    [true,  "コメントの投稿フォームを表示する。"]
+     },
+     "extension": {
+       "show_toolbar_icon": [true,  "ツールバーアイコンを表示する。"],
+       "show_config_ui":    [false, "ページ内に設定ボタンを表示する。"]
      }
      /* __CONFIG_END__ */
    };
    var conf = {
      popup: { },
+     extension: { },
      /** タグの並び換え+分類。
       * 処理対象はブックマーク管理ページとイラストのブックマーク編集時のタグリスト。
       * 文字列の二次配列で表現し、完全一致したタグのみ適用される。
@@ -260,7 +265,12 @@
 
    var LS = {
      u: false, // usable or not
-     l: [{name:   'general',
+     l: [{name:   'extension',
+          label:  'Extension',
+          schema: conf_schema.extension,
+          conf:   conf.extension,
+          keys:   []},
+         {name:   'general',
           label:  'General',
           schema: conf_schema,
           conf:   conf,
@@ -345,6 +355,7 @@
        func();
      }
    };
+   if (!opera.extension) LS.l.shift();
    each(LS.l,
         function(sec) {
           LS.map[sec.name] = sec;
@@ -370,10 +381,12 @@
               return data.data[s + '_' + n];
             };
             LS.set = function(s, n, v) {
-              alert('LS.set() not implemented');
+              var data = { section: s, key: n, value: v };
+              opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
             };
             LS.remove = function(s, n) {
-              alert('LS.remove() not implemented');
+              var data = { section: s, key: n };
+              opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
             };
             if (init_func) _init(init_func);
           }
@@ -804,10 +817,9 @@
                val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
              }
              if (val === sec.schema[key][0] && sec.schema[key]._set_default) {
-               if (conf.debug) opera.postError('remove LS key - ' + [c.name, key].join(':'));
-               LS.remove(c.name, key);
+               LS.remove(sec.name, key);
              } else if (val != sec.conf[key]) {
-               LS.set(c.name, key, val);
+               LS.set(sec.name, key, val);
              }
            });
          window.location.reload();
@@ -846,7 +858,7 @@
              }
              if (val !== sec.schema[key][0]) {
                var ns = 'opera.pixplus.conf';
-               if (sec.conf !== conf) ns += '.' + c.name;
+               if (sec.conf !== conf) ns += '.' + sec.name;
                js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';\n';
              }
            });
@@ -1596,7 +1608,9 @@
                'div.popup .viewer_comments .worksComment:last-child{border:none;}'
               );
 
-     init_config_ui();
+     if (!opera.extension || LS.get('extension', 'show_config_ui') == 'true') {
+       init_config_ui();
+     }
      init_galleries();
      init_recommend();
      init_taglist();

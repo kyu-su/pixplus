@@ -1,4 +1,5 @@
 RSVG_CONVERT    ?= rsvg-convert
+ECHO            ?= /bin/echo
 ZIP             ?= zip
 ICON_SIZE       ?= 64 16
 OEX              = pixplus.oex
@@ -23,19 +24,24 @@ dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' < $< > $@
-	@for size in $(ICON_SIZE);do \
-           echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
+	@for size in $(ICON_SIZE); do \
+           $(ECHO) "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
-	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
+	$(ECHO) "  <icon src=\"$(ICON_SVG)\" />" >> $@;
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < includes/pixplus.js \
-          | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@
+	@for f in $(SRC_USERJS); do \
+           sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < $$f \
+             | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@; \
+         done
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(INDEX_CONFIG_JS):
-	/bin/echo -ne 'var conf_schema = {\r\n' > $@
-	sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < includes/pixplus.js >> $@
-	/bin/echo -ne '};\r\n' >> $@
+	$(ECHO) -ne 'var conf_schema = {\r\n' > $@
+	@a=1;for f in $(SRC_USERJS); do \
+           test $$a = 1 && a=0 || $(ECHO) -ne ',\r\n' >> $@; \
+           sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < $$f >> $@; \
+         done
+	$(ECHO) -ne '};\r\n' >> $@
 
 $(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
@@ -44,10 +50,10 @@ $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
 
 $(OEX): $(DIST_FILES)
-	@for kw in $(WARN_KEYWORDS_W);do \
+	@for kw in $(WARN_KEYWORDS_W); do \
            grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v '/\* WARN \*/' || : ; \
          done
-	@for kw in $(WARN_KEYWORDS_P);do \
+	@for kw in $(WARN_KEYWORDS_P); do \
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
          done
 	$(ZIP) -r $@ $^
