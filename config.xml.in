@@ -7,5 +7,5 @@
   <access origin="http://pixiv.net" subdomains="true" />
   <update-description href="http://crckyl.ath.cx:8088/pixplus/update.php?version=@VERSION@" />
 @ICONS@
-@PREFS@
+@CONFIG@
 </widget>

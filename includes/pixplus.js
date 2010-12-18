@@ -259,26 +259,18 @@
    }
 
    var LS = {
-     prefix: '__pixplus_',
-     s: window.localStorage,
-     l: [{name:  'general',
-          label: 'General',
-          data:  [conf_schema, conf]},
-         {name:  'popup',
-          label: 'Popup',
-          data:  [conf_schema.popup, conf.popup]}],
-     create_name: function(s, n) {
-       return LS.prefix + s + '_' + n;
-     },
-     get: function(s, n) {
-       return LS.s.getItem(LS.create_name(s, n));
-     },
-     set: function(s, n, v) {
-       return LS.s.setItem(LS.create_name(s, n), v);
-     },
-     remove: function(s, n) {
-       return LS.s.removeItem(LS.create_name(s, n));
-     },
+     u: false, // usable or not
+     l: [{name:   'general',
+          label:  'General',
+          schema: conf_schema,
+          conf:   conf,
+          keys:   []},
+         {name:   'popup',
+          label:  'Popup',
+          schema: conf_schema.popup,
+          conf:   conf.popup,
+          keys:   []}],
+     map: {},
      conv: {
        'string':  [String, String],
        'boolean': [function(s) { return s == 'true'; },
@@ -286,51 +278,39 @@
        'number':  [parseFloat, String]
      },
      each: function(cb_key, cb_sec, cb_sec_after) {
-       each(
-         LS.l,
-         function(c) {
-           if (cb_sec) cb_sec(c, c.data[0], c.data[1]);
-           each(
-             c.data[0].keys,
-             function(key) {
-               cb_key(c, c.data[0], c.data[1], key);
-             });
-           if (cb_sec_after) cb_sec_after(c, c.data[0], c.data[1]);
-         });
+       each(LS.l,
+            function(sec) {
+              if (cb_sec) cb_sec(sec);
+              each(sec.keys, function(key) { cb_key(sec, key); });
+              if (cb_sec_after) cb_sec_after(sec);
+            });
      },
-     init_section: function(name, cs, cf) {
-       var keys = [];
-       for(var key in cs) {
-         var type = typeof(cs[key][0]);
-         if (!LS.conv[type]) continue;
-         var func = LS.conv[type][0];
-         if (func) {
-           cs[key].type = type;
-           keys.push(key);
-           cf[key] = cs[key][0];
-           if (LS.s) {
-             var v = LS.get(name, key);
-             if (v) cf[key] = func(v);
-           }
-         }
-       }
-       cs.keys = keys.sort();
+     init_section: function(sec) {
+       each(sec.keys,
+            function(key) {
+              sec.conf[key] = sec.schema[key][0];
+              if (LS.u) {
+                var v = LS.get(sec.name, key);
+                if (typeof v != 'undefined' && v !== null) {
+                  sec.conf[key] = LS.conv[sec.schema[key].type][0](v);
+                }
+              }
+            });
      },
      parse_bm_tag_order: function(str) {
        var ary = [], ary_ary = [];
-       each(
-         str.split('\n'),
-         function(tag) {
-           tag = tag.replace(/[\r\n]/g, '');
-           if (tag == '-') {
-             ary.push(ary_ary);
-             ary_ary = [];
-           } else if (tag == '*') {
-             ary_ary.push(null);
-           } else if (tag) {
-             ary_ary.push(tag);
-           }
-         });
+       each(str.split('\n'),
+            function(tag) {
+              tag = tag.replace(/[\r\n]/g, '');
+              if (tag == '-') {
+                ary.push(ary_ary);
+                ary_ary = [];
+              } else if (tag == '*') {
+                ary_ary.push(null);
+              } else if (tag) {
+                ary_ary.push(tag);
+              }
+            });
        ary.push(ary_ary);
        return ary;
      },
@@ -343,17 +323,85 @@
          if (tag && alias) aliases[tag] = alias.split(/\s+/);
        }
        return aliases;
+     },
+     init: function(func) {
+       each(LS.l, function(sec) { LS.init_section(sec); });
+       if (LS.u) {
+         var order = LS.get('bookmark', 'tag_order');
+         if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
+         var aliases = LS.get('bookmark', 'tag_aliases');
+         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+       }
+       each(['auto_manga', 'reverse'],
+            function(key) {
+              try {
+                if (!conf.popup[key + '_regexp']) throw 1;
+                var v = conf.popup[key], r = new RegExp(conf.popup[key + '_regexp']);
+                conf.popup[key + '_p'] = v & 2 ? !!window.location.href.match(r) : !!(v & 1);
+              } catch(ex) {
+                conf.popup[key + '_p'] = false;
+              }
+            });
+       func();
      }
    };
-   conf.register_section = function(name, label, schema) {
-     if (conf_schema[name]) return;
-     conf_schema[name] = schema;
-     conf[name] = {};
-     LS.l.push({name:  name,
-                label: label,
-                data:  [conf_schema[name], conf[name]]});
-     LS.init_section(name, conf_schema[name], conf[name]);
-   };
+   each(LS.l,
+        function(sec) {
+          LS.map[sec.name] = sec;
+          for(var key in sec.schema) {
+            var type = typeof sec.schema[key][0];
+            if (LS.conv[type]) {
+              sec.schema[key].type = type;
+              sec.keys.push(key);
+            }
+          }
+          sec.keys.sort();
+        });
+
+
+   if (opera.extension) {
+     (function() {
+        var _init = LS.init, init_func;
+        opera.extension.onmessage = function(event){
+          var data = JSON.parse(event.data);
+          if (data.command == 'config') {
+            LS.u = true;
+            LS.get = function(s, n) {
+              return data.data[s + '_' + n];
+            };
+            LS.set = function(s, n, v) {
+              alert('LS.set() not implemented');
+            };
+            LS.remove = function(s, n) {
+              alert('LS.remove() not implemented');
+            };
+            if (init_func) _init(init_func);
+          }
+        };
+
+        LS.init = function(func) {
+          if (LS.u) {
+            _init(func);
+          } else {
+            init_func = func;
+          }
+        };
+      })();
+   } else {
+     LS.u = !!window.localStorage;
+     LS.get = function(s, n) {
+       return window.localStorage.getItem(create_name(s, n));
+     };
+     LS.set = function(s, n, v) {
+       return window.localStorage.setItem(create_name(s, n), v);
+     };
+     LS.remove = function(s, n) {
+       return window.localStorage.removeItem(create_name(s, n));
+     };
+     function create_name(s, n) {
+       return '__pixplus_' + s + '_' + n;
+     }
+   }
 
    var options = parseopts(window.location.href);
 
@@ -554,15 +602,15 @@
 
          var table = $c('table', div, 'conf');
          LS.each(
-           function(c, cs, cf, key) {
+           function(sec, key) {
              var row  = table.insertRow(-1);
              var ckey = row.insertCell(-1);
-             if (cs[key].type == 'boolean') {
-               ckey.setAttribute('colspan', 2);
+             if (sec.schema[key].type == 'boolean') {
+               ckey.setAttribute('colspan', '2');
                var check = $c('input', ckey);
                check.setAttribute('type', 'checkbox');
-               check.id = LS.create_name(cs.name, key);
-               cs[key].input = check;
+               check.id = '__pixplus_' + sec.schema.name + '_' + key;
+               sec.schema[key].input = check;
                var label = $c('label', ckey);
                label.setAttribute('for', check.id);
                label.innerText = key;
@@ -570,7 +618,7 @@
                ckey.innerText = key;
                var cval = row.insertCell(-1);
                var input = $c('input', cval);
-               cs[key].input = input;
+               sec.schema[key].input = input;
              }
              var cdef = row.insertCell(-1);
              var bdef = $c('button', cdef);
@@ -578,26 +626,26 @@
              bdef.addEventListener(
                'click',
                function() {
-                 if (cs[key].type == 'boolean') {
-                   cs[key].input.checked = cs[key][0];
+                 if (sec.schema[key].type == 'boolean') {
+                   sec.schema[key].input.checked = sec.schema[key][0];
                  } else {
-                   cs[key].input.value = cs[key][0];
+                   sec.schema[key].input.value = sec.schema[key][0];
                  }
-                 cs[key]._set_default = true;
-                 if (conf.debug) cs[key].input.style.color = 'gray';
+                 sec.schema[key]._set_default = true;
+                 if (conf.debug) sec.schema[key].input.style.color = 'gray';
                }, false);
              var cdes = row.insertCell(-1);
-             cdes.innerText = cs[key][1];
+             cdes.innerText = sec.schema[key][1];
            },
-           function(c, cs, cf) {
+           function(sec) {
              var th = $c('th', table.insertRow(-1));
-             th.setAttribute('colspan', 4);
-             th.innerText = c.label;
+             th.setAttribute('colspan', '4');
+             th.innerText = sec.label;
            });
 
-         if (LS.s) {
+         if (LS.u) {
            var cell = table.insertRow(-1).insertCell(-1);
-           cell.setAttribute('colspan', 4);
+           cell.setAttribute('colspan', '4');
            create_button('Save', cell, save_conf);
            create_button('Cancel', cell, cancel);
          }
@@ -608,7 +656,7 @@
            '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
          tag_order_textarea = $c('textarea', tocont);
          tag_order_textarea.rows = '20';
-         if (LS.s) {
+         if (LS.u) {
            var tobtns = $c('div', tocont);
            create_button('Save', tobtns, save_tag_order);
            create_button('Cancel', tobtns, cancel);
@@ -621,13 +669,13 @@
          var btaadd = $c('button', tacont);
          btaadd.innerText = 'Add';
          btaadd.addEventListener('click', function() { create_alias_row('', -1); }, false);
-         if (LS.s) {
+         if (LS.u) {
            var tabtns = $c('div', tacont);
            create_button('Save', tabtns, save_tag_alias);
            create_button('Cancel', tabtns, cancel);
          }
 
-         if (LS.s) {
+         if (LS.u) {
            (function() {
               var mpcont = create_section('MyPage', div);
               var now = window.jQuery.cookie('pixiv_mypage');
@@ -678,12 +726,12 @@
        }
        function init() {
          LS.each(
-           function(c, cs, cf, key) {
+           function(sec, key) {
              var val;
-             if (cs[key].type == 'boolean') {
-               cs[key].input.checked = cf[key];
+             if (sec.schema[key].type == 'boolean') {
+               sec.schema[key].input.checked = sec.conf[key];
              } else {
-               cs[key].input.value = cf[key];
+               sec.schema[key].input.value = sec.conf[key];
              }
            });
 
@@ -721,9 +769,9 @@
        }
        function check_conf() {
          LS.each(
-           function(c, cs, cf, key) {
-             if (cs[key].type == 'number') {
-               var val = cs[key].input.value;
+           function(sec, key) {
+             if (sec.schema[key].type == 'number') {
+               var val = sec.schema[key].input.value;
                if (isNaN(parseFloat(val))) throw 'Invalid value - ' + val;
              }
            });
@@ -748,17 +796,17 @@
            return;
          }
          LS.each(
-           function(c, cs, cf, key) {
+           function(sec, key) {
              var val;
-             if (cs[key].type == 'boolean') {
-               val = cs[key].input.checked;
+             if (sec.schema[key].type == 'boolean') {
+               val = sec.schema[key].input.checked;
              } else {
-               val = LS.conv[cs[key].type][0](cs[key].input.value);
+               val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
              }
-             if (val === cs[key][0] && cs[key]._set_default) {
+             if (val === sec.schema[key][0] && sec.schema[key]._set_default) {
                if (conf.debug) opera.postError('remove LS key - ' + [c.name, key].join(':'));
                LS.remove(c.name, key);
-             } else if (val != cf[key]) {
+             } else if (val != sec.conf[key]) {
                LS.set(c.name, key, val);
              }
            });
@@ -789,16 +837,16 @@
                    ' document.addEventListener("pixplusInitialize",init,false);',
                    ' function init() {', ''].join('\n');
          LS.each(
-           function(c, cs, cf, key) {
+           function(sec, key) {
              var val;
-             if (cs[key].type == 'boolean') {
-               val = cs[key].input.checked;
+             if (sec.schema[key].type == 'boolean') {
+               val = sec.schema[key].input.checked;
              } else {
-               val = LS.conv[cs[key].type][0](cs[key].input.value);
+               val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
              }
-             if (val !== cs[key][0]) {
+             if (val !== sec.schema[key][0]) {
                var ns = 'opera.pixplus.conf';
-               if (cf !== conf) ns += '.' + c.name;
+               if (sec.conf !== conf) ns += '.' + c.name;
                js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';\n';
              }
            });
@@ -1444,6 +1492,22 @@
      evt.initEvent('pixplusInitialize', true, true);
      document.dispatchEvent(evt);
 
+     pp.rpc_usable = true;
+     if (true || !conf.debug) {
+       /* イラストページで誤爆防止のためにタグ編集と評価機能を無効化。 */
+       for(var id in pp.rpc_ids) {
+         if ($(id)) {
+           pp.rpc_usable = false;
+           break;
+         }
+       }
+     }
+     if (pp.rpc_usable) {
+       pp.rpc_div = $c('div');
+       pp.rpc_div.style.display = 'none';
+       document.body.insertBefore(pp.rpc_div, document.body.firstChild);
+     }
+
      write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
                '#header .header_otehrs_ul li + li{margin-left:16px;}' +
                '*[float]{position:fixed;top:0px;}' +
@@ -1624,23 +1688,6 @@
    }
    function init_pixplus() {
      document.body.setAttribute('pixplus', '');
-     each(LS.l, function(c) { LS.init_section(c.name, c.data[0], c.data[1]); });
-     if (LS.s) {
-       var order = LS.get('bookmark', 'tag_order');
-       if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
-       var aliases = LS.get('bookmark', 'tag_aliases');
-       if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
-     }
-     each(['auto_manga', 'reverse'],
-          function(key) {
-            try {
-              if (!conf.popup[key + '_regexp']) throw 1;
-              var v = conf.popup[key], r = new RegExp(conf.popup[key + '_regexp']);
-              conf.popup[key + '_p'] = v & 2 ? !!window.location.href.match(r) : !!(v & 1);
-            } catch(ex) {
-              conf.popup[key + '_p'] = false;
-            }
-          });
 
      each($xa('//a[contains(@href, "jump.php")]'),
           function(anc) {
@@ -1650,22 +1697,6 @@
               anc.href = url;
             }
           });
-
-     pp.rpc_usable = true;
-     if (true || !conf.debug) {
-       /* イラストページで誤爆防止のためにタグ編集と評価機能を無効化。 */
-       for(var id in pp.rpc_ids) {
-         if ($(id)) {
-           pp.rpc_usable = false;
-           break;
-         }
-       }
-     }
-     if (pp.rpc_usable) {
-       pp.rpc_div = $c('div');
-       pp.rpc_div.style.display = 'none';
-       document.body.insertBefore(pp.rpc_div, document.body.firstChild);
-     }
 
      load_css(pp.url.css.bookmark_add);
 
@@ -1679,7 +1710,7 @@
          .wait(function() {
                  window.jQuery.noConflict();
                  if (conf.disable_effect) window.jQuery.fx.off = true;
-                 init_pixplus_real();
+                 LS.init(init_pixplus_real);
                })
          .script(pp.url.js.prototypejs)
          .wait()
@@ -2818,7 +2849,7 @@
      var hidden = this.viewer_comments_c.style.display == 'none', comment;
      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
      if (hidden && (comment = $x('form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
-     if (LS.s) LS.set('popup', 'show_comment_form', hidden ? 'true' : 'false');
+     if (LS.u) LS.set('popup', 'show_comment_form', hidden ? 'true' : 'false');
    };
    Popup.prototype.reload_viewer_comments = function() {
      if (this.viewer_comments_enabled) {

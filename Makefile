@@ -1,20 +1,22 @@
-RSVG_CONVERT ?= rsvg-convert
-ZIP          ?= zip
-ICON_SIZE    ?= 64 16
-OEX           = pixplus.oex
+RSVG_CONVERT    ?= rsvg-convert
+ZIP             ?= zip
+ICON_SIZE       ?= 64 16
+OEX              = pixplus.oex
 
-CONFIG_XML    = config.xml
-ICON_PREFIX   = icons/pixplus_
-ICON_SUFFIX   = .png
-ICON_FILES    = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
-SIGNATURE     = signature1.xml
-SRC_USERJS    = includes/pixplus.js
-SIGN_FILES    = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES    = $(SIGN_FILES) index.html
-VERSION       = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
+CONFIG_XML       = config.xml
+INDEX_CONFIG_JS  = index_config.js
+ICON_PREFIX      = icons/pixplus_
+ICON_SUFFIX      = .png
+ICON_FILES       = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
+ICON_SVG         = icons/pixplus.svg
+SIGNATURE        = signature1.xml
+SRC_USERJS       = includes/pixplus.js
+SIGN_FILES       = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
+DIST_FILES       = $(SIGN_FILES) common.js index.html index.js $(INDEX_CONFIG_JS) options.html options.css
+VERSION          = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
 
-WARN_KEYWORDS_W = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
-WARN_KEYWORDS_P = $(shell cat prototypejs_funcs.txt)
+WARN_KEYWORDS_W  = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
+WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
 
 all: $(OEX)
 dist: $(OEX)
@@ -24,12 +26,18 @@ $(CONFIG_XML): $(CONFIG_XML).in
 	@for size in $(ICON_SIZE);do \
            echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
-	sed -e '1,/@ICONS@/d' -e '/@PREFS@/,$$d' < $< >> $@
+	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
+	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
 	sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < includes/pixplus.js \
           | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@
-	sed -e '1,/@PREFS@/d' < $< >> $@
+	sed -e '1,/@CONFIG@/d' < $< >> $@
 
-$(ICON_FILES): icons/pixplus.svg
+$(INDEX_CONFIG_JS):
+	/bin/echo -ne 'var conf_schema = {\r\n' > $@
+	sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < includes/pixplus.js >> $@
+	/bin/echo -ne '};\r\n' >> $@
+
+$(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
 
 $(SIGNATURE): $(SIGN_FILES)
@@ -45,4 +53,4 @@ $(OEX): $(DIST_FILES)
 	$(ZIP) -r $@ $^
 
 clean:
-	rm -f $(CONFIG_XML) $(ICON_FILES) $(SIGNATURE) $(OEX)
+	rm -f $(CONFIG_XML) $(INDEX_CONFIG_JS) $(ICON_FILES) $(SIGNATURE) $(OEX)

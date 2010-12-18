@@ -1,0 +1,4 @@
+tr.section{color:gray;font-weight:bold;}
+tr.entry{font-size:smaller;}
+tr.entry.odd{background-color:#efefef;}
+tr.entry td:first-child{padding-left:1em;}
