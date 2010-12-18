@@ -5,7 +5,6 @@
 // @license     Public domain
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
-// @include     http://img*.pixiv.net/*
 // ==/UserScript==
 
 /** 0.3.0
@@ -133,11 +132,6 @@
  */
 
 (function(){
-   if (window.location.href.match(/^http:\/\/img\d+\.pixiv\.net\/img\/[^\/]*\/(\d+)/)) {
-     addillustlink(RegExp.$1);
-     return;
-   }
-
    /* Opera10.50以降なら、ページ上部のメニューから設定変更可能 */
    var conf_schema = {
      debug:                  [false, 'デバッグモード。'],
@@ -501,16 +495,6 @@
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
-   function addillustlink(id) {
-     var anc = $c('a', document.body);
-     anc.href = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + id;
-     anc.innerText = 'illust page';
-     //anc.style.backgroundColor = 'white';
-     anc.style.position = 'fixed';
-     anc.style.left = '0px';
-     anc.style.top = '0px';
-     anc.setAttribute('nopopup', '');
-   }
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
@@ -1389,15 +1373,6 @@
          if (img && img.src.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i)) {
            img.parentNode.href = RegExp.$1 + RegExp.$2;
          }
-         break;
-       case 'big':
-         //addillustlink(options.illust_id);
-         /*
-         var img = $x('//body/div/a/img');
-         img.parentNode.href = img.src;
-         img.parentNode.onclick = '';
-         window.location.replace(img.src);
-          */
          break;
        case 'manga':
          if (options.type == 'slide' && window.location.hash.match(/^#page(\d+)$/)) {
