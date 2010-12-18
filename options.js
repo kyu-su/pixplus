@@ -85,8 +85,9 @@ function init() {
    */
 
   function make_custom_section(label) {
-    make_section('Tag order');
-    var cell = table.insertRow(-1).insertCell(-1);
+    make_section(label);
+    var row = table.insertRow(-1), cell = row.insertCell(-1);
+    row.className = 'section-custom';
     cell.setAttribute('colspan', '4');
     return cell;
   }
@@ -97,5 +98,6 @@ function init() {
     cell.setAttribute('colspan', '4');
     cell.innerText = label;
     idx = 0;
+    return row;
   }
 }
