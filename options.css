@@ -1,4 +1,12 @@
+*{margin:0px;padding:0px;}
+table{border-spacing:0px;}
+
 tr.section{color:gray;font-weight:bold;}
 tr.entry{font-size:smaller;}
 tr.entry.odd{background-color:#efefef;}
-tr.entry td:first-child{padding-left:1em;}
+
+td{padding:1px 2px;}
+td:first-child{padding-left:2em;}
+tr.section td:first-child{padding-left:0px;}
+
+textarea{width:100%;}

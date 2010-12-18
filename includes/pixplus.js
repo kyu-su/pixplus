@@ -307,6 +307,7 @@
               }
             });
      },
+     /* __PARSER_FUNCTIONS_BEGIN__ */
      parse_bm_tag_order: function(str) {
        var ary = [], ary_ary = [];
        each(str.split('\n'),
@@ -334,6 +335,7 @@
        }
        return aliases;
      },
+     /* __PARSER_FUNCTIONS_END__ */
      init: function(func) {
        each(LS.l, function(sec) { LS.init_section(sec); });
        if (LS.u) {

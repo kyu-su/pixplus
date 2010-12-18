@@ -1,3 +1,7 @@
+conf_schema.bookmark = {
+  tag_order: [''],
+  tag_aliases: ['']
+};
 var conf = {
   conv: {
     'string':  [String, String],
@@ -19,6 +23,11 @@ var conf = {
        label:  'Popup',
        path:   ['conf', 'popup'],
        schema: conf_schema.popup,
+       keys:   []},
+      {name:   'bookmark',
+       label:  'Bookmark',
+       path:   ['conf', 'bookmark'],
+       schema: conf_schema.bookmark,
        keys:   []}],
   map: {},
   get_conv: function(s, n) {
