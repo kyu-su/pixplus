@@ -24,7 +24,10 @@ $(CONFIG_XML): $(CONFIG_XML).in
 	@for size in $(ICON_SIZE);do \
            echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
-	sed -e '1,/@ICONS@/d' < $< >> $@
+	sed -e '1,/@ICONS@/d' -e '/@PREFS@/,$$d' < $< >> $@
+	sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < includes/pixplus.js \
+          | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@
+	sed -e '1,/@PREFS@/d' < $< >> $@
 
 $(ICON_FILES): icons/pixplus.svg
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
