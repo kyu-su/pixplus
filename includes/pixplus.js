@@ -132,8 +132,8 @@
  */
 
 (function(){
-   /* Opera10.50以降なら、ページ上部のメニューから設定変更可能 */
    var conf_schema = {
+     /* __CONFIG_BEGIN__ */
      debug:                  [false, 'デバッグモード。'],
      scroll:                 [1,     'イラストページを開いた時にスクロールする。0:なし/1:キャプション/2:イラスト'],
      bookmark_hide:          [false, 'ブックマーク非公開をデフォルトにする。'],
@@ -174,6 +174,7 @@
        author_status_icon:   [true,  'プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する。'],
        show_comment_form:    [true,  'コメントの投稿フォームを表示する。']
      }
+     /* __CONFIG_END__ */
    };
    var conf = {
      popup: { },
