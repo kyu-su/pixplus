@@ -176,8 +176,8 @@
        "show_comment_form":    [true,  "コメントの投稿フォームを表示する。"]
      },
      "extension": {
-       "show_toolbar_icon": [true,  "ツールバーアイコンを表示する。"],
-       "show_config_ui":    [false, "ページ内に設定ボタンを表示する。"]
+       "show_toolbar_icon":    [true,  "ツールバーアイコンを表示する。"],
+       "show_config_ui":       [false, "ページ内に設定ボタンを表示する。"]
      }
      /* __CONFIG_END__ */
    };
