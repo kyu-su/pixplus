@@ -18,7 +18,7 @@
  * conf.expand_novel追加。
  * ランキングカレンダーに対応。conf.popup_ranking_log追加。
  * イベント詳細/参加者ページに対応。
- * Extension版にツールバーボタンと設定画面を追加。
+ * Extension版にツールバーボタンと設定画面を追加。conf.extension.*追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
