@@ -42,6 +42,7 @@ function init() {
           } else {
             input.value = sec.schema[key][0];
           }
+          conf.remove(sec.name, key, value);
         }, false);
       row.insertCell(-1).appendChild(def);
       row.insertCell(-1).innerText = sec.schema[key][1];

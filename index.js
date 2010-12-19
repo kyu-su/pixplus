@@ -4,7 +4,9 @@ opera.extension.onconnect = function(event){
     function(sec, key) {
       data[sec.name + '_' + key] = conf.get_conv(sec.name, key)[1](conf.get(sec.name, key));
     });
-  event.source.postMessage(JSON.stringify({'command': 'config', 'data': data}));
+  try {
+    event.source.postMessage(JSON.stringify({'command': 'config', 'data': data}));
+  } catch(ex) { }
 };
 opera.extension.onmessage = function(event) {
   var data = JSON.parse(event.data);
