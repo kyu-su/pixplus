@@ -18,6 +18,7 @@
  * conf.expand_novel追加。
  * ランキングカレンダーに対応。conf.popup_ranking_log追加。
  * イベント詳細/参加者ページに対応。
+ * Extension版にツールバーボタンと設定画面を追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -326,12 +327,15 @@
        return ary;
      },
      parse_bm_tag_aliases: function(str) {
-       var aliases = {};
+       var aliases = {keys: [], map: {}};
        var lines = str.split('\n');
        var len = Math.floor(lines.length / 2);
        for(var i = 0; i < len; ++i) {
          var tag = lines[i * 2], alias = lines[i * 2 + 1];
-         if (tag && alias) aliases[tag] = alias.split(/\s+/);
+         if (tag && alias) {
+           aliases.keys.push(tag);
+           aliases.map[tag] = alias.split(/\s+/);
+         }
        }
        return aliases;
      },
@@ -342,7 +346,7 @@
          var order = LS.get('bookmark', 'tag_order');
          if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
          var aliases = LS.get('bookmark', 'tag_aliases');
-         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases).map;
        }
        each(['auto_manga', 'reverse'],
             function(key) {
@@ -793,14 +797,13 @@
        }
        function get_tag_alias_str() {
          var tag_aliases = '';
-         each(
-           tag_alias_table.rows,
-           function(row) {
-             var inputs = $t('input', row);
-             var key = inputs[0].value;
-             var val = inputs[1].value;
-             if (key && val) tag_aliases += key + '\n' + val + '\n';
-           });
+         each(tag_alias_table.rows,
+              function(row) {
+                var inputs = $t('input', row);
+                var key = inputs[0].value;
+                var val = inputs[1].value;
+                if (key && val) tag_aliases += key + '\n' + val + '\n';
+              });
          return tag_aliases;
        }
        function save_conf() {
@@ -875,21 +878,17 @@
              });
            js += '  ];\n';
          }
-         var first = true;
-         for(var key in alias) {
-           if (first) {
-             js += '  opera.pixplus.conf.bm_tag_aliases = {\n';
-             first = false;
-           }
-           js += '   ' + stringify(key) + ':[\n';
-           each(
-             alias[key],
-             function(tag) {
-               js += '    ' + stringify(tag) + ',\n';
-             });
-           js += '   ],\n';
-         }
-         if (!first) js += '  };\n';
+         each(alias.keys,
+              function(key, idx) {
+                if (idx == 0) js += '  opera.pixplus.conf.bm_tag_aliases = {\n';
+                js += '   ' + stringify(key) + ':[\n';
+                each(alias.map[key],
+                     function(tag) {
+                       js += '    ' + stringify(tag) + ',\n';
+                     });
+                js += '   ],\n';
+              });
+         if (alias.keys.length) js += '  };\n';
          js += ' }\n})();\n';
          window.open('data:text/javascript;application/x-www-form-urlencoded,' + encodeURIComponent(js));
 

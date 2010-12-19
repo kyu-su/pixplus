@@ -4,10 +4,15 @@ table{border-spacing:0px;}
 
 tr.section{color:gray;font-weight:bold;}
 tr.entry, tr.section-custom{font-size:smaller;}
+tr.entry > td:first-child, tr.section-custom > td:first-child{padding-left:2em;}
 tr.entry.odd{background-color:#efefef;}
 
-td{padding:1px 2px;}
-td:first-child{padding-left:2em;}
-tr.section td:first-child{padding-left:0px;}
+.config-table td{padding:1px 2px;}
+.config-table textarea{display:block;width:100%;}
+.config-table > tbody > tr > td > button{margin:1px 2px;}
 
-textarea{width:100%;}
+.tagalias-table{width:100%;}
+.tagalias-table input{display:block;width:100%;}
+.tagalias-table .cell-remove{width:0;}
+.tagalias-table .cell-tag{width:30%;}
+.tagalias-table .cell-aliases{width:100%;}
