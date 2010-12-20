@@ -1882,7 +1882,8 @@
               }
             }
 
-            var item;
+            var item = new GalleryItem(url, thumb, cap, prev, self);
+
             var pbtn = thumb;
             if (!thumb && cap) {
               pbtn = $c('a');
@@ -1890,10 +1891,10 @@
               pbtn.innerText = '\u25a0';
               pbtn.style.marginRight = '4px';
               cap.parentNode.insertBefore(pbtn, cap);
+              item.added_popup_button = pbtn;
             }
             if (pbtn) $ev(pbtn).click(function() { Popup.run(item); });
 
-            item = new GalleryItem(url, thumb, cap, prev, self);
             if (!self.first) self.first = item;
             if (self.filter) self.filter(item);
 

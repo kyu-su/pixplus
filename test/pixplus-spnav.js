@@ -12,9 +12,10 @@
 
    function init() {
      var css = window.opera.pixplus.write_css;
-     css('.' + _p + '_item{padding:3px !important;}' +
+     // *:-o-prefocus{outline: -o-highlight-border;}
+     css('.' + _p + '_item{padding:4px !important;display:inline-block;}' +
          '.' + _p + '_item:focus,.' + _p + '_item:focus:hover{' +
-         '  padding:4px !important;border:none !important;' +
+         '  padding:4px !important;' +
          '  outline:0px solid;background-image:-o-skin("Active element inside");}'
      );
 
@@ -23,12 +24,10 @@
          this.items.forEach(bind(add_item, this));
          this.onadditem.connect(bind(add_item, this));
        });
-     /*
      window.opera.pixplus.Popup.onsetitem.connect(
        function(item) {
          if (item.thumb) prefocus(item.thumb);
        });
-      */
 
      function add_item(item) {
        if (!item.thumb) return;
@@ -38,14 +37,14 @@
 
        if (!this.spnav) {
          this.spnav = {
-           left: -1,
+           right: -1,
            rows: []
          };
        }
-       if (this.spnav.left < 0 || pos.left < this.spnav.left) {
+       if (this.spnav.right < 0 || pos.left <= this.spnav.right) {
          this.spnav.rows.push([]);
        }
-       this.spnav.left = pos.left;
+       this.spnav.right = pos.left + item.thumb.offsetWidth;
 
        var row = this.spnav.rows.length - 1;
        var cell = this.spnav.rows[row].length;
@@ -59,11 +58,7 @@
          //if (cell < this.spnav.rows[0].length) set_spnav(item, this.spnav.rows[0][cell], false);
        }
 
-       item.thumb.addEventListener(
-         'focus',
-         function() {
-           window.opera.pixplus.lazy_scroll(document.activeElement);
-         }, false);
+       item.thumb.addEventListener('focus', function() { window.opera.pixplus.lazy_scroll(item.thumb); }, false);
      }
    }
    function load() {
@@ -99,16 +94,15 @@
      }
    }
    function prefocus(elem) {
-     var ae, save;
-     if (!document.activeElement || document.activeElement.nodeType != 1 ||
-         !$x('ancestor::body', document.activeElement)) {
-       document.moveFocusRight();
+     if (!prefocus.css) {
+       prefocus.css = document.createElement('style');
+       prefocus.css.setAttribute('type', 'text/css');
      }
-     ae = document.activeElement;
-     save = ae.style.navRight;
-     ae.style.navRight = '#' + elem.id;
+     prefocus.css.innerText = '*{nav-right:#' + elem.id + ' !important;}';
+     document.body.appendChild(prefocus.css);
      document.moveFocusRight();
-     ae.style.navRight = save;
+     document.moveFocusRight();
+     prefocus.css.parentNode.removeChild(prefocus.css);
    }
 
    function $x(xpath, root) {
