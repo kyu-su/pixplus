@@ -1287,6 +1287,8 @@
            var re;
            if (cancelled) return;
            if ((re = text.match(/<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi))) {
+             // エラー回避
+             if (!window.update_input_tag) window.update_input_tag = function() { };
              wrap.innerHTML = re[0];
              mod_edit_bookmark(wrap, autotag, null, null, hide);
            } else {

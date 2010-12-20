@@ -75,8 +75,8 @@
           });
    }
    document.addEventListener('pixplusInitialize', init, false);
-   document.addEventListener('pixplusLoaded', load, false);
-   //window.addEventListener('Load', load, false);
+   //document.addEventListener('pixplusLoaded', load, false);
+   window.addEventListener('Load', load, false);
 
    var num = 0;
    function set_spnav(item1, item2, side) {
