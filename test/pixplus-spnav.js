@@ -19,16 +19,17 @@
          '  outline:0px solid;background-image:-o-skin("Active element inside");}'
      );
 
-     window.opera.pixplus.Gallery.oncreate.connect(
-       function() {
-         this.items.forEach(bind(add_item, this));
-         this.onadditem.connect(bind(add_item, this));
-       });
+     window.opera.pixplus.galleries.forEach(function(g) { add_gallery.apply(g); });
+     window.opera.pixplus.Gallery.oncreate.connect(add_gallery);
      window.opera.pixplus.Popup.onsetitem.connect(
        function(item) {
          if (item.thumb) prefocus(item.thumb);
        });
 
+     function add_gallery() {
+       this.items.forEach(bind(add_item, this));
+       this.onadditem.connect(bind(add_item, this));
+     }
      function add_item(item) {
        if (!item.thumb) return;
 
@@ -74,9 +75,14 @@
                         }) >= 0;
           });
    }
-   document.addEventListener('pixplusInitialize', init, false);
+   //document.addEventListener('pixplusInitialize', init, false);
    //document.addEventListener('pixplusLoaded', load, false);
-   window.addEventListener('Load', load, false);
+   window.addEventListener(
+     'Load',
+     function() {
+       init();
+       load();
+     }, false);
 
    var num = 0;
    function set_spnav(item1, item2, side) {

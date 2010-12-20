@@ -288,6 +288,7 @@
                    function(v) { return v ? 'true' : 'false'; }],
        'number':  [parseFloat, String]
      },
+     wait_funcs:  [],
      each: function(cb_key, cb_sec, cb_sec_after) {
        each(LS.l,
             function(sec) {
@@ -358,7 +359,15 @@
                 conf.popup[key + '_p'] = false;
               }
             });
-       func();
+       if (func) LS.wait_funcs.push(func);
+       each(LS.wait_funcs, function(func) { func(); });
+     },
+     wait: function(func) {
+       if (LS.u) {
+         func();
+       } else {
+         LS.wait_funcs.push(func);
+       }
      }
    };
    if (!opera.extension) LS.l.shift();
@@ -1724,20 +1733,25 @@
          .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
-                 if (conf.disable_effect) window.jQuery.fx.off = true;
-                 LS.init(init_pixplus_real);
+                 LS.init(function() {
+                           init_pixplus_real();
+                           if (conf.disable_effect) window.jQuery.fx.off = true;
+                         });
                })
          .script(pp.url.js.prototypejs)
          .wait()
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
          .wait(function() {
-                 if (conf.disable_effect) {
-                   window.Effect.ScopedQueue.prototype.add = function(effect) {
-                     effect.loop(effect.startOn);
-                     effect.loop(effect.finishOn);
-                   };
-                 }
+                 LS.wait(
+                   function() {
+                     if (conf.disable_effect) {
+                       window.Effect.ScopedQueue.prototype.add = function(effect) {
+                         effect.loop(effect.startOn);
+                         effect.loop(effect.finishOn);
+                       };
+                     }
+                   });
                })
          .script(pp.url.js.tag_edit)
         );
@@ -3668,6 +3682,7 @@
        var pos = getpos(elem, root);
        var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
        var top = Math.floor(root.scrollTop + bt), bot = Math.floor(root.scrollTop + bb);
+       window.jQuery(root).stop();
        if (pos.top < top) {
          window.jQuery(root).animate({scrollTop: pos.top - bt}, 200);
        } else if (pos.top + elem.offsetHeight > bot) {

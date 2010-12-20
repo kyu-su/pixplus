@@ -33,11 +33,14 @@
            move_icon(item);
          }
        });
-     window.opera.pixplus.Gallery.oncreate.connect(
-       function() {
-         this.items.forEach(check_item);
-         this.onadditem.connect(check_item);
-       });
+
+     window.opera.pixplus.galleries.forEach(function(g) { add_gallery.apply(g); });
+     window.opera.pixplus.Gallery.oncreate.connect(add_gallery);
+
+     function add_gallery() {
+       this.items.forEach(check_item);
+       this.onadditem.connect(check_item);
+     }
 
      function move_icon(item) {
        if (item.thumb) {
@@ -60,5 +63,6 @@
        }
      }
    }
-   document.addEventListener('pixplusInitialize', init, false);
+   //document.addEventListener('pixplusInitialize', init, false);
+   window.addEventListener('Load', init, false);
  })();
