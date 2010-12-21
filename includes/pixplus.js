@@ -359,7 +359,7 @@
                 conf.popup[key + '_p'] = false;
               }
             });
-       if (func) LS.wait_funcs.push(func);
+       if (func) func();
        each(LS.wait_funcs, function(func) { func(); });
      },
      wait: function(func) {
@@ -1733,10 +1733,7 @@
          .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
-                 LS.init(function() {
-                           init_pixplus_real();
-                           if (conf.disable_effect) window.jQuery.fx.off = true;
-                         });
+                 LS.init(init_pixplus_real);
                })
          .script(pp.url.js.prototypejs)
          .wait()
@@ -1746,6 +1743,7 @@
                  LS.wait(
                    function() {
                      if (conf.disable_effect) {
+                       window.jQuery.fx.off = true;
                        window.Effect.ScopedQueue.prototype.add = function(effect) {
                          effect.loop(effect.startOn);
                          effect.loop(effect.finishOn);
