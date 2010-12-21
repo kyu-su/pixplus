@@ -460,15 +460,6 @@
 
    // tag edit
    window.opera.defineMagicFunction(
-     'startTagEdit',
-     function(real, othis) {
-       if (Popup.instance && Popup.instance.tag_edit_enabled) {
-         Popup.instance.tag_editing = true;
-         Popup.instance.locate();
-       }
-       real.apply(othis, [].slice.apply(arguments, [2]));
-     });
-   window.opera.defineMagicFunction(
      'ef4',
      function(real, othis) {
        new window.Effect.BlindDown(
@@ -1567,7 +1558,7 @@
                'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
                'div.popup .post_cap{line-height:1.1em;position:relative;}' +
                'div.popup .post_cap .author_img{box-sizing:border-box;' +
-               '  float:left;max-height:3.3em;border:1px solid gray;margin:0px 4px 0px 1px;}' +
+               '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
                'div.popup .post_cap .author_img:hover{max-height:100%;}' +
                'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
@@ -1751,8 +1742,29 @@
                      }
                    });
                })
-         .script(pp.url.js.tag_edit)
-        );
+        )
+       .script(pp.url.js.tag_edit)
+       .wait(function() {
+               var _showTags = window.showTags;
+               window.showTags = function() {
+                 _showTags.apply(this, [].slice.apply(arguments));
+
+                 var _display = this.display;
+                 this.display = function() {
+                   if (Popup.instance && Popup.instance.tag_edit_enabled) {
+                     Popup.instance.tag_editing = true;
+                     Popup.instance.locate();
+                     //window.jQuery(Popup.instance.comment).slideUp(200);
+                     //window.jQuery(Popup.instance.viewer_comments).slideUp(200);
+                   }
+                   _display.apply(this, [].slice.apply(arguments));
+                   if (Popup.instance && Popup.instance.tag_edit_enabled) {
+                     var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
+                     window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
+                   }
+                 };
+               };
+             });
    }
 
    function GalleryItem(url, thumb, caption, prev, gallery) {
@@ -1954,10 +1966,10 @@
      this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
      this.viewer_comments_a     = $c('div',     this.viewer_comments_w);
      this.viewer_comments_a.id  = 'one_comment_area';
+     this.tag_edit              = $c('div',     this.comment_wrap);
+     this.tag_edit.id           = 'tag_edit';
      this.tags                  = $c('div',     this.caption,       'tags separator');
      this.tags.id               = 'tag_area';
-     this.tag_edit              = $c('div',     this.caption);
-     this.tag_edit.id           = 'tag_edit';
      this.rating                = $c('div',     this.caption,       'rating separator works_area');
      this.post_cap              = $c('div',     this.caption,       'post_cap');
      this.a_img                 = $c('img',     this.post_cap,      'author_img');
@@ -2743,9 +2755,18 @@
        tg.style.margin = '0px';
        tg.style.maxWidth = mw;
        tg.style.maxHeight = mh;
+
        this.caption.style.pixelWidth = this.header.offsetWidth;
-       var ch = this.img_div.offsetHeight * conf.popup.caption_height - this.tags.offsetHeight - this.author.offsetHeight;
-       this.comment_wrap.style.maxHeight = (ch < 48 ? 48 : ch) + 'px';
+
+       var post_cap_height = 0, cap_height;
+       each([this.rating, this.post_cap],
+            function(elem) { post_cap_height += elem.offsetHeight; });
+       if (this.tag_editing) {
+         cap_height = this.img_div.offsetHeight - post_cap_height;
+       } else {
+         cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
+       }
+       this.comment_wrap.style.maxHeight = (cap_height < 48 ? 48 : cap_height) + 'px';
        /*
        if (this.caption.offsetHeight * 2 > this.img_div.offsetHeight) {
          var o = this.root_div.offsetHeight - this.img_div.offsetHeight;
@@ -3877,7 +3898,11 @@
      ctx.prototype.script = function(url) {
        log('$js#script: ' + url);
        this.urls.push(url);
-       if (!this.block) this.add_load(url);
+       if (this.block) {
+         ++this.load_cnt;
+       } else {
+         this.add_load(url, true);
+       }
        return this;
      };
      ctx.prototype.wait = function(func) {
@@ -3891,11 +3916,11 @@
          return this;
        }
      };
-     ctx.prototype.add_load = function(url) {
+     ctx.prototype.add_load = function(url, raise) {
        if (!chk_ext_src('script', 'src', url)) {
          log('$js#load: ' + url);
          var js  = $c('script'), self = this;
-         ++this.load_cnt;
+         if (raise) ++this.load_cnt;
          js.type = 'text/javascript';
          js.addEventListener('load', function() { if (--self.load_cnt < 1) self.unblock(); }, false);
          js.src  = url;
@@ -3905,7 +3930,10 @@
      ctx.prototype.fire = function() {
        log('$js#fire');
        this.block = false;
-       each(this.urls, bind(this.add_load, this));
+       each(this.urls,
+            bind(function(url) {
+                   this.add_load(url);
+                 }, this));
      };
      ctx.prototype.unblock = function() {
        log('$js#unblock');
@@ -3950,7 +3978,10 @@
    }
 
    function log(msg) {
-     if (conf.debug) (window.console && window.console.log || opera.postError)(msg);
+     if (conf.debug) {
+       //opera.postError(msg);
+       window.console && window.console.log && window.console.log(msg);
+     }
    }
 
    function create_post_data(form) {
