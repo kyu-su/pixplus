@@ -458,27 +458,6 @@
        }
      }, false);
 
-   // tag edit
-   window.opera.defineMagicFunction(
-     'ef4',
-     function(real, othis) {
-       new window.Effect.BlindDown(
-         'tag_area', {
-	   delay:0.2,
-	   duration:0.2,
-           afterFinish: function() {
-             if (Popup.instance && Popup.instance.tag_editing) {
-               Popup.instance.tag_editing = false;
-               Popup.instance.locate();
-               Popup.instance.reload();
-             }
-             if (lc(document.activeElement.tagName || '') == 'input') {
-               document.activeElement.blur();
-             }
-           }
-	 });
-     });
-
    // rating
    window.opera.defineMagicFunction(
      'countup_rating', /* WARN */
@@ -516,7 +495,7 @@
    window.opera.defineMagicFunction(
      'rating_ef', /* WARN */
      function(real, othis) {
-       window.jQuery('#quality_rating').slideDown('fast', after_show);
+       window.jQuery('#quality_rating').slideDown(200, after_show);
        function after_show() {
          var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
          if (f) f.focus();
@@ -1758,11 +1737,35 @@
                      //window.jQuery(Popup.instance.viewer_comments).slideUp(200);
                    }
                    _display.apply(this, [].slice.apply(arguments));
-                   if (Popup.instance && Popup.instance.tag_edit_enabled) {
-                     var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
-                     window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
-                   }
                  };
+               };
+
+               var _ef2 = window.ef2;
+               window.ef2 = function() {
+                 _ef2.apply(this, [].slice.apply(arguments));
+                 //window.jQuery('#tag_edit').slideDown(200);
+                 if (Popup.instance && Popup.instance.tag_edit_enabled) {
+                   var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
+                   window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
+                 }
+               };
+
+               window.ef4 = function() {
+                 new window.Effect.BlindDown(
+                   'tag_area', {
+	             delay:0.2,
+	             duration:0.2,
+                     afterFinish: function() {
+                       if (Popup.instance && Popup.instance.tag_editing) {
+                         Popup.instance.tag_editing = false;
+                         Popup.instance.locate();
+                         Popup.instance.reload();
+                       }
+                       if (lc(document.activeElement.tagName || '') == 'input') {
+                         document.activeElement.blur();
+                       }
+                     }
+                   });
                };
              });
    }
@@ -2008,6 +2011,7 @@
      this.bm_loading = false;
      this.rating_enabled = false;
      this.viewer_comments_enabled = false;
+     this.expand_header = false;
      this.tag_editing = false;
      this.tag_edit_enabled = false;
      this.has_qrate = false;
@@ -2352,6 +2356,9 @@
      //this.update_page_counter(this.item);
 
      if (scroll) lazy_scroll(this.item.thumb || this.item.caption);
+
+     this.expand_header = false;
+     this.tag_editing = false;
 
      this.init_comments();
      this.manga.init();
@@ -2759,9 +2766,9 @@
        this.caption.style.pixelWidth = this.header.offsetWidth;
 
        var post_cap_height = 0, cap_height;
-       each([this.rating, this.post_cap],
+       each([this.tags, this.rating, this.post_cap],
             function(elem) { post_cap_height += elem.offsetHeight; });
-       if (this.tag_editing) {
+       if (this.tag_editing || this.expand_header) {
          cap_height = this.img_div.offsetHeight - post_cap_height;
        } else {
          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
@@ -2885,9 +2892,16 @@
        show();
      }else{
        this.comments_btn.removeAttribute('enable');
-       window.jQuery(this.viewer_comments).slideUp(200);
+       window.jQuery(this.viewer_comments).slideUp(
+         200,
+         function() {
+           self.expand_header = false;
+           self.locate();
+         });
      }
      function show() {
+       self.expand_header = true;
+       self.locate();
        self.comments_btn.setAttribute('enable', '');
        window.jQuery(self.viewer_comments).slideDown(200);
        window.jQuery(self.comment_wrap).animate({scrollTop: self.comment.offsetHeight}, 200);
