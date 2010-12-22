@@ -19,6 +19,7 @@
  * ランキングカレンダーに対応。conf.popup_ranking_log追加。
  * イベント詳細/参加者ページに対応。
  * Extension版にツールバーボタンと設定画面を追加。conf.extension.*追加。
+ * タグの並べ替えを設定していない時、ブックマーク編集の動作がおかしかった不具合を修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -459,39 +460,6 @@
      }, false);
 
    // rating
-   window.opera.defineMagicFunction(
-     'countup_rating', /* WARN */
-     function(real, othis, score) {
-       if (conf.rate_confirm && !confirm('\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9')) return;
-       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-       real.apply(othis, [].slice.apply(arguments, [2]));
-     });
-   window.opera.defineMagicFunction(
-     'send_quality_rating', /* WARN */
-     function(real, othis) {
-       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-
-       var _ajax = window.jQuery.ajax;
-       window.jQuery.ajax = function(obj) {
-         var success = obj.success;
-         obj.success = function() {
-           success.apply(othis, [].slice.apply(arguments));
-           if (Popup.instance && Popup.instance.has_qrate) {
-             if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-             each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                  function(item) {
-                    if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
-                      var value = $x('following-sibling::div', item);
-                      if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
-                    }
-                  });
-           }
-         };
-         return _ajax.apply(this, [obj]);
-       };
-       real.apply(othis, [].slice.apply(arguments, [2]));
-       window.jQuery.ajax = _ajax;
-     });
    window.opera.defineMagicFunction(
      'rating_ef', /* WARN */
      function(real, othis) {
@@ -1766,6 +1734,41 @@
                        }
                      }
                    });
+               };
+
+               var _countup_rating = window.countup_rating;
+               window.countup_rating = function(score) {
+                 var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
+                 if (conf.rate_confirm && !confirm(msg)) return;
+                 if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+                 _countup_rating.apply(this, [].slice.apply(arguments));
+               };
+
+               var _send_quality_rating = window.send_quality_rating;
+               window.send_quality_rating = function() {
+                 if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+
+                 var _ajax = window.jQuery.ajax;
+                 window.jQuery.ajax = function(obj) {
+                   var othis = this;
+                   var success = obj.success;
+                   obj.success = function() {
+                     success.apply(othis, [].slice.apply(arguments));
+                     if (Popup.instance && Popup.instance.has_qrate) {
+                       if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+                       each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
+                            function(item) {
+                              if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
+                                var value = $x('following-sibling::div', item);
+                                if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                              }
+                            });
+                     }
+                   };
+                   return _ajax.apply(this, [obj]);
+                 };
+                 _send_quality_rating.apply(this, [].slice.apply(arguments));
+                 window.jQuery.ajax = _ajax;
                };
              });
    }
@@ -3305,40 +3308,43 @@
                 }
                 anc.parentNode.removeChild(anc);
               });
-         each(
-           reorder_tags($xa('ul/li', tag_wrap_bm)),
-           function(list) {
-             var ul = $c('ul', tag_wrap_bm, 'tagCloud');
-             each(
-               list,
-               function(li) {
-                 li.parentNode.removeChild(li);
-                 ul.appendChild(li);
-               });
-           });
+         each(reorder_tags($xa('ul/li', tag_wrap_bm)),
+              function(list) {
+                var ul = $c('ul', tag_wrap_bm, 'tagCloud');
+                each(
+                  list,
+                  function(li) {
+                    li.parentNode.removeChild(li);
+                    ul.appendChild(li);
+                  });
+              });
          tag_wrap_bm.removeChild($t('ul', tag_wrap_bm)[0]);
        } else {
-         bookmarkTagSort.init();
+         window.bookmarkTagSort.sortedTag = {
+	   name: { asc: [], desc: [] },
+	   num:  { asc: [], desc: [] }
+	 };
+         window.bookmarkTagSort.tag = [];
+         window.bookmarkTagSort.init();
        }
 
        var first = true;
        var p = 'pixplus-bm-tag-' + Math.floor(Math.random() * 100);
-       each(
-         $xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', root),
-         function(ul, idx) {
-           var q = p + '-' + idx;
-           var tags = $xa('li/a', ul);
-           each(tags,
-                function(tag, idx) {
-                  tag.id = q + '-' + idx;
-                  tag.style.navLeft = '#' + q + '-' + (idx ? idx - 1 : tags.length - 1);
-                  tag.style.navRight = '#' + q + '-' + (tags[idx + 1] ? idx + 1 : 0);
-                });
-           if (first && tags.length) {
-             input_tag.style.navDown = '#' + tags[0].id;
-             first = false;
-           }
-         });
+       each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', root),
+            function(ul, idx) {
+              var q = p + '-' + idx;
+              var tags = $xa('li/a', ul);
+              each(tags,
+                   function(tag, idx) {
+                     tag.id = q + '-' + idx;
+                     tag.style.navLeft = '#' + q + '-' + (idx ? idx - 1 : tags.length - 1);
+                     tag.style.navRight = '#' + q + '-' + (tags[idx + 1] ? idx + 1 : 0);
+                   });
+              if (first && tags.length) {
+                input_tag.style.navDown = '#' + tags[0].id;
+                first = false;
+              }
+            });
 
        if (conf.extagedit) {
          var items = [];
