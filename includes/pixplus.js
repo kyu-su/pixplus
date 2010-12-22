@@ -458,55 +458,23 @@
          };
        }
      }, false);
-
-   // rating
-   window.opera.defineMagicFunction(
-     'rating_ef', /* WARN */
-     function(real, othis) {
-       window.jQuery('#quality_rating').slideDown(200, after_show);
-       function after_show() {
-         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
-         if (f) f.focus();
+   window.opera.addEventListener(
+     'AfterEvent.click',
+     function(e) {
+       if (e.event.shiftKey || e.event.ctrlKey) return;
+       var anc = $x('ancestor-or-self::a[1]', e.event.target);
+       if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
+           anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
+         if (Popup.instance || $t('img', anc).length ||
+             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
+           var opts = parseopts(anc.href);
+           if (opts.illust_id && opts.mode == 'medium') {
+             e.event.preventDefault();
+             Popup.run_url(anc.href);
+           }
+         }
        }
-     });
-   window.opera.defineMagicFunction(
-     'rating_ef2', /* WARN */
-     function(real, othis) {
-       if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-       return real.apply(othis, [].slice.apply(arguments, [2]));
-     });
-
-   // viewer comments
-   window.opera.defineMagicFunction(
-     'on_loaded_one_comment_view',
-     function(real, othis) {
-       real.apply(othis, [].slice.apply(arguments, [2]));
-       if (Popup.instance && Popup.instance.viewer_comments_enabled) {
-         each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', Popup.instance.viewer_comments_a),
-              function(btn) {
-                $ev(btn).click(
-                  function() {
-                    geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                           function() { alert('Error!'); }, true);
-                  });
-              });
-       }
-     });
-
-   // novel
-   window.opera.defineMagicFunction(
-     'parseNovel',
-     function(real, othis) {
-       var _onload = window.onLoad, ret;
-       window.onLoad = function() {
-         _onload.apply(this, [].slice.apply(arguments));
-         setTimeout(init_novel, 100);
-       };
-       ret = real.apply(othis, [].slice.apply(arguments, [2]));
-       if (window.illust_id_list.length <= 0) setTimeout(init_novel, 100);
-       window.onLoad = _onload;
-       return ret;
-     });
+     }, false);
 
    window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
@@ -1413,6 +1381,17 @@
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
        conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
+     } else if (window.location.pathname.match(/^\/novel\/show\.php/)) {
+       if (illust_html_list.length < illust_id_list.length) {
+         var _jump_to = window.jump_to;
+         window.jump_to = function() {
+           _jump_to.apply(this, [].slice.apply(arguments));
+           window.jump_to = _jump_to;
+           setTimeout(init_novel, 100);
+         };
+       } else {
+         setTimeout(init_novel, 100);
+       }
      }
    }
    function init_novel() {
@@ -1736,6 +1715,7 @@
                    });
                };
 
+               // rating
                var _countup_rating = window.countup_rating;
                window.countup_rating = function(score) {
                  var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
@@ -1743,7 +1723,6 @@
                  if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
                  _countup_rating.apply(this, [].slice.apply(arguments));
                };
-
                var _send_quality_rating = window.send_quality_rating;
                window.send_quality_rating = function() {
                  if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
@@ -1769,6 +1748,36 @@
                  };
                  _send_quality_rating.apply(this, [].slice.apply(arguments));
                  window.jQuery.ajax = _ajax;
+               };
+               var _rating_ef = window.rating_ef;
+               window.rating_ef = function() {
+                 window.jQuery('#quality_rating').slideDown(200, after_show);
+                 function after_show() {
+                   var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
+                   if (f) f.focus();
+                 }
+               };
+               var _rating_ef2 = window.rating_ef2;
+               window.rating_ef2 = function() {
+                 if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
+                 return _rating_ef2.apply(this, [].slice.apply(arguments));
+               };
+
+               // viewer comments
+               var _on_loaded_one_comment_view = window.on_loaded_one_comment_view;
+               window.on_loaded_one_comment_view = function() {
+                 _on_loaded_one_comment_view.apply(this, [].slice.apply(arguments));
+                 if (Popup.instance && Popup.instance.viewer_comments_enabled) {
+                   each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
+                            Popup.instance.viewer_comments_a),
+                        function(btn) {
+                          $ev(btn).click(
+                            function() {
+                              geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
+                                     function() { alert('Error!'); }, true);
+                            });
+                        });
+                 }
                };
              });
    }
@@ -3138,24 +3147,6 @@
    Popup.MangaLoader.prototype.cancel = function() {
      this.cancelled = true;
    };
-
-   window.opera.addEventListener(
-     'AfterEvent.click',
-     function(e) {
-       if (e.event.shiftKey || e.event.ctrlKey) return;
-       var anc = $x('ancestor-or-self::a[1]', e.event.target);
-       if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
-           anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
-         if (Popup.instance || $t('img', anc).length ||
-             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
-           var opts = parseopts(anc.href);
-           if (opts.illust_id && opts.mode == 'medium') {
-             e.event.preventDefault();
-             Popup.run_url(anc.href);
-           }
-         }
-       }
-     }, false);
 
    function mod_edit_bookmark(root, autotag, title, comment, on_close) {
      var form          = $x('.//form[@action="bookmark_add.php"]', root);
