@@ -1485,7 +1485,7 @@
                'div.popup .post_cap{line-height:1.1em;position:relative;}' +
                'div.popup .post_cap .author_img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
-               'div.popup .post_cap .author_img:hover{max-height:100%;}' +
+               'div.popup .post_cap .author_img:hover{max-height:100% !important;}' +
                'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
                'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
                'div.popup .post_cap .date_repost:before{content:"(\u518d ";}' +
@@ -2775,11 +2775,14 @@
        tg.style.maxWidth = mw;
        tg.style.maxHeight = mh;
 
+       var a_img_height = 0;
+       each([this.date_wrap, this.info, this.author],
+            function(elem) { a_img_height += elem.offsetHeight; });
+       this.a_img.style.maxHeight = a_img_height + 'px';
+
        this.caption.style.pixelWidth = this.header.offsetWidth;
 
-       var post_cap_height = 0, cap_height;
-       each([this.tags, this.rating, this.post_cap],
-            function(elem) { post_cap_height += elem.offsetHeight; });
+       var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
        if (this.tag_editing || this.expand_header) {
          cap_height = this.img_div.offsetHeight - post_cap_height;
        } else {
