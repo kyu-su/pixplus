@@ -3527,6 +3527,7 @@
    function Floater(wrap, cont) {
      this.wrap = wrap;
      this.cont = cont;
+     this.disable_float = false;
      if (!Floater.instances) Floater.instances = [];
      Floater.instances.push(this);
      if (Floater.loaded) this.init();
@@ -3553,7 +3554,7 @@
        this.cont.style.display = 'block';
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
-       this.update_height();
+       //this.update_height();
      }
      this.update_position();
      this.update_float();
@@ -3561,6 +3562,7 @@
    Floater.prototype.force_update = function() {
      this.unfloat();
      this.floating = undefined;
+     this.disable_float = false;
      this.update_position();
      this.update_float();
    };
@@ -3584,11 +3586,18 @@
      if (this.cont) {
        var de = document.documentElement;
        var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
+       if (mh < 60) {
+         this.disable_float = true;
+         this.unfloat();
+         this.cont.style.maxHeight = '';
+         return;
+       }
        if (!this.floating) mh -= getpos(this.wrap).top - de.scrollTop;
        this.cont.style.maxHeight = mh;
      }
    };
    Floater.prototype.update_float = function () {
+     if (this.disable_float) return;
      var de = document.documentElement;
      if (this.floating !== true && de.scrollTop > this.wrap_pos.top) {
        this.scroll_save();
