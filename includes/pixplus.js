@@ -3,6 +3,7 @@
 // @author      wowo
 // @version     0.3.0
 // @license     Public domain
+// @description pixivでイラストをページ遷移せずにポップアップ表示し、概ねキーボードのみでイラストの移動や評価などを行う。その他雑多な機能いろいろ。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // ==/UserScript==
@@ -256,11 +257,15 @@
        }
      }
    };
-   if (window.opera.pixplus) {
-     window.opera.postError('pixplus is already loaded');
+   if (window.pixplus || (window.opera && window.opera.pixplus)) {
+     //window.opera.postError('pixplus is already loaded');
      return;
    }
-   window.opera.pixplus = pp;
+   if (window.opera) {
+     window.opera.pixplus = pp;
+   } else {
+     window.pixplus = pp;
+   }
    function rpc_chk(f) {
      return (pp.rpc_state & f) == f;
    }
@@ -371,7 +376,7 @@
        }
      }
    };
-   if (!opera.extension) LS.l.shift();
+   if (!(window.opera && opera.extension)) LS.l.shift();
    each(LS.l,
         function(sec) {
           LS.map[sec.name] = sec;
@@ -386,7 +391,7 @@
         });
 
 
-   if (opera.extension) {
+   if (window.opera && opera.extension) {
      (function() {
         var _init = LS.init, init_func;
         opera.extension.onmessage = function(event){
@@ -434,49 +439,55 @@
 
    var options = parseopts(window.location.href);
 
-   if (window.location.pathname.match(/^\/stacc/)) {
-     /* スタックページで評価とタグ編集出来ないのをなんとかする */
+   if (window.opera) {
+     if (window.location.pathname.match(/^\/stacc/)) {
+       /* スタックページで評価とタグ編集出来ないのをなんとかする */
+       window.opera.addEventListener(
+         'BeforeScript',
+         function(e) {
+           if (e.element.src.indexOf('/tag_edit.js') > 0) {
+             e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
+           } else if (e.element.src.indexOf('/rating.js') > 0) {
+             e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+           }
+         }, false);
+     }
      window.opera.addEventListener(
-       'BeforeScript',
+       'AfterScript',
        function(e) {
-         if (e.element.src.indexOf('/tag_edit.js') > 0) {
-           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-         } else if (e.element.src.indexOf('/rating.js') > 0) {
-           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+         if (e.element.src.indexOf('illust_recommender.js') >= 0) {
+           var _load = window.IllustRecommender.prototype.load;
+           window.IllustRecommender.prototype.load = function() {
+             _load.apply(this, [].slice.apply(arguments));
+             pp.recommender.loaded = true;
+             each(pp.recommender.funcs, function(func) { func(); });
+           };
+         }
+       }, false);
+     window.opera.addEventListener(
+       'AfterEvent.click',
+       function(e) {
+         if (e.event.shiftKey || e.event.ctrlKey) return;
+         var anc = $x('ancestor-or-self::a[1]', e.event.target);
+         if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
+             anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
+           if (Popup.instance || $t('img', anc).length ||
+               !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
+             var opts = parseopts(anc.href);
+             if (opts.illust_id && opts.mode == 'medium') {
+               e.event.preventDefault();
+               Popup.run_url(anc.href);
+             }
+           }
          }
        }, false);
    }
-   window.opera.addEventListener(
-     'AfterScript',
-     function(e) {
-       if (e.element.src.indexOf('illust_recommender.js') >= 0) {
-         var _load = window.IllustRecommender.prototype.load;
-         window.IllustRecommender.prototype.load = function() {
-           _load.apply(this, [].slice.apply(arguments));
-           pp.recommender.loaded = true;
-           each(pp.recommender.funcs, function(func) { func(); });
-         };
-       }
-     }, false);
-   window.opera.addEventListener(
-     'AfterEvent.click',
-     function(e) {
-       if (e.event.shiftKey || e.event.ctrlKey) return;
-       var anc = $x('ancestor-or-self::a[1]', e.event.target);
-       if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
-           anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
-         if (Popup.instance || $t('img', anc).length ||
-             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
-           var opts = parseopts(anc.href);
-           if (opts.illust_id && opts.mode == 'medium') {
-             e.event.preventDefault();
-             Popup.run_url(anc.href);
-           }
-         }
-       }
-     }, false);
 
-   window.addEventListener('DOMContentLoaded', init_pixplus, false);
+   if (window.opera) {
+     window.addEventListener('DOMContentLoaded', init_pixplus, false);
+   } else {
+     setTimeout(init_pixplus, 10);
+   }
 
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
@@ -1537,7 +1548,7 @@
                'div.popup .viewer_comments .worksComment:last-child{border:none;}'
               );
 
-     if (!opera.extension || LS.get('extension', 'show_config_ui') == 'true') {
+     if (!(window.opera && opera.extension) || LS.get('extension', 'show_config_ui') == 'true') {
        init_config_ui();
      }
      init_galleries();
@@ -1723,7 +1734,7 @@
                  var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
                  if (conf.rate_confirm && !confirm(msg)) return;
                  if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-                 _countup_rating.apply(this, [].slice.apply(arguments));
+                 _countup_rating.apply(this, [].slice.apply(arguments)); /* WARN */
                };
                var _send_quality_rating = window.send_quality_rating;
                window.send_quality_rating = function() {
@@ -1748,7 +1759,7 @@
                    };
                    return _ajax.apply(this, [obj]);
                  };
-                 _send_quality_rating.apply(this, [].slice.apply(arguments));
+                 _send_quality_rating.apply(this, [].slice.apply(arguments)); /* WARN */
                  window.jQuery.ajax = _ajax;
                };
                var _rating_ef = window.rating_ef;
@@ -1762,7 +1773,7 @@
                var _rating_ef2 = window.rating_ef2;
                window.rating_ef2 = function() {
                  if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
-                 return _rating_ef2.apply(this, [].slice.apply(arguments));
+                 return _rating_ef2.apply(this, [].slice.apply(arguments)); /* WARN */
                };
 
                // viewer comments
@@ -4013,15 +4024,14 @@
 
    function create_post_data(form) {
      var data = new Object();
-     each(
-       $t('input', form),
-       function(input) {
-         switch(lc(input.type)) {
-         case 'reset': case 'submit': break;
-         case 'checkbox': case 'radio': if (!input.checked) break;
-         default: data[input.name] = input.value; break;
-         }
-       });
+     each($t('input', form),
+          function(input) {
+            switch(lc(input.type)) {
+            case 'reset': case 'submit': break;
+            case 'checkbox': case 'radio': if (!input.checked) break;
+            default: data[input.name] = input.value; break;
+            }
+          });
      var res = '';
      for(var name in data) {
        if (res) res += '&';

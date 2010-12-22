@@ -3,6 +3,7 @@ ECHO            ?= /bin/echo
 ZIP             ?= zip
 ICON_SIZE       ?= 64 16
 OEX              = pixplus.oex
+CRX              = pixplus.crx
 
 CONFIG_XML       = config.xml
 CONFIG_JS        = config.js
@@ -16,15 +17,19 @@ SRC_USERJS       = includes/pixplus.js
 SIGN_FILES       = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
 DIST_FILES       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css
 VERSION          = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
+DESCRIPTION      = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description\s*//')
+
+CRX_TMP_DIR      = .crx
+MANIFEST_JSON    = manifest.json
 
 WARN_KEYWORDS_W  = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
 
-all: $(OEX)
+all: $(OEX) $(CRX)
 dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
-	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' < $< > $@
+	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
 	@for size in $(ICON_SIZE); do \
            $(ECHO) "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
@@ -69,5 +74,22 @@ $(OEX): $(DIST_FILES)
          done
 	$(ZIP) -r $@ $^
 
+$(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
+	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
+
+$(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
+	rm -rf $(CRX_TMP_DIR)
+	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)
+	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
+	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
+	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
+	@test -f $(CRX:.crx=.pem) && \
+           chromium-browser --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
+           chromium-browser --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
+	mv $(CRX_TMP_DIR)/$(CRX) ./
+	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./ || :
+
 clean:
-	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX)
+	rm -rf $(CRX_TMP_DIR)
+	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
+              $(MANIFEST_JSON) $(CRX)
