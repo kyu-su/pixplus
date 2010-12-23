@@ -134,6 +134,17 @@
  * ユーザーIDは`-'を含むかも知れない。\w+とかやると失敗する。
  */
 
+/* __GREASEMONKEY_BEGIN__
+(function(func) {
+   if (typeof unsafeWindow == "undefined" && !navigator.userAgent.match(/Chrome/)) return func;
+   return function() {
+     var s = window.document.createElement('script');
+     s.setAttribute('type', 'text/javascript');
+     s.textContent = '(' + func.toString() + ')(window, window)';
+     window.document.body.appendChild(s);
+   };
+ })
+ __GREASEMONKEY_END__ */
 (function(window, safeWindow) {
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
@@ -494,7 +505,7 @@
        }
        function show() {
          create();
-         div.style.display = '';
+         div.style.display = 'block';
          fire_event();
        }
        function hide() {
@@ -1089,7 +1100,7 @@
            r_switch.parentNode.removeChild(r_switch);
            if (show) {
              $('wrapper').style.width = '1160px';
-             $('recom_wrap').style.display = '';
+             $('recom_wrap').style.display = 'block';
              switch_wrap.appendChild(r_switch);
            } else {
              $('wrapper').style.width = '970px';
@@ -1407,7 +1418,7 @@
                 var newcont = cont.cloneNode(false);
                 cont.removeChild(page);
 
-                page.style.display = '';
+                page.style.display = 'block';
                 if (page.className.split(/\s+/).indexOf('parsed') < 0) {
 		  page.innerHTML = window.parse_page(page.innerHTML);
 		  page.className += ' parsed';
@@ -2243,7 +2254,7 @@
      this.viewer_comments_c.innerHTML = '';
      this.viewer_comments_a.innerHTML = '';
      if (pp.rpc_usable) {
-       this.comments_btn.style.display = '';
+       this.comments_btn.style.display = 'inline';
        this.comments_btn.removeAttribute('enable');
        if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
      } else {
@@ -2252,7 +2263,7 @@
    };
    Popup.prototype.set_status = function(msg) {
      this.status.textContent = msg;
-     this.status.style.display = '';
+     this.status.style.display = 'inline';
      this.err_msg.style.display = 'none';
      this.locate();
    };
@@ -2260,7 +2271,7 @@
      this.set_status('Error!');
      if (msg) {
        this.err_msg.textContent = msg;
-       this.err_msg.style.display = '';
+       this.err_msg.style.display = 'block';
      }
    };
    Popup.prototype.complete = function() {
@@ -2328,7 +2339,7 @@
        }
        text += item.page_item;
        this.page_counter.textContent = '[' + text + ']';
-       this.page_counter.style.display = '';
+       this.page_counter.style.display = 'inline';
      } else {
        this.page_counter.style.display = 'none';
      }
@@ -2395,7 +2406,7 @@
 
      var img_size = false, _title = 'Error!';
      this.date_wrap.style.display = 'none';
-     this.info.style.display = '';
+     this.info.style.display = 'inline';
      this.info_tools.style.display = 'none';
      /* ツールは「&nbsp;」区切り
       * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
@@ -2409,11 +2420,11 @@
          // 再投稿表示。「日」が抜けてる。pixivのバグ？
          if (loader.text.match(/(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/)) {
            this.date_repost.textContent = (RegExp.$1 == _date ? '' : RegExp.$1 + '\u65e5 ') + RegExp.$2;
-           this.date_repost.style.display = '';
+           this.date_repost.style.display = 'inline';
          } else {
            this.date_repost.style.display = 'none';
          }
-         this.date_wrap.style.display = '';
+         this.date_wrap.style.display = 'inline';
        }
        if (tmp.length > 1 && tmp[1].match(/(\d+)\u00d7(\d+)|\u6f2b\u753b (\d+)P/)) {
          if (RegExp.$3) {
@@ -2432,7 +2443,7 @@
              html += '<span>' + tool + '</span>';
            });
          this.info_tools.innerHTML = html;
-         this.info_tools.style.display = '';
+         this.info_tools.style.display = 'inline';
        }
      }
      this.root_div.setAttribute('manga', this.manga.usable ? 'true' : 'false');
@@ -2461,7 +2472,7 @@
        this.a_bookmark.href      = '/bookmark.php?id=' + RegExp.$2;
        if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"[^>]+title=\"\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\"/i)) {
          this.a_stacc.href       = RegExp.$1;
-         this.a_stacc.style.display = '';
+         this.a_stacc.style.display = 'inline';
        }
        if (conf.popup.author_status_icon) {
          if (loader.text.match(/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i)) {
@@ -2474,13 +2485,13 @@
        }
        if (a_status_class) {
          this.a_status.className = 'author_status' + a_status_class;
-         this.a_status.style.display = '';
+         this.a_status.style.display = 'inline';
        } else {
          this.a_status.style.display = 'none';
        }
-       this.a_img.style.display  = '';
-       this.author.style.display = '';
-       this.post_cap.style.display = '';
+       this.a_img.style.display  = 'block';
+       this.author.style.display = 'block';
+       this.post_cap.style.display = 'block';
      } else {
        this.a_img.style.display  = 'none';
        this.author.style.display = 'none';
@@ -2497,7 +2508,7 @@
        } else {
          this.res_btn.setAttribute('enable', '');
        }
-       this.res_btn.style.display = '';
+       this.res_btn.style.display = 'inline';
      }
 
      this.bm_btn.style.display = 'none';
@@ -2508,12 +2519,12 @@
          this.bm_btn.removeAttribute('enable');
        }
        this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
-       this.bm_btn.style.display = '';
+       this.bm_btn.style.display = 'inline';
      }
      this.comment.style.display = 'none';
      if (loader.text.match(/<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i) &&
          (this.comment.innerHTML = edit_comment(RegExp.$1))) {
-       this.comment.style.display = '';
+       this.comment.style.display = 'block';
      }
 
      this.tag_edit_enabled = false;
@@ -2535,9 +2546,10 @@
            this.tag_edit_enabled = true;
          }
          this.tags.innerHTML = html;
-         this.tags.style.display = '';
+         this.tags.style.display = 'block';
        }
      }
+
      this.has_qrate = false;
      this.rating_enabled = false;
      this.rating.style.display = 'none';
@@ -2578,20 +2590,23 @@
        }
        if (!this.has_qrate) html += '</div>';
        this.rating.innerHTML = html;
-       this.rating.style.display = '';
+       this.rating.style.display = 'block';
        this.rating_enabled = true;
 
-       var anc = $x('div[@id="rating"]/h4/a', this.rating);
-       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
-         anc.onclick = '';
-         anc.addEventListener(
-           'click',
-           function(ev) {
-             var qr = $x('div[@id="quality_rating"]', self.rating);
-             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
-             ev.preventDefault();
-           }, false);
-       }
+       setTimeout(
+         function() {
+           var anc = $x('div[@id="rating"]/h4/a', self.rating);
+           if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
+             anc.onclick = '';
+             anc.addEventListener(
+               'click',
+               function(ev) {
+                 var qr = $x('div[@id="quality_rating"]', self.rating);
+                 window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
+                 ev.preventDefault();
+               }, false);
+           }
+         }, 0);
      }
 
      this.viewer_comments_enabled = false;
@@ -2733,7 +2748,7 @@
      this.image_scaled.parentNode.replaceChild(img_scaled, this.image_scaled);
      this.image = img;
      this.image_scaled = img_scaled;
-     this.img_div.style.display = '';
+     this.img_div.style.display = 'block';
      this.locate();
      //this.root_div.style.visibility = 'visible';
      this.update_info();
@@ -2759,7 +2774,7 @@
      var scale = Math.floor(this.image_scaled.clientWidth / this.image_size_orig[0] * 100) / 100;
      this.info_size.textContent = this.image_size_orig.join('x');
      this.info_scale.textContent = scale + 'x';
-     this.post_cap.style.display = '';
+     this.post_cap.style.display = 'block';
    };
 
    Popup.prototype.locate = function() {
@@ -2961,7 +2976,7 @@
              // エラー回避
              if (!window.update_input_tag) window.update_input_tag = function() { };
              self.bm_edit.innerHTML = RegExp.$1;
-             self.bm_edit.style.display    = '';
+             self.bm_edit.style.display    = 'block';
              self.caption.style.visibility = 'hidden';
              self.img_div.style.display    = 'none';
              mod_edit_bookmark(
@@ -2986,7 +3001,7 @@
    Popup.prototype.close_edit_bookmark = function() {
      this.bm_edit.style.display    = 'none';
      this.caption.style.visibility = conf.popup.oldcap ? 'visible' : '';
-     this.img_div.style.display    = '';
+     this.img_div.style.display    = 'block';
      this.locate();
    };
    Popup.prototype.is_bookmark_editing = function() {
@@ -3563,7 +3578,7 @@
      this.wrap.style.boxSizing = 'border-box';
      this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
-       this.cont.style.display = '';
+       this.cont.style.display = 'block';
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
        //this.update_height();
