@@ -2117,7 +2117,7 @@
        if (p.is_bookmark_editing()) {
          if (c == 27 && m()) q(e, p.close_edit_bookmark);
        } else {
-         if (c == e.which) {
+         if (c == (e.charCode || e.which)) {
            switch(c) {
            case 65: case  97: if (m())  q(e, move, true, true);           return; // a
            //case 83: case 115: if (m())  q(e, move, false, true);          return; // s
