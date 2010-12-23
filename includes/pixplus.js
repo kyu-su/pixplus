@@ -2129,20 +2129,20 @@
        } else {
          if (c == (ev.charCode || ev.which)) {
            switch(c) {
-           case 65: case  97: if (m())  q(e, move, true, true);           return; // a
-           //case 83: case 115: if (m())  q(e, move, false, true);          return; // s
-           case 69: case 101: if (m())  q(e, p.open_author_profile,   s); return; // e
-           case 82: case 114: if (m(1)) q(e, a_illust,                s); return; // r
-           case 84: case 116: if (m())  q(e, p.open_author_bookmark,  s); return; // t
-           case 89: case 121: if (m())  q(e, p.open_author_staccfeed, s); return; // y
-           case 66: case  98: if (m(1)) q(e, bookmark, s);                return; // b
-           case 68: case 100: if (m())  q(e, p.toggle_qrate);             return; // d
-           case 70: case 102: if (m(1)) q(e, p.open, !s);                 return; // f
-           case 71: case 103: if (m())  q(e, p.reload);                   return; // g
-           case 67: case  99: if (m(1)) q(e, caption, s);                 return; // c
-           case 86: case 118: if (m(1)) q(e, manga, s);                   return; // v
-           case 45:           if (m())  q(e, zoom, -1);                   return; // -
-           case 43:           if (m())  q(e, zoom,  1);                   return; // +
+           case 65: case  97: if (m())  q(ev, move, true, true);           return; // a
+           //case 83: case 115: if (m())  q(ev, move, false, true);          return; // s
+           case 69: case 101: if (m())  q(ev, p.open_author_profile,   s); return; // e
+           case 82: case 114: if (m(1)) q(ev, a_illust,                s); return; // r
+           case 84: case 116: if (m())  q(ev, p.open_author_bookmark,  s); return; // t
+           case 89: case 121: if (m())  q(ev, p.open_author_staccfeed, s); return; // y
+           case 66: case  98: if (m(1)) q(ev, bookmark, s);                return; // b
+           case 68: case 100: if (m())  q(ev, p.toggle_qrate);             return; // d
+           case 70: case 102: if (m(1)) q(ev, p.open, !s);                 return; // f
+           case 71: case 103: if (m())  q(ev, p.reload);                   return; // g
+           case 67: case  99: if (m(1)) q(ev, caption, s);                 return; // c
+           case 86: case 118: if (m(1)) q(ev, manga, s);                   return; // v
+           case 45:           if (m())  q(ev, zoom, -1);                   return; // -
+           case 43:           if (m())  q(ev, zoom,  1);                   return; // +
            }
            if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
              var score = c == 126 ? 1 : 43 - c;
