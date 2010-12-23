@@ -4040,11 +4040,4 @@
    /* __GREASEMONKEY_BEGIN__
     init_pixplus();
     __GREASEMONKEY_END__ */
- })(
-  /* __OPERA_BEGIN__ */
-  window, window
-  /* __OPERA_END__ */
-  /* __GREASEMONKEY_BEGIN__
-   unsafeWindow, window
-   __GREASEMONKEY_END__ */
-);
+ })(this.unsafeWindow || window, window);
