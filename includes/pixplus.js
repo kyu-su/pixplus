@@ -2093,12 +2093,12 @@
      Popup.instance.locate();
    };
    Popup.set_event_handler = function() {
-     window.addEventListener('keypress', Popup._keypress, false);
-     window.addEventListener('resize',   Popup._locate,   false);
+     window.addEventListener(window.getMatchedCSSRules ? 'keydown' : 'keypress', Popup._keypress, false);
+     window.addEventListener('resize', Popup._locate, false);
    };
    Popup.unset_event_handler = function() {
-     window.removeEventListener('keypress', Popup._keypress, false);
-     window.removeEventListener('resize',   Popup._locate,   false);
+     window.removeEventListener(window.getMatchedCSSRules ? 'keydown' : 'keypress', Popup._keypress, false);
+     window.removeEventListener('resize', Popup._locate, false);
    };
    Popup.oncreate = new Signal(
      function(item, manga_page) {
