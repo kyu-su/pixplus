@@ -134,17 +134,16 @@
  * ユーザーIDは`-'を含むかも知れない。\w+とかやると失敗する。
  */
 
-/* __GREASEMONKEY_BEGIN__
-(function(func) {
-   if (typeof unsafeWindow == "undefined" && !navigator.userAgent.match(/Chrome/)) return func;
-   return function() {
+(function(func, unsafeWindow) {
+   if (window.opera || unsafeWindow) {
+     func(unsafeWindow || window, window);
+   } else {
      var s = window.document.createElement('script');
      s.setAttribute('type', 'text/javascript');
      s.textContent = '(' + func.toString() + ')(window, window)';
      window.document.body.appendChild(s);
-   };
+   }
  })
- __GREASEMONKEY_END__ */
 (function(window, safeWindow) {
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
@@ -210,6 +209,17 @@
       */
      bm_tag_aliases: {/*'hoge': ['fuga', 'piyo'], 'foo':  ['bar', 'baz']*/}
    };
+
+   var browser = {
+     opera:  false,
+     gecko:  false,
+     webkit: false
+   };
+   browser[window.opera
+           ? 'opera'
+           : (window.getMatchedCSSRules
+              ? 'webkit'
+              : 'gecko')] = true;
 
    var XMLNS_SVG = "http://www.w3.org/2000/svg";
    var XMLNS_XLINK = "http://www.w3.org/1999/xlink";
@@ -2087,17 +2097,19 @@
      Popup.oncreate.emit(this, item, manga_page);
    }
    Popup._keypress = function(ev) {
-     Popup.instance.keypress(ev);
+     alert([ev.keyCode, ev.charCode, ev.which]);
+     ev.preventDefault();
+     //Popup.instance.keypress(ev);
    };
    Popup._locate = function() {
      Popup.instance.locate();
    };
    Popup.set_event_handler = function() {
-     window.addEventListener(window.getMatchedCSSRules ? 'keydown' : 'keypress', Popup._keypress, false);
+     window.addEventListener('keypress', Popup._keypress, false);
      window.addEventListener('resize', Popup._locate, false);
    };
    Popup.unset_event_handler = function() {
-     window.removeEventListener(window.getMatchedCSSRules ? 'keydown' : 'keypress', Popup._keypress, false);
+     window.removeEventListener('keypress', Popup._keypress, false);
      window.removeEventListener('resize', Popup._locate, false);
    };
    Popup.oncreate = new Signal(
@@ -2111,11 +2123,11 @@
    Popup.onsetitem = new Signal();
    Popup.onload = new Signal();
    Popup.onkeypress = new Signal(
-     function(e) {
+     function(ev) {
        var p = this;
-       var c = e.keyCode || e.charCode, s = e.shiftKey, m_e = p.manga.enabled;
+       var c = ev.keyCode || ev.charCode, s = ev.shiftKey, m_e = p.manga.enabled;
        if (p.is_bookmark_editing()) {
-         if (c == 27 && m()) q(e, p.close_edit_bookmark);
+         if (c == 27 && m()) q(ev, p.close_edit_bookmark);
        } else {
          if (c == (e.charCode || e.which)) {
            switch(c) {
@@ -2140,27 +2152,28 @@
              return;
            }
          }
-         if (e.qrate) {
+         if (ev.qrate) {
            var n;
            switch(c) {
-           case 38: if (m()) q(e, sel_qr, e.qrate.previousSibling); return; // up
-           case 40: if (m()) q(e, sel_qr, e.qrate.nextSibling);     return; // down
-           case 27: if (m()) q(e, window.rating_ef2);               return; // esc
+           case 38: if (m()) q(ev, sel_qr, e.qrate.previousSibling); return; // up
+           case 40: if (m()) q(ev, sel_qr, e.qrate.nextSibling);     return; // down
+           case 27: if (m()) q(ev, window.rating_ef2);               return; // esc
            }
            function sel_qr(node) {
              if (Popup.is_qrate_button(node)) node.focus();
            }
          } else {
            switch(c) {
-           case  8: case 37: if (m()) q(e, p.prev, c == 8);                     return; // bs/left
-           case 32: case 39: if (m()) q(e, p.next, c == 32);                    return; // space/right
-           case 38: if (m()) q(e, p.scroll_caption, -conf.popup.scroll_height); return; // up
-           case 40: if (m()) q(e, p.scroll_caption,  conf.popup.scroll_height); return; // down
-           case 35: if (m()) q(e, p.last);                                      return; // end
-           case 36: if (m()) q(e, p.first);                                     return; // home
-           case 27: if (m()) q(e, m_e ? p.toggle_manga_mode : p.close);         return; // escape
+           case  8: case 37: if (m()) q(ev, p.prev, c == 8);                     return; // bs/left
+           case 32: case 39: if (m()) q(ev, p.next, c == 32);                    return; // space/right
+           case 38: if (m()) q(ev, p.scroll_caption, -conf.popup.scroll_height); return; // up
+           case 40: if (m()) q(ev, p.scroll_caption,  conf.popup.scroll_height); return; // down
+           case 35: if (m()) q(ev, p.last);                                      return; // end
+           case 36: if (m()) q(ev, p.first);                                     return; // home
+           case 27: if (m()) q(ev, m_e ? p.toggle_manga_mode : p.close);         return; // escape
            }
          }
+          */
        }
        function move(prev, close) {
          prev ? p.prev(close) : p.next(close);
@@ -2188,9 +2201,9 @@
          return f.apply(p, [].slice.apply(arguments, [2]));
        }
        function m(shift, ctrl, alt) {
-         if (!shift && e.shiftKey) return false;
-         if (!ctrl  && e.ctrlKey)  return false;
-         if (!alt   && e.altKey)   return false;
+         if (!shift && ev.shiftKey) return false;
+         if (!ctrl  && ev.ctrlKey)  return false;
+         if (!alt   && ev.altKey)   return false;
          return true;
        }
      });
@@ -4049,11 +4062,9 @@
      }
      return res;
    }
-
-   /* __OPERA_BEGIN__ */
-   window.addEventListener('DOMContentLoaded', init_pixplus, false);
-   /* __OPERA_END__ */
-   /* __GREASEMONKEY_BEGIN__
-    init_pixplus();
-    __GREASEMONKEY_END__ */
- })(this.unsafeWindow || window, window);
+   if (window.opera) {
+     window.addEventListener('DOMContentLoaded', init_pixplus, false);
+   } else {
+     init_pixplus();
+   }
+ }, this.unsafeWindow);
