@@ -2709,7 +2709,8 @@
      this.manga.preload();
    };
    Popup.prototype.set_manga_button_text = function() {
-     this.manga_btn.textContent = '[M:' + (this.manga.page + 1) + '/' + this.manga.page_count + ']';
+     var page = this.manga.page + 1; // fix for greasemonkey
+     this.manga_btn.textContent = '[M:' + page + '/' + this.manga.page_count + ']';
    };
    Popup.create_zoom_image = function(url, width, height) {
      var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
