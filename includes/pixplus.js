@@ -2097,9 +2097,7 @@
      Popup.oncreate.emit(this, item, manga_page);
    }
    Popup._keypress = function(ev) {
-     alert([ev.keyCode, ev.charCode, ev.which]);
-     ev.preventDefault();
-     //Popup.instance.keypress(ev);
+     Popup.instance.keypress(ev);
    };
    Popup._locate = function() {
      Popup.instance.locate();
@@ -2129,7 +2127,7 @@
        if (p.is_bookmark_editing()) {
          if (c == 27 && m()) q(ev, p.close_edit_bookmark);
        } else {
-         if (c == (e.charCode || e.which)) {
+         if (c == (ev.charCode || ev.which)) {
            switch(c) {
            case 65: case  97: if (m())  q(e, move, true, true);           return; // a
            //case 83: case 115: if (m())  q(e, move, false, true);          return; // s
@@ -2173,7 +2171,6 @@
            case 27: if (m()) q(ev, m_e ? p.toggle_manga_mode : p.close);         return; // escape
            }
          }
-          */
        }
        function move(prev, close) {
          prev ? p.prev(close) : p.next(close);
