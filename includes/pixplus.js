@@ -83,7 +83,7 @@
  * opera.pixplus.confオブジェクトを書き換える事で個人設定を別スクリプトに分離出来る。
  * スクリプトのロード順は問わないのでファイル名は任意。以下サンプル。
 
- document.addEventListener(
+ window.document.addEventListener(
    'pixplusInitialize',
    function() {
      opera.pixplus.conf.bookmark_hide = true;
@@ -134,7 +134,7 @@
  * ユーザーIDは`-'を含むかも知れない。\w+とかやると失敗する。
  */
 
-(function(){
+(function(window, safeWindow) {
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "デバッグモード。"],
@@ -439,57 +439,79 @@
 
    var options = parseopts(window.location.href);
 
-   if (window.location.pathname.match(/^\/stacc/)) {
-     /* スタックページで評価とタグ編集出来ないのをなんとかする */
+   if (window.opera) {
+     if (window.location.pathname.match(/^\/stacc/)) {
+       /* スタックページで評価とタグ編集出来ないのをなんとかする */
+       window.opera.addEventListener(
+         'BeforeScript',
+         function(e) {
+           if (e.element.src.indexOf('/tag_edit.js') > 0) {
+             e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
+           } else if (e.element.src.indexOf('/rating.js') > 0) {
+             e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+           }
+         }, false);
+     }
      window.opera.addEventListener(
-       'BeforeScript',
+       'AfterScript',
        function(e) {
-         if (e.element.src.indexOf('/tag_edit.js') > 0) {
-           e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-         } else if (e.element.src.indexOf('/rating.js') > 0) {
-           e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
+         if (e.element.src.indexOf('illust_recommender.js') >= 0) {
+           var _load = window.IllustRecommender.prototype.load;
+           window.IllustRecommender.prototype.load = function() {
+             _load.apply(this, [].slice.apply(arguments));
+             pp.recommender.loaded = true;
+             each(pp.recommender.funcs, function(func) { func(); });
+           };
+         }
+       }, false);
+     window.opera.addEventListener(
+       'AfterEvent.click',
+       function(e) {
+         if (e.event.shiftKey || e.event.ctrlKey) return;
+         var anc = $x('ancestor-or-self::a[1]', e.event.target);
+         if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
+             anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
+           if (Popup.instance || $t('img', anc).length ||
+               !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
+             var opts = parseopts(anc.href);
+             if (opts.illust_id && opts.mode == 'medium') {
+               e.event.preventDefault();
+               Popup.run_url(anc.href);
+             }
+           }
          }
        }, false);
    }
-   window.opera.addEventListener(
-     'AfterScript',
-     function(e) {
-       if (e.element.src.indexOf('illust_recommender.js') >= 0) {
-         var _load = window.IllustRecommender.prototype.load;
-         window.IllustRecommender.prototype.load = function() {
-           _load.apply(this, [].slice.apply(arguments));
-           pp.recommender.loaded = true;
-           each(pp.recommender.funcs, function(func) { func(); });
-         };
-       }
-     }, false);
-   window.opera.addEventListener(
-     'AfterEvent.click',
-     function(e) {
-       if (e.event.shiftKey || e.event.ctrlKey) return;
-       var anc = $x('ancestor-or-self::a[1]', e.event.target);
-       if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
-           anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
-         if (Popup.instance || $t('img', anc).length ||
-             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
-           var opts = parseopts(anc.href);
-           if (opts.illust_id && opts.mode == 'medium') {
-             e.event.preventDefault();
-             Popup.run_url(anc.href);
-           }
-         }
-       }
-     }, false);
-
-   window.addEventListener('DOMContentLoaded', init_pixplus, false);
 
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
      if (menu || sp_manga_tb) {
+       function fire_event() {
+         var evt = window.document.createEvent('Event');
+         evt.initEvent('pixplusConfigToggled', true, true);
+         window.document.dispatchEvent(evt);
+       }
+       function show() {
+         create();
+         div.style.display = '';
+         fire_event();
+       }
+       function hide() {
+         div.style.display = 'none';
+         fire_event();
+       }
+       function toggle() {
+         if (!div || div.style.display == 'none') {
+           show();
+         } else {
+           hide();
+         }
+       }
+
        var anc = $c('a');
        anc.href = 'javascript:void(0)';
-       anc.innerText = 'pixplus';
+       anc.textContent = 'pixplus';
        anc.addEventListener('click', toggle, false);
        if (menu) {
          var li  = $c('li');
@@ -510,33 +532,12 @@
                  '.pixplus_conf td.aliases, .pixplus_conf td.aliases input{width:100%;}');
 
        var div, tag_order_textarea, tag_alias_table;
-       function fire_event() {
-         var evt = document.createEvent('Event');
-         evt.initEvent('pixplusConfigToggled', true, true);
-         document.dispatchEvent(evt);
-       }
-       function show() {
-         create();
-         div.style.display = '';
-         fire_event();
-       }
-       function hide() {
-         div.style.display = 'none';
-         fire_event();
-       }
-       function toggle() {
-         if (!div || div.style.display == 'none') {
-           show();
-         } else {
-           hide();
-         }
-       }
        function create() {
          if (div) return;
          div = $c('div', null, 'pixplus_conf');
          var gen_js = $c('a', div);
          gen_js.href = 'javascript:void(0)';
-         gen_js.innerText = 'Generate Setting JS';
+         gen_js.textContent = 'Generate Setting JS';
          gen_js.addEventListener('click', gen_set_js, false);
 
          var table = $c('table', div, 'conf');
@@ -546,22 +547,20 @@
              var ckey = row.insertCell(-1);
              if (sec.schema[key].type == 'boolean') {
                ckey.setAttribute('colspan', '2');
-               var check = $c('input', ckey);
-               check.setAttribute('type', 'checkbox');
-               check.id = '__pixplus_' + sec.schema.name + '_' + key;
-               sec.schema[key].input = check;
                var label = $c('label', ckey);
-               label.setAttribute('for', check.id);
-               label.innerText = key;
+               var check = $c('input', label);
+               check.setAttribute('type', 'checkbox');
+               label.appendChild(window.document.createTextNode(key));
+               sec.schema[key].input = check;
              } else {
-               ckey.innerText = key;
+               ckey.textContent = key;
                var cval = row.insertCell(-1);
                var input = $c('input', cval);
                sec.schema[key].input = input;
              }
              var cdef = row.insertCell(-1);
              var bdef = $c('button', cdef);
-             bdef.innerText = 'Default';
+             bdef.textContent = 'Default';
              bdef.addEventListener(
                'click',
                function() {
@@ -574,12 +573,12 @@
                  if (conf.debug) sec.schema[key].input.style.color = 'gray';
                }, false);
              var cdes = row.insertCell(-1);
-             cdes.innerText = sec.schema[key][1];
+             cdes.textContent = sec.schema[key][1];
            },
            function(sec) {
              var th = $c('th', table.insertRow(-1));
              th.setAttribute('colspan', '4');
-             th.innerText = sec.label;
+             th.textContent = sec.label;
            });
 
          if (LS.u) {
@@ -590,7 +589,7 @@
          }
 
          var tocont = create_section('Tag order', div);
-         tocont.innerText = '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff' +
+         tocont.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff' +
            '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
            '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
          tag_order_textarea = $c('textarea', tocont);
@@ -602,11 +601,11 @@
          }
 
          var tacont = create_section('Tag alias', div);
-         tacont.innerText = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
+         tacont.textContent = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
            '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
          tag_alias_table = $c('table', tacont);
          var btaadd = $c('button', tacont);
-         btaadd.innerText = 'Add';
+         btaadd.textContent = 'Add';
          btaadd.addEventListener('click', function() { create_alias_row('', -1); }, false);
          if (LS.u) {
            var tabtns = $c('div', tacont);
@@ -644,7 +643,7 @@
          function create_section(label, parent) {
            var anc = $c('a', parent, 'section');
            anc.href = 'javascript:void(0)';
-           anc.innerText = label;
+           anc.textContent = label;
            var cont = $c('div', parent, 'content');
            cont.style.display = 'none';
            anc.addEventListener(
@@ -658,7 +657,7 @@
          }
          function create_button(label, parent, callback) {
            var button = $c('button', parent);
-           button.innerText = label;
+           button.textContent = label;
            button.addEventListener('click', callback, false);
            return button;
          }
@@ -699,7 +698,7 @@
          var caliases = row.insertCell(-1);
          caliases.className = 'aliases';
          var brem = $c('button', crem);
-         brem.innerText = 'Remove';
+         brem.textContent = 'Remove';
          brem.addEventListener('click', function() { tag_alias_table.deleteRow(row.rowIndex); }, false);
          var itag = $c('input', ctag);
          itag.value = key;
@@ -730,7 +729,7 @@
          try {
            check_conf();
          } catch(ex) {
-           alert(ex);
+           safeWindow.alert(ex);
            return;
          }
          LS.each(
@@ -771,7 +770,7 @@
                    '// @include http://www.pixiv.net/*',
                    '// ==/UserScript==',
                    '(function() {',
-                   ' document.addEventListener("pixplusInitialize",init,false);',
+                   ' window.document.addEventListener("pixplusInitialize",init,false);',
                    ' function init() {', ''].join('\n');
          LS.each(
            function(sec, key) {
@@ -909,9 +908,6 @@
        // ブックマーク管理
        // http://www.pixiv.net/bookmark.php
        // http://www.pixiv.net/bookmark.php?type=illust_all
-       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-                    xpath_cap: 'ul/li/label'},
-                   unpack_captions_label, conf.debug ? debug_filter : null);
        function debug_filter(item) {
          var c = $x('input[@name="book_id[]"]', item.caption.parentNode);
          if (c) {
@@ -921,6 +917,9 @@
            item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
          }
        }
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+                    xpath_cap: 'ul/li/label'},
+                   unpack_captions_label, conf.debug ? debug_filter : null);
      } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
        // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
        // 下部の「****の他の作品」
@@ -1011,7 +1010,7 @@
               }
             };
             ir.prototype.error = function(msg) {
-              alert(msg);
+              safeWindow.alert(msg);
               _error.apply(this, arguments);
             };
           }
@@ -1024,17 +1023,17 @@
               preloader.addEventListener(
                 'load',
                 function() {
-                  document.body.removeChild(preloader);
+                  window.document.body.removeChild(preloader);
                   img.src = src;
                 }, false);
               preloader.src = src;
               preloader.style.display = 'none';
-              document.body.appendChild(preloader);
+              window.document.body.appendChild(preloader);
               this.preloaders.set(image, preloader);
             };
           }
         })();
-       var de = document.documentElement;
+       var de = window.document.documentElement;
        var gallery;
        pp.recommender.attach(
          function() {
@@ -1210,17 +1209,17 @@
              wrap.innerHTML = re[0];
              mod_edit_bookmark(wrap, autotag, null, null, hide);
            } else {
-             wrap.innerText = 'Error!';
+             wrap.textContent = 'Error!';
            }
          }, function() {
            if (cancelled) return;
-           wrap.innerText = 'Error!';
+           wrap.textContent = 'Error!';
          }, true);
      }
      function show() {
        if (bm_form_div) return;
        bm_form_div = $c('div');
-       bm_form_div.innerText = 'Loading...';
+       bm_form_div.textContent = 'Loading...';
        bm_form_div.style.marginTop = '1em';
        loader = new Loader(bm_add_anc.href, bm_form_div);
        display.parentNode.insertBefore(bm_form_div, display);
@@ -1291,9 +1290,9 @@
              } else {
                _bookmarkToggle(container_id, type);
              }
-             var evt = document.createEvent('Event');
+             var evt = window.document.createEvent('Event');
              evt.initEvent('pixplusBMTagToggled', true, true);
-             document.dispatchEvent(evt);
+             window.document.dispatchEvent(evt);
            };
 
            var head = $xa('ul/li[contains(concat(" ", @class, " "), " level0 ")]', bm_tag_list).reverse()[0];
@@ -1335,7 +1334,7 @@
              anc.setAttribute('nopopup', '');
            });
 
-         var elem, pos, de = document.documentElement;
+         var elem, pos, de = window.document.documentElement;
          if (conf.scroll == 1) {
            elem = $x('//div[contains(concat(" ", @class, " "), " works_area ")]');
            pos = 0;
@@ -1374,8 +1373,8 @@
                  $ev(img).click(function() { Popup.run(item, page); });
                }
              });
-           document.documentElement.style.minHeight = '100%';
-           document.body.style.minHeight = '100%';
+           window.document.documentElement.style.minHeight = '100%';
+           window.document.body.style.minHeight = '100%';
          }
          break;
        }
@@ -1432,9 +1431,9 @@
      }
    }
    function init_pixplus_real() {
-     var evt = document.createEvent('Event');
+     var evt = window.document.createEvent('Event');
      evt.initEvent('pixplusInitialize', true, true);
-     document.dispatchEvent(evt);
+     window.document.dispatchEvent(evt);
 
      pp.rpc_usable = true;
      if (true || !conf.debug) {
@@ -1449,7 +1448,7 @@
      if (pp.rpc_usable) {
        pp.rpc_div = $c('div');
        pp.rpc_div.style.display = 'none';
-       document.body.insertBefore(pp.rpc_div, document.body.firstChild);
+       window.document.body.insertBefore(pp.rpc_div, window.document.body.firstChild);
      }
 
      write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
@@ -1564,7 +1563,7 @@
      if (conf.stacc_link) {
        var stacc_anc;
        if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
-         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
+         safeWindow.alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
        } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
          if (conf.stacc_link == 'all') {
            stacc_anc.href = '/stacc/p/all';
@@ -1576,13 +1575,13 @@
 
      if (conf.default_manga_type) {
        if (['scroll', 'slide'].indexOf(conf.default_manga_type) < 0) {
-         alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
+         safeWindow.alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
        } else {
          // http://www.pixiv.net/member_illust.php?mode=manga&illust_id=00000000&type=scroll
          each(
            $xa('//a[contains(@href, "member_illust.php?mode=manga")]'),
            function(anc) {
-             if (!anc.innerText.match(/^(?:\u30b9\u30af\u30ed\u30fc\u30eb|\u30b9\u30e9\u30a4\u30c9)\u5f0f/)) {
+             if (!anc.textContent.match(/^(?:\u30b9\u30af\u30ed\u30fc\u30eb|\u30b9\u30e9\u30a4\u30c9)\u5f0f/)) {
                var o = parseopts(anc.href);
                if (!o.type) anc.href += '&type=' + conf.default_manga_type;
              }
@@ -1612,13 +1611,13 @@
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
                 } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
-                  alert(RegExp.$1);
+                  safeWindow.alert(RegExp.$1);
                 } else {
-                  alert('Error!');
+                  safeWindow.alert('Error!');
                 }
               };
               xhr.onerror = function() {
-                alert('Error!');
+                safeWindow.alert('Error!');
               };
               each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
               xhr.send(create_post_data(form));
@@ -1630,12 +1629,12 @@
         })();
      }
 
-     evt = document.createEvent('Event');
+     evt = window.document.createEvent('Event');
      evt.initEvent('pixplusLoaded', true, true);
-     document.dispatchEvent(evt);
+     window.document.dispatchEvent(evt);
    }
    function init_pixplus() {
-     document.body.setAttribute('pixplus', '');
+     window.document.body.setAttribute('pixplus', '');
 
      each($xa('//a[contains(@href, "jump.php")]'),
           function(anc) {
@@ -1715,8 +1714,8 @@
                          Popup.instance.locate();
                          Popup.instance.reload();
                        }
-                       if (lc(document.activeElement.tagName || '') == 'input') {
-                         document.activeElement.blur();
+                       if (lc(window.document.activeElement.tagName || '') == 'input') {
+                         window.document.activeElement.blur();
                        }
                      }
                    });
@@ -1760,13 +1759,13 @@
                window.rating_ef = function() {
                  window.jQuery('#quality_rating').slideDown(200, after_show);
                  function after_show() {
-                   var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : document.body);
+                   var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
                    if (f) f.focus();
                  }
                };
                var _rating_ef2 = window.rating_ef2;
                window.rating_ef2 = function() {
-                 if (Popup.is_qrate_button(document.activeElement)) document.activeElement.blur();
+                 if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
                  return _rating_ef2.apply(this, [].slice.apply(arguments)); /* WARN */
                };
 
@@ -1781,7 +1780,7 @@
                           $ev(btn).click(
                             function() {
                               geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                                     function() { alert('Error!'); }, true);
+                                     function() { safeWindow.alert('Error!'); }, true);
                             });
                         });
                  }
@@ -1861,7 +1860,7 @@
      if (this.args.xpath_col) {
        var self = this;
        this.detect_new_collection();
-       document.body.addEventListener(
+       window.document.body.addEventListener(
          'DOMNodeInserted',
          function() {
            setTimeout(function() { self.detect_new_collection(); }, 100);
@@ -1915,7 +1914,7 @@
               if (cap.nodeType == 3) {
                 var new_caption = $c('a');
                 new_caption.href = url;
-                new_caption.innerText = trim(cap.nodeValue);
+                new_caption.textContent = trim(cap.nodeValue);
                 new_caption.setAttribute('nopopup', '');
                 cap.parentNode.replaceChild(new_caption, cap);
                 cap = new_caption;
@@ -1934,7 +1933,7 @@
             if (!thumb && cap) {
               pbtn = $c('a');
               pbtn.href = url;
-              pbtn.innerText = '\u25a0';
+              pbtn.textContent = '\u25a0';
               pbtn.style.marginRight = '4px';
               cap.parentNode.insertBefore(pbtn, cap);
               item.added_popup_button = pbtn;
@@ -2006,11 +2005,11 @@
      this.author                = $c('span',    this.post_cap,      'author');
      this.a_profile             = $c('a',       this.author);
      this.a_illust              = $c('a',       this.author);
-     this.a_illust.innerText    = '\u4f5c\u54c1';
+     this.a_illust.textContent    = '\u4f5c\u54c1';
      this.a_bookmark            = $c('a',       this.author);
-     this.a_bookmark.innerText  = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
+     this.a_bookmark.textContent  = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
      this.a_stacc               = $c('a',       this.author);
-     this.a_stacc.innerText     = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
+     this.a_stacc.textContent     = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
      this.bm_edit               = $c('div',     this.root_div,      'bm_edit');
      this.img_div               = $c('div',     this.root_div,      'img_div');
      this.img_anc               = $c('a',       this.img_div);
@@ -2092,8 +2091,8 @@
    };
    Popup.oncreate = new Signal(
      function(item, manga_page) {
-       //document.body.insertBefore(this.root_div, document.body.firstChild);
-       document.body.appendChild(this.root_div);
+       //window.document.body.insertBefore(this.root_div, window.document.body.firstChild);
+       window.document.body.appendChild(this.root_div);
        this.locate();
        this.set(item, false, false, false, typeof manga_page == 'number' ? manga_page : -1);
        Popup.set_event_handler();
@@ -2103,7 +2102,7 @@
    Popup.onkeypress = new Signal(
      function(e) {
        var p = this;
-       var c = e.keyCode, s = e.shiftKey, m_e = p.manga.enabled;
+       var c = e.keyCode || e.charCode, s = e.shiftKey, m_e = p.manga.enabled;
        if (p.is_bookmark_editing()) {
          if (c == 27 && m()) q(e, p.close_edit_bookmark);
        } else {
@@ -2214,7 +2213,7 @@
    Popup.create_button = function(text, parent, cls, cb_click) {
      var btn = $c('a', parent, cls);
      btn.href = 'javascript:void(0)';
-     btn.innerText = text;
+     btn.textContent = text;
      if (cb_click) $ev(btn).click(cb_click);
      return btn;
    };
@@ -2252,7 +2251,7 @@
      }
    };
    Popup.prototype.set_status = function(msg) {
-     this.status.innerText = msg;
+     this.status.textContent = msg;
      this.status.style.display = '';
      this.err_msg.style.display = 'none';
      this.locate();
@@ -2260,7 +2259,7 @@
    Popup.prototype.error = function(msg) {
      this.set_status('Error!');
      if (msg) {
-       this.err_msg.innerText = msg;
+       this.err_msg.textContent = msg;
        this.err_msg.style.display = '';
      }
    };
@@ -2328,7 +2327,7 @@
          text += item.page_col + '+';
        }
        text += item.page_item;
-       this.page_counter.innerText = '[' + text + ']';
+       this.page_counter.textContent = '[' + text + ']';
        this.page_counter.style.display = '';
      } else {
        this.page_counter.style.display = 'none';
@@ -2343,7 +2342,7 @@
      if (this.loader) this.loader.cancel();
      if (!this.item && item.caption) {
        //this.update_page_counter(item);
-       this.title.innerText = trim(item.caption.innerText);
+       this.title.textContent = trim(item.caption.textContent);
        this.title.href = item.medium;
      }
      var self = this;
@@ -2406,10 +2405,10 @@
        _title = trim(RegExp.$2);
        if (tmp[0].match(/((\d{4}\u5e74\d{2}\u6708\d{2})\u65e5 \d{2}:\d{2})/)) {
          var _date = RegExp.$2;
-         this.date.innerText = RegExp.$1;
+         this.date.textContent = RegExp.$1;
          // 再投稿表示。「日」が抜けてる。pixivのバグ？
          if (loader.text.match(/(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/)) {
-           this.date_repost.innerText = (RegExp.$1 == _date ? '' : RegExp.$1 + '\u65e5 ') + RegExp.$2;
+           this.date_repost.textContent = (RegExp.$1 == _date ? '' : RegExp.$1 + '\u65e5 ') + RegExp.$2;
            this.date_repost.style.display = '';
          } else {
            this.date_repost.style.display = 'none';
@@ -2439,7 +2438,7 @@
      this.root_div.setAttribute('manga', this.manga.usable ? 'true' : 'false');
 
      if (this.item.caption) {
-       this.title.innerText = trim(this.item.caption.innerText);
+       this.title.textContent = trim(this.item.caption.textContent);
      } else {
        this.title.innerHTML = _title;
      }
@@ -2633,13 +2632,13 @@
                     submit.removeAttribute('disabled');
                   };
                   xhr.onerror = function() {
-                    alert('Error!');
+                    safeWindow.alert('Error!');
                   };
                   xhr.send(create_post_data(form));
                   comment.setAttribute('disabled', '');
                   submit.setAttribute('disabled', '');
                 } else {
-                  alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+                  safeWindow.alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
                 }
               }, false);
 
@@ -2695,15 +2694,15 @@
      this.manga.preload();
    };
    Popup.prototype.set_manga_button_text = function() {
-     this.manga_btn.innerText = '[M:' + (this.manga.page + 1) + '/' + this.manga.page_count + ']';
+     this.manga_btn.textContent = '[M:' + (this.manga.page + 1) + '/' + this.manga.page_count + ']';
    };
    Popup.create_zoom_image = function(url, width, height) {
-     var svg_img = document.createElementNS(XMLNS_SVG, 'image');
+     var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
      svg_img.setAttribute('width', '100%');
      svg_img.setAttribute('height', '100%');
      svg_img.style.imageRendering = 'optimizeSpeed';
      svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', url);
-     var svg = document.createElementNS(XMLNS_SVG, 'svg');
+     var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
      svg.setAttribute('width', width);
      svg.setAttribute('height', height);
      svg.appendChild(svg_img);
@@ -2758,13 +2757,13 @@
    };
    Popup.prototype.update_info = function() {
      var scale = Math.floor(this.image_scaled.clientWidth / this.image_size_orig[0] * 100) / 100;
-     this.info_size.innerText = this.image_size_orig.join('x');
-     this.info_scale.innerText = scale + 'x';
+     this.info_size.textContent = this.image_size_orig.join('x');
+     this.info_scale.textContent = scale + 'x';
      this.post_cap.style.display = '';
    };
 
    Popup.prototype.locate = function() {
-     var de = document.documentElement;
+     var de = window.document.documentElement;
      var tg = this.is_bookmark_editing() ? this.bm_edit : this.image_scaled;
      var mw = de.clientWidth  + tg.offsetWidth  - this.root_div.offsetWidth  - 32;
      var mh = de.clientHeight + tg.offsetHeight - this.root_div.offsetHeight - 32;
@@ -2775,12 +2774,12 @@
        this.root_div.style.minWidth = '';
      }
      if (this.is_bookmark_editing()) {
-       //bm_edit.style.maxWidth  = mw;
-       //bm_edit.style.maxHeight = mh;
+       //bm_edit.style.maxWidth  = mw + 'px';
+       //bm_edit.style.maxHeight = mh + 'px';
      } else {
        tg.style.margin = '0px';
-       tg.style.maxWidth = mw;
-       tg.style.maxHeight = mh;
+       tg.style.maxWidth = mw + 'px';
+       tg.style.maxHeight = mh + 'px';
 
        /*
        var a_img_height = 0;
@@ -2789,7 +2788,7 @@
        this.a_img.style.maxHeight = a_img_height + 'px';
         */
 
-       this.caption.style.pixelWidth = this.header.offsetWidth;
+       this.caption.style.width = this.header.offsetWidth + 'px';
 
        var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
        if (this.tag_editing || this.expand_header) {
@@ -2813,14 +2812,15 @@
          } else {
            width = Math.floor(conf.popup.overlay_control);
          }
-         this.olc_prev.style.pixelWidth  = width;
-         this.olc_prev.style.pixelHeight = this.img_div.offsetHeight;
-         this.olc_next.style.pixelWidth  = width;
-         this.olc_next.style.pixelHeight = this.img_div.offsetHeight;
+         this.olc_prev.style.width  = width + 'px';
+         this.olc_prev.style.height = this.img_div.offsetHeight + 'px';
+         this.olc_next.style.width  = width + 'px';
+         this.olc_next.style.height = this.img_div.offsetHeight + 'px';
        }
      }
-     this.root_div.style.pixelLeft = (de.clientWidth  - this.root_div.offsetWidth)  / 2;
-     this.root_div.style.pixelTop  = (de.clientHeight - this.root_div.offsetHeight) / 2;
+     //safeWindow.alert([de.clientWidth, this.root_div.offsetWidth]);
+     this.root_div.style.left = ((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
+     this.root_div.style.top  = ((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
    };
 
    Popup.prototype.update_olc = function(page) {
@@ -2837,7 +2837,7 @@
      if (Popup.onclose.emit(this)) return;
      if (this.loader) this.loader.cancel();
      if (this.conn_g_add_item) this.conn_g_add_item.disconnect();
-     document.body.removeChild(this.root_div);
+     window.document.body.removeChild(this.root_div);
      if (pp.rpc_usable) {
        pp.rpc_div.innerHTML = '';
        pp.rpc_state = 0;
@@ -2877,7 +2877,7 @@
      return elem && lc(elem.tagName || '') == 'input' && elem.id.match(/^qr_kw\d+$/) ? true : false;
    };
    Popup.prototype.keypress = function(e) {
-     var ae = document.activeElement;
+     var ae = window.document.activeElement;
      if (ae && lc(ae.tagName || '') == 'input') {
        if (Popup.is_qrate_button(ae)) {
          e.qrate = ae;
@@ -3460,7 +3460,7 @@
      function create_anc(text, click_func, parent) {
        var anc = $c('a');
        anc.href = 'javascript:void(0)';
-       anc.innerText = text;
+       anc.textContent = text;
        anc.style.fontSize = 'x-small';
        anc.addEventListener('click', click_func, false);
        if (parent) parent.appendChild(anc);
@@ -3469,7 +3469,7 @@
      function get_caption() {
        var i_title   = title || $x('//div[contains(concat(" ", @class, " "), " works_data ")]/h3');
        var i_comment = comment || $x('//div[contains(concat(" ", @class, " "), " works_tag ")]/preceding-sibling::p');
-       return (i_title ? i_title.innerText : '') + (i_comment ? i_comment.innerText : '');
+       return (i_title ? i_title.textContent : '') + (i_comment ? i_comment.textContent : '');
      }
    }
 
@@ -3549,8 +3549,8 @@
      each(Floater.instances, function(inst) { inst.init(); });
      window.addEventListener('scroll', Floater.update_float, false);
      window.addEventListener('resize', Floater.force_update, false);
-     document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
-     document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
+     window.document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
+     window.document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
      Floater.loaded = true;
    };
    Floater.update_float = function() {
@@ -3561,7 +3561,7 @@
    };
    Floater.prototype.init = function() {
      this.wrap.style.boxSizing = 'border-box';
-     this.wrap.style.pixelWidth = this.wrap.offsetWidth;
+     this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
        this.cont.style.display = '';
        this.cont.style.overflowX = 'hidden';
@@ -3596,7 +3596,7 @@
    };
    Floater.prototype.update_height = function () {
      if (this.cont) {
-       var de = document.documentElement;
+       var de = window.document.documentElement;
        var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
        if (mh < 60) {
          this.disable_float = true;
@@ -3605,12 +3605,12 @@
          return;
        }
        if (!this.floating) mh -= getpos(this.wrap).top - de.scrollTop;
-       this.cont.style.maxHeight = mh;
+       this.cont.style.maxHeight = mh + 'px';
      }
    };
    Floater.prototype.update_float = function () {
      if (this.disable_float) return;
-     var de = document.documentElement;
+     var de = window.document.documentElement;
      if (this.floating !== true && de.scrollTop > this.wrap_pos.top) {
        this.scroll_save();
        this.wrap.setAttribute('float', '');
@@ -3679,37 +3679,37 @@
        with_pager_func.funcs.push(func);
      }
      function connect_event(name) {
-       document.addEventListener(
+       window.document.addEventListener(
          name,
          function() {
            each(with_pager_func.funcs, function(func) { func(); });
            with_pager_func.funcs = null;
-           document.removeEventListener(name, arguments.callee, false);
+           window.document.removeEventListener(name, arguments.callee, false);
          }, false);
      }
    }
 
    // 汎用
    function $(id, elem) {
-     return document.getElementById(id);
+     return window.document.getElementById(id);
    }
    function $t(tag, elem) {
-     return (elem || document).getElementsByTagName(tag);
+     return (elem || window.document).getElementsByTagName(tag);
    }
    function $c(tag, parent, cls) {
-     var elem = document.createElement(tag);
+     var elem = window.document.createElement(tag);
      if (parent) parent.appendChild(elem);
      if (cls) elem.className = cls;
      return elem;
    }
    function $x(xpath, root) {
      if (arguments.length > 1 && !root) return null;
-     var doc = root ? root.ownerDocument : (root = document);
+     var doc = root ? root.ownerDocument : (root = window.document);
      // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
      return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
    }
    function $xa(xpath, root) {
-     var doc = root ? root.ownerDocument : (root = document);
+     var doc = root ? root.ownerDocument : (root = window.document);
      // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
      var nodes = doc.evaluate(xpath, root, null, 7, null);
      var res = new Array();
@@ -3749,7 +3749,7 @@
          }
          p = p.parentNode;
        }
-       lazy_scroll(elem, offset, document.documentElement);
+       lazy_scroll(elem, offset, window.document.documentElement);
      }
    }
    function remove_node_if_tag_name(node, tag) {
@@ -3862,7 +3862,7 @@
        if (cb_abort) img.addEventListener('abort', cb_abort, false);
        img.src = url;
        img.style.display = 'none';
-       document.body.appendChild(img);
+       window.document.body.appendChild(img);
      }
    }
    function parseimgurl(text, big) {
@@ -3896,7 +3896,7 @@
      var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
      if (conf.debug && ret) {
        var attr_f = ret.getAttribute(attr);
-       if (attr_f != url) alert('New one?\n' + attr_f);
+       if (attr_f != url) safeWindow.alert('New one?\n' + attr_f);
      }
      return ret;
    }
@@ -3956,7 +3956,7 @@
          js.type = 'text/javascript';
          js.addEventListener('load', function() { if (--self.load_cnt < 1) self.unblock(); }, false);
          js.src  = url;
-         document.body.appendChild(js);
+         window.document.body.appendChild(js);
        }
      };
      ctx.prototype.fire = function() {
@@ -3984,15 +3984,15 @@
        css.rel  = 'stylesheet';
        css.type = 'text/css';
        css.href = url;
-       document.body.appendChild(css);
+       window.document.body.appendChild(css);
        return true;
      }
    }
    function write_css(source) {
      var css = $c('style');
      css.setAttribute('type', 'text/css');
-     css.innerText = source;
-     document.body.appendChild(css);
+     css.textContent = source;
+     window.document.body.appendChild(css);
    }
 
    function bind(func, obj) {
@@ -4033,4 +4033,18 @@
      }
      return res;
    }
- })();
+
+   /* __OPERA_BEGIN__ */
+   window.addEventListener('DOMContentLoaded', init_pixplus, false);
+   /* __OPERA_END__ */
+   /* __GREASEMONKEY_BEGIN__
+    init_pixplus();
+    __GREASEMONKEY_END__ */
+ })(
+  /* __OPERA_BEGIN__ */
+  window, window
+  /* __OPERA_END__ */
+  /* __GREASEMONKEY_BEGIN__
+   unsafeWindow, window
+   __GREASEMONKEY_END__ */
+);

@@ -8,6 +8,7 @@ CRX              = pixplus.crx
 CONFIG_XML       = config.xml
 CONFIG_JS        = config.js
 PARSER_JS        = parser.js
+GREASEMONKEY_JS  = pixplus.user.js
 ICON_PREFIX      = icons/pixplus_
 ICON_SUFFIX      = .png
 ICON_FILES       = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
@@ -22,10 +23,10 @@ DESCRIPTION      = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@
 CRX_TMP_DIR      = .crx
 MANIFEST_JSON    = manifest.json
 
-WARN_KEYWORDS_W  = location jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
+WARN_KEYWORDS_W  = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
 
-all: $(OEX)
+all: $(OEX) $(GREASEMONKEY_JS)
 dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
@@ -36,7 +37,7 @@ $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
 	$(ECHO) "  <icon src=\"$(ICON_SVG)\" />" >> $@;
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
 	@for f in $(SRC_USERJS); do \
-           sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < $$f \
+           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f \
              | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@; \
          done
 	$(ECHO) '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
@@ -47,7 +48,7 @@ $(CONFIG_JS): $(SRC_USERJS)
 	$(ECHO) -ne 'var conf_schema = {\r\n' > $@
 	@a=1;for f in $(SRC_USERJS); do \
            test $$a = 1 && a=0 || $(ECHO) -ne ',\r\n' >> $@; \
-           sed -e '1,/\/\* __CONFIG_BEGIN__ \*\//d' -e '/\/\* __CONFIG_END__ \*\//,$$d' < $$f >> $@; \
+           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f >> $@; \
          done
 	$(ECHO) -ne '};\r\n' >> $@
 
@@ -55,7 +56,7 @@ $(PARSER_JS): $(SRC_USERJS)
 	$(ECHO) -ne 'var parser = {\r\n' > $@
 	@a=1;for f in $(SRC_USERJS); do \
            test $$a = 1 && a=0 || $(ECHO) -ne ',\r\n' >> $@; \
-           sed -e '1,/\/\* __PARSER_FUNCTIONS_BEGIN__ \*\//d' -e '/\/\* __PARSER_FUNCTIONS_END__ \*\//,$$d' < $$f >> $@; \
+           sed -e '1,/__PARSER_FUNCTIONS_BEGIN__/d' -e '/__PARSER_FUNCTIONS_END__/,$$d' < $$f >> $@; \
          done
 	$(ECHO) -ne '};\r\n' >> $@
 
@@ -73,6 +74,9 @@ $(OEX): $(DIST_FILES)
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
          done
 	$(ZIP) -r $@ $^
+
+$(GREASEMONKEY_JS): $(SRC_USERJS)
+	sed -e '/__OPERA_BEGIN__/,/__OPERA_END__/d' -e '/__GREASEMONKEY_BEGIN__/d' -e '/__GREASEMONKEY_END__/d' < $< > $@
 
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
@@ -92,4 +96,4 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 clean:
 	rm -rf $(CRX_TMP_DIR)
 	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
-              $(MANIFEST_JSON) $(CRX)
+              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX)
