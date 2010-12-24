@@ -2816,8 +2816,10 @@
          this.root_div.style.minHeight = (this.caption.offsetHeight * 2 + o) + 'px';
        }
         */
-       var ph = this.caption.offsetHeight + 48;
-       if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
+       if (!(this.tag_editing || this.expand_header)) {
+         var ph = this.caption.offsetHeight + 48;
+         if (tg.offsetHeight < ph) tg.style.margin = (ph - tg.offsetHeight) / 2 + 'px 0px';
+       }
        if (conf.popup.overlay_control > 0) {
          var width;
          if (conf.popup.overlay_control < 1) {
@@ -3365,43 +3367,41 @@
        if (conf.extagedit) {
          var items = [];
          var selected, sx = 0, sy = 0;
-         each(
-           $xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', root),
-           function(ul) {
-             var l = $t('li', ul);
-             if (l.length) items.push(l);
-           });
+         each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', root),
+              function(ul) {
+                var l = $t('li', ul);
+                if (l.length) items.push(l);
+              });
          if (items.length) {
-           input_tag.addEventListener(
-             'keypress',
-             function(e) {
-               if (e.shiftKey || e.ctrlKey || e.altKey) return;
+           $ev(input_tag).key(
+             function(ev, key) {
+               if (ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
                if (selected) {
-                 switch(e.keyCode) {
-                 case 32: toggle(e); break; // space
-                 case 27: unselect(e); break; // escape
-                 case 37: select(e, false, -1,  0); break; // left
-                 case 38: select(e, false,  0, -1); break; // up
-                 case 39: select(e, false,  1,  0); break; // right
-                 case 40: select(e, false,  0,  1); break; // down
+                 switch(key) {
+                 case $ev.KEY_SPACE:  toggle(ev);                break;
+                 case $ev.KEY_ESCAPE: unselect(ev);              break;
+                 case $ev.KEY_LEFT:   select(ev, false, -1,  0); break;
+                 case $ev.KEY_UP:     select(ev, false,  0, -1); break;
+                 case $ev.KEY_RIGHT:  select(ev, false,  1,  0); break;
+                 case $ev.KEY_DOWN:   select(ev, false,  0,  1); break;
                  }
-               } else if (e.keyCode == 40 || e.keyCode == 38) {
-                 select(e, true, 0, e.keyCode == 40 ? 0 : items.length - 1);
+               } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
+                 select(ev, true, 0, key == $ev.KEY_DOWN ? 0 : items.length - 1);
                }
              }, false);
-           function toggle(e) {
-             e.preventDefault();
+           function toggle(ev) {
+             ev.preventDefault();
              if (selected) toggle_tag($x('./a', selected));
            }
-           function unselect(e) {
-             if (e) e.preventDefault();
+           function unselect(ev) {
+             if (ev) ev.preventDefault();
              if (selected) {
                selected.removeAttribute('selected');
                selected = null;
              }
            }
-           function select(e, absolute, px, py) {
-             e.preventDefault();
+           function select(ev, absolute, px, py) {
+             ev.preventDefault();
              if (selected) selected.removeAttribute('selected');
              if (absolute) {
                sx = px;

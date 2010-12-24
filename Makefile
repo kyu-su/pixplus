@@ -26,7 +26,7 @@ MANIFEST_JSON    = manifest.json
 WARN_KEYWORDS_W  = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
 
-all: $(OEX) $(GREASEMONKEY_JS)
+all: $(OEX) $(CRX) $(GREASEMONKEY_JS)
 dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
