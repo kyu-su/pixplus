@@ -3610,6 +3610,7 @@
    Floater.prototype.update_height = function () {
      if (this.cont) {
        var de = window.document.documentElement;
+       var sc = browser.webkit ? window.document.body : de;
        var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
        if (mh < 60) {
          this.disable_float = true;
@@ -3617,19 +3618,19 @@
          this.cont.style.maxHeight = '';
          return;
        }
-       if (!this.floating) mh -= getpos(this.wrap).top - de.scrollTop;
+       if (!this.floating) mh -= getpos(this.wrap).top - sc.scrollTop;
        this.cont.style.maxHeight = mh + 'px';
      }
    };
    Floater.prototype.update_float = function () {
      if (this.disable_float) return;
-     var de = window.document.documentElement;
-     if (this.floating !== true && de.scrollTop > this.wrap_pos.top) {
+     var sc = browser.webkit ? window.document.body : window.document.documentElement;
+     if (this.floating !== true && sc.scrollTop > this.wrap_pos.top) {
        this.scroll_save();
        this.wrap.setAttribute('float', '');
        this.scroll_restore();
        this.floating = true;
-     } else if (this.floating !== false && de.scrollTop < this.wrap_pos.top) {
+     } else if (this.floating !== false && sc.scrollTop < this.wrap_pos.top) {
        this.unfloat();
      }
      this.update_height();
@@ -3762,7 +3763,7 @@
          }
          p = p.parentNode;
        }
-       lazy_scroll(elem, offset, window.document.documentElement);
+       lazy_scroll(elem, offset, browser.webkit ? window.document.body : window.document.documentElement);
      }
    }
    function remove_node_if_tag_name(node, tag) {
