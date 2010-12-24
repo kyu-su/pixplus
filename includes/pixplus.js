@@ -151,7 +151,7 @@
      "scroll":                 [1,     "イラストページを開いた時にスクロールする。0:なし/1:キャプション/2:イラスト"],
      "bookmark_hide":          [false, "ブックマーク非公開をデフォルトにする。"],
      "float_tag_list":         [1,     "タグリストをフロート表示する。0:無効/1:有効/2:AutoPagerize"],
-     "locate_recommend_right": [2,     "レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerize"],
+     "locate_recommend_right": [1,     "レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerize"],
      "extagedit":              [true,  "ブックマーク編集時にアローキーでのタグ選択を有効にする。"],
      "mod_bookmark_add_page":  [false, "ブックマーク編集ページにも変更を加える。"],
      "tag_separator_style":    ["border-top:2px solid #dae1e7;", "ブックマーク編集ページでのセパレータのスタイル。"],

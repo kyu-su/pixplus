@@ -5,6 +5,9 @@
       "matches": [ "http://www.pixiv.net/*" ]
     }
   ],
+  "icons": {
+    @ICONS@
+  },
   "permissions": [ "http://www.pixiv.net/*" ],
   "name": "pixplus",
   "version": "@VERSION@",

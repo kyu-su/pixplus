@@ -87,7 +87,13 @@ $(GREASEMONKEY_JS): $(SRC_USERJS)
 	sed -e '/__OPERA_BEGIN__/,/__OPERA_END__/d' -e '/__GREASEMONKEY_BEGIN__/d' -e '/__GREASEMONKEY_END__/d' < $< > $@
 
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
-	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
+	sed -e '/@ICONS@/,$$d' < $< > $@
+	@first=1;for size in $(ICON_SIZE); do \
+           test $$first -eq 1 && first=0 || $(ECHO) -ne ',\r\n' >> $@; \
+           $(ECHO) -n "    \"$$size\": \"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\"" >> $@; \
+         done
+	$(ECHO) -ne '\r\n' >> $@;
+	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< >> $@
 
 $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	rm -rf $(CRX_TMP_DIR)
@@ -95,6 +101,11 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
 	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
+	@for size in $(ICON_SIZE); do \
+           mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
+           cp $(ICON_PREFIX)$$size$(ICON_SUFFIX) \
+             $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
+         done
 	@test -f $(CRX:.crx=.pem) && \
            $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
            $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
