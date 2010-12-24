@@ -555,10 +555,13 @@
        function create() {
          if (div) return;
          div = $c('div', null, 'pixplus_conf');
-         var gen_js = $c('a', div);
-         gen_js.href = 'javascript:void(0)';
-         gen_js.textContent = 'Generate Setting JS';
-         gen_js.addEventListener('click', gen_set_js, false);
+         var btn_user_js = $c('button', div);
+         btn_user_js.textContent = 'Generate Setting JS';
+         btn_user_js.addEventListener('click', gen_set_js, false);
+
+         var btn_bmlet = $c('a', div);
+         btn_bmlet.textContent = 'Bookmarklet';
+         btn_bmlet.style.marginLeft = '1em';
 
          var table = $c('table', div, 'conf');
          LS.each(
@@ -659,6 +662,7 @@
          var wrap = $('manga_top') || $('pageHeader');
          if (wrap) wrap.appendChild(div);
          init();
+         btn_bmlet.href = 'javascript:(function(){' + gen_js() + '})()';
 
          function create_section(label, parent) {
            var anc = $c('a', parent, 'section');
@@ -781,9 +785,6 @@
          hide();
        }
        function gen_set_js() {
-         var order = LS.parse_bm_tag_order(tag_order_textarea.value);
-         var alias = LS.parse_bm_tag_aliases(get_tag_alias_str());
-
          var js = ['// ==UserScript==',
                    '// @name    pixplus settings',
                    '// @version ' + (new Date()).toLocaleString(),
@@ -791,7 +792,18 @@
                    '// ==/UserScript==',
                    '(function() {',
                    ' window.document.addEventListener("pixplusInitialize",init,false);',
-                   ' function init() {', ''].join('\n');
+                   ' function init() {',
+                   gen_js('\n'),
+                   ' }',
+                   '})();',
+                   ''].join('\n');
+         window.open('data:text/javascript;application/x-www-form-urlencoded,' + encodeURIComponent(js));
+       }
+       function gen_js(new_line) {
+         var js = '', prefix = window.opera ? 'window.opera' : 'window';
+         var order = LS.parse_bm_tag_order(tag_order_textarea.value);
+         var alias = LS.parse_bm_tag_aliases(get_tag_alias_str());
+         new_line = new_line || '';
          LS.each(
            function(sec, key) {
              var val;
@@ -801,35 +813,33 @@
                val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
              }
              if (val !== sec.schema[key][0]) {
-               var ns = 'opera.pixplus.conf';
+               var ns = prefix + '.pixplus.conf';
                if (sec.conf !== conf) ns += '.' + sec.name;
-               js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';\n';
+               js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';' + new_line;
              }
            });
          if (order.length) {
-           js += '  opera.pixplus.conf.bm_tag_order = [\n';
-           each(
-             order,
-             function(ary) {
-               js += '   [\n';
-               each(ary, function(tag) { js += '    ' + (tag ? stringify(tag) : 'null') + ',\n'; });
-               js += '   ],\n';
-             });
-           js += '  ];\n';
+           js += '  ' + prefix + '.pixplus.conf.bm_tag_order = [' + new_line;
+           each(order,
+                function(ary) {
+                  js += '   [' + new_line;
+                  each(ary, function(tag) { js += '    ' + (tag ? stringify(tag) : 'null') + ',' + new_line; });
+                  js += '   ],' + new_line;
+                });
+           js += '  ];' + new_line;
          }
          each(alias.keys,
               function(key, idx) {
-                if (idx == 0) js += '  opera.pixplus.conf.bm_tag_aliases = {\n';
-                js += '   ' + stringify(key) + ':[\n';
+                if (idx == 0) js += '  ' + prefix + '.pixplus.conf.bm_tag_aliases = {' + new_line;
+                js += '   ' + stringify(key) + ':[' + new_line;
                 each(alias.map[key],
                      function(tag) {
-                       js += '    ' + stringify(tag) + ',\n';
+                       js += '    ' + stringify(tag) + ',' + new_line;
                      });
-                js += '   ],\n';
+                js += '   ],' + new_line;
               });
-         if (alias.keys.length) js += '  };\n';
-         js += ' }\n})();\n';
-         window.open('data:text/javascript;application/x-www-form-urlencoded,' + encodeURIComponent(js));
+         if (alias.keys.length) js += '  };' + new_line;
+         return js;
 
          function stringify(val) {
            if (window.JSON && window.JSON.stringify) return JSON.stringify(val);
