@@ -1704,7 +1704,7 @@
                  var _sendRequest = window.sendRequest;
                  window.sendRequest = function(url) {
                    url = mod_rpc_url(url);
-                   _sendRequest.apply(this, [url].concat([].slice.apply(arguments, [1])));
+                   _sendRequest.apply(this, [url].concat([].slice.apply(arguments, [1]))); /* WARN */
                  };
 
                  LS.wait(
