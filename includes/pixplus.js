@@ -2653,10 +2653,9 @@
             form.appendChild(comment);
             form.appendChild(submit);
 
-            form.addEventListener(
-              'submit',
+            submit.addEventListener(
+              'click',
               function(ev) {
-                ev.preventDefault();
                 if (trim(comment.value)) {
                   var xhr = new window.XMLHttpRequest();
                   xhr.open('POST', form.getAttribute('action'), true);
@@ -2945,12 +2944,32 @@
      if (!this.viewer_comments_a.innerHTML) {
        var i_id = $('rpc_i_id').getAttribute('title');
        var u_id = $('rpc_u_id').getAttribute('title');
-       window.sendRequest('/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
-                          function(obj) {
-                            //window.on_loaded_one_comment_view(obj);
-                            self.viewer_comments_a.innerHTML = obj.responseText;
-                            show();
-                          });
+       window.sendRequest(
+         '/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
+         function(obj) {
+           //window.on_loaded_one_comment_view(obj);
+           self.viewer_comments_a.innerHTML = obj.responseText;
+           each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', self.viewer_comments_a),
+                function(del) {
+                  var url = del.getAttribute('href');
+                  del.onclick = '';
+                  if (url.match(/^\w/)) url = '/' + url;
+                  $ev(del).click(
+                    function() {
+                      if (!confirm('\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002' +
+                                   '\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f')) return;
+                      geturl(url,
+                             function(text) {
+                               self.reload_viewer_comments();
+                             },
+                             function() {
+                               safeWindow.alert('Error!');
+                             },
+                             true);
+                    });
+                });
+           show();
+         });
      } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
        show();
      }else{
