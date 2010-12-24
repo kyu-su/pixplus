@@ -1,9 +1,11 @@
-RSVG_CONVERT    ?= rsvg-convert
-ECHO            ?= /bin/echo
-ZIP             ?= zip
-ICON_SIZE       ?= 64 16
+RSVG_CONVERT     = rsvg-convert
+ECHO             = /bin/echo
+ZIP              = zip
+ICON_SIZE        = 64 16
+CHROME           = chromium-browser
 OEX              = pixplus.oex
 CRX              = pixplus.crx
+BUILD_CRX        = $(shell test -x $(CHROME) && echo yes || echo no)
 
 CONFIG_XML       = config.xml
 CONFIG_JS        = config.js
@@ -26,7 +28,12 @@ MANIFEST_JSON    = manifest.json
 WARN_KEYWORDS_W  = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
 
-all: $(OEX) $(CRX) $(GREASEMONKEY_JS)
+ALL_TARGETS      = $(OEX) $(GREASEMONKEY_JS)
+ifeq ($(BUILD_CRX),yes)
+ALL_TARGETS     += $(CRX)
+endif
+
+all: $(ALL_TARGETS)
 dist: $(OEX)
 
 $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
