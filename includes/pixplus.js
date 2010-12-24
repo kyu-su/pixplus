@@ -2165,13 +2165,13 @@
          case '-': if (m())  q(ev, zoom, -1);                   return;
          case '+': if (m())  q(ev, zoom,  1);                   return;
          }
-         /*
-         if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
-           var score = c == 126 ? 1 : 43 - c;
-           window.countup_rating(score);
-           return;
+         if (conf.popup.rate && conf.popup.rate_key && m(1) && key.length == 1) {
+           var score = '1234567890!"#$%&\'()~'.indexOf(key);
+           if (score >= 0) {
+             window.countup_rating(10 - (score % 10));
+             return;
+           }
          }
-          */
          if (ev.qrate) {
            var n;
            switch(key) {
@@ -3980,11 +3980,11 @@
          var conn = new $ev.Connection(obj.ctx);
          var listener = function(ev) {
            var c = ev.keyCode || ev.charCode, key;
-           if ($ev.key_map[c]) {
+           if (c == ev.which && c > 0x20) {
+             key = lc(String.fromCharCode(c));
+           } else if ($ev.key_map[c]) {
              if (browser.webkit) return;
              key = $ev.key_map[c];
-           } else if (c == (ev.charCode || ev.which) && c >= 0x20) {
-             key = lc(String.fromCharCode(c));
            } else {
              key = c;
            }
