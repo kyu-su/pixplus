@@ -4095,7 +4095,7 @@
      ctx.prototype.add_load = function(url, raise) {
        var elem = chk_ext_src('script', 'src', url);
        if (elem) {
-         if (elem.readyState && elem.readyState != 'loaded') {
+         if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
            log('$js#preexists: ' + url);
            wait.apply(this, [elem]);
          }
