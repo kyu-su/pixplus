@@ -3801,6 +3801,7 @@
        var p = elem.parentNode;
        while(p && p !== doc.body && p !== doc.documentElement) { /* WARN */
          if (p.scrollHeight > p.offsetHeight) {
+           // for webkit
            var style = p.ownerDocument.defaultView.getComputedStyle(p, '');
            if (style.overflowY.match(/auto|scroll/)) {
              lazy_scroll(elem, offset, p, p);
