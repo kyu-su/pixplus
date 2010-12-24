@@ -1063,10 +1063,10 @@
                locate_right();
              } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
                         $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-               with_pager_func(function() {
-                                 locate_right();
-                                 if (gallery) init_right_gallery(illusts);
-                               });
+               wait_pager(function() {
+                            locate_right();
+                            if (gallery) init_right_gallery(illusts);
+                          });
              }
            }
            init_gallery(illusts);
@@ -1187,7 +1187,7 @@
      if (conf.float_tag_list == 1) {
        make_float();
      } else if (conf.float_tag_list == 2) {
-       with_pager_func(make_float);
+       wait_pager(make_float);
      }
      function make_float() {
        var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
@@ -3574,6 +3574,8 @@
    };
    Floater.prototype.init = function() {
      this.wrap.style.boxSizing = 'border-box';
+     this.wrap.style.webkitBoxSizing = 'border-box';
+     this.wrap.style.MozBoxSizing = 'border-box';
      this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
        this.cont.style.display = '';
@@ -3681,23 +3683,24 @@
      if (!this.disconnected) this.signal.disconnect(this.id);
    };
 
-   function with_pager_func(func) {
+   function wait_pager(func) {
+     var callee = arguments.callee;
      if (window.AutoPagerize || window.AutoPatchWork) {
        func();
      } else {
-       if (!with_pager_func.funcs) {
-         with_pager_func.funcs = [];
+       if (!callee.funcs) {
+         callee.funcs = [];
          connect_event('GM_AutoPagerizeLoaded');
          connect_event('AutoPatchWork.request');
        }
-       with_pager_func.funcs.push(func);
+       callee.funcs.push(func);
      }
      function connect_event(name) {
        window.document.addEventListener(
          name,
          function() {
-           each(with_pager_func.funcs, function(func) { func(); });
-           with_pager_func.funcs = null;
+           each(callee.funcs, function(func) { func(); });
+           callee.funcs = null;
            window.document.removeEventListener(name, arguments.callee, false);
          }, false);
      }
