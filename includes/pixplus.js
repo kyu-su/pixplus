@@ -461,18 +461,6 @@
    var options = parseopts(window.location.href);
 
    if (window.opera) {
-     if (window.location.pathname.match(/^\/stacc/)) {
-       /* スタックページで評価とタグ編集出来ないのをなんとかする */
-       window.opera.addEventListener(
-         'BeforeScript',
-         function(e) {
-           if (e.element.src.indexOf('/tag_edit.js') > 0) {
-             e.element.text = e.element.text.replace(/\'\.(?=\/rpc_tag_edit\.php\')/g, "'");
-           } else if (e.element.src.indexOf('/rating.js') > 0) {
-             e.element.text = e.element.text.replace(/\'\.(?=\/\' \+ type_dir \+ \'rpc_rating\.php\')/g, "'");
-           }
-         }, false);
-     }
      window.opera.addEventListener(
        'AfterEvent.click',
        function(e) {
@@ -1681,6 +1669,15 @@
         })();
      }
 
+     function mod_rpc_url(url) {
+       if (url == './rpc_rating.php') {
+         return '/rpc_rating.php';
+       } else if (url == './rpc_tag_edit.php') {
+         return '/rpc_tag_edit.php';
+       }
+       return url;
+     }
+
      (function($js) {
         if (!$x('//script[contains(@src, "/rating")]')) {
           $js.script(pp.url.js.rating);
@@ -1690,6 +1687,13 @@
          .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
+
+                 var _ajax = window.jQuery.ajax;
+                 window.jQuery.ajax = function(obj) {
+                   if (obj) obj.url = mod_rpc_url(obj.url);
+                   _ajax.apply(this, [].slice.apply(arguments));
+                 };
+
                  LS.init(init_pixplus_real);
                })
          .script(pp.url.js.prototypejs)
@@ -1697,6 +1701,12 @@
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
          .wait(function() {
+                 var _sendRequest = window.sendRequest;
+                 window.sendRequest = function(url) {
+                   url = mod_rpc_url(url);
+                   _sendRequest.apply(this, [url].concat([].slice.apply(arguments, [1])));
+                 };
+
                  LS.wait(
                    function() {
                      if (conf.disable_effect) {
