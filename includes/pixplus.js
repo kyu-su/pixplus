@@ -545,6 +545,7 @@
                  '.pixplus_conf table.conf th{text-align:left;}' +
                  '.pixplus_conf table.conf td{padding-left:4px;}' +
                  '.pixplus_conf table.conf td:first-child{padding-left:1em;}' +
+                 '.pixplus_conf button{white-space:pre;}' +
                  '.pixplus_conf button + button{margin-left:4px;}' +
                  '.pixplus_conf .section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
                  '.pixplus_conf .content{margin-left:1em;}' +
