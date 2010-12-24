@@ -1046,10 +1046,10 @@
        pp.recommender.wait(
          function() {
            var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
-           if (!window.location.pathname.match(/^\/bookmark_add\.php/)) {
+           if (!window.location.pathname.match(/^\/bookmark_add\.php/) && de.clientWidth >= 1175) {
              if (conf.locate_recommend_right == 1) {
                locate_right();
-             } else if (conf.locate_recommend_right == 2 && de.clientWidth >= 1175 &&
+             } else if (conf.locate_recommend_right == 2 &&
                         $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
                wait_pager(function() {
                             locate_right();
