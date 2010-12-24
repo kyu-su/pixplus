@@ -3187,7 +3187,7 @@
      var tags_bookmark = $xa('ul/li/a', tag_wrap_bm);
 
      root.className += ' pixplus_bm_wrap';
-     if (!mod_edit_bookmark.css_written) {
+     if (!arguments.callee.css_written) {
        write_css('.pixplus_bm_wrap .bookmain_title{padding:4px;}' +
                  '.pixplus_bm_wrap .bookmain_title_img{text-align:left;}' +
                  '.pixplus_bm_wrap .box_main_sender{padding-right:0px;padding-bottom:0px;}' +
@@ -3207,7 +3207,7 @@
                  '.pixplus_bm_wrap .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}' +
                  '.pixplus_bm_wrap .bookmark_bottom{padding-bottom:4px;}' +
                  '.pixplus_bm_wrap .bookmark_bottom input{margin:0px;}');
-       mod_edit_bookmark.css_written = true;
+       arguments.callee.css_written = true;
      }
 
      var submit = $xa('.//input[@type="submit"]', root);
@@ -3282,18 +3282,28 @@
          http.send(create_post_data(form));
        }, false);
 
-     each(
-       tags_illust.concat(tags_bookmark),
-       function(it) {
-         var tag = it.firstChild.nodeValue;
-         it.addEventListener(
-           'click',
-           function(e) {
-             e.preventDefault();
-             window.add_form(tag);
-           }, false);
-         it.onclick = '';
-         it.href = '/tags.php?tag=' + tag;
+     each(tags_illust.concat(tags_bookmark),
+          function(it) {
+            var tag = it.firstChild.nodeValue;
+            it.addEventListener(
+              'click',
+              function(e) {
+                e.preventDefault();
+                window.add_form(tag);
+              }, false);
+            it.onclick = '';
+            it.href = '/tags.php?tag=' + tag;
+          });
+
+     var ev_key_func;
+     $ev(input_tag).key(
+       function(ev, key) {
+         if (ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+         if (ev_key_func && ev_key_func(ev, key)) return;
+         if (key == $ev.KEY_ESCAPE) {
+           ev.cancelBubble = true;
+           input_tag.blur();
+         }
        });
 
      var initialized = false;
@@ -3373,22 +3383,22 @@
                 if (l.length) items.push(l);
               });
          if (items.length) {
-           $ev(input_tag).key(
-             function(ev, key) {
-               if (ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
-               if (selected) {
-                 switch(key) {
-                 case $ev.KEY_SPACE:  toggle(ev);                break;
-                 case $ev.KEY_ESCAPE: unselect(ev);              break;
-                 case $ev.KEY_LEFT:   select(ev, false, -1,  0); break;
-                 case $ev.KEY_UP:     select(ev, false,  0, -1); break;
-                 case $ev.KEY_RIGHT:  select(ev, false,  1,  0); break;
-                 case $ev.KEY_DOWN:   select(ev, false,  0,  1); break;
-                 }
-               } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
-                 select(ev, true, 0, key == $ev.KEY_DOWN ? 0 : items.length - 1);
+           ev_key_func = function(ev, key) {
+             if (selected) {
+               switch(key) {
+               case $ev.KEY_SPACE:  toggle(ev);                return true;
+               case $ev.KEY_ESCAPE: unselect(ev);              return true;
+               case $ev.KEY_LEFT:   select(ev, false, -1,  0); return true;
+               case $ev.KEY_UP:     select(ev, false,  0, -1); return true;
+               case $ev.KEY_RIGHT:  select(ev, false,  1,  0); return true;
+               case $ev.KEY_DOWN:   select(ev, false,  0,  1); return true;
                }
-             }, false);
+             } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
+               select(ev, true, 0, key == $ev.KEY_DOWN ? 0 : items.length - 1);
+               return true;
+             }
+             return false;
+           };
            function toggle(ev) {
              ev.preventDefault();
              if (selected) toggle_tag($x('./a', selected));
