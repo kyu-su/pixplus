@@ -856,7 +856,7 @@
           });
    }
    function unpack_captions_label(col) {
-     unpack_captions(col, 'ul/li/a[img]/label');
+     unpack_captions(col, './ul/li/a[img]/label');
    }
    function init_galleries() {
      function area_right() {
@@ -874,7 +874,7 @@
             function(root) {
               add_gallery({root:      root,
                            xpath_col: './/ul[contains(concat(" ", @class, " "), " top_display_works ")]',
-                           xpath_cap: 'li/text()[last()]'},
+                           xpath_cap: './li/text()[last()]'},
                           unpack_captions);
             });
        area_right();
@@ -893,7 +893,7 @@
          // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
          // 下部のイメージレスポンス
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
-                      xpath_cap: 'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'});
+                      xpath_cap: './ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'});
        } else if (options.id) {
          // http://www.pixiv.net/member_illust.php?id=11
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'},
@@ -902,7 +902,7 @@
          // 自分のイラスト管理
          // http://www.pixiv.net/member_illust.php
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-                      xpath_cap: 'ul/li/label'},
+                      xpath_cap: './ul/li/label'},
                      unpack_captions_label);
        }
      } else if (window.location.pathname.match(/^\/ranking(?:_tag|_area)?\.php/)) {
@@ -920,7 +920,7 @@
          // http://www.pixiv.net/ranking.php?mode=weekly_r18
          // http://www.pixiv.net/ranking.php?mode=r18g
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
-                      xpath_cap: 'div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
+                      xpath_cap: './div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
                       xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'});
        }
      } else if (window.location.pathname.match(/^\/bookmark\.php/) && !options.id &&
@@ -938,7 +938,7 @@
          }
        }
        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-                    xpath_cap: 'ul/li/label'},
+                    xpath_cap: './ul/li/label'},
                    unpack_captions_label, conf.debug ? debug_filter : null);
      } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
        // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
@@ -947,7 +947,7 @@
      } else if (window.location.pathname.match(/^\/stacc/)) {
        // http://www.pixiv.net/stacc/
        add_gallery({xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-                    xpath_cap: 'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
+                    xpath_cap: './div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
                     xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
                     skip_dups: true});
        add_gallery({xpath_col:  '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
@@ -956,12 +956,12 @@
      } else if (window.location.pathname.match(/^\/event_detail\.php/)) {
        // http://www.pixiv.net/event_detail.php?event_id=805
        add_gallery({xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
-                    xpath_tmb:  'li/a[contains(@href, "mode=medium")]/img',
+                    xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
                     thumb_only: true});
      } else if (window.location.pathname.match(/^\/event_member\.php/)) {
        // http://www.pixiv.net/event_member.php?event_id=805
        add_gallery({xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
-                    xpath_tmb:  'li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
+                    xpath_tmb:  './li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
                     thumb_only: true,
                     get_url:    get_url_from_image});
      } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
@@ -969,7 +969,7 @@
        // http://www.pixiv.net/rating_all.php
        // http://www.pixiv.net/comment_all.php
        add_gallery({xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
-                    xpath_cap:     'dd/a[contains(@href, "mode=medium")]',
+                    xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
                     allow_nothumb: -1});
      } else if (window.location.pathname.match(/^\/ranking_log\.php/)) {
        // http://www.pixiv.net/ranking_log.php
@@ -1073,8 +1073,8 @@
          });
        function init_gallery(illusts) {
          gallery = add_gallery({root:      illusts,
-                                xpath_col: 'li',
-                                xpath_cap: 'a[img]/following-sibling::text()[1]',
+                                xpath_col: './li',
+                                xpath_cap: './a[img]/following-sibling::text()[1]',
                                 xpath_tmb: 'preceding-sibling::a/img'},
                                unpack_captions);
          if (float_wrap) init_right_gallery(illusts);
