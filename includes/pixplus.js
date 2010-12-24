@@ -135,15 +135,15 @@
  */
 
 (function(func, unsafeWindow) {
-   if (window.opera || unsafeWindow) {
-     func(unsafeWindow || window, window);
-   } else {
-     var s = window.document.createElement('script');
-     s.setAttribute('type', 'text/javascript');
-     s.textContent = '(' + func.toString() + ')(window, window)';
-     window.document.body.appendChild(s);
-   }
- })
+  if (window.opera || unsafeWindow) {
+    func(unsafeWindow || window, window);
+  } else {
+    var s = window.document.createElement('script');
+    s.setAttribute('type', 'text/javascript');
+    s.textContent = '(' + func.toString() + ')(window, window)';
+    window.document.body.appendChild(s);
+  }
+})
 (function(window, safeWindow) {
   var conf_schema = {
     /* __CONFIG_BEGIN__ */
