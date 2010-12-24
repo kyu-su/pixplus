@@ -3785,14 +3785,14 @@
      } else {
        var doc = window.document;
        var p = elem.offsetParent;
-       while(p && p !== doc.body && p !== doc.documentElement) {
+       while(p && p !== doc.body && p !== doc.documentElement) { /* WARN */
          if (p.scrollHeight > p.offsetHeight) {
            lazy_scroll(elem, offset, p, p);
            return;
          }
          p = p.offsetParent;
        }
-       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement);
+       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement); /* WARN */
      }
    }
    function remove_node_if_tag_name(node, tag) {
