@@ -3464,23 +3464,22 @@
 
      function input_tags(func) {
        var tags = input_tag.value.split(/\s+|\u3000+/);
-       each(
-         tags_bookmark,
-         function(t) {
-           var tag = t.firstChild.nodeValue;
-           if (tags.indexOf(tag) < 0) {
-             var aliases = conf.bm_tag_aliases[tag];
-             each(aliases ? [tag].concat(aliases) : [tag],
-                  function(tag) {
-                    if (func(t, tag)) {
-                      toggle_tag(t);
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  });
-           }
-         });
+       each(tags_bookmark,
+            function(t) {
+              var tag = t.firstChild.nodeValue;
+              if (tags.indexOf(tag) < 0) {
+                var aliases = conf.bm_tag_aliases[tag];
+                each(aliases ? [tag].concat(aliases) : [tag],
+                     function(tag) {
+                       if (func(t, tag)) {
+                         toggle_tag(t);
+                         return true;
+                       } else {
+                         return false;
+                       }
+                     });
+              }
+            });
      }
      function toggle_tag(tag) {
        clickelem(tag);
@@ -3532,50 +3531,48 @@
 
    function reorder_tags(list) {
      var ary = [];
-     each(
-       conf.bm_tag_order,
-       function(order) {
-         var ary_ary = [];
-         each(
-           order,
-           function(tag) {
-             if (!tag) {
-               ary_ary.push(null);
-               return;
-             }
-             list = abst(
-               list,
-               function(li) {
-                 try {
-                   if (t(li) == tag) {
-                     ary_ary.push(li);
-                     return false;
-                   }
-                 } catch(e) { }
-                 return true;
-               });
-           });
-         ary.push(ary_ary);
-       });
+     each(conf.bm_tag_order,
+          function(order) {
+            var ary_ary = [];
+            each(
+              order,
+              function(tag) {
+                if (!tag) {
+                  ary_ary.push(null);
+                  return;
+                }
+                list = abst(
+                  list,
+                  function(li) {
+                    try {
+                      if (t(li) == tag) {
+                        ary_ary.push(li);
+                        return false;
+                      }
+                    } catch(e) { }
+                    return true;
+                  });
+              });
+            ary.push(ary_ary);
+          });
      list.sort(function(a, b) {
                  a = t(a); b = t(b);
                  return a == b ? 0 : (a < b ? -1 : 1);
                });
-     each(
-       ary,
-       function(ary_ary, idx) {
-         var null_idx = ary_ary.indexOf(null);
-         if (null_idx >= 0) {
-           var left = ary_ary.slice(0, null_idx);
-           var right = ary_ary.slice(null_idx + 1);
-           if (list.length) {
-             ary[idx] = left.concat(list).concat(right);
-             list = [];
-           } else {
-             ary[idx] = left.concat(right);
-           }
-         }
-       });
+     each(ary,
+          function(ary_ary, idx) {
+            var null_idx = ary_ary.indexOf(null);
+            if (null_idx >= 0) {
+              var left = ary_ary.slice(0, null_idx);
+              var right = ary_ary.slice(null_idx + 1);
+              if (list.length) {
+                ary[idx] = left.concat(list).concat(right);
+                list = [];
+              } else {
+                ary[idx] = left.concat(right);
+              }
+            }
+          });
      if (list.length) ary.push(list);
      function t(elem) {
        return $x('.//text()', elem).nodeValue;
@@ -3612,8 +3609,8 @@
      this.wrap.style.MozBoxSizing = 'border-box';
      this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
-       this.cont.style.display = '';
-       this.cont.style.position = 'relative';
+       this.cont.style.display = 'block';
+       //this.cont.style.position = 'relative';
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
        //this.update_height();
@@ -3770,11 +3767,16 @@
      }
      return res;
    }
-   function getpos(element, root) {
-     var left = element.offsetLeft, top = element.offsetTop;
-     while((element = element.offsetParent) && element != root) {
-       left += element.offsetLeft;
-       top += element.offsetTop;
+   function getpos(elem, root) {
+     var left = elem.offsetLeft, top = elem.offsetTop;
+     while((elem = elem.offsetParent) && elem != root) {
+       left += elem.offsetLeft;
+       top += elem.offsetTop;
+     }
+     if (!elem && root) {
+       var pos = arguments.callee(root);
+       left -= pos.left;
+       top -= pos.top;
      }
      return {left: left, top: top};
    }
@@ -3785,22 +3787,27 @@
        var pos = getpos(elem, root);
        var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
        var top = Math.floor(scroll.scrollTop + bt), bot = Math.floor(scroll.scrollTop + bb);
-       window.jQuery(scroll).stop();
+       //window.jQuery(scroll).stop();
        if (pos.top < top) {
-         window.jQuery(scroll).animate({scrollTop: pos.top - bt}, 200);
+         //window.jQuery(scroll).animate({scrollTop: pos.top - bt}, 200);
+         scroll.scrollTop = pos.top - bt;
        } else if (pos.top + elem.offsetHeight > bot) {
-         window.jQuery(scroll).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
+         //window.jQuery(scroll).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
+         scroll.scrollTop = pos.top + elem.offsetHeight - bb;
        }
        arguments.callee.last = elem;
      } else {
        var doc = window.document;
-       var p = elem.offsetParent;
+       var p = elem.parentNode;
        while(p && p !== doc.body && p !== doc.documentElement) { /* WARN */
          if (p.scrollHeight > p.offsetHeight) {
-           lazy_scroll(elem, offset, p, p);
-           return;
+           var style = p.ownerDocument.defaultView.getComputedStyle(p, '');
+           if (style.overflowY.match(/auto|scroll/)) {
+             lazy_scroll(elem, offset, p, p);
+             break;
+           }
          }
-         p = p.offsetParent;
+         p = p.parentNode;
        }
        lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement); /* WARN */
      }
