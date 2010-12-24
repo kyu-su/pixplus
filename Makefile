@@ -89,11 +89,12 @@ $(GREASEMONKEY_JS): $(SRC_USERJS)
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
 
-$(CRX): $(MANIFEST_JSON) $(GREASEMONKEY_JS)
+$(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	rm -rf $(CRX_TMP_DIR)
 	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)
+	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
-	cp $(GREASEMONKEY_JS) $(CRX_TMP_DIR)/$(CRX:.crx=)
+	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	@test -f $(CRX:.crx=.pem) && \
            $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
            $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)

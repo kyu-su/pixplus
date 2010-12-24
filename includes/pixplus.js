@@ -250,13 +250,14 @@
 
      url: {
        js: {
-         jquery:          'http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-         prototypejs:     'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
-         effects:         'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
-         rpc:             'http://source.pixiv.net/source/js/rpc.js',
-         rating:          'http://source.pixiv.net/source/js/modules/rating.js?20101107',
-         tag_edit:        'http://source.pixiv.net/source/js/tag_edit.js',
-         bookmark_add_v4: 'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028'
+         jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
+         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
+         effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
+         rpc:                'http://source.pixiv.net/source/js/rpc.js',
+         rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
+         tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
+         bookmark_add_v4:    'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
+         illust_recommender: 'http://source.pixiv.net/source/js/illust_recommender.js?021216'
        },
        css: {
          bookmark_add: 'http://source.pixiv.net/source/css/bookmark_add.css?20100720'
@@ -267,9 +268,9 @@
      },
 
      recommender: {
-       loaded:      false,
-       funcs:       [],
-       attach:      function(func) {
+       loaded: false,
+       funcs:  [],
+       wait:   function(func) {
          if (this.loaded) {
            func();
          } else {
@@ -472,18 +473,6 @@
            }
          }, false);
      }
-     window.opera.addEventListener(
-       'AfterScript',
-       function(e) {
-         if (e.element.src.indexOf('illust_recommender.js') >= 0) {
-           var _load = window.IllustRecommender.prototype.load;
-           window.IllustRecommender.prototype.load = function() {
-             _load.apply(this, [].slice.apply(arguments));
-             pp.recommender.loaded = true;
-             each(pp.recommender.funcs, function(func) { func(); });
-           };
-         }
-       }, false);
      window.opera.addEventListener(
        'AfterEvent.click',
        function(e) {
@@ -1066,7 +1055,7 @@
         })();
        var de = window.document.documentElement;
        var gallery;
-       pp.recommender.attach(
+       pp.recommender.wait(
          function() {
            var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
            if (!window.location.pathname.match(/^\/bookmark_add\.php/)) {
@@ -1677,6 +1666,20 @@
           });
 
      load_css(pp.url.css.bookmark_add);
+
+     if (chk_ext_src('script', 'src', pp.url.js.illust_recommender)) {
+       //pp.recommender.loaded = true;
+       //each(pp.recommender.funcs, function(func) { func(); });
+       (function() {
+          var _show = window.IllustRecommender.prototype.show;
+          window.IllustRecommender.prototype.show = function() {
+            _show.apply(this, [].slice.apply(arguments));
+            pp.recommender.loaded = true;
+            each(pp.recommender.funcs, function(func) { func(); });
+            window.IllustRecommender.prototype.show = _show;
+          };
+        })();
+     }
 
      (function($js) {
         if (!$x('//script[contains(@src, "/rating")]')) {
@@ -3600,6 +3603,7 @@
      this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
        this.cont.style.display = '';
+       this.cont.style.position = 'relative';
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
        //this.update_height();
@@ -3764,30 +3768,31 @@
      }
      return {left: left, top: top};
    }
-   function lazy_scroll(elem, offset, root) {
+   function lazy_scroll(elem, offset, root, scroll) {
      if (!elem || elem == arguments.callee.last) return;
      offset = parseFloat(typeof offset == 'undefined' ? 0.2 : offset);
-     if (root) {
+     if (root && scroll) {
        var pos = getpos(elem, root);
        var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
-       var top = Math.floor(root.scrollTop + bt), bot = Math.floor(root.scrollTop + bb);
-       window.jQuery(root).stop();
+       var top = Math.floor(scroll.scrollTop + bt), bot = Math.floor(scroll.scrollTop + bb);
+       window.jQuery(scroll).stop();
        if (pos.top < top) {
-         window.jQuery(root).animate({scrollTop: pos.top - bt}, 200);
+         window.jQuery(scroll).animate({scrollTop: pos.top - bt}, 200);
        } else if (pos.top + elem.offsetHeight > bot) {
-         window.jQuery(root).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
+         window.jQuery(scroll).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
        }
        arguments.callee.last = elem;
      } else {
-       var p = elem.parentNode;
-       while(p) {
+       var doc = window.document;
+       var p = elem.offsetParent;
+       while(p && p !== doc.body && p !== doc.documentElement) {
          if (p.scrollHeight > p.offsetHeight) {
-           lazy_scroll(elem, offset, p);
+           lazy_scroll(elem, offset, p, p);
            return;
          }
-         p = p.parentNode;
+         p = p.offsetParent;
        }
-       lazy_scroll(elem, offset, browser.webkit ? window.document.body : window.document.documentElement);
+       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement);
      }
    }
    function remove_node_if_tag_name(node, tag) {
