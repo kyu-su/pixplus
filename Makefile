@@ -1,7 +1,7 @@
 RSVG_CONVERT     = rsvg-convert
 ECHO             = /bin/echo
 ZIP              = zip
-ICON_SIZE        = 64 16
+ICON_SIZE        = 64 16 32 48
 CHROME           = /usr/bin/chromium-browser
 OEX              = pixplus.oex
 CRX              = pixplus.crx
