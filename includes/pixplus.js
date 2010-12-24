@@ -4186,8 +4186,10 @@
      }
      return res;
    }
-   if (window.opera) {
-     window.addEventListener('DOMContentLoaded', init_pixplus, false);
+
+   if (window.opera && (window.document.readyState == 'loading' ||
+                        window.document.readyState == 'interactive')) {
+     window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
      init_pixplus();
    }
