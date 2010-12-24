@@ -930,7 +930,7 @@
        // http://www.pixiv.net/bookmark.php
        // http://www.pixiv.net/bookmark.php?type=illust_all
        function debug_filter(item) {
-         var c = $x('input[@name="book_id[]"]', item.caption.parentNode);
+         var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
          if (c) {
            var d = $c('div');
            remove_node_if_tag_name(item.caption.nextSibling, 'br');
@@ -1121,7 +1121,7 @@
          locate_right_real();
        }
        function locate_right_real() {
-         var anc = $x('a[contains(@href, "bookmark.php?tag=")]', r_caption);
+         var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
          var wrap = $c('div');
          var div = $c('div', wrap);
          wrap.id = 'recom_wrap';
@@ -2096,18 +2096,18 @@
 
      Popup.oncreate.emit(this, item, manga_page);
    }
-   Popup._keypress = function(ev) {
-     Popup.instance.keypress(ev);
+   Popup._keypress = function(ev, key) {
+     Popup.instance.keypress(ev, key);
    };
    Popup._locate = function() {
      Popup.instance.locate();
    };
    Popup.set_event_handler = function() {
-     window.addEventListener('keypress', Popup._keypress, false);
+     Popup.ev_conn_key = $ev(window).key(Popup._keypress);
      window.addEventListener('resize', Popup._locate, false);
    };
    Popup.unset_event_handler = function() {
-     window.removeEventListener('keypress', Popup._keypress, false);
+     Popup.ev_conn_key.disconnect();
      window.removeEventListener('resize', Popup._locate, false);
    };
    Popup.oncreate = new Signal(
@@ -2121,59 +2121,54 @@
    Popup.onsetitem = new Signal();
    Popup.onload = new Signal();
    Popup.onkeypress = new Signal(
-     function(ev) {
-       var p = this;
-       var c = ev.keyCode || ev.charCode, s = ev.shiftKey, m_e = p.manga.enabled;
+     function(ev, key) {
+       var p = this, s = ev.shiftKey, m_e = p.manga.enabled;
        if (p.is_bookmark_editing()) {
-         if (c == 27 && m()) q(ev, p.close_edit_bookmark);
+         if (key == $ev.KEY_ESCAPE && m()) q(ev, p.close_edit_bookmark);
        } else {
-         if (c == (ev.charCode || ev.which)) {
-           switch(c) {
-           case 65: case  97: if (m())  q(ev, move, true, true);           return; // a
-           //case 83: case 115: if (m())  q(ev, move, false, true);          return; // s
-           case 69: case 101: if (m())  q(ev, p.open_author_profile,   s); return; // e
-           case 82: case 114: if (m(1)) q(ev, a_illust,                s); return; // r
-           case 84: case 116: if (m())  q(ev, p.open_author_bookmark,  s); return; // t
-           case 89: case 121: if (m())  q(ev, p.open_author_staccfeed, s); return; // y
-           case 66: case  98: if (m(1)) q(ev, bookmark, s);                return; // b
-           case 68: case 100: if (m())  q(ev, p.toggle_qrate);             return; // d
-           case 70: case 102: if (m(1)) q(ev, p.open, !s);                 return; // f
-           case 71: case 103: if (m())  q(ev, p.reload);                   return; // g
-           case 67: case  99: if (m(1)) q(ev, caption, s);                 return; // c
-           case 86: case 118: if (m(1)) q(ev, manga, s);                   return; // v
-           case 45:           if (m())  q(ev, zoom, -1);                   return; // -
-           case 43:           if (m())  q(ev, zoom,  1);                   return; // +
-           }
-           if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
-             var score = c == 126 ? 1 : 43 - c;
-             window.countup_rating(score);
-             return;
-           }
+         switch(key) {
+         case 'a': if (m())  q(ev, p.prev, true);               return;
+         //case 's': if (m())  q(ev, p.next, true);               return;
+         case 'e': if (m())  q(ev, p.open_author_profile,   s); return;
+         case 'r': if (m(1)) q(ev, a_illust,                s); return;
+         case 't': if (m())  q(ev, p.open_author_bookmark,  s); return;
+         case 'y': if (m())  q(ev, p.open_author_staccfeed, s); return;
+         case 'b': if (m(1)) q(ev, bookmark, s);                return;
+         case 'd': if (m())  q(ev, p.toggle_qrate);             return;
+         case 'f': if (m(1)) q(ev, p.open, !s);                 return;
+         case 'g': if (m())  q(ev, p.reload);                   return;
+         case 'c': if (m(1)) q(ev, caption, s);                 return;
+         case 'v': if (m(1)) q(ev, manga, s);                   return;
+         case '-': if (m())  q(ev, zoom, -1);                   return;
+         case '+': if (m())  q(ev, zoom,  1);                   return;
          }
+         /*
+         if (conf.popup.rate && conf.popup.rate_key && ((c >= 33 && c <= 41) || c == 126) && m(1)) {
+           var score = c == 126 ? 1 : 43 - c;
+           window.countup_rating(score);
+           return;
+         }
+          */
          if (ev.qrate) {
            var n;
-           switch(c) {
-           case 38: if (m()) q(ev, sel_qr, e.qrate.previousSibling); return; // up
-           case 40: if (m()) q(ev, sel_qr, e.qrate.nextSibling);     return; // down
-           case 27: if (m()) q(ev, window.rating_ef2);               return; // esc
-           }
-           function sel_qr(node) {
-             if (Popup.is_qrate_button(node)) node.focus();
+           switch(key) {
+           case $ev.KEY_UP:     if (m()) q(ev, sel_qr, ev.qrate.previousSibling); return;
+           case $ev.KEY_DOWN:   if (m()) q(ev, sel_qr, ev.qrate.nextSibling);     return;
+           case $ev.KEY_ESCAPE: if (m()) q(ev, window.rating_ef2);               return;
            }
          } else {
-           switch(c) {
-           case  8: case 37: if (m()) q(ev, p.prev, c == 8);                     return; // bs/left
-           case 32: case 39: if (m()) q(ev, p.next, c == 32);                    return; // space/right
-           case 38: if (m()) q(ev, p.scroll_caption, -conf.popup.scroll_height); return; // up
-           case 40: if (m()) q(ev, p.scroll_caption,  conf.popup.scroll_height); return; // down
-           case 35: if (m()) q(ev, p.last);                                      return; // end
-           case 36: if (m()) q(ev, p.first);                                     return; // home
-           case 27: if (m()) q(ev, m_e ? p.toggle_manga_mode : p.close);         return; // escape
+           switch(key) {
+           case $ev.KEY_BACKSPACE: if (m()) q(ev, p.prev, true);                                return;
+           case $ev.KEY_SPACE:     if (m()) q(ev, p.next, true);                                return;
+           case $ev.KEY_LEFT:      if (m()) q(ev, p.prev);                                      return;
+           case $ev.KEY_RIGHT:     if (m()) q(ev, p.next);                                      return;
+           case $ev.KEY_UP:        if (m()) q(ev, p.scroll_caption, -conf.popup.scroll_height); return;
+           case $ev.KEY_DOWN:      if (m()) q(ev, p.scroll_caption,  conf.popup.scroll_height); return;
+           case $ev.KEY_END:       if (m()) q(ev, p.last);                                      return;
+           case $ev.KEY_HOME:      if (m()) q(ev, p.first);                                     return;
+           case $ev.KEY_ESCAPE:    if (m()) q(ev, m_e ? p.toggle_manga_mode : p.close);         return;
            }
          }
-       }
-       function move(prev, close) {
-         prev ? p.prev(close) : p.next(close);
        }
        function a_illust(response) {
          response ? p.open_image_response() : p.open_author_illust();
@@ -2181,9 +2176,6 @@
        function bookmark(detail) {
          detail ? p.open_bookmark_detail() : p.toggle_edit_bookmark();
        }
-       //function prev(comments) {
-       //  comments ? p.toggle_viewer_comments() : p.prev(true);
-       //}
        function caption(comments) {
          comments ? p.toggle_viewer_comments() : p.toggle_caption();
        }
@@ -2192,6 +2184,9 @@
        }
        function zoom(z) {
          p.set_zoom(p.zoom_scale + z);
+       }
+       function sel_qr(node) {
+         if (Popup.is_qrate_button(node)) node.focus();
        }
        function q(e, f) {
          if (e) e.preventDefault();
@@ -2603,20 +2598,17 @@
        this.rating.style.display = 'block';
        this.rating_enabled = true;
 
-       setTimeout(
-         function() {
-           var anc = $x('div[@id="rating"]/h4/a', self.rating);
-           if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
-             anc.onclick = '';
-             anc.addEventListener(
-               'click',
-               function(ev) {
-                 var qr = $x('div[@id="quality_rating"]', self.rating);
-                 window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
-                 ev.preventDefault();
-               }, false);
-           }
-         }, 0);
+       var anc = $x('./div[@id="rating"]/h4/a', self.rating);
+       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
+         anc.onclick = '';
+         anc.addEventListener(
+           'click',
+           function(ev) {
+             var qr = $x('./div[@id="quality_rating"]', self.rating);
+             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
+             ev.preventDefault();
+           }, false);
+       }
      }
 
      this.viewer_comments_enabled = false;
@@ -2902,20 +2894,20 @@
    Popup.is_qrate_button = function(elem) {
      return elem && lc(elem.tagName || '') == 'input' && elem.id.match(/^qr_kw\d+$/) ? true : false;
    };
-   Popup.prototype.keypress = function(e) {
+   Popup.prototype.keypress = function(ev, key) {
      var ae = window.document.activeElement;
      if (ae && lc(ae.tagName || '') == 'input') {
        if (Popup.is_qrate_button(ae)) {
-         e.qrate = ae;
-         Popup.onkeypress.emit(this, e);
+         ev.qrate = ae;
+         Popup.onkeypress.emit(this, ev, key);
        }
      } else {
-       Popup.onkeypress.emit(this, e);
+       Popup.onkeypress.emit(this, ev, key);
      }
    };
    Popup.prototype.toggle_qrate = function() {
      if (this.has_qrate) {
-       var anc = $x('div[@id="rating"]/h4/a', this.rating), qr;
+       var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
        if (anc) {
          this.caption.setAttribute('show', '');
          clickelem(anc);
@@ -2961,7 +2953,7 @@
    Popup.prototype.toggle_viewer_comment_form = function() {
      var hidden = this.viewer_comments_c.style.display == 'none', comment;
      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
-     if (hidden && (comment = $x('form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
+     if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
      if (LS.u) LS.set('popup', 'show_comment_form', hidden ? 'true' : 'false');
    };
    Popup.prototype.reload_viewer_comments = function() {
@@ -3404,7 +3396,7 @@
              }, false);
            function toggle(e) {
              e.preventDefault();
-             if (selected) toggle_tag($x('a', selected));
+             if (selected) toggle_tag($x('./a', selected));
            }
            function unselect(e) {
              if (e) e.preventDefault();
@@ -3929,18 +3921,82 @@
 
    function $ev(ctx) {
      var obj = {
-       ctx:   ctx,
+       ctx: ctx,
        click: function(func) {
-         obj.ctx.addEventListener(
-           'click',
-           function(ev) {
-             if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
-             ev.preventDefault();
-             func(ev);
-           }, false);
+         var conn = new $ev.Connection(obj.ctx);
+         var listener = function(ev) {
+           if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+           ev.preventDefault();
+           func(ev);
+         };
+         obj.ctx.addEventListener('click', listener, false);
+         conn.listeners.push(['click', listener]);
+         return conn;
+       },
+       key: function(func) {
+         var conn = new $ev.Connection(obj.ctx);
+         var listener = function(ev) {
+           var c = ev.keyCode || ev.charCode, key;
+           if ($ev.key_map[c]) {
+             if (browser.webkit) return;
+             key = $ev.key_map[c];
+           } else if (c == (ev.charCode || ev.which) && c >= 0x20) {
+             key = lc(String.fromCharCode(c));
+           } else {
+             key = c;
+           }
+           func(ev, key);
+         };
+         obj.ctx.addEventListener('keypress', listener, false);
+         conn.listeners.push(['keypress', listener]);
+         if (browser.webkit) {
+           listener = function(ev) {
+             var c = ev.keyCode || ev.charCode, key;
+             if ($ev.key_map[c]) func(ev, $ev.key_map[c]);
+           };
+           obj.ctx.addEventListener('keydown', listener, false);
+           conn.listeners.push(['keydown', listener]);
+         }
+         return conn;
+       },
+       disconnect: function() {
+         each(obj.listeners, function(item) { obj.ctx.removeEventListener(item[0], item[1], false); });
        }
      };
      return obj;
+   };
+   $ev.KEY_BACKSPACE = 'Backspace';
+   $ev.KEY_ENTER     = 'Enter';
+   $ev.KEY_ESCAPE    = 'Escape';
+   $ev.KEY_SPACE     = 'Space';
+   $ev.KEY_END       = 'End';
+   $ev.KEY_HOME      = 'Home';
+   $ev.KEY_LEFT      = 'Left';
+   $ev.KEY_UP        = 'Up';
+   $ev.KEY_RIGHT     = 'Right';
+   $ev.KEY_DOWN      = 'Down';
+   $ev.key_map = {
+     8:  $ev.KEY_BACKSPACE,
+     13: $ev.KEY_ENTER,
+     27: $ev.KEY_ESCAPE,
+     32: $ev.KEY_SPACE,
+     35: $ev.KEY_END,
+     36: $ev.KEY_HOME,
+     37: $ev.KEY_LEFT,
+     38: $ev.KEY_UP,
+     39: $ev.KEY_RIGHT,
+     40: $ev.KEY_DOWN
+   };
+   $ev.Connection = function(ctx) {
+     this.ctx = ctx;
+     this.listeners = [];
+   };
+   $ev.Connection.prototype.disconnect = function() {
+     var self = this;
+     each(this.listeners,
+          function(item) {
+            self.ctx.removeEventListener(item[0], item[1], false);
+          });
    };
 
    var $js = new function() {
