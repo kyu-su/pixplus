@@ -411,7 +411,6 @@
           sec.keys.sort();
         });
 
-
    if (window.opera && opera.extension) {
      (function() {
         var _init = LS.init, init_func;
@@ -2192,19 +2191,15 @@
          if (e) e.preventDefault();
          return f.apply(p, [].slice.apply(arguments, [2]));
        }
-       function m(shift, ctrl, alt) {
+       function m(shift, ctrl, alt, meta) {
          if (!shift && ev.shiftKey) return false;
          if (!ctrl  && ev.ctrlKey)  return false;
          if (!alt   && ev.altKey)   return false;
+         if (!meta  && ev.metaKey)  return false;
          return true;
        }
      });
-   Popup.onclick = new Signal(
-     function(ev) {
-       if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
-       ev.preventDefault();
-       this.close();
-     });
+   Popup.onclick = new Signal(function(ev) { this.close(); });
    Popup.onclose = new Signal(
      function() {
        Popup.unset_event_handler();
@@ -3925,7 +3920,7 @@
        click: function(func) {
          var conn = new $ev.Connection(obj.ctx);
          var listener = function(ev) {
-           if (ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+           if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
            ev.preventDefault();
            func(ev);
          };
