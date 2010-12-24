@@ -800,10 +800,10 @@
          window.open('data:text/javascript;application/x-www-form-urlencoded,' + encodeURIComponent(js));
        }
        function gen_js(new_line) {
-         var js = '', prefix = window.opera ? 'window.opera' : 'window';
+         new_line = new_line || '';
+         var js = '  var pp = window.opera ? window.opera.pixplus : window.pixplus;' + new_line;
          var order = LS.parse_bm_tag_order(tag_order_textarea.value);
          var alias = LS.parse_bm_tag_aliases(get_tag_alias_str());
-         new_line = new_line || '';
          LS.each(
            function(sec, key) {
              var val;
@@ -813,13 +813,13 @@
                val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
              }
              if (val !== sec.schema[key][0]) {
-               var ns = prefix + '.pixplus.conf';
+               var ns = 'pp.conf';
                if (sec.conf !== conf) ns += '.' + sec.name;
                js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';' + new_line;
              }
            });
          if (order.length) {
-           js += '  ' + prefix + '.pixplus.conf.bm_tag_order = [' + new_line;
+           js += '  pp.conf.bm_tag_order = [' + new_line;
            each(order,
                 function(ary) {
                   js += '   [' + new_line;
@@ -830,7 +830,7 @@
          }
          each(alias.keys,
               function(key, idx) {
-                if (idx == 0) js += '  ' + prefix + '.pixplus.conf.bm_tag_aliases = {' + new_line;
+                if (idx == 0) js += '  pp.conf.bm_tag_aliases = {' + new_line;
                 js += '   ' + stringify(key) + ':[' + new_line;
                 each(alias.map[key],
                      function(tag) {
