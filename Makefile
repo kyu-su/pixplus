@@ -2,7 +2,7 @@ RSVG_CONVERT     = rsvg-convert
 ECHO             = /bin/echo
 ZIP              = zip
 ICON_SIZE        = 64 16
-CHROME           = chromium-browser
+CHROME           = /usr/bin/chromium-browser
 OEX              = pixplus.oex
 CRX              = pixplus.crx
 BUILD_CRX        = $(shell test -x $(CHROME) && echo yes || echo no)
@@ -95,8 +95,8 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
 	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	@test -f $(CRX:.crx=.pem) && \
-           chromium-browser --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
-           chromium-browser --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
+           $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
+           $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
 	mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./ || :
 
