@@ -69,6 +69,7 @@ $(PARSER_JS): $(SRC_USERJS)
 
 $(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
+	cp $@ Icon-$(@:$(ICON_PREFIX)%=%)
 
 $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
