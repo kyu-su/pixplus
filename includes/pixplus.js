@@ -1078,7 +1078,7 @@
               'scroll',
               function() {
                 if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
-                  clickelem(more);
+                  send_click(more);
                   illusts.removeEventListener('scroll', arguments.callee, false);
                 }
               }, false);
@@ -2930,7 +2930,7 @@
       var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
       if (anc) {
         this.caption.setAttribute('show', '');
-        clickelem(anc);
+        send_click(anc);
       }
     }
   };
@@ -3328,13 +3328,13 @@
     each(tags_illust.concat(tags_bookmark),
          function(it) {
            var tag = it.firstChild.nodeValue;
+           it.onclick = '';
            it.addEventListener(
              'click',
              function(e) {
                e.preventDefault();
                window.add_form(tag);
              }, false);
-           it.onclick = '';
            it.href = '/tags.php?tag=' + tag;
          });
 
@@ -3444,7 +3444,7 @@
           };
           function toggle(ev) {
             ev.preventDefault();
-            if (selected) toggle_tag($x('./a', selected));
+            if (selected) send_click($x('./a', selected));
           }
           function unselect(ev) {
             if (ev) ev.preventDefault();
@@ -3484,14 +3484,14 @@
     function input_tags(func) {
       var tags = input_tag.value.split(/\s+|\u3000+/);
       each(tags_bookmark,
-           function(t) {
-             var tag = t.firstChild.nodeValue;
+           function(bt) {
+             var tag = bt.parentNode.getAttribute('jsatagname');
              if (tags.indexOf(tag) < 0) {
                var aliases = conf.bm_tag_aliases[tag];
                each(aliases ? [tag].concat(aliases) : [tag],
                     function(tag) {
-                      if (func(t, tag)) {
-                        toggle_tag(t);
+                      if (func(bt, tag)) {
+                        send_click(bt);
                         return true;
                       } else {
                         return false;
@@ -3499,9 +3499,6 @@
                     });
              }
            });
-    }
-    function toggle_tag(tag) {
-      clickelem(tag);
     }
     function autoinput_from_caption() {
       var caption = get_caption();
@@ -3553,25 +3550,24 @@
     each(conf.bm_tag_order,
          function(order) {
            var ary_ary = [];
-           each(
-             order,
-             function(tag) {
-               if (!tag) {
-                 ary_ary.push(null);
-                 return;
-               }
-               list = abst(
-                 list,
-                 function(li) {
-                   try {
-                     if (t(li) == tag) {
-                       ary_ary.push(li);
-                       return false;
-                     }
-                   } catch(e) { }
-                   return true;
-                 });
-             });
+           each(order,
+                function(tag) {
+                  if (!tag) {
+                    ary_ary.push(null);
+                    return;
+                  }
+                  list = abst(
+                    list,
+                    function(li) {
+                      try {
+                        if (t(li) == tag) {
+                          ary_ary.push(li);
+                          return false;
+                        }
+                      } catch(e) { }
+                      return true;
+                    });
+                });
            ary.push(ary_ary);
          });
     list.sort(function(a, b) {
@@ -3863,7 +3859,7 @@
     each(ary, function(i, idx) {if (func(i, idx)) new_ary.push(i);});
     return new_ary;
   }
-  function clickelem(elem) {
+  function send_click(elem) {
     var evt = elem.ownerDocument.createEvent('MouseEvents');
     evt.initMouseEvent('click', true, true, window,
                        0, 0, 0, 0, 0, false, false, false, false, 0, null);
