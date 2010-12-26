@@ -1,26 +1,15 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.3.0
+// @version     0.3.1
 // @license     Public domain
 // @description pixivでイラストをページ遷移せずにポップアップ表示し、概ねキーボードのみでイラストの移動や評価などを行う。その他雑多な機能いろいろ。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // ==/UserScript==
 
-/** 0.3.0
- * conf.fast_user_bookmark追加。
- * プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。
- * コメント表示機能を追加。
- * アンケート結果の表示を変更。
- * 閲覧・評価・コメント履歴ページに対応。
- * キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る
- * ポップアップのイベントAPIをPopup.on*のみに変更。
- * conf.expand_novel追加。
- * ランキングカレンダーに対応。conf.popup_ranking_log追加。
- * イベント詳細/参加者ページに対応。
- * Extension版にツールバーボタンと設定画面を追加。conf.extension.*追加。
- * タグの並べ替えを設定していない時、ブックマーク編集の動作がおかしかった不具合を修正。
+/** 0.3.1
+ * Opera以外のブラウザにおいて一部のページで評価やコメント表示などの機能の動作が変だったバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
