@@ -4096,7 +4096,7 @@
 	if (window.$LAB && elem.getAttribute('type') == 'script/cache') {
           log('$js#labjs: ' + url);
           var callee = arguments.callee, self = this;
-          setTimeout(function() { callee.apply(self, [url]); }, 1000);
+          setTimeout(function() { callee.apply(self, [url]); }, 100);
           //url = elem.getAttribute('src');
           //window.$LAB.script({src: url, allowDup: false}).wait(bind(load_cb, this));
         } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
