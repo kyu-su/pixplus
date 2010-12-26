@@ -1517,6 +1517,7 @@
                // rating
                'div.popup .rating.works_area{padding:0px !important;}' +
                'div.popup .rating.works_area input{display:block;}' +
+               'div.popup .rating.works_area input:focus{background-color:#feffdf;}' +
                'div.popup .rating span + span{margin-left:0.4em;}' +
                'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
                'div.popup .rating #quality_rating{float:none !important;}' +
@@ -1791,7 +1792,6 @@
                log(window.rating_ef);
                var _rating_ef = window.rating_ef;
                window.rating_ef = function() {
-                 
                  window.jQuery('#quality_rating').slideDown(200, after_show);
                  function after_show() {
                    var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
