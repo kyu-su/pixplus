@@ -18,7 +18,7 @@ ICON_SVG         = icons/pixplus.svg
 SIGNATURE        = signature1.xml
 SRC_USERJS       = includes/pixplus.js
 SIGN_FILES       = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css
+DIST_FILES       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js
 VERSION          = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
 DESCRIPTION      = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description\s*//')
 
