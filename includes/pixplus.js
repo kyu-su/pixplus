@@ -1799,6 +1799,7 @@
           _send_quality_rating.apply(this, [].slice.apply(arguments)); /* WARN */
           window.jQuery.ajax = _ajax;
         };
+        log(window.rating_ef);
         var _rating_ef = window.rating_ef;
         window.rating_ef = function() {
           window.jQuery('#quality_rating').slideDown(200, after_show);
@@ -4090,10 +4091,19 @@
     };
     ctx.prototype.add_load = function(url, raise) {
       var elem = chk_ext_src('script', 'src', url);
+      if (raise) ++this.load_cnt;
       if (elem) {
-        if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
+	if (window.$LAB && elem.getAttribute('type') == 'script/cache') {
+          log('$js#labjs: ' + url);
+          var callee = arguments.callee, self = this;
+          setTimeout(function() { callee.apply(self, [url]); }, 1000);
+          //url = elem.getAttribute('src');
+          //window.$LAB.script({src: url, allowDup: false}).wait(bind(load_cb, this));
+        } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
           log('$js#preexists: ' + url);
           wait.apply(this, [elem]);
+        } else {
+          load_cb.apply(this);
         }
       } else {
         log('$js#load: ' + url);
@@ -4103,9 +4113,10 @@
         window.document.body.appendChild(elem);
       }
       function wait(elem) {
-        var self = this;
-        if (raise) ++this.load_cnt;
-        elem.addEventListener('load', function() { if (--self.load_cnt < 1) self.unblock(); }, false);
+        elem.addEventListener('load', bind(load_cb, this), false);
+      }
+      function load_cb() {
+        if (--this.load_cnt < 1) this.unblock();
       }
     };
     ctx.prototype.fire = function() {
