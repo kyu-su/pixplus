@@ -4091,8 +4091,10 @@
         } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
           log('$js#preexists: ' + url);
           wait.apply(this, [elem]);
-        } else {
+        } else if (elem.readyState) {
           load_cb.apply(this);
+        } else {
+          setTimeout(bind(load_cb, this), 0);
         }
       } else {
         log('$js#load: ' + url);
