@@ -5,7 +5,7 @@
   <author href="http://my.opera.com/crckyl/">wowo</author>
   <license>Public domain</license>
   <access origin="http://pixiv.net" subdomains="true" />
-  <update-description href="http://crckyl.ath.cx:8088/pixplus/update.php?version=@VERSION@" />
+  <update-description href="http://crckyl.ath.cx:8088/pixplus/update.php?browser=opera&amp;version=@VERSION@" />
 @ICONS@
 @CONFIG@
 </widget>

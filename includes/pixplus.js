@@ -73,11 +73,11 @@
  * スクリプトのロード順は問わないのでファイル名は任意。以下サンプル。
 
  window.document.addEventListener(
- 'pixplusInitialize',
- function() {
- opera.pixplus.conf.bookmark_hide = true;
- opera.pixplus.conf.disable_effect = true;
- }, false);
+   'pixplusInitialize',
+   function() {
+     opera.pixplus.conf.bookmark_hide = true;
+     opera.pixplus.conf.disable_effect = true;
+   }, false);
  */
 
 /** コメントの処理について
