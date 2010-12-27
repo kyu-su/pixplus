@@ -12,5 +12,5 @@
   "name": "pixplus",
   "version": "@VERSION@",
   "description": "@DESCRIPTION@",
-  "update_url": "http://crckyl.ath.cx:8088/pixplus/update.php?browser=chrome&version=@VERSION@"
+  "update_url": "http://crckyl.ath.cx:8088/pixplus/update.php?browser=chrome"
 }
