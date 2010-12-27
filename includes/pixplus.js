@@ -3,7 +3,7 @@
 // @author      wowo
 // @version     0.3.1
 // @license     Public domain
-// @description pixivでイラストをページ遷移せずにポップアップ表示し、概ねキーボードのみでイラストの移動や評価などを行う。その他雑多な機能いろいろ。
+// @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // ==/UserScript==
