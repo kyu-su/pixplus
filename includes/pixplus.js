@@ -1516,7 +1516,7 @@
                (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
                // rating
                'div.popup .rating.works_area{padding:0px !important;}' +
-               'div.popup .rating.works_area input{display:block;}' +
+               'div.popup .rating.works_area input{display:block;line-height:1em;}' +
                'div.popup .rating.works_area input:focus{background-color:#feffdf;}' +
                'div.popup .rating span + span{margin-left:0.4em;}' +
                'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
@@ -4050,8 +4050,6 @@
 
    var $js = new function() {
      var holder = $t('head')[0];
-     var async = $c('script').async === true;
-     var order = browser.opera || browser.gecko || async;
      this.script = function(url) {
        return new ctx().script(url);
      };
@@ -4086,14 +4084,14 @@
        var elem = chk_ext_src('script', 'src', url);
        if (raise) ++this.load_cnt;
        if (elem) {
-	 if (elem.getAttribute('type') == 'script/cache') {
+	 if (elem.getAttribute('type') == 'script/cache') { // webkit
            log('$js#labjs: ' + url);
            var callee = arguments.callee, self = this;
            setTimeout(function() { callee.apply(self, [url]); }, 0);
          } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
            log('$js#preexists: ' + url);
            wait.apply(this, [elem]);
-         } else if (elem.readyState || order) {
+         } else if (elem.readyState) { // for opera
            load_cb.apply(this);
          } else {
            setTimeout(bind(load_cb, this), 0);
@@ -4101,7 +4099,7 @@
        } else {
          log('$js#load: ' + url);
          elem = $c('script');
-         if (async) elem.async = false;
+         elem.async = false;
          wait.apply(this, [elem]);
          elem.src  = url;
          holder.appendChild(elem);
