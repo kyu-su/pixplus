@@ -4049,6 +4049,9 @@
    };
 
    var $js = new function() {
+     var holder = $t('head')[0];
+     var async = $c('script').async === true;
+     var order = browser.opera || browser.gecko || async;
      this.script = function(url) {
        return new ctx().script(url);
      };
@@ -4083,16 +4086,14 @@
        var elem = chk_ext_src('script', 'src', url);
        if (raise) ++this.load_cnt;
        if (elem) {
-	 if (window.$LAB && elem.getAttribute('type') == 'script/cache') {
+	 if (elem.getAttribute('type') == 'script/cache') {
            log('$js#labjs: ' + url);
            var callee = arguments.callee, self = this;
-           setTimeout(function() { callee.apply(self, [url]); }, 100);
-           //url = elem.getAttribute('src');
-           //window.$LAB.script({src: url, allowDup: false}).wait(bind(load_cb, this));
+           setTimeout(function() { callee.apply(self, [url]); }, 0);
          } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
            log('$js#preexists: ' + url);
            wait.apply(this, [elem]);
-         } else if (elem.readyState) {
+         } else if (elem.readyState || order) {
            load_cb.apply(this);
          } else {
            setTimeout(bind(load_cb, this), 0);
@@ -4100,9 +4101,10 @@
        } else {
          log('$js#load: ' + url);
          elem = $c('script');
+         if (async) elem.async = false;
          wait.apply(this, [elem]);
          elem.src  = url;
-         window.document.body.appendChild(elem);
+         holder.appendChild(elem);
        }
        function wait(elem) {
          elem.addEventListener('load', bind(load_cb, this), false);
