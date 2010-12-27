@@ -3220,7 +3220,7 @@
      var tags_illust   = tag_wrap_it ? $xa('ul/li/a', tag_wrap_it) : [];
      var tags_bookmark = $xa('ul/li/a', tag_wrap_bm);
 
-     root.className += ' pixplus_bm_wrap';
+     if (root.className.indexOf('pixplus_bm_wrap') < 0) root.className += ' pixplus_bm_wrap';
      if (!arguments.callee.css_written) {
        write_css('.pixplus_bm_wrap .bookmain_title{padding:4px;}' +
                  '.pixplus_bm_wrap .bookmain_title_img{text-align:left;}' +
