@@ -1,36 +1,42 @@
-RSVG_CONVERT     = rsvg-convert
-ECHO             = /bin/echo
-ZIP              = zip
-ICON_SIZE        = 64 16 32 48
-CHROME           = /usr/bin/chromium-browser
-OEX              = pixplus.oex
-CRX              = pixplus.crx
-BUILD_CRX        = $(shell test -x $(CHROME) && echo yes || echo no)
+RSVG_CONVERT         = rsvg-convert
+ECHO                 = /bin/echo
+ZIP                  = zip
+XAR                  = xar
+ICON_SIZE            = 64 16 32 48
+CHROME               = /usr/bin/chromium-browser
+OEX                  = pixplus.oex
+CRX                  = pixplus.crx
+SAFARIEXTZ           = pixplus.safariextz
+BUILD_CRX            = $(shell test -x $(CHROME) && echo yes || echo no)
 
-CONFIG_XML       = config.xml
-CONFIG_JS        = config.js
-PARSER_JS        = parser.js
-GREASEMONKEY_JS  = pixplus.user.js
-ICON_PREFIX      = icons/pixplus_
-ICON_SUFFIX      = .png
-ICON_FILES       = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
-ICON_SVG         = icons/pixplus.svg
-SIGNATURE        = signature1.xml
-SRC_USERJS       = includes/pixplus.js
-SIGN_FILES       = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js
-VERSION          = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version\s*//')
-DESCRIPTION      = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description\s*//')
+CONFIG_XML           = config.xml
+CONFIG_JS            = config.js
+PARSER_JS            = parser.js
+GREASEMONKEY_JS      = pixplus.user.js
+ICON_PREFIX          = icons/pixplus_
+ICON_SUFFIX          = .png
+ICON_FILES           = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
+ICON_FILES_SAFARI    = $(ICON_SIZE:%=Icon-%$(ICON_SUFFIX))
+ICON_SVG             = icons/pixplus.svg
+SIGNATURE            = signature1.xml
+SRC_USERJS           = includes/pixplus.js
+SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
+DIST_FILES           = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js
+VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
+DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
-CRX_TMP_DIR      = .crx
-MANIFEST_JSON    = manifest.json
+CRX_TMP_DIR          = .crx
+MANIFEST_JSON        = manifest.json
 
-WARN_KEYWORDS_W  = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
-WARN_KEYWORDS_P  = $(shell cat prototypejs_funcs.txt)
+SAFARIEXTZ_TMP_DIR   = .safariextz
+INFO_PLIST           = Info.plist
 
-ALL_TARGETS      = $(OEX) $(GREASEMONKEY_JS)
+WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
+WARN_KEYWORDS_P      = $(shell cat prototypejs_funcs.txt)
+
+ALL_TARGETS          = $(OEX) $(GREASEMONKEY_JS) $(SAFARIEXTZ)
 ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS     += $(CRX)
+ALL_TARGETS         += $(CRX)
 endif
 
 all: $(ALL_TARGETS)
@@ -69,7 +75,8 @@ $(PARSER_JS): $(SRC_USERJS)
 
 $(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
-	cp $@ Icon-$(@:$(ICON_PREFIX)%=%)
+$(ICON_FILES_SAFARI): $(ICON_SVG)
+	$(RSVG_CONVERT) $< -w $(@:Icon-%$(ICON_SUFFIX)=%) -o $@
 
 $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
@@ -98,7 +105,6 @@ $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	rm -rf $(CRX_TMP_DIR)
 	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)
-	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
 	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	@for size in $(ICON_SIZE); do \
@@ -112,7 +118,20 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./ || :
 
+$(INFO_PLIST): $(INFO_PLIST).in
+	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
+
+$(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
+	rm -rf $(SAFARIEXTZ_TMP_DIR)
+	mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$(shell dirname $(SRC_USERJS))
+	cp $(INFO_PLIST) $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)
+	cp $(SRC_USERJS) $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$(shell dirname $(SRC_USERJS))
+	@for file in $(ICON_FILES_SAFARI); do \
+           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
+         done
+	cd $(SAFARIEXTZ_TMP_DIR) && $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension)
+
 clean:
-	rm -rf $(CRX_TMP_DIR)
+	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
 	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
-              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX)
+              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)

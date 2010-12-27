@@ -11,9 +11,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.0</string>
+	<string>@VERSION@</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>@VERSION@</string>
 	<key>Chrome</key>
 	<dict/>
 	<key>Content</key>
@@ -46,6 +46,8 @@
 			<string>Some</string>
 		</dict>
 	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://crckyl.ath.cx:8088/pixplus/update.php?browser=safari&version=@VERSION@</string>
 	<key>Website</key>
 	<string>http://my.opera.com/crckyl</string>
 </dict>
