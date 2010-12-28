@@ -1,7 +1,7 @@
 RSVG_CONVERT         = rsvg-convert
 ECHO                 = /bin/echo
 ZIP                  = zip
-XAR                  = xar
+XAR                  = $(shell echo $$HOME/local/xar/bin/xar)
 ICON_SIZE            = 64 16 32 48
 CHROME               = /usr/bin/chromium-browser
 OEX                  = pixplus.oex
@@ -30,6 +30,8 @@ MANIFEST_JSON        = manifest.json
 
 SAFARIEXTZ_TMP_DIR   = .safariextz
 INFO_PLIST           = Info.plist
+SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
+SAFARIEXTZ_PRIV      = safari_key.pem
 
 WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P      = $(shell cat prototypejs_funcs.txt)
@@ -130,6 +132,10 @@ $(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
            cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
          done
 	cd $(SAFARIEXTZ_TMP_DIR) && $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension)
+	: | openssl dgst -sign $(SAFARIEXTZ_PRIV) -binary | wc -c > siglen.txt
+	$(XAR) --sign -f $@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc %)
+	(echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) |openssl rsautl -sign -inkey $(SAFARIEXTZ_PRIV) > signature.dat
+	$(XAR) --inject-sig signature.dat -f $@
 
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
