@@ -140,4 +140,6 @@ $(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
 	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
-              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
+              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
+              $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI) \
+              siglen.txt sha1_hash.dat signature.dat
