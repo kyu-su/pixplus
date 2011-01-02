@@ -131,15 +131,15 @@ $(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
 	@for file in $(ICON_FILES_SAFARI); do \
            cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
          done
-	cd $(SAFARIEXTZ_TMP_DIR) && $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension)
-	: | openssl dgst -sign $(SAFARIEXTZ_PRIV) -binary | wc -c > siglen.txt
-	$(XAR) --sign -f $@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc %)
-	(echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) |openssl rsautl -sign -inkey $(SAFARIEXTZ_PRIV) > signature.dat
-	$(XAR) --inject-sig signature.dat -f $@
+	cd $(SAFARIEXTZ_TMP_DIR) && \
+          $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
+          : | openssl dgst -sign ../$(SAFARIEXTZ_PRIV) -binary | wc -c > siglen.txt && \
+          $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc ../%) && \
+          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | openssl rsautl -sign -inkey ../$(SAFARIEXTZ_PRIV) > signature.dat && \
+          $(XAR) --inject-sig signature.dat -f $@
 
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
 	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
-              $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI) \
-              siglen.txt sha1_hash.dat signature.dat
+              $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
