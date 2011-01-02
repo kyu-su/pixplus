@@ -136,7 +136,7 @@ $(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
           : | openssl dgst -sign ../$(SAFARIEXTZ_PRIV) -binary | wc -c > siglen.txt && \
           $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc ../%) && \
           (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | openssl rsautl -sign -inkey ../$(SAFARIEXTZ_PRIV) > signature.dat && \
-          $(XAR) --inject-sig signature.dat -f $@
+          $(XAR) --inject-sig signature.dat -f ../$@
 
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
