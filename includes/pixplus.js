@@ -1973,7 +1973,7 @@
               cap.parentNode.insertBefore(pbtn, cap);
               item.added_popup_button = pbtn;
             }
-            if (pbtn) $ev(pbtn).click(function() { Popup.run(item); });
+            if (pbtn) $ev($x('ancestor::a', pbtn) || pbtn).click(function() { Popup.run(item); });
 
             if (!self.first) self.first = item;
             if (self.filter) self.filter(item);
