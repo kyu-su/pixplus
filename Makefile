@@ -1,13 +1,12 @@
 RSVG_CONVERT         = rsvg-convert
-ECHO                 = /bin/echo
 ZIP                  = zip
 XAR                  = $(shell echo $$HOME/local/xar/bin/xar)
 ICON_SIZE            = 64 16 32 48
-CHROME               = /usr/bin/chromium-browser
+CHROME               = $(shell ./find_chrome.sh)
 OEX                  = pixplus.oex
 CRX                  = pixplus.crx
 SAFARIEXTZ           = pixplus.safariextz
-BUILD_CRX            = $(shell test -x $(CHROME) && echo yes || echo no)
+BUILD_CRX            = $(shell test -x "$(CHROME)" && echo yes || echo no)
 
 CONFIG_XML           = config.xml
 CONFIG_JS            = config.js
@@ -47,33 +46,33 @@ dist: $(OEX)
 $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
 	@for size in $(ICON_SIZE); do \
-           $(ECHO) "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
+           echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
-	$(ECHO) "  <icon src=\"$(ICON_SVG)\" />" >> $@;
+	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
 	@for f in $(SRC_USERJS); do \
            sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f \
              | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@; \
          done
-	$(ECHO) '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
-	$(ECHO) '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
+	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
+	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
-	$(ECHO) -ne 'var conf_schema = {\r\n' > $@
+	echo 'var conf_schema = {' > $@
 	@a=1;for f in $(SRC_USERJS); do \
-           test $$a = 1 && a=0 || $(ECHO) -ne ',\r\n' >> $@; \
+           test $$a = 1 && a=0 || echo ',' >> $@; \
            sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f >> $@; \
          done
-	$(ECHO) -ne '};\r\n' >> $@
+	echo '};' >> $@
 
 $(PARSER_JS): $(SRC_USERJS)
-	$(ECHO) -ne 'var parser = {\r\n' > $@
+	echo 'var parser = {' > $@
 	@a=1;for f in $(SRC_USERJS); do \
-           test $$a = 1 && a=0 || $(ECHO) -ne ',\r\n' >> $@; \
+           test $$a = 1 && a=0 || echo ',' >> $@; \
            sed -e '1,/__PARSER_FUNCTIONS_BEGIN__/d' -e '/__PARSER_FUNCTIONS_END__/,$$d' < $$f >> $@; \
          done
-	$(ECHO) -ne '};\r\n' >> $@
+	echo '};' >> $@
 
 $(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
@@ -98,10 +97,10 @@ $(GREASEMONKEY_JS): $(SRC_USERJS)
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' < $< > $@
 	@first=1;for size in $(ICON_SIZE); do \
-           test $$first -eq 1 && first=0 || $(ECHO) -ne ',\r\n' >> $@; \
-           $(ECHO) -n "    \"$$size\": \"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\"" >> $@; \
+           test $$first -eq 1 && first=0 || echo ',' >> $@; \
+           /bin/echo -n "    \"$$size\": \"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\"" >> $@; \
          done
-	$(ECHO) -ne '\r\n' >> $@;
+	echo >> $@;
 	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< >> $@
 
 $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
@@ -115,8 +114,8 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
              $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
          done
 	@test -f $(CRX:.crx=.pem) && \
-           $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
-           $(CHROME) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
+           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
+           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
 	mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./ || :
 
