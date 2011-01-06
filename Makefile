@@ -29,7 +29,7 @@ MANIFEST_JSON        = manifest.json
 
 SAFARIEXTZ_TMP_DIR   = .safariextz
 INFO_PLIST           = Info.plist
-SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der
+SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
 SAFARIEXTZ_PRIV      = safari_key.pem
 
 WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
