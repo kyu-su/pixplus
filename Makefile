@@ -29,7 +29,7 @@ MANIFEST_JSON        = manifest.json
 
 SAFARIEXTZ_TMP_DIR   = .safariextz
 INFO_PLIST           = Info.plist
-SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
+SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der
 SAFARIEXTZ_PRIV      = safari_key.pem
 
 WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
@@ -105,7 +105,7 @@ $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 
 $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	rm -rf $(CRX_TMP_DIR)
-	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)
+	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
 	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
 	@for size in $(ICON_SIZE); do \
@@ -113,11 +113,11 @@ $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
            cp $(ICON_PREFIX)$$size$(ICON_SUFFIX) \
              $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
          done
-	@test -f $(CRX:.crx=.pem) && \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.pem) || \
+	@test -f $(CRX:.crx=.crx.pem) && \
+           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.crx.pem) || \
            "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
 	mv $(CRX_TMP_DIR)/$(CRX) ./
-	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./ || :
+	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./$(CRX:.crx=.crx.pem) || :
 
 $(INFO_PLIST): $(INFO_PLIST).in
 	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
