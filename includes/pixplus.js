@@ -2149,7 +2149,7 @@
          case '-': if (m(1)) q(ev, zoom, -1);                   return;
          case '+': if (m(1)) q(ev, zoom,  1);                   return;
          }
-         if (conf.popup.rate && conf.popup.rate_key && m(1) && key.length == 1) {
+         if (conf.popup.rate && conf.popup.rate_key && s && key.length == 1) {
            var score = '1234567890!"#$%&\'()~'.indexOf(key);
            if (score >= 0) {
              window.countup_rating(10 - (score % 10));
