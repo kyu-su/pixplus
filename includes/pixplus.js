@@ -507,21 +507,21 @@
          sp_manga_tb.parentNode.insertBefore(anc, sp_manga_tb.nextSibling);
          anc.parentNode.insertBefore(sp_manga_tb.cloneNode(true), anc.nextSibling);
        }
-       write_css('.pixplus_conf{text-align:left;}' +
-                 '.pixplus_conf table.conf th{text-align:left;}' +
-                 '.pixplus_conf table.conf td{padding-left:4px;}' +
-                 '.pixplus_conf table.conf td:first-child{padding-left:1em;}' +
-                 '.pixplus_conf button{white-space:pre;}' +
-                 '.pixplus_conf button + button{margin-left:4px;}' +
-                 '.pixplus_conf .section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
-                 '.pixplus_conf .content{margin-left:1em;}' +
-                 '.pixplus_conf textarea{width:100%;}' +
-                 '.pixplus_conf td.aliases, .pixplus_conf td.aliases input{width:100%;}');
+       write_css('#pp-conf-root{text-align:left;}' +
+                 '#pp-conf-root table#pp-conf-table th{text-align:left;}' +
+                 '#pp-conf-root table#pp-conf-table td{padding-left:4px;}' +
+                 '#pp-conf-root table#pp-conf-table td:first-child{padding-left:1em;}' +
+                 '#pp-conf-root button{white-space:pre;}' +
+                 '#pp-conf-root button + button{margin-left:4px;}' +
+                 '#pp-conf-root .pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
+                 '#pp-conf-root .pp-conf-content{margin-left:1em;}' +
+                 '#pp-conf-root textarea{width:100%;}' +
+                 '#pp-conf-root td#pp-conf-aliases, #pp-conf-root td#pp-conf-aliases input{width:100%;}');
 
        var div, tag_order_textarea, tag_alias_table;
        function create() {
          if (div) return;
-         div = $c('div', null, 'pixplus_conf');
+         div = $c('div', null, 'pp-conf-root');
          var btn_user_js = $c('button', div);
          btn_user_js.textContent = 'Generate Setting JS';
          btn_user_js.addEventListener('click', gen_set_js, false);
@@ -530,7 +530,7 @@
          btn_bmlet.textContent = 'Bookmarklet';
          btn_bmlet.style.marginLeft = '1em';
 
-         var table = $c('table', div, 'conf');
+         var table = $c('table', div, 'pp-conf-table');
          LS.each(
            function(sec, key) {
              var row  = table.insertRow(-1);
@@ -632,10 +632,10 @@
          btn_bmlet.href = 'javascript:(function(){' + gen_js() + '})()';
 
          function create_section(label, parent) {
-           var anc = $c('a', parent, 'section');
+           var anc = $c('a', parent, null, 'pp-conf-section');
            anc.href = 'javascript:void(0)';
            anc.textContent = label;
-           var cont = $c('div', parent, 'content');
+           var cont = $c('div', parent, null, 'pp-conf-content');
            cont.style.display = 'none';
            anc.addEventListener(
              'click',
@@ -687,7 +687,7 @@
          var crem = row.insertCell(-1);
          var ctag = row.insertCell(-1);
          var caliases = row.insertCell(-1);
-         caliases.className = 'aliases';
+         caliases.id = 'pp-conf-aliases';
          var brem = $c('button', crem);
          brem.textContent = 'Remove';
          brem.addEventListener('click', function() { tag_alias_table.deleteRow(row.rowIndex); }, false);
@@ -1086,11 +1086,11 @@
            r_switch.parentNode.removeChild(r_switch);
            if (show) {
              $('wrapper').style.width = '1160px';
-             $('recom_wrap').style.display = '';
+             $('pp-recom-wrap').style.display = '';
              switch_wrap.appendChild(r_switch);
            } else {
              $('wrapper').style.width = '970px';
-             $('recom_wrap').style.display = 'none';
+             $('pp-recom-wrap').style.display = 'none';
              r_switch_p.appendChild(r_switch);
            }
          }
@@ -1100,13 +1100,13 @@
          var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
          var wrap = $c('div');
          var div = $c('div', wrap);
-         wrap.id = 'recom_wrap';
+         wrap.id = 'pp-recom-wrap';
          if (anc) {
            div.appendChild(anc.cloneNode(true));
            if (r_switch) {
              var r_switch_p_new = $c('span');
              switch_wrap = $c('span', div);
-             switch_wrap.id = 'recom_switch_wrap';
+             switch_wrap.id = 'pp-recom-switch-wrap';
              r_switch_p.replaceChild(r_switch_p_new, r_switch);
              r_switch_p = r_switch_p_new;
              switch_wrap.appendChild(r_switch);
@@ -1122,11 +1122,11 @@
          write_css('#wrapper{width:1160px;}' +
                    '#contents{width:970px;float:left;}' +
                    '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
-                   '#recom_switch_wrap:before{content:"[";margin-left:4px;}' +
-                   '#recom_switch_wrap:after{content:"]";}' +
-                   '#recom_wrap{float:right;width:190px;text-align:center;}' +
-                   '#recom_wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
-                   '#recom_wrap li{float:none !important;}' +
+                   '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
+                   '#pp-recom-switch-wrap:after{content:"]";}' +
+                   '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
+                   '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
+                   '#pp-recom-wrap li{float:none !important;}' +
                    // 縦方向の隙間を詰める小細工
                    '#illust_recommendation div.image_container{height:inherit;}' +
                    '#illust_recommendation div.image_container a{display:block;}' +
@@ -1459,84 +1459,81 @@
                '.pixplus-flag{width:14px;height:16px;background-position:-1701px -1px;' +
                '  background-image:url("' + pp.url.img.sprite + '");}' +
                // コメント
-               (conf.popup.font_size ? 'div.popup{font-size:' + conf.popup.font_size + ';}' : '') +
-               '.works_caption hr, div.popup hr{display:block;border:none;height:1px;background-color:silver;}' +
+               (conf.popup.font_size ? '#pp-popup{font-size:' + conf.popup.font_size + ';}' : '') +
+               '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                'hr + br, hr ~ br{display:none;}' +
                // ポップアップ/検索欄がz-index:1000なので
-               'div.popup{background-color:white;position:fixed;padding:3px;' +
+               '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
-               'div.popup .header{line-height:1.1em;}' +
-               //'div.popup .page_counter{font-size:smaller;color:gray;line-height:1em;}' +
-               'div.popup .title{font-size:larger;font-weight:bold;}' +
-               'div.popup .title:hover{text-decoration:none;}' +
-               'div.popup .right{float:right;font-size:smaller;}' +
-               'div.popup .right > * + *{margin-left:0.4em;}' +
-               'div.popup .right a{color:#258fb8;font-weight:bold;}' +
-               'div.popup .right a[enable]{color:gray;font-weight:normal;}' +
-               'div.popup .header{background-color:white;}' +
-               'div.popup .header .caption{padding-top:2px;position:absolute;' +
+               '#pp-popup #pp-header{line-height:1.1em;}' +
+               '#pp-popup #pp-title{font-size:larger;font-weight:bold;}' +
+               '#pp-popup #pp-title:hover{text-decoration:none;}' +
+               '#pp-popup #pp-right{float:right;font-size:smaller;}' +
+               '#pp-popup #pp-right > * + *{margin-left:0.4em;}' +
+               '#pp-popup #pp-right a{color:#258fb8;font-weight:bold;}' +
+               '#pp-popup #pp-right a[enable]{color:gray;font-weight:normal;}' +
+               '#pp-popup #pp-header{background-color:white;}' +
+               '#pp-popup #pp-header #pp-caption{padding-top:2px;position:absolute;' +
                '  background-color:white;z-index:10010;opacity:0;padding-bottom:1px;}' +
-               'div.popup .header:hover .caption{opacity:' + conf.popup.caption_opacity + ';}' +
-               'div.popup .header .caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
-               'div.popup .caption .separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-               'div.popup .comment_wrap{overflow:auto;line-height:1.2em;}' +
-               'div.popup .tags > * + *{margin-left:0.6em;}' +
-               'div.popup .tags > span > a + a{margin-left:0.2em;}' +
-               'div.popup .tags > .tageditbtn{font-size:smaller;color:gray;line-height:1.1em;}' +
-               'div.popup .post_cap{line-height:1.1em;position:relative;}' +
-               'div.popup .post_cap .author_img{box-sizing:border-box;' +
+               '#pp-popup #pp-header:hover #pp-caption{opacity:' + conf.popup.caption_opacity + ';}' +
+               '#pp-popup #pp-header #pp-caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
+               '#pp-popup #pp-caption .pp-separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
+               '#pp-popup #pp-comment-wrap{overflow:auto;line-height:1.2em;}' +
+               '#pp-popup #tag_area > * + *{margin-left:0.6em;}' +
+               '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
+               '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
+               '#pp-popup #pp-post-cap{line-height:1.1em;position:relative;}' +
+               '#pp-popup #pp-post-cap #pp-author-img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
-               'div.popup .post_cap .author_img:hover{max-height:100%;}' +
-               'div.popup .post_cap .date_wrap > span + span{margin-left:0.6em;}' +
-               'div.popup .post_cap .date_wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
-               'div.popup .post_cap .date_repost{font-size:smaller;line-height:1.1em;}' +
-               'div.popup .post_cap .date_repost:before{content:"(\u518d ";}' +
-               'div.popup .post_cap .date_repost:after{content:")";}' +
-               'div.popup .post_cap .info_wrap > span + span{margin-left:0.6em;}' +
-               'div.popup .post_cap .info_wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
-               'div.popup .post_cap .info_tools > * + *{margin-left:0.6em;}' +
-               'div.popup .post_cap .author_status{position:absolute;left:3px;top:2px;display:inline-block;}' +
-               'div.popup .post_cap .author_img:hover + .author_status{display:none;}' +
-               'div.popup .post_cap .author a{font-weight:bold;}' +
-               'div.popup .post_cap .author a + a{margin-left:0.6em;}' +
-               'div.popup .bm_edit{margin-top:2px;}' +
-               'div.popup .img_div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
-               'div.popup .img_div img, div.popup .img_div svg{border:1px solid silver;}' +
-               'div.popup .olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
-               'div.popup .olc:hover{opacity:0.6;}' +
-               'div.popup .olc-prev{left:3px;}' +
-               'div.popup .olc-next{right:3px;}' +
+               '#pp-popup #pp-post-cap #pp-author-img:hover{max-height:100%;}' +
+               '#pp-popup #pp-post-cap #pp-date-wrap > span + span{margin-left:0.6em;}' +
+               '#pp-popup #pp-post-cap #pp-date-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
+               '#pp-popup #pp-post-cap #pp-date-repost{font-size:smaller;line-height:1.1em;}' +
+               '#pp-popup #pp-post-cap #pp-date-repost:before{content:"(\u518d ";}' +
+               '#pp-popup #pp-post-cap #pp-date-repost:after{content:")";}' +
+               '#pp-popup #pp-post-cap #pp-info-wrap > span + span{margin-left:0.6em;}' +
+               '#pp-popup #pp-post-cap #pp-info-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
+               '#pp-popup #pp-post-cap #pp-info-tools > * + *{margin-left:0.6em;}' +
+               '#pp-popup #pp-post-cap #pp-author-status{position:absolute;left:3px;top:2px;display:inline-block;}' +
+               '#pp-popup #pp-post-cap #pp-author-img:hover + #pp-author-status{display:none;}' +
+               '#pp-popup #pp-post-cap #pp-author a{font-weight:bold;}' +
+               '#pp-popup #pp-post-cap #pp-author a + a{margin-left:0.6em;}' +
+               '#pp-popup #pp-bm-edit{margin-top:2px;}' +
+               '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:320px;line-height:0px;}' +
+               '#pp-popup #pp-img-div img, #pp-popup #pp-img-div svg{border:1px solid silver;}' +
+               '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
+               '#pp-popup .pp-olc:hover{opacity:0.6;}' +
+               '#pp-popup #pp-olc-prev{left:3px;}' +
+               '#pp-popup #pp-olc-next{right:3px;}' +
                /*
-                'div.popup .olc-prev:before, div.popup .olc-next:before{display:block;position:absolute;bottom:0;' +
+                '#pp-popup .olc-prev:before, #pp-popup .olc-next:before{display:block;position:absolute;bottom:0;' +
                 '  background-color:white;border:1px solid silver;border-bottom-width:0px;font-size:120%;font-weight:bold;' +
                 '  padding:0.2em 0.6em;text-decoration:none;line-height:1em;background-color:white;color:gray;}' +
-                'div.popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
-                'div.popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
+                '#pp-popup .olc-prev:before{left:0px;content:"Prev";border-left-width:0px;border-top-right-radius:0.6em;}' +
+                '#pp-popup .olc-next:before{right:0px;content:"Next";border-right-width:0px;border-top-left-radius:0.6em;}' +
                 */
-               (conf.popup.remove_pixpedia ? "div.popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
+               (conf.popup.remove_pixpedia ? "#pp-popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
                // rating
-               'div.popup .rating.works_area{padding:0px !important;}' +
-               'div.popup .rating.works_area input{display:block;line-height:1em;}' +
-               'div.popup .rating.works_area input:focus{background-color:#feffdf;}' +
-               'div.popup .rating span + span{margin-left:0.4em;}' +
-               'div.popup .rating ul.unit-rating{margin:0px;float:none;}' +
-               'div.popup .rating #quality_rating{float:none !important;}' +
-               'div.popup .rating h4{margin:0px;}' +
-               //'div.popup .rating #result{font-size:inherit !important;width:330px;}' +
-               'div.popup .rating #result{font-size:inherit !important;width:100% !important;}' +
-               'div.popup .rating #result > div{width:auto !important;}' +
-               //'div.popup .rating dl.ra_a{line-height:1.1em;}' +
-               'div.popup .rating dl.ra_a dt{width:100%;}' +
-               'div.popup .rating dl.ra_a dd{margin-top:-1.1em;}' +
-               'div.popup .rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
-               'div.popup .rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
-               'div.popup .rating #result div[highlight]{background-color:#efefef;}' +
-               'div.popup .rating #quality_rating{width:100% !important;}' +
+               '#pp-popup #pp-rating{padding:0px !important;}' +
+               '#pp-popup #pp-rating input{display:block;line-height:1em;}' +
+               '#pp-popup #pp-rating input:focus{background-color:#feffdf;}' +
+               '#pp-popup #pp-rating span + span{margin-left:0.4em;}' +
+               '#pp-popup #pp-rating ul.unit-rating{margin:0px;float:none;}' +
+               '#pp-popup #pp-rating #quality_rating{float:none !important;}' +
+               '#pp-popup #pp-rating h4{margin:0px;}' +
+               '#pp-popup #pp-rating #result{font-size:inherit !important;width:100% !important;}' +
+               '#pp-popup #pp-rating #result > div{width:auto !important;}' +
+               '#pp-popup #pp-rating dl.ra_a dt{width:100%;}' +
+               '#pp-popup #pp-rating dl.ra_a dd{margin-top:-1.1em;}' +
+               '#pp-popup #pp-rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
+               '#pp-popup #pp-rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
+               '#pp-popup #pp-rating #result div[highlight]{background-color:#efefef;}' +
+               '#pp-popup #pp-rating #quality_rating{width:100% !important;}' +
                // comments
-               'div.popup .viewer_comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
-               'div.popup .viewer_comments input + input{margin-left:0.4em;}' +
-               'div.popup .viewer_comments .worksComment{padding:2px 0px;}' +
-               'div.popup .viewer_comments .worksComment:last-child{border:none;}'
+               '#pp-popup #pp-viewer-comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
+               '#pp-popup #pp-viewer-comments input + input{margin-left:0.4em;}' +
+               '#pp-popup #pp-viewer-comments .worksComment{padding:2px 0px;}' +
+               '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
               );
 
      if (!(window.opera && opera.extension) || LS.get('extension', 'show_config_ui') == 'true') {
@@ -1995,65 +1992,60 @@
    };
 
    function Popup(item, manga_page) {
-     this.root_div              = $c('div',     null,               'popup');
-     this.header                = $c('div',     this.root_div,      'header');
+     this.root_div              = $c('div',     null,               'pp-popup');
+     this.header                = $c('div',     this.root_div,      'pp-header');
      // 文字によってはキャプションの幅計算が壊れるのでタイトルをblockなエレメントでラップする
-     this.title_div             = $c('div',     this.header,        'title_wrapper');
-     //this.page_counter          = $c('span',    this.title_div,     'page_counter');
-     this.title                 = $c('a',       this.title_div,     'title');
+     this.title_div             = $c('div',     this.header,        'pp-title_wrapper');
+     this.title                 = $c('a',       this.title_div,     'pp-title');
      this.title.setAttribute('nopopup', '');
-     this.header_right          = $c('span',    this.title_div,     'right');
-     this.status                = $c('span',    this.header_right,  'status');
+     this.header_right          = $c('span',    this.title_div,     'pp-right');
+     this.status                = $c('span',    this.header_right,  'pp-status');
      this.status.style.display  = 'none';
-     this.manga_btn             = $c('a',       this.header_right,  'manga_btn');
+     this.manga_btn             = $c('a',       this.header_right,  'pp-manga-btn');
      $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); }, this));
-     this.res_btn               = Popup.create_button('[R]', this.header_right, 'res_btn');
-     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'comments_btn',
+     this.res_btn               = Popup.create_button('[R]', this.header_right, 'pp-res-btn');
+     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
                                                       bind(this.toggle_viewer_comments, this));
-     this.bm_btn                = Popup.create_button('[B]', this.header_right, 'bm_btn',
+     this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                       bind(this.edit_bookmark, this));
-     this.caption               = $c('div',     this.header,        'caption');
-     this.err_msg               = $c('div',     this.caption,       'error separator');
-     this.comment_wrap          = $c('div',     this.caption,       'comment_wrap');
-     this.comment               = $c('div',     this.comment_wrap,  'comment');
-     this.viewer_comments       = $c('div',     this.comment_wrap,  'viewer_comments');
-     this.viewer_comments.id    = 'pp_viewer_comments';
+     this.caption               = $c('div',     this.header,        'pp-caption');
+     this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator');
+     this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
+     this.comment               = $c('div',     this.comment_wrap,  'pp-comment');
+     this.viewer_comments       = $c('div',     this.comment_wrap,  'pp-viewer-comments');
      this.viewer_comments_w     = $c('div',     this.viewer_comments);
      this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
-     this.viewer_comments_a     = $c('div',     this.viewer_comments_w);
-     this.viewer_comments_a.id  = 'one_comment_area';
-     this.tag_edit              = $c('div',     this.comment_wrap);
-     this.tag_edit.id           = 'tag_edit';
-     this.tags                  = $c('div',     this.caption,       'tags separator');
-     this.tags.id               = 'tag_area';
-     this.rating                = $c('div',     this.caption,       'rating separator works_area');
-     this.post_cap              = $c('div',     this.caption,       'post_cap');
-     this.a_img                 = $c('img',     this.post_cap,      'author_img');
-     this.a_status              = $c('span',    this.post_cap,      'author_status');
-     this.date_wrap             = $c('span',    this.post_cap,      'date_wrap');
-     this.date                  = $c('span',    this.date_wrap,     'date');
-     this.date_repost           = $c('span',    this.date_wrap,     'date_repost');
-     this.info                  = $c('span',    this.post_cap,      'info_wrap');
-     this.info_size             = $c('span',    this.info,          'info_size');
-     this.info_scale            = $c('span',    this.info,          'info_scale');
-     this.info_tools            = $c('span',    this.info,          'info_tools');
-     this.author                = $c('span',    this.post_cap,      'author');
+     this.viewer_comments_a     = $c('div',     this.viewer_comments_w, 'one_comment_area');
+     this.tag_edit              = $c('div',     this.comment_wrap,  'tag_edit');
+     this.tags                  = $c('div',     this.caption,       'tag_area', 'pp-separator');
+     this.rating                = $c('div',     this.caption,       'pp-rating', 'pp-separator works_area');
+     this.post_cap              = $c('div',     this.caption,       'pp-post-cap');
+     this.a_img                 = $c('img',     this.post_cap,      'pp-author-img');
+     this.a_status              = $c('span',    this.post_cap,      'pp-author-status');
+     this.date_wrap             = $c('span',    this.post_cap,      'pp-date-wrap');
+     this.date                  = $c('span',    this.date_wrap,     'pp-date');
+     this.date_repost           = $c('span',    this.date_wrap,     'pp-date-repost');
+     this.info                  = $c('span',    this.post_cap,      'pp-info-wrap');
+     this.info_size             = $c('span',    this.info,          'pp-info-size');
+     this.info_scale            = $c('span',    this.info,          'pp-info-scale');
+     this.info_tools            = $c('span',    this.info,          'pp-info-tools');
+     this.author                = $c('span',    this.post_cap,      'pp-author');
      this.a_profile             = $c('a',       this.author);
      this.a_illust              = $c('a',       this.author);
-     this.a_illust.textContent    = '\u4f5c\u54c1';
+     this.a_illust.textContent  = '\u4f5c\u54c1';
      this.a_bookmark            = $c('a',       this.author);
-     this.a_bookmark.textContent  = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
+     this.a_bookmark.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
      this.a_stacc               = $c('a',       this.author);
-     this.a_stacc.textContent     = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
-     this.bm_edit               = $c('div',     this.root_div,      'bm_edit');
-     this.img_div               = $c('div',     this.root_div,      'img_div');
+     this.a_stacc.textContent   = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
+     this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
+     this.img_div               = $c('div',     this.root_div,      'pp-img-div');
      this.img_anc               = $c('a',       this.img_div);
      this.image                 = $c('img',     this.img_anc);
      this.image_scaled          = this.image;
 
      if (conf.popup.overlay_control > 0) {
-       this.olc_prev              = $c('span',    this.img_div,       'olc olc-prev');
-       this.olc_next              = $c('span',    this.img_div,       'olc olc-next');
+       this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
+       this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
        $ev(this.olc_prev).click(bind(function() { this.prev(false, false, true); }, this));
        $ev(this.olc_next).click(bind(function() { this.next(false, false, true); }, this));
      }
@@ -2236,8 +2228,8 @@
      Popup.instant_prev = item;
      return Popup.run(item);
    };
-   Popup.create_button = function(text, parent, cls, cb_click) {
-     var btn = $c('a', parent, cls);
+   Popup.create_button = function(text, parent, id, cb_click) {
+     var btn = $c('a', parent, id);
      btn.href = 'javascript:void(0)';
      btn.textContent = text;
      if (cb_click) $ev(btn).click(cb_click);
@@ -2345,21 +2337,6 @@
      if (!item && loop && g) item = r ? g.last : g.first;
      this.set(item, true, close);
    };
-   /*
-    Popup.prototype.update_page_counter = function(item) {
-    if (item.gallery && item.page_item && item.page_col) {
-    var text = '';
-    if (item.gallery.page_col < item.gallery.page_item) {
-    text += item.page_col + '+';
-    }
-    text += item.page_item;
-    this.page_counter.textContent = '[' + text + ']';
-    this.page_counter.style.display = '';
-    } else {
-    this.page_counter.style.display = 'none';
-    }
-    };
-    */
    Popup.prototype.set = function(item, scroll, close, reload, manga_page) {
      if (!item) {
        if (close) this.close();
@@ -2367,7 +2344,6 @@
      }
      if (this.loader) this.loader.cancel();
      if (!this.item && item.caption) {
-       //this.update_page_counter(item);
        this.title.textContent = trim(item.caption.textContent);
        this.title.href = item.medium;
      }
@@ -2397,7 +2373,6 @@
      var self = this;
      //this.root_div.style.visibility = 'hidden';
      this.complete();
-     //this.update_page_counter(this.item);
 
      if (scroll) lazy_scroll(this.item.thumb || this.item.caption);
 
@@ -2491,15 +2466,15 @@
        }
        if (conf.popup.author_status_icon) {
          if (loader.text.match(/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i)) {
-           a_status_class = ' pixplus-flag';
+           a_status_class = 'pixplus-flag';
          } else if (loader.text.match(/<span[^>]+class=\"list_fav\">/i)) {
-           a_status_class = ' pixplus-heart';
+           a_status_class = 'pixplus-heart';
          } else if (loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
-           a_status_class = ' pixplus-check';
+           a_status_class = 'pixplus-check';
          }
        }
        if (a_status_class) {
-         this.a_status.className = 'author_status' + a_status_class;
+         this.a_status.className = a_status_class;
          this.a_status.style.display = '';
        } else {
          this.a_status.style.display = 'none';
@@ -2557,7 +2532,7 @@
          // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
          if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
              loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
-           html += '<a href="javascript:void(0)" class="tageditbtn" onclick="startTagEdit()">[E]</a>';
+           html += '<a href="javascript:void(0)" id="pp-tag-edit-btn" onclick="startTagEdit()">[E]</a>';
            this.tag_edit_enabled = true;
          }
          this.tags.innerHTML = html;
@@ -3220,27 +3195,27 @@
      var tags_illust   = tag_wrap_it ? $xa('ul/li/a', tag_wrap_it) : [];
      var tags_bookmark = $xa('ul/li/a', tag_wrap_bm);
 
-     if (root.className.indexOf('pixplus_bm_wrap') < 0) root.className += ' pixplus_bm_wrap';
+     if (root.className.indexOf('pp-bm-wrap') < 0) root.className += ' pp-bm-wrap';
      if (!arguments.callee.css_written) {
-       write_css('.pixplus_bm_wrap .bookmain_title{padding:4px;}' +
-                 '.pixplus_bm_wrap .bookmain_title_img{text-align:left;}' +
-                 '.pixplus_bm_wrap .box_main_sender{padding-right:0px;padding-bottom:0px;}' +
-                 '.pixplus_bm_wrap .box_one_body{padding:0px;}' +
-                 '.pixplus_bm_wrap .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}' +
-                 '.pixplus_bm_wrap .box_one_body > dl:last-child{padding:4px;}' +
-                 '.pixplus_bm_wrap .box_one_body > dl > dd{margin-top:-24px;}' +
-                 '.pixplus_bm_wrap .autoinput_wrap{text-align:right;line-height:normal;margin-top:4px;}' +
-                 '.pixplus_bm_wrap .autoinput_wrap > a + a{margin-left:0.6em;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag{margin:4px;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > span:first-child{display:none;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > br{display:none;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}' +
-                 '.pixplus_bm_wrap .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}' +
-                 '.pixplus_bm_wrap .bookmark_bottom{padding-bottom:4px;}' +
-                 '.pixplus_bm_wrap .bookmark_bottom input{margin:0px;}');
+       write_css('.pp-bm-wrap .bookmain_title{padding:4px;}' +
+                 '.pp-bm-wrap .bookmain_title_img{text-align:left;}' +
+                 '.pp-bm-wrap .box_main_sender{padding-right:0px;padding-bottom:0px;}' +
+                 '.pp-bm-wrap .box_one_body{padding:0px;}' +
+                 '.pp-bm-wrap .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}' +
+                 '.pp-bm-wrap .box_one_body > dl:last-child{padding:4px;}' +
+                 '.pp-bm-wrap .box_one_body > dl > dd{margin-top:-24px;}' +
+                 '.pp-bm-wrap #pp-autoinput-wrap{text-align:right;line-height:normal;margin-top:4px;}' +
+                 '.pp-bm-wrap #pp-autoinput-wrap > a + a{margin-left:0.6em;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag{margin:4px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > span:first-child{display:none;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > br{display:none;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}' +
+                 '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
+                 '.pp-bm-wrap .bookmark_bottom input{margin:0px;}');
        arguments.callee.css_written = true;
      }
 
@@ -3269,7 +3244,7 @@
 
      var closed = false;
      if (on_close) {
-       var close  = $c('input', submit.parentNode, 'btn_type01 bookmark_submit_btn');
+       var close  = $c('input', submit.parentNode, null, 'btn_type01 bookmark_submit_btn');
        close.type  = 'button';
        close.value = '\u3000\u9589\u3058\u308b\u3000';
        close.addEventListener(
@@ -3283,7 +3258,7 @@
          }, false);
      }
 
-     var autoinput_wrap = $c('div', null, 'autoinput_wrap');
+     var autoinput_wrap = $c('div', null, 'pp-autoinput-wrap');
      create_anc('\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304b\u3089', autoinput_from_caption, autoinput_wrap);
      create_anc('\u81ea\u52d5\u5165\u529b', autoinput_from_tag, autoinput_wrap);
      input_tag.parentNode.appendChild(autoinput_wrap);
@@ -3372,7 +3347,7 @@
               });
          each(reorder_tags($xa('ul/li', tag_wrap_bm)),
               function(list) {
-                var ul = $c('ul', tag_wrap_bm, 'tagCloud');
+                var ul = $c('ul', tag_wrap_bm, null, 'tagCloud');
                 each(
                   list,
                   function(li) {
@@ -3751,9 +3726,10 @@
    function $t(tag, elem) {
      return (elem || window.document).getElementsByTagName(tag);
    }
-   function $c(tag, parent, cls) {
+   function $c(tag, parent, id, cls) {
      var elem = window.document.createElement(tag);
      if (parent) parent.appendChild(elem);
+     if (id) elem.id = id;
      if (cls) elem.className = cls;
      return elem;
    }
