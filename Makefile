@@ -95,13 +95,13 @@ $(GREASEMONKEY_JS): $(SRC_USERJS)
 	sed -e '/__OPERA_BEGIN__/,/__OPERA_END__/d' -e '/__GREASEMONKEY_BEGIN__/d' -e '/__GREASEMONKEY_END__/d' < $< > $@
 
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
-	sed -e '/@ICONS@/,$$d' < $< > $@
+	sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
            test $$first -eq 1 && first=0 || echo ',' >> $@; \
            /bin/echo -n "    \"$$size\": \"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\"" >> $@; \
          done
 	echo >> $@;
-	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< >> $@
+	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< | tr -d '\r' >> $@
 
 $(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
 	rm -rf $(CRX_TMP_DIR)
