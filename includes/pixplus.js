@@ -1,16 +1,14 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.3.1
+// @version     0.3.2
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // ==/UserScript==
 
-/** 0.3.1
- * Opera以外のブラウザにおいて一部のページで評価やコメント表示などの機能の動作が変だったバグを修正。
- * conf.popup.rate_key=trueの時、Shiftキーなしで評価できていたバグを修正。
+/** 0.3.2
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
