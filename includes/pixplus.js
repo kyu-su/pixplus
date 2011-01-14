@@ -914,8 +914,8 @@
          }
        }
        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-                    xpath_cap: './ul/li/label'},
-                   unpack_captions_label, conf.debug ? debug_filter : null);
+                    xpath_cap: './ul/li/text()[preceding-sibling::a/img]'},
+                   unpack_captions, conf.debug ? debug_filter : null);
      } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
        // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
        // 下部の「****の他の作品」
