@@ -51,12 +51,14 @@ function init() {
         type == 'boolean' ? 'change' : 'keyup',
         function() {
           var value;
-          if (type == 'boolean') {
-            value = input.checked;
-          } else {
-            value = conf.conv[type][0](input.value);
-          }
-          conf.set(sec.name, key, value);
+          try {
+            if (type == 'boolean') {
+              value = input.checked;
+            } else {
+              value = conf.conv[type][0](input.value);
+            }
+            conf.set(sec.name, key, value);
+          } catch(ex) { }
         }, false);
 
       ++idx;

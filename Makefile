@@ -62,7 +62,7 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo 'var conf_schema = {' > $@
 	@a=1;for f in $(SRC_USERJS); do \
            test $$a = 1 && a=0 || echo ',' >> $@; \
-           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f >> $@; \
+           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f | tr -d '\r' >> $@; \
          done
 	echo '};' >> $@
 
@@ -70,7 +70,7 @@ $(PARSER_JS): $(SRC_USERJS)
 	echo 'var parser = {' > $@
 	@a=1;for f in $(SRC_USERJS); do \
            test $$a = 1 && a=0 || echo ',' >> $@; \
-           sed -e '1,/__PARSER_FUNCTIONS_BEGIN__/d' -e '/__PARSER_FUNCTIONS_END__/,$$d' < $$f >> $@; \
+           sed -e '1,/__PARSER_FUNCTIONS_BEGIN__/d' -e '/__PARSER_FUNCTIONS_END__/,$$d' < $$f | tr -d '\r' >> $@; \
          done
 	echo '};' >> $@
 

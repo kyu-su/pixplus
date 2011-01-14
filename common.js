@@ -7,7 +7,15 @@ var conf = {
     'string':  [String, String],
     'boolean': [function(s) { return s == 'true'; },
                 function(v) { return v ? 'true' : 'false'; }],
-    'number':  [parseFloat, String]
+    'number':  [function(s) {
+                  var v = parseFloat(s);
+                  if (isNaN(v)) {
+                    throw 1;
+                  } else {
+                    return v;
+                  }
+                },
+                String]
   },
   l: [{name:   'extension',
        label:  'Extension',
