@@ -493,7 +493,6 @@
      window.__defineSetter__(
        name,
        function(func) {
-         log('wrap_global_function: <' + name);
          orig = func;
        });
      function wrap() {
