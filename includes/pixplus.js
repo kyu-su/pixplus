@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.3.2
+// @version     0.3.3
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
+// @exclude     *pixivreader*
 // ==/UserScript==
 
-/** 0.3.2
- * ブックマーク管理ページで上手く動作していなかった不具合を修正。
+/** 0.3.3
+ * pixivreaderと衝突するらしいので、excludeに追加。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
