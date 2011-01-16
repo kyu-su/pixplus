@@ -501,7 +501,7 @@
    }
 
    defineMagicFunction(
-     'sendRequest',
+     'sendRequest', /* WARN */
      function(real, othis, url) {
        url = mod_rpc_url(url);
        real.apply(othis, [url].concat([].slice.apply(arguments, [3])));
@@ -546,7 +546,7 @@
      });
    // rate
    defineMagicFunction(
-     'countup_rating',
+     'countup_rating', /* WARN */
      function(real, othis, score) {
        var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
        if (conf.rate_confirm && !confirm(msg)) return;
@@ -554,7 +554,7 @@
        real.apply(othis, [].slice.apply(arguments, [2]));
      });
    defineMagicFunction(
-     'send_quality_rating',
+     'send_quality_rating', /* WARN */
      function(real, othis) {
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
 
@@ -581,7 +581,7 @@
        window.jQuery.ajax = _ajax;
      });
    defineMagicFunction(
-     'rating_ef',
+     'rating_ef', /* WARN */
      function(real, othis) {
        window.jQuery('#quality_rating').slideDown(200, after_show);
        function after_show() {
@@ -590,7 +590,7 @@
        }
      });
    defineMagicFunction(
-     'rating_ef2',
+     'rating_ef2', /* WARN */
      function(real, othis) {
        if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
        real.apply(othis, [].slice.apply(arguments, [2]));
