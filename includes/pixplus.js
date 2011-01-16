@@ -470,6 +470,150 @@
        }, false);
    }
 
+   function mod_rpc_url(url) {
+     if (url == './rpc_rating.php') {
+       return '/rpc_rating.php';
+     } else if (url == './rpc_tag_edit.php') {
+       return '/rpc_tag_edit.php';
+     }
+     return url;
+   }
+
+   //var defineMagicFunction = window.opera ? window.opera.defineMagicFunction : wrap_global_function;
+   var defineMagicFunction = wrap_global_function;
+   function wrap_global_function(name, func) {
+     if (!name || !func) return;
+     var orig = window[name] || function() { };
+     window[name] = wrap;
+     window.__defineGetter__(
+       name,
+       function() {
+         return wrap;
+       });
+     window.__defineSetter__(
+       name,
+       function(func) {
+         log('wrap_global_function: <' + name);
+         orig = func;
+       });
+     function wrap() {
+       func.apply(window, [orig, this].concat([].slice.apply(arguments)));
+     };
+   }
+
+   defineMagicFunction(
+     'sendRequest',
+     function(real, othis, url) {
+       url = mod_rpc_url(url);
+       real.apply(othis, [url].concat([].slice.apply(arguments, [3])));
+     });
+   // tag edit
+   defineMagicFunction(
+     'on_loaded_tag',
+     function(real, othis) {
+       if (Popup.instance && Popup.instance.tag_edit_enabled) {
+         Popup.instance.tag_editing = true;
+         Popup.instance.locate();
+       }
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   defineMagicFunction(
+     'ef2',
+     function(real, othis) {
+       real.apply(othis, [].slice.apply(arguments, [2]));
+       if (Popup.instance && Popup.instance.tag_edit_enabled) {
+         var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
+         window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
+       }
+     });
+   defineMagicFunction(
+     'ef4',
+     function(real, othis) {
+       new window.Effect.BlindDown(
+         'tag_area', {
+	   delay:0.2,
+	   duration:0.2,
+           afterFinish: function() {
+             if (Popup.instance && Popup.instance.tag_editing) {
+               Popup.instance.tag_editing = false;
+               Popup.instance.locate();
+               Popup.instance.reload();
+             }
+             if (lc(window.document.activeElement.tagName || '') == 'input') {
+               window.document.activeElement.blur();
+             }
+           }
+         });
+     });
+   // rate
+   defineMagicFunction(
+     'countup_rating',
+     function(real, othis, score) {
+       var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
+       if (conf.rate_confirm && !confirm(msg)) return;
+       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   defineMagicFunction(
+     'send_quality_rating',
+     function(real, othis) {
+       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+
+       var _ajax = window.jQuery.ajax;
+       window.jQuery.ajax = function(obj) {
+         var othis = this;
+         var success = obj.success;
+         obj.success = function() {
+           success.apply(othis, [].slice.apply(arguments));
+           if (Popup.instance && Popup.instance.has_qrate) {
+             if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+             each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
+                  function(item) {
+                    if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
+                      var value = $x('following-sibling::div', item);
+                      if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                    }
+                  });
+           }
+         };
+         return _ajax.apply(this, [obj]);
+       };
+       real.apply(othis, [].slice.apply(arguments, [2]));
+       window.jQuery.ajax = _ajax;
+     });
+   defineMagicFunction(
+     'rating_ef',
+     function(real, othis) {
+       window.jQuery('#quality_rating').slideDown(200, after_show);
+       function after_show() {
+         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
+         if (f) f.focus();
+       }
+     });
+   defineMagicFunction(
+     'rating_ef2',
+     function(real, othis) {
+       if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
+       real.apply(othis, [].slice.apply(arguments, [2]));
+     });
+   // viewer comments
+   defineMagicFunction(
+     'on_loaded_one_comment_view',
+     function(real, othis) {
+       real.apply(othis, [].slice.apply(arguments, [2]));
+       if (Popup.instance && Popup.instance.viewer_comments_enabled) {
+         each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
+                  Popup.instance.viewer_comments_a),
+              function(btn) {
+                $ev(btn).click(
+                  function() {
+                    geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
+                           function() { safeWindow.alert('Error!'); }, true);
+                  });
+              });
+       }
+     });
+
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
@@ -1657,15 +1801,6 @@
         })();
      }
 
-     function mod_rpc_url(url) {
-       if (url == './rpc_rating.php') {
-         return '/rpc_rating.php';
-       } else if (url == './rpc_tag_edit.php') {
-         return '/rpc_tag_edit.php';
-       }
-       return url;
-     }
-
      (function($js) {
         if (!$x('//script[contains(@src, "/rating_manga")]')) {
           $js = $js.script(pp.url.js.rating);
@@ -1689,12 +1824,6 @@
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
          .wait(function() {
-                 var _sendRequest = window.sendRequest;
-                 window.sendRequest = function(url) {
-                   url = mod_rpc_url(url);
-                   _sendRequest.apply(this, [url].concat([].slice.apply(arguments, [1]))); /* WARN */
-                 };
-
                  LS.wait(
                    function() {
                      if (conf.disable_effect) {
@@ -1707,118 +1836,7 @@
                    });
                })
         )
-       .script(pp.url.js.tag_edit)
-       .wait(function() {
-               var _showTags = window.showTags;
-               window.showTags = function() {
-                 _showTags.apply(this, [].slice.apply(arguments));
-
-                 var _display = this.display;
-                 this.display = function() {
-                   if (Popup.instance && Popup.instance.tag_edit_enabled) {
-                     Popup.instance.tag_editing = true;
-                     Popup.instance.locate();
-                     //window.jQuery(Popup.instance.comment).slideUp(200);
-                     //window.jQuery(Popup.instance.viewer_comments).slideUp(200);
-                   }
-                   _display.apply(this, [].slice.apply(arguments));
-                 };
-               };
-
-               var _ef2 = window.ef2;
-               window.ef2 = function() {
-                 _ef2.apply(this, [].slice.apply(arguments));
-                 //window.jQuery('#tag_edit').slideDown(200);
-                 if (Popup.instance && Popup.instance.tag_edit_enabled) {
-                   var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
-                   window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
-                 }
-               };
-
-               window.ef4 = function() {
-                 new window.Effect.BlindDown(
-                   'tag_area', {
-	             delay:0.2,
-	             duration:0.2,
-                     afterFinish: function() {
-                       if (Popup.instance && Popup.instance.tag_editing) {
-                         Popup.instance.tag_editing = false;
-                         Popup.instance.locate();
-                         Popup.instance.reload();
-                       }
-                       if (lc(window.document.activeElement.tagName || '') == 'input') {
-                         window.document.activeElement.blur();
-                       }
-                     }
-                   });
-               };
-
-               // rating
-               var _countup_rating = window.countup_rating;
-               window.countup_rating = function(score) {
-                 var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
-                 if (conf.rate_confirm && !confirm(msg)) return;
-                 if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-                 _countup_rating.apply(this, [].slice.apply(arguments)); /* WARN */
-               };
-               var _send_quality_rating = window.send_quality_rating;
-               window.send_quality_rating = function() {
-                 if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-
-                 var _ajax = window.jQuery.ajax;
-                 window.jQuery.ajax = function(obj) {
-                   var othis = this;
-                   var success = obj.success;
-                   obj.success = function() {
-                     success.apply(othis, [].slice.apply(arguments));
-                     if (Popup.instance && Popup.instance.has_qrate) {
-                       if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-                       each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                            function(item) {
-                              if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
-                                var value = $x('following-sibling::div', item);
-                                if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
-                              }
-                            });
-                     }
-                   };
-                   return _ajax.apply(this, [obj]);
-                 };
-                 _send_quality_rating.apply(this, [].slice.apply(arguments)); /* WARN */
-                 window.jQuery.ajax = _ajax;
-               };
-               log(window.rating_ef);
-               var _rating_ef = window.rating_ef;
-               window.rating_ef = function() {
-                 window.jQuery('#quality_rating').slideDown(200, after_show);
-                 function after_show() {
-                   var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
-                   if (f) f.focus();
-                 }
-               };
-               var _rating_ef2 = window.rating_ef2;
-               window.rating_ef2 = function() {
-                 if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
-                 return _rating_ef2.apply(this, [].slice.apply(arguments)); /* WARN */
-               };
-
-               // viewer comments
-               var _on_loaded_one_comment_view = window.on_loaded_one_comment_view;
-               window.on_loaded_one_comment_view = function() {
-                 _on_loaded_one_comment_view.apply(this, [].slice.apply(arguments));
-                 if (Popup.instance && Popup.instance.viewer_comments_enabled) {
-                   each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
-                            Popup.instance.viewer_comments_a),
-                        function(btn) {
-                          $ev(btn).click(
-                            function() {
-                              geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                                     function() { safeWindow.alert('Error!'); }, true);
-                            });
-                        });
-                 }
-               };
-             });
+       .script(pp.url.js.tag_edit);
    }
 
    function GalleryItem(url, thumb, caption, prev, gallery) {
