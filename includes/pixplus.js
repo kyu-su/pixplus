@@ -358,6 +358,24 @@
        }
        return aliases;
      },
+     bm_tag_order_to_str: function(bm_tag_order) {
+       var str = '';
+       if (!bm_tag_order) return str;
+       each(bm_tag_order,
+            function(ary, idx) {
+              each(ary, function(tag, idx) { if (tag === null) ary[idx] = '*'; } );
+              if (idx) str += '-\n';
+              str += ary.join('\n') + '\n';
+            });
+       return str;
+     },
+     bm_tag_aliases_to_str: function(bm_tag_aliases) {
+       var str = '';
+       for(var key in bm_tag_aliases) {
+         str += key + '\n' + bm_tag_aliases[key] + '\n';
+       }
+       return str;
+     },
      /* __PARSER_FUNCTIONS_END__ */
      init: function(func) {
        each(LS.l, function(sec) { LS.init_section(sec); });
@@ -401,6 +419,16 @@
           }
           sec.keys.sort();
         });
+
+   pp.save_conf = function() {
+     LS.each(
+       function(sec, key) {
+         var val = LS.conv[sec.schema[key].type][1](sec.conf[key]);
+         if (val !== LS.get(sec.name, key)) LS.set(sec.name, key, val);
+       });
+     LS.set('bookmark', 'tag_order', LS.bm_tag_order_to_str(conf.bm_tag_order));
+     LS.set('bookmark', 'tag_aliases', LS.bm_tag_aliases_to_str(conf.bm_tag_aliases));
+   };
 
    if (window.opera && opera.extension) {
      (function() {
@@ -501,7 +529,7 @@
    }
 
    defineMagicFunction(
-     'sendRequest', /* WARN */
+     'sendRequest',
      function(real, othis, url) {
        url = mod_rpc_url(url);
        real.apply(othis, [url].concat([].slice.apply(arguments, [3])));
@@ -546,7 +574,7 @@
      });
    // rate
    defineMagicFunction(
-     'countup_rating', /* WARN */
+     'countup_rating',
      function(real, othis, score) {
        var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
        if (conf.rate_confirm && !confirm(msg)) return;
@@ -554,7 +582,7 @@
        real.apply(othis, [].slice.apply(arguments, [2]));
      });
    defineMagicFunction(
-     'send_quality_rating', /* WARN */
+     'send_quality_rating',
      function(real, othis) {
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
 
@@ -581,7 +609,7 @@
        window.jQuery.ajax = _ajax;
      });
    defineMagicFunction(
-     'rating_ef', /* WARN */
+     'rating_ef',
      function(real, othis) {
        window.jQuery('#quality_rating').slideDown(200, after_show);
        function after_show() {
@@ -590,7 +618,7 @@
        }
      });
    defineMagicFunction(
-     'rating_ef2', /* WARN */
+     'rating_ef2',
      function(real, othis) {
        if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
        real.apply(othis, [].slice.apply(arguments, [2]));
@@ -773,7 +801,7 @@
          var wrap = $('manga_top') || $('pageHeader');
          if (wrap) wrap.appendChild(div);
          init();
-         btn_bmlet.href = 'javascript:(function(){' + gen_js() + '})()';
+         btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();\nlocation.reload();\n})()';
 
          function create_section(label, parent) {
            var anc = $c('a', parent, null, 'pp-conf-section');
@@ -808,17 +836,7 @@
              }
            });
 
-         if (conf.bm_tag_order) {
-           var tag_order = '';
-           each(
-             conf.bm_tag_order,
-             function(ary, idx) {
-               each(ary, function(tag, idx) { if (tag === null) ary[idx] = '*'; } );
-               if (idx) tag_order += '-\n';
-               tag_order += ary.join('\n') + '\n';
-             });
-           tag_order_textarea.value = tag_order;
-         }
+         tag_order_textarea.value = LS.bm_tag_order_to_str(conf.bm_tag_order);
 
          tag_alias_table.innerHTML = '';
          var keys = [];
@@ -2602,13 +2620,13 @@
        this.rating_enabled = true;
 
        var anc = $x('./div[@id="rating"]/h4/a', self.rating);
-       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') { /* WARN */
+       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') {
          anc.onclick = '';
          anc.addEventListener(
            'click',
            function(ev) {
              var qr = $x('./div[@id="quality_rating"]', self.rating);
-             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef'](); /* WARN */
+             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef']();
              ev.preventDefault();
            }, false);
        }

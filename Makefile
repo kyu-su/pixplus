@@ -84,7 +84,7 @@ $(SIGNATURE): $(SIGN_FILES)
 
 $(OEX): $(DIST_FILES)
 	@for kw in $(WARN_KEYWORDS_W); do \
-           grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v '/\* WARN \*/' || : ; \
+           grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
          done
 	@for kw in $(WARN_KEYWORDS_P); do \
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
