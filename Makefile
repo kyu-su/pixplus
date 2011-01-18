@@ -25,13 +25,15 @@ MANIFEST_JSON        = manifest.json
 
 SAFARIEXTZ_TMP_DIR   = .safariextz
 INFO_PLIST           = Info.plist
+SETTINGS_PLIST       = Settings.plist
 SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
 SAFARIEXTZ_PRIV      = safari_key.pem
 
 SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES_EXTRA     = common.js index.html index.js options.html options.css options.js
-DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) $(DIST_FILES_EXTRA)
-DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(CONFIG_JS) $(PARSER_JS) $(DIST_FILES_EXTRA)
+DIST_FILES_EXTRA     = $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js
+DIST_FILES_OEX       = $(SIGN_FILES) $(DIST_FILES_EXTRA)
+DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(DIST_FILES_EXTRA)
+DIST_FILES_SAFARI    = $(INFO_PLIST) $(SETTINGS_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
 VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
@@ -53,10 +55,8 @@ $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
          done
 	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@for f in $(SRC_USERJS); do \
-           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f \
-             | sed -e '1 s/^/{/' -e '$$ s/$$/}/' | python conf-parser.py >> $@; \
-         done
+	@(echo '{'; sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS); echo '}') \
+           | python conf-parser.py opera >> $@
 	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
 	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
@@ -121,13 +121,17 @@ $(CRX): $(DIST_FILES_CRX)
 $(INFO_PLIST): $(INFO_PLIST).in
 	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
 
-$(SAFARIEXTZ): $(INFO_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
+$(SETTINGS_PLIST): $(SETTINGS_PLIST).in
+	sed -e '/__SETTINGS__/,$$d' < $< > $@
+	@(echo '{'; sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS); echo '}') \
+           | python conf-parser.py safari >> $@
+	sed -e '1,/__SETTINGS__/d' < $< >> $@
+
+$(SAFARIEXTZ): $(DIST_FILES_SAFARI)
 	rm -rf $(SAFARIEXTZ_TMP_DIR)
-	mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$(shell dirname $(SRC_USERJS))
-	cp $(INFO_PLIST) $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)
-	cp $(SRC_USERJS) $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$(shell dirname $(SRC_USERJS))
-	@for file in $(ICON_FILES_SAFARI); do \
-           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
+	@for file in $(DIST_FILES_SAFARI); do \
+           mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
+           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
          done
 	cd $(SAFARIEXTZ_TMP_DIR) && \
           $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
@@ -140,4 +144,4 @@ clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
 	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
-              $(INFO_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
+              $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
