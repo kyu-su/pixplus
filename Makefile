@@ -30,7 +30,7 @@ SAFARIEXTZ_PRIV      = safari_key.pem
 
 SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
 DIST_FILES_EXTRA     = common.js index.html index.js options.html options.css options.js
-DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) $(SIGNATURE) $(DIST_FILES_EXTRA)
+DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) $(DIST_FILES_EXTRA)
 DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(CONFIG_JS) $(PARSER_JS) $(DIST_FILES_EXTRA)
 VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
