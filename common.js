@@ -37,19 +37,23 @@ var conf = {
        path:   ['conf', 'bookmark'],
        schema: conf_schema.bookmark,
        keys:   []}],
+  s: (window.chrome
+      ? localStorage
+      : widget.preferences
+     ),
   map: {},
   get_conv: function(s, n) {
     return conf.conv[typeof conf.map[s].schema[n][0]];
   },
   get: function(s, n) {
-    var value = widget.preferences.getItem(conf.map[s].path.join('_') + '_' + n);
+    var value = conf.s.getItem(conf.map[s].path.join('_') + '_' + n);
     return value === null ? conf.map[s].schema[n][0] : conf.get_conv(s, n)[0](value);
   },
   set: function(s, n, v) {
-    widget.preferences.setItem(conf.map[s].path.join('_') + '_' + n, conf.get_conv(s, n)[1](v));
+    conf.s.setItem(conf.map[s].path.join('_') + '_' + n, conf.get_conv(s, n)[1](v));
   },
   remove: function(s, n) {
-    widget.preferences.removeItem(conf.map[s].path.join('_') + '_' + n);
+    conf.s.removeItem(conf.map[s].path.join('_') + '_' + n);
     //conf.set(s, n, conf.map[s].schema[n][0]);
   },
   each: function(func_key, func_sec) {

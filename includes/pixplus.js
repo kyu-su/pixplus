@@ -128,13 +128,30 @@
    if (window.opera || unsafeWindow) {
      func(unsafeWindow || window, window);
    } else {
-     var s = window.document.createElement('script');
-     s.setAttribute('type', 'text/javascript');
-     s.textContent = '(' + func.toString() + ')(window, window)';
-     window.document.body.appendChild(s);
+     (function(func) {
+        if (window.chrome) {
+          chrome.extension.sendRequest( /* WARN */
+            '{"command":"config"}',
+            function(data) {
+              data = JSON.parse(data);
+              if (data.command == 'config') {
+                func(JSON.stringify(data.data));
+              }
+            });
+        } else {
+          func();
+        }
+      })(function(conf) {
+           conf = conf ? ',' + conf : '';
+
+           var s = window.document.createElement('script');
+           s.setAttribute('type', 'text/javascript');
+           s.textContent = '(' + func.toString() + ')(window,window' + conf + ')';
+           window.document.body.appendChild(s);
+         });
    }
  })
-(function(window, safeWindow) {
+(function(window, safeWindow, _conf_storage) {
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "デバッグモード。"],
@@ -430,8 +447,8 @@
      LS.set('bookmark', 'tag_aliases', LS.bm_tag_aliases_to_str(conf.bm_tag_aliases));
    };
 
-   if (window.opera && opera.extension) {
-     (function() {
+   (function() {
+      if (window.opera && opera.extension) {
         var _init = LS.init, init_func;
         opera.extension.onmessage = function(event){
           var data = JSON.parse(event.data);
@@ -459,22 +476,27 @@
             init_func = func;
           }
         };
-      })();
-   } else {
-     LS.u = !!window.localStorage;
-     LS.get = function(s, n) {
-       return window.localStorage.getItem(create_name(s, n));
-     };
-     LS.set = function(s, n, v) {
-       return window.localStorage.setItem(create_name(s, n), v);
-     };
-     LS.remove = function(s, n) {
-       return window.localStorage.removeItem(create_name(s, n));
-     };
-     function create_name(s, n) {
-       return '__pixplus_' + s + '_' + n;
-     }
-   }
+      } else if (_conf_storage) {
+        LS.u = true;
+        LS.get = function(s, n) {
+          return _conf_storage[s + '_' + n];
+        };
+      } else {
+        LS.u = !!window.localStorage;
+        LS.get = function(s, n) {
+          return window.localStorage.getItem(create_name(s, n));
+        };
+        LS.set = function(s, n, v) {
+          return window.localStorage.setItem(create_name(s, n), v);
+        };
+        LS.remove = function(s, n) {
+          return window.localStorage.removeItem(create_name(s, n));
+        };
+        function create_name(s, n) {
+          return '__pixplus_' + s + '_' + n;
+        }
+      }
+    })();
 
    var options = parseopts(window.location.href);
 
@@ -801,7 +823,7 @@
          var wrap = $('manga_top') || $('pageHeader');
          if (wrap) wrap.appendChild(div);
          init();
-         btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();\nlocation.reload();\n})()';
+         btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();\nlocation.reload();\n})()'; /* WARN */
 
          function create_section(label, parent) {
            var anc = $c('a', parent, null, 'pp-conf-section');
@@ -1698,7 +1720,9 @@
                '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
               );
 
-     if (!(window.opera && opera.extension) || LS.get('extension', 'show_config_ui') == 'true') {
+     if (!_conf_storage &&
+         (!(window.opera && opera.extension) ||
+          LS.get('extension', 'show_config_ui') == 'true')) {
        init_config_ui();
      }
      init_galleries();

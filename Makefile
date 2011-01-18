@@ -19,10 +19,6 @@ ICON_FILES_SAFARI    = $(ICON_SIZE:%=Icon-%$(ICON_SUFFIX))
 ICON_SVG             = icons/pixplus.svg
 SIGNATURE            = signature1.xml
 SRC_USERJS           = includes/pixplus.js
-SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES           = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js $(SIGNATURE)
-VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
 CRX_TMP_DIR          = .crx
 MANIFEST_JSON        = manifest.json
@@ -31,6 +27,13 @@ SAFARIEXTZ_TMP_DIR   = .safariextz
 INFO_PLIST           = Info.plist
 SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
 SAFARIEXTZ_PRIV      = safari_key.pem
+
+SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
+DIST_FILES_EXTRA     = common.js index.html index.js options.html options.css options.js
+DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(PARSER_JS) $(SIGNATURE) $(DIST_FILES_EXTRA)
+DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(CONFIG_JS) $(PARSER_JS) $(DIST_FILES_EXTRA)
+VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
+DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
 WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
 WARN_KEYWORDS_P      = $(shell cat prototypejs_funcs.txt)
@@ -82,7 +85,7 @@ $(ICON_FILES_SAFARI): $(ICON_SVG)
 $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
 
-$(OEX): $(DIST_FILES)
+$(OEX): $(DIST_FILES_OEX)
 	@for kw in $(WARN_KEYWORDS_W); do \
            grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
          done
@@ -103,15 +106,11 @@ $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	echo >> $@;
 	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< | tr -d '\r' >> $@
 
-$(CRX): $(MANIFEST_JSON) $(SRC_USERJS)
+$(CRX): $(DIST_FILES_CRX)
 	rm -rf $(CRX_TMP_DIR)
-	mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
-	cp $(MANIFEST_JSON) $(CRX_TMP_DIR)/$(CRX:.crx=)
-	cp $(SRC_USERJS) $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(SRC_USERJS))
-	@for size in $(ICON_SIZE); do \
-           mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
-           cp $(ICON_PREFIX)$$size$(ICON_SUFFIX) \
-             $(CRX_TMP_DIR)/$(CRX:.crx=)/$(shell dirname $(ICON_PREFIX)$$size$(ICON_SUFFIX)); \
+	@for file in $(DIST_FILES_CRX); do \
+           mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
+           cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
          done
 	@test -f $(CRX:.crx=.crx.pem) && \
            "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.crx.pem) || \
