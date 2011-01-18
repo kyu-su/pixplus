@@ -132,13 +132,21 @@
      (function(func) {
         if (window.chrome) {
           chrome.extension.sendRequest( /* WARN */
-            '{"command":"config"}',
+            {command: 'config'},
             function(data) {
-              data = JSON.parse(data);
               if (data.command == 'config') {
-                func(JSON.stringify(data.data));
+                func(data.data);
               }
             });
+        } else if (window.safari) {
+          safari.self.addEventListener(
+            'message',
+            function(ev) {
+              if (ev.name == 'config') {
+                func(ev.message);
+              }
+            },false);
+          safari.self.tab.dispatchMessage('config', null);
         } else {
           func();
         }

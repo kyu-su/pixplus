@@ -1,11 +1,11 @@
 if (window.opera) {
   opera.extension.onconnect = function(event){
     try {
-      event.source.postMessage(create_response_json('config', create_config_map()));
+      event.source.postMessage(JSON.stringify({command: 'config', data: create_config_map()});
     } catch(ex) { }
   };
   opera.extension.onmessage = function(event) {
-    create_response(event.data);
+    create_response(JSON.parse(event.data));
   };
   if (conf.get('extension', 'show_toolbar_icon')) {
     var btn = opera.contexts.toolbar.createItem(
@@ -25,6 +25,13 @@ if (window.opera) {
     function(message, sender, func) {
       func(create_response(message));
     });
+} else if (window.safari) {
+  safari.application.addEventListener(
+    'message',
+    function(ev) {
+      var res = create_response({command: ev.name, data: ev.message});
+      ev.target.page.dispatchMessage(res.command, res.data);
+    },false);
 }
 
 function create_config_map() {
@@ -35,18 +42,14 @@ function create_config_map() {
     });
   return data;
 }
-function create_response(message) {
-  var data = JSON.parse(message);
+function create_response(data) {
   if (data.command == 'config') {
-    return create_response_json(data.command, create_config_map());
+    return {command: data.command, data: create_config_map()};
   } else if (data.command == 'config-set') {
     var section = data.data.section, key = data.data.key, value = data.data.value;
     conf.set(section, key, conf.get_conv(section, key)[0](value));
   } else if (data.command == 'config-remove') {
     conf.remove(data.data.section, data.data.key);
   }
-  return create_response_json(data.command, null);
-}
-function create_response_json(command, data) {
-  return JSON.stringify({'command': command, 'data': data});
+  return {command: data.command, data: null};
 }
