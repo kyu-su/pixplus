@@ -130,7 +130,7 @@
      func(unsafeWindow || window, window);
    } else {
      (function(func) {
-        if (window.chrome) {console.log(chrome.extension.getURL('/'));
+        if (window.chrome) {
           chrome.extension.sendRequest( /* WARN */
             {command: 'config'},
             function(data) {
