@@ -14,8 +14,11 @@
 	<string>@VERSION@</string>
 	<key>CFBundleVersion</key>
 	<string>@VERSION@</string>
-	<key>Chrome</key>
-	<dict/>
+        <key>Chrome</key>
+        <dict>
+                <key>Global Page</key>
+                <string>index.html</string>
+        </dict>
 	<key>Content</key>
 	<dict>
 		<key>Scripts</key>
