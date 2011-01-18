@@ -130,12 +130,13 @@
      func(unsafeWindow || window, window);
    } else {
      (function(func) {
-        if (window.chrome) {
+        if (window.chrome) {console.log(chrome.extension.getURL('/'));
           chrome.extension.sendRequest( /* WARN */
             {command: 'config'},
             function(data) {
               if (data.command == 'config') {
-                func(JSON.stringify({conf: data.data}));
+                func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
+                                     conf:     data.data}));
               }
             });
         } else if (window.safari) {
@@ -144,7 +145,7 @@
             function(ev) {
               if (ev.name == 'config') {
                 func(JSON.stringify({base_uri: safari.extension.baseURI,
-                                     conf: ev.message}));
+                                     conf:     ev.message}));
                 //safari.self.removeEventListener('message', arguments.callee, false);
               }
             }, false);
@@ -706,7 +707,7 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data) {
+           if (_extension_data && _extension_data.base_uri) {
              window.open(_extension_data.base_uri + 'options.html');
            } else {
              toggle();
