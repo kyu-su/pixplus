@@ -19,6 +19,7 @@ ICON_FILES_SAFARI    = $(ICON_SIZE:%=Icon-%$(ICON_SUFFIX))
 ICON_SVG             = icons/pixplus.svg
 SIGNATURE            = signature1.xml
 SRC_USERJS           = includes/pixplus.js
+CONFIG_JSON          = config.json
 
 CRX_TMP_DIR          = .crx
 MANIFEST_JSON        = manifest.json
@@ -48,15 +49,20 @@ endif
 all: $(ALL_TARGETS)
 dist: $(OEX)
 
-$(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS)
+$(CONFIG_JSON): $(SRC_USERJS)
+	echo '{' > $@
+	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
+	echo ',"bookmark_tag_order":["",""],' >> $@
+	echo '"bookmark_tag_aliases":["",""]}' >> $@
+
+$(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
 	@for size in $(ICON_SIZE); do \
            echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
          done
 	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@(echo '{'; sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS); echo '}') \
-           | python conf-parser.py opera >> $@
+	python conf-parser.py opera < $(CONFIG_JSON) >> $@
 	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
 	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
@@ -121,10 +127,9 @@ $(CRX): $(DIST_FILES_CRX)
 $(INFO_PLIST): $(INFO_PLIST).in
 	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
 
-$(SETTINGS_PLIST): $(SETTINGS_PLIST).in
+$(SETTINGS_PLIST): $(SETTINGS_PLIST).in $(CONFIG_JSON)
 	sed -e '/__SETTINGS__/,$$d' < $< > $@
-	@(echo '{'; sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS); echo '}') \
-           | python conf-parser.py safari >> $@
+	python conf-parser.py safari < $(CONFIG_JSON) >> $@
 	sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
@@ -142,6 +147,6 @@ $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
 
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
-	rm -f $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
+	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
               $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
