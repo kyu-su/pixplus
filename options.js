@@ -1,5 +1,31 @@
 document.addEventListener('DOMContentLoaded', init, false);
+
 function init() {
+  if (window.safari) {
+    safari.self.addEventListener(
+      'message',
+      function(ev) {
+        if (ev.name == 'config') {
+          conf.s = {
+            getItem: function(key) {
+              return ev.message[key];
+            },
+            setItem: function(key, value) {
+            },
+            removeItem: function(key) {
+            }
+          };
+          init_real();
+          safari.self.removeEventListener('message', arguments.callee, false);
+        }
+      }, false);
+    safari.self.tab.dispatchMessage('config', null);
+  } else {
+    init_real();
+  }
+}
+
+function init_real() {
   var root = document.getElementById('options-root');
   var table = document.createElement('table');
   table.className = 'config-table';

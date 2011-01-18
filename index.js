@@ -38,7 +38,7 @@ function create_config_map() {
   var data = {};
   conf.each(
     function(sec, key) {
-      data[sec.name + '_' + key] = conf.get_conv(sec.name, key)[1](conf.get(sec.name, key));
+      data[sec.path.join('_') + '_' + n] = conf.get_conv(sec.name, key)[1](conf.get(sec.name, key));
     });
   return data;
 }
