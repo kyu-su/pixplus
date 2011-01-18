@@ -18,7 +18,7 @@ function init() {
             safari.self.tab.dispatchMessage('config-remove', {section: s, key: n});
           };
           init_real();
-          safari.self.removeEventListener('message', arguments.callee, false);
+          //safari.self.removeEventListener('message', arguments.callee, false);
         }
       }, false);
     safari.self.tab.dispatchMessage('config', null);

@@ -145,7 +145,7 @@
               if (ev.name == 'config') {
                 func(JSON.stringify({base_uri: safari.extension.baseURI,
                                      conf: ev.message}));
-                safari.self.removeEventListener('message', arguments.callee, false);
+                //safari.self.removeEventListener('message', arguments.callee, false);
               }
             }, false);
           safari.self.tab.dispatchMessage('config', null);
