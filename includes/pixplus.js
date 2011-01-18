@@ -143,13 +143,12 @@
             'message',
             function(ev) {
               if (ev.name == 'config') {
-                func(JSON.stringify(ev.message));
+                func(JSON.stringify({base_uri: safari.extension.baseURI,
+                                     conf: ev.message}));
+                safari.self.removeEventListener('message', arguments.callee, false);
               }
             }, false);
           safari.self.tab.dispatchMessage('config', null);
-          window.pixplus.open_options = function() {
-            window.open(safari.extension.baseURI + 'options.html');
-          };
         } else {
           func();
         }
@@ -163,7 +162,7 @@
          });
    }
  })
-(function(window, safeWindow, _conf_storage) {
+(function(window, safeWindow, _extension_data) {
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "デバッグモード。"],
@@ -488,10 +487,10 @@
             init_func = func;
           }
         };
-      } else if (_conf_storage) {
+      } else if (_extension_data) {
         LS.u = true;
         LS.get = function(s, n) {
-          return _conf_storage[s + '_' + n];
+          return _extension_data.conf[s + '_' + n];
         };
       } else {
         LS.u = !!window.localStorage;
@@ -707,7 +706,11 @@
        anc.addEventListener(
          'click',
          function() {
-           (pp.open_options || toggle)();
+           if (_extension_data.base_uri) {
+             window.open(_extension_data.base_uri + 'options.html');
+           } else {
+             toggle();
+           }
          }, false);
        if (menu) {
          var li  = $c('li');
