@@ -6,14 +6,13 @@ function init() {
       'message',
       function(ev) {
         if (ev.name == 'config') {
-          conf.s = {
-            getItem: function(key) {
-              return ev.message[key];
-            },
-            setItem: function(key, value) {
-            },
-            removeItem: function(key) {
-            }
+          conf.get = function(s, n) {
+            var value = ev.message[s + '_' + n];
+            return typeof value === 'undefined' ? conf.map[s].schema[n][0] : conf.get_conv(s, n)[0](value);
+          };
+          conf.set = function(s, n, v) {
+          };
+          conf.remove = function(s, n) {
           };
           init_real();
           safari.self.removeEventListener('message', arguments.callee, false);
