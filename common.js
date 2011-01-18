@@ -37,11 +37,11 @@ var conf = {
        path:   ['conf', 'bookmark'],
        schema: conf_schema.bookmark,
        keys:   []}],
-  s: (window.chrome
-      ? localStorage
-      : (window.safari
-         ? safari.extension.settings
-         : widget.preferences
+  s: (window.opera
+      ? widget.preferences
+      : (window.chrome
+         ? localStorage
+         : safari.extension.settings
         )),
   map: {},
   get_conv: function(s, n) {
