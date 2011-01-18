@@ -141,8 +141,8 @@
         } else if (window.safari) {
           safari.self.addEventListener(
             'message',
-            function(ev) {console.log(ev);
-              if (ev.name == 'config') {console.log(ev.message);
+            function(ev) {
+              if (ev.name == 'config') {
                 func(JSON.stringify({base_uri: safari.extension.baseURI,
                                      conf: ev.message}));
                 safari.self.removeEventListener('message', arguments.callee, false);
