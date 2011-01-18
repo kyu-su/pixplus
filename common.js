@@ -5,8 +5,8 @@ conf_schema.bookmark = {
 var conf = {
   conv: {
     'string':  [String, String],
-    'boolean': [function(s) { return s == 'true'; },
-                function(v) { return v ? 'true' : 'false'; }],
+    'boolean': [function(s) { return window.safari ? s : s == 'true'; },
+                function(v) { return window.safari ? v : (v ? 'true' : 'false'); }],
     'number':  [function(s) {
                   var v = parseFloat(s);
                   if (isNaN(v)) {
