@@ -1,7 +1,7 @@
 if (window.opera) {
   opera.extension.onconnect = function(event){
     try {
-      event.source.postMessage(JSON.stringify({command: 'config', data: create_config_map()});
+      event.source.postMessage(JSON.stringify({command: 'config', data: create_config_map()}));
     } catch(ex) { }
   };
   opera.extension.onmessage = function(event) {

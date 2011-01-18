@@ -135,17 +135,17 @@
             {command: 'config'},
             function(data) {
               if (data.command == 'config') {
-                func(data.data);
+                func(JSON.stringify(data.data));
               }
             });
         } else if (window.safari) {
           safari.self.addEventListener(
             'message',
             function(ev) {
-              if (ev.name == 'config') {
-                func(ev.message);
+              if (ev.name == 'config') {console.log(ev.message);
+                func(JSON.stringify(ev.message));
               }
-            },false);
+            }, false);
           safari.self.tab.dispatchMessage('config', null);
         } else {
           func();
@@ -487,7 +487,7 @@
         };
       } else if (_conf_storage) {
         LS.u = true;
-        LS.get = function(s, n) {
+        LS.get = function(s, n) {console.log(s + '_' + n);
           return _conf_storage[s + '_' + n];
         };
       } else {
