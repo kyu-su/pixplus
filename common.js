@@ -57,8 +57,8 @@ var conf = {
     conf.s.setItem(conf.map[s].path.join('_') + '_' + n, conf.get_conv(s, n)[1](v));
   },
   remove: function(s, n) {
-    conf.s.removeItem(conf.map[s].path.join('_') + '_' + n);
-    //conf.set(s, n, conf.map[s].schema[n][0]);
+    //conf.s.removeItem(conf.map[s].path.join('_') + '_' + n);
+    conf.set(s, n, conf.map[s].schema[n][0]);
   },
   each: function(func_key, func_sec) {
     conf.l.forEach(

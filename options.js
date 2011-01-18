@@ -11,8 +11,11 @@ function init() {
             return typeof value === 'undefined' ? conf.map[s].schema[n][0] : conf.get_conv(s, n)[0](value);
           };
           conf.set = function(s, n, v) {
+            v = conf.get_conv(s, n)[1](v);
+            safari.self.tab.dispatchMessage('config-set', {section: s, key: n, value: v});
           };
           conf.remove = function(s, n) {
+            safari.self.tab.dispatchMessage('config-remove', {section: s, key: n});
           };
           init_real();
           safari.self.removeEventListener('message', arguments.callee, false);

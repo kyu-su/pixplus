@@ -135,7 +135,7 @@
             {command: 'config'},
             function(data) {
               if (data.command == 'config') {
-                func(JSON.stringify(data.data));
+                func(JSON.stringify({conf: data.data}));
               }
             });
         } else if (window.safari) {
