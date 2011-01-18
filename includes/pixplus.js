@@ -138,15 +138,18 @@
                 func(JSON.stringify(data.data));
               }
             });
-        } else if (window.safari) {
+        } else if (window.safari) {console.log(safari);
           safari.self.addEventListener(
             'message',
             function(ev) {
-              if (ev.name == 'config') {console.log(ev.message);
+              if (ev.name == 'config') {
                 func(JSON.stringify(ev.message));
               }
             }, false);
           safari.self.tab.dispatchMessage('config', null);
+          window.pixplus.open_options = function() {
+            window.open(safari.extension.baseURI + 'options.html');
+          };
         } else {
           func();
         }
@@ -487,7 +490,7 @@
         };
       } else if (_conf_storage) {
         LS.u = true;
-        LS.get = function(s, n) {console.log(s + '_' + n);
+        LS.get = function(s, n) {
           return _conf_storage[s + '_' + n];
         };
       } else {
@@ -1729,9 +1732,8 @@
                '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
               );
 
-     if (!_conf_storage &&
-         (!(window.opera && opera.extension) ||
-          LS.get('extension', 'show_config_ui') == 'true')) {
+     if (!(window.opera && opera.extension) ||
+         LS.get('extension', 'show_config_ui') == 'true') {
        init_config_ui();
      }
      init_galleries();
