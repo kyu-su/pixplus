@@ -704,11 +704,11 @@
        var anc = $c('a');
        anc.href = 'javascript:void(0)';
        anc.textContent = 'pixplus';
-       if (pp.open_options) {
-         anc.addEventListener('click', pp.open_options, false);
-         return;
-       }
-       anc.addEventListener('click', toggle, false);
+       anc.addEventListener(
+         'click',
+         function() {
+           (pp.open_options || toggle)();
+         }, false);
        if (menu) {
          var li  = $c('li');
          li.appendChild(anc);
