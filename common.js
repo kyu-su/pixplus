@@ -39,8 +39,10 @@ var conf = {
        keys:   []}],
   s: (window.chrome
       ? localStorage
-      : widget.preferences
-     ),
+      : (window.safari
+         ? safari.extension.settings
+         : widget.preferences
+        )),
   map: {},
   get_conv: function(s, n) {
     return conf.conv[typeof conf.map[s].schema[n][0]];
