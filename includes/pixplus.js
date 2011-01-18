@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.3.3
+// @version     0.4
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -9,8 +9,9 @@
 // @exclude     *pixivreader*
 // ==/UserScript==
 
-/** 0.3.3
+/** 0.4
  * pixivreaderと衝突するらしいので、excludeに追加。
+ * Chrome拡張版にオプションページ追加。設定が引き継がれない。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
