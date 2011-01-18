@@ -41,8 +41,10 @@ var conf = {
       ? widget.preferences
       : (window.chrome
          ? localStorage
-         : safari.extension.settings
-        )),
+         : (window.safari && safari.extension
+            ? safari.extension.settings
+            : null
+           ))),
   map: {},
   get_conv: function(s, n) {
     return conf.conv[typeof conf.map[s].schema[n][0]];

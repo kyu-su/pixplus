@@ -138,11 +138,11 @@
                 func(JSON.stringify(data.data));
               }
             });
-        } else if (window.safari) {console.log(safari);
+        } else if (window.safari) {
           safari.self.addEventListener(
             'message',
-            function(ev) {
-              if (ev.name == 'config') {
+            function(ev) {console.log(ev);
+              if (ev.name == 'config') {console.log(ev.message);
                 func(JSON.stringify({base_uri: safari.extension.baseURI,
                                      conf: ev.message}));
                 safari.self.removeEventListener('message', arguments.callee, false);
@@ -706,7 +706,7 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data.base_uri) {
+           if (_extension_data) {
              window.open(_extension_data.base_uri + 'options.html');
            } else {
              toggle();
