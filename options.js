@@ -7,11 +7,9 @@ function init() {
       function(ev) {
         if (ev.name == 'config') {
           conf.get = function(s, n) {
-            var value = ev.message[s + '_' + n];
-            return typeof value === 'undefined' ? conf.map[s].schema[n][0] : conf.get_conv(s, n)[0](value);
+            return ev.message[s + '_' + n];
           };
           conf.set = function(s, n, v) {
-            v = conf.get_conv(s, n)[1](v);
             safari.self.tab.dispatchMessage('config-set', {section: s, key: n, value: v});
           };
           conf.remove = function(s, n) {

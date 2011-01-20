@@ -332,9 +332,17 @@
        'string':  [String, String],
        'boolean': [function(s) { return s == 'true'; },
                    function(v) { return v ? 'true' : 'false'; }],
-       'number':  [parseFloat, String]
+       'number':  [function(s) {
+                     var v = parseFloat(s);
+                     if (isNaN(v)) throw 1;
+                     return v;
+                   },
+                   String]
      },
      wait_funcs:  [],
+     get_conv: function(s, n) {
+       return LS.map[s] ? LS.conv[LS.map[s].schema[n].type] : LS.conv['string'];
+     },
      each: function(cb_key, cb_sec, cb_sec_after) {
        each(LS.l,
             function(sec) {
@@ -349,9 +357,7 @@
               sec.conf[key] = sec.schema[key][0];
               if (LS.u) {
                 var v = LS.get(sec.name, key);
-                if (typeof v != 'undefined' && v !== null) {
-                  sec.conf[key] = LS.conv[sec.schema[key].type][0](v);
-                }
+                if (typeof v !== 'undefined' && v !== null) sec.conf[key] = v;
               }
             });
      },
@@ -451,7 +457,7 @@
    pp.save_conf = function() {
      LS.each(
        function(sec, key) {
-         var val = LS.conv[sec.schema[key].type][1](sec.conf[key]);
+         var val = sec.conf[key];
          if (val !== LS.get(sec.name, key)) LS.set(sec.name, key, val);
        });
      LS.set('bookmark', 'tag_order', LS.bm_tag_order_to_str(conf.bm_tag_order));
@@ -495,10 +501,10 @@
       } else {
         LS.u = !!window.localStorage;
         LS.get = function(s, n) {
-          return window.localStorage.getItem(create_name(s, n));
+          return LS.get_conv(s, n)[0](window.localStorage.getItem(create_name(s, n)));
         };
         LS.set = function(s, n, v) {
-          return window.localStorage.setItem(create_name(s, n), v);
+          return window.localStorage.setItem(create_name(s, n), LS.get_conv(s, n)[1](v));
         };
         LS.remove = function(s, n) {
           return window.localStorage.removeItem(create_name(s, n));
@@ -932,7 +938,7 @@
              if (sec.schema[key].type == 'boolean') {
                val = sec.schema[key].input.checked;
              } else {
-               val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
+               val = LS.get_conv(sec.name, key)[0](sec.schema[key].input.value);
              }
              if (val === sec.schema[key][0] && sec.schema[key]._set_default) {
                LS.remove(sec.name, key);
@@ -980,7 +986,7 @@
              if (sec.schema[key].type == 'boolean') {
                val = sec.schema[key].input.checked;
              } else {
-               val = LS.conv[sec.schema[key].type][0](sec.schema[key].input.value);
+               val = LS.get_conv(sec.name, key)[0](sec.schema[key].input.value);
              }
              if (val !== sec.schema[key][0]) {
                var ns = 'pp.conf';
@@ -1739,8 +1745,7 @@
                '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
               );
 
-     if (!(window.opera && opera.extension) ||
-         LS.get('extension', 'show_config_ui') == 'true') {
+     if (!(window.opera && opera.extension) || LS.get('extension', 'show_config_ui')) {
        init_config_ui();
      }
      init_galleries();
@@ -3038,7 +3043,7 @@
      var hidden = this.viewer_comments_c.style.display == 'none', comment;
      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
      if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
-     if (LS.u) LS.set('popup', 'show_comment_form', hidden ? 'true' : 'false');
+     if (LS.u) LS.set('popup', 'show_comment_form', !!hidden);
    };
    Popup.prototype.reload_viewer_comments = function() {
      if (this.viewer_comments_enabled) {

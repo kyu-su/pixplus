@@ -21,19 +21,19 @@ def print_conf(conf, prefix):
       print_conf(conf[key], name)
     else:
       value = conf[key][0]
-      #type_safari = 'TextField'
-      #value_safari = '<string>%s</string>' % value
+      type_safari = 'TextField'
+      value_safari = '<string>%s</string>' % value
       if isinstance(value, bool):
         if value:
           value = 'true'
         else:
           value = 'false'
           pass
-        #type_safari = 'CheckBox'
-        #value_safari = '<%s/>' % value
+        type_safari = 'CheckBox'
+        value_safari = '<%s/>' % value
         pass
-      type_safari = 'TextField'
-      value_safari = '<string>%s</string>' % value
+      #type_safari = 'TextField'
+      #value_safari = '<string>%s</string>' % value
       print format % {'name': name, 'value': value,
                       'type_safari': type_safari, 'value_safari': value_safari}
 

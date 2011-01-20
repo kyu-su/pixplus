@@ -38,7 +38,7 @@ function create_config_map() {
   var data = {};
   conf.each(
     function(sec, key) {
-      data[sec.name + '_' + key] = conf.get_conv(sec.name, key)[1](conf.get(sec.name, key));
+      data[sec.name + '_' + key] = conf.get(sec.name, key);
     });
   return data;
 }
@@ -47,7 +47,7 @@ function create_response(data) {
     return {command: data.command, data: create_config_map()};
   } else if (data.command == 'config-set') {
     var section = data.data.section, key = data.data.key, value = data.data.value;
-    conf.set(section, key, conf.get_conv(section, key)[0](value));
+    conf.set(section, key, value);
   } else if (data.command == 'config-remove') {
     conf.remove(data.data.section, data.data.key);
   }

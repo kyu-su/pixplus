@@ -9,11 +9,8 @@ var conf = {
                 function(v) { return v ? 'true' : 'false'; }],
     'number':  [function(s) {
                   var v = parseFloat(s);
-                  if (isNaN(v)) {
-                    throw 1;
-                  } else {
-                    return v;
-                  }
+                  if (isNaN(v)) throw 1;
+                  return v;
                 },
                 String]
   },
@@ -51,10 +48,12 @@ var conf = {
   },
   get: function(s, n) {
     var value = conf.s.getItem(conf.map[s].path.join('_') + '_' + n);
-    return value === null ? conf.map[s].schema[n][0] : conf.get_conv(s, n)[0](value);
+    if (typeof value === 'undefined' || value === null) value = conf.map[s].schema[n][0];
+    return typeof value !== 'string' ? value : conf.get_conv(s, n)[0](value);
   },
   set: function(s, n, v) {
-    conf.s.setItem(conf.map[s].path.join('_') + '_' + n, conf.get_conv(s, n)[1](v));
+    if (!window.safari || typeof v !== 'boolean') v = conf.get_conv(s, n)[1](v);
+    conf.s.setItem(conf.map[s].path.join('_') + '_' + n, v);
   },
   remove: function(s, n) {
     //conf.s.removeItem(conf.map[s].path.join('_') + '_' + n);
