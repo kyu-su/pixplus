@@ -732,7 +732,8 @@
                    '   window.document.addEventListener("pixplusInitialize",init,false);',
                    '   function init() {',
                    '     ' + gen_js('\n     ', 2),
-                   '   }})();'].join('\n');
+                   '   }',
+                   ' })();'].join('\n');
          window.open('data:text/javascript,' + encodeURI(js));
        }, false);
      root.appendChild(btn_userjs);
