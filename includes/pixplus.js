@@ -195,7 +195,7 @@
      "tag_separator_style":    ["border-top:2px solid #dae1e7;", "ブックマーク編集ページでのセパレータのスタイル。"],
      "stacc_link":             ["",    "上部メニューの「スタックフィード」のリンク先。",
                                 ["", "all", "mypixiv", "favorite", "self"]],
-     "default_manga_type":     ["",    "デフォルトのマンガ表示タイプ。", ["scroll", "slide"]],
+     "default_manga_type":     ["",    "デフォルトのマンガ表示タイプ。", ["", "scroll", "slide"]],
      "rate_confirm":           [true,  "イラストを評価する時に確認をとる。"],
      "popup_manga_tb":         [true,  "マンガサムネイルページでポップアップを使用する。"],
      "disable_effect":         [false, "アニメーションなどのエフェクトを無効化する。"],
@@ -391,7 +391,7 @@
          var tag = lines[i];
          tag = tag.replace(/[\r\n]/g, '');
          if (tag == '-') {
-           ary.push(ary_ary);
+           if (ary_ary.length) ary.push(ary_ary);
            ary_ary = [];
          } else if (tag == '*') {
            ary_ary.push(null);
@@ -399,18 +399,17 @@
            ary_ary.push(tag);
          }
        }
-       ary.push(ary_ary);
+       if (ary_ary.length) ary.push(ary_ary);
        return ary;
      },
      parse_bm_tag_aliases: function(str) {
-       var aliases = {keys: [], map: {}};
+       var aliases = {};
        var lines = str.split('\n');
        var len = Math.floor(lines.length / 2);
        for(var i = 0; i < len; ++i) {
          var tag = lines[i * 2], alias = lines[i * 2 + 1];
          if (tag && alias) {
-           aliases.keys.push(tag);
-           aliases.map[tag] = alias.split(/\s+/);
+           aliases[tag] = alias.split(/\s+/);
          }
        }
        return aliases;
@@ -452,7 +451,7 @@
          var order = LS.get('bookmark', 'tag_order');
          if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
          var aliases = LS.get('bookmark', 'tag_aliases');
-         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases).map;
+         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
        }
        each(['auto_manga', 'reverse'],
             function(key) {
@@ -481,6 +480,7 @@
         });
 
    pp.save_conf = function() {
+     if (!LS.u) return;
      LS.each(
        function(sec, key) {
          var val = sec.conf[key];
@@ -699,10 +699,31 @@
    function ConfigUI(root, st) {
      this.root = root;
 
+     var btn_userjs = window.document.createElement('a');
+     btn_userjs.href = 'javascript:void(0)';
+     btn_userjs.textContent = 'UserJS';
+     btn_userjs.addEventListener(
+       'click',
+       function() {
+         var js = ['// ==UserScript==',
+                   '// @name    pixplus settings',
+                   '// @version Wednesday December 15, 15:27:27 GMT+0900 2010',
+                   '// @include http://www.pixiv.net/*',
+                   '// ==/UserScript==',
+                   '(function() {',
+                   '   document.addEventListener("pixplusInitialize",init,false);',
+                   '   function init() {',
+                   '     ' + gen_js('\n     ', 2),
+                   '   }})();'].join('\n');
+         window.open('data:text/javascript,' + encodeURI(js));
+       }, false);
+     root.appendChild(btn_userjs);
+
      var btn_bmlet;
      if (window.opera) {
        btn_bmlet = window.document.createElement('a');
        btn_bmlet.textContent = 'Bookmarklet';
+       btn_bmlet.style.marginLeft = '2em';
        root.appendChild(btn_bmlet);
      }
 
@@ -717,7 +738,7 @@
        function(sec, key) {
          if (sec.name == 'bookmark') return;
 
-         var value = st.conf ? st.conf[key] : st.get(sec.name, key);
+         var value = sec.conf ? sec.conf[key] : st.get(sec.name, key);
          var type = typeof sec.schema[key][0];
          var row = table.insertRow(-1), cell = row.insertCell(-1), input;
          row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
@@ -798,7 +819,9 @@
        '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.rows = '20';
-     tag_order_textarea.value = st.get('bookmark', 'tag_order');
+     tag_order_textarea.value = (conf.bm_tag_order
+                                 ? st.bm_tag_order_to_str(conf.bm_tag_order)
+                                 : st.get('bookmark', 'tag_order'));
      tag_order_textarea.addEventListener(
        'keyup',
        function() {
@@ -819,8 +842,8 @@
         add.addEventListener('click', function() { add_row(); }, false);
         tacont.appendChild(add);
 
-        var aliases = st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'));
-        aliases.keys.forEach(function(key) { add_row(key, aliases.map[key]); });
+        var aliases = conf.bm_tag_aliases || st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'));
+        for(var key in aliases) add_row(key, aliases[key]);
 
         function add_row(tag, list) {
           var row = tag_alias_table.insertRow(-1), cell, remove, input1, input2;
@@ -889,10 +912,12 @@
        if (window.opera) btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();})()';
      }
 
-     function gen_js() {
-       var js = 'var pp=window.opera?window.opera.pixplus:window.pixplus;';
+     function gen_js(new_line, indent_level) {
+       var js = ['var pp=window.opera?window.opera.pixplus:window.pixplus;'];
        var order = st.parse_bm_tag_order(tag_order_textarea.value);
        var alias = st.parse_bm_tag_aliases(get_tag_alias_str());
+       var indent = 0;
+       if (!indent_level) indent_level = 0;
        st.each(
          function(sec, key) {
            if (sec.name == 'bookmark') return;
@@ -903,35 +928,53 @@
              val = st.get_conv(sec.name, key)[0](input.value);
            }
            if (val !== sec.schema[key][0]) {
-             js += 'pp.' + sec.path.join('.') + '.' + key + '=' + stringify(val) + ';';
+             push('pp.' + sec.path.join('.') + '.' + key + '=' + stringify(val) + ';');
            }
          });
        if (order.length) {
-         js += 'pp.conf.bm_tag_order=[';
+         push('pp.conf.bm_tag_order=[');
+         ++indent;
          for(var i = 0; i < order.length; ++i) {
            var ary = order[i];
-           js += '[';
+           push('[');
+           ++indent;
            for(var j = 0; j < ary.length; ++j) {
              var tag = ary[j];
-             js += (tag ? stringify(tag) : 'null') + ',';
+             push((tag ? stringify(tag) : 'null') + ',');
            }
-           js += '],';
+           --indent;
+           push('],');
          }
-         js += '];';
+         --indent;
+         push('];');
        }
-       for(var i = 0; i < alias.keys.length; ++i) {
-         var key = alias.keys[i];
-         if (i == 0) js += 'pp.conf.bm_tag_aliases={';
-         js += stringify(key) + ':[';
-         for(var j = 0; j < alias.map[key].length; ++j) {
-           var tag = alias.map[key][j];
-           js += stringify(tag) + ',';
+       var alias_f = true;
+       for(var key in alias) {
+         if (alias_f) {
+           push('pp.conf.bm_tag_aliases={');
+           alias_f = false;
+           ++indent;
          }
-         js += '],';
+         push(stringify(key) + ':[');
+         ++indent;
+         for(var j = 0; j < alias[key].length; ++j) {
+           var tag = alias[key][j];
+           push(stringify(tag) + ',');
+         }
+         --indent;
+         push('],');
        }
-       if (alias.keys.length) js += '};';
-       return js;
+       if (!alias_f) {
+         js.push('};');
+         --indent
+       }
+       return js.join(new_line);
 
+       function push(str) {
+         var sp = '';
+         for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
+         js.push(sp + str);
+       }
        function stringify(val) {
          if (window.JSON && window.JSON.stringify) return JSON.stringify(val);
          if (typeof val == 'string') {

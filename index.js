@@ -7,19 +7,33 @@ if (window.opera) {
   opera.extension.onmessage = function(event) {
     create_response(JSON.parse(event.data));
   };
-  if (conf.get('extension', 'show_toolbar_icon')) {
-    var btn = opera.contexts.toolbar.createItem(
-      {
-        title: 'pixplus',
-        icon:  'icons/pixplus_64.png',
-        popup: {
-          href:   'options.html',
-          width:  800,
-          height: 600
-        }
-      });
-    opera.contexts.toolbar.addItem(btn);
-  }
+
+  (function() {
+     var btn;
+     onstorage();
+     window.addEventListener('storage', onstorage, false);
+     function onstorage(ev) {
+       if (ev && ev.key != 'conf_extension_show_toolbar_icon') return;
+       if (conf.get('extension', 'show_toolbar_icon')) {
+         if (!btn) {
+           btn = opera.contexts.toolbar.createItem(
+             {
+               title: 'pixplus',
+               icon:  'icons/pixplus_64.png',
+               popup: {
+                 href:   'options.html',
+                 width:  800,
+                 height: 600
+               }
+             });
+           opera.contexts.toolbar.addItem(btn);
+         }
+       } else if (btn) {
+         opera.contexts.toolbar.removeItem(btn);
+         btn = null;
+       }
+     }
+   })();
 } else if (window.chrome) {
   chrome.extension.onRequest.addListener(
     function(message, sender, func) {
