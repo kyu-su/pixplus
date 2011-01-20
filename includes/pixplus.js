@@ -430,7 +430,7 @@
      bm_tag_aliases_to_str: function(bm_tag_aliases) {
        var str = '';
        for(var key in bm_tag_aliases) {
-         str += key + '\n' + bm_tag_aliases[key] + '\n';
+         str += key + '\n' + bm_tag_aliases[key].join(' ') + '\n';
        }
        return str;
      }
@@ -968,7 +968,7 @@
          js.push('};');
          --indent;
        }
-       return js.join(new_line);
+       return js.join(new_line || '');
 
        function push(str) {
          var sp = '';
