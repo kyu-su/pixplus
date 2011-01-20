@@ -131,8 +131,9 @@
        opera.extension.onmessage = function(ev){
          var data = JSON.parse(ev.data);
          if (data.command == 'config') {
-           var uri = ev.origin.replace(/^(widget:\/\/[^\/]+).*$/, '$1/options.html');
-           func(window, window, {base_uri: uri, conf: data.data});
+           //var uri = ev.origin.replace(/^(widget:\/\/[^\/]+).*$/, '$1/');
+           //func(window, window, {base_uri: uri, conf: data.data});
+           func(window, window, {conf: data.data});
          }
        };
      } else {
@@ -924,6 +925,8 @@
    /* __CONFIG_UI_END__ */
 
    function init_config_ui() {
+     if (_extension_data && !_extension_data.base_uri) return;
+
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
      if (menu || sp_manga_tb) {
@@ -1704,9 +1707,7 @@
                '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
               );
 
-     if (!(window.opera && opera.extension) || LS.get('extension', 'show_config_ui')) {
-       init_config_ui();
-     }
+     init_config_ui();
      init_galleries();
      init_recommend();
      init_taglist();
