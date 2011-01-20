@@ -966,7 +966,7 @@
        }
        if (!alias_f) {
          js.push('};');
-         --indent
+         --indent;
        }
        return js.join(new_line);
 
