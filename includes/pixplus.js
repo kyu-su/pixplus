@@ -170,6 +170,12 @@
            s.setAttribute('type', 'text/javascript');
            s.textContent = '(' + func.toString() + ')(window,window' + conf + ')';
            window.document.body.appendChild(s);
+
+           window.document.addEventListener(
+             'pixplusConfigSet',
+             function(ev) {
+               console.log(ev);
+             }, false);
          });
    }
  })
@@ -501,6 +507,10 @@
           if (window.opera) {
 	    opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
           } else {
+            var ev = window.document.createEvent('Event');
+            ev.initEvent('pixplusConfigSet', true, true);
+            ev.currentTarget = data;
+            window.document.dispatchEvent(ev);
           }
         };
         LS.remove = function(s, n) {
@@ -528,6 +538,7 @@
           return '__pixplus_' + s + '_' + n;
         }
       }
+      LS.init();
     })();
 
    var options = parseopts(window.location.href);
@@ -996,9 +1007,9 @@
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
      if (menu || sp_manga_tb) {
        function fire_event() {
-         var evt = window.document.createEvent('Event');
-         evt.initEvent('pixplusConfigToggled', true, true);
-         window.document.dispatchEvent(evt);
+         var ev = window.document.createEvent('Event');
+         ev.initEvent('pixplusConfigToggled', true, true);
+         window.document.dispatchEvent(ev);
        }
        function show() {
          create();
@@ -1023,7 +1034,7 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data && _extension_data.base_uri) {
+           if (_extension_data && _extension_data.base_uri && false) {
              window.open(_extension_data.base_uri + 'options.html');
            } else {
              toggle();
@@ -1515,9 +1526,9 @@
              } else {
                _bookmarkToggle(container_id, type);
              }
-             var evt = window.document.createEvent('Event');
-             evt.initEvent('pixplusBMTagToggled', true, true);
-             window.document.dispatchEvent(evt);
+             var ev = window.document.createEvent('Event');
+             ev.initEvent('pixplusBMTagToggled', true, true);
+             window.document.dispatchEvent(ev);
            };
 
            var head = $xa('ul/li[contains(concat(" ", @class, " "), " level0 ")]', bm_tag_list).reverse()[0];
@@ -1656,9 +1667,9 @@
      }
    }
    function init_pixplus_real() {
-     var evt = window.document.createEvent('Event');
-     evt.initEvent('pixplusInitialize', true, true);
-     window.document.dispatchEvent(evt);
+     var ev = window.document.createEvent('Event');
+     ev.initEvent('pixplusInitialize', true, true);
+     window.document.dispatchEvent(ev);
 
      pp.rpc_usable = true;
      if (true || !conf.debug) {
@@ -1858,9 +1869,11 @@
         })();
      }
 
-     evt = window.document.createEvent('Event');
-     evt.initEvent('pixplusLoaded', true, true);
-     window.document.dispatchEvent(evt);
+     (function() {
+        var ev = window.document.createEvent('Event');
+        ev.initEvent('pixplusLoaded', true, true);
+        window.document.dispatchEvent(ev);
+      })();
    }
    function init_pixplus() {
      window.document.body.setAttribute('pixplus', '');
@@ -1899,14 +1912,11 @@
          .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
-
                  var _ajax = window.jQuery.ajax;
                  window.jQuery.ajax = function(obj) {
                    if (obj) obj.url = mod_rpc_url(obj.url);
                    _ajax.apply(this, [].slice.apply(arguments));
                  };
-
-                 LS.init();
                  init_pixplus_real();
                })
          .script(pp.url.js.prototypejs)
@@ -3933,10 +3943,10 @@
      return new_ary;
    }
    function send_click(elem) {
-     var evt = elem.ownerDocument.createEvent('MouseEvents');
-     evt.initMouseEvent('click', true, true, window,
-                        0, 0, 0, 0, 0, false, false, false, false, 0, null);
-     elem.dispatchEvent(evt);
+     var ev = elem.ownerDocument.createEvent('MouseEvents');
+     ev.initMouseEvent('click', true, true, window,
+                       0, 0, 0, 0, 0, false, false, false, false, 0, null);
+     elem.dispatchEvent(ev);
    }
    function parseopts(str) {
      var opts = {};
