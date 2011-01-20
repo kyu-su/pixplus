@@ -357,8 +357,7 @@
                    function(v) { return v ? 'true' : 'false'; }],
        'number':  [function(s) {
                      var v = parseFloat(s);
-                     if (isNaN(v)) throw 1;
-                     return v;
+                     return isNaN(v) ? null : v;
                    },
                    String]
      },
@@ -706,9 +705,251 @@
        }
      });
 
+   /* __CONFIG_UI_BEGIN__ */
    function ConfigUI(root, st) {
-     
+     this.root = root;
+
+     var btn_bmlet = window.document.createElement('a');
+     btn_bmlet.textContent = 'Bookmarklet';
+     root.appendChild(btn_bmlet);
+
+     var table = window.document.createElement('table');
+     table.id = 'pp-conf-table';
+     root.appendChild(table);
+
+     var input_table = { };
+
+     var idx;
+     st.each(
+       function(sec, key) {
+         if (sec.name == 'bookmark') return;
+
+         var value = st.conf ? st.conf[key] : st.get(sec.name, key);
+         var type = typeof sec.schema[key][0];
+         var row = table.insertRow(-1), cell = row.insertCell(-1), input;
+         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
+         if (sec.schema[key][2]) {
+           input = window.document.createElement('select');
+           for(var i = 0; i < sec.schema[key][2].length; ++i) {
+             var entry = sec.schema[key][2][i];
+             var opt = window.document.createElement('option');
+             if (typeof entry === 'string') {
+               opt.value = opt.textContent = entry;
+             } else {
+               opt.value = entry.value;
+               opt.textContent = entry.title;
+             }
+             input.appendChild(opt);
+           }
+         } else {
+           input = window.document.createElement('input');
+         }
+         if (type == 'boolean') {
+           input.setAttribute('type', 'checkbox');
+           input.checked = value;
+
+           var label = window.document.createElement('label');
+           label.appendChild(input);
+           label.appendChild(window.document.createTextNode(key));
+
+           cell.appendChild(label);
+           cell.setAttribute('colspan', '2');
+         } else {
+           cell.innerText = key;
+           input.value = value;
+           cell = row.insertCell(-1);
+           cell.className = 'pp-conf-cell-value';
+           cell.appendChild(input);
+         }
+         input_table[sec.name + '_' + key] = input;
+
+         var def = window.document.createElement('button');
+         def.innerText = 'Default';
+         def.addEventListener(
+           'click',
+           function() {
+             if (type == 'boolean') {
+               input.checked = sec.schema[key][0];
+             } else {
+               input.value = sec.schema[key][0];
+             }
+             if (st.u) st.remove(sec.name, key, value);
+             update_bookmarklet();
+           }, false);
+         row.insertCell(-1).appendChild(def);
+         row.insertCell(-1).innerText = sec.schema[key][1];
+
+         input.addEventListener(
+           sec.schema[key][2] || type == 'boolean' ? 'change' : 'keyup',
+           function() {
+             var value;
+             if (type == 'boolean') {
+               value = input.checked;
+             } else {
+               value = st.conv[type][0](input.value);
+             }
+             if (st.u) st.set(sec.name, key, value);
+             update_bookmarklet();
+           }, false);
+
+         ++idx;
+       },
+       function(sec) {
+         if (sec.name == 'bookmark') return;
+         make_section(sec.label);
+       });
+
+     var tocont = make_custom_section('Tag order');
+     tocont.innerText = '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff' +
+       '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
+       '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
+     var tag_order_textarea = window.document.createElement('textarea');
+     tag_order_textarea.rows = '20';
+     tag_order_textarea.value = st.get('bookmark', 'tag_order');
+     tag_order_textarea.addEventListener(
+       'keyup',
+       function() {
+         if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
+         update_bookmarklet();
+       }, false);
+     tocont.appendChild(tag_order_textarea);
+
+     var tacont = make_custom_section('Tag alias');
+     tacont.innerText = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
+       '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
+     var tag_alias_table = window.document.createElement('table');
+     tag_alias_table.id = 'pp-tagalias-table';
+     tacont.appendChild(tag_alias_table);
+     (function() {
+        var add = window.document.createElement('button');
+        add.innerText = 'Add';
+        add.addEventListener('click', function() { add_row(); }, false);
+        tacont.appendChild(add);
+
+        var aliases = st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'));
+        aliases.keys.forEach(function(key) { add_row(key, aliases.map[key]); });
+
+        function add_row(tag, list) {
+          var row = tag_alias_table.insertRow(-1), cell, remove, input1, input2;
+          remove = window.document.createElement('button');
+          remove.innerText = 'Remove';
+          remove.addEventListener(
+            'click',
+            function() {
+              row.parentNode.removeChild(row);
+              save();
+            }, false);
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-remove';
+          cell.appendChild(remove);
+
+          input1 = window.document.createElement('input');
+          input1.value = tag || '';
+          input1.addEventListener('keyup', save, false);
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-tag';
+          cell.appendChild(input1);
+
+          input2 = window.document.createElement('input');
+          input2.value = list ? list.join(' ') : '';
+          input2.addEventListener('keyup', save, false);
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-aliases';
+          cell.appendChild(input2);
+        }
+
+        function save() {
+          if (st.u) st.set('bookmark', 'tag_aliases', get_tag_alias_str());
+          update_bookmarklet();
+        }
+      })();
+     update_bookmarklet();
+
+     function make_custom_section(label) {
+       make_section(label);
+       var row = table.insertRow(-1), cell = row.insertCell(-1);
+       row.className = 'pp-conf-section-custom';
+       cell.setAttribute('colspan', '4');
+       return cell;
+     }
+     function make_section(label) {
+       var row = table.insertRow(-1);
+       row.className = 'pp-conf-section';
+       var cell = row.insertCell(-1);
+       cell.setAttribute('colspan', '4');
+       cell.innerText = label;
+       idx = 0;
+       return row;
+     }
+     function get_tag_alias_str() {
+       var tag_aliases = '';
+       for(var i = 0; i < tag_alias_table.rows.length; ++i) {
+         var row = tag_alias_table.rows[i];
+         var inputs = row.getElementsByTagName('input');
+         var key = inputs[0].value;
+         var val = inputs[1].value;
+         if (key && val) tag_aliases += key + '\n' + val + '\n';
+       }
+       return tag_aliases;
+     }
+     function update_bookmarklet() {
+       btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();location.reload();})()';
+     }
+
+     function gen_js() {
+       var js = 'var pp=window.opera?window.opera.pixplus:window.pixplus;';
+       var order = st.parse_bm_tag_order(tag_order_textarea.value);
+       var alias = st.parse_bm_tag_aliases(get_tag_alias_str());
+       st.each(
+         function(sec, key) {
+           if (sec.name == 'bookmark') return;
+           var input = input_table[sec.name + '_' + key], val;
+           if (typeof sec.schema[key][0] == 'boolean') {
+             val = input.checked;
+           } else {
+             val = st.get_conv(sec.name, key)[0](input.value);
+           }
+           if (val !== sec.schema[key][0]) {
+             js += 'pp.' + sec.path.join('.') + '.' + key + '=' + stringify(val) + ';';
+           }
+         });
+       if (order.length) {
+         js += 'pp.conf.bm_tag_order=[';
+         for(var i = 0; i < order.length; ++i) {
+           var ary = order[i];
+           js += '[';
+           for(var j = 0; j < ary.length; ++j) {
+             var tag = ary[j];
+             js += (tag ? stringify(tag) : 'null') + ',';
+           }
+           js += '],';
+         }
+         js += '];';
+       }
+       for(var i = 0; i < alias.keys.length; ++i) {
+         var key = alias.keys[i];
+         if (i == 0) js += 'pp.conf.bm_tag_aliases={';
+         js += stringify(key) + ':[';
+         for(var j = 0; j < alias.map[key].length; ++j) {
+           var tag = alias.map[key][j];
+           js += stringify(tag) + ',';
+         }
+         js += '],';
+       }
+       if (alias.keys.length) js += '};';
+       return js;
+
+       function stringify(val) {
+         if (window.JSON && window.JSON.stringify) return JSON.stringify(val);
+         if (typeof val == 'string') {
+           return '"' + val.replace(/[\\\"]/g, '\\$0') + '"';
+         } else {
+           return val.toString();
+         }
+       }
+     }
    }
+   /* __CONFIG_UI_END__ */
 
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
@@ -756,305 +997,13 @@
          sp_manga_tb.parentNode.insertBefore(anc, sp_manga_tb.nextSibling);
          anc.parentNode.insertBefore(sp_manga_tb.cloneNode(true), anc.nextSibling);
        }
-       write_css('#pp-conf-root{text-align:left;}' +
-                 '#pp-conf-root table#pp-conf-table th{text-align:left;}' +
-                 '#pp-conf-root table#pp-conf-table td{padding-left:4px;}' +
-                 '#pp-conf-root table#pp-conf-table td:first-child{padding-left:1em;}' +
-                 '#pp-conf-root button{white-space:pre;}' +
-                 '#pp-conf-root button + button{margin-left:4px;}' +
-                 '#pp-conf-root .pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
-                 '#pp-conf-root .pp-conf-content{margin-left:1em;}' +
-                 '#pp-conf-root textarea{width:100%;}' +
-                 '#pp-conf-root td#pp-conf-aliases, #pp-conf-root td#pp-conf-aliases input{width:100%;}');
 
        var div, tag_order_textarea, tag_alias_table;
        function create() {
          if (div) return;
          div = $c('div', null, 'pp-conf-root');
-         var btn_user_js = $c('button', div);
-         btn_user_js.textContent = 'Generate Setting JS';
-         btn_user_js.addEventListener('click', gen_set_js, false);
-
-         var btn_bmlet = $c('a', div);
-         btn_bmlet.textContent = 'Bookmarklet';
-         btn_bmlet.style.marginLeft = '1em';
-
-         var table = $c('table', div, 'pp-conf-table');
-         LS.each(
-           function(sec, key) {
-             var row  = table.insertRow(-1);
-             var ckey = row.insertCell(-1);
-             if (sec.schema[key].type == 'boolean') {
-               ckey.setAttribute('colspan', '2');
-               var label = $c('label', ckey);
-               var check = $c('input', label);
-               check.setAttribute('type', 'checkbox');
-               label.appendChild(window.document.createTextNode(key));
-               sec.schema[key].input = check;
-             } else {
-               ckey.textContent = key;
-               var cval = row.insertCell(-1);
-               var input = $c('input', cval);
-               sec.schema[key].input = input;
-             }
-             var cdef = row.insertCell(-1);
-             var bdef = $c('button', cdef);
-             bdef.textContent = 'Default';
-             bdef.addEventListener(
-               'click',
-               function() {
-                 if (sec.schema[key].type == 'boolean') {
-                   sec.schema[key].input.checked = sec.schema[key][0];
-                 } else {
-                   sec.schema[key].input.value = sec.schema[key][0];
-                 }
-                 sec.schema[key]._set_default = true;
-                 if (conf.debug) sec.schema[key].input.style.color = 'gray';
-               }, false);
-             var cdes = row.insertCell(-1);
-             cdes.textContent = sec.schema[key][1];
-           },
-           function(sec) {
-             var th = $c('th', table.insertRow(-1));
-             th.setAttribute('colspan', '4');
-             th.textContent = sec.label;
-           });
-
-         if (LS.u) {
-           var cell = table.insertRow(-1).insertCell(-1);
-           cell.setAttribute('colspan', '4');
-           create_button('Save', cell, save_conf);
-           create_button('Cancel', cell, cancel);
-         }
-
-         var tocont = create_section('Tag order', div);
-         tocont.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff' +
-           '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
-           '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
-         tag_order_textarea = $c('textarea', tocont);
-         tag_order_textarea.rows = '20';
-         if (LS.u) {
-           var tobtns = $c('div', tocont);
-           create_button('Save', tobtns, save_tag_order);
-           create_button('Cancel', tobtns, cancel);
-         }
-
-         var tacont = create_section('Tag alias', div);
-         tacont.textContent = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
-           '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
-         tag_alias_table = $c('table', tacont);
-         var btaadd = $c('button', tacont);
-         btaadd.textContent = 'Add';
-         btaadd.addEventListener('click', function() { create_alias_row('', -1); }, false);
-         if (LS.u) {
-           var tabtns = $c('div', tacont);
-           create_button('Save', tabtns, save_tag_alias);
-           create_button('Cancel', tabtns, cancel);
-         }
-
-         if (LS.u) {
-           (function() {
-              var mpcont = create_section('MyPage', div);
-              var now = window.jQuery.cookie('pixiv_mypage');
-              var saved = LS.get('cookie', 'pixiv_mypage');
-              mpcont.innerHTML = 'Now: ' + now + '<br />' + 'Saved: ' + saved;
-              var mpbtns = $c('div', mpcont);
-              create_button('Save', mpbtns, save_mypage);
-              var btn_restore = create_button('Restore', mpbtns, restore_mypage);
-
-              if (!saved) btn_restore.setAttribute('disabled', '');
-
-              function save_mypage() {
-                LS.set('cookie', 'pixiv_mypage', now);
-                window.location.reload();
-              }
-              function restore_mypage() {
-                window.jQuery.cookie('pixiv_mypage', saved, {expires: 30});
-                window.location.reload();
-              }
-            })();
-         }
-
-         var wrap = $('manga_top') || $('pageHeader');
-         if (wrap) wrap.appendChild(div);
-         init();
-         btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();\nlocation.reload();\n})()'; /* WARN */
-
-         function create_section(label, parent) {
-           var anc = $c('a', parent, null, 'pp-conf-section');
-           anc.href = 'javascript:void(0)';
-           anc.textContent = label;
-           var cont = $c('div', parent, null, 'pp-conf-content');
-           cont.style.display = 'none';
-           anc.addEventListener(
-             'click',
-             function(e) {
-               e.preventDefault();
-               cont.style.display = cont.style.display == 'none' ? 'block' : 'none';
-               fire_event();
-             }, false);
-           return cont;
-         }
-         function create_button(label, parent, callback) {
-           var button = $c('button', parent);
-           button.textContent = label;
-           button.addEventListener('click', callback, false);
-           return button;
-         }
-       }
-       function init() {
-         LS.each(
-           function(sec, key) {
-             var val;
-             if (sec.schema[key].type == 'boolean') {
-               sec.schema[key].input.checked = sec.conf[key];
-             } else {
-               sec.schema[key].input.value = sec.conf[key];
-             }
-           });
-
-         tag_order_textarea.value = LS.bm_tag_order_to_str(conf.bm_tag_order);
-
-         tag_alias_table.innerHTML = '';
-         var keys = [];
-         for(var key in conf.bm_tag_aliases) keys.push(key);
-         keys.sort();
-         each(keys, create_alias_row);
-       }
-       function create_alias_row(key, idx) {
-         var row = tag_alias_table.insertRow(idx);
-         var crem = row.insertCell(-1);
-         var ctag = row.insertCell(-1);
-         var caliases = row.insertCell(-1);
-         caliases.id = 'pp-conf-aliases';
-         var brem = $c('button', crem);
-         brem.textContent = 'Remove';
-         brem.addEventListener('click', function() { tag_alias_table.deleteRow(row.rowIndex); }, false);
-         var itag = $c('input', ctag);
-         itag.value = key;
-         var ialiases = $c('input', caliases);
-         if (key) ialiases.value = conf.bm_tag_aliases[key].join(' ');
-       }
-       function check_conf() {
-         LS.each(
-           function(sec, key) {
-             if (sec.schema[key].type == 'number') {
-               var val = sec.schema[key].input.value;
-               if (isNaN(parseFloat(val))) throw 'Invalid value - ' + val;
-             }
-           });
-       }
-       function get_tag_alias_str() {
-         var tag_aliases = '';
-         each(tag_alias_table.rows,
-              function(row) {
-                var inputs = $t('input', row);
-                var key = inputs[0].value;
-                var val = inputs[1].value;
-                if (key && val) tag_aliases += key + '\n' + val + '\n';
-              });
-         return tag_aliases;
-       }
-       function save_conf() {
-         try {
-           check_conf();
-         } catch(ex) {
-           safeWindow.alert(ex);
-           return;
-         }
-         LS.each(
-           function(sec, key) {
-             var val;
-             if (sec.schema[key].type == 'boolean') {
-               val = sec.schema[key].input.checked;
-             } else {
-               val = LS.get_conv(sec.name, key)[0](sec.schema[key].input.value);
-             }
-             if (val === sec.schema[key][0] && sec.schema[key]._set_default) {
-               LS.remove(sec.name, key);
-             } else if (val != sec.conf[key]) {
-               LS.set(sec.name, key, val);
-             }
-           });
-         window.location.reload();
-       }
-       function save_tag_order() {
-         LS.set('bookmark', 'tag_order', tag_order_textarea.value);
-         window.location.reload();
-       }
-       function save_tag_alias() {
-         LS.set('bookmark', 'tag_aliases', get_tag_alias_str());
-         window.location.reload();
-       }
-       function cancel() {
-         init();
-         hide();
-       }
-       function gen_set_js() {
-         var js = ['// ==UserScript==',
-                   '// @name    pixplus settings',
-                   '// @version ' + (new Date()).toLocaleString(),
-                   '// @include http://www.pixiv.net/*',
-                   '// ==/UserScript==',
-                   '(function() {',
-                   ' window.document.addEventListener("pixplusInitialize",init,false);',
-                   ' function init() {',
-                   gen_js('\n'),
-                   ' }',
-                   '})();',
-                   ''].join('\n');
-         window.open('data:text/javascript;application/x-www-form-urlencoded,' + encodeURIComponent(js));
-       }
-       function gen_js(new_line) {
-         new_line = new_line || '';
-         var js = '  var pp = window.opera ? window.opera.pixplus : window.pixplus;' + new_line;
-         var order = LS.parse_bm_tag_order(tag_order_textarea.value);
-         var alias = LS.parse_bm_tag_aliases(get_tag_alias_str());
-         LS.each(
-           function(sec, key) {
-             var val;
-             if (sec.schema[key].type == 'boolean') {
-               val = sec.schema[key].input.checked;
-             } else {
-               val = LS.get_conv(sec.name, key)[0](sec.schema[key].input.value);
-             }
-             if (val !== sec.schema[key][0]) {
-               var ns = 'pp.conf';
-               if (sec.conf !== conf) ns += '.' + sec.name;
-               js += '  ' + ns + '.' + key + ' = ' + stringify(val) + ';' + new_line;
-             }
-           });
-         if (order.length) {
-           js += '  pp.conf.bm_tag_order = [' + new_line;
-           each(order,
-                function(ary) {
-                  js += '   [' + new_line;
-                  each(ary, function(tag) { js += '    ' + (tag ? stringify(tag) : 'null') + ',' + new_line; });
-                  js += '   ],' + new_line;
-                });
-           js += '  ];' + new_line;
-         }
-         each(alias.keys,
-              function(key, idx) {
-                if (idx == 0) js += '  pp.conf.bm_tag_aliases = {' + new_line;
-                js += '   ' + stringify(key) + ':[' + new_line;
-                each(alias.map[key],
-                     function(tag) {
-                       js += '    ' + stringify(tag) + ',' + new_line;
-                     });
-                js += '   ],' + new_line;
-              });
-         if (alias.keys.length) js += '  };' + new_line;
-         return js;
-
-         function stringify(val) {
-           if (window.JSON && window.JSON.stringify) return JSON.stringify(val);
-           if (typeof val == 'string') {
-             return '"' + val.replace(/[\\\"]/g, '\\$0') + '"';
-           } else {
-             return val.toString();
-           }
-         }
+         new ConfigUI(div, LS);
+         ($('manga_top') || $('pageHeader')).appendChild(div);
        }
      }
    }
@@ -1701,6 +1650,14 @@
                (conf.popup.font_size ? '#pp-popup{font-size:' + conf.popup.font_size + ';}' : '') +
                '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                'hr + br, hr ~ br{display:none;}' +
+               // 設定
+               '.pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
+               '.pp-conf-content{margin-left:1em;}' +
+               '#pp-conf-root button{display:block !important;}' +
+               '#pp-conf-root textarea{width:100%;}' +
+               '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;box-sizing:border-box;}' +
+               '#pp-tagalias-table .pp-conf-cell-aliases{width:100%}' +
+               '#pp-tagalias-table .pp-conf-cell-aliases input{width:100%}' +
                // ポップアップ/検索欄がz-index:1000なので
                '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +

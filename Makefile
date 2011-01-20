@@ -74,8 +74,9 @@ $(CONFIG_JS): $(SRC_USERJS)
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
             -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
             -e '/__REMOVE__/d' \
-          < $(SRC_USERJS) | tr -d '\r' >> $@; \
+          < $(SRC_USERJS) | tr -d '\r' >> $@;
 	echo '};' >> $@
+	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
 $(ICON_FILES): $(ICON_SVG)
 	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
