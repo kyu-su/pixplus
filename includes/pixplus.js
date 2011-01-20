@@ -496,10 +496,27 @@
         LS.get = function(s, n) {
           return _extension_data.conf[s + '_' + n];
         };
+        LS.set = function(s, n, v) {
+          var data = { section: s, key: n, value: v };
+          if (window.opera) {
+	    opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
+          } else {
+          }
+        };
+        LS.remove = function(s, n) {
+          var data = { section: s, key: n };
+          if (window.opera) {
+	    opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
+          } else {
+          }
+        };
       } else {
         LS.u = !!window.localStorage;
         LS.get = function(s, n) {
-          return LS.get_conv(s, n)[0](window.localStorage.getItem(create_name(s, n)));
+          var value = window.localStorage.getItem(create_name(s, n));
+          return (typeof value === 'undefined' || value === null
+                  ? (LS.map[s] ? LS.map[s].schema[n][0] : '')
+                  : LS.get_conv(s, n)[0](value));
         };
         LS.set = function(s, n, v) {
           return window.localStorage.setItem(create_name(s, n), LS.get_conv(s, n)[1](v));
