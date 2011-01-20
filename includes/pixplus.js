@@ -699,9 +699,12 @@
    function ConfigUI(root, st) {
      this.root = root;
 
-     var btn_bmlet = window.document.createElement('a');
-     btn_bmlet.textContent = 'Bookmarklet';
-     root.appendChild(btn_bmlet);
+     var btn_bmlet;
+     if (window.opera) {
+       btn_bmlet = window.document.createElement('a');
+       btn_bmlet.textContent = 'Bookmarklet';
+       root.appendChild(btn_bmlet);
+     }
 
      var table = window.document.createElement('table');
      table.id = 'pp-conf-table';
@@ -883,7 +886,7 @@
        return tag_aliases;
      }
      function update_bookmarklet() {
-       btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();})()';
+       if (window.opera) btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();})()';
      }
 
      function gen_js() {
@@ -942,7 +945,8 @@
    /* __CONFIG_UI_END__ */
 
    function init_config_ui() {
-     if (_extension_data && !_extension_data.base_uri) return;
+     if (_extension_data && !_extension_data.base_uri &&
+         !(window.opera && LS.u && LS.get('extension', 'show_config_ui'))) return;
 
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
