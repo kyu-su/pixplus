@@ -1034,7 +1034,7 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data && _extension_data.base_uri && false) {
+           if (_extension_data && _extension_data.base_uri) {
              window.open(_extension_data.base_uri + 'options.html');
            } else {
              toggle();
@@ -2276,7 +2276,7 @@
            switch(key) {
            case $ev.KEY_UP:     if (m()) q(ev, sel_qr, ev.qrate.previousSibling); return;
            case $ev.KEY_DOWN:   if (m()) q(ev, sel_qr, ev.qrate.nextSibling);     return;
-           case $ev.KEY_ESCAPE: if (m()) q(ev, window.rating_ef2);               return;
+           case $ev.KEY_ESCAPE: if (m()) q(ev, window.rating_ef2);                return;
            }
          } else {
            switch(key) {
