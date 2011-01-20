@@ -127,7 +127,17 @@
 
 (function(func, unsafeWindow) {
    if (window.opera || unsafeWindow) {
-     func(unsafeWindow || window, window);
+     if (window.opera && opera.extension) {
+       opera.extension.onmessage = function(ev){
+         var data = JSON.parse(ev.data);
+         if (data.command == 'config') {
+           var uri = ev.origin.replace(/^(widget:\/\/[^\/]+).*$/, '$1/options.html');
+           func(window, window, {base_uri: uri, conf: data.data});
+         }
+       };
+     } else {
+       func(unsafeWindow || window, window);
+     }
    } else {
      (function(func) {
         if (window.chrome) {
@@ -425,7 +435,6 @@
        return str;
      }
      /* __STORAGE_COMMON_ENTRIES_END__ */,
-     wait_funcs:  [],
      init_section: function(sec) {
        each(sec.keys,
             function(key) {
@@ -436,7 +445,7 @@
               }
             });
      },
-     init: function(func) {
+     init: function() {
        each(LS.l, function(sec) { LS.init_section(sec); });
        if (LS.u) {
          var order = LS.get('bookmark', 'tag_order');
@@ -454,15 +463,6 @@
                 conf.popup[key + '_p'] = false;
               }
             });
-       if (func) func();
-       each(LS.wait_funcs, function(func) { func(); });
-     },
-     wait: function(func) {
-       if (LS.u) {
-         func();
-       } else {
-         LS.wait_funcs.push(func);
-       }
      }
    };
    if (!(window.opera && opera.extension)) LS.l.shift();
@@ -490,35 +490,7 @@
    };
 
    (function() {
-      if (window.opera && opera.extension) {
-        var _init = LS.init, init_func;
-        opera.extension.onmessage = function(event){
-          var data = JSON.parse(event.data);
-          if (data.command == 'config') {
-            LS.u = true;
-            LS.get = function(s, n) {
-              return data.data[s + '_' + n];
-            };
-            LS.set = function(s, n, v) {
-              var data = { section: s, key: n, value: v };
-              opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
-            };
-            LS.remove = function(s, n) {
-              var data = { section: s, key: n };
-              opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
-            };
-            if (init_func) _init(init_func);
-          }
-        };
-
-        LS.init = function(func) {
-          if (LS.u) {
-            _init(func);
-          } else {
-            init_func = func;
-          }
-        };
-      } else if (_extension_data) {
+      if (_extension_data) {
         LS.u = true;
         LS.get = function(s, n) {
           return _extension_data.conf[s + '_' + n];
@@ -1868,23 +1840,21 @@
                    _ajax.apply(this, [].slice.apply(arguments));
                  };
 
-                 LS.init(init_pixplus_real);
+                 LS.init();
+                 init_pixplus_real();
                })
          .script(pp.url.js.prototypejs)
          .wait()
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
          .wait(function() {
-                 LS.wait(
-                   function() {
-                     if (conf.disable_effect) {
-                       window.jQuery.fx.off = true;
-                       window.Effect.ScopedQueue.prototype.add = function(effect) {
-                         effect.loop(effect.startOn);
-                         effect.loop(effect.finishOn);
-                       };
-                     }
-                   });
+                 if (conf.disable_effect) {
+                   window.jQuery.fx.off = true;
+                   window.Effect.ScopedQueue.prototype.add = function(effect) {
+                     effect.loop(effect.startOn);
+                     effect.loop(effect.finishOn);
+                   };
+                 }
                })
         )
        .script(pp.url.js.tag_edit);
