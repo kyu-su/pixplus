@@ -10,7 +10,6 @@ BUILD_CRX            = $(shell test -x "$(CHROME)" && echo yes || echo no)
 
 CONFIG_XML           = config.xml
 CONFIG_JS            = config.js
-PARSER_JS            = parser.js
 GREASEMONKEY_JS      = pixplus.user.js
 ICON_PREFIX          = icons/pixplus_
 ICON_SUFFIX          = .png
@@ -31,7 +30,7 @@ SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
 SAFARIEXTZ_PRIV      = safari_key.pem
 
 SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES_EXTRA     = $(CONFIG_JS) $(PARSER_JS) common.js index.html index.js options.html options.css options.js
+DIST_FILES_EXTRA     = $(CONFIG_JS) common.js index.html index.js options.html options.css options.js
 DIST_FILES_OEX       = $(SIGN_FILES) $(DIST_FILES_EXTRA)
 DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(DIST_FILES_EXTRA)
 DIST_FILES_SAFARI    = $(INFO_PLIST) $(SETTINGS_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
@@ -69,18 +68,13 @@ $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 
 $(CONFIG_JS): $(SRC_USERJS)
 	echo 'var conf_schema = {' > $@
-	@a=1;for f in $(SRC_USERJS); do \
-           test $$a = 1 && a=0 || echo ',' >> $@; \
-           sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $$f | tr -d '\r' >> $@; \
-         done
+	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@; \
 	echo '};' >> $@
-
-$(PARSER_JS): $(SRC_USERJS)
-	echo 'var parser = {' > $@
-	@a=1;for f in $(SRC_USERJS); do \
-           test $$a = 1 && a=0 || echo ',' >> $@; \
-           sed -e '1,/__PARSER_FUNCTIONS_BEGIN__/d' -e '/__PARSER_FUNCTIONS_END__/,$$d' < $$f | tr -d '\r' >> $@; \
-         done
+	echo 'var conf = {' >> $@
+	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
+            -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
+            -e '/__REMOVE__/d' \
+          < $(SRC_USERJS) | tr -d '\r' >> $@; \
 	echo '};' >> $@
 
 $(ICON_FILES): $(ICON_SVG)
@@ -147,6 +141,6 @@ $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
 
 clean:
 	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
-	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(PARSER_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
+	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
               $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)

@@ -1,18 +1,19 @@
 *{margin:0px;padding:0px;}
-body{padding:2px;}
+body{padding:2px;font-size:smaller;}
 table{border-spacing:0px;}
 
-tr.section{color:gray;font-weight:bold;}
-tr.entry, tr.section-custom{font-size:smaller;}
-tr.entry > td:first-child, tr.section-custom > td:first-child{padding-left:2em;}
-tr.entry.odd{background-color:#efefef;}
+tr.pp-conf-section{color:gray;font-weight:bold;font-size:larger;}
+tr.pp-conf-entry > td:first-child, tr.pp-conf-section-custom > td:first-child{padding-left:2em;}
+tr.pp-conf-entry-odd{background-color:#efefef;}
 
-.config-table td{padding:1px 2px;}
-.config-table textarea{display:block;width:100%;}
-.config-table > tbody > tr > td > button{margin:1px 2px;}
+#pp-conf-table td{padding:1px 2px;}
+.pp-conf-cell-value select, .pp-conf-cell-value input{width:100%;}
+#pp-conf-table textarea{display:block;width:100%;}
+#pp-conf-table > tbody > tr > td > button{margin:1px 2px;}
 
-.tagalias-table{width:100%;}
-.tagalias-table input{display:block;width:100%;}
-.tagalias-table .cell-remove{width:0;}
-.tagalias-table .cell-tag{width:30%;}
-.tagalias-table .cell-aliases{width:100%;}
+#pp-tagalias-table{width:100%;}
+#pp-tagalias-table button{display:block;}
+#pp-tagalias-table input{display:block;width:100%;}
+#pp-tagalias-table .pp-conf-cell-remove{width:0;}
+#pp-tagalias-table .pp-conf-cell-tag{width:30%;}
+#pp-tagalias-table .pp-conf-cell-aliases{width:100%;}

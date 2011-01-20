@@ -166,20 +166,33 @@
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "デバッグモード。"],
-     "scroll":                 [1,     "イラストページを開いた時にスクロールする。0:なし/1:キャプション/2:イラスト"],
+     "scroll":                 [1,     "イラストページを開いた時にスクロールする。",
+                                [{"value": 0, "title": "なし"},
+                                 {"value": 1, "title": "キャプション"},
+                                 {"value": 2, "title": "イラスト"}]],
      "bookmark_hide":          [false, "ブックマーク非公開をデフォルトにする。"],
-     "float_tag_list":         [1,     "タグリストをフロート表示する。0:無効/1:有効/2:AutoPagerize"],
-     "locate_recommend_right": [1,     "レコメンドを右側に縦1列に並べる。0:無効/1:有効/2:AutoPagerize"],
+     "float_tag_list":         [1,     "タグリストをフロート表示する。",
+                                [{"value": 0, "title": "無効"},
+                                 {"value": 1, "title": "有効"},
+                                 {"value": 2, "title": "AutoPagerize"}]],
+     "locate_recommend_right": [1,     "レコメンドを右側に縦1列に並べる。",
+                                [{"value": 0, "title": "無効"},
+                                 {"value": 1, "title": "有効"},
+                                 {"value": 2, "title": "AutoPagerize"}]],
      "extagedit":              [true,  "ブックマーク編集時にアローキーでのタグ選択を有効にする。"],
      "mod_bookmark_add_page":  [false, "ブックマーク編集ページにも変更を加える。"],
      "tag_separator_style":    ["border-top:2px solid #dae1e7;", "ブックマーク編集ページでのセパレータのスタイル。"],
-     "stacc_link":             ["",    "上部メニューの「スタックフィード」のリンク先。空白/all/mypixiv/favorite/self"],
-     "default_manga_type":     ["",    "デフォルトのマンガ表示タイプ。scroll/slide"],
+     "stacc_link":             ["",    "上部メニューの「スタックフィード」のリンク先。",
+                                ["", "all", "mypixiv", "favorite", "self"]],
+     "default_manga_type":     ["",    "デフォルトのマンガ表示タイプ。", ["scroll", "slide"]],
      "rate_confirm":           [true,  "イラストを評価する時に確認をとる。"],
      "popup_manga_tb":         [true,  "マンガサムネイルページでポップアップを使用する。"],
      "disable_effect":         [false, "アニメーションなどのエフェクトを無効化する。"],
      "workaround":             [false, "Operaやpixivのバグ回避のための機能を使用する。"],
-     "fast_user_bookmark":     [0,     "お気に入りユーザーの追加をワンクリックで行う。0:無効/1:有効(公開)/2:有効(非公開)"],
+     "fast_user_bookmark":     [0,     "お気に入りユーザーの追加をワンクリックで行う。",
+                                [{"value": 0, "title": "無効"},
+                                 {"value": 1, "title": "有効(公開)"},
+                                 {"value": 2, "title": "有効(非公開)"}]],
      "expand_novel":           [false, "小説ページのロード時に全ページを表示する。"],
      "popup_ranking_log":      [true,  "ランキングカレンダーでポップアップを使用する。"],
      "popup": {
@@ -191,10 +204,16 @@
        "rate":                 [true,  "評価機能を使用する。"],
        "rate_key":             [false, "評価のキーバインドを有効にする。"],
        "font_size":            ["",    "フォントサイズ(e.g. 10px)"],
-       "auto_manga":           [0,     "自動的にマンガモードを開始する。0:無効/1:有効/2:ページを正規表現で指定"],
+       "auto_manga":           [0,     "自動的にマンガモードを開始する。",
+                                [{"value": 0, "title": "無効"},
+                                 {"value": 1, "title": "有効"},
+                                 {"value": 2, "title": "ページを正規表現で指定"}]],
        "auto_manga_regexp":    ["/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php",
                                 "auto_mangaに2を指定した場合に使用する正規表現。"],
-       "reverse":              [0,     "移動方向を反対にする。0:無効/1:有効/2:ページを正規表現で指定"],
+       "reverse":              [0,     "移動方向を反対にする。",
+                                [{"value": 0, "title": "無効"},
+                                 {"value": 1, "title": "有効"},
+                                 {"value": 2, "title": "ページを正規表現で指定"}]],
        "reverse_regexp":       ["/(?:bookmark_new_illust|member_illust|mypage)\\.php",
                                 "reverseに2を指定した場合に使用する正規表現。"],
        "auto_zoom":            [0,     "自動ズームする最大サイズ。0で無効。"],
@@ -311,21 +330,25 @@
    }
 
    var LS = {
+     /* __STORAGE_COMMON_ENTRIES_BEGIN__ */
      u: false, // usable or not
      l: [{name:   'extension',
           label:  'Extension',
+          path:   ['conf', 'extension'],
           schema: conf_schema.extension,
-          conf:   conf.extension,
+          conf:   conf.extension, /* __REMOVE__ */
           keys:   []},
          {name:   'general',
           label:  'General',
+          path:   ['conf'],
           schema: conf_schema,
-          conf:   conf,
+          conf:   conf, /* __REMOVE__ */
           keys:   []},
          {name:   'popup',
           label:  'Popup',
+          path:   ['conf', 'popup'],
           schema: conf_schema.popup,
-          conf:   conf.popup,
+          conf:   conf.popup, /* __REMOVE__ */
           keys:   []}],
      map: {},
      conv: {
@@ -339,43 +362,33 @@
                    },
                    String]
      },
-     wait_funcs:  [],
      get_conv: function(s, n) {
-       return LS.map[s] ? LS.conv[LS.map[s].schema[n].type] : LS.conv['string'];
+       return this.map[s] ? this.conv[typeof this.map[s].schema[n][0]] : this.conv['string'];
      },
      each: function(cb_key, cb_sec, cb_sec_after) {
-       each(LS.l,
-            function(sec) {
-              if (cb_sec) cb_sec(sec);
-              each(sec.keys, function(key) { cb_key(sec, key); });
-              if (cb_sec_after) cb_sec_after(sec);
-            });
+       for(var i = 0; i < this.l.length; ++i) {
+         var sec = this.l[i];
+         if (cb_sec) cb_sec(sec);
+         for(var j = 0; j < sec.keys.length; ++j) {
+           cb_key(sec, sec.keys[j]);
+         }
+         if (cb_sec_after) cb_sec_after(sec);
+       }
      },
-     init_section: function(sec) {
-       each(sec.keys,
-            function(key) {
-              sec.conf[key] = sec.schema[key][0];
-              if (LS.u) {
-                var v = LS.get(sec.name, key);
-                if (typeof v !== 'undefined' && v !== null) sec.conf[key] = v;
-              }
-            });
-     },
-     /* __PARSER_FUNCTIONS_BEGIN__ */
      parse_bm_tag_order: function(str) {
-       var ary = [], ary_ary = [];
-       each(str.split('\n'),
-            function(tag) {
-              tag = tag.replace(/[\r\n]/g, '');
-              if (tag == '-') {
-                ary.push(ary_ary);
-                ary_ary = [];
-              } else if (tag == '*') {
-                ary_ary.push(null);
-              } else if (tag) {
-                ary_ary.push(tag);
-              }
-            });
+       var ary = [], ary_ary = [], lines = str.split('\n');
+       for(var i = 0; i < lines.length; ++i) {
+         var tag = lines[i];
+         tag = tag.replace(/[\r\n]/g, '');
+         if (tag == '-') {
+           ary.push(ary_ary);
+           ary_ary = [];
+         } else if (tag == '*') {
+           ary_ary.push(null);
+         } else if (tag) {
+           ary_ary.push(tag);
+         }
+       }
        ary.push(ary_ary);
        return ary;
      },
@@ -395,12 +408,14 @@
      bm_tag_order_to_str: function(bm_tag_order) {
        var str = '';
        if (!bm_tag_order) return str;
-       each(bm_tag_order,
-            function(ary, idx) {
-              each(ary, function(tag, idx) { if (tag === null) ary[idx] = '*'; } );
-              if (idx) str += '-\n';
-              str += ary.join('\n') + '\n';
-            });
+       for(var i = 0; i < bm_tag_order.length; ++i) {
+         var ary = bm_tag_order[i];
+         for(var j = 0; j < ary.length; ++j) {
+           if (ary[j] === null) ary[j] = '*';
+         }
+         if (i) str += '-\n';
+         str += ary.join('\n') + '\n';
+       }
        return str;
      },
      bm_tag_aliases_to_str: function(bm_tag_aliases) {
@@ -409,8 +424,19 @@
          str += key + '\n' + bm_tag_aliases[key] + '\n';
        }
        return str;
+     }
+     /* __STORAGE_COMMON_ENTRIES_END__ */,
+     wait_funcs:  [],
+     init_section: function(sec) {
+       each(sec.keys,
+            function(key) {
+              sec.conf[key] = sec.schema[key][0];
+              if (LS.u) {
+                var v = LS.get(sec.name, key);
+                if (typeof v !== 'undefined' && v !== null) sec.conf[key] = v;
+              }
+            });
      },
-     /* __PARSER_FUNCTIONS_END__ */
      init: function(func) {
        each(LS.l, function(sec) { LS.init_section(sec); });
        if (LS.u) {
@@ -679,6 +705,10 @@
               });
        }
      });
+
+   function ConfigUI(root, st) {
+     
+   }
 
    function init_config_ui() {
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
