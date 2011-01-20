@@ -2,6 +2,7 @@ conf_schema.bookmark = {
   tag_order: [''],
   tag_aliases: ['']
 };
+conf.u = true;
 conf.l.push(
   {name:   'bookmark',
    label:  'Bookmark',
