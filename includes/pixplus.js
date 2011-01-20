@@ -883,7 +883,7 @@
        return tag_aliases;
      }
      function update_bookmarklet() {
-       btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();location.reload();})()'; /* WARN */
+       btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();})()';
      }
 
      function gen_js() {
