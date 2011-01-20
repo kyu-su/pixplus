@@ -11,7 +11,7 @@ if sys.argv[1] == 'safari':
       <key>DefaultValue</key>
       %(value_safari)s
       <key>Type</key>
-      <string>%(type_safari)s</string>
+      <string>%(type_safari)s</string>%(more)s
     </dict>'''
 
 def print_conf(conf, prefix):
@@ -23,7 +23,32 @@ def print_conf(conf, prefix):
       value = conf[key][0]
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % value
-      if isinstance(value, bool):
+      more = ''
+      if len(conf[key]) > 2:
+        type_safari = 'PopUpButton'
+        more = '''
+      <key>Titles</key>
+      <array>'''
+        for entry in conf[key][2]:
+          if isinstance(entry, dict):
+            more += '\n        <string>%s</string>' % entry['title']
+          else:
+            more += '\n        <string>%s</string>' % entry
+            pass
+          pass
+        more += '\n      </array>'
+        more += '''
+      <key>Values</key>
+      <array>'''
+        for entry in conf[key][2]:
+          if isinstance(entry, dict):
+            more += '\n        <string>%s</string>' % str(entry['value'])
+          else:
+            more += '\n        <string>%s</string>' % entry
+            pass
+          pass
+        more += '\n      </array>'
+      elif isinstance(value, bool):
         if value:
           value = 'true'
         else:
@@ -32,9 +57,10 @@ def print_conf(conf, prefix):
         type_safari = 'CheckBox'
         value_safari = '<%s/>' % value
         pass
-      #type_safari = 'TextField'
-      #value_safari = '<string>%s</string>' % value
-      print format % {'name': name, 'value': value,
-                      'type_safari': type_safari, 'value_safari': value_safari}
+      print (format % {'name':         name,
+                       'value':        value,
+                       'type_safari':  type_safari,
+                       'value_safari': value_safari,
+                       'more':         more}).encode('utf-8')
 
 print_conf(json.loads(sys.stdin.read()), 'conf')
