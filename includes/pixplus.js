@@ -711,7 +711,7 @@
                    '// @include http://www.pixiv.net/*',
                    '// ==/UserScript==',
                    '(function() {',
-                   '   document.addEventListener("pixplusInitialize",init,false);',
+                   '   window.document.addEventListener("pixplusInitialize",init,false);',
                    '   function init() {',
                    '     ' + gen_js('\n     ', 2),
                    '   }})();'].join('\n');
