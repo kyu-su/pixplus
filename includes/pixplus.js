@@ -818,6 +818,7 @@
        '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
        '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
      var tag_order_textarea = window.document.createElement('textarea');
+     tag_order_textarea.id = 'pp-conf-tagorder';
      tag_order_textarea.rows = '20';
      tag_order_textarea.value = (conf.bm_tag_order
                                  ? st.bm_tag_order_to_str(conf.bm_tag_order)
@@ -834,7 +835,7 @@
      tacont.innerText = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
        '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
      var tag_alias_table = window.document.createElement('table');
-     tag_alias_table.id = 'pp-tagalias-table';
+     tag_alias_table.id = 'pp-conf-tagalias';
      tacont.appendChild(tag_alias_table);
      (function() {
         var add = window.document.createElement('button');
@@ -1695,8 +1696,8 @@
                '#pp-conf-root button{display:block !important;}' +
                '#pp-conf-root textarea{width:100%;}' +
                '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;box-sizing:border-box;}' +
-               '#pp-tagalias-table .pp-conf-cell-aliases{width:100%}' +
-               '#pp-tagalias-table .pp-conf-cell-aliases input{width:100%}' +
+               '#pp-conf-tagalias .pp-conf-cell-aliases{width:100%}' +
+               '#pp-conf-tagalias .pp-conf-cell-aliases input{width:100%}' +
                // ポップアップ/検索欄がz-index:1000なので
                '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
