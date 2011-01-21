@@ -721,9 +721,10 @@
      var export_input = window.document.createElement('input');
      export_wrap.textContent = 'Export/Import:';
      export_wrap.appendChild(export_input);
-     if (options_page || window.opera) {
+     if ((options_page || window.opera) && window.JSON && st.u) {
        var btn_import = window.document.createElement('button');
        btn_import.textContent = 'Import';
+       btn_import.addEventListener('click', import_json, false);
        export_wrap.appendChild(btn_import);
      }
      root.appendChild(export_wrap);
@@ -947,6 +948,23 @@
        obj['bookmark_tag_order'] = tag_order_textarea.value.replace(/\r/g, '');
        obj['bookmark_tag_aliases'] = get_tag_alias_str();
        export_input.value = stringify(obj);
+     }
+     function import_json() {
+       try {
+         var obj = window.JSON.parse(export_input.value);
+         st.each(
+           function(sec, key) {
+             var val = obj[sec.name + '_' + key];
+             if (typeof val !== 'undefined' && val !== null) {
+               st.set(sec.name, key, val);
+             }
+           });
+         if (obj['bookmark_tag_order']) st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+         if (obj['bookmark_tag_aliases']) st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+         window.location.reload();
+       } catch(ex) {
+         alert(ex);
+       }
      }
 
      function gen_js(new_line, indent_level) {
