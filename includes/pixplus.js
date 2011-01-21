@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        pixplus.js
+// @name        pixplus
 // @author      wowo
 // @version     0.4
 // @license     Public domain
@@ -145,9 +145,13 @@
           chrome.extension.sendRequest( /* WARN */
             {command: 'config'},
             function(data) {
-              if (data.command == 'config') {
-                func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
-                                     conf:     data.data}));
+              if (data) {
+                if (data.command == 'config') {
+                  func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
+                                       conf:     data.data}));
+                }
+              } else {
+                func();
               }
             });
         } else if (window.safari) {
@@ -1791,13 +1795,14 @@
                '#pp-conf-head form{display:inline;}' +
                '#pp-conf-head input{margin-left:0.2em;}' +
                '#pp-conf-head a{margin-left:1em;}' +
-       '.pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
+               '.pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
                '.pp-conf-content{margin-left:1em;}' +
-               '#pp-conf-root button{display:block !important;}' +
+               '#pp-conf-root button{display:block !important;white-space:pre !important;}' +
                '#pp-conf-root textarea{width:100%;}' +
                '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;padding:0px;}' +
-               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases{width:100%}' +
-               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases input{width:100%}' +
+               '#pp-conf-bookmark-tag_aliases{width:100%;}' +
+               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases{width:100%;}' +
+               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases input{width:100%;}' +
                // ポップアップ/検索欄がz-index:1000なので
                '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
