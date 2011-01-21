@@ -726,7 +726,7 @@
      export_input.addEventListener(
        'mouseup',
        function(ev) {
-         export_input.select(0, export_input.value.length);
+         export_input.select(0, export_input.value.length); /* WARN */
        }, false);
      export_form.textContent = 'Export/Import:';
      export_form.appendChild(export_input);
@@ -765,7 +765,7 @@
                    '     ' + gen_js('\n     ', 2),
                    '   }',
                    ' })();'].join('\n');
-         window.open('data:text/javascript,' + encodeURI(js));
+         window.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
        }, false);
      head.appendChild(btn_userjs);
 
