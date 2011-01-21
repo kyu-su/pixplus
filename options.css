@@ -2,6 +2,10 @@
 body{padding:2px;font-size:smaller;}
 table{border-spacing:0px;}
 
+#pp-conf-head form{display:inline;}
+#pp-conf-head input{margin-left:0.2em;}
+#pp-conf-head a{margin-left:1em;}
+
 tr.pp-conf-section{color:gray;font-weight:bold;font-size:larger;}
 tr.pp-conf-entry > td:first-child, tr.pp-conf-section-custom > td:first-child{padding-left:2em !important;}
 tr.pp-conf-entry-odd{background-color:#efefef;}

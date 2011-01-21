@@ -717,17 +717,36 @@
    function ConfigUI(root, st, options_page) {
      this.root = root;
 
-     var export_wrap = window.document.createElement('span');
+     var head = window.document.createElement('div');
+     head.id = 'pp-conf-head';
+     root.appendChild(head);
+
+     var export_form = window.document.createElement('form');
      var export_input = window.document.createElement('input');
-     export_wrap.textContent = 'Export/Import:';
-     export_wrap.appendChild(export_input);
+     export_input.addEventListener(
+       'mouseup',
+       function(ev) {
+         export_input.select(0, export_input.value.length);
+       }, false);
+     export_form.textContent = 'Export/Import:';
+     export_form.appendChild(export_input);
      if ((options_page || window.opera) && window.JSON && st.u) {
-       var btn_import = window.document.createElement('button');
-       btn_import.textContent = 'Import';
-       btn_import.addEventListener('click', import_json, false);
-       export_wrap.appendChild(btn_import);
+       var btn_import = window.document.createElement('input');
+       btn_import.type = 'submit';
+       btn_import.value = 'Import';
+       export_form.addEventListener(
+         'submit',
+         function(ev) {
+           try {
+             ev.preventDefault();
+             import_json();
+           } catch(ex) {
+             alert(ex);
+           }
+         }, false);
+       export_form.appendChild(btn_import);
      }
-     root.appendChild(export_wrap);
+     head.appendChild(export_form);
 
      var btn_userjs = window.document.createElement('a');
      btn_userjs.href = 'javascript:void(0)';
@@ -748,8 +767,7 @@
                    ' })();'].join('\n');
          window.open('data:text/javascript,' + encodeURI(js));
        }, false);
-     btn_userjs.style.marginLeft = '1em';
-     root.appendChild(btn_userjs);
+     head.appendChild(btn_userjs);
 
      var table = window.document.createElement('table');
      table.id = 'pp-conf-table';
@@ -950,21 +968,17 @@
        export_input.value = stringify(obj);
      }
      function import_json() {
-       try {
-         var obj = window.JSON.parse(export_input.value);
-         st.each(
-           function(sec, key) {
-             var val = obj[sec.name + '_' + key];
-             if (typeof val !== 'undefined' && val !== null) {
-               st.set(sec.name, key, val);
-             }
-           });
-         if (obj['bookmark_tag_order']) st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
-         if (obj['bookmark_tag_aliases']) st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
-         window.location.reload();
-       } catch(ex) {
-         alert(ex);
-       }
+       var obj = window.JSON.parse(export_input.value);
+       st.each(
+         function(sec, key) {
+           var val = obj[sec.name + '_' + key];
+           if (typeof val !== 'undefined' && val !== null) {
+             st.set(sec.name, key, val);
+           }
+         });
+       if (obj['bookmark_tag_order']) st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+       if (obj['bookmark_tag_aliases']) st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+       window.location.reload();
      }
 
      function gen_js(new_line, indent_level) {
