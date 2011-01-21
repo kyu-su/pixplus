@@ -25,5 +25,5 @@ function init() {
 }
 
 function init_real() {
-  new ConfigUI(document.getElementById('options-root'), conf);
+  new ConfigUI(document.getElementById('options-root'), conf, true);
 }

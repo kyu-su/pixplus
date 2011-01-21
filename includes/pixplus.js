@@ -714,7 +714,7 @@
      });
 
    /* __CONFIG_UI_BEGIN__ */
-   function ConfigUI(root, st) {
+   function ConfigUI(root, st, options_page) {
      this.root = root;
 
      var btn_userjs = window.document.createElement('a');
@@ -742,7 +742,7 @@
      if (window.opera) {
        btn_bmlet = window.document.createElement('a');
        btn_bmlet.textContent = 'Bookmarklet';
-       btn_bmlet.style.marginLeft = '2em';
+       btn_bmlet.style.marginLeft = '1em';
        root.appendChild(btn_bmlet);
      }
 
@@ -757,7 +757,7 @@
        function(sec, key) {
          if (sec.name == 'bookmark') return;
 
-         var value = sec.conf ? sec.conf[key] : st.get(sec.name, key);
+         var value = options_page ? st.get(sec.name, key) : sec.conf[key];
          var type = typeof sec.schema[key][0];
          var row = table.insertRow(-1), cell = row.insertCell(-1), input;
          row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
@@ -777,6 +777,7 @@
          } else {
            input = window.document.createElement('input');
          }
+         input.id = 'pp-conf-' + sec.name + '-' + key;
          if (type == 'boolean') {
            input.setAttribute('type', 'checkbox');
            input.checked = value;
@@ -837,11 +838,11 @@
        '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
        '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
      var tag_order_textarea = window.document.createElement('textarea');
-     tag_order_textarea.id = 'pp-conf-tagorder';
+     tag_order_textarea.id = 'pp-conf-bookmark-tag_order';
      tag_order_textarea.rows = '20';
-     tag_order_textarea.value = (conf.bm_tag_order
-                                 ? st.bm_tag_order_to_str(conf.bm_tag_order)
-                                 : st.get('bookmark', 'tag_order'));
+     tag_order_textarea.value = (options_page
+                                 ? st.get('bookmark', 'tag_order')
+                                 : st.bm_tag_order_to_str(conf.bm_tag_order));
      tag_order_textarea.addEventListener(
        'keyup',
        function() {
@@ -854,7 +855,7 @@
      tacont.innerText = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
        '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
      var tag_alias_table = window.document.createElement('table');
-     tag_alias_table.id = 'pp-conf-tagalias';
+     tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
      tacont.appendChild(tag_alias_table);
      (function() {
         var add = window.document.createElement('button');
@@ -862,7 +863,7 @@
         add.addEventListener('click', function() { add_row(); }, false);
         tacont.appendChild(add);
 
-        var aliases = conf.bm_tag_aliases || st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'));
+        var aliases = options_page ? st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases')) : conf.bm_tag_aliases;
         for(var key in aliases) add_row(key, aliases[key]);
 
         function add_row(tag, list) {
@@ -995,14 +996,40 @@
          for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
          js.push(sp + str);
        }
+
        function stringify(val) {
-         if (window.JSON && window.JSON.stringify) return JSON.stringify(val);
-         if (typeof val == 'string') {
-           return '"' + val.replace(/[\\\"]/g, '\\$0') + '"';
+         if (window.JSON && window.JSON.stringify) {
+           return JSON.stringify(val);
          } else {
-           return val.toString();
+           var str = '';
+           if (val.constructor === String) {
+             return '"' + val.replace(/[\\\"]/g, '\\$0').replace(/\n/, '\\n') + '"';
+           } else if (val.constructor === Array) {
+             for(var i = 0; i < val.length; ++i) {
+               if (i) str += ',';
+               str += stringify(val[i]);
+             }
+             return '[' + str + ']';
+           } else if (val.constructor === Object) {
+             var first = true;
+             for(var key in val) {
+               if (!val.hasOwnProperty(key)) continue;
+               if (first) {
+                 first = false;
+               } else {
+                 str += ',';
+               }
+               str += stringify(key) + ':' + stringify(val[key]);
+             }
+             return '{' + str + '}';
+           } else if (val.constructor === Number) {
+             return String(val);
+           } else {
+             throw 1;
+           }
          }
-       }
+       } // stringify()
+
      }
    }
    /* __CONFIG_UI_END__ */
@@ -1715,8 +1742,8 @@
                '#pp-conf-root button{display:block !important;}' +
                '#pp-conf-root textarea{width:100%;}' +
                '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;box-sizing:border-box;}' +
-               '#pp-conf-tagalias .pp-conf-cell-aliases{width:100%}' +
-               '#pp-conf-tagalias .pp-conf-cell-aliases input{width:100%}' +
+               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases{width:100%}' +
+               '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases input{width:100%}' +
                // ポップアップ/検索欄がz-index:1000なので
                '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
