@@ -736,7 +736,7 @@
        function() {
          var js = ['// ==UserScript==',
                    '// @name    pixplus settings',
-                   '// @version Wednesday December 15, 15:27:27 GMT+0900 2010',
+                   '// @version ' + (new Date()).toLocaleString(),
                    '// @include http://www.pixiv.net/*',
                    '// ==/UserScript==',
                    '(function() {',
