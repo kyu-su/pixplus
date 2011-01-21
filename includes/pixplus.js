@@ -417,7 +417,7 @@
      },
      parse_bm_tag_aliases: function(str) {
        var aliases = {};
-       var lines = str.split('\n');
+       var lines = str.split(/\r?\n/);
        var len = Math.floor(lines.length / 2);
        for(var i = 0; i < len; ++i) {
          var tag = lines[i * 2], alias = lines[i * 2 + 1];
@@ -717,6 +717,17 @@
    function ConfigUI(root, st, options_page) {
      this.root = root;
 
+     var export_wrap = window.document.createElement('span');
+     var export_input = window.document.createElement('input');
+     export_wrap.textContent = 'Export/Import:';
+     export_wrap.appendChild(export_input);
+     if (options_page || window.opera) {
+       var btn_import = window.document.createElement('button');
+       btn_import.textContent = 'Import';
+       export_wrap.appendChild(btn_import);
+     }
+     root.appendChild(export_wrap);
+
      var btn_userjs = window.document.createElement('a');
      btn_userjs.href = 'javascript:void(0)';
      btn_userjs.textContent = 'UserJS';
@@ -736,15 +747,8 @@
                    ' })();'].join('\n');
          window.open('data:text/javascript,' + encodeURI(js));
        }, false);
+     btn_userjs.style.marginLeft = '1em';
      root.appendChild(btn_userjs);
-
-     var btn_bmlet;
-     if (window.opera) {
-       btn_bmlet = window.document.createElement('a');
-       btn_bmlet.textContent = 'Bookmarklet';
-       btn_bmlet.style.marginLeft = '1em';
-       root.appendChild(btn_bmlet);
-     }
 
      var table = window.document.createElement('table');
      table.id = 'pp-conf-table';
@@ -808,7 +812,7 @@
                input.value = sec.schema[key][0];
              }
              if (st.u) st.remove(sec.name, key, value);
-             update_bookmarklet();
+             update_export();
            }, false);
          row.insertCell(-1).appendChild(def);
          row.insertCell(-1).innerText = sec.schema[key][1];
@@ -823,7 +827,7 @@
                value = st.conv[type][0](input.value);
              }
              if (st.u) st.set(sec.name, key, value);
-             update_bookmarklet();
+             update_export();
            }, false);
 
          ++idx;
@@ -847,7 +851,7 @@
        'keyup',
        function() {
          if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
-         update_bookmarklet();
+         update_export();
        }, false);
      tocont.appendChild(tag_order_textarea);
 
@@ -897,10 +901,10 @@
 
         function save() {
           if (st.u) st.set('bookmark', 'tag_aliases', get_tag_alias_str());
-          update_bookmarklet();
+          update_export();
         }
       })();
-     update_bookmarklet();
+     update_export();
 
      function make_custom_section(label) {
        make_section(label);
@@ -929,8 +933,20 @@
        }
        return tag_aliases;
      }
-     function update_bookmarklet() {
-       if (window.opera) btn_bmlet.href = 'javascript:(function(){' + gen_js() + 'pp.save_conf();})()';
+     function update_export() {
+       var obj = { };
+       st.each(
+         function(sec, key) {
+           var input = input_table[sec.name + '_' + key], val;
+           if (!input) return;
+           val = (typeof sec.schema[key][0] === 'boolean'
+                  ? input.checked
+                  : st.get_conv(sec.name, key)[0](input.value));
+           if (val !== sec.schema[key][0]) obj[sec.name + '_' + key] = val;
+         });
+       obj['bookmark_tag_order'] = tag_order_textarea.value.replace(/\r/g, '');
+       obj['bookmark_tag_aliases'] = get_tag_alias_str();
+       export_input.value = stringify(obj);
      }
 
      function gen_js(new_line, indent_level) {
@@ -996,41 +1012,42 @@
          for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
          js.push(sp + str);
        }
-
-       function stringify(val) {
-         if (window.JSON && window.JSON.stringify) {
-           return JSON.stringify(val);
-         } else {
-           var str = '';
-           if (val.constructor === String) {
-             return '"' + val.replace(/[\\\"]/g, '\\$0').replace(/\n/, '\\n') + '"';
-           } else if (val.constructor === Array) {
-             for(var i = 0; i < val.length; ++i) {
-               if (i) str += ',';
-               str += stringify(val[i]);
-             }
-             return '[' + str + ']';
-           } else if (val.constructor === Object) {
-             var first = true;
-             for(var key in val) {
-               if (!val.hasOwnProperty(key)) continue;
-               if (first) {
-                 first = false;
-               } else {
-                 str += ',';
-               }
-               str += stringify(key) + ':' + stringify(val[key]);
-             }
-             return '{' + str + '}';
-           } else if (val.constructor === Number) {
-             return String(val);
-           } else {
-             throw 1;
-           }
-         }
-       } // stringify()
-
      }
+
+     function stringify(val) {
+       if (window.JSON && window.JSON.stringify) {
+         return JSON.stringify(val);
+       } else {
+         var str = '';
+         if (val.constructor === String) {
+           return '"' + val.replace(/[\\\"]/g, '\\$0')
+             .replace(/\n/g, '\\n')
+             .replace(/\r/g, '\\r') + '"';
+         } else if (val.constructor === Array) {
+           for(var i = 0; i < val.length; ++i) {
+             if (i) str += ',';
+             str += stringify(val[i]);
+           }
+           return '[' + str + ']';
+         } else if (val.constructor === Object) {
+           var first = true;
+           for(var key in val) {
+             if (!val.hasOwnProperty(key)) continue;
+             if (first) {
+               first = false;
+             } else {
+               str += ',';
+             }
+             str += stringify(key) + ':' + stringify(val[key]);
+           }
+           return '{' + str + '}';
+         } else if (val.constructor === Number) {
+           return String(val);
+         } else {
+           throw 1;
+         }
+       }
+     } // stringify()
    }
    /* __CONFIG_UI_END__ */
 
