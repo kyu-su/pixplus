@@ -748,26 +748,28 @@
      }
      head.appendChild(export_form);
 
-     var btn_userjs = window.document.createElement('a');
-     btn_userjs.href = 'javascript:void(0)';
-     btn_userjs.textContent = 'UserJS';
-     btn_userjs.addEventListener(
-       'click',
-       function() {
-         var js = ['// ==UserScript==',
-                   '// @name    pixplus settings',
-                   '// @version ' + (new Date()).toLocaleString(),
-                   '// @include http://www.pixiv.net/*',
-                   '// ==/UserScript==',
-                   '(function() {',
-                   '   window.document.addEventListener("pixplusInitialize",init,false);',
-                   '   function init() {',
-                   '     ' + gen_js('\n     ', 2),
-                   '   }',
-                   ' })();'].join('\n');
-         window.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
-       }, false);
-     head.appendChild(btn_userjs);
+     if (window.opera) {
+       var btn_userjs = window.document.createElement('a');
+       btn_userjs.href = 'javascript:void(0)';
+       btn_userjs.textContent = 'UserJS';
+       btn_userjs.addEventListener(
+         'click',
+         function() {
+           var js = ['// ==UserScript==',
+                     '// @name    pixplus settings',
+                     '// @version ' + (new Date()).toLocaleString(),
+                     '// @include http://www.pixiv.net/*',
+                     '// ==/UserScript==',
+                     '(function() {',
+                     '   window.document.addEventListener("pixplusInitialize",init,false);',
+                     '   function init() {',
+                     '     ' + gen_js('\n     ', 2),
+                     '   }',
+                     ' })();'].join('\n');
+           window.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+         }, false);
+       head.appendChild(btn_userjs);
+     }
 
      var table = window.document.createElement('table');
      table.id = 'pp-conf-table';
