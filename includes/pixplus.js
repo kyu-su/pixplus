@@ -1377,7 +1377,7 @@
             };
             ir.prototype.error = function(msg) {
               safeWindow.alert(msg);
-              _error.apply(this, arguments);
+              if (_error) _error.apply(this, arguments);
             };
           }
           if (conf.workaround) {
@@ -2103,7 +2103,7 @@
      if (this.args.xpath_col) {
        var self = this;
        this.detect_new_collection();
-       if (this.page_col == 0) throw 1;
+       //if (this.page_col == 0) throw 1;
        window.document.body.addEventListener(
          'DOMNodeInserted',
          function() {
