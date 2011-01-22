@@ -2103,6 +2103,7 @@
      if (this.args.xpath_col) {
        var self = this;
        this.detect_new_collection();
+       if (this.page_col == 0) throw 1;
        window.document.body.addEventListener(
          'DOMNodeInserted',
          function() {
