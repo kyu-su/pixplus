@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        pixplus
+// @name        pixplus.js
 // @author      wowo
 // @version     0.4
 // @license     Public domain
@@ -585,18 +585,22 @@
    var defineMagicFunction = wrap_global_function;
    function wrap_global_function(name, func) {
      if (!name || !func) return;
-     var orig = window[name] || function() { };
-     window[name] = wrap;
-     window.__defineGetter__(
-       name,
-       function() {
-         return wrap;
-       });
-     window.__defineSetter__(
-       name,
-       function(func) {
-         orig = func;
-       });
+     if (window[name]) {
+       // 名前つき関数が定義濟みのときにwindow.__defineGetter__()するとOperaとFirefoxでエラーが出る。
+       window[name] = wrap;
+     } else {
+       var orig = function() { };
+       window.__defineGetter__(
+         name,
+         function() {
+           return wrap;
+         });
+       window.__defineSetter__(
+         name,
+         function(func) {
+           orig = func;
+         });
+     }
      function wrap() {
        func.apply(window, [orig, this].concat([].slice.apply(arguments)));
      };
@@ -714,6 +718,44 @@
               });
        }
      });
+
+   defineMagicFunction(
+     'bookmarkToggle',
+     function(real, othis, container_id, type) {
+       if (!options.id && conf.bm_tag_order.length) {
+         var container = $(container_id);
+         container.className = type;
+         each($t('ul', container),
+              function(ul) {
+                if (type == 'cloud') {
+                  ul.className = 'tagCloud';
+                } else {
+                  ul.removeAttribute('class');
+                }
+              });
+         each($xa('ul/li', container),
+              function(li, idx) {
+                var cn = li.className.replace(/bg_(?:gray|white)/, '');
+                if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                li.className = cn;
+              });
+
+         $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
+
+         var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
+	 toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
+	 toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
+
+         window.jQuery.cookie('bookToggle', type,
+                              {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
+       } else {
+         real.apply(othis, [].slice.apply(arguments, [2]));
+       }
+       var ev = window.document.createEvent('Event');
+       ev.initEvent('pixplusBMTagToggled', true, true);
+       window.document.dispatchEvent(ev);
+     });
+
 
    /* __CONFIG_UI_BEGIN__ */
    function ConfigUI(root, st, options_page) {
@@ -1580,45 +1622,6 @@
           */
        } else if (bm_tag_list && !options.id) {
          if (conf.bm_tag_order.length) {
-           // trap
-           var _bookmarkToggle = window.bookmarkToggle;
-           window.bookmarkToggle = function(container_id, type) {
-             if (!options.id && conf.bm_tag_order.length) {
-               var container = $(container_id);
-               container.className = type;
-               each(
-                 $t('ul', container),
-                 function(ul) {
-                   if (type == 'cloud') {
-                     ul.className = 'tagCloud';
-                   } else {
-                     ul.removeAttribute('class');
-                   }
-                 });
-               each(
-                 $xa('ul/li', container),
-                 function(li, idx) {
-                   var cn = li.className.replace(/bg_(?:gray|white)/, '');
-                   if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
-                   li.className = cn;
-                 });
-
-               $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
-
-               var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
-	       toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-	       toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
-
-               window.jQuery.cookie('bookToggle', type,
-                                    {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
-             } else {
-               _bookmarkToggle(container_id, type);
-             }
-             var ev = window.document.createEvent('Event');
-             ev.initEvent('pixplusBMTagToggled', true, true);
-             window.document.dispatchEvent(ev);
-           };
-
            var head = $xa('ul/li[contains(concat(" ", @class, " "), " level0 ")]', bm_tag_list).reverse()[0];
            var list = reorder_tags($xa('ul/li[contains(concat(" ", @class, " "), " level") and not(contains(concat(" ", @class, " "), " level0 "))]', bm_tag_list));
            each(
