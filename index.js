@@ -10,11 +10,18 @@ if (window.opera) {
 
   (function() {
      var btn;
-     onstorage();
-     window.addEventListener('storage', onstorage, false);
-     function onstorage(ev) {
-       if (ev && ev.key != 'conf_extension_show_toolbar_icon') return;
-       if (conf.get('extension', 'show_toolbar_icon')) {
+     update_button();
+     window.addEventListener(
+       'storage',
+       function(ev) {
+         if (ev.key == 'conf_extension_show_toolbar_icon') update_button();
+       }, false);
+     //opera.extension.tabs.addEventListener('focus', update_button, false);
+     function update_button(ev) {
+       //var tab = opera.extension.tabs.getFocused();
+       //var show = tab && tab.url.match(/^http:\/\/www\.pixiv\.net\//) && conf.get('extension', 'show_toolbar_icon');
+       var show = conf.get('extension', 'show_toolbar_icon');
+       if (show) {
          if (!btn) {
            btn = opera.contexts.toolbar.createItem(
              {
