@@ -586,7 +586,7 @@
    function wrap_global_function(name, func) {
      if (!name || !func) return;
      if (window[name]) {
-       // 名前つき関数が定義濟みのときにwindow.__defineGetter__()するとOperaとFirefoxでエラーが出る。
+       // 名前つき関数が定義濟みのときにwindow.__define[GS]etter__()するとOperaとFirefoxでエラーが出る。
        window[name] = wrap;
      } else {
        var orig = function() { };
