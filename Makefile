@@ -96,7 +96,7 @@ $(OEX): $(DIST_FILES_OEX)
 	$(ZIP) -r $@ $^
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)
-	sed -e '/__OPERA_BEGIN__/,/__OPERA_END__/d' -e '/__GREASEMONKEY_BEGIN__/d' -e '/__GREASEMONKEY_END__/d' < $< > $@
+	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
 
 $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@

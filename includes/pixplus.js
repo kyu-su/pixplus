@@ -125,7 +125,7 @@
  * ユーザーIDは`-'を含むかも知れない。\w+とかやると失敗する。
  */
 
-(function(func, unsafeWindow) {
+(function(func, unsafeWindow, userjs) {
    if (window.opera || unsafeWindow) {
      if (window.opera && opera.extension) {
        opera.extension.onmessage = function(ev){
@@ -141,17 +141,15 @@
      }
    } else {
      (function(func) {
-        if (window.chrome) {
+        if (userjs) {
+          func();
+        } else if (window.chrome) {
           chrome.extension.sendRequest( /* WARN */
             {command: 'config'},
             function(data) {
-              if (data) {
-                if (data.command == 'config') {
-                  func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
-                                       conf:     data.data}));
-                }
-              } else {
-                func();
+              if (data.command == 'config') {
+                func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
+                                     conf:     data.data}));
               }
             });
         } else if (window.safari) {
@@ -4378,4 +4376,10 @@
    } else {
      init_pixplus();
    }
- }, this.unsafeWindow);
+ },
+ this.unsafeWindow,
+ /* __GREASEMONKEY_REMOVE__
+ true
+    __GREASEMONKEY_REMOVE__ */
+ false /* __GREASEMONKEY_REMOVE__ */
+ );
