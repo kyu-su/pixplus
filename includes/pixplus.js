@@ -555,16 +555,16 @@
    if (window.opera) {
      window.opera.addEventListener(
        'AfterEvent.click',
-       function(e) {
-         if (e.event.shiftKey || e.event.ctrlKey) return;
-         var anc = $x('ancestor-or-self::a[1]', e.event.target);
-         if (!e.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
+       function(ev) {
+         if (ev.event.shiftKey || ev.event.ctrlKey) return;
+         var anc = $x('ancestor-or-self::a[1]', ev.event.target);
+         if (!ev.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
              anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
            if (Popup.instance || $t('img', anc).length ||
                !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
              var opts = parseopts(anc.href);
              if (opts.illust_id && opts.mode == 'medium') {
-               e.event.preventDefault();
+               ev.event.preventDefault();
                Popup.run_url(anc.href);
              }
            }
@@ -1646,7 +1646,7 @@
            form.insertBefore(msgbox, form.firstChild);
            write_css('.msgbox_bottom{border:0px !important;}' +
                      // ポップアップより下(z-index:90)に表示する
-                     '.msgbox_bottom[float]{z-index:90;padding:4px !important;opacity:0.6;}' +
+                     '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
                      '.msgbox_bottom[float]:hover{opacity:1;}');
            new Floater(msgbox);
          }
@@ -3808,20 +3808,19 @@
        this.cont.style.overflowY = 'auto';
        //this.update_height();
      }
-     this.update_position();
      this.update_float();
    };
    Floater.prototype.force_update = function() {
      this.unfloat();
      this.floating = undefined;
      this.disable_float = false;
-     this.update_position();
      this.update_float();
    };
-   Floater.prototype.update_position = function () {
-     this.wrap_pos = getpos(this.wrap);
-   };
    Floater.prototype.unfloat = function () {
+     if (this.placeholder) {
+       this.placeholder.parentNode.removeChild(this.placeholder);
+       this.placeholder = null;
+     }
      this.scroll_save();
      this.wrap.removeAttribute('float');
      this.scroll_restore();
@@ -3852,12 +3851,22 @@
    Floater.prototype.update_float = function () {
      if (this.disable_float) return;
      var sc = browser.webkit ? window.document.body : window.document.documentElement;
-     if (this.floating !== true && sc.scrollTop > this.wrap_pos.top) {
+     var pos = getpos(this.wrap);
+     if (this.floating !== true && sc.scrollTop > pos.top) {
+       this.wrap_pos = pos;
        this.scroll_save();
+       this.placeholder = this.wrap.cloneNode(false);
+       this.placeholder.style.width = this.wrap.offsetWidth + 'px';
+       this.placeholder.style.height = this.wrap.offsetHeight + 'px';
+       if (this.wrap.nextSibling) {
+         this.wrap.parentNode.insertBefore(this.placeholder, this.wrap.nextSibling);
+       } else {
+         this.wrap.parentNode.appendChild(this.placeholder);
+       }
        this.wrap.setAttribute('float', '');
        this.scroll_restore();
        this.floating = true;
-     } else if (this.floating !== false && sc.scrollTop < this.wrap_pos.top) {
+     } else if (this.floating === true && sc.scrollTop < this.wrap_pos.top) {
        this.unfloat();
      }
      this.update_height();
@@ -3868,7 +3877,7 @@
    Floater.prototype.scroll_restore = function () {
      if (this.cont) this.cont.scrollTop = this.scroll_pos;
    };
-   window.addEventListener('load', Floater.load, false);
+   Floater.load();
 
    function Signal(def) {
      this.def = def;
