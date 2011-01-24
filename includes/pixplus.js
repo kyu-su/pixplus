@@ -4374,8 +4374,8 @@
      return res;
    }
 
-   if (window.opera && (window.document.readyState == 'loading' ||
-                        window.document.readyState == 'interactive')) {
+   // loading => DOMContentLoaded => interactive => Load => complete
+   if (window.opera && (window.document.readyState == 'loading')) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
      init_pixplus();
