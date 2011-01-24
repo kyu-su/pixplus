@@ -1648,7 +1648,7 @@
                      // ポップアップより下(z-index:90)に表示する
                      '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
                      '.msgbox_bottom[float]:hover{opacity:1;}');
-           new Floater(msgbox);
+           new Floater(msgbox, null, true);
          }
        }
      } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
@@ -3773,10 +3773,11 @@
      return ary;
    }
 
-   function Floater(wrap, cont) {
+   function Floater(wrap, cont, use_placeholder) {
      this.wrap = wrap;
      this.cont = cont;
      this.disable_float = false;
+     this.use_placeholder = !!use_placeholder;
      Floater.instances.push(this);
      this.init();
    }
@@ -3843,13 +3844,15 @@
      if (this.floating !== true && sc.scrollTop > pos.top) {
        this.wrap_pos = pos;
        this.scroll_save();
-       this.placeholder = this.wrap.cloneNode(false);
-       this.placeholder.style.width = this.wrap.offsetWidth + 'px';
-       this.placeholder.style.height = this.wrap.offsetHeight + 'px';
-       if (this.wrap.nextSibling) {
-         this.wrap.parentNode.insertBefore(this.placeholder, this.wrap.nextSibling);
-       } else {
-         this.wrap.parentNode.appendChild(this.placeholder);
+       if (this.use_placeholder) {
+         this.placeholder = this.wrap.cloneNode(false);
+         this.placeholder.style.width = this.wrap.offsetWidth + 'px';
+         this.placeholder.style.height = this.wrap.offsetHeight + 'px';
+         if (this.wrap.nextSibling) {
+           this.wrap.parentNode.insertBefore(this.placeholder, this.wrap.nextSibling);
+         } else {
+           this.wrap.parentNode.appendChild(this.placeholder);
+         }
        }
        this.wrap.setAttribute('float', '');
        this.scroll_restore();
