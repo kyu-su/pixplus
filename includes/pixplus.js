@@ -11,7 +11,8 @@
 
 /** 0.4
  * pixivreaderと衝突するらしいので、excludeに追加。
- * Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
+ * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
+ * OperaExtension版で動作しない場合があるバグをたぶん修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -4374,7 +4375,7 @@
      return res;
    }
 
-   // loading => DOMContentLoaded => interactive => Load => complete
+   // loading => interactive => complete
    if (window.opera && (window.document.readyState == 'loading')) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
