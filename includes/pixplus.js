@@ -3777,18 +3777,15 @@
      this.wrap = wrap;
      this.cont = cont;
      this.disable_float = false;
-     if (!Floater.instances) Floater.instances = [];
      Floater.instances.push(this);
-     if (Floater.loaded) this.init();
+     this.init();
    }
-   Floater.load = function() {
-     if (Floater.loaded) return;
-     each(Floater.instances, function(inst) { inst.init(); });
+   Floater.instances = [];
+   Floater.init = function() {
      window.addEventListener('scroll', Floater.update_float, false);
      window.addEventListener('resize', Floater.force_update, false);
      window.document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
      window.document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
-     Floater.loaded = true;
    };
    Floater.update_float = function() {
      each(Floater.instances, function(inst) { inst.update_float(); });
@@ -3803,16 +3800,14 @@
      this.wrap.style.width = this.wrap.offsetWidth + 'px';
      if (this.cont) {
        this.cont.style.display = 'block';
-       //this.cont.style.position = 'relative';
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
-       //this.update_height();
      }
      this.update_float();
    };
    Floater.prototype.force_update = function() {
      this.unfloat();
-     this.floating = undefined;
+     this.floating = void(0);
      this.disable_float = false;
      this.update_float();
    };
@@ -3824,13 +3819,6 @@
      this.scroll_save();
      this.wrap.removeAttribute('float');
      this.scroll_restore();
-     /*
-      if (this.cont) {
-      this.cont.style.overflowX = '';
-      this.cont.style.overflowY = '';
-      this.cont.style.maxHeight = '';
-      }
-      */
      this.floating = false;
    };
    Floater.prototype.update_height = function () {
@@ -3877,7 +3865,7 @@
    Floater.prototype.scroll_restore = function () {
      if (this.cont) this.cont.scrollTop = this.scroll_pos;
    };
-   Floater.load();
+   Floater.init();
 
    function Signal(def) {
      this.def = def;
