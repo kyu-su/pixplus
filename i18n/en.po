@@ -210,10 +210,6 @@ msgstr="Show toolbar icon"
 msgid="\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"
 msgstr="Enable settings UI in page"
 
-# includes/pixplus.js:658 "評価しますか？\n%s点"
-msgid="\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9"
-msgstr="Rate it?\n%s point"
-
 # includes/pixplus.js:907 "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"
 msgstr="Reorder bookmark tags. 1 tag per line.<br>-: Separator<br>*: Others"
@@ -221,32 +217,3 @@ msgstr="Reorder bookmark tags. 1 tag per line.<br>-: Separator<br>*: Others"
 # includes/pixplus.js:923 "スペース区切りで複数記述。ブックマーク時のタグの自動入力に使用。"
 msgid="\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002"
 msgstr="Separated by space."
-
-# includes/pixplus.js:1833 "(再 "
-msgid="(\u518d "
-msgstr="(Re "
-
-# includes/pixplus.js:2246 "作品"
-msgid="\u4f5c\u54c1"
-msgstr="Works"
-
-# includes/pixplus.js:2248 "ブックマーク"
-msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af"
-msgstr="Bookmarks"
-
-# includes/pixplus.js:2250 "スタックフィード"
-msgid="\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9"
-msgstr="StaccFeed"
-
-# includes/pixplus.js:2853 "コメントを入力してください。"
-msgid="\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002"
-msgstr="Enter your comment"
-
-# includes/pixplus.js:3136 "コメントを削除します。よろしいですか？"
-msgid="\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f"
-msgstr="Are you sure to delete comment?"
-
-# includes/pixplus.js:3459 "閉じる"
-msgid="\u9589\u3058\u308b"
-msgstr="Close"
-

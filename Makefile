@@ -64,7 +64,7 @@ $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE) Makefile
 $(I18N_FILES_JA): locales/ja/%: %
 	mkdir -p `dirname $@`
 	cp $^ $@
-$(I18N_FILES_OTHERS): $(I18N_SOURCES)
+$(I18N_FILES_OTHERS): $(I18N_SOURCES) $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 	mkdir -p `dirname $@`
 	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po < $${file#locales/$$l/} > $$file;
 
