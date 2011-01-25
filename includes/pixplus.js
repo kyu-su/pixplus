@@ -2911,17 +2911,26 @@
      var page = this.manga.page + 1; // fix for greasemonkey
      this.manga_btn.textContent = '[M:' + page + '/' + this.manga.page_count + ']';
    };
-   Popup.create_zoom_image = function(url, width, height) {
-     var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
-     svg_img.setAttribute('width', '100%');
-     svg_img.setAttribute('height', '100%');
-     svg_img.style.imageRendering = 'optimizeSpeed';
-     svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', url);
-     var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
-     svg.setAttribute('width', width);
-     svg.setAttribute('height', height);
-     svg.appendChild(svg_img);
-     return svg;
+   Popup.create_zoom_image = function(img, width, height) {
+     if (browser.opera) {
+       var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
+       svg_img.setAttribute('width', '100%');
+       svg_img.setAttribute('height', '100%');
+       svg_img.style.imageRendering = 'optimizeSpeed';
+       svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', img.src);
+       var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
+       svg.setAttribute('width', width);
+       svg.setAttribute('height', height);
+       svg.appendChild(svg_img);
+       return svg;
+     } else {
+       img = img.cloneNode(false);
+       img.style.cssText = '';
+       img.style.width = width + 'px';
+       img.style.height = height + 'px';
+       img.style.imageRendering = 'optimizeSpeed';
+       return img;
+     }
    };
 
    Popup.prototype.set_image = function(img, img_size, no_zoom) {
@@ -2941,7 +2950,7 @@
      }
 
      if (this.zoom_scale > 1) {
-       img_scaled = Popup.create_zoom_image(img.src, img.width * this.zoom_scale, img.height * this.zoom_scale);
+       img_scaled = Popup.create_zoom_image(img, img.width * this.zoom_scale, img.height * this.zoom_scale);
      }
      this.image_size = [img.width, img.height];
      this.image_size_orig = img_size;
@@ -2963,7 +2972,7 @@
        this.image_scaled = this.image;
      } else {
        var w = this.image_size[0] * this.zoom_scale, h = this.image_size[1] * this.zoom_scale;
-       var img = Popup.create_zoom_image(this.image.src, w, h);
+       var img = Popup.create_zoom_image(this.image, w, h);
        this.image_scaled.parentNode.replaceChild(img, this.image_scaled);
        this.image_scaled = img;
      }
