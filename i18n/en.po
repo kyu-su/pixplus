@@ -1,219 +1,220 @@
-# includes/pixplus.js:188 "デバッグモード"
+# includes/pixplus.js:189 "デバッグモード"
 msgid="\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"
 msgstr="Debug mode"
 
-# includes/pixplus.js:189 "イラストページを開いた時にスクロールする"
+# includes/pixplus.js:190 "イラストページを開いた時にスクロールする"
 msgid="\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"
 msgstr="Scroll page after opening illust"
 
-# includes/pixplus.js:190 "スクロールしない"
+# includes/pixplus.js:191 "スクロールしない"
 msgid="\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"
 msgstr="Do not scroll"
 
-# includes/pixplus.js:191 "キャプション"
+# includes/pixplus.js:192 "キャプション"
 msgid="\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"
 msgstr="Caption"
 
-# includes/pixplus.js:192 "イラスト"
+# includes/pixplus.js:193 "イラスト"
 msgid="\u30a4\u30e9\u30b9\u30c8"
 msgstr="Illust"
 
-# includes/pixplus.js:193 "ブックマーク非公開をデフォルトにする"
+# includes/pixplus.js:194 "ブックマーク非公開をデフォルトにする"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"
 msgstr="Make private bookmark by default"
 
-# includes/pixplus.js:194 "タグリストをフロート表示する"
+# includes/pixplus.js:195 "タグリストをフロート表示する"
 msgid="\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b"
 msgstr="Enable float view for tag list"
 
-# includes/pixplus.js:195:199:220:235:241 "無効"
+# includes/pixplus.js:196:200:221:236:242 "無効"
 msgid="\u7121\u52b9"
 msgstr="Disable"
 
-# includes/pixplus.js:196:200:236:242 "有効"
+# includes/pixplus.js:197:201:237:243 "有効"
 msgid="\u6709\u52b9"
 msgstr="Enable"
 
-# includes/pixplus.js:198 "レコメンドを右側に縦1列に並べる"
+# includes/pixplus.js:199 "レコメンドを右側に縦1列に並べる"
 msgid="\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b"
 msgstr="Move illust recommendation to right space"
 
-# includes/pixplus.js:202 "ブックマーク編集時にアローキーでのタグ選択を有効にする"
+# includes/pixplus.js:203 "ブックマーク編集時にアローキーでのタグ選択を有効にする"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u6642\u306b\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u306e\u30bf\u30b0\u9078\u629e\u3092\u6709\u52b9\u306b\u3059\u308b"
 msgstr="Select tags by arrow keys in bookmark form"
 
-# includes/pixplus.js:203 "ブックマーク編集ページにも変更を加える"
+# includes/pixplus.js:204 "ブックマーク編集ページにも変更を加える"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"
 msgstr="Change bookmark edit page"
 
-# includes/pixplus.js:204 "タグリストのセパレータのスタイル"
+# includes/pixplus.js:205 "タグリストのセパレータのスタイル"
 msgid="\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"
 msgstr="Separator style for tag list"
 
-# includes/pixplus.js:205 "上部メニューの「スタックフィード」のリンク先"
+# includes/pixplus.js:206 "上部メニューの「スタックフィード」のリンク先"
 msgid="\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148"
 msgstr="Change 'Stacc feed' link"
 
-# includes/pixplus.js:206:212 "変更しない"
+# includes/pixplus.js:207:213 "変更しない"
 msgid="\u5909\u66f4\u3057\u306a\u3044"
 msgstr="Do not change"
 
-# includes/pixplus.js:207 "すべて"
+# includes/pixplus.js:208 "すべて"
 msgid="\u3059\u3079\u3066"
 msgstr="All"
 
-# includes/pixplus.js:208 "お気に入り"
+# includes/pixplus.js:209 "お気に入り"
 msgid="\u304a\u6c17\u306b\u5165\u308a"
 msgstr="Favorite"
 
-# includes/pixplus.js:209 "マイピク"
+# includes/pixplus.js:210 "マイピク"
 msgid="\u30de\u30a4\u30d4\u30af"
 msgstr="MyPixiv"
 
-# includes/pixplus.js:210 "あなた"
+# includes/pixplus.js:211 "あなた"
 msgid="\u3042\u306a\u305f"
 msgstr="Self"
 
-# includes/pixplus.js:211 "デフォルトのマンガ表示タイプ"
+# includes/pixplus.js:212 "デフォルトのマンガ表示タイプ"
 msgid="\u30c7\u30d5\u30a9\u30eb\u30c8\u306e\u30de\u30f3\u30ac\u8868\u793a\u30bf\u30a4\u30d7"
 msgstr="Default manga mode"
 
-# includes/pixplus.js:213 "スクロール"
+# includes/pixplus.js:214 "スクロール"
 msgid="\u30b9\u30af\u30ed\u30fc\u30eb"
 msgstr="Scroll"
 
-# includes/pixplus.js:214 "スライド"
+# includes/pixplus.js:215 "スライド"
 msgid="\u30b9\u30e9\u30a4\u30c9"
 msgstr="Slide"
 
-# includes/pixplus.js:215 "イラストを評価する時に確認をとる"
+# includes/pixplus.js:216 "イラストを評価する時に確認をとる"
 msgid="\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"
 msgstr="Show confirmation dialog on rating"
 
-# includes/pixplus.js:216 "マンガサムネイルページでポップアップを使用する"
+# includes/pixplus.js:217 "マンガサムネイルページでポップアップを使用する"
 msgid="\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"
 msgstr="Enable popup in manga thumbnails page"
 
-# includes/pixplus.js:217 "アニメーションなどのエフェクトを無効化する"
+# includes/pixplus.js:218 "アニメーションなどのエフェクトを無効化する"
 msgid="\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"
 msgstr="Disable UI animation"
 
-# includes/pixplus.js:218 "Operaやpixivのバグ回避のための機能を使用する"
+# includes/pixplus.js:219 "Operaやpixivのバグ回避のための機能を使用する"
 msgid="Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"
 msgstr="Enable workarounds"
 
-# includes/pixplus.js:219 "お気に入りユーザーの追加をワンクリックで行う"
+# includes/pixplus.js:220 "お気に入りユーザーの追加をワンクリックで行う"
 msgid="\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046"
 msgstr="Add favorite user by one-click"
 
-# includes/pixplus.js:221 "有効(公開)"
+# includes/pixplus.js:222 "有効(公開)"
 msgid="\u6709\u52b9(\u516c\u958b)"
 msgstr="Enable(public)"
 
-# includes/pixplus.js:222 "有効(非公開)"
+# includes/pixplus.js:223 "有効(非公開)"
 msgid="\u6709\u52b9(\u975e\u516c\u958b)"
 msgstr="Enable(private)"
 
-# includes/pixplus.js:223 "小説ページのロード時に全ページを表示する"
+# includes/pixplus.js:224 "小説ページのロード時に全ページを表示する"
 msgid="\u5c0f\u8aac\u30da\u30fc\u30b8\u306e\u30ed\u30fc\u30c9\u6642\u306b\u5168\u30da\u30fc\u30b8\u3092\u8868\u793a\u3059\u308b"
 msgstr="Show all pages after opening novel"
 
-# includes/pixplus.js:224 "ランキングカレンダーでポップアップを使用する"
+# includes/pixplus.js:225 "ランキングカレンダーでポップアップを使用する"
 msgid="\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"
 msgstr="Enable popup in ranking calender"
 
-# includes/pixplus.js:226 "先読みを使用する"
+# includes/pixplus.js:227 "先読みを使用する"
 msgid="\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"
 msgstr="Enable preloading"
 
-# includes/pixplus.js:227 "原寸の画像を表示する"
+# includes/pixplus.js:228 "原寸の画像を表示する"
 msgid="\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"
 msgstr="Use original size image"
 
-# includes/pixplus.js:228 "キャプションの高さ"
+# includes/pixplus.js:229 "キャプションの高さ"
 msgid="\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055"
 msgstr="Caption height"
 
-# includes/pixplus.js:229 "キャプションの不透明度"
+# includes/pixplus.js:230 "キャプションの不透明度"
 msgid="\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6"
 msgstr="Caption opacity"
 
-# includes/pixplus.js:230 "タグのpixpediaアイコンを除去する"
+# includes/pixplus.js:231 "タグのpixpediaアイコンを除去する"
 msgid="\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b"
 msgstr="Remove pixpedia icon"
 
-# includes/pixplus.js:231 "評価機能を使用する"
+# includes/pixplus.js:232 "評価機能を使用する"
 msgid="\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"
 msgstr="Enable rating"
 
-# includes/pixplus.js:232 "評価のキーバインドを有効にする"
+# includes/pixplus.js:233 "評価のキーバインドを有効にする"
 msgid="\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b"
 msgstr="Enable rate keys"
 
-# includes/pixplus.js:233 "フォントサイズ(e.g. 10px)"
+# includes/pixplus.js:234 "フォントサイズ(e.g. 10px)"
 msgid="\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(e.g. 10px)"
 msgstr="Font size(e.g. 10px)"
 
-# includes/pixplus.js:234 "自動的にマンガモードを開始する"
+# includes/pixplus.js:235 "自動的にマンガモードを開始する"
 msgid="\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b"
 msgstr="Switch manga-mode automatically"
 
-# includes/pixplus.js:237:243 "ページを正規表現で指定"
+# includes/pixplus.js:238:244 "ページを正規表現で指定"
 msgid="\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"
 msgstr="Specify pages by regexp"
 
-# includes/pixplus.js:239 "auto_mangaに2を指定した場合に使用する正規表現"
+# includes/pixplus.js:240 "auto_mangaに2を指定した場合に使用する正規表現"
 msgid="auto_manga\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"
 msgstr="Regular expression for auto_manga=2"
 
-# includes/pixplus.js:240 "移動方向を反対にする"
+# includes/pixplus.js:241 "移動方向を反対にする"
 msgid="\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"
 msgstr="Reverse move direction"
 
-# includes/pixplus.js:245 "reverseに2を指定した場合に使用する正規表現"
+# includes/pixplus.js:246 "reverseに2を指定した場合に使用する正規表現"
 msgid="reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"
 msgstr="Regular expression for reverse=2"
 
-# includes/pixplus.js:246 "自動ズームする最大サイズ(0:無効)"
+# includes/pixplus.js:247 "自動ズームする最大サイズ(0:無効)"
 msgid="\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"
 msgstr="Auto zoom threshold(0:Disable)"
 
-# includes/pixplus.js:247 "自動ズーム後のサイズ上限"
+# includes/pixplus.js:248 "自動ズーム後のサイズ上限"
 msgid="\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u30b5\u30a4\u30ba\u4e0a\u9650"
 msgstr="Max size for auto-zoom"
 
-# includes/pixplus.js:248 "自動ズーム後の拡大率上限"
+# includes/pixplus.js:249 "自動ズーム後の拡大率上限"
 msgid="\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650"
 msgstr="Max scale for auto-zoom"
 
-# includes/pixplus.js:249 "移動用クリックインターフェースの幅(0:使用しない/<1:画像に対する割合/>1:ピクセル)"
+# includes/pixplus.js:250 "移動用クリックインターフェースの幅(0:使用しない/<1:画像に対する割合/>1:ピクセル)"
 msgid="\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)"
 msgstr="Click area width(0:Disable/<1:Ratio/>1:Pixel)"
 
-# includes/pixplus.js:250 "上下キーでキャプションをスクロールする高さ"
+# includes/pixplus.js:251 "上下キーでキャプションをスクロールする高さ"
 msgid="\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055"
 msgstr="Scroll step for caption"
 
-# includes/pixplus.js:251 "プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する"
+# includes/pixplus.js:252 "プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する"
 msgid="\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b"
 msgstr="Show icon on profile image"
 
-# includes/pixplus.js:252 "コメントの投稿フォームを表示する"
+# includes/pixplus.js:253 "コメントの投稿フォームを表示する"
 msgid="\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"
 msgstr="Show comment posting form"
 
-# includes/pixplus.js:255 "ツールバーアイコンを表示する"
+# includes/pixplus.js:256 "ツールバーアイコンを表示する"
 msgid="\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b"
 msgstr="Show toolbar icon"
 
-# includes/pixplus.js:256 "ページ内に設定ボタンを表示する"
+# includes/pixplus.js:257 "ページ内に設定ボタンを表示する"
 msgid="\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"
 msgstr="Enable settings UI in page"
 
-# includes/pixplus.js:907 "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
+# includes/pixplus.js:908 "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"
 msgstr="Reorder bookmark tags. 1 tag per line.<br>-: Separator<br>*: Others"
 
-# includes/pixplus.js:923 "スペース区切りで複数記述。ブックマーク時のタグの自動入力に使用。"
+# includes/pixplus.js:924 "スペース区切りで複数記述。ブックマーク時のタグの自動入力に使用。"
 msgid="\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002"
 msgstr="Separated by space."
+

@@ -26,9 +26,12 @@ I18N_LANGUAGES       = en
 I18N_UPDATE          = $(I18N_DIR)/update.py
 I18N_EDIT            = $(I18N_DIR)/edit.py
 I18N_SOURCES         = $(SRC_USERJS) $(CONFIG_JS)
-I18N_FILES_JA        = $(shell for j in $(I18N_SOURCES);do echo -n "locales/ja/$$j ";done)
-I18N_FILES_OTHERS    = $(shell for i in $(I18N_LANGUAGES);do for j in $(I18N_SOURCES);do echo -n "locales/$$i/$$j ";done;done)
-I18N_FILES           = $(I18N_FILES_JA) $(I18N_FILES_OTHERS)
+
+O_I18N_FILES_JA      = $(shell for j in $(I18N_SOURCES);do echo -n "locales/ja/$$j ";done)
+O_I18N_FILES_OTHERS  = $(shell for i in $(I18N_LANGUAGES);do for j in $(I18N_SOURCES);do echo -n "locales/$$i/$$j ";done;done)
+O_I18N_FILES         = $(O_I18N_FILES_JA) $(O_I18N_FILES_OTHERS)
+
+C_I18N_FILES         = _locales/ja/messages.json $(I18N_LANGUAGES:%=_locales/%/messages.json)
 
 CRX_TMP_DIR          = .crx
 MANIFEST_JSON        = manifest.json
@@ -47,7 +50,7 @@ DIST_FILES_SAFARI    = $(INFO_PLIST) $(SETTINGS_PLIST) $(SRC_USERJS) $(ICON_FILE
 VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
-WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest
+WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
 WARN_KEYWORDS_P      = $(shell cat prototypejs_funcs.txt)
 
 ALL_TARGETS          = $(OEX) $(GREASEMONKEY_JS) $(SAFARIEXTZ)
@@ -61,14 +64,22 @@ dist: $(OEX)
 $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE) Makefile
 	$(I18N_UPDATE) $@ $(SRC_USERJS)
 
-$(I18N_FILES_JA): locales/ja/%: %
+$(O_I18N_FILES_JA): locales/ja/%: %
 	mkdir -p `dirname $@`
-	cp $^ $@
-$(I18N_FILES_OTHERS): $(I18N_SOURCES) $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
+	cp $< $@
+$(O_I18N_FILES_OTHERS): $(I18N_SOURCES) $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 	mkdir -p `dirname $@`
 	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po < $${file#locales/$$l/} > $$file;
 
-$(I18N_LANGUAGES:%=locales/%) locales/ja:
+#_locales/ja/messages.json: $(I18N_DIR)/en.po
+#	mkdir -p `dirname $@`
+#	awk -F = '$$1=="msgid"{print $$2":{";print "\"message\":"$$2"},"}' < $< | \
+#          sed -e '1s/^/{/' -e '$$s/,$$/}/' -e '/:{/s/\\u//g' -e '/:{/s/"\(.*\)"/"_\1"/' > $@
+#$(I18N_LANGUAGES:%=_locales/%/messages.json): _locales/%/messages.json: $(I18N_DIR)/%.po
+#	mkdir -p `dirname $@`
+#	sed -e '/^#/d' -e '/^$$/d' -e '/msgid/s/\\u//g' \
+#            -e 's/msgid="\(.*\)"/"_\1":{/' -e 's/msgstr="\(.*\)"/"message":"\1"},/' \
+#          < $< | sed -e '1s/^/{/' -e '$$s/,$$/}/' > $@
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
@@ -108,8 +119,7 @@ $(ICON_FILES_SAFARI): $(ICON_SVG)
 $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
 
-$(OEX): $(DIST_FILES_OEX) $(I18N_FILES)
-	echo $(I18N_FILES)
+$(OEX): $(DIST_FILES_OEX) $(O_I18N_FILES)
 	@for kw in $(WARN_KEYWORDS_W); do \
            grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
          done
@@ -117,7 +127,7 @@ $(OEX): $(DIST_FILES_OEX) $(I18N_FILES)
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
          done
 	rm -rf $(OEX_TMP_DIR)
-	@for file in $(DIST_FILES_OEX) $(I18N_FILES); do \
+	@for file in $(DIST_FILES_OEX) $(O_I18N_FILES); do \
            mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
            cp $$file $(OEX_TMP_DIR)/$$file; \
          done
@@ -138,9 +148,9 @@ $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	echo >> $@;
 	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< | tr -d '\r' >> $@
 
-$(CRX): $(DIST_FILES_CRX)
+$(CRX): $(DIST_FILES_CRX)# $(C_I18N_FILES)
 	rm -rf $(CRX_TMP_DIR)
-	@for file in $(DIST_FILES_CRX); do \
+	@for file in $^; do \
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
            cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
@@ -172,7 +182,7 @@ $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
           $(XAR) --inject-sig signature.dat -f ../$@
 
 clean:
-	rm -rf $(OEX_TMP_DIR) $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
+	rm -rf $(OEX_TMP_DIR) $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR) locales _locales
 	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
               $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)

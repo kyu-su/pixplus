@@ -13,6 +13,7 @@
  * pixivreaderと衝突するらしいので、excludeに追加。
  * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
  * OperaExtension版で動作しない場合があるバグをたぶん修正。
+ * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -1682,7 +1683,7 @@
          break;
        case 'manga':
          if (options.type == 'slide' && window.location.hash.match(/^#page(\d+)$/)) {
-           getPageUrl(parseInt(RegExp.$1));
+           window.getPageUrl(parseInt(RegExp.$1));
          }
          break;
        case 'manga_tb':
