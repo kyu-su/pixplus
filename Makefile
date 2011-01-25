@@ -8,6 +8,7 @@ CRX                  = pixplus.crx
 SAFARIEXTZ           = pixplus.safariextz
 BUILD_CRX            = $(shell test -x "$(CHROME)" && echo yes || echo no)
 
+OEX_TMP_DIR          = .oex
 CONFIG_XML           = config.xml
 CONFIG_JS            = config.js
 GREASEMONKEY_JS      = pixplus.user.js
@@ -19,6 +20,12 @@ ICON_SVG             = icons/pixplus.svg
 SIGNATURE            = signature1.xml
 SRC_USERJS           = includes/pixplus.js
 CONFIG_JSON          = config.json
+
+I18N_DIR             = i18n
+I18N_LANGUAGES       = en
+I18N_UPDATE          = $(I18N_DIR)/update.py
+I18N_EDIT            = $(I18N_DIR)/edit.py
+I18N_FILES           = $(SRC_USERJS) $(CONFIG_JS)
 
 CRX_TMP_DIR          = .crx
 MANIFEST_JSON        = manifest.json
@@ -48,6 +55,9 @@ endif
 all: $(ALL_TARGETS)
 dist: $(OEX)
 
+$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE) Makefile
+	$(I18N_UPDATE) $@ $(SRC_USERJS)
+
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
@@ -68,7 +78,7 @@ $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 
 $(CONFIG_JS): $(SRC_USERJS)
 	echo 'var conf_schema = {' > $@
-	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@; \
+	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	echo '};' >> $@
 	echo 'var conf = {' >> $@
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
@@ -93,7 +103,21 @@ $(OEX): $(DIST_FILES_OEX)
 	@for kw in $(WARN_KEYWORDS_P); do \
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
          done
-	$(ZIP) -r $@ $^
+	rm -rf $(OEX_TMP_DIR)
+	@for file in $(DIST_FILES_OEX); do \
+           mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
+           cp $$file $(OEX_TMP_DIR)/$$file; \
+         done
+	@for file in $(I18N_FILES); do \
+           $(I18N_EDIT) $(I18N_DIR)/en.po < $$file > $(OEX_TMP_DIR)/$$file; \
+           mkdir -p $(OEX_TMP_DIR)/locales/ja/`dirname $$file`; \
+           cp $$file $(OEX_TMP_DIR)/locales/ja/$$file; \
+           for lang in $(I18N_LANGUAGES); do \
+             mkdir -p $(OEX_TMP_DIR)/locales/$$lang/`dirname $$file`; \
+             $(I18N_EDIT) $(I18N_DIR)/$$lang.po < $$file > $(OEX_TMP_DIR)/locales/$$lang/$$file; \
+           done; \
+         done
+	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ $^ locales
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)
 	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
@@ -111,7 +135,7 @@ $(CRX): $(DIST_FILES_CRX)
 	rm -rf $(CRX_TMP_DIR)
 	@for file in $(DIST_FILES_CRX); do \
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
-           cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
+           cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
 	@test -f $(CRX:.crx=.crx.pem) && \
            "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.crx.pem) || \
@@ -131,7 +155,7 @@ $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
 	rm -rf $(SAFARIEXTZ_TMP_DIR)
 	@for file in $(DIST_FILES_SAFARI); do \
            mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
-           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
+           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$$file; \
          done
 	cd $(SAFARIEXTZ_TMP_DIR) && \
           $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
@@ -141,7 +165,7 @@ $(SAFARIEXTZ): $(DIST_FILES_SAFARI)
           $(XAR) --inject-sig signature.dat -f ../$@
 
 clean:
-	rm -rf $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
+	rm -rf $(OEX_TMP_DIR) $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR)
 	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
               $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
               $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)

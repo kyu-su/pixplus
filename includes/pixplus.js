@@ -187,7 +187,7 @@
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"],
      "scroll":                 [1, "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b",
-                                [{"value": 0, "title": "\u306a\u3057"},
+                                [{"value": 0, "title": "\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"},
                                  {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
                                  {"value": 2, "title": "\u30a4\u30e9\u30b9\u30c8"}]],
      "bookmark_hide":          [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"],
@@ -201,7 +201,7 @@
                                  {"value": 2, "title": "AutoPagerize"}]],
      "extagedit":              [true, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u6642\u306b\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u306e\u30bf\u30b0\u9078\u629e\u3092\u6709\u52b9\u306b\u3059\u308b"],
      "mod_bookmark_add_page":  [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"],
-     "tag_separator_style":    ["border-top:2px solid #dae1e7;", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u3067\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"],
+     "tag_separator_style":    ["border-top:2px solid #dae1e7;", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"],
      "stacc_link":             ["", "\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148",
                                 [{"value": "",         "title": "\u5909\u66f4\u3057\u306a\u3044"},
                                  {"value": "all",      "title": "\u3059\u3079\u3066"},
@@ -655,7 +655,7 @@
    defineMagicFunction(
      'countup_rating',
      function(real, othis, score) {
-       var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n' + score + '\u70b9';
+       var msg = "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9".replace('%s', String(score));
        if (conf.rate_confirm && !confirm(msg)) return;
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
        real.apply(othis, [].slice.apply(arguments, [2]));
@@ -904,9 +904,7 @@
        });
 
      var tocont = make_custom_section('Tag order');
-     tocont.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff' +
-       '\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n' +
-       '"-": \u30bb\u30d1\u30ec\u30fc\u30bf\n"*": \u6b8b\u308a\u5168\u90e8';
+     tocont.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n-: \u30bb\u30d1\u30ec\u30fc\u30bf\n*: \u6b8b\u308a\u5168\u90e8";
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.id = 'pp-conf-bookmark-tag_order';
      tag_order_textarea.rows = '20';
@@ -922,8 +920,7 @@
      tocont.appendChild(tag_order_textarea);
 
      var tacont = make_custom_section('Tag alias');
-     tacont.textContent = '\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3' +
-       '\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002';
+     tacont.textContent = "\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002";
      var tag_alias_table = window.document.createElement('table');
      tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
      tacont.appendChild(tag_alias_table);
@@ -1359,7 +1356,7 @@
    }
    function init_recommend() {
      var r_container = $('illust_recommendation');
-     var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., "\u304a\u3059\u3059\u3081")]]', r_container);
+     var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., \"\u304a\u3059\u3059\u3081\")]]', r_container);
      var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
      var float_wrap = null;
      if (r_container) {
@@ -1431,7 +1428,7 @@
          var timer;
          gallery.onadditem.connect(function() { if (!timer) timer = setTimeout(init_pager, 100); });
          function init_pager() {
-           var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
+           var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
            if (more) {
              illusts.addEventListener(
                'scroll',
@@ -1709,7 +1706,7 @@
      } else if (window.location.pathname.match(/^\/bookmark_add\.php/)) {
        if (conf.mod_bookmark_add_page && options.type == 'illust') {
          var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
-         var autotag = $x('//h2[contains(text(), "\u8ffd\u52a0")]') ? true : false;
+         var autotag = $x('//h2[contains(text(), \"\u8ffd\u52a0\")]') ? true : false;
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
        conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
@@ -1943,7 +1940,7 @@
 		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
 	          window.jQuery('form', this.preference)
 		    .attr('action', '/bookmark_setting.php')
-                    .find('div.action').append('<input type="button" value="\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664" class="button remove"/>')
+                    .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
                 } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
@@ -2245,11 +2242,11 @@
      this.author                = $c('span',    this.post_cap,      'pp-author');
      this.a_profile             = $c('a',       this.author);
      this.a_illust              = $c('a',       this.author);
-     this.a_illust.textContent  = '\u4f5c\u54c1';
+     this.a_illust.textContent  = "\u4f5c\u54c1";
      this.a_bookmark            = $c('a',       this.author);
-     this.a_bookmark.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
+     this.a_bookmark.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af";
      this.a_stacc               = $c('a',       this.author);
-     this.a_stacc.textContent   = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
+     this.a_stacc.textContent   = "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9";
      this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
      this.img_div               = $c('div',     this.root_div,      'pp-img-div');
      this.img_anc               = $c('a',       this.img_div);
@@ -2852,7 +2849,7 @@
                   comment.setAttribute('disabled', '');
                   submit.setAttribute('disabled', '');
                 } else {
-                  safeWindow.alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+                  safeWindow.alert("\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
                 }
               }, false);
 
@@ -3135,8 +3132,7 @@
                   if (url.match(/^\w/)) url = '/' + url;
                   $ev(del).click(
                     function() {
-                      if (!confirm('\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002' +
-                                   '\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f')) return;
+                      if (!confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) return;
                       geturl(url,
                              function(text) {
                                self.reload_viewer_comments();
@@ -3449,7 +3445,7 @@
          bottom.removeChild(bottom.firstChild);
        }
      } catch (x) { }
-     var note = $x('.//dd/text()[contains(., "10\u500b")]', root);
+     var note = $x('.//dd/text()[contains(., \"10\u500b\")]', root);
      if (note) {
        remove_node_if_tag_name(note.previousSibling, 'br');
        note.parentNode.removeChild(note);
@@ -3459,7 +3455,7 @@
      if (on_close) {
        var close  = $c('input', submit.parentNode, null, 'btn_type01 bookmark_submit_btn');
        close.type  = 'button';
-       close.value = '\u3000\u9589\u3058\u308b\u3000';
+       close.value = "\u9589\u3058\u308b";
        close.addEventListener(
          'click',
          function(e) {
@@ -3471,10 +3467,12 @@
          }, false);
      }
 
+     /*
      var autoinput_wrap = $c('div', null, 'pp-autoinput-wrap');
      create_anc('\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304b\u3089', autoinput_from_caption, autoinput_wrap);
      create_anc('\u81ea\u52d5\u5165\u529b', autoinput_from_tag, autoinput_wrap);
      input_tag.parentNode.appendChild(autoinput_wrap);
+      */
 
      if (conf.bookmark_hide) {
        var hide = $x('.//input[@type="radio" and @name="restrict" and @value="1"]', root);
