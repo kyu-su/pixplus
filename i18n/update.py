@@ -37,7 +37,7 @@ if os.path.exists(sys.argv[1]):
         msgid = m.group(2)
       elif messages_map.has_key(msgid):
         messages_map[msgid]['msgstr'] = m.group(2)
-      else:
+      elif m.group(2) != '""':
         messages_map[msgid] = {'msgid': msgid, 'msgstr': m.group(2)}
         messages_keys.append(msgid)
         pass

@@ -225,7 +225,7 @@
      "popup": {
        "preload":              [true, "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"],
        "big_image":            [false, "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"],
-       "caption_height":       [0.4, "\u753b\u50cf\u3092\u57fa\u6e96\u3068\u3057\u305f\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u4e0a\u9650\u3002\u30b3\u30e1\u30f3\u30c8\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u30d0\u30fc\u304c\u4ed8\u304f"],
+       "caption_height":       [0.4, "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055"],
        "caption_opacity":      [0.9, "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6"],
        "remove_pixpedia":      [false, "\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b"],
        "rate":                 [true, "\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"],
@@ -904,7 +904,7 @@
        });
 
      var tocont = make_custom_section('Tag order');
-     tocont.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n-: \u30bb\u30d1\u30ec\u30fc\u30bf\n*: \u6b8b\u308a\u5168\u90e8";
+     tocont.innerHTML = "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8";
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.id = 'pp-conf-bookmark-tag_order';
      tag_order_textarea.rows = '20';
@@ -1794,6 +1794,7 @@
                '#pp-conf-head form{display:inline;}' +
                '#pp-conf-head input{margin-left:0.2em;}' +
                '#pp-conf-head a{margin-left:1em;}' +
+               '#pp-conf-table input{box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
                '.pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
                '.pp-conf-content{margin-left:1em;}' +
                '#pp-conf-root button{display:block !important;white-space:pre !important;}' +

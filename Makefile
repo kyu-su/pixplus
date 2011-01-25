@@ -25,7 +25,10 @@ I18N_DIR             = i18n
 I18N_LANGUAGES       = en
 I18N_UPDATE          = $(I18N_DIR)/update.py
 I18N_EDIT            = $(I18N_DIR)/edit.py
-I18N_FILES           = $(SRC_USERJS) $(CONFIG_JS)
+I18N_SOURCES         = $(SRC_USERJS) $(CONFIG_JS)
+I18N_FILES_JA        = $(shell for j in $(I18N_SOURCES);do echo -n "locales/ja/$$j ";done)
+I18N_FILES_OTHERS    = $(shell for i in $(I18N_LANGUAGES);do for j in $(I18N_SOURCES);do echo -n "locales/$$i/$$j ";done;done)
+I18N_FILES           = $(I18N_FILES_JA) $(I18N_FILES_OTHERS)
 
 CRX_TMP_DIR          = .crx
 MANIFEST_JSON        = manifest.json
@@ -57,6 +60,15 @@ dist: $(OEX)
 
 $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE) Makefile
 	$(I18N_UPDATE) $@ $(SRC_USERJS)
+
+$(I18N_FILES_JA): locales/ja/%: %
+	mkdir -p `dirname $@`
+	cp $^ $@
+$(I18N_FILES_OTHERS): $(I18N_SOURCES)
+	mkdir -p `dirname $@`
+	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po < $${file#locales/$$l/} > $$file;
+
+$(I18N_LANGUAGES:%=locales/%) locales/ja:
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
@@ -96,7 +108,8 @@ $(ICON_FILES_SAFARI): $(ICON_SVG)
 $(SIGNATURE): $(SIGN_FILES)
 	./create_signature.sh $^ > $@
 
-$(OEX): $(DIST_FILES_OEX)
+$(OEX): $(DIST_FILES_OEX) $(I18N_FILES)
+	echo $(I18N_FILES)
 	@for kw in $(WARN_KEYWORDS_W); do \
            grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
          done
@@ -104,18 +117,12 @@ $(OEX): $(DIST_FILES_OEX)
            grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
          done
 	rm -rf $(OEX_TMP_DIR)
-	@for file in $(DIST_FILES_OEX); do \
+	@for file in $(DIST_FILES_OEX) $(I18N_FILES); do \
            mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
            cp $$file $(OEX_TMP_DIR)/$$file; \
          done
-	@for file in $(I18N_FILES); do \
+	@for file in $(I18N_SOURCES); do \
            $(I18N_EDIT) $(I18N_DIR)/en.po < $$file > $(OEX_TMP_DIR)/$$file; \
-           mkdir -p $(OEX_TMP_DIR)/locales/ja/`dirname $$file`; \
-           cp $$file $(OEX_TMP_DIR)/locales/ja/$$file; \
-           for lang in $(I18N_LANGUAGES); do \
-             mkdir -p $(OEX_TMP_DIR)/locales/$$lang/`dirname $$file`; \
-             $(I18N_EDIT) $(I18N_DIR)/$$lang.po < $$file > $(OEX_TMP_DIR)/locales/$$lang/$$file; \
-           done; \
          done
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ $^ locales
 
