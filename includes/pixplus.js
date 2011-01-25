@@ -15,6 +15,7 @@
  * OperaExtension版で動作しない場合があるバグをたぶん修正。
  * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
  * 閲覧できないマンガがあったバグを修正。
+ * ズーム機能でFirefoxをサポート。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -2928,7 +2929,11 @@
        img.style.cssText = '';
        img.style.width = width + 'px';
        img.style.height = height + 'px';
-       img.style.imageRendering = 'optimizeSpeed';
+       if (browser.gecko) {
+         img.style.imageRendering = 'optimizeSpeed';
+       } else if (browser.webkit) {
+         //img.style.imageRendering = '-webkit-crisp-edges';
+       }
        return img;
      }
    };
