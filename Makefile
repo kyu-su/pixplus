@@ -27,8 +27,8 @@ I18N_UPDATE          = $(I18N_DIR)/update.py
 I18N_EDIT            = $(I18N_DIR)/edit.py
 I18N_SOURCES         = $(SRC_USERJS) $(CONFIG_JS)
 
-O_I18N_FILES_JA      = $(shell for j in $(I18N_SOURCES);do echo -n "locales/ja/$$j ";done)
-O_I18N_FILES_OTHERS  = $(shell for i in $(I18N_LANGUAGES);do for j in $(I18N_SOURCES);do echo -n "locales/$$i/$$j ";done;done)
+O_I18N_FILES_JA      = $(I18N_SOURCES:%=locales/ja/%)
+O_I18N_FILES_OTHERS  = $(foreach l,$(I18N_LANGUAGES),$(I18N_SOURCES:%=locales/$(l)/%))
 O_I18N_FILES         = $(O_I18N_FILES_JA) $(O_I18N_FILES_OTHERS)
 
 C_I18N_FILES         = _locales/ja/messages.json $(I18N_LANGUAGES:%=_locales/%/messages.json)
