@@ -14,6 +14,7 @@
  * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
  * OperaExtension版で動作しない場合があるバグをたぶん修正。
  * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
+ * 閲覧できないマンガがあったバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -2063,7 +2064,7 @@
    }
    GalleryItem.prototype.parse_img_url = function(url) {
      // 冒頭メモ参照
-     if (url.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)$/)) {
+     if (url.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/)) {
        this.img_url_base = RegExp.$1;
        this.img_url_ext  = RegExp.$2;
      }
