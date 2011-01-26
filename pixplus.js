@@ -63,27 +63,6 @@
  ** アンケート
  * Up                   一つ上の選択肢にフォーカスを移す。
  * Down                 一つ下の選択肢にフォーカスを移す。
-
- **
- * 移動系のキーバインドは端に到達した時の挙動がキーによって違う。
- * ブックマーク編集モードでは、フォームにフォーカスがある場合はキーバインドが動作しない。
-
- * 左手の範囲でシングルキーショートカットとかぶらない感じで。
- */
-
-/** 設定の変更方法
- * Opera10.50以降なら、ページ上部のメニュー「pixplus」から設定変更が可能。
-
- * スクリプトを直接書き換えてもいいが、pixplusInitializeイベント中に
- * opera.pixplus.confオブジェクトを書き換える事で個人設定を別スクリプトに分離出来る。
- * スクリプトのロード順は問わないのでファイル名は任意。以下サンプル。
-
- window.document.addEventListener(
-   'pixplusInitialize',
-   function() {
-     opera.pixplus.conf.bookmark_hide = true;
-     opera.pixplus.conf.disable_effect = true;
-   }, false);
  */
 
 /** コメントの処理について
@@ -106,27 +85,8 @@
  * 閲覧・評価・コメント履歴
  * イベント(詳細/参加者)
 
- ** 人気タグ別ランキングについて
- * 現在この機能自体存在しないが、2009/10/22付けの開発者ブログに「何らかの方法で数ヶ月以内に再開します」とある。
- * http://dev.pixiv.net/archives/892022.html
- * 2010/07/20 http://twitter.com/pixiv/status/18992660402 やっちゃうらしい。
-
- ** ギャラリーに含まれないイラストへのリンクをクリックした場合の挙動
- * ポップアップが既に表示さてていれば、無条件でポップアップ内で表示。
- * ポップアップが表示されていない場合、imgエレメントを含むか、ページ内に
- * 同じリンク先かつ子孫にimgエレメントを持つリンクが存在しない場合にのみ
- * 新規にポップアップを開く。
- * ポップアップ内でのイラストの移動は出来ない。
- * ただしそのイラストを開く前にポップアップが開いていた場合、そのイラストに戻れる。
- */
-
-/** 画像ファイルのURLについて
- * サムネイルやマンガの各ページはすべて同じディレクトリにある。
- * ファイル名は「\d+(?:_[0-9a-f]{10})?(?:_[sm]|_100|_p\d+)?\.ext」形式。
- * 公開レベルをマイピク限定/非公開にするとイラストIDの後ろに16進ランダム10桁な数字がつく。
- * 拡張子はすべて同じ。マンガ作品で複数の形式を使うと投稿エラーになる。
- * 以前は全ページがjpg固定で、他の形式は投稿時に変換されていた。
- * ユーザーIDは`-'を含むかも知れない。\w+とかやると失敗する。
+ * 2009/10/22 http://dev.pixiv.net/archives/892022.html
+ * 2010/07/20 http://twitter.com/pixiv/status/18992660402
  */
 
 (function(func, unsafeWindow, userjs) {
@@ -555,26 +515,6 @@
     })();
 
    var options = parseopts(window.location.href);
-
-   if (window.opera) {
-     window.opera.addEventListener(
-       'AfterEvent.click',
-       function(ev) {
-         if (ev.event.shiftKey || ev.event.ctrlKey) return;
-         var anc = $x('ancestor-or-self::a[1]', ev.event.target);
-         if (!ev.eventCancelled && anc && !anc.hasAttribute('nopopup') &&
-             anc.href.match(/^(?:http:\/\/www\.pixiv\.net\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
-           if (Popup.instance || $t('img', anc).length ||
-               !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
-             var opts = parseopts(anc.href);
-             if (opts.illust_id && opts.mode == 'medium') {
-               ev.event.preventDefault();
-               Popup.run_url(anc.href);
-             }
-           }
-         }
-       }, false);
-   }
 
    function mod_rpc_url(url) {
      if (url == './rpc_rating.php') {
