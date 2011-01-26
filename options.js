@@ -25,5 +25,6 @@ function init() {
 }
 
 function init_real() {
-  new ConfigUI(document.getElementById('options-root'), conf, true, chrome.i18n.getMessage);
+  new ConfigUI(document.getElementById('options-root'), conf, true,
+               window.chrome ? chrome.i18n.getMessage : null);
 }
