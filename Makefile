@@ -58,7 +58,7 @@ $(CONFIG_JS): $(SRC_USERJS)
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
 clean: clean-opera
-	rm -f $(CONFIG_JS)
+	rm -f $(CONFIG_JSON) $(CONFIG_JS)
 
 # ================ Opera ================
 
@@ -94,5 +94,5 @@ $(OEX): $(OPERA_DIST_FILES)
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-opera:
-	rm -f $(OPERA_CONFIG_XML) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
-	rm -rf $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
+	rm -f $(OEX) $(OPERA_CONFIG_XML) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
+	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
