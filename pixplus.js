@@ -909,7 +909,7 @@
        });
 
      var tocont = make_custom_section('Tag order');
-     tocont.innerHTML = "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8";
+     tocont.innerHTML = msg_filter("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8");
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.id = 'pp-conf-bookmark-tag_order';
      tag_order_textarea.rows = '20';
@@ -925,7 +925,7 @@
      tocont.appendChild(tag_order_textarea);
 
      var tacont = make_custom_section('Tag alias');
-     tacont.textContent = "\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002";
+     tacont.textContent = msg_filter("\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002");
      var tag_alias_table = window.document.createElement('table');
      tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
      tacont.appendChild(tag_alias_table);

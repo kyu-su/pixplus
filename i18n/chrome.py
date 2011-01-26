@@ -8,10 +8,12 @@ import hashlib
 from common import *
 
 messages = {}
-if os.path.exists(sys.argv[1]): parse_po(sys.argv[1], messages)
+if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+  parse_po(sys.argv[1], messages)
+  pass
 
 messages_json = {}
-if os.path.exists(sys.argv[2]):
+if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):
   json_fp = open(sys.argv[2], 'r')
   messages_json = json.load(json_fp)
   json_fp.close()
@@ -32,6 +34,8 @@ for line in sys.stdin:
     pass
   pass
 
-json_fp = open(sys.argv[2], 'w')
-json_fp.write(json.dumps(messages_json))
-json_fp.close()
+if len(sys.argv) > 2:
+  json_fp = open(sys.argv[2], 'w')
+  json_fp.write(json.dumps(messages_json))
+  json_fp.close()
+  pass
