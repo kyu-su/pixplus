@@ -26,7 +26,7 @@ if (window.opera) {
            btn = opera.contexts.toolbar.createItem(
              {
                title: 'pixplus',
-               icon:  'icons/pixplus_64.png',
+               icon:  'icons/64.png',
                popup: {
                  href:   'options.html',
                  width:  800,
