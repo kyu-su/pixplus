@@ -45,7 +45,7 @@ CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
 CHROME_I18N_FILES       = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
 CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
 
-SAFARI_ROOT             = safari
+SAFARI_ROOT             = safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
 SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
