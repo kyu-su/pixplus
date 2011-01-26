@@ -17,12 +17,20 @@ ICON_SVG             = pixplus.svg
 SRC_USERJS           = pixplus.js
 DIST_FILES           = common.js index.html index.js options.html options.css options.js
 
+I18N_DIR             = i18n
+I18N_LANGUAGES       = en ja
+I18N_UPDATE          = $(I18N_DIR)/update.py
+I18N_EDIT            = $(I18N_DIR)/edit.py
+I18N_CHROME          = $(I18N_DIR)/chrome.py
+
 OPERA_ROOT           = opera
 OPERA_CONFIG_XML     = $(OPERA_ROOT)/config.xml
 OPERA_ICON_SIZE      = 64 16 32 48
 OPERA_ICON_DIR       = icons
 OPERA_ICON_FILES     = $(OPERA_ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
-OPERA_DIST_FILES     = $(OPERA_CONFIG_XML) $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ICON_FILES) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
+OPERA_I18N_SOURCES   = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
+OPERA_I18N_FILES     = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
+OPERA_DIST_FILES     = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
 
 ALL_TARGETS          =
 
@@ -73,17 +81,25 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS)
 	mkdir -p `dirname $@`
-	cp $< $@
+	$(I18N_EDIT) $(I18N_DIR)/en.po opera < $< > $@
 
 $(OPERA_ICON_FILES): $(ICON_SVG)
 	mkdir -p `dirname $@`
 	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
 
 $(OPERA_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
-	cp $< $@
+	$(I18N_EDIT) $(I18N_DIR)/en.po opera < $< > $@
 
 $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
 	cp $< $@
+
+$(I18N_LANGUAGES:%=$(OPERA_ROOT)/locales/%/includes/$(SRC_USERJS)): $(SRC_USERJS)
+	mkdir -p `dirname $@`
+	$(I18N_EDIT) $(I18N_DIR)/$(@:$(OPERA_ROOT)/locales/%/includes/$(SRC_USERJS)=%).po opera < $< > $@
+
+$(I18N_LANGUAGES:%=$(OPERA_ROOT)/locales/%/$(CONFIG_JS)): $(CONFIG_JS)
+	mkdir -p `dirname $@`
+	$(I18N_EDIT) $(I18N_DIR)/$(@:$(OPERA_ROOT)/locales/%/$(CONFIG_JS)=%).po opera < $< > $@
 
 $(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
@@ -95,4 +111,4 @@ $(OEX): $(OPERA_DIST_FILES)
 
 clean-opera:
 	rm -f $(OEX) $(OPERA_CONFIG_XML) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
-	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
+	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR) $(OPERA_ROOT)/locales

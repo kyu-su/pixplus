@@ -6,7 +6,8 @@ import re
 
 from common import *
 
-messages = parse_po(sys.argv[1])
+messages = {}
+if os.path.exists(sys.argv[1]): parse_po(sys.argv[1], messages)
 
 for line in sys.stdin:
   for msg in messages.values():
