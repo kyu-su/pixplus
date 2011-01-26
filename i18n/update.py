@@ -11,7 +11,7 @@ messages_map = {}
 messages_keys = []
 
 for path in sys.argv[2:]:
-  list_messages(path, (messages_map, messages_keys))
+  list_messages(path, (messages_map, messages_keys), sys.argv[1])
   pass
 
 if os.path.exists(sys.argv[1]):

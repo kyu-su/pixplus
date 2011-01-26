@@ -1,18 +1,20 @@
 import re
+import os
 
 LIST_MESSAGES_REGEX = re.compile(r'(?<!\\)("[^"]*\\u[^"]*")')
 
-def list_messages(path, target):
+def list_messages(path, target, base_path):
   line_number = 1
+  path_r = os.path.relpath(os.path.realpath(path), os.path.dirname(base_path))
   f = open(path, 'r')
   for line in f:
     m = LIST_MESSAGES_REGEX.search(line)
     if m:
       if isinstance(target, tuple):
         if target[0].has_key(m.group(1)):
-          target[0][m.group(1)]['line'].append((path, line_number))
+          target[0][m.group(1)]['line'].append((path_r, line_number))
         else:
-          target[0][m.group(1)] = {'line': [(path, line_number)], 'msgid': m.group(1), 'msgstr': m.group(1)}
+          target[0][m.group(1)] = {'line': [(path_r, line_number)], 'msgid': m.group(1), 'msgstr': m.group(1)}
           target[1].append(m.group(1))
           pass
       elif callable(target):
