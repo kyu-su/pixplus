@@ -1,76 +1,43 @@
 RSVG_CONVERT         = rsvg-convert
 ZIP                  = zip
-XAR                  = $(shell echo $$HOME/local/xar/bin/xar)
-ICON_SIZE            = 64 16 32 48
+XAR                  = xar
 CHROME               = $(shell ./find_chrome.sh)
 OEX                  = pixplus.oex
 CRX                  = pixplus.crx
 SAFARIEXTZ           = pixplus.safariextz
-BUILD_CRX            = $(shell test -x "$(CHROME)" && echo yes || echo no)
-
 OEX_TMP_DIR          = .oex
-CONFIG_XML           = config.xml
+BUILD_OEX            = $(shell which "$(ZIP)" >/dev/null && echo yes || echo no)
+BUILD_CRX            = $(shell which "$(CHROME)" >/dev/null && echo yes || echo no)
+BUILD_SAFARIEXTZ     = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+
+CONFIG_JSON          = config.json
 CONFIG_JS            = config.js
 GREASEMONKEY_JS      = pixplus.user.js
-ICON_PREFIX          = icons/pixplus_
-ICON_SUFFIX          = .png
-ICON_FILES           = $(ICON_SIZE:%=$(ICON_PREFIX)%$(ICON_SUFFIX))
-ICON_FILES_SAFARI    = $(ICON_SIZE:%=Icon-%$(ICON_SUFFIX))
-ICON_SVG             = icons/pixplus.svg
-SIGNATURE            = signature1.xml
-SRC_USERJS           = includes/pixplus.js
-CONFIG_JSON          = config.json
+ICON_SVG             = pixplus.svg
+SRC_USERJS           = pixplus.js
+DIST_FILES           = common.js index.html index.js options.html options.css options.js
 
-I18N_DIR             = i18n
-I18N_LANGUAGES       = en
-I18N_UPDATE          = $(I18N_DIR)/update.py
-I18N_EDIT            = $(I18N_DIR)/edit.py
-I18N_CHROME          = $(I18N_DIR)/chrome.py
-I18N_SOURCES         = $(SRC_USERJS) $(CONFIG_JS)
+OPERA_ROOT           = opera
+OPERA_CONFIG_XML     = $(OPERA_ROOT)/config.xml
+OPERA_ICON_SIZE      = 64 16 32 48
+OPERA_ICON_DIR       = icons
+OPERA_ICON_FILES     = $(OPERA_ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
+OPERA_DIST_FILES     = $(OPERA_CONFIG_XML) $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ICON_FILES) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
 
-O_I18N_FILES_JA      = $(I18N_SOURCES:%=locales/ja/%)
-O_I18N_FILES_OTHERS  = $(foreach l,$(I18N_LANGUAGES),$(I18N_SOURCES:%=locales/$(l)/%))
-O_I18N_FILES         = $(O_I18N_FILES_JA) $(O_I18N_FILES_OTHERS)
+ALL_TARGETS          =
 
-C_I18N_FILES         = _locales/ja/messages.json $(I18N_LANGUAGES:%=_locales/%/messages.json)
-
-CRX_TMP_DIR          = .crx
-MANIFEST_JSON        = manifest.json
-
-SAFARIEXTZ_TMP_DIR   = .safariextz
-INFO_PLIST           = Info.plist
-SETTINGS_PLIST       = Settings.plist
-SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
-SAFARIEXTZ_PRIV      = safari_key.pem
-
-SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES_EXTRA     = common.js index.html index.js options.html options.css options.js
-DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(DIST_FILES_EXTRA)
-DIST_FILES_CRX       = $(MANIFEST_JSON) $(CONFIG_JS) $(SRC_USERJS) $(ICON_FILES) $(DIST_FILES_EXTRA)
-DIST_FILES_SAFARI    = $(INFO_PLIST) $(SETTINGS_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
-VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
-
-WARN_KEYWORDS_W      = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
-WARN_KEYWORDS_P      = $(shell cat prototypejs_funcs.txt)
-
-ALL_TARGETS          = $(OEX) $(GREASEMONKEY_JS) $(SAFARIEXTZ)
-ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS         += $(CRX)
+ifeq ($(BUILD_OEX),yes)
+ALL_TARGETS         += $(OEX)
 endif
+#ifeq ($(BUILD_CRX),yes)
+#ALL_TARGETS         += $(CRX)
+#endif
+#ifeq ($(BUILD_SAFARIEXTZ),yes)
+#ALL_TARGETS         += $(SAFARIEXTZ)
+#endif
 
 all: $(ALL_TARGETS)
-dist: $(OEX)
-
-$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE) Makefile
-	$(I18N_UPDATE) $@ $(SRC_USERJS)
-
-$(O_I18N_FILES_JA): locales/ja/%: %
-	mkdir -p `dirname $@`
-	cp $< $@
-$(O_I18N_FILES_OTHERS): $(I18N_SOURCES) $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
-	mkdir -p `dirname $@`
-	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po opera < $${file#locales/$$l/} > $$file;
+	echo $(ALL_TARGETS)
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
@@ -78,28 +45,9 @@ $(CONFIG_JSON): $(SRC_USERJS)
 	echo ',"bookmark_tag_order":["",""],' >> $@
 	echo '"bookmark_tag_aliases":["",""]}' >> $@
 
-$(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
-	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
-	@for size in $(ICON_SIZE); do \
-           echo "  <icon src=\"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\" />" >> $@; \
-         done
-	echo "  <icon src=\"$(ICON_SVG)\" />" >> $@;
-	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	python conf-parser.py opera < $(CONFIG_JSON) >> $@
-	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
-	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
-	sed -e '1,/@CONFIG@/d' < $< >> $@
-
-$(I18N_LANGUAGES:%=_locales/%/messages.json): _locales/%/messages.json: $(I18N_DIR)/%.po $(SRC_USERJS)
-	mkdir -p `dirname $@`
-	$(I18N_CHROME) $< $@ < $(SRC_USERJS) > /dev/null
-
-_locales/ja/messages.json: $(CONFIG_JS)
 $(CONFIG_JS): $(SRC_USERJS)
-	mkdir -p _locales/ja
 	echo 'var conf_schema = {' > $@
-	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | \
-          tr -d '\r' | $(I18N_CHROME) _dummy _locales/ja/messages.json >> $@
+	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	echo '};' >> $@
 	echo 'var conf = {' >> $@
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
@@ -109,78 +57,42 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
-$(ICON_FILES): $(ICON_SVG)
-	$(RSVG_CONVERT) $< -w $(@:$(ICON_PREFIX)%$(ICON_SUFFIX)=%) -o $@
-$(ICON_FILES_SAFARI): $(ICON_SVG)
-	$(RSVG_CONVERT) $< -w $(@:Icon-%$(ICON_SUFFIX)=%) -o $@
+clean: clean-opera
+	rm -f $(CONFIG_JS)
 
-$(SIGNATURE): $(SIGN_FILES)
-	./create_signature.sh $^ > $@
+# ================ Opera ================
 
-$(OEX): $(DIST_FILES_OEX) $(O_I18N_FILES)
-	@for kw in $(WARN_KEYWORDS_W); do \
-           grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
-         done
-	@for kw in $(WARN_KEYWORDS_P); do \
-           grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
-         done
+$(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
+	sed -e '/@ICONS@/,$$d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< > $@
+	@for size in $(OPERA_ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)//$$size.png\" />" >> $@; done
+	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
+	python conf-parser.py opera < $(CONFIG_JSON) >> $@
+	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
+	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
+	sed -e '1,/@CONFIG@/d' < $< >> $@
+
+$(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS)
+	mkdir -p `dirname $@`
+	cp $< $@
+
+$(OPERA_ICON_FILES): $(ICON_SVG)
+	mkdir -p `dirname $@`
+	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
+
+$(OPERA_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
+	cp $< $@
+
+$(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
+	cp $< $@
+
+$(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
-	@for file in $(DIST_FILES_OEX) $(O_I18N_FILES); do \
+	@for file in $(^:$(OPERA_ROOT)/%=%); do \
            mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
-           cp $$file $(OEX_TMP_DIR)/$$file; \
+           cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file; \
          done
-	@for file in $(I18N_SOURCES); do \
-           $(I18N_EDIT) $(I18N_DIR)/en.po opera < $$file > $(OEX_TMP_DIR)/$$file; \
-         done
-	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ $^ locales
+	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
 
-$(GREASEMONKEY_JS): $(SRC_USERJS)
-	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
-
-$(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
-	sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@
-	@first=1;for size in $(ICON_SIZE); do \
-           test $$first -eq 1 && first=0 || echo ',' >> $@; \
-           /bin/echo -n "    \"$$size\": \"$(ICON_PREFIX)$$size$(ICON_SUFFIX)\"" >> $@; \
-         done
-	echo >> $@;
-	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< | tr -d '\r' >> $@
-
-$(CRX): $(DIST_FILES_CRX) $(C_I18N_FILES)
-	rm -rf $(CRX_TMP_DIR)
-	@for file in $^; do \
-           mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
-           cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
-         done
-	@test -f $(CRX:.crx=.crx.pem) && \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CRX:.crx=.crx.pem) || \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
-	mv $(CRX_TMP_DIR)/$(CRX) ./
-	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) ./$(CRX:.crx=.crx.pem) || :
-
-$(INFO_PLIST): $(INFO_PLIST).in
-	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
-
-$(SETTINGS_PLIST): $(SETTINGS_PLIST).in $(CONFIG_JSON)
-	sed -e '/__SETTINGS__/,$$d' < $< > $@
-	python conf-parser.py safari < $(CONFIG_JSON) >> $@
-	sed -e '1,/__SETTINGS__/d' < $< >> $@
-
-$(SAFARIEXTZ): $(DIST_FILES_SAFARI)
-	rm -rf $(SAFARIEXTZ_TMP_DIR)
-	@for file in $(DIST_FILES_SAFARI); do \
-           mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
-           cp $$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$$file; \
-         done
-	cd $(SAFARIEXTZ_TMP_DIR) && \
-          $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
-          : | openssl dgst -sign ../$(SAFARIEXTZ_PRIV) -binary | wc -c > siglen.txt && \
-          $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc ../%) && \
-          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | openssl rsautl -sign -inkey ../$(SAFARIEXTZ_PRIV) > signature.dat && \
-          $(XAR) --inject-sig signature.dat -f ../$@
-
-clean:
-	rm -rf $(OEX_TMP_DIR) $(CRX_TMP_DIR) $(SAFARIEXTZ_TMP_DIR) locales _locales
-	rm -f $(CONFIG_JSON) $(CONFIG_XML) $(CONFIG_JS) $(ICON_FILES) $(SIGNATURE) $(OEX) \
-              $(GREASEMONKEY_JS) $(MANIFEST_JSON) $(CRX) \
-              $(INFO_PLIST) $(SETTINGS_PLIST) $(SAFARIEXTZ) $(ICON_FILES_SAFARI)
+clean-opera:
+	rm -f $(OPERA_CONFIG_XML) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
+	rm -rf $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
