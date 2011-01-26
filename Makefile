@@ -85,8 +85,8 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
-$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS)
-	$(I18N_UPDATE) $@ $^
+$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE)
+	$(I18N_UPDATE) $@ $<
 
 clean: clean-opera clean-chrome clean-safari
 	rm -f $(CONFIG_JSON) $(CONFIG_JS)
