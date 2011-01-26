@@ -16,6 +16,7 @@
  * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
  * 閲覧できないマンガがあったバグを修正。
  * ズーム機能でFirefoxをサポート。
+ * 企画目録一覧ページに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -84,6 +85,7 @@
  * ブックマーク詳細ページ
  * 閲覧・評価・コメント履歴
  * イベント(詳細/参加者)
+ * 企画目録一覧(新着/注目)
 
  * 2009/10/22 http://dev.pixiv.net/archives/892022.html
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
@@ -1269,6 +1271,12 @@
                       skip_dups:  true,
                       get_url:    get_url_from_image});
        }
+     } else if (window.location.pathname.match(/^\/user_event\.php/)) {
+       // http://www.pixiv.net/user_event.php
+       // http://www.pixiv.net/user_event.php?mode=attn
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
+                    xpath_cap: './li/text()[preceding-sibling::a/img]'},
+                   unpack_captions);
      }
 
      // 汎用
@@ -2029,7 +2037,7 @@
    };
    function Gallery(args, filter_col, filter) {
      this.args = args;
-     this.args.xpath_cap = this.args.xpath_cap || 'ul/li/text()[1]';
+     this.args.xpath_cap = this.args.xpath_cap || './ul/li/text()[1]';
      this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[position()=1 and contains(@href, "mode=medium")]/img';
      this.filter_col = filter_col;
      this.filter = filter;
