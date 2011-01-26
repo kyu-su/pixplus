@@ -25,7 +25,7 @@
 		<dict>
 			<key>End</key>
 			<array>
-				<string>includes/pixplus.js</string>
+				<string>pixplus.js</string>
 			</array>
 		</dict>
 		<key>Whitelist</key>
