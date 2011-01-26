@@ -127,6 +127,7 @@ $(OEX): $(OPERA_DIST_FILES)
            mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
            cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file; \
          done
+#	cd $(OEX_TMP_DIR) && ../$(OPERA_ROOT)/sign/create_signature.sh $(^:$(OPERA_ROOT)/%=%) > signature1.xml
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-opera:

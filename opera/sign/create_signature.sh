@@ -1,14 +1,14 @@
 #!/bin/sh
 SIGN_ID='crckyl-pixplus'
-#C14N=http://www.w3.org/2006/12/xml-c14n11
-C14N=http://www.w3.org/TR/2001/REC-xml-c14n-20010315
-SIGN_ROOT=sign
-SIGN_CRT=$SIGN_ROOT/sign.crt
+C14N=http://www.w3.org/2006/12/xml-c14n11
+#C14N=http://www.w3.org/TR/2001/REC-xml-c14n-20010315
+SIGN_ROOT=`dirname $0`
 SIGN_KEY=$SIGN_ROOT/sign.key
 SIGN_PASS=$SIGN_ROOT/password
 SIGN_TMPL=$SIGN_ROOT/template.xml
 SIGN_UID=`date | sha256sum | awk '{print $1}'`
-X509CERT=`grep -v '^-' $SIGN_CRT | sed -e 's/^/    /'`
+CERT1=`grep -v '^-' $SIGN_ROOT/sign.crt | sed -e 's/^/        /'`
+#CERT2=`grep -v '^-' $SIGN_ROOT/cacert.crt | sed -e 's/^/        /'`
 
 hash_postproc() {
   awk '{print $1}' | tr -d '\n' | perl -e 'print pack("H*",<>)' | base64
@@ -42,9 +42,13 @@ cat >> $SIGN_TMPL <<EOS
 EOS
 cat >> $SIGN_TMPL <<EOS
   <SignatureValue />
-  <KeyInfo><X509Data><X509Certificate>
-$X509CERT
-  </X509Certificate></X509Data></KeyInfo>
+  <KeyInfo>
+    <X509Data>
+      <X509Certificate>
+$CERT1
+      </X509Certificate>
+    </X509Data>
+  </KeyInfo>
 EOS
 cat >> $SIGN_TMPL <<EOS
   <Object Id="prop">
