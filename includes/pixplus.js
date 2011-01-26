@@ -762,7 +762,8 @@
 
 
    /* __CONFIG_UI_BEGIN__ */
-   function ConfigUI(root, st, options_page) {
+   function ConfigUI(root, st, options_page, msg_filter) {
+     if (!msg_filter) msg_filter = function(s) { return s; };
      this.root = root;
 
      var head = window.document.createElement('div');
@@ -840,10 +841,11 @@
              var entry = sec.schema[key][2][i];
              var opt = window.document.createElement('option');
              if (typeof entry === 'string') {
-               opt.value = opt.textContent = entry;
+               opt.value = entry;
+               opt.textContent = msg_filter(entry);
              } else {
                opt.value = entry.value;
-               opt.textContent = entry.title;
+               opt.textContent = msg_filter(entry.title);
              }
              input.appendChild(opt);
            }
@@ -884,7 +886,7 @@
              update_export();
            }, false);
          row.insertCell(-1).appendChild(def);
-         row.insertCell(-1).textContent = sec.schema[key][1];
+         row.insertCell(-1).textContent = msg_filter(sec.schema[key][1]);
 
          input.addEventListener(
            sec.schema[key][2] || type == 'boolean' ? 'change' : 'keyup',

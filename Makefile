@@ -25,6 +25,7 @@ I18N_DIR             = i18n
 I18N_LANGUAGES       = en
 I18N_UPDATE          = $(I18N_DIR)/update.py
 I18N_EDIT            = $(I18N_DIR)/edit.py
+I18N_CHROME          = $(I18N_DIR)/chrome.py
 I18N_SOURCES         = $(SRC_USERJS) $(CONFIG_JS)
 
 O_I18N_FILES_JA      = $(I18N_SOURCES:%=locales/ja/%)
@@ -43,9 +44,9 @@ SAFARIEXTZ_CERTS     = safari_cert.der safari_ca1.der safari_ca2.der
 SAFARIEXTZ_PRIV      = safari_key.pem
 
 SIGN_FILES           = $(CONFIG_XML) $(SRC_USERJS) $(ICON_FILES)
-DIST_FILES_EXTRA     = $(CONFIG_JS) common.js index.html index.js options.html options.css options.js
-DIST_FILES_OEX       = $(SIGN_FILES) $(DIST_FILES_EXTRA)
-DIST_FILES_CRX       = $(MANIFEST_JSON) $(SRC_USERJS) $(ICON_FILES) $(DIST_FILES_EXTRA)
+DIST_FILES_EXTRA     = common.js index.html index.js options.html options.css options.js
+DIST_FILES_OEX       = $(SIGN_FILES) $(CONFIG_JS) $(DIST_FILES_EXTRA)
+DIST_FILES_CRX       = $(MANIFEST_JSON) $(CONFIG_JS) $(SRC_USERJS) $(ICON_FILES) $(DIST_FILES_EXTRA)
 DIST_FILES_SAFARI    = $(INFO_PLIST) $(SETTINGS_PLIST) $(SRC_USERJS) $(ICON_FILES_SAFARI)
 VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
@@ -69,17 +70,7 @@ $(O_I18N_FILES_JA): locales/ja/%: %
 	cp $< $@
 $(O_I18N_FILES_OTHERS): $(I18N_SOURCES) $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 	mkdir -p `dirname $@`
-	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po < $${file#locales/$$l/} > $$file;
-
-#_locales/ja/messages.json: $(I18N_DIR)/en.po
-#	mkdir -p `dirname $@`
-#	awk -F = '$$1=="msgid"{print $$2":{";print "\"message\":"$$2"},"}' < $< | \
-#          sed -e '1s/^/{/' -e '$$s/,$$/}/' -e '/:{/s/\\u//g' -e '/:{/s/"\(.*\)"/"_\1"/' > $@
-#$(I18N_LANGUAGES:%=_locales/%/messages.json): _locales/%/messages.json: $(I18N_DIR)/%.po
-#	mkdir -p `dirname $@`
-#	sed -e '/^#/d' -e '/^$$/d' -e '/msgid/s/\\u//g' \
-#            -e 's/msgid="\(.*\)"/"_\1":{/' -e 's/msgstr="\(.*\)"/"message":"\1"},/' \
-#          < $< | sed -e '1s/^/{/' -e '$$s/,$$/}/' > $@
+	@file=$@;l=$${file#locales/};l=$${l%%/*};$(I18N_EDIT) $(I18N_DIR)/$$l.po opera < $${file#locales/$$l/} > $$file;
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
@@ -99,9 +90,16 @@ $(CONFIG_XML): $(CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
+$(I18N_LANGUAGES:%=_locales/%/messages.json): _locales/%/messages.json: $(I18N_DIR)/%.po $(SRC_USERJS)
+	mkdir -p `dirname $@`
+	$(I18N_CHROME) $< $@ < $(SRC_USERJS) > /dev/null
+
+_locales/ja/messages.json: $(CONFIG_JS)
 $(CONFIG_JS): $(SRC_USERJS)
+	mkdir -p _locales/ja
 	echo 'var conf_schema = {' > $@
-	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
+	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | \
+          tr -d '\r' | $(I18N_CHROME) _dummy _locales/ja/messages.json >> $@
 	echo '};' >> $@
 	echo 'var conf = {' >> $@
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
@@ -132,7 +130,7 @@ $(OEX): $(DIST_FILES_OEX) $(O_I18N_FILES)
            cp $$file $(OEX_TMP_DIR)/$$file; \
          done
 	@for file in $(I18N_SOURCES); do \
-           $(I18N_EDIT) $(I18N_DIR)/en.po < $$file > $(OEX_TMP_DIR)/$$file; \
+           $(I18N_EDIT) $(I18N_DIR)/en.po opera < $$file > $(OEX_TMP_DIR)/$$file; \
          done
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ $^ locales
 
@@ -148,7 +146,7 @@ $(MANIFEST_JSON): $(MANIFEST_JSON).in $(SRC_USERJS)
 	echo >> $@;
 	sed -e '1,/@ICONS@/d' -e 's/@VERSION@/$(VERSION)/' -e 's/@DESCRIPTION@/$(DESCRIPTION)/' < $< | tr -d '\r' >> $@
 
-$(CRX): $(DIST_FILES_CRX)# $(C_I18N_FILES)
+$(CRX): $(DIST_FILES_CRX) $(C_I18N_FILES)
 	rm -rf $(CRX_TMP_DIR)
 	@for file in $^; do \
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \

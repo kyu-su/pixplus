@@ -1,22 +1,12 @@
 #!/usr/bin/python
 
 import sys
+import os
 import re
 
-messages = {}
+from common import *
 
-f = open(sys.argv[1], 'r')
-for line in f:
-  m = re.match(r'(msgid|msgstr)=(".*")', line)
-  if m:
-    if m.group(1) == 'msgid':
-      msgid = m.group(2)
-    else:
-      messages[msgid] = {'msgid': msgid, 'msgstr': m.group(2)}
-      pass
-    pass
-  pass
-f.close()
+messages = parse_po(sys.argv[1])
 
 for line in sys.stdin:
   for msg in messages.values():

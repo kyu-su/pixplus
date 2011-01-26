@@ -4,46 +4,25 @@ import sys
 import os
 import re
 
+from common import *
+
 messages_map = {}
 messages_keys = []
 
 for path in sys.argv[2:]:
-  line_number = 1
-  for line in open(path, 'r'):
-    m = re.search(r'(?<!\\)("[^"]*\\u[^"]*")', line)
-    if m:
-      if messages_map.has_key(m.group(1)):
-        l = messages_map[m.group(1)]['line']
-        if l.has_key(path):
-          l[path].append(line_number)
-        else:
-          l[path] = [line_number]
-          pass
-      else:
-        messages_map[m.group(1)] = {'line': {path: [line_number]}, 'msgid': m.group(1), 'msgstr': '""'}
-        messages_keys.append(m.group(1))
-        pass
-      pass
-    line_number += 1
-    pass
+  list_messages(path, (messages_map, messages_keys))
   pass
 
 if os.path.exists(sys.argv[1]):
-  f = open(sys.argv[1], 'r')
-  for line in f:
-    m = re.match(r'(msgid|msgstr)=(".*")', line)
-    if m:
-      if m.group(1) == 'msgid':
-        msgid = m.group(2)
-      elif messages_map.has_key(msgid):
-        messages_map[msgid]['msgstr'] = m.group(2)
-      elif m.group(2) != '""':
-        messages_map[msgid] = {'msgid': msgid, 'msgstr': m.group(2)}
-        messages_keys.append(msgid)
-        pass
+  def po_cb(msgid, msgstr):
+    if messages_map.has_key(msgid):
+      messages_map[msgid]['msgstr'] = msgstr
+    elif msgstr != '""':
+      messages_map[msgid] = {'msgid': msgid, 'msgstr': msgstr}
+      messages_keys.append(msgid)
       pass
     pass
-  f.close()
+  parse_po(sys.argv[1], po_cb)
   pass
 
 f = open(sys.argv[1], 'w')

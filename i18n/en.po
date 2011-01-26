@@ -210,11 +210,11 @@ msgstr="Show toolbar icon"
 msgid="\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"
 msgstr="Enable settings UI in page"
 
-# includes/pixplus.js:910 "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
+# includes/pixplus.js:912 "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
 msgid="\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"
 msgstr="Reorder bookmark tags. 1 tag per line.<br>-: Separator<br>*: Others"
 
-# includes/pixplus.js:926 "スペース区切りで複数記述。ブックマーク時のタグの自動入力に使用。"
+# includes/pixplus.js:928 "スペース区切りで複数記述。ブックマーク時のタグの自動入力に使用。"
 msgid="\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002"
 msgstr="Separated by space."
 
