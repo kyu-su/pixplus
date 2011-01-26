@@ -66,7 +66,6 @@ ALL_TARGETS         += $(SAFARIEXTZ)
 endif
 
 all: $(ALL_TARGETS)
-	echo $(ALL_TARGETS)
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
@@ -86,6 +85,9 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
+$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS)
+	$(I18N_UPDATE) $@ $^
+
 clean: clean-opera clean-chrome clean-safari
 	rm -f $(CONFIG_JSON) $(CONFIG_JS)
 
@@ -100,27 +102,24 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
-$(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS)
-	mkdir -p `dirname $@`
-	$(I18N_EDIT) $(I18N_DIR)/en.po opera < $< > $@
+$(OPERA_ROOT)/includes/$(SRC_USERJS): $(I18N_DIR)/en.po $(SRC_USERJS)
+	mkdir -p $(dir $@)
+	$(I18N_EDIT) $< opera < $(SRC_USERJS) > $@
 
 $(OPERA_ICON_FILES): $(ICON_SVG)
-	mkdir -p `dirname $@`
+	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
 
-$(OPERA_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
-	$(I18N_EDIT) $(I18N_DIR)/en.po opera < $< > $@
+$(OPERA_ROOT)/$(CONFIG_JS): $(I18N_DIR)/en.po $(CONFIG_JS)
+	$(I18N_EDIT) $< opera < $(CONFIG_JS) > $@
 
 $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
 	cp $< $@
 
-$(I18N_LANGUAGES:%=$(OPERA_ROOT)/locales/%/includes/$(SRC_USERJS)): $(SRC_USERJS)
-	mkdir -p `dirname $@`
-	$(I18N_EDIT) $(I18N_DIR)/$(@:$(OPERA_ROOT)/locales/%/includes/$(SRC_USERJS)=%).po opera < $< > $@
-
-$(I18N_LANGUAGES:%=$(OPERA_ROOT)/locales/%/$(CONFIG_JS)): $(CONFIG_JS)
-	mkdir -p `dirname $@`
-	$(I18N_EDIT) $(I18N_DIR)/$(@:$(OPERA_ROOT)/locales/%/$(CONFIG_JS)=%).po opera < $< > $@
+$(OPERA_I18N_FILES): $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po) $(OPERA_I18N_SOURCES)
+	mkdir -p $(dir $@)
+	$(I18N_EDIT) $(I18N_DIR)/$(shell echo $@ | sed -e 's/.*locales\/\([^\/]*\)\/.*/\1/').po opera \
+          < $(shell basename $@) > $@
 
 $(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
@@ -149,15 +148,15 @@ $(CHROME_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
 	$(I18N_CHROME) < $< >> $@
 
 $(CHROME_ICON_FILES): $(ICON_SVG)
-	mkdir -p `dirname $@`
+	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png=%) -o $@
 
 $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%): $(CHROME_ROOT)/%: %
 	cp $< $@
 
-$(CHROME_I18N_FILES): $(CONFIG_JS)
-	mkdir -p `dirname $@`
-	@l=$(@:$(CHROME_ROOT)/_locales/%/messages.json=%);$(I18N_CHROME) i18n/$$l.po $@ < $< > /dev/null
+$(CHROME_I18N_FILES): $(CHROME_ROOT)/_locales/%/messages.json: i18n/%.po $(CONFIG_JS)
+	mkdir -p $(dir $@)
+	$(I18N_CHROME) $< $@ < $(CONFIG_JS) > /dev/null
 
 $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
