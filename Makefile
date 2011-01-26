@@ -1,49 +1,57 @@
-RSVG_CONVERT         = rsvg-convert
-ZIP                  = zip
-XAR                  = xar
-CHROME               = $(shell ./find_chrome.sh)
-OEX                  = pixplus.oex
-CRX                  = pixplus.crx
-SAFARIEXTZ           = pixplus.safariextz
-OEX_TMP_DIR          = .oex
-CRX_TMP_DIR          = .crx
-SAFARIEXTZ_TMP_DIR   = .safariextz
-BUILD_OEX            = $(shell which "$(ZIP)" >/dev/null && echo yes || echo no)
-BUILD_CRX            = $(shell which "$(CHROME)" >/dev/null && echo yes || echo no)
-BUILD_SAFARIEXTZ     = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+RSVG_CONVERT            = rsvg-convert
+ZIP                     = zip
+XAR                     = xar
+CHROME                  = $(shell ./find_chrome.sh)
+OEX                     = pixplus.oex
+CRX                     = pixplus.crx
+SAFARIEXTZ              = pixplus.safariextz
+OEX_TMP_DIR             = .oex
+CRX_TMP_DIR             = .crx
+SAFARIEXTZ_TMP_DIR      = .safariextz
+BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null && echo yes || echo no)
+BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null && echo yes || echo no)
+BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
-CONFIG_JSON          = config.json
-CONFIG_JS            = config.js
-GREASEMONKEY_JS      = pixplus.user.js
-ICON_SVG             = pixplus.svg
-ICON_SIZE            = 16 32 48 64
-SRC_USERJS           = pixplus.js
-DIST_FILES           = common.js index.html index.js options.html options.css options.js
+CONFIG_JSON             = config.json
+CONFIG_JS               = config.js
+GREASEMONKEY_JS         = pixplus.user.js
+ICON_SVG                = pixplus.svg
+ICON_SIZE               = 16 32 48 64
+SRC_USERJS              = pixplus.js
+DIST_FILES              = common.js index.html index.js options.html options.css options.js
 
-I18N_DIR             = i18n
-I18N_LANGUAGES       = en ja
-I18N_UPDATE          = $(I18N_DIR)/update.py
-I18N_EDIT            = $(I18N_DIR)/edit.py
-I18N_CHROME          = $(I18N_DIR)/chrome.py
+I18N_DIR                = i18n
+I18N_LANGUAGES          = en ja
+I18N_UPDATE             = $(I18N_DIR)/update.py
+I18N_EDIT               = $(I18N_DIR)/edit.py
+I18N_CHROME             = $(I18N_DIR)/chrome.py
 
-VERSION              = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-DESCRIPTION          = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
+VERSION                 = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
+DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 
-OPERA_ROOT           = opera
-OPERA_CONFIG_XML     = $(OPERA_ROOT)/config.xml
-OPERA_ICON_DIR       = icons
-OPERA_ICON_FILES     = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
-OPERA_I18N_SOURCES   = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
-OPERA_I18N_FILES     = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
-OPERA_DIST_FILES     = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
+OPERA_ROOT              = opera
+OPERA_CONFIG_XML        = $(OPERA_ROOT)/config.xml
+OPERA_ICON_DIR          = icons
+OPERA_ICON_FILES        = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
+OPERA_I18N_SOURCES      = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
+OPERA_I18N_FILES        = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
+OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
 
-CHROME_ROOT          = chrome
-CHROME_SIGN_KEY      = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
-CHROME_MANIFEST_JSON = $(CHROME_ROOT)/manifest.json
-CHROME_ICON_DIR      = icons
-CHROME_ICON_FILES    = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
-CHROME_I18N_FILES    = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
-CHROME_DIST_FILES    = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
+CHROME_ROOT             = chrome
+CHROME_SIGN_KEY         = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
+CHROME_MANIFEST_JSON    = $(CHROME_ROOT)/manifest.json
+CHROME_ICON_DIR         = icons
+CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
+CHROME_I18N_FILES       = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
+CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
+
+SAFARI_ROOT             = safari
+SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
+SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
+SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
+SAFARI_CERTS            = $(SAFARI_ROOT)/sign/safari_cert.der $(SAFARI_ROOT)/sign/safari_ca1.der $(SAFARI_ROOT)/sign/safari_ca2.der
+SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
+SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%)
 
 ALL_TARGETS          =
 
@@ -53,9 +61,9 @@ endif
 ifeq ($(BUILD_CRX),yes)
 ALL_TARGETS         += $(CRX)
 endif
-#ifeq ($(BUILD_SAFARIEXTZ),yes)
-#ALL_TARGETS         += $(SAFARIEXTZ)
-#endif
+ifeq ($(BUILD_SAFARIEXTZ),yes)
+ALL_TARGETS         += $(SAFARIEXTZ)
+endif
 
 all: $(ALL_TARGETS)
 	echo $(ALL_TARGETS)
@@ -78,7 +86,7 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
-clean: clean-opera clean-chrome
+clean: clean-opera clean-chrome clean-safari
 	rm -f $(CONFIG_JSON) $(CONFIG_JS)
 
 # ================ Opera ================
@@ -166,3 +174,36 @@ $(CRX): $(CHROME_DIST_FILES)
 clean-chrome:
 	rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
 	rm -rf $(CRX_TMP_DIR) $(CHROME_ROOT)/$(CHROME_ICON_DIR) $(CHROME_ROOT)/_locales
+
+# ================ Safari ================
+
+$(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
+	sed -e 's/@VERSION@/$(VERSION)/' < $< > $@
+
+$(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
+	sed -e '/__SETTINGS__/,$$d' < $< > $@
+	python conf-parser.py safari < $(CONFIG_JSON) >> $@
+	sed -e '1,/__SETTINGS__/d' < $< >> $@
+
+$(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
+	cp $< $@
+
+$(SAFARI_ICON_FILES): $(ICON_SVG)
+	$(RSVG_CONVERT) $< -w $(@:$(SAFARI_ROOT)/Icon-%.png=%) -o $@
+
+$(SAFARIEXTZ): $(SAFARI_DIST_FILES)
+	rm -rf $(SAFARIEXTZ_TMP_DIR)
+	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
+           mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
+           cp $(SAFARI_ROOT)/$$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$$file; \
+         done
+	cd $(SAFARIEXTZ_TMP_DIR) && \
+          $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
+          : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
+          $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) && \
+          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
+          $(XAR) --inject-sig signature.dat -f ../$@
+
+clean-safari:
+	rm -f $(SAFARIEXTZ) $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ICON_FILES)
+	rm -rf $(SAFARIEXTZ_TMP_DIR)
