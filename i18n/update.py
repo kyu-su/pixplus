@@ -3,6 +3,7 @@
 import sys
 import os
 import re
+import time
 
 from common import *
 
@@ -32,18 +33,16 @@ for key in messages_keys:
   for idx in range(len(raw) / 2):
     raw[idx * 2 + 1] = unichr(int(raw[idx * 2 + 1], 16))
     pass
+  raw = ''.join(raw)
   p = ''
   l = ''
   if msg.has_key('line'):
-    for path in sys.argv[2:]:
-      if msg['line'].has_key(path):
-        l += '%s:%s ' % (path, ':'.join(map(str, msg['line'][path])))
-        pass
-      pass
+    l = ' '.join(map(lambda p:':'.join(map(str, p)), msg['line']))
   else:
     p = '# '
     pass
-  f.write(('# %s%s\n' % (l, ''.join(raw))).encode('utf-8'))
-  f.write('%smsgid=%s\n' % (p, msg['msgid']))
-  f.write('%smsgstr=%s\n\n' % (p, msg['msgstr']))
+  f.write('#: %s\n' % l)
+  f.write(('# %s\n' % raw).encode('utf-8'))
+  f.write('%smsgid %s\n' % (p, msg['msgid']))
+  f.write('%smsgstr %s\n\n' % (p, msg['msgstr']))
 f.close()

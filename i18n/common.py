@@ -10,14 +10,9 @@ def list_messages(path, target):
     if m:
       if isinstance(target, tuple):
         if target[0].has_key(m.group(1)):
-          l = target[0][m.group(1)]['line']
-          if l.has_key(path):
-            l[path].append(line_number)
-          else:
-            l[path] = [line_number]
-            pass
+          target[0][m.group(1)]['line'].append((path, line_number))
         else:
-          target[0][m.group(1)] = {'line': {path: [line_number]}, 'msgid': m.group(1), 'msgstr': m.group(1)}
+          target[0][m.group(1)] = {'line': [(path, line_number)], 'msgid': m.group(1), 'msgstr': m.group(1)}
           target[1].append(m.group(1))
           pass
       elif callable(target):
@@ -34,7 +29,7 @@ def list_messages(path, target):
 def parse_po(path, target = {}):
   f = open(path, 'r')
   for line in f:
-    m = re.match(r'(msgid|msgstr)=(".*")', line)
+    m = re.match(r'(msgid|msgstr) (".*")', line)
     if m:
       if m.group(1) == 'msgid':
         msgid = m.group(2)
