@@ -88,6 +88,8 @@ $(CONFIG_JS): $(SRC_USERJS)
 $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE)
 	$(I18N_UPDATE) $@ $<
 
+po: $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
+
 clean: clean-opera clean-chrome clean-safari
 	rm -f $(CONFIG_JSON) $(CONFIG_JS)
 
@@ -102,7 +104,7 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
-$(OPERA_ROOT)/includes/$(SRC_USERJS): $(I18N_DIR)/en.po $(SRC_USERJS)
+$(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS)
 	mkdir -p $(dir $@)
 	$(I18N_EDIT) $< opera < $(SRC_USERJS) > $@
 
@@ -110,13 +112,13 @@ $(OPERA_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
 
-$(OPERA_ROOT)/$(CONFIG_JS): $(I18N_DIR)/en.po $(CONFIG_JS)
+$(OPERA_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
 	$(I18N_EDIT) $< opera < $(CONFIG_JS) > $@
 
 $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
 	cp $< $@
 
-$(OPERA_I18N_FILES): $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po) $(OPERA_I18N_SOURCES)
+$(OPERA_I18N_FILES): $(OPERA_I18N_SOURCES)
 	mkdir -p $(dir $@)
 	$(I18N_EDIT) $(I18N_DIR)/$(shell echo $@ | sed -e 's/.*locales\/\([^\/]*\)\/.*/\1/').po opera \
           < $(shell basename $@) > $@
@@ -155,9 +157,9 @@ $(CHROME_ICON_FILES): $(ICON_SVG)
 $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%): $(CHROME_ROOT)/%: %
 	cp $< $@
 
-$(CHROME_I18N_FILES): $(CHROME_ROOT)/_locales/%/messages.json: i18n/%.po $(CONFIG_JS)
+$(CHROME_I18N_FILES): $(CONFIG_JS)
 	mkdir -p $(dir $@)
-	$(I18N_CHROME) $< $@ < $(CONFIG_JS) > /dev/null
+	$(I18N_CHROME) $(I18N_DIR)/$(@:$(CHROME_ROOT)/_locales/%/messages.json=%).po $@ < $(CONFIG_JS) > /dev/null
 
 $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
