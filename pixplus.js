@@ -1786,7 +1786,8 @@
                '  background-color:white;z-index:10010;opacity:0;padding-bottom:1px;}' +
                '#pp-popup #pp-header:hover #pp-caption{opacity:' + conf.popup.caption_opacity + ';}' +
                '#pp-popup #pp-header #pp-caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
-               '#pp-popup #pp-caption .pp-separator{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
+               '#pp-popup #pp-caption .pp-separator{border-top:1px solid gray;margin-top:1px;padding-top:1px;}' +
+               '#pp-popup #pp-caption .pp-separator-b{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
                '#pp-popup #pp-comment-wrap{overflow:auto;line-height:1.2em;}' +
                '#pp-popup #tag_area > * + *{margin-left:0.6em;}' +
                '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
@@ -2188,7 +2189,7 @@
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                       bind(this.edit_bookmark, this));
      this.caption               = $c('div',     this.header,        'pp-caption');
-     this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator');
+     this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator-b');
      this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
      this.comment               = $c('div',     this.comment_wrap,  'pp-comment');
      this.viewer_comments       = $c('div',     this.comment_wrap,  'pp-viewer-comments');
@@ -2196,9 +2197,9 @@
      this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
      this.viewer_comments_a     = $c('div',     this.viewer_comments_w, 'one_comment_area');
      this.tag_edit              = $c('div',     this.comment_wrap,  'tag_edit');
-     this.tags                  = $c('div',     this.caption,       'tag_area', 'pp-separator');
+     this.tags                  = $c('div',     this.caption,       'tag_area');
      this.rating                = $c('div',     this.caption,       'pp-rating', 'pp-separator works_area');
-     this.post_cap              = $c('div',     this.caption,       'pp-post-cap');
+     this.post_cap              = $c('div',     this.caption,       'pp-post-cap', 'pp-separator');
      this.a_img                 = $c('img',     this.post_cap,      'pp-author-img');
      this.a_status              = $c('span',    this.post_cap,      'pp-author-status');
      this.date_wrap             = $c('span',    this.post_cap,      'pp-date-wrap');
@@ -2700,20 +2701,20 @@
      this.tags.style.display = 'none';
      if (loader.text.match(/<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i)) {
        var html = '';
-       each(
-         RegExp.$1.replace(/\s*\n\s*/g, '').split('\u3000'),
-         function(t) {
-           t = trim(t);
-           if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
-         });
-       if (html && html.match(/<a /i)) {
+       each(RegExp.$1.replace(/\s*\n\s*/g, '').split('\u3000'),
+            function(t) {
+              t = trim(t);
+              if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
+            });
+       if (!html.match(/<a /i)) html = '';
+       // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
+       if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
+           loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
+         html += '<a href="javascript:void(0)" id="pp-tag-edit-btn" onclick="startTagEdit()">[E]</a>';
+         this.tag_edit_enabled = true;
+       }
+       if (html) {
          html = html.replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
-         // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
-         if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
-             loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
-           html += '<a href="javascript:void(0)" id="pp-tag-edit-btn" onclick="startTagEdit()">[E]</a>';
-           this.tag_edit_enabled = true;
-         }
          this.tags.innerHTML = html;
          this.tags.style.display = '';
        }
