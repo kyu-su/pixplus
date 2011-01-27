@@ -16,7 +16,7 @@
  * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
  * 閲覧できないマンガがあったバグを修正。
  * ズーム機能でFirefoxをサポート。
- * 企画目録一覧ページに対応。
+ * 企画目録関連ページに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -85,7 +85,7 @@
  * ブックマーク詳細ページ
  * 閲覧・評価・コメント履歴
  * イベント(詳細/参加者)
- * 企画目録一覧(新着/注目)
+ * 企画目録(新着/注目/まとめ/関連)
 
  * 2009/10/22 http://dev.pixiv.net/archives/892022.html
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
@@ -1277,6 +1277,21 @@
        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
                     xpath_cap: './li/text()[preceding-sibling::a/img]'},
                    unpack_captions);
+       if (options.id) {
+         // http://www.pixiv.net/user_event.php?id=23
+         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
+                      xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+                      xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'});
+       }
+     } else if (window.location.pathname.match(/^\/user_event_related\.php/)) {
+       // http://www.pixiv.net/user_event_related.php?id=23
+       write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
+       add_gallery({xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
+                    xpath_cap: './li/p[preceding-sibling::a/img]'},
+                   function(col) { unpack_captions(col, './li/a/p'); });
+       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
+                    xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+                    xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'});
      }
 
      // 汎用
@@ -4295,10 +4310,12 @@
      }
    }
    function write_css(source) {
-     var css = $c('style');
-     css.setAttribute('type', 'text/css');
-     css.textContent = source;
-     window.document.body.appendChild(css);
+     if (!arguments.callee.css) {
+       arguments.callee.css = $c('style');
+       arguments.callee.css.setAttribute('type', 'text/css');
+       window.document.body.appendChild(arguments.callee.css);
+     }
+     arguments.callee.css.textContent += source;
    }
 
    function bind(func, obj) {
