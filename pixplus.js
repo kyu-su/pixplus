@@ -1770,7 +1770,7 @@
                '#pp-conf-table input{box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
                '.pp-conf-section{display:block;color:#333333;text-decoration:none;font-weight:bold;margin-top:1em;}' +
                '.pp-conf-content{margin-left:1em;}' +
-               '#pp-conf-root button{display:block !important;white-space:pre !important;}' +
+               '#pp-conf-root button{display:block !important;word-break:keep-all !important;}' +
                '#pp-conf-root textarea{width:100%;}' +
                '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;padding:0px;}' +
                '#pp-conf-bookmark-tag_aliases{width:100%;}' +

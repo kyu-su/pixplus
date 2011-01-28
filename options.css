@@ -18,7 +18,7 @@ tr.pp-conf-entry-odd{background-color:#efefef;}
 #pp-conf-bookmark-tag_order{display:block;width:60%;}
 
 #pp-conf-bookmark-tag_aliases{width:100%;}
-#pp-conf-bookmark-tag_aliases button{display:block;}
+#pp-conf-bookmark-tag_aliases button{display:block;word-break:keep-all;}
 #pp-conf-bookmark-tag_aliases input{display:block;width:100%;}
 #pp-conf-bookmark-tag_aliases .pp-conf-cell-remove{width:0;}
 #pp-conf-bookmark-tag_aliases .pp-conf-cell-tag{width:30%;}
