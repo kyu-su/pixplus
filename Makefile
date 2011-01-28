@@ -14,7 +14,6 @@ BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&
 
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
-GREASEMONKEY_JS         = pixplus.user.js
 ICON_SVG                = pixplus.svg
 ICON_SIZE               = 16 32 48 64
 SRC_USERJS              = pixplus.js
@@ -28,6 +27,8 @@ I18N_CHROME             = $(I18N_DIR)/chrome.py
 
 VERSION                 = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
+
+GREASEMONKEY_JS         = pixplus.user.js
 
 OPERA_ROOT              = opera
 OPERA_CONFIG_XML        = $(OPERA_ROOT)/config.xml
@@ -53,7 +54,7 @@ SAFARI_CERTS            = $(SAFARI_ROOT)/sign/safari_cert.der $(SAFARI_ROOT)/sig
 SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
 SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%)
 
-ALL_TARGETS          =
+ALL_TARGETS             = $(GREASEMONKEY_JS)
 
 ifeq ($(BUILD_OEX),yes)
 ALL_TARGETS         += $(OEX)
@@ -85,13 +86,16 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
+$(GREASEMONKEY_JS): $(SRC_USERJS)
+	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
+
 $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE)
 	$(I18N_UPDATE) $@ $<
 
 po: $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 
 clean: clean-opera clean-chrome clean-safari
-	rm -f $(CONFIG_JSON) $(CONFIG_JS)
+	rm -f $(CONFIG_JSON) $(CONFIG_JS) $(GREASEMONKEY_JS)
 
 # ================ Opera ================
 

@@ -615,16 +615,21 @@
          var othis = this;
          var success = obj.success;
          obj.success = function() {
-           success.apply(othis, [].slice.apply(arguments));
-           if (Popup.instance && Popup.instance.has_qrate) {
-             if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-             each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                  function(item) {
-                    if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
-                      var value = $x('following-sibling::div', item);
-                      if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
-                    }
-                  });
+           try {
+             success.apply(othis, [].slice.apply(arguments));
+             if (Popup.instance && Popup.instance.has_qrate) {
+               if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+               each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
+                    function(item) {
+                      if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
+                        var value = $x('following-sibling::div', item);
+                        if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                      }
+                    });
+             }
+           } catch(ex) {
+             alert('Error!\nCheck referer setting.');
+             throw ex;
            }
          };
          return _ajax.apply(this, [obj]);
