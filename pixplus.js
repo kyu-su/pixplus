@@ -105,6 +105,58 @@
      } else {
        func(unsafeWindow || window, window);
      }
+   } else if (String(window) =='[object ChromeWindow]') {
+     function log(msg) {
+       var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+         .getService(Components.interfaces.nsIConsoleService);
+       consoleService.logStringMessage(msg);
+     }
+     (function() {
+        function load(window, url) {
+          var safeWindow = new XPCNativeWrapper(window);
+          var sandbox = new Components.utils.Sandbox(safeWindow);
+          sandbox.window = window;
+          sandbox.document = window.document;
+          sandbox.safeWindow = safeWindow;
+          sandbox.__proto__ = sandbox.window;
+          try {
+            sandbox_eval('(' + func.toString() + ')(this.window, this.safeWindow)', url, sandbox);
+          } catch(ex) {
+            alert(ex);
+          }
+        }
+        function sandbox_eval(code, codebase, sandbox) {
+	  if (Components.utils && Components.utils.Sandbox) {
+	    // DP beta+
+	    Components.utils.evalInSandbox(code, sandbox);
+	  } else if (Components.utils && Components.utils.evalInSandbox) {
+	    // DP alphas
+	    Components.utils.evalInSandbox(code, codebase, sandbox);
+	  } else if (Sandbox) {
+	    // 1.0.x
+	    evalInSandbox(code, sandbox, codebase);
+	  } else {
+	    throw new Error("Could not create sandbox.");
+	  }
+        }
+        window.addEventListener(
+          'load',
+          function() {
+	    var appcontent = window.document.getElementById('appcontent');
+	    if (appcontent) {
+              appcontent.addEventListener(
+                'DOMContentLoaded',
+                function(ev) {
+                  var window = ev.target.defaultView.window;
+	          if (window.wrappedJSObject) window = window.wrappedJSObject;
+	          var location = new XPCNativeWrapper(window, 'location').location;
+                  var hostname = new XPCNativeWrapper(location, 'hostname').hostname; /* WARN */
+                  var href = new XPCNativeWrapper(location, 'href').href; /* WARN */
+                  if (hostname == 'www.pixiv.net') load(window, href);
+                }, true);
+            }
+          }, false);
+      })();
    } else {
      (function(func) {
         if (userjs) {
@@ -664,7 +716,7 @@
                 $ev(btn).click(
                   function() {
                     geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                           function() { safeWindow.alert('Error!'); }, true);
+                           function() { alert('Error!'); }, true);
                   });
               });
        }
@@ -1347,7 +1399,7 @@
               }
             };
             ir.prototype.error = function(msg) {
-              safeWindow.alert(msg);
+              alert(msg);
               if (_error) _error.apply(this, arguments);
             };
           }
@@ -1871,7 +1923,7 @@
      if (conf.stacc_link) {
        var stacc_anc;
        if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
-         safeWindow.alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
+         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
        } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
          if (conf.stacc_link == 'all') {
            stacc_anc.href = '/stacc/p/all';
@@ -1883,7 +1935,7 @@
 
      if (conf.default_manga_type) {
        if (['scroll', 'slide'].indexOf(conf.default_manga_type) < 0) {
-         safeWindow.alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
+         alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
        } else {
          // http://www.pixiv.net/member_illust.php?mode=manga&illust_id=00000000&type=scroll
          each(
@@ -1919,13 +1971,13 @@
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
                 } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
-                  safeWindow.alert(RegExp.$1);
+                  alert(RegExp.$1);
                 } else {
-                  safeWindow.alert('Error!');
+                  alert('Error!');
                 }
               };
               xhr.onerror = function() {
-                safeWindow.alert('Error!');
+                alert('Error!');
               };
               each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
               xhr.send(create_post_data(form));
@@ -2818,13 +2870,13 @@
                     submit.removeAttribute('disabled');
                   };
                   xhr.onerror = function() {
-                    safeWindow.alert('Error!');
+                    alert('Error!');
                   };
                   xhr.send(create_post_data(form));
                   comment.setAttribute('disabled', '');
                   submit.setAttribute('disabled', '');
                 } else {
-                  safeWindow.alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+                  alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
                 }
               }, false);
 
@@ -3020,7 +3072,7 @@
          this.olc_next.style.height = this.img_div.offsetHeight + 'px';
        }
      }
-     //safeWindow.alert([de.clientWidth, this.root_div.offsetWidth]);
+     //alert([de.clientWidth, this.root_div.offsetWidth]);
      this.root_div.style.left = ((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
      this.root_div.style.top  = ((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
    };
@@ -3126,7 +3178,7 @@
                                self.reload_viewer_comments();
                              },
                              function() {
-                               safeWindow.alert('Error!');
+                               alert('Error!');
                              },
                              true);
                     });
@@ -4138,7 +4190,7 @@
      var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
      if (conf.debug && ret) {
        var attr_f = ret.getAttribute(attr);
-       if (attr_f != url) safeWindow.alert('New one?\n' + attr_f);
+       if (attr_f != url) alert('New one?\n' + attr_f);
      }
      return ret;
    }
@@ -4361,6 +4413,10 @@
        res += encodeURIComponent(name) + '=' + encodeURIComponent(data[name]);
      }
      return res;
+   }
+
+   function alert() {
+     safeWindow.alert.apply(safeWindow, [].slice.apply(arguments));
    }
 
    // loading => interactive => complete

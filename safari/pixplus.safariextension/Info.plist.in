@@ -52,6 +52,6 @@
 	<key>Update Manifest URL</key>
 	<string>http://crckyl.ath.cx:8088/pixplus/update.php?browser=safari&amp;version=@VERSION@</string>
 	<key>Website</key>
-	<string>http://my.opera.com/crckyl</string>
+	<string>@WEBSITE@</string>
 </dict>
 </plist>
