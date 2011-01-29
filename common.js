@@ -1,7 +1,3 @@
-conf_schema.bookmark = {
-  tag_order: [''],
-  tag_aliases: ['']
-};
 conf.u = true;
 if (window.chrome || window.safari) conf.l.shift();
 conf.l.push(

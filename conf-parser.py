@@ -13,6 +13,8 @@ if sys.argv[1] == 'safari':
       <key>Type</key>
       <string>%(type_safari)s</string>%(more)s
     </dict>'''
+elif sys.argv[1] == 'firefox':
+  format = 'pref("extensions.pixplus.%(name)s", %(value_firefox)s);'
 
 def print_conf(conf, prefix):
   for key in sorted(conf.keys()):
@@ -23,6 +25,7 @@ def print_conf(conf, prefix):
       value = conf[key][0]
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % value
+      value_firefox = json.dumps(value)
       more = ''
       if len(conf[key]) > 2:
         type_safari = 'PopUpButton'
@@ -57,10 +60,14 @@ def print_conf(conf, prefix):
         type_safari = 'CheckBox'
         value_safari = '<%s/>' % value
         pass
-      print (format % {'name':         name,
-                       'value':        value,
-                       'type_safari':  type_safari,
-                       'value_safari': value_safari,
-                       'more':         more}).encode('utf-8')
+      if isinstance(value, int) or isinstance(value, float):
+        value_firefox = '"%s"' % value
+        pass
+      print (format % {'name':          name,
+                       'value':         value,
+                       'type_safari':   type_safari,
+                       'value_safari':  value_safari,
+                       'value_firefox': value_firefox,
+                       'more':          more}).encode('utf-8')
 
 print_conf(json.loads(sys.stdin.read()), 'conf')

@@ -118,9 +118,34 @@
           sandbox.window = window;
           sandbox.document = window.document;
           sandbox.safeWindow = safeWindow;
+
+          var pref = Components.classes['@mozilla.org/preferences-service;1']
+            .getService(Components.interfaces.nsIPrefBranch);
+          function check_key(key) {
+            if (!(key && key.constructor === String && key.match(/^[a-z_]+$/))) {
+              throw 'invalid argument';
+            }
+            return 'extensions.pixplus.' + key;
+          }
+          sandbox.storage = {
+            getBoolPref: function(key) {
+              return pref.getBoolPref(check_key(key));
+            },
+            setBoolPref: function(key, val) {
+              return pref.setBoolPref(check_key(key), !!val);
+            },
+            getCharPref: function(key) {
+              return pref.getCharPref(check_key(key));
+            },
+            setCharPref: function(key, val) {
+              return pref.setCharPref(check_key(key), String(val));
+            }
+          };
+
           sandbox.__proto__ = sandbox.window;
           try {
-            sandbox_eval('(' + func.toString() + ')(this.window, this.safeWindow)', url, sandbox);
+            var src = '(' + func.toString() + ')(this.window, this.safeWindow, {storage: this.storage})';
+            sandbox_eval(src, url, sandbox);
           } catch(ex) {
             alert(ex);
           }
@@ -271,6 +296,10 @@
      "extension": {
        "show_toolbar_icon":    [true, "\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b"],
        "show_config_ui":       [false, "\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"]
+     },
+     "bookmark": {
+       "tag_order": ["", ""],
+       "tag_aliases": [""]
      }
      /* __CONFIG_END__ */
    };
@@ -393,6 +422,11 @@
           path:   ['conf', 'popup'],
           schema: conf_schema.popup,
           conf:   conf.popup, /* __REMOVE__ */
+          keys:   []},
+         {name:   'bookmark',
+          label:  'Bookmark',
+          path:   ['conf', 'bookmark'],
+          schema: conf_schema.bookmark,
           keys:   []}],
      map: {},
      conv: {
@@ -479,7 +513,10 @@
             });
      },
      init: function() {
-       each(LS.l, function(sec) { LS.init_section(sec); });
+       each(LS.l,
+            function(sec) {
+              if (sec.name != 'bookmark') LS.init_section(sec);
+            });
        if (LS.u) {
          var order = LS.get('bookmark', 'tag_order');
          if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
@@ -504,10 +541,7 @@
           LS.map[sec.name] = sec;
           for(var key in sec.schema) {
             var type = typeof sec.schema[key][0];
-            if (LS.conv[type]) {
-              sec.schema[key].type = type;
-              sec.keys.push(key);
-            }
+            if (LS.conv[type]) sec.keys.push(key);
           }
           sec.keys.sort();
         });
@@ -516,6 +550,7 @@
      if (!LS.u) return;
      LS.each(
        function(sec, key) {
+         if (!sec.conf) return;
          var val = sec.conf[key];
          if (val !== LS.get(sec.name, key)) LS.set(sec.name, key, val);
        });
@@ -525,29 +560,52 @@
 
    (function() {
       if (_extension_data) {
-        LS.u = true;
-        LS.get = function(s, n) {
-          return _extension_data.conf[s + '_' + n];
-        };
-        LS.set = function(s, n, v) {
-          var data = { section: s, key: n, value: v };
-          if (window.opera) {
-	    opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
-          } else {
-            var ev = window.document.createEvent('Event');
-            ev.initEvent('pixplusConfigSet', true, true);
-            ev.currentTarget = data;
-            window.document.dispatchEvent(ev);
-          }
-        };
-        LS.remove = function(s, n) {
-          var data = { section: s, key: n };
-          if (window.opera) {
-	    opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
-          } else {
-          }
-        };
+        if (_extension_data.storage) {
+          // firefox
+          LS.u = true;
+          LS.get = function(s, n) {
+            var key = LS.map[s].path.join('_') + '_' + n, val;
+            var def = LS.map[s].schema[n][0];
+            if (def.constructor === Boolean) {
+              val = _extension_data.storage.getBoolPref(key);
+            } else {
+              val = LS.get_conv(s, n)[0](_extension_data.storage.getCharPref(key));
+            }
+            return (typeof val === 'undefined' || val === null || val.constructor !== def.constructor
+                    ? (LS.map[s] ? LS.map[s].schema[n][0] : '')
+                    : val);
+          };
+          LS.set = function(s, n, v) {
+          };
+          LS.remove = function(s, n) {
+          };
+        } else {
+          // opera/chrome/safari
+          LS.u = true;
+          LS.get = function(s, n) {
+            return _extension_data.conf[s + '_' + n];
+          };
+          LS.set = function(s, n, v) {
+            var data = { section: s, key: n, value: v };
+            if (window.opera) {
+	      opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
+            } else {
+              var ev = window.document.createEvent('Event');
+              ev.initEvent('pixplusConfigSet', true, true);
+              ev.currentTarget = data;
+              window.document.dispatchEvent(ev);
+            }
+          };
+          LS.remove = function(s, n) {
+            var data = { section: s, key: n };
+            if (window.opera) {
+	      opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
+            } else {
+            }
+          };
+        }
       } else {
+        // opera userjs/greasemonkey
         LS.u = !!window.localStorage;
         LS.get = function(s, n) {
           var value = window.localStorage.getItem(create_name(s, n));
@@ -1019,6 +1077,7 @@
        var obj = window.JSON.parse(export_input.value);
        st.each(
          function(sec, key) {
+           if (sec.name == 'bookmark') return;
            var val = obj[sec.name + '_' + key];
            if (typeof val !== 'undefined' && val !== null) {
              st.set(sec.name, key, val);
@@ -1824,6 +1883,7 @@
                '.pp-conf-content{margin-left:1em;}' +
                '#pp-conf-root button{display:block !important;word-break:keep-all !important;}' +
                '#pp-conf-root textarea{width:100%;}' +
+               '.pp-conf-entry > td:first-child, .pp-conf-section-custom > td:first-child{padding-left:2em;}' +
                '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;width:100%;padding:0px;}' +
                '#pp-conf-bookmark-tag_aliases{width:100%;}' +
                '#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases{width:100%;}' +

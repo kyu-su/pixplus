@@ -63,10 +63,11 @@ FIREFOX_ROOT            = firefox
 FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
 FIREFOX_CHROME_MANIFEST = $(FIREFOX_ROOT)/chrome.manifest
 FIREFOX_OVERLAY_XUL     = $(FIREFOX_ROOT)/content/pixplus.xul
+FIREFOX_DEFAULTS_PREFS  = $(FIREFOX_ROOT)/defaults/preferences/pixplus.js
 FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
-FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_ICON_FILES)
+FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ICON_FILES)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
 WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
@@ -267,6 +268,10 @@ $(FIREFOX_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png=%) -o $@
 
+$(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
+	mkdir -p $(dir $@)
+	python conf-parser.py firefox < $(CONFIG_JSON) >> $@
+
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
@@ -280,4 +285,4 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 
 clean-firefox:
 	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_INSTALL_RDF) $(FIREFOX_DEBUG_LOADER)
-	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
+	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
