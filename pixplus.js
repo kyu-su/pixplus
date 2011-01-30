@@ -112,6 +112,9 @@
        consoleService.logStringMessage(msg);
      }
      (function() {
+        function open_options() {
+          window.openDialog('chrome://pixplus/content/options.xul');
+        }
         function load(window, url) {
           var safeWindow = new XPCNativeWrapper(window);
           var sandbox = new Components.utils.Sandbox(safeWindow);
@@ -141,10 +144,12 @@
               return pref.setCharPref(check_key(key), String(val));
             }
           };
+          sandbox.open_options = open_options;
 
           sandbox.__proto__ = sandbox.window;
           try {
-            var src = '(' + func.toString() + ')(this.window, this.safeWindow, {storage: this.storage})';
+            var data = '{storage: this.storage, open_options: this.open_options}';
+            var src = '(' + func.toString() + ')(this.window, this.safeWindow, ' + data + ')';
             sandbox_eval(src, url, sandbox);
           } catch(ex) {
             alert(ex);
@@ -1193,7 +1198,7 @@
    /* __CONFIG_UI_END__ */
 
    function init_config_ui() {
-     if (_extension_data && !_extension_data.base_uri &&
+     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options) &&
          !(window.opera && LS.u && LS.get('extension', 'show_config_ui'))) return;
 
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
@@ -1227,8 +1232,12 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data && _extension_data.base_uri) {
-             window.open(_extension_data.base_uri + 'options.html');
+           if (_extension_data && (_extension_data.base_uri || _extension_data.open_options)) {
+             if (_extension_data.open_options) {
+               _extension_data.open_options();
+             } else {
+               window.open(_extension_data.base_uri + 'options.html');
+             }
            } else {
              toggle();
            }
