@@ -304,7 +304,7 @@
      },
      "bookmark": {
        "tag_order": ["", ""],
-       "tag_aliases": [""]
+       "tag_aliases": ["", ""]
      }
      /* __CONFIG_END__ */
    };
@@ -989,7 +989,7 @@
      tocont.appendChild(tag_order_textarea);
 
      var tacont = make_custom_section('Tag alias');
-     tacont.textContent = msg_filter("\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3067\u8907\u6570\u8a18\u8ff0\u3002\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6642\u306e\u30bf\u30b0\u306e\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3002");
+     tacont.textContent = msg_filter("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002");
      var tag_alias_table = window.document.createElement('table');
      tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
      tacont.appendChild(tag_alias_table);

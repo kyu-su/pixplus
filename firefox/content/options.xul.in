@@ -4,4 +4,16 @@
 <prefwindow id="pixplus.pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
             title="pixplus" bottons="accept,cancel">
   <!-- __PREFERENCES__ -->
+  <prefpane id="tags" label="Tags">
+    <preferences>
+      <preference id="extensions.pixplus.conf_bookmark_tag_order" name="extensions.pixplus.conf_bookmark_tag_order" type="string"/>
+      <preference id="extensions.pixplus.conf_bookmark_tag_aliases" name="extensions.pixplus.conf_bookmark_tag_aliases" type="string"/>
+    </preferences>
+    <box orient="vertical" flex="1">
+      <description style="white-space:pre;">&__MSG_5b23e5a021fff50d9240aacd354348d8e60ff3ac__;</description>
+      <textbox multiline="true" preference="extensions.pixplus.conf_bookmark_tag_order" flex="1"/>
+      <description style="white-space:pre;">&__MSG_39e3ea78d60b82bbc6a138cf465a4416c725a94c__;</description>
+      <textbox multiline="true" preference="extensions.pixplus.conf_bookmark_tag_aliases" flex="1"/>
+    </box>
+  </prefpane>
 </prefwindow>

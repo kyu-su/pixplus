@@ -97,8 +97,7 @@ all: $(ALL_TARGETS)
 $(CONFIG_JSON): $(SRC_USERJS)
 	echo '{' > $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	echo ',"bookmark_tag_order":["",""],' >> $@
-	echo '"bookmark_tag_aliases":["",""]}' >> $@
+	echo '}' >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
 	echo '// auto generated code' > $@
@@ -143,8 +142,6 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)/$$size.png\" />" >> $@; done
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
 	python conf-parser.py opera < $(CONFIG_JSON) >> $@
-	echo '  <preference name="conf_bookmark_tag_order" value="" />' >> $@
-	echo '  <preference name="conf_bookmark_tag_aliases" value="" />' >> $@
 	sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS) warn

@@ -4,6 +4,7 @@ import sys
 import os
 import json
 import hashlib
+import re
 import cgi
 
 from common import *
@@ -44,7 +45,8 @@ if len(sys.argv) > 3:
     json_fp.write(json.dumps(messages_json))
   else:
     for key in messages_json.keys():
-      json_fp.write(('<!ENTITY %s "%s">\n' % (key, cgi.escape(messages_json[key]['message']))).encode('utf-8'))
+      msg = re.sub(r'&lt;br&gt;', "&#13;&#10;", cgi.escape(messages_json[key]['message']))
+      json_fp.write(('<!ENTITY %s "%s">\n' % (key, msg)).encode('utf-8'))
       pass
     pass
   json_fp.close()
