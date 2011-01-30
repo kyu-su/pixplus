@@ -1,11 +1,5 @@
 conf.u = true;
 if (window.chrome || window.safari) conf.l.shift();
-conf.l.push(
-  {name:   'bookmark',
-   label:  'Bookmark',
-   path:   ['conf', 'bookmark'],
-   schema: conf_schema.bookmark,
-   keys:   []});
 conf.s = (window.opera
           ? widget.preferences
           : (window.chrome
@@ -27,11 +21,4 @@ conf.remove = function(s, n) {
   //conf.s.removeItem(conf.map[s].path.join('_') + '_' + n);
   conf.set(s, n, conf.map[s].schema[n][0]);
 };
-conf.l.forEach(
-  function(sec) {
-    conf.map[sec.name] = sec;
-    for(var key in sec.schema) {
-      conf.conv[typeof sec.schema[key][0]] && sec.keys.push(key);
-    }
-    sec.keys.sort();
-  });
+conf.init_map();

@@ -17,5 +17,6 @@
     <em:creator>wowo</em:creator>
     <em:homepageURL>@WEBSITE@</em:homepageURL>
     <em:iconURL>chrome://pixplus/content/icons/64.png</em:iconURL>
+    <em:optionsURL>chrome://pixplus/content/options.xul</em:optionsURL>
   </Description>      
 </RDF>

@@ -439,13 +439,23 @@
                    },
                    String]
      },
+     init_map: function() {
+       for(var i = 0; i < this.l.length; ++i) {
+         var sec = this.l[i];
+         this.map[sec.name] = sec;
+         for(var key in sec.schema) {
+           this.conv[typeof sec.schema[key][0]] && sec.keys.push(key);
+         }
+         sec.keys.sort();
+       }
+     },
      get_conv: function(s, n) {
        return this.map[s] ? this.conv[typeof this.map[s].schema[n][0]] : this.conv['string'];
      },
      each: function(cb_key, cb_sec, cb_sec_after) {
        for(var i = 0; i < this.l.length; ++i) {
          var sec = this.l[i];
-         if (cb_sec) cb_sec(sec);
+         if (cb_sec && cb_sec(sec)) continue;
          for(var j = 0; j < sec.keys.length; ++j) {
            cb_key(sec, sec.keys[j]);
          }
@@ -536,15 +546,7 @@
      }
    };
    if (!(window.opera && opera.extension)) LS.l.shift();
-   each(LS.l,
-        function(sec) {
-          LS.map[sec.name] = sec;
-          for(var key in sec.schema) {
-            var type = typeof sec.schema[key][0];
-            if (LS.conv[type]) sec.keys.push(key);
-          }
-          sec.keys.sort();
-        });
+   LS.init_map();
 
    pp.save_conf = function() {
      if (!LS.u) return;

@@ -1,6 +1,7 @@
 RSVG_CONVERT            = rsvg-convert
 ZIP                     = zip
 XAR                     = xar
+JS                      = js
 CHROME                  = $(shell ./find_chrome.sh)
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
@@ -13,7 +14,7 @@ XPI_TMP_DIR             = .xpi
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null && echo yes || echo no)
 BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null && echo yes || echo no)
 BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
-BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null && echo yes || echo no)
+BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null && which "$(JS)" >/dev/null && echo yes || echo no)
 
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
@@ -64,10 +65,12 @@ FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
 FIREFOX_CHROME_MANIFEST = $(FIREFOX_ROOT)/chrome.manifest
 FIREFOX_OVERLAY_XUL     = $(FIREFOX_ROOT)/content/pixplus.xul
 FIREFOX_DEFAULTS_PREFS  = $(FIREFOX_ROOT)/defaults/preferences/pixplus.js
+FIREFOX_OPTIONS_XUL     = $(FIREFOX_ROOT)/content/options.xul
 FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
-FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ICON_FILES)
+FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
+FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ICON_FILES)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
 WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
@@ -96,7 +99,8 @@ $(CONFIG_JSON): $(SRC_USERJS)
 	echo '"bookmark_tag_aliases":["",""]}' >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
-	echo 'var conf_schema = {' > $@
+	echo '// auto generated code' > $@
+	echo 'var conf_schema = {' >> $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	echo '};' >> $@
 	echo 'var conf = {' >> $@
@@ -272,6 +276,11 @@ $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
 	mkdir -p $(dir $@)
 	python conf-parser.py firefox < $(CONFIG_JSON) >> $@
 
+$(FIREFOX_OPTIONS_XUL): $(FIREFOX_OPTIONS_XUL).in $(CONFIG_JS)
+	sed -e '/__PREFERENCES__/,$$d' < $< > $@
+	$(JS) -f $(FIREFOX_GEN_OPTIONS) < $(CONFIG_JS) >> $@
+	sed -e '1,/__PREFERENCES__/d' < $< >> $@
+
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
@@ -284,5 +293,5 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-firefox:
-	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_INSTALL_RDF) $(FIREFOX_DEBUG_LOADER)
+	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_INSTALL_RDF) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
