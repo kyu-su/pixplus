@@ -24,10 +24,11 @@ SRC_USERJS              = pixplus.js
 DIST_FILES              = common.js index.html index.js options.html options.css options.js
 
 I18N_DIR                = i18n
-I18N_LANGUAGES          = en ja
+I18N_LANGUAGES_FULL     = en-US ja-JP
+I18N_LANGUAGES          = $(foreach l,$(I18N_LANGUAGES_FULL),$(firstword $(subst -, ,$(l))))
 I18N_UPDATE             = $(I18N_DIR)/update.py
 I18N_EDIT               = $(I18N_DIR)/edit.py
-I18N_CHROME             = $(I18N_DIR)/chrome.py
+I18N_EDIT_HASH          = $(I18N_DIR)/edit_hash.py
 
 VERSION                 = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
@@ -70,7 +71,8 @@ FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
 FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
-FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ICON_FILES)
+FIREFOX_I18N_FILES      = $(I18N_LANGUAGES_FULL:%=$(FIREFOX_ROOT)/locale/%/entities.dtd)
+FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
 WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
@@ -193,7 +195,7 @@ $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
           < $< | tr -d '\r' >> $@
 
 $(CHROME_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
-	$(I18N_CHROME) < $< >> $@
+	$(I18N_EDIT_HASH) < $< >> $@
 
 $(CHROME_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
@@ -204,7 +206,7 @@ $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%): $(CHROME_ROOT)/%:
 
 $(CHROME_I18N_FILES): $(CONFIG_JS)
 	mkdir -p $(dir $@)
-	$(I18N_CHROME) $(I18N_DIR)/$(@:$(CHROME_ROOT)/_locales/%/messages.json=%).po $@ < $(CONFIG_JS) > /dev/null
+	$(I18N_EDIT_HASH) chrome $(I18N_DIR)/$(@:$(CHROME_ROOT)/_locales/%/messages.json=%).po $@ < $(CONFIG_JS) > /dev/null
 
 $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
@@ -268,6 +270,10 @@ $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
           < $< > $@
 
+$(FIREFOX_CHROME_MANIFEST): $(FIREFOX_CHROME_MANIFEST).in
+	cp $< $@
+	@for l in $(I18N_LANGUAGES_FULL); do echo "locale pixplus $$l locale/$$l/" >> $@; done
+
 $(FIREFOX_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png=%) -o $@
@@ -278,11 +284,17 @@ $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
 
 $(FIREFOX_OPTIONS_XUL): $(FIREFOX_OPTIONS_XUL).in $(CONFIG_JS)
 	sed -e '/__PREFERENCES__/,$$d' < $< > $@
-	$(JS) -f $(FIREFOX_GEN_OPTIONS) < $(CONFIG_JS) >> $@
+	$(I18N_EDIT_HASH) < $(CONFIG_JS) | $(JS) -f $(FIREFOX_GEN_OPTIONS) >> $@
 	sed -e '1,/__PREFERENCES__/d' < $< >> $@
 
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
+
+$(FIREFOX_I18N_FILES): $(CONFIG_JS)
+	mkdir -p $(dir $@)
+	$(I18N_EDIT_HASH) firefox \
+          $(I18N_DIR)/$(firstword $(subst -, ,$(@:$(FIREFOX_ROOT)/locale/%/entities.dtd=%))).po \
+          $@ < $(CONFIG_JS) > /dev/null
 
 $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
@@ -293,5 +305,5 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-firefox:
-	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_INSTALL_RDF) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_DEBUG_LOADER)
-	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
+	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_DEBUG_LOADER)
+	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR) $(FIREFOX_ROOT)/locale

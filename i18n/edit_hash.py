@@ -4,17 +4,21 @@ import sys
 import os
 import json
 import hashlib
+import cgi
 
 from common import *
 
+mode = 'chrome'
+if len(sys.argv) > 1: mode = sys.argv[1]
+
 messages = {}
-if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
-  parse_po(sys.argv[1], messages)
+if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):
+  parse_po(sys.argv[2], messages)
   pass
 
 messages_json = {}
-if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):
-  json_fp = open(sys.argv[2], 'r')
+if len(sys.argv) > 3 and os.path.exists(sys.argv[3]):
+  json_fp = open(sys.argv[3], 'r')
   messages_json = json.load(json_fp)
   json_fp.close()
   pass
@@ -34,8 +38,14 @@ for line in sys.stdin:
     pass
   pass
 
-if len(sys.argv) > 2:
-  json_fp = open(sys.argv[2], 'w')
-  json_fp.write(json.dumps(messages_json))
+if len(sys.argv) > 3:
+  json_fp = open(sys.argv[3], 'w')
+  if mode == 'chrome':
+    json_fp.write(json.dumps(messages_json))
+  else:
+    for key in messages_json.keys():
+      json_fp.write(('<!ENTITY %s "%s">\n' % (key, cgi.escape(messages_json[key]['message']))).encode('utf-8'))
+      pass
+    pass
   json_fp.close()
   pass

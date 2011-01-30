@@ -6,7 +6,7 @@ conf.each(
     var path = 'extensions.pixplus.' + sec.path.join('_') + '_' + key;
     print('      <preference id="' + path + '" name="' + path + '" type="' + type + '"/>');
 
-    var desc = escape(sec.schema[key][1]);
+    var desc = '&' + escape(sec.schema[key][1]) + ';';
     if (sec.ui) sec.ui += '\n';
     sec.ui += '        <row>\n';
     if (sec.schema[key][2]) {
@@ -19,7 +19,8 @@ conf.each(
           if (entry.constructor === String) {
             sec.ui += '              <menuitem label="' + entry + '" value="' + entry + '"/>\n';
           } else {
-            sec.ui += '              <menuitem label="' + escape(entry.title) + '" value="' + entry.value + '"/>\n';
+            var label = entry.title.match(/^__MSG_/) ? '&' + entry.title + ';' : entry.title;
+            sec.ui += '              <menuitem label="' + label + '" value="' + entry.value + '"/>\n';
           }
         });
       sec.ui += '            </menupopup>\n';
@@ -31,7 +32,6 @@ conf.each(
     } else {
       sec.ui += '          <checkbox label="' + key + '" preference="' + path + '" tooltiptext="' + desc + '"/>\n';
     }
-    //sec.ui += '          <box orient="horizontal" align="center"><label value="' + escape(sec.schema[key][1]) + '"/></box>\n';
     sec.ui += '        </row>';
   },
   function(sec) {
@@ -55,17 +55,3 @@ conf.each(
     print('    </grid>');
     print('  </prefpane>');
   });
-
-function escape(str) {
-  var res = '';
-  for(var i = 0; i < str.length; ++i) {
-    var c = str.charCodeAt(i);
-    var e = {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[str[i]];
-    if (c >= 0x20 && c < 0x80) {
-      res += e || str[i];
-    } else {
-      res += '&#' + c + ';';
-    }
-  }
-  return res;
-}
