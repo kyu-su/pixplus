@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        id="pixplus.tagalias"
+        title="pixplus - Tag alias"
+        buttons="accept,cancel"
+        ondialogaccept="return accept();"
+        ondialogcancel="return true;">
+  <box id="root" orient="vertical" flex="1">
+    <box orient="horizontal">
+      <box orient="horizontal" align="center"><label value="Tag:"/></box>
+      <textbox id="tag" flex="1"/>
+    </box>
+  </box>
+  <script src="tag_alias.js"/>
+</dialog>

@@ -106,11 +106,6 @@
        func(unsafeWindow || window, window);
      }
    } else if (String(window) =='[object ChromeWindow]') {
-     function log(msg) {
-       var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-         .getService(Components.interfaces.nsIConsoleService);
-       consoleService.logStringMessage(msg);
-     }
      (function() {
         function open_options() {
           window.openDialog('chrome://pixplus/content/options.xul');
@@ -220,12 +215,6 @@
            s.setAttribute('type', 'text/javascript');
            s.textContent = '(' + func.toString() + ')(window,window' + conf + ')';
            window.document.body.appendChild(s);
-
-           window.document.addEventListener(
-             'pixplusConfigSet',
-             function(ev) {
-               console.log(ev);
-             }, false);
          });
    }
  })

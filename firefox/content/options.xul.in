@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://pixplus/locale/entities.dtd">
-<prefwindow id="pixplus.pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
-            title="pixplus" bottons="accept,cancel">
+<prefwindow xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+            id="pixplus.options"
+            title="pixplus"
+            bottons="accept,cancel">
   <!-- __PREFERENCES__ -->
   <prefpane id="tags" label="Tags">
     <preferences>
@@ -13,7 +15,22 @@
       <description style="white-space:pre;">&__MSG_5b23e5a021fff50d9240aacd354348d8e60ff3ac__;</description>
       <textbox multiline="true" preference="extensions.pixplus.conf_bookmark_tag_order" flex="1"/>
       <description style="white-space:pre;">&__MSG_39e3ea78d60b82bbc6a138cf465a4416c725a94c__;</description>
-      <textbox multiline="true" preference="extensions.pixplus.conf_bookmark_tag_aliases" flex="1"/>
+      <box orient="horizontal" flex="1">
+        <listbox id="conf_bookmark_tag_aliases" flex="1">
+          <listcols>
+            <listcol/>
+            <listcol/>
+            <listcol flex="1"/>
+          </listcols>
+        </listbox>
+        <box orient="vertical">
+          <button label="Add" icon="add" oncommand="tag_aliases_add()"/>
+          <button label="Remove" icon="remove" oncommand="tag_aliases_remove()"/>
+          <button label="Edit" icon="properties" oncommand="tag_aliases_edit()"/>
+        </box>
+      </box>
     </box>
   </prefpane>
+  <script src="config.js"/>
+  <script src="options.js"/>
 </prefwindow>
