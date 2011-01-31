@@ -133,10 +133,10 @@
               return pref.setBoolPref(check_key(key), !!val);
             },
             getCharPref: function(key) {
-              return pref.getCharPref(check_key(key));
+              return decodeURIComponent(pref.getCharPref(check_key(key)));
             },
             setCharPref: function(key, val) {
-              return pref.setCharPref(check_key(key), String(val));
+              return pref.setCharPref(check_key(key), encodeURIComponent(String(val)));
             }
           };
           sandbox.open_options = open_options;

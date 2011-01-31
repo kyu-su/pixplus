@@ -32,6 +32,17 @@
       </box>
     </box>
   </prefpane>
+  <prefpane id="export" label="Export">
+    <box orient="vertical" flex="1">
+      <textbox id="export_text"/>
+      <box orient="horizontal">
+        <button label="Export" oncommand="export_export();"/>
+        <button label="Import" oncommand="export_import();"/>
+      </box>
+    </box>
+  </prefpane>
   <script src="config.js"/>
+  <script src="debug.js"/>
+  <script src="pref.js"/>
   <script src="options.js"/>
 </prefwindow>
