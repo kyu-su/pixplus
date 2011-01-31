@@ -292,8 +292,8 @@
        "show_config_ui":       [false, "\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"]
      },
      "bookmark": {
-       "tag_order": ["", ""],
-       "tag_aliases": ["", ""]
+       "tag_order": ["__Tag1\n-\n*\n-\n__Tag2", ""],
+       "tag_aliases": ["__Tag1\n__Tag2 __Tag3 __Tag4\n__Tag5\n__Tag6 __Tag7", ""]
      }
      /* __CONFIG_END__ */
    };
@@ -654,7 +654,7 @@
          });
      }
      function wrap() {
-       func.apply(window, [orig, this].concat([].slice.apply(arguments)));
+       func.apply(window, [orig, this].concat(Array.prototype.slice.apply(arguments)));
      };
    }
 
@@ -662,7 +662,7 @@
      'sendRequest',
      function(real, othis, url) {
        url = mod_rpc_url(url);
-       real.apply(othis, [url].concat([].slice.apply(arguments, [3])));
+       real.apply(othis, [url].concat(Array.prototype.slice.apply(arguments, [3])));
      });
    // tag edit
    defineMagicFunction(
@@ -672,12 +672,12 @@
          Popup.instance.tag_editing = true;
          Popup.instance.locate();
        }
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
      });
    defineMagicFunction(
      'ef2',
      function(real, othis) {
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
        if (Popup.instance && Popup.instance.tag_edit_enabled) {
          var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
          window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
@@ -709,7 +709,7 @@
        var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9'.replace('%s', String(score));
        if (conf.rate_confirm && !confirm(msg)) return;
        if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
      });
    defineMagicFunction(
      'send_quality_rating',
@@ -722,7 +722,7 @@
          var success = obj.success;
          obj.success = function() {
            try {
-             success.apply(othis, [].slice.apply(arguments));
+             success.apply(othis, Array.prototype.slice.apply(arguments));
              if (Popup.instance && Popup.instance.has_qrate) {
                if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
                each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
@@ -740,7 +740,7 @@
          };
          return _ajax.apply(this, [obj]);
        };
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
        window.jQuery.ajax = _ajax;
      });
    defineMagicFunction(
@@ -756,13 +756,13 @@
      'rating_ef2',
      function(real, othis) {
        if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
      });
    // viewer comments
    defineMagicFunction(
      'on_loaded_one_comment_view',
      function(real, othis) {
-       real.apply(othis, [].slice.apply(arguments, [2]));
+       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
        if (Popup.instance && Popup.instance.viewer_comments_enabled) {
          each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
                   Popup.instance.viewer_comments_a),
@@ -806,7 +806,7 @@
          window.jQuery.cookie('bookToggle', type,
                               {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
        } else {
-         real.apply(othis, [].slice.apply(arguments, [2]));
+         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
        }
        var ev = window.document.createEvent('Event');
        ev.initEvent('pixplusBMTagToggled', true, true);
@@ -1798,7 +1798,7 @@
        if (illust_html_list.length < illust_id_list.length) {
          var _jump_to = window.jump_to;
          window.jump_to = function() {
-           _jump_to.apply(this, [].slice.apply(arguments));
+           _jump_to.apply(this, Array.prototype.slice.apply(arguments));
            window.jump_to = _jump_to;
            setTimeout(init_novel, 100);
          };
@@ -2043,7 +2043,7 @@
               xhr.send(create_post_data(form));
               btn.style.opacity = '0.2';
             } else {
-              _open.apply(this, [].slice.apply(arguments));
+              _open.apply(this, Array.prototype.slice.apply(arguments));
             }
           };
         })();
@@ -2075,7 +2075,7 @@
        (function() {
           var _show = window.IllustRecommender.prototype.show;
           window.IllustRecommender.prototype.show = function() {
-            _show.apply(this, [].slice.apply(arguments));
+            _show.apply(this, Array.prototype.slice.apply(arguments));
             pp.recommender.loaded = true;
             each(pp.recommender.funcs, function(func) { func(); });
             window.IllustRecommender.prototype.show = _show;
@@ -2095,7 +2095,7 @@
                  var _ajax = window.jQuery.ajax;
                  window.jQuery.ajax = function(obj) {
                    if (obj) obj.url = mod_rpc_url(obj.url);
-                   _ajax.apply(this, [].slice.apply(arguments));
+                   _ajax.apply(this, Array.prototype.slice.apply(arguments));
                  };
                  init_pixplus_real();
                })
@@ -2493,7 +2493,7 @@
        }
        function q(e, f) {
          if (e) e.preventDefault();
-         return f.apply(p, [].slice.apply(arguments, [2]));
+         return f.apply(p, Array.prototype.slice.apply(arguments, [2]));
        }
        function m(shift, ctrl, alt, meta) {
          if (!shift && ev.shiftKey) return false;
@@ -3845,7 +3845,7 @@
                        return true;
                      });
                  });
-            ary.push(ary_ary);
+            if (ary_ary.length > 0) ary.push(ary_ary);
           });
      list.sort(function(a, b) {
                  a = t(a); b = t(b);
@@ -3855,14 +3855,8 @@
           function(ary_ary, idx) {
             var null_idx = ary_ary.indexOf(null);
             if (null_idx >= 0) {
-              var left = ary_ary.slice(0, null_idx);
-              var right = ary_ary.slice(null_idx + 1);
-              if (list.length) {
-                ary[idx] = left.concat(list).concat(right);
-                list = [];
-              } else {
-                ary[idx] = left.concat(right);
-              }
+              Array.prototype.splice.apply(ary[idx], [null_idx, 1].concat(list));
+              list = [];
             }
           });
      if (list.length) ary.push(list);
@@ -3989,7 +3983,7 @@
      }
    };
    Signal.prototype.emit = function(inst) {
-     var args = [].slice.apply(arguments, [1]);
+     var args = Array.prototype.slice.apply(arguments, [1]);
      var res;
      for(var i = 0; i < this.funcs.length; ++i) {
        res = this.funcs[i].cb.apply(inst, args);
@@ -4437,13 +4431,13 @@
    }
 
    function bind(func, obj) {
-     var args = [].slice.apply(arguments, [2]);
+     var args = Array.prototype.slice.apply(arguments, [2]);
      return function() {
-       func.apply(obj || window, args.concat([].slice.apply(arguments)));
+       func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
      };
    }
    function bind_event(func, obj) {
-     var args = [].slice.apply(arguments, [2]);
+     var args = Array.prototype.slice.apply(arguments, [2]);
      return function(ev) {
        ev.preventDefault();
        func.apply(obj, args);
@@ -4476,7 +4470,7 @@
    }
 
    function alert() {
-     safeWindow.alert.apply(safeWindow, [].slice.apply(arguments));
+     safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
    }
 
    // loading => interactive => complete
