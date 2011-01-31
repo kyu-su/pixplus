@@ -3869,12 +3869,11 @@
      return ary;
    }
 
-   function Floater(wrap, cont, use_placeholder) {
+   function Floater(wrap, cont) {
      this.wrap = wrap;
      this.cont = cont;
      this.floating = false;
      this.disable_float = false;
-     //this.use_placeholder = !!use_placeholder;
      this.use_placeholder = true;
      Floater.instances.push(this);
      if (Floater.initialized) this.init();
