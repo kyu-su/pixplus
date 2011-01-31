@@ -43,7 +43,8 @@ OPERA_ICON_DIR          = icons
 OPERA_ICON_FILES        = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
 OPERA_I18N_SOURCES      = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
 OPERA_I18N_FILES        = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
-OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
+OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) \
+                          $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
 
 CHROME_ROOT             = chrome
 CHROME_SIGN_KEY         = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
@@ -51,15 +52,17 @@ CHROME_MANIFEST_JSON    = $(CHROME_ROOT)/manifest.json
 CHROME_ICON_DIR         = icons
 CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
 CHROME_I18N_FILES       = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
-CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
+CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) \
+                          $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
 
 SAFARI_ROOT             = safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
 SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
-SAFARI_CERTS            = $(SAFARI_ROOT)/sign/safari_cert.der $(SAFARI_ROOT)/sign/safari_ca1.der $(SAFARI_ROOT)/sign/safari_ca2.der
+SAFARI_CERTS            = $(patsubst %,$(SAFARI_ROOT)/sign/%,safari_cert.der safari_ca1.der safari_ca2.der)
 SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
-SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%)
+SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) \
+                          $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%)
 
 FIREFOX_ROOT            = firefox
 FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
@@ -67,27 +70,29 @@ FIREFOX_CHROME_MANIFEST = $(FIREFOX_ROOT)/chrome.manifest
 FIREFOX_OVERLAY_XUL     = $(FIREFOX_ROOT)/content/pixplus.xul
 FIREFOX_DEFAULTS_PREFS  = $(FIREFOX_ROOT)/defaults/preferences/pixplus.js
 FIREFOX_OPTIONS_XUL     = $(FIREFOX_ROOT)/content/options.xul
+FIREFOX_CONTENTS        = $(SRC_USERJS) $(CONFIG_JS) options.xul options.js tag_alias.xul tag_alias.js
 FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
 FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
 FIREFOX_I18N_FILES      = $(I18N_LANGUAGES_FULL:%=$(FIREFOX_ROOT)/locale/%/entities.dtd)
-FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ROOT)/content/$(CONFIG_JS) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES)
+FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) \
+                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
 WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
 
 ALL_TARGETS             = $(GREASEMONKEY_JS)
 
-#ifeq ($(BUILD_OEX),yes)
-#ALL_TARGETS         += $(OEX)
-#endif
-#ifeq ($(BUILD_CRX),yes)
-#ALL_TARGETS         += $(CRX)
-#endif
-#ifeq ($(BUILD_SAFARIEXTZ),yes)
-#ALL_TARGETS         += $(SAFARIEXTZ)
-#endif
+ifeq ($(BUILD_OEX),yes)
+ALL_TARGETS         += $(OEX)
+endif
+ifeq ($(BUILD_CRX),yes)
+ALL_TARGETS         += $(CRX)
+endif
+ifeq ($(BUILD_SAFARIEXTZ),yes)
+ALL_TARGETS         += $(SAFARIEXTZ)
+endif
 ifeq ($(BUILD_XPI),yes)
 ALL_TARGETS         += $(XPI)
 endif
