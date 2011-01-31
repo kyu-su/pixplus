@@ -13,10 +13,11 @@
  * pixivreaderと衝突するらしいので、excludeに追加。
  * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
  * OperaExtension版で動作しない場合があるバグをたぶん修正。
- * conf.default_manga_type=slideの時、ポップアップのShift+Fが動作しないバグを修正。
  * 閲覧できないマンガがあったバグを修正。
  * ズーム機能でFirefoxをサポート。
  * 企画目録関連ページに対応。
+ * マンガのスライドモード廃止に伴ってconf.default_manga_typeを削除。
+ * 作品管理ページで動作しなくなっていた不具合を修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -244,10 +245,6 @@
                                  {"value": "favorite", "title": "\u304a\u6c17\u306b\u5165\u308a"},
                                  {"value": "mypixiv",  "title": "\u30de\u30a4\u30d4\u30af"},
                                  {"value": "self",     "title": "\u3042\u306a\u305f"}]],
-     "default_manga_type":     ["", "\u30c7\u30d5\u30a9\u30eb\u30c8\u306e\u30de\u30f3\u30ac\u8868\u793a\u30bf\u30a4\u30d7",
-                                [{"value": "",       "title": "\u5909\u66f4\u3057\u306a\u3044"},
-                                 {"value": "scroll", "title": "\u30b9\u30af\u30ed\u30fc\u30eb"},
-                                 {"value": "slide",  "title": "\u30b9\u30e9\u30a4\u30c9"}]],
      "rate_confirm":           [true, "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"],
      "popup_manga_tb":         [true, "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"],
      "disable_effect":         [false, "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"],
@@ -1309,10 +1306,10 @@
          // 自分のイラスト管理
          // http://www.pixiv.net/member_illust.php
          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-                      xpath_cap: './ul/li/label'},
-                     unpack_captions_label);
+                      xpath_cap: './ul/li/a[img]/following-sibling::text()[1]'},
+                     unpack_captions);
        }
-     } else if (window.location.pathname.match(/^\/ranking(?:_tag|_area)?\.php/)) {
+     } else if (window.location.pathname.match(/^\/ranking(_tag|_area)?\.php/)) {
        if ((RegExp.$1 == '_tag' || RegExp.$1 == '_area') && !options.type) {
          // 人気タグ別ランキング / 地域ランキング
          // http://www.pixiv.net/ranking_area.php
@@ -1994,22 +1991,6 @@
        }
      }
 
-     if (conf.default_manga_type) {
-       if (['scroll', 'slide'].indexOf(conf.default_manga_type) < 0) {
-         alert('conf.default_manga_type: invalid value - ' + conf.default_manga_type);
-       } else {
-         // http://www.pixiv.net/member_illust.php?mode=manga&illust_id=00000000&type=scroll
-         each(
-           $xa('//a[contains(@href, "member_illust.php?mode=manga")]'),
-           function(anc) {
-             if (!anc.textContent.match(/^(?:\u30b9\u30af\u30ed\u30fc\u30eb|\u30b9\u30e9\u30a4\u30c9)\u5f0f/)) {
-               var o = parseopts(anc.href);
-               if (!o.type) anc.href += '&type=' + conf.default_manga_type;
-             }
-           });
-       }
-     }
-
      if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
        (function() {
           var _open = window.pixiv.Favorite.prototype.open;
@@ -2381,8 +2362,7 @@
          }
        },
        get_url: function(page) {
-         var mode = conf.default_manga_type ? '&type=' + conf.default_manga_type : '';
-         return 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + self.item.id + mode + '#page' + page;
+         return 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + self.item.id;
        }
      };
 
@@ -2745,7 +2725,7 @@
      this.manga_btn.removeAttribute('enable');
      this.manga_btn.href = urlmode(this.item.medium, 'manga_tb');
      this.img_anc.href = (this.manga.usable
-                          ? urlmode(this.item.medium, 'manga', conf.default_manga_type)
+                          ? urlmode(this.item.medium, 'manga')
                           : loader.image.src.replace(/_[sm](\.\w+)$/, '$1'));
 
      if (loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i)) {
@@ -3161,7 +3141,7 @@
        if (this.manga.page >= 0) {
          url = big ? this.image.src : this.manga.get_url(this.manga.page);
        } else {
-         url = big ? urlmode(this.item.medium, 'manga', conf.default_manga_type) : this.item.medium;
+         url = big ? urlmode(this.item.medium, 'manga') : this.item.medium;
        }
      } else {
        url = big ? this.img_anc.href : this.item.medium;
@@ -4236,20 +4216,8 @@
        return null;
      }
    }
-   function urlmode(url, mode, manga_type) {
-     url = url.replace(/([\?&])mode=[^&]*/, '$1mode=' + mode);
-     return mode == 'manga' && manga_type ? urlmangatype(url, manga_type) : url;
-   }
-   function urlmangatype(url, type) {
-     if (url.indexOf('&type=') >= 0) {
-       return url.replace(/&type=[^&]*/, '&type=' + type);
-     } else {
-       if (url.match(/^(.*)(#.*)$/)) {
-         return RegExp.$1 + '&type=' + type + RegExp.$2;
-       } else {
-         return url + '&type=' + type;
-       }
-     }
+   function urlmode(url, mode) {
+     return url.replace(/([\?&])mode=[^&]*/, '$1mode=' + mode);
    }
    function chk_ext_src(elem, attr, url) {
      var name = url.replace(/\?.*$/, '').replace(/.*\//, '');
