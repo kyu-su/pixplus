@@ -4,7 +4,8 @@
 <prefwindow xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             id="pixplus.options"
             title="pixplus"
-            bottons="accept,cancel">
+            bottons="accept,cancel"
+            ondialogaccept="return accept();">
   <!-- __PREFERENCES__ -->
   <prefpane id="tags" label="Tags">
     <preferences>
@@ -16,7 +17,7 @@
       <textbox multiline="true" preference="extensions.pixplus.conf_bookmark_tag_order" flex="1"/>
       <description style="white-space:pre;">&__MSG_39e3ea78d60b82bbc6a138cf465a4416c725a94c__;</description>
       <box orient="horizontal" flex="1">
-        <listbox id="conf_bookmark_tag_aliases" flex="1">
+        <listbox id="conf_bookmark_tag_aliases" ondblclick="tag_aliases_edit();" flex="1">
           <listcols>
             <listcol/>
             <listcol/>
@@ -24,9 +25,9 @@
           </listcols>
         </listbox>
         <box orient="vertical">
-          <button label="Add" icon="add" oncommand="tag_aliases_add()"/>
-          <button label="Remove" icon="remove" oncommand="tag_aliases_remove()"/>
-          <button label="Edit" icon="properties" oncommand="tag_aliases_edit()"/>
+          <button label="Add" icon="add" oncommand="tag_aliases_add();"/>
+          <button label="Remove" icon="remove" oncommand="tag_aliases_remove();"/>
+          <button label="Edit" icon="properties" oncommand="tag_aliases_edit();"/>
         </box>
       </box>
     </box>

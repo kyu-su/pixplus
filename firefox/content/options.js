@@ -4,6 +4,12 @@ var tag_aliases = conf.parse_bm_tag_aliases(pref.getCharPref('extensions.pixplus
 var tag_aliases_list = document.getElementById('conf_bookmark_tag_aliases');
 var tag_alias_dialog;
 
+function log(msg) {
+  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+    .getService(Components.interfaces.nsIConsoleService);
+  consoleService.logStringMessage(msg);
+}
+
 for(var key in tag_aliases) {
   var row = tag_aliases_add_row();
   row[1].setAttribute('label', key);
@@ -32,6 +38,7 @@ function tag_aliases_add() {
   row[1].setAttribute('label', 'Tag');
   row[2].setAttribute('label', 'Tag1 Tag2');
   tag_aliases_list.selectedItem = row[0];
+  tag_aliases_edit();
 }
 function tag_aliases_remove() {
   if (!tag_aliases_list.selectedItem) return;
@@ -41,9 +48,22 @@ function tag_aliases_edit() {
   if (!tag_aliases_list.selectedItem) return;
   var item = tag_aliases_get_row_data(tag_aliases_list.selectedItem);
   var data = {complete: false, tag: item[0], aliases: item[1].split(/ +/)};
-  openDialog('chrome://pixplus/content/tag_alias.xul', null, 'modal', data);
+  openDialog('chrome://pixplus/content/tag_alias.xul', null, 'modal,resizable', data);
   if (data.complete) {
     item[2].setAttribute('label', data.tag);
     item[3].setAttribute('label', data.aliases.join(' '));
   }
+}
+
+function accept() {
+  var val = '';
+  Array.prototype.forEach.apply(
+    tag_aliases_list.getElementsByTagName('listitem'),
+    [function(row) {
+       row = tag_aliases_get_row_data(row);
+       val += row[0] + '\n' + row[1] + '\n';
+     }]);
+  log(val);
+  pref.setCharPref('extensions.pixplus.conf_bookmark_tag_aliases', val);
+  return true;
 }

@@ -4,13 +4,22 @@
         id="pixplus.tagalias"
         title="pixplus - Tag alias"
         buttons="accept,cancel"
-        ondialogaccept="return accept();"
-        ondialogcancel="return true;">
-  <box id="root" orient="vertical" flex="1">
-    <box orient="horizontal">
-      <box orient="horizontal" align="center"><label value="Tag:"/></box>
-      <textbox id="tag" flex="1"/>
-    </box>
-  </box>
+        ondialogaccept="return accept();">
+  <grid flex="1">
+    <columns>
+      <column/>
+      <column flex="1"/>
+    </columns>
+    <rows>
+      <row>
+        <box orient="horizontal" align="center"><label value="Tag"/></box>
+        <textbox id="tag" flex="1"/>
+      </row>
+      <row>
+        <box orient="horizontal" align="center"><label value="Aliases"/></box>
+        <textbox id="aliases" tooltiptext="Separated by space" flex="1"/>
+      </row>
+    </rows>
+  </grid>
   <script src="tag_alias.js"/>
 </dialog>
