@@ -4,12 +4,6 @@ var tag_aliases = conf.parse_bm_tag_aliases(pref.getCharPref('extensions.pixplus
 var tag_aliases_list = document.getElementById('conf_bookmark_tag_aliases');
 var tag_alias_dialog;
 
-function log(msg) {
-  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-    .getService(Components.interfaces.nsIConsoleService);
-  consoleService.logStringMessage(msg);
-}
-
 for(var key in tag_aliases) {
   var row = tag_aliases_add_row();
   row[1].setAttribute('label', key);
@@ -63,7 +57,6 @@ function accept() {
        row = tag_aliases_get_row_data(row);
        val += row[0] + '\n' + row[1] + '\n';
      }]);
-  log(val);
   pref.setCharPref('extensions.pixplus.conf_bookmark_tag_aliases', val);
   return true;
 }
