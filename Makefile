@@ -79,7 +79,8 @@ FIREFOX_I18N_FILES      = $(I18N_LANGUAGES_FULL:%=$(FIREFOX_ROOT)/locale/%/entit
 FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) \
                           $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES)
 
-WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender Effect sendRequest getPageUrl
+WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender \
+                          Effect sendRequest getPageUrl
 WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
 
 ALL_TARGETS             = $(GREASEMONKEY_JS)
@@ -255,7 +256,8 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
           $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
           : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
           $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) && \
-          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
+          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
+            openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
           $(XAR) --inject-sig signature.dat -f ../$@
 
 clean-safari:
