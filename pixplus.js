@@ -2189,14 +2189,9 @@
      this.onadditem = new Signal();
 
      if (this.args.xpath_col) {
-       var self = this;
        this.detect_new_collection();
        //if (this.page_col == 0) throw 1;
-       window.document.body.addEventListener(
-         'DOMNodeInserted',
-         function() {
-           setTimeout(function() { self.detect_new_collection(); }, 100);
-         }, false);
+       $ev(window.document.body, true).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
        Gallery.oncreate.emit(this);
      } else {
        throw 1;
@@ -3983,7 +3978,7 @@
               function() {
                 timer = null;
                 func.apply(last_args[0], last_args[1]);
-              }, 40);
+              }, async.constructor === Number ? async : 40);
           } else {
             func.apply(this, last_args[1]);
           }
@@ -4309,6 +4304,9 @@
        },
        resize: function(func) {
          return listen('resize', func);
+       },
+       listen: function(name, func) {
+         return listen(name, func);
        }
      };
      function listen(name, func, conn) {
@@ -4320,12 +4318,11 @@
              ev_last = ev;
            } else {
              ev_last = null;
-             func(ev, conn);
              timer = setTimeout(
                function() {
                  timer = null;
-                 if (ev_last) listener(ev_last);
-               }, 40);
+                 func(ev_last, conn);
+               }, async.constructor === Number ? async : 40);
            }
          } else {
            func(ev, conn);
