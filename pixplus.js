@@ -1510,18 +1510,17 @@
        function init_right_gallery(illusts) {
          var floater = new Floater(float_wrap, illusts);
          var timer;
-         gallery.onadditem.connect(function() { if (!timer) timer = setTimeout(init_pager, 100); });
+         gallery.onadditem.connect(init_pager, true);
          function init_pager() {
            var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
            if (more) {
-             illusts.addEventListener(
-               'scroll',
-               function() {
+             $ev(illusts, true).scroll(
+               function(ev, conn) {
                  if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
                    send_click(more);
-                   illusts.removeEventListener('scroll', arguments.callee, false);
+                   conn.disconnect();
                  }
-               }, false);
+               });
            }
            floater.update_height();
            timer = null;
@@ -1624,7 +1623,8 @@
          if (wrap) {
            write_css('.ui-layout-east{float:right;}' +
                      '.ui-layout-west .area_new{margin:0px;}');
-           new Floater(wrap, cont);
+           var floater = new Floater(wrap, cont);
+           window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
          }
        }
      }
@@ -1730,6 +1730,7 @@
                      // ポップアップより下(z-index:90)に表示する
                      '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
                      '.msgbox_bottom[float]:hover{opacity:1;}');
+
            new Floater(msgbox, null, true);
          }
        }
@@ -2114,6 +2115,8 @@
                })
         )
        .script(pp.url.js.tag_edit);
+
+     setTimeout(Floater.init, 100);
    }
 
    function GalleryItem(url, thumb, caption, prev, gallery) {
@@ -3869,23 +3872,30 @@
    function Floater(wrap, cont, use_placeholder) {
      this.wrap = wrap;
      this.cont = cont;
+     this.floating = false;
      this.disable_float = false;
-     this.use_placeholder = !!use_placeholder;
+     //this.use_placeholder = !!use_placeholder;
+     this.use_placeholder = true;
      Floater.instances.push(this);
-     this.init();
+     if (Floater.initialized) this.init();
    }
    Floater.instances = [];
+   Floater.initialized = false;
    Floater.init = function() {
-     window.addEventListener('scroll', Floater.update_float, false);
-     window.addEventListener('resize', Floater.force_update, false);
-     window.document.addEventListener('pixplusBMTagToggled', Floater.force_update, false);
-     window.document.addEventListener('pixplusConfigToggled', Floater.force_update, false);
+     if (Floater.initialized) return;
+     each(Floater.instances,
+          function(inst) {
+            inst.init();
+          });
+     $ev(window, true).scroll(Floater.update_float);
+     $ev(window, true).resize(Floater.update_height);
+     Floater.initialized = true;
    };
    Floater.update_float = function() {
      each(Floater.instances, function(inst) { inst.update_float(); });
    };
-   Floater.force_update = function() {
-     each(Floater.instances, function(inst) { inst.force_update(); });
+   Floater.update_height = function() {
+     each(Floater.instances, function(inst) { inst.update_height(); });
    };
    Floater.prototype.init = function() {
      this.wrap.style.boxSizing = 'border-box';
@@ -3897,12 +3907,6 @@
        this.cont.style.overflowX = 'hidden';
        this.cont.style.overflowY = 'auto';
      }
-     this.update_float();
-   };
-   Floater.prototype.force_update = function() {
-     this.unfloat();
-     this.floating = void(0);
-     this.disable_float = false;
      this.update_float();
    };
    Floater.prototype.unfloat = function () {
@@ -3933,9 +3937,8 @@
    Floater.prototype.update_float = function () {
      if (this.disable_float) return;
      var sc = browser.webkit ? window.document.body : window.document.documentElement;
-     var pos = getpos(this.wrap);
-     if (this.floating !== true && sc.scrollTop > pos.top) {
-       this.wrap_pos = pos;
+     var pos = getpos(this.placeholder || this.wrap);
+     if (!this.floating && sc.scrollTop > pos.top) {
        this.scroll_save();
        if (this.use_placeholder) {
          this.placeholder = this.wrap.cloneNode(false);
@@ -3950,7 +3953,7 @@
        this.wrap.setAttribute('float', '');
        this.scroll_restore();
        this.floating = true;
-     } else if (this.floating === true && sc.scrollTop < this.wrap_pos.top) {
+     } else if (this.floating && sc.scrollTop < pos.top) {
        this.unfloat();
      }
      this.update_height();
@@ -3961,7 +3964,6 @@
    Floater.prototype.scroll_restore = function () {
      if (this.cont) this.cont.scrollTop = this.scroll_pos;
    };
-   Floater.init();
 
    function Signal(def) {
      this.def = def;
@@ -3969,9 +3971,25 @@
      this.id = 1;
      return this;
    }
-   Signal.prototype.connect = function(f) {
+   Signal.prototype.connect = function(func, async) {
      var conn = new Signal.Connection(this, this.id);
-     this.funcs.push({id: this.id, cb: f, conn: conn});
+     var timer, last_args;
+     this.funcs.push(
+       {id: this.id,
+        cb: function() {
+          last_args = [this, Array.prototype.slice.apply(arguments)];
+          if (async) {
+            if (timer) return;
+            timer = setTimeout(
+              function() {
+                timer = null;
+                func.apply(last_args[0], last_args[1]);
+              }, 40);
+          } else {
+            func.apply(this, last_args[1]);
+          }
+        },
+        conn: conn});
      ++this.id;
      return conn;
    };
@@ -4249,50 +4267,75 @@
      return ret;
    }
 
-   function $ev(ctx) {
+   function $ev(ctx, async) {
      var obj = {
        ctx: ctx,
        click: function(func) {
-         var conn = new $ev.Connection(obj.ctx);
-         var listener = function(ev) {
-           if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
-           ev.preventDefault();
-           func(ev);
-         };
-         obj.ctx.addEventListener('click', listener, false);
-         conn.listeners.push(['click', listener]);
-         return conn;
+         return listen(
+           'click',
+           function(ev, conn) {
+             if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
+             ev.preventDefault();
+             func.apply(this, Array.prototype.slice(arguments));
+           });
        },
        key: function(func) {
-         var conn = new $ev.Connection(obj.ctx);
-         var listener = function(ev) {
-           var c = ev.keyCode || ev.charCode, key;
-           if (c == ev.which && c > 0x20) {
-             key = lc(String.fromCharCode(c));
-           } else if ($ev.key_map[c]) {
-             if (browser.webkit) return;
-             key = $ev.key_map[c];
-           } else {
-             key = c;
-           }
-           func(ev, key);
-         };
-         obj.ctx.addEventListener('keypress', listener, false);
-         conn.listeners.push(['keypress', listener]);
-         if (browser.webkit) {
-           listener = function(ev) {
+         var conn = listen(
+           'keypress',
+           function(ev, conn) {
              var c = ev.keyCode || ev.charCode, key;
-             if ($ev.key_map[c]) func(ev, $ev.key_map[c]);
-           };
-           obj.ctx.addEventListener('keydown', listener, false);
-           conn.listeners.push(['keydown', listener]);
+             if (c == ev.which && c > 0x20) {
+               key = lc(String.fromCharCode(c));
+             } else if ($ev.key_map[c]) {
+               if (browser.webkit) return;
+               key = $ev.key_map[c];
+             } else {
+               key = c;
+             }
+             func(ev, key, conn);
+           });
+         if (browser.webkit) {
+           conn = listen(
+             'keydown',
+             function(ev) {
+               var c = ev.keyCode || ev.charCode, key;
+               if ($ev.key_map[c]) func(ev, $ev.key_map[c], conn);
+             },
+             conn);
          }
          return conn;
        },
-       disconnect: function() {
-         each(obj.listeners, function(item) { obj.ctx.removeEventListener(item[0], item[1], false); });
+       scroll: function(func) {
+         return listen('scroll', func);
+       },
+       resize: function(func) {
+         return listen('resize', func);
        }
      };
+     function listen(name, func, conn) {
+       if (!conn) conn = new $ev.Connection(ctx);
+       var timer, ev_last;
+       var listener = function(ev) {
+         if (async) {
+           if (timer) {
+             ev_last = ev;
+           } else {
+             ev_last = null;
+             func(ev, conn);
+             timer = setTimeout(
+               function() {
+                 timer = null;
+                 if (ev_last) listener(ev_last);
+               }, 40);
+           }
+         } else {
+           func(ev, conn);
+         }
+       };
+       obj.ctx.addEventListener(name, listener, false);
+       conn.listeners.push([name, listener]);
+       return conn;
+     }
      return obj;
    };
    $ev.KEY_BACKSPACE = 'Backspace';
