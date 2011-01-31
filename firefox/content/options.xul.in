@@ -7,7 +7,7 @@
             bottons="accept,cancel"
             ondialogaccept="return accept();">
   <!-- __PREFERENCES__ -->
-  <prefpane id="tags" label="Tags">
+  <prefpane id="tags" label="&pixplus.options.tags;">
     <preferences>
       <preference id="extensions.pixplus.conf_bookmark_tag_order" name="extensions.pixplus.conf_bookmark_tag_order" type="string"/>
       <preference id="extensions.pixplus.conf_bookmark_tag_aliases" name="extensions.pixplus.conf_bookmark_tag_aliases" type="string"/>
@@ -25,19 +25,19 @@
           </listcols>
         </listbox>
         <box orient="vertical">
-          <button label="Add" icon="add" oncommand="tag_aliases_add();"/>
-          <button label="Remove" icon="remove" oncommand="tag_aliases_remove();"/>
-          <button label="Edit" icon="properties" oncommand="tag_aliases_edit();"/>
+          <button label="&pixplus.options.tags.aliases.add;" icon="add" oncommand="tag_aliases_add();"/>
+          <button label="&pixplus.options.tags.aliases.remove;" icon="remove" oncommand="tag_aliases_remove();"/>
+          <button label="&pixplus.options.tags.aliases.edit;" icon="properties" oncommand="tag_aliases_edit();"/>
         </box>
       </box>
     </box>
   </prefpane>
-  <prefpane id="export" label="Export">
+  <prefpane id="export" label="&pixplus.options.export;">
     <box orient="vertical" flex="1">
       <textbox id="export_text"/>
       <box orient="horizontal">
-        <button label="Export" oncommand="export_export();"/>
-        <button label="Import" oncommand="export_import();"/>
+        <button label="&pixplus.options.export.export;" oncommand="export_export();"/>
+        <button label="&pixplus.options.export.import;" oncommand="export_import();"/>
       </box>
     </box>
   </prefpane>

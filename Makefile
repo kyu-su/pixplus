@@ -299,11 +299,12 @@ $(FIREFOX_OPTIONS_XUL): $(FIREFOX_OPTIONS_XUL).in $(CONFIG_JS)
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
-$(FIREFOX_I18N_FILES): $(CONFIG_JS)
-	mkdir -p $(dir $@)
+$(FIREFOX_I18N_FILES): %: %.in $(CONFIG_JS)
+	rm -f $@
 	$(I18N_EDIT_HASH) firefox \
           $(I18N_DIR)/$(firstword $(subst -, ,$(@:$(FIREFOX_ROOT)/locale/%/entities.dtd=%))).po \
           $@ < $(CONFIG_JS) > /dev/null
+	cat $< >> $@
 
 $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
@@ -317,4 +318,4 @@ clean-firefox:
 	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ROOT)/content/$(CONFIG_JS) \
           $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) \
           $(FIREFOX_DEBUG_LOADER)
-	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR) $(FIREFOX_ROOT)/locale
+	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)

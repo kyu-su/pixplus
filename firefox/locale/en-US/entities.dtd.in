@@ -1,0 +1,11 @@
+<!ENTITY pixplus.options.tags                "Tags">
+<!ENTITY pixplus.options.tags.aliases.add    "Add">
+<!ENTITY pixplus.options.tags.aliases.remove "Remove">
+<!ENTITY pixplus.options.tags.aliases.edit   "Edit">
+
+<!ENTITY pixplus.options.export              "Export">
+<!ENTITY pixplus.options.export.export       "Export">
+<!ENTITY pixplus.options.export.import       "Import">
+
+<!ENTITY pixplus.tagalias.tag                "Tag">
+<!ENTITY pixplus.tagalias.aliases            "Aliases">

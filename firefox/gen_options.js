@@ -10,9 +10,8 @@ conf.each(
     if (sec.ui) sec.ui += '\n';
     sec.ui += '        <row>\n';
     if (sec.schema[key][2]) {
-      sec.ui += '          <box orient="horizontal" align="center">' +
-        '<label value="' + key + '" tooltiptext="' + desc + '"/></box>\n';
-      sec.ui += '          <menulist preference="' + path + '" tooltiptext="' + desc + '">\n';
+      sec.ui += '          <box orient="horizontal" align="center"><label value="' + key + '"/></box>\n';
+      sec.ui += '          <menulist preference="' + path + '">\n';
       sec.ui += '            <menupopup>\n';
       sec.schema[key][2].forEach(
         function(entry) {
@@ -26,17 +25,18 @@ conf.each(
       sec.ui += '            </menupopup>\n';
       sec.ui += '          </menulist>\n';
     } else if (type == 'string') {
-      sec.ui += '          <box orient="horizontal" align="center">' +
-        '<label value="' + key + '" tooltiptext="' + desc + '"/></box>\n';
-      sec.ui += '          <textbox preference="' + path + '" flex="1" tooltiptext="' + desc + '"/>\n';
+      sec.ui += '          <box orient="horizontal" align="center"><label value="' + key + '"/></box>\n';
+      sec.ui += '          <textbox preference="' + path + '"/>\n';
     } else {
-      sec.ui += '          <checkbox label="' + key + '" preference="' + path + '" tooltiptext="' + desc + '"/>\n';
+      sec.ui += '          <checkbox label="' + key + '" preference="' + path + '"/>\n';
+      sec.ui += '          <spacer/>\n';
     }
+    sec.ui += '          <box orient="horizontal" align="center"><description>' + desc + '</description></box>\n';
     sec.ui += '        </row>';
   },
   function(sec) {
     if (sec.name == 'extension' || sec.name == 'bookmark') return true;
-    print('  <prefpane id="' + sec.name + '" label="' + sec.label + '">');
+    print('  <prefpane id="' + sec.name + '" label="&' + sec.label + ';">');
     print('    <preferences>');
     sec.ui = '';
     return false;
@@ -46,8 +46,8 @@ conf.each(
     print('    <grid flex="1">');
     print('      <columns>');
     print('        <column/>');
-    print('        <column flex="1"/>');
-    //print('        <column/>');
+    print('        <column/>');
+    print('        <column/>');
     print('      </columns>');
     print('      <rows>');
     print(sec.ui);

@@ -284,7 +284,7 @@
        "auto_zoom_scale":      [4, "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650"],
        "overlay_control":      [0.3, "\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)"],
        "scroll_height":        [32, "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055"],
-       "author_status_icon":   [true, "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b"],
+       "author_status_icon":   [true, "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)"],
        "show_comment_form":    [true, "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"]
      },
      "extension": {
@@ -400,25 +400,25 @@
      /* __STORAGE_COMMON_ENTRIES_BEGIN__ */
      u: false, // usable or not
      l: [{name:   'extension',
-          label:  'Extension',
+          label:  "\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3",
           path:   ['conf', 'extension'],
           schema: conf_schema.extension,
           conf:   conf.extension, /* __REMOVE__ */
           keys:   []},
          {name:   'general',
-          label:  'General',
+          label:  "\u5168\u822c",
           path:   ['conf'],
           schema: conf_schema,
           conf:   conf, /* __REMOVE__ */
           keys:   []},
          {name:   'popup',
-          label:  'Popup',
+          label:  "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7",
           path:   ['conf', 'popup'],
           schema: conf_schema.popup,
           conf:   conf.popup, /* __REMOVE__ */
           keys:   []},
          {name:   'bookmark',
-          label:  'Bookmark',
+          label:  "\u30d6\u30c3\u30af\u30de\u30fc\u30af",
           path:   ['conf', 'bookmark'],
           schema: conf_schema.bookmark,
           keys:   []}],
@@ -961,7 +961,7 @@
          make_section(sec.label);
        });
 
-     var tocont = make_custom_section('Tag order');
+     var tocont = make_custom_section("\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048");
      tocont.innerHTML = msg_filter("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8");
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.id = 'pp-conf-bookmark-tag_order';
@@ -977,7 +977,7 @@
        }, false);
      tocont.appendChild(tag_order_textarea);
 
-     var tacont = make_custom_section('Tag alias');
+     var tacont = make_custom_section("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9");
      tacont.textContent = msg_filter("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002");
      var tag_alias_table = window.document.createElement('table');
      tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
