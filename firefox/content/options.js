@@ -66,6 +66,23 @@ function tag_aliases_to_string() {
 }
 
 function export_export() {
+  var obj = { };
+  conf.each(
+    function(sec, key) {
+      if (sec.name == 'bookmark') return;
+      var name = sec.path.join('_') + '_' + key;
+      var val;
+      if (sec.schema[key][0].constructor === Boolean) {
+        val = pref.getBoolPref(name);
+      } else {
+        val = conf.get_conv(sec.name, key)[0](pref.getCharPref(name));
+      }
+      if (val !== sec.schema[key][0]) obj[sec.name + '_' + key] = val;
+    });
+  var o = pref.getCharPref('conf_bookmark_tag_order'), a = pref.getCharPref('conf_bookmark_tag_aliases');
+  if (o) obj['bookmark_tag_order'] = o;
+  if (a) obj['bookmark_tag_aliases'] = a;
+  document.getElementById('export_text').value = JSON.stringify(obj);
 }
 function export_import() {
   var obj = JSON.parse(document.getElementById('export_text').value);

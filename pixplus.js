@@ -133,10 +133,10 @@
               return pref.setBoolPref(check_key(key), !!val);
             },
             getCharPref: function(key) {
-              return decodeURIComponent(pref.getCharPref(check_key(key)));
+              return decodeURIComponent(escape(pref.getCharPref(check_key(key))));
             },
             setCharPref: function(key, val) {
-              return pref.setCharPref(check_key(key), encodeURIComponent(String(val)));
+              return pref.setCharPref(check_key(key), unescape(encodeURIComponent(String(val))));
             }
           };
           sandbox.open_options = open_options;
