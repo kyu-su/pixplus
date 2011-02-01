@@ -3010,7 +3010,7 @@
           function(img, idx) {
             img.style.cssText = '';
             var anc = $c('a', self.img_div);
-            anc.href = img.src;
+            anc.href = img.src.replace(/_[sm](\.\w+)$/, '$1');
             anc.appendChild(img);
 
             var size = {width: img.width, height: img.height};
