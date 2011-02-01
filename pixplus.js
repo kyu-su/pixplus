@@ -248,7 +248,7 @@
                                  {"value": "self",     "title": "\u3042\u306a\u305f"}]],
      "rate_confirm":           [true, "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"],
      "disable_effect":         [false, "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"],
-     "workaround":             [false, "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"],
+     "workaround":             [false, "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"],
      "fast_user_bookmark":     [0, "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
@@ -1443,6 +1443,7 @@
               if (_error) _error.apply(this, arguments);
             };
           }
+          /* no effect, probably
           if (conf.workaround) {
             var il = window.IllustList;
             il.prototype.createPreloader = function(image) {
@@ -1461,6 +1462,7 @@
               this.preloaders.set(image, preloader);
             };
           }
+           */
         })();
        var de = window.document.documentElement;
        var gallery;
