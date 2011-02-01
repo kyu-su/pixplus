@@ -3116,12 +3116,14 @@
        var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
        if (this.tag_editing || this.expand_header) {
          cap_height = this.img_div.offsetHeight - post_cap_height;
+         if (this.tag_editing) cap_height += this.tags.offsetHeight;
        } else {
          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
        }
+       if (this.tag_editing && cap_height < 300) cap_height = 300;
        this.comment_wrap.style.maxHeight = (cap_height < 48 ? 48 : cap_height) + 'px';
 
-       if (!(this.tag_editing || this.expand_header)) {
+       if (!this.expand_header) {
          var ph = this.caption.offsetHeight + 48;
          if (this.img_div.offsetHeight < ph) {
            this.img_div.style.margin = (ph - this.img_div.offsetHeight) / 2 + 'px 0px';
