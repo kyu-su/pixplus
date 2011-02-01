@@ -232,11 +232,11 @@
      "float_tag_list":         [1, "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9"},
-                                 {"value": 2, "title": "AutoPagerize"}]],
+                                 {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
      "locate_recommend_right": [1, "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9"},
-                                 {"value": 2, "title": "AutoPagerize"}]],
+                                 {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
      "extagedit":              [true, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u6642\u306b\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u306e\u30bf\u30b0\u9078\u629e\u3092\u6709\u52b9\u306b\u3059\u308b"],
      "mod_bookmark_add_page":  [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"],
      "tag_separator_style":    ["border-top:2px solid #dae1e7;", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"],
@@ -1463,7 +1463,7 @@
                locate_right();
              } else if (conf.locate_recommend_right == 2 &&
                         $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-               wait_pager(function() {
+               Pager.wait(function() {
                             locate_right(illusts);
                             if (gallery) init_right_gallery(r_container);
                           });
@@ -1603,7 +1603,7 @@
      if (conf.float_tag_list == 1) {
        make_float();
      } else if (conf.float_tag_list == 2) {
-       wait_pager(make_float);
+       Pager.wait(make_float);
      }
      function make_float() {
        var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
@@ -4091,30 +4091,225 @@
      if (!this.disconnected) this.signal.disconnect(this.id);
    };
 
-   function wait_pager(func) {
-     var callee = arguments.callee;
-     if (window.AutoPagerize || window.AutoPatchWork) {
-       func();
-     } else {
-       if (!callee.funcs) {
-         callee.funcs = [];
-         connect_event('GM_AutoPagerizeLoaded');
-         connect_event('AutoPatchWork.request');
+   function $ev(ctx, async) {
+     var obj = {
+       ctx: ctx,
+       click: function(func) {
+         return listen(
+           'click',
+           function(ev, conn) {
+             if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
+             ev.preventDefault();
+             func(ev, conn);
+           });
+       },
+       key: function(func) {
+         var conn = listen(
+           'keypress',
+           function(ev, conn) {
+             var c = ev.keyCode || ev.charCode, key;
+             if (c == ev.which && c > 0x20) {
+               key = lc(String.fromCharCode(c));
+             } else if ($ev.key_map[c]) {
+               if (browser.webkit) return;
+               key = $ev.key_map[c];
+             } else {
+               key = c;
+             }
+             func(ev, key, conn);
+           });
+         if (browser.webkit) {
+           conn = listen(
+             'keydown',
+             function(ev) {
+               var c = ev.keyCode || ev.charCode, key;
+               if ($ev.key_map[c]) func(ev, $ev.key_map[c], conn);
+             },
+             conn);
+         }
+         return conn;
+       },
+       scroll: function(func) {
+         return listen('scroll', func);
+       },
+       resize: function(func) {
+         return listen('resize', func);
+       },
+       listen: function(name, func) {
+         if (name.constructor === Array) {
+           var conn;
+           each(name,
+                function(name) {
+                  conn = listen(name, func, conn);
+                });
+           return conn;
+         } else {
+           return listen(name, func);
+         }
        }
-       callee.funcs.push(func);
+     };
+     function listen(name, func, conn) {
+       if (!conn) conn = new $ev.Connection(ctx);
+       var timer, ev_last;
+       var listener = function(ev) {
+         if (conn.disconnected) return;
+         if (async) {
+           if (timer) {
+             ev_last = ev;
+           } else {
+             ev_last = null;
+             timer = setTimeout(
+               function() {
+                 if (conn.disconnected) return;
+                 timer = null;
+                 func(ev_last, conn);
+               }, async.constructor === Number ? async : 40);
+           }
+         } else {
+           func(ev, conn);
+         }
+       };
+       obj.ctx.addEventListener(name, listener, false);
+       conn.listeners.push([name, listener]);
+       return conn;
      }
-     function connect_event(name) {
-       window.document.addEventListener(
-         name,
-         function() {
-           each(callee.funcs, function(func) { func(); });
-           callee.funcs = null;
-           window.document.removeEventListener(name, arguments.callee, false);
-         }, false);
-     }
-   }
+     return obj;
+   };
+   $ev.KEY_BACKSPACE = 'Backspace';
+   $ev.KEY_ENTER     = 'Enter';
+   $ev.KEY_ESCAPE    = 'Escape';
+   $ev.KEY_SPACE     = 'Space';
+   $ev.KEY_END       = 'End';
+   $ev.KEY_HOME      = 'Home';
+   $ev.KEY_LEFT      = 'Left';
+   $ev.KEY_UP        = 'Up';
+   $ev.KEY_RIGHT     = 'Right';
+   $ev.KEY_DOWN      = 'Down';
+   $ev.key_map = {
+     8:  $ev.KEY_BACKSPACE,
+     13: $ev.KEY_ENTER,
+     27: $ev.KEY_ESCAPE,
+     32: $ev.KEY_SPACE,
+     35: $ev.KEY_END,
+     36: $ev.KEY_HOME,
+     37: $ev.KEY_LEFT,
+     38: $ev.KEY_UP,
+     39: $ev.KEY_RIGHT,
+     40: $ev.KEY_DOWN
+   };
+   $ev.Connection = function(ctx) {
+     this.ctx = ctx;
+     this.disconnected = false;
+     this.listeners = [];
+   };
+   $ev.Connection.prototype.disconnect = function() {
+     this.disconnected = true;
+     each(this.listeners,
+          bind(function(item) {
+                 this.ctx.removeEventListener(item[0], item[1], false);
+               }, this));
+   };
 
-   // 汎用
+   var Pager = new function() {
+     var loaded = ((_extension_data && _extension_data.has_pager) ||
+                   window.AutoPagerize || window.AutoPatchWork);
+     var funcs = [];
+     this.wait = function(func) {
+       if (loaded) {
+         func();
+       } else {
+         funcs.push(func);
+       }
+     };
+     $ev(window.document).listen(
+       ['GM_AutoPagerizeLoaded', 'AutoPatchWork.request'],
+       function(ev, conn) {
+         loaded = true;
+         each(funcs, function(func) { func(); });
+         conn.disconnect();
+       });
+   };
+
+   var $js = new function() {
+     var holder = $t('head')[0];
+     this.script = function(url) {
+       return new ctx().script(url);
+     };
+     function ctx(block) {
+       this.urls     = [];
+       this.scripts  = [];
+       this.load_cnt = 0;
+       this.block    = block;
+     };
+     ctx.prototype.script = function(url) {
+       log('$js#script: ' + url);
+       this.urls.push(url);
+       if (this.block) {
+         ++this.load_cnt;
+       } else {
+         this.add_load(url, true);
+       }
+       return this;
+     };
+     ctx.prototype.wait = function(func) {
+       log('$js#wait');
+       if (this.load_cnt > 0) {
+         var new_obj = new ctx(true);
+         this.wait = {ctx: new_obj, func: func};
+         return new_obj;
+       } else {
+         if (func) func();
+         return this;
+       }
+     };
+     ctx.prototype.add_load = function(url, raise) {
+       var elem = chk_ext_src('script', 'src', url);
+       if (raise) ++this.load_cnt;
+       if (elem) {
+	 if (elem.getAttribute('type') == 'script/cache') { // webkit
+           log('$js#labjs: ' + url);
+           var callee = arguments.callee, self = this;
+           setTimeout(function() { callee.apply(self, [url]); }, 0);
+         } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
+           log('$js#preexists: ' + url);
+           wait.apply(this, [elem]);
+         } else if (elem.readyState) { // for opera
+           load_cb.apply(this);
+         } else {
+           setTimeout(bind(load_cb, this), 0);
+         }
+       } else {
+         log('$js#load: ' + url);
+         elem = $c('script');
+         elem.async = false;
+         wait.apply(this, [elem]);
+         elem.src  = url;
+         holder.appendChild(elem);
+       }
+       function wait(elem) {
+         elem.addEventListener('load', bind(load_cb, this), false);
+       }
+       function load_cb() {
+         if (--this.load_cnt < 1) this.unblock();
+       }
+     };
+     ctx.prototype.fire = function() {
+       log('$js#fire');
+       this.block = false;
+       each(this.urls,
+            bind(function(url) {
+                   this.add_load(url);
+                 }, this));
+     };
+     ctx.prototype.unblock = function() {
+       log('$js#unblock');
+       if (this.wait) {
+         if (this.wait.func) this.wait.func();
+         if (this.wait.ctx)  this.wait.ctx.fire();
+       }
+     };
+   };
+
    function $(id, elem) {
      return window.document.getElementById(id);
    }
@@ -4326,205 +4521,6 @@
      }
      return ret;
    }
-
-   function $ev(ctx, async) {
-     var obj = {
-       ctx: ctx,
-       click: function(func) {
-         return listen(
-           'click',
-           function(ev, conn) {
-             if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
-             ev.preventDefault();
-             func(ev, conn);
-           });
-       },
-       key: function(func) {
-         var conn = listen(
-           'keypress',
-           function(ev, conn) {
-             var c = ev.keyCode || ev.charCode, key;
-             if (c == ev.which && c > 0x20) {
-               key = lc(String.fromCharCode(c));
-             } else if ($ev.key_map[c]) {
-               if (browser.webkit) return;
-               key = $ev.key_map[c];
-             } else {
-               key = c;
-             }
-             func(ev, key, conn);
-           });
-         if (browser.webkit) {
-           conn = listen(
-             'keydown',
-             function(ev) {
-               var c = ev.keyCode || ev.charCode, key;
-               if ($ev.key_map[c]) func(ev, $ev.key_map[c], conn);
-             },
-             conn);
-         }
-         return conn;
-       },
-       scroll: function(func) {
-         return listen('scroll', func);
-       },
-       resize: function(func) {
-         return listen('resize', func);
-       },
-       listen: function(name, func) {
-         if (name.constructor === Array) {
-           var conn;
-           each(name,
-                function(name) {
-                  conn = listen(name, func, conn);
-                });
-           return conn;
-         } else {
-           return listen(name, func);
-         }
-       }
-     };
-     function listen(name, func, conn) {
-       if (!conn) conn = new $ev.Connection(ctx);
-       var timer, ev_last;
-       var listener = function(ev) {
-         if (conn.disconnected) return;
-         if (async) {
-           if (timer) {
-             ev_last = ev;
-           } else {
-             ev_last = null;
-             timer = setTimeout(
-               function() {
-                 if (conn.disconnected) return;
-                 timer = null;
-                 func(ev_last, conn);
-               }, async.constructor === Number ? async : 40);
-           }
-         } else {
-           func(ev, conn);
-         }
-       };
-       obj.ctx.addEventListener(name, listener, false);
-       conn.listeners.push([name, listener]);
-       return conn;
-     }
-     return obj;
-   };
-   $ev.KEY_BACKSPACE = 'Backspace';
-   $ev.KEY_ENTER     = 'Enter';
-   $ev.KEY_ESCAPE    = 'Escape';
-   $ev.KEY_SPACE     = 'Space';
-   $ev.KEY_END       = 'End';
-   $ev.KEY_HOME      = 'Home';
-   $ev.KEY_LEFT      = 'Left';
-   $ev.KEY_UP        = 'Up';
-   $ev.KEY_RIGHT     = 'Right';
-   $ev.KEY_DOWN      = 'Down';
-   $ev.key_map = {
-     8:  $ev.KEY_BACKSPACE,
-     13: $ev.KEY_ENTER,
-     27: $ev.KEY_ESCAPE,
-     32: $ev.KEY_SPACE,
-     35: $ev.KEY_END,
-     36: $ev.KEY_HOME,
-     37: $ev.KEY_LEFT,
-     38: $ev.KEY_UP,
-     39: $ev.KEY_RIGHT,
-     40: $ev.KEY_DOWN
-   };
-   $ev.Connection = function(ctx) {
-     this.ctx = ctx;
-     this.disconnected = false;
-     this.listeners = [];
-   };
-   $ev.Connection.prototype.disconnect = function() {
-     this.disconnected = true;
-     each(this.listeners,
-          bind(function(item) {
-                 this.ctx.removeEventListener(item[0], item[1], false);
-               }, this));
-   };
-
-   var $js = new function() {
-     var holder = $t('head')[0];
-     this.script = function(url) {
-       return new ctx().script(url);
-     };
-     function ctx(block) {
-       this.urls     = [];
-       this.scripts  = [];
-       this.load_cnt = 0;
-       this.block    = block;
-     };
-     ctx.prototype.script = function(url) {
-       log('$js#script: ' + url);
-       this.urls.push(url);
-       if (this.block) {
-         ++this.load_cnt;
-       } else {
-         this.add_load(url, true);
-       }
-       return this;
-     };
-     ctx.prototype.wait = function(func) {
-       log('$js#wait');
-       if (this.load_cnt > 0) {
-         var new_obj = new ctx(true);
-         this.wait = {ctx: new_obj, func: func};
-         return new_obj;
-       } else {
-         if (func) func();
-         return this;
-       }
-     };
-     ctx.prototype.add_load = function(url, raise) {
-       var elem = chk_ext_src('script', 'src', url);
-       if (raise) ++this.load_cnt;
-       if (elem) {
-	 if (elem.getAttribute('type') == 'script/cache') { // webkit
-           log('$js#labjs: ' + url);
-           var callee = arguments.callee, self = this;
-           setTimeout(function() { callee.apply(self, [url]); }, 0);
-         } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
-           log('$js#preexists: ' + url);
-           wait.apply(this, [elem]);
-         } else if (elem.readyState) { // for opera
-           load_cb.apply(this);
-         } else {
-           setTimeout(bind(load_cb, this), 0);
-         }
-       } else {
-         log('$js#load: ' + url);
-         elem = $c('script');
-         elem.async = false;
-         wait.apply(this, [elem]);
-         elem.src  = url;
-         holder.appendChild(elem);
-       }
-       function wait(elem) {
-         elem.addEventListener('load', bind(load_cb, this), false);
-       }
-       function load_cb() {
-         if (--this.load_cnt < 1) this.unblock();
-       }
-     };
-     ctx.prototype.fire = function() {
-       log('$js#fire');
-       this.block = false;
-       each(this.urls,
-            bind(function(url) {
-                   this.add_load(url);
-                 }, this));
-     };
-     ctx.prototype.unblock = function() {
-       log('$js#unblock');
-       if (this.wait) {
-         if (this.wait.func) this.wait.func();
-         if (this.wait.ctx)  this.wait.ctx.fire();
-       }
-     };
-   };
 
    function load_css(url) {
      if (chk_ext_src('link', 'href', url)) {

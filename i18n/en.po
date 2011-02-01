@@ -43,6 +43,11 @@ msgstr "Disable"
 msgid "\u6709\u52b9"
 msgstr "Enable"
 
+#: ../pixplus.js:235 ../pixplus.js:239
+# "ページャ"
+msgid "\u30da\u30fc\u30b8\u30e3"
+msgstr "Pager"
+
 #: ../pixplus.js:236
 # "レコメンドを右側に縦1列に並べる"
 msgid "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b"
@@ -236,7 +241,7 @@ msgstr "Show comment posting form"
 #: ../pixplus.js:286
 # "マンガの見開き表示を使用する"
 msgid "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"
-msgstr "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"
+msgstr "Enable manga spreads"
 
 #: ../pixplus.js:289
 # "ツールバーアイコンを表示する"
@@ -248,42 +253,42 @@ msgstr "Show toolbar icon"
 msgid "\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"
 msgstr "Enable settings UI in page"
 
-#: ../pixplus.js:391
+#: ../pixplus.js:379
 # "エクステンション"
 msgid "\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3"
 msgstr "Extension"
 
-#: ../pixplus.js:397
+#: ../pixplus.js:385
 # "全般"
 msgid "\u5168\u822c"
 msgstr "General"
 
-#: ../pixplus.js:403
+#: ../pixplus.js:391
 # "ポップアップ"
 msgid "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7"
 msgstr "Popup"
 
-#: ../pixplus.js:409
+#: ../pixplus.js:397
 # "ブックマーク"
 msgid "\u30d6\u30c3\u30af\u30de\u30fc\u30af"
 msgstr "Bookmark"
 
-#: ../pixplus.js:952
+#: ../pixplus.js:939
 # "タグの並べ替え"
 msgid "\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048"
 msgstr "Reorder tags"
 
-#: ../pixplus.js:953
+#: ../pixplus.js:940
 # "ブックマークタグの並べ替えとグルーピング。1行1タグ。<br>-: セパレータ<br>*: 残り全部"
 msgid "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"
 msgstr "Reorder tags. 1 tag per line.<br>-: Separator<br>*: Others"
 
-#: ../pixplus.js:968
+#: ../pixplus.js:955
 # "タグのエイリアス"
 msgid "\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9"
 msgstr "Tag aliases"
 
-#: ../pixplus.js:969
+#: ../pixplus.js:956
 # "タグのエイリアス。自動入力に使用する。スペース区切り。"
 msgid "\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"
 msgstr "Tag aliases. Used for auto input. Separated by space."
