@@ -142,6 +142,9 @@
             }
           };
           sandbox.open_options = open_options;
+          sandbox.safeWindow.alert = function(msg) {
+            alert(String(msg));
+          };
 
           sandbox.__proto__ = sandbox.window;
           try {
@@ -149,7 +152,8 @@
             var src = '(' + func.toString() + ')(this.window, this.safeWindow, ' + data + ')';
             sandbox_eval(src, url, sandbox);
           } catch(ex) {
-            alert(ex);
+            //alert(ex);
+            throw ex;
           }
         }
         function sandbox_eval(code, codebase, sandbox) {
@@ -193,8 +197,8 @@
             {command: 'config'},
             function(data) {
               if (data.command == 'config') {
-                func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
-                                     conf:     data.data}));
+                func(JSON.stringify({base_uri:  chrome.extension.getURL('/'),
+                                     conf:      data.data}));
               }
             });
         } else if (window.safari) {
@@ -202,8 +206,8 @@
             'message',
             function(ev) {
               if (ev.name == 'config') {
-                func(JSON.stringify({base_uri: safari.extension.baseURI,
-                                     conf:     ev.message}));
+                func(JSON.stringify({base_uri:  safari.extension.baseURI,
+                                     conf:      ev.message}));
               }
             }, false);
           safari.self.tab.dispatchMessage('config', null);
@@ -1411,172 +1415,174 @@
      var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., \"\u304a\u3059\u3059\u3081\")]]', r_container);
      var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
      var float_wrap = null;
-     if (r_container) {
-       (function() {
-          if (conf.debug) {
-            // trap
-            var ir = window.IllustRecommender;
-            var _show = ir.prototype.show;
-            var _error = ir.error;
-            ir.prototype.show = function(res) {
-              try {
-                _show.apply(this, arguments);
-              } catch(ex) {
-                this.error(ex);
-              }
-            };
-            ir.prototype.error = function(msg) {
-              alert(msg);
-              if (_error) _error.apply(this, arguments);
-            };
-          }
-          /* no effect, probably
-          if (conf.workaround) {
-            var il = window.IllustList;
-            il.prototype.createPreloader = function(image) {
-              var img = window.jQuery(image), src = img.src;
-              img.src = this.LOADING_IMAGE_ICON_URL;
-              var preloader = new Image();
-              preloader.addEventListener(
-                'load',
-                function() {
-                  window.document.body.removeChild(preloader);
-                  img.src = src;
-                }, false);
-              preloader.src = src;
-              preloader.style.display = 'none';
-              window.document.body.appendChild(preloader);
-              this.preloaders.set(image, preloader);
-            };
-          }
-           */
-        })();
-       var de = window.document.documentElement;
-       var gallery;
+     if (!r_container) return;
 
-       wait_xpath(
-         './/ul[contains(concat(" ", @class, " "), " illusts ")]',
-         r_container,
-         function(illusts) {
-           if (!window.location.pathname.match(/^\/bookmark_add\.php/) && de.clientWidth >= 1175) {
-             if (conf.locate_recommend_right == 1) {
-               locate_right();
-             } else if (conf.locate_recommend_right == 2 &&
-                        $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-               Pager.wait(function() {
-                            locate_right(illusts);
-                            if (gallery) init_right_gallery(r_container);
-                          });
-             }
-           }
-           init_gallery(illusts);
-         });
+     (function() {
+        if (conf.debug) {
+          // trap
+          var ir = window.IllustRecommender;
+          var _show = ir.prototype.show;
+          var _error = ir.error;
+          ir.prototype.show = function(res) {
+            try {
+              _show.apply(this, arguments);
+            } catch(ex) {
+              this.error(ex);
+            }
+          };
+          ir.prototype.error = function(msg) {
+            alert(msg);
+            if (_error) _error.apply(this, arguments);
+          };
+        }
+        /* no effect, probably
+         if (conf.workaround) {
+         var il = window.IllustList;
+         il.prototype.createPreloader = function(image) {
+         var img = window.jQuery(image), src = img.src;
+         img.src = this.LOADING_IMAGE_ICON_URL;
+         var preloader = new Image();
+         preloader.addEventListener(
+         'load',
+         function() {
+         window.document.body.removeChild(preloader);
+         img.src = src;
+         }, false);
+         preloader.src = src;
+         preloader.style.display = 'none';
+         window.document.body.appendChild(preloader);
+         this.preloaders.set(image, preloader);
+         };
+         }
+         */
+      })();
 
-       function wait_xpath(xpath, root, func) {
-         var node = $x(xpath, root);
-         if (node) {
-           func(node);
-         } else {
-           $ev(root, true).listen(
-             ['DOMNodeInserted', 'DOMAttrModified'],
+     var de = window.document.documentElement;
+     var gallery;
+
+     function init_gallery(illusts) {
+       gallery = add_gallery({root:      illusts,
+                              xpath_col: './li',
+                              xpath_cap: './a[img]/following-sibling::text()[1]',
+                              xpath_tmb: 'preceding-sibling::a/img'},
+                             unpack_captions);
+       if (float_wrap) init_right_gallery(illusts);
+     }
+     function init_right_gallery(illusts) {
+       var floater = new Floater(float_wrap, illusts);
+       var timer;
+       gallery.onadditem.connect(init_pager, true);
+       function init_pager() {
+         var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
+         if (more) {
+           $ev(illusts, true).scroll(
              function(ev, conn) {
-               node = $x(xpath, root);
-               if (node) {
-                 func(node);
+               if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
+                 send_click(more);
                  conn.disconnect();
                }
              });
          }
-       }
-       function init_gallery(illusts) {
-         gallery = add_gallery({root:      illusts,
-                                xpath_col: './li',
-                                xpath_cap: './a[img]/following-sibling::text()[1]',
-                                xpath_tmb: 'preceding-sibling::a/img'},
-                               unpack_captions);
-         if (float_wrap) init_right_gallery(illusts);
-       }
-       function init_right_gallery(illusts) {
-         var floater = new Floater(float_wrap, illusts);
-         var timer;
-         gallery.onadditem.connect(init_pager, true);
-         function init_pager() {
-           var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
-           if (more) {
-             $ev(illusts, true).scroll(
-               function(ev, conn) {
-                 if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
-                   send_click(more);
-                   conn.disconnect();
-                 }
-               });
-           }
-           floater.update_height();
-           timer = null;
-         }
-       }
-
-       var switch_wrap;
-       function locate_right() {
-         var _show = r_container.show, _hide = r_container.hide;
-         r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
-         r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
-         function sv(show) {
-           r_switch.parentNode.removeChild(r_switch);
-           if (show) {
-             $('wrapper').style.width = '1160px';
-             $('pp-recom-wrap').style.display = '';
-             switch_wrap.appendChild(r_switch);
-           } else {
-             $('wrapper').style.width = '970px';
-             $('pp-recom-wrap').style.display = 'none';
-             r_switch_p.appendChild(r_switch);
-           }
-         }
-         locate_right_real();
-       }
-       function locate_right_real() {
-         var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
-         var wrap = $c('div');
-         var div = $c('div', wrap);
-         wrap.id = 'pp-recom-wrap';
-         if (anc) {
-           div.appendChild(anc.cloneNode(true));
-           if (r_switch) {
-             var r_switch_p_new = $c('span');
-             switch_wrap = $c('span', div);
-             switch_wrap.id = 'pp-recom-switch-wrap';
-             r_switch_p.replaceChild(r_switch_p_new, r_switch);
-             r_switch_p = r_switch_p_new;
-             switch_wrap.appendChild(r_switch);
-           }
-         }
-         r_container.parentNode.removeChild(r_container);
-         div.appendChild(r_container);
-
-         var contents = $('contents');
-         contents.parentNode.insertBefore(wrap, contents);
-         float_wrap = div;
-
-         write_css('#wrapper{width:1160px;}' +
-                   '#contents{width:970px;float:left;}' +
-                   '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
-                   '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
-                   '#pp-recom-switch-wrap:after{content:"]";}' +
-                   '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
-                   '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
-                   '#pp-recom-wrap li{float:none !important;}' +
-                   // 縦方向の隙間を詰める小細工
-                   '#illust_recommendation div.image_container{height:inherit;}' +
-                   '#illust_recommendation div.image_container a{display:block;}' +
-                   '#illust_recommendation div.image_container>br{display:none;}' +
-                   '#illust_recommendation div.caption{height:inherit;overflow:inherit;}' +
-                   // オートビューモード/もっと見る
-                   '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
-                   '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
+         floater.update_height();
+         timer = null;
        }
      }
+
+     var switch_wrap;
+     function locate_right() {
+       var _show = r_container.show, _hide = r_container.hide;
+       r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
+       r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
+       function sv(show) {
+         r_switch.parentNode.removeChild(r_switch);
+         if (show) {
+           $('wrapper').style.width = '1160px';
+           $('pp-recom-wrap').style.display = '';
+           switch_wrap.appendChild(r_switch);
+         } else {
+           $('wrapper').style.width = '970px';
+           $('pp-recom-wrap').style.display = 'none';
+           r_switch_p.appendChild(r_switch);
+         }
+       }
+       locate_right_real();
+     }
+     function locate_right_real() {
+       var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
+       var wrap = $c('div');
+       var div = $c('div', wrap);
+       wrap.id = 'pp-recom-wrap';
+       if (anc) {
+         div.appendChild(anc.cloneNode(true));
+         if (r_switch) {
+           var r_switch_p_new = $c('span');
+           switch_wrap = $c('span', div);
+           switch_wrap.id = 'pp-recom-switch-wrap';
+           r_switch_p.replaceChild(r_switch_p_new, r_switch);
+           r_switch_p = r_switch_p_new;
+           switch_wrap.appendChild(r_switch);
+         }
+       }
+       r_container.parentNode.removeChild(r_container);
+       div.appendChild(r_container);
+
+       var contents = $('contents');
+       contents.parentNode.insertBefore(wrap, contents);
+       float_wrap = div;
+
+       write_css('#wrapper{width:1160px;}' +
+                 '#contents{width:970px;float:left;}' +
+                 '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
+                 '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
+                 '#pp-recom-switch-wrap:after{content:"]";}' +
+                 '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
+                 '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
+                 '#pp-recom-wrap li{float:none !important;}' +
+                 // 縦方向の隙間を詰める小細工
+                 '#illust_recommendation div.image_container{height:inherit;}' +
+                 '#illust_recommendation div.image_container a{display:block;}' +
+                 '#illust_recommendation div.image_container>br{display:none;}' +
+                 '#illust_recommendation div.caption{height:inherit;overflow:inherit;}' +
+                 // オートビューモード/もっと見る
+                 '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
+                 '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
+     }
+
+     function wait_xpath(xpath, root, func) {
+       var node = $x(xpath, root);
+       if (node) {
+         func(node);
+       } else {
+         $ev(root, true).listen(
+           ['DOMNodeInserted', 'DOMAttrModified'],
+           function(ev, conn) {
+             node = $x(xpath, root);
+             if (node) {
+               func(node);
+               conn.disconnect();
+             }
+           });
+       }
+     }
+     wait_xpath(
+       './/ul[contains(concat(" ", @class, " "), " illusts ")]',
+       r_container,
+       function(illusts) {
+         if (!window.location.pathname.match(/^\/bookmark_add\.php/) && de.clientWidth >= 1175) {
+           if (conf.locate_recommend_right == 1) {
+             locate_right();
+           } else if (conf.locate_recommend_right == 2 &&
+                      $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
+             Pager.wait(function() {
+                          locate_right();
+                          if (gallery) init_right_gallery(r_container);
+                        });
+           }
+         }
+         init_gallery(illusts);
+       });
    }
+
    function init_taglist() {
      var bm_tag_list = $('bookmark_list');
      if (bm_tag_list) {
@@ -4212,7 +4218,8 @@
 
    var Pager = new function() {
      var loaded = ((_extension_data && _extension_data.has_pager) ||
-                   window.AutoPagerize || window.AutoPatchWork);
+                   window.AutoPagerize || window.AutoPatchWork ||
+                   $('AutoPatchWork-Bar'));
      var funcs = [];
      this.wait = function(func) {
        if (loaded) {
@@ -4221,8 +4228,9 @@
          funcs.push(func);
        }
      };
+     if (loaded) return;
      $ev(window.document).listen(
-       ['GM_AutoPagerizeLoaded', 'AutoPatchWork.request'],
+       ['GM_AutoPagerizeLoaded', 'AutoPatchWork.initialized'],
        function(ev, conn) {
          loaded = true;
          each(funcs, function(func) { func(); });
