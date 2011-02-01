@@ -1179,8 +1179,7 @@
          !(window.opera && LS.u && LS.get('extension', 'show_config_ui'))) return;
 
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
-     var sp_manga_tb = $x('//div[@id="manga_top"]/div[span[@id="total_clap"]]/span[img[contains(@src, "spacer.gif")]]');
-     if (menu || sp_manga_tb) {
+     if (menu) {
        function fire_event() {
          var ev = window.document.createEvent('Event');
          ev.initEvent('pixplusConfigToggled', true, true);
@@ -1203,7 +1202,9 @@
          }
        }
 
-       var anc = $c('a');
+       var li  = $c('li');
+       menu.insertBefore(li, menu.firstChild);
+       var anc = $c('a', li);
        anc.href = 'javascript:void(0)';
        anc.textContent = 'pixplus';
        anc.addEventListener(
@@ -1219,14 +1220,6 @@
              toggle();
            }
          }, false);
-       if (menu) {
-         var li  = $c('li');
-         li.appendChild(anc);
-         menu.insertBefore(li, menu.firstChild);
-       } else if (sp_manga_tb) {
-         sp_manga_tb.parentNode.insertBefore(anc, sp_manga_tb.nextSibling);
-         anc.parentNode.insertBefore(sp_manga_tb.cloneNode(true), anc.nextSibling);
-       }
 
        var div, tag_order_textarea, tag_alias_table;
        function create() {
