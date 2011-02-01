@@ -357,18 +357,6 @@
        img: {
          sprite: 'http://source.pixiv.net/source/images/sprite_20101101.png'
        }
-     },
-
-     recommender: {
-       loaded: false,
-       funcs:  [],
-       wait:   function(func) {
-         if (this.loaded) {
-           func();
-         } else {
-           this.funcs.push(func);
-         }
-       }
      }
    };
    if (window.pixplus || (window.opera && window.opera.pixplus)) {
@@ -800,7 +788,6 @@
        ev.initEvent('pixplusBMTagToggled', true, true);
        window.document.dispatchEvent(ev);
      });
-
 
    /* __CONFIG_UI_BEGIN__ */
    function ConfigUI(root, st, options_page, msg_filter) {
@@ -1466,22 +1453,41 @@
         })();
        var de = window.document.documentElement;
        var gallery;
-       pp.recommender.wait(
-         function() {
-           var illusts = $x('.//ul[contains(concat(" ", @class, " "), " illusts ")]', r_container);
+
+       wait_xpath(
+         './/ul[contains(concat(" ", @class, " "), " illusts ")]',
+         r_container,
+         function(illusts) {
            if (!window.location.pathname.match(/^\/bookmark_add\.php/) && de.clientWidth >= 1175) {
              if (conf.locate_recommend_right == 1) {
                locate_right();
              } else if (conf.locate_recommend_right == 2 &&
                         $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
                wait_pager(function() {
-                            locate_right();
-                            if (gallery) init_right_gallery(illusts);
+                            locate_right(illusts);
+                            if (gallery) init_right_gallery(r_container);
                           });
              }
            }
            init_gallery(illusts);
          });
+
+       function wait_xpath(xpath, root, func) {
+         var node = $x(xpath, root);
+         if (node) {
+           func(node);
+         } else {
+           $ev(root, true).listen(
+             ['DOMNodeInserted', 'DOMAttrModified'],
+             function(ev, conn) {
+               node = $x(xpath, root);
+               if (node) {
+                 func(node);
+                 conn.disconnect();
+               }
+             });
+         }
+       }
        function init_gallery(illusts) {
          gallery = add_gallery({root:      illusts,
                                 xpath_col: './li',
@@ -2038,20 +2044,6 @@
           });
 
      load_css(pp.url.css.bookmark_add);
-
-     if (chk_ext_src('script', 'src', pp.url.js.illust_recommender)) {
-       //pp.recommender.loaded = true;
-       //each(pp.recommender.funcs, function(func) { func(); });
-       (function() {
-          var _show = window.IllustRecommender.prototype.show;
-          window.IllustRecommender.prototype.show = function() {
-            _show.apply(this, Array.prototype.slice.apply(arguments));
-            pp.recommender.loaded = true;
-            each(pp.recommender.funcs, function(func) { func(); });
-            window.IllustRecommender.prototype.show = _show;
-          };
-        })();
-     }
 
      (function($js) {
         if (!$x('//script[contains(@src, "/rating_manga")]')) {
@@ -4380,13 +4372,23 @@
          return listen('resize', func);
        },
        listen: function(name, func) {
-         return listen(name, func);
+         if (name.constructor === Array) {
+           var conn;
+           each(name,
+                function(name) {
+                  conn = listen(name, func, conn);
+                });
+           return conn;
+         } else {
+           return listen(name, func);
+         }
        }
      };
      function listen(name, func, conn) {
        if (!conn) conn = new $ev.Connection(ctx);
        var timer, ev_last;
        var listener = function(ev) {
+         if (conn.disconnected) return;
          if (async) {
            if (timer) {
              ev_last = ev;
@@ -4394,6 +4396,7 @@
              ev_last = null;
              timer = setTimeout(
                function() {
+                 if (conn.disconnected) return;
                  timer = null;
                  func(ev_last, conn);
                }, async.constructor === Number ? async : 40);
@@ -4432,14 +4435,15 @@
    };
    $ev.Connection = function(ctx) {
      this.ctx = ctx;
+     this.disconnected = false;
      this.listeners = [];
    };
    $ev.Connection.prototype.disconnect = function() {
-     var self = this;
+     this.disconnected = true;
      each(this.listeners,
-          function(item) {
-            self.ctx.removeEventListener(item[0], item[1], false);
-          });
+          bind(function(item) {
+                 this.ctx.removeEventListener(item[0], item[1], false);
+               }, this));
    };
 
    var $js = new function() {
