@@ -2324,12 +2324,12 @@
        this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
        $ev(this.olc_prev).click(
          bind(function(ev) {
-                ev.cancelBubble = true;
+                ev.stopPropagation();
                 this.prev(false, false, true);
               }, this));
        $ev(this.olc_next).click(
          bind(function(ev) {
-                ev.cancelBubble = true;
+                ev.stopPropagation();
                 this.next(false, false, true);
               }, this));
      }
@@ -3720,7 +3720,7 @@
          if (ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
          if (ev_key_func && ev_key_func(ev, key)) return;
          if (key == $ev.KEY_ESCAPE) {
-           ev.cancelBubble = true;
+           ev.stopPropagation();
            input_tag.blur();
          }
        });
