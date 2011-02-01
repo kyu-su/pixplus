@@ -1037,7 +1037,7 @@
        row.className = 'pp-conf-section';
        var cell = row.insertCell(-1);
        cell.setAttribute('colspan', '4');
-       cell.textContent = label;
+       cell.textContent = msg_filter(label);
        idx = 0;
        return row;
      }
