@@ -16,9 +16,9 @@
  * 閲覧できないマンガがあったバグを修正。
  * ズーム機能でFirefoxをサポート。
  * 企画目録関連ページに対応。
- * マンガのスライドモード廃止に伴ってconf.default_manga_typeを削除。
+ * マンガページの変更(見開き表示など)に対応。それに伴ってconf.default_manga_typeとconf.popup_manga_tbを削除。
  * 作品管理ページで動作しなくなっていた不具合を修正。
- * マンガページの変更に伴ってconf.popup_manga_tbを削除。
+ * Chrome/SafariでAutoPatchWorkに対応。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
