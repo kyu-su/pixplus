@@ -1606,23 +1606,19 @@
        }
      }
 
-     if (conf.float_tag_list == 1) {
-       make_float();
-     } else if (conf.float_tag_list == 2) {
-       Pager.wait(make_float);
-     }
-     function make_float() {
-       var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
-       if (cont) {
-         var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
-         if (wrap) {
-           write_css('.ui-layout-east{float:right;}' +
-                     '.ui-layout-west .area_new{margin:0px;}');
-           var floater = new Floater(wrap, cont);
-           window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
+     Floater.auto_run(
+       function() {
+         var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
+         if (cont) {
+           var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
+           if (wrap) {
+             write_css('.ui-layout-east{float:right;}' +
+                       '.ui-layout-west .area_new{margin:0px;}');
+             var floater = new Floater(wrap, cont);
+             window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
+           }
          }
-       }
-     }
+       });
      return bm_tag_list;
    }
    function init_illust_page_bookmark() {
@@ -1716,18 +1712,21 @@
            window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
          }
 
-         var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
-         var form = $x('//form[@action="bookmark_setting.php"]');
-         if (msgbox && form) {
-           msgbox.parentNode.removeChild(msgbox);
-           form.insertBefore(msgbox, form.firstChild);
-           write_css('.msgbox_bottom{border:0px !important;}' +
-                     // ポップアップより下(z-index:90)に表示する
-                     '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
-                     '.msgbox_bottom[float]:hover{opacity:1;}');
+         Floater.auto_run(
+           function() {
+             var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
+             var form = $x('//form[@action="bookmark_setting.php"]');
+             if (msgbox && form) {
+               msgbox.parentNode.removeChild(msgbox);
+               form.insertBefore(msgbox, form.firstChild);
+               write_css('.msgbox_bottom{border:0px !important;}' +
+                         // ポップアップより下(z-index:90)に表示する
+                         '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
+                         '.msgbox_bottom[float]:hover{opacity:1;}');
 
-           new Floater(msgbox, null, true);
-         }
+               new Floater(msgbox, null, true);
+             }
+           });
        }
      } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
        switch(options.mode) {
@@ -3968,6 +3967,13 @@
      $ev(window, true).scroll(Floater.update_float);
      $ev(window, true).resize(Floater.update_height);
      Floater.initialized = true;
+   };
+   Floater.auto_run = function(func) {
+     if (conf.float_tag_list == 1) {
+       func();
+     } else if (conf.float_tag_list == 2) {
+       Pager.wait(func);
+     }
    };
    Floater.update_float = function() {
      each(Floater.instances, function(inst) { inst.update_float(); });
