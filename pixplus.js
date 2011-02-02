@@ -2918,7 +2918,8 @@
      } else if (conf.popup.auto_manga_p && (conf.popup.auto_manga & 4) && this.manga.usable && !this.item.manga.viewed) {
        this.set_manga_mode(true);
      } else {
-       this.set_images([loader.image], [img_size], this.manga.usable);
+       var url = this.manga.usable ? urlmode(this.item.medium, 'manga') : null;
+       this.set_images([{image: loader.image, size: img_size, url: url}], this.manga.usable);
        this.update_olc();
        Popup.onload.emit(this);
        if (this.manga.usable) this.manga.preload();
@@ -2954,7 +2955,7 @@
      this.item.manga.viewed = true;
      //this.manga.page = page;
      this.set_manga_button_text();
-     this.set_images(loader.image, null, true);
+     this.set_images(loader.images, true);
      this.manga.preload();
    };
    Popup.prototype.set_manga_button_text = function() {
@@ -2966,9 +2967,9 @@
    Popup.prototype.adjust_image_size = function() {
      var width = 0, height = 0;
      each(this.images,
-          function(img) {
-            width += img.size.width;
-            if (img.size.height > height) height = img.size.height;
+          function(image) {
+            width += image.size.width;
+            if (image.size.height > height) height = image.size.height;
           });
 
      var de = window.document.documentElement;
@@ -2977,29 +2978,30 @@
      if (width > mw || height > mh) {
        var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
        each(this.images,
-            function(img) {
-              var height = Math.floor(img.size.height * scale);
-              img.image.style.height = height + 'px';
+            function(image) {
+              var height = Math.floor(image.size.height * scale);
+              image.image.style.height = height + 'px';
             });
      }
    };
-   Popup.prototype.set_images = function(images, sizes, no_zoom) {
+   Popup.prototype.set_images = function(images, no_zoom) {
      each(this.images, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
      this.images = [];
 
      var self = this;
      each(images,
-          function(img, idx) {
-            img.style.cssText = '';
+          function(entry, idx) {
+            var image = entry.image || entry;
+            image.style.cssText = '';
             var anc = $c('a', self.img_div);
-            anc.href = img.src.replace(/_[sm](\.\w+)$/, '$1');
-            anc.appendChild(img);
+            anc.href = entry.url || image.src.replace(/_[sm](\.\w+)$/, '$1');
+            anc.appendChild(image);
 
-            var size = {width: img.width, height: img.height};
-            self.images.push({image:        img,
+            var size = {width: image.width, height: image.height};
+            self.images.push({image:        image,
                               anchor:       anc,
                               size:         size,
-                              display_size: sizes && sizes[idx] || size});
+                              display_size: entry.size || size});
           });
 
      var zoom = this.zoom_scale = 1;
@@ -3082,7 +3084,6 @@
 
    Popup.prototype.locate = function() {
      var de = window.document.documentElement;
-     this.img_div.style.margin = '';
      this.root_div.style.minHeight = '';
      if (this.tag_editing) {
        this.root_div.style.minWidth = '746px';
@@ -3105,12 +3106,15 @@
        if (this.tag_editing && cap_height < 300) cap_height = 300;
        this.comment_wrap.style.maxHeight = (cap_height < 48 ? 48 : cap_height) + 'px';
 
+       /*
        if (!this.expand_header) {
+         this.img_div.style.margin = '';
          var ph = this.caption.offsetHeight + 48;
          if (this.img_div.offsetHeight < ph) {
            this.img_div.style.margin = (ph - this.img_div.offsetHeight) / 2 + 'px 0px';
          }
        }
+        */
 
        if (conf.popup.overlay_control > 0) {
          var width;
@@ -3125,8 +3129,8 @@
          this.olc_next.style.height = this.img_div.offsetHeight + 'px';
        }
      }
-     this.root_div.style.left = ((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
-     this.root_div.style.top  = ((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
+     this.root_div.style.left = Math.floor((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
+     this.root_div.style.top  = Math.floor((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
    };
 
    Popup.prototype.update_olc = function(page) {
@@ -3150,17 +3154,18 @@
      }
    };
    Popup.prototype.open = function(big, same_page) {
-     var url;
-     if (this.manga.usable) {
-       if (this.manga.page >= 0) {
-         url = big ? this.images[0].anchor.href : this.manga.get_url(this.manga.page);
-       } else {
-         url = big ? urlmode(this.item.medium, 'manga') : this.item.medium;
-       }
+     if (this.manga.usable && this.manga.page < 0) {
+       this.open_url(big ? urlmode(this.item.medium, 'manga') : this.item.medium, same_page);
+     } else if (big) {
+       each(this.images,
+            function(image) {
+              alert(image.anchor.href);
+              this.open_url(image.anchor.href, same_page);
+            },
+            this);
      } else {
-       url = big ? this.images[0].anchor.href : this.item.medium;
+       this.open_url(this.manga.usable ? this.manga.get_url(this.manga.page) : this.item.medium, same_page);
      }
-     this.open_url(url, same_page);
    };
    Popup.prototype.open_image_response = function(same_page) {
      this.has_image_response && this.open_url(this.res_btn.href, same_page);
@@ -3458,7 +3463,6 @@
    };
 
    Popup.MangaLoader = function(item, page, load_cb, error_cb) {
-     var self = this;
      this.item      = item;
      this.page      = page;
      this.load_cb   = load_cb;
@@ -3470,45 +3474,45 @@
      this.page_inc  = 1;
      this.page_dec  = 1;
 
-     this.image     = null;
+     this.images    = null;
      this.html      = null;
      this.load_html = conf.popup.manga_spread;
      /* Popup.Loaderで画像URLのパースに失敗するとGalleryItem#img_url_*がnull */
      getimg(this.image_url,
             bind(Popup.MangaLoader.prototype.load_image, this),
-            function() {
-              self.onerror('Failed to load manga image');
-            });
+            bind(function() {
+                   this.onerror('Failed to load manga image');
+                 }, this));
      if (this.load_html) {
        if (item.manga_html) {
          this.parse_html(item.manga_html);
        } else {
          geturl(urlmode(item.medium, 'manga'),
-                function(text) {
-                  self.parse_html(text);
-                },
-                function() {
-                  self.onerror('Failed to load manga page');
-                });
+                bind(function(text) {
+                       this.parse_html(text);
+                     }, this),
+                bind(function() {
+                       this.onerror('Failed to load manga page');
+                     }, this));
        }
      }
      return this;
    };
    Popup.MangaLoader.prototype.load_image = function(image) {
-     if (this.image) {
+     if (this.images) {
        var i;
-       for(i = 0; i < this.image.length; ++i) {
-         if (image.src === this.image[i]) this.image[i] = image;
+       for(i = 0; i < this.images.length; ++i) {
+         if (image.src === this.images[i]) this.images[i] = image;
        }
-       for(i = 0; i < this.image.length; ++i) {
-         if (this.image[i].constructor === String) return;
+       for(i = 0; i < this.images.length; ++i) {
+         if (this.images[i].constructor === String) return;
        }
        this.onload();
      } else  if (!this.load_html || this.html) {
-       this.image = [image];
+       this.images = [image];
        this.onload();
      } else {
-       this.image = image;
+       this.images = image;
      }
    };
    Popup.MangaLoader.prototype.parse_html = function(html) {
@@ -3518,37 +3522,36 @@
      var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
      var page = 0;
      for(var i = 0; i + 1 < containers.length; i += 2) {
-       var images = containers[i + 1].split(/<script[^>]*>[^<]*(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)[^<]*<\/script><img[^>]+data-mode=\"([^\"]*)\"/i);
+       var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
        if (images.length >= 6) {
          if (this.page >= page && this.page <= (page + 1)) {
-           var url, url1 = images[1], url2 = images[4];
+           var url, url1 = images[2], url2 = images[5];
            if (this.image_url === url1) {
              this.pages.push(this.page + 1);
              this.page_inc = 2;
-             this.image = [this.image || url1, url = url2];
+             this.images = [this.images || url1, url = url2];
            } else if (this.image_url === url2) {
              this.pages.unshift(this.page - 1);
              this.page_dec = 2;
-             this.image = [url = url1, this.image || url2];
+             this.images = [url = url1, this.images || url2];
            } else {
              this.onerror('Unexpected image url');
              return;
            }
-           if (images[2] == '1') this.image.reverse();
+           if (images[1] == 'unshift') this.images.reverse();
 
-           var self = this;
            getimg(url,
                   bind(Popup.MangaLoader.prototype.load_image, this),
-                  function() {
-                    self.onerror('Failed to load manga image');
-                  });
+                  bind(function() {
+                         this.onerror('Failed to load manga image');
+                       }, this));
            return;
          }
          page += 2;
        } else if (images.length >= 3) {
          if (page == this.page) {
-           if (this.image) {
-             this.image = [this.image];
+           if (this.images) {
+             this.images = [this.images];
              this.onload();
            }
            return;
@@ -4217,9 +4220,10 @@
    $ev.Connection.prototype.disconnect = function() {
      this.disconnected = true;
      each(this.listeners,
-          bind(function(item) {
-                 this.ctx.removeEventListener(item[0], item[1], false);
-               }, this));
+          function(item) {
+            this.ctx.removeEventListener(item[0], item[1], false);
+          },
+          this);
    };
 
    var Pager = new function() {
@@ -4311,9 +4315,10 @@
        log('$js#fire');
        this.block = false;
        each(this.urls,
-            bind(function(url) {
-                   this.add_load(url);
-                 }, this));
+            function(url) {
+              this.add_load(url);
+            },
+            this);
      };
      ctx.prototype.unblock = function() {
        log('$js#unblock');
@@ -4412,10 +4417,10 @@
      return false;
    }
 
-   function each(list, func) {
+   function each(list, func, obj) {
      if (!list) return list;
      for(var i = 0; i < list.length; ++i) {
-       if (func(list[i], i)) break;
+       if (func.apply(obj || window, [list[i], i])) break;
      }
      return list;
    }
@@ -4438,14 +4443,13 @@
    }
    function parseopts(str) {
      var opts = {};
-     each(
-       str.replace(/^.*?\?/, '').replace(/#.*$/, '').split('&'),
-       function(p) {
-         var pair = p.split('=', 2);
-         if (pair[0] && pair[1]) {
-           opts[pair[0]] = pair[1];
-         }
-       });
+     each(str.replace(/^.*?\?/, '').replace(/#.*$/, '').split('&'),
+          function(p) {
+            var pair = p.split('=', 2);
+            if (pair[0] && pair[1]) {
+              opts[pair[0]] = pair[1];
+            }
+          });
      return opts;
    }
 
