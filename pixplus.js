@@ -337,6 +337,8 @@
      load_css:      load_css,
      write_css:     write_css,
 
+     open:          function() { window.open.apply(window, Array.prototype.slice.apply(arguments)); },
+
      rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8},
      rpc_usable:    false,
      rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
@@ -847,7 +849,7 @@
                      '     ' + gen_js('\n     ', 2),
                      '   }',
                      ' })();'].join('\n');
-           window.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+           pp.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
          }, false);
        head.appendChild(btn_userjs);
      }
@@ -1205,7 +1207,7 @@
              if (_extension_data.open_options) {
                _extension_data.open_options();
              } else {
-               window.open(_extension_data.base_uri + 'options.html');
+               pp.open(_extension_data.base_uri + 'options.html');
              }
            } else {
              toggle();
@@ -2299,7 +2301,6 @@
      this.a_stacc.textContent   = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
      this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
      this.img_div               = $c('div',     this.root_div,      'pp-img-div');
-     this.images                = [];
 
      if (conf.popup.overlay_control > 0) {
        this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
@@ -2319,6 +2320,7 @@
      this.init_display();
      this.init_comments();
 
+     this.images = { };
      this.bm_loading = false;
      this.rating_enabled = false;
      this.viewer_comments_enabled = false;
@@ -2334,7 +2336,7 @@
        usable:      false,
        enabled:     false,
        page:        -1,
-       pages:       [-1],
+       pages:       null,
        page_count:  -1,
        page_inc:    1,
        page_dec:    -1,
@@ -2956,17 +2958,20 @@
      //this.manga.page = page;
      this.set_manga_button_text();
      this.set_images(loader.images, true);
+     this.images.order = [];
+     each(loader.pages, function(page) { this.images.order.push(page.image_index); }, this);
+     console.log(this.images);
      this.manga.preload();
    };
    Popup.prototype.set_manga_button_text = function() {
      var pages = [];
-     each(this.manga.pages, function(p) { pages.push(p + 1); });
+     each(this.manga.pages, function(p) { pages.push(p.page + 1); });
      this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
    };
 
    Popup.prototype.adjust_image_size = function() {
      var width = 0, height = 0;
-     each(this.images,
+     each(this.images.list,
           function(image) {
             width += image.size.width;
             if (image.size.height > height) height = image.size.height;
@@ -2977,7 +2982,7 @@
      var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
      if (width > mw || height > mh) {
        var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
-       each(this.images,
+       each(this.images.list,
             function(image) {
               var height = Math.floor(image.size.height * scale);
               image.image.style.height = height + 'px';
@@ -2985,28 +2990,33 @@
      }
    };
    Popup.prototype.set_images = function(images, no_zoom) {
-     each(this.images, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
-     this.images = [];
+     each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
+     this.images = {
+       list:   [],
+       order:  [],
+       curidx: 0
+     };
 
-     var self = this;
      each(images,
           function(entry, idx) {
             var image = entry.image || entry;
             image.style.cssText = '';
-            var anc = $c('a', self.img_div);
+            var anc = $c('a', this.img_div);
             anc.href = entry.url || image.src.replace(/_[sm](\.\w+)$/, '$1');
             anc.appendChild(image);
 
             var size = {width: image.width, height: image.height};
-            self.images.push({image:        image,
-                              anchor:       anc,
-                              size:         size,
-                              display_size: entry.size || size});
-          });
+            this.images.list.push({image:        image,
+                                   anchor:       anc,
+                                   size:         size,
+                                   display_size: entry.size || size});
+            this.images.order.push(idx);
+          },
+          this);
 
      var zoom = this.zoom_scale = 1;
      if (!no_zoom && conf.popup.auto_zoom) {
-       var width = this.images[0].size.width, height = this.images[0].size.height;
+       var width = this.images.list[0].size.width, height = this.images.list[0].size.height;
        var len = width > height ? width : height;
        if (len <= conf.popup.auto_zoom) {
          zoom = Math.floor(conf.popup.auto_zoom_size / len);
@@ -3049,12 +3059,12 @@
      }
    };
    Popup.prototype.set_zoom = function(zoom) {
-     if (this.images.length != 1) return;
+     if (this.images.list.length != 1) return;
      zoom = zoom < 1 ? 1 : Math.floor(zoom);
      if (zoom == this.zoom_scale) return;
      this.zoom_scale = zoom;
 
-     var img = this.images[0];
+     var img = this.images.list[0];
      if (this.zoom_scale == 1) {
        if (img.image_unscaled) {
          img.image.parentNode.replaceChild(img.image_unscaled, img.image);
@@ -3073,7 +3083,7 @@
    };
    Popup.prototype.update_info = function() {
      var info_size = [];
-     each(this.images,
+     each(this.images.list,
           function(img) {
             var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
             info_size.push(img.display_size.width + 'x' + img.display_size.height + '(' + scale + 'x)');
@@ -3157,12 +3167,8 @@
      if (this.manga.usable && this.manga.page < 0) {
        this.open_url(big ? urlmode(this.item.medium, 'manga') : this.item.medium, same_page);
      } else if (big) {
-       each(this.images,
-            function(image) {
-              alert(image.anchor.href);
-              this.open_url(image.anchor.href, same_page);
-            },
-            this);
+       var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
+       this.open_url(this.images.list[idx].anchor.href, same_page);
      } else {
        this.open_url(this.manga.usable ? this.manga.get_url(this.manga.page) : this.item.medium, same_page);
      }
@@ -3360,7 +3366,7 @@
      if (same_page) {
        window.location.href = url;
      } else {
-       window.open(url);
+       pp.open(url);
      }
    };
    Popup.prototype.scroll_caption = function(pos) {
@@ -3463,20 +3469,20 @@
    };
 
    Popup.MangaLoader = function(item, page, load_cb, error_cb) {
-     this.item      = item;
-     this.page      = page;
-     this.load_cb   = load_cb;
-     this.error_cb  = error_cb;
+     this.item       = item;
+     this.page       = page;
+     this.load_cb    = load_cb;
+     this.error_cb   = error_cb;
 
-     this.cancelled = false;
-     this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
-     this.pages     = [page];
-     this.page_inc  = 1;
-     this.page_dec  = 1;
+     this.cancelled  = false;
+     this.image_url  = item.img_url_base + '_p' + page + item.img_url_ext;
+     this.pages      = [{page: page, image_index: 0}];
+     this.page_inc   = 1;
+     this.page_dec   = 1;
 
-     this.images    = null;
-     this.html      = null;
-     this.load_html = conf.popup.manga_spread;
+     this.images     = null;
+     this.html       = null;
+     this.load_html  = conf.popup.manga_spread;
      /* Popup.Loaderで画像URLのパースに失敗するとGalleryItem#img_url_*がnull */
      getimg(this.image_url,
             bind(Popup.MangaLoader.prototype.load_image, this),
@@ -3527,18 +3533,22 @@
          if (this.page >= page && this.page <= (page + 1)) {
            var url, url1 = images[2], url2 = images[5];
            if (this.image_url === url1) {
-             this.pages.push(this.page + 1);
+             this.pages.push({page: this.page + 1, image_index: 1});
              this.page_inc = 2;
              this.images = [this.images || url1, url = url2];
            } else if (this.image_url === url2) {
-             this.pages.unshift(this.page - 1);
+             this.pages.unshift({page: this.page - 1, image_index: 0});
+             this.pages[1].image_index = 1;
              this.page_dec = 2;
              this.images = [url = url1, this.images || url2];
            } else {
              this.onerror('Unexpected image url');
              return;
            }
-           if (images[1] == 'unshift') this.images.reverse();
+           if (images[1] == 'unshift') {
+             this.pages.reverse();
+             this.images.reverse();
+           }
 
            getimg(url,
                   bind(Popup.MangaLoader.prototype.load_image, this),
