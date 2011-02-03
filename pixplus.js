@@ -614,9 +614,13 @@
      return url;
    }
 
-   //var defineMagicFunction = window.opera ? window.opera.defineMagicFunction : wrap_global_function;
    var defineMagicFunction = wrap_global_function;
    function wrap_global_function(name, func) {
+     if (window.opera && opera.version() < 11) { // for debug
+       window.opera.defineMagicFunction(name, func);
+       return;
+     }
+
      if (!name || !func) return;
      if (window[name]) {
        // 名前つき関数が定義濟みのときにwindow.__define[GS]etter__()するとOperaとFirefoxでエラーが出る。
@@ -4619,8 +4623,9 @@
      safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
    }
 
-   // loading => interactive => complete
-   if (window.opera && (window.document.readyState == 'loading')) {
+   // 10.63+ loading => interactive => complete
+   if (window.opera && (window.document.readyState == 'loading' ||
+                        (opera.version() < 10.50 && window.document.readyState == 'interactive'))) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
      init_pixplus();
