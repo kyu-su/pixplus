@@ -1778,8 +1778,16 @@
           })(function() {
                if (window.location.hash.match(/^#pp_page=(\d+)$/)) {
                  var page = parseInt(RegExp.$1);
-                 window.pixiv.manga.updatePosition(window.pixiv.manga.findPosition(page));
-                 window.pixiv.manga.move(page);
+                 each(window.pixiv.context.images,
+                      function(ary, idx) {
+                        if ((page + 1) <= ary.length) {
+                          window.pixiv.manga.updatePosition(window.pixiv.manga.findPosition(idx));
+                          window.pixiv.manga.move(idx);
+                          return true;
+                        }
+                        page -= ary.length;
+                        return false;
+                      });
                } else if (window.location.hash.match(/^#pp_manga_tb$/)) {
                  window.pixiv.manga.toggleView();
                }
@@ -2349,6 +2357,8 @@
          this.enabled     = false;
          this.page        = -1;
          this.page_count  = -1;
+         this.page_inc    = 1;
+         this.page_dec    = -1;
          this.preload_map = {};
        },
        preload: function() {
@@ -2358,9 +2368,6 @@
              new Popup.MangaLoader(self.item, page);
            }
          }
-       },
-       get_url: function(page) {
-         return 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + self.item.id + '#pp_page=' + page;
        }
      };
 
@@ -2954,11 +2961,11 @@
    };
    Popup.prototype.manga_onload = function(loader, page) {
      this.complete();
+     //this.manga.page = page;
      this.manga.pages = loader.pages;
      this.manga.page_inc = loader.page_inc;
      this.manga.page_dec = loader.page_dec;
      this.item.manga.viewed = true;
-     //this.manga.page = page;
      this.set_manga_button_text();
      this.set_images(loader.images, true);
      this.images.order = [];
@@ -3171,8 +3178,10 @@
      } else if (big) {
        var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
        this.open_url(this.images.list[idx].anchor.href, same_page);
+     } else if (this.manga.usable) {
+       this.open_url(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page, same_page);
      } else {
-       this.open_url(this.manga.usable ? this.manga.get_url(this.manga.page) : this.item.medium, same_page);
+       this.open_url(this.item.medium, same_page);
      }
    };
    Popup.prototype.open_image_response = function(same_page) {
