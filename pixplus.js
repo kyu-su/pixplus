@@ -336,8 +336,7 @@
 
      load_css:      load_css,
      write_css:     write_css,
-
-     open:          function() { window.open.apply(window, Array.prototype.slice.apply(arguments)); },
+     open:          window_open,
 
      rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8},
      rpc_usable:    false,
@@ -4593,6 +4592,9 @@
      if (conf.debug) {
        window.console && window.console.log && window.console.log(msg);
      }
+   }
+   function window_open() {
+     window.open.apply(window, Array.prototype.slice.apply(arguments));
    }
 
    function create_post_data(form) {
