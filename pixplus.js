@@ -616,7 +616,7 @@
 
    var defineMagicFunction = wrap_global_function;
    function wrap_global_function(name, func) {
-     if (window.opera && opera.version() < 11) { // for debug
+     if (window.opera && window.opera.version() < 11) { // for debug
        window.opera.defineMagicFunction(name, func);
        return;
      }
@@ -4625,7 +4625,7 @@
 
    // 10.63+ loading => interactive => complete
    if (window.opera && (window.document.readyState == 'loading' ||
-                        (opera.version() < 10.50 && window.document.readyState == 'interactive'))) {
+                        (window.opera.version() < 10.50 && window.document.readyState == 'interactive'))) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
      init_pixplus();
