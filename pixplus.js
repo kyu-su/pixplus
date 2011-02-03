@@ -2960,7 +2960,6 @@
      this.set_images(loader.images, true);
      this.images.order = [];
      each(loader.pages, function(page) { this.images.order.push(page.image_index); }, this);
-     console.log(this.images);
      this.manga.preload();
    };
    Popup.prototype.set_manga_button_text = function() {
@@ -3473,25 +3472,18 @@
      this.page       = page;
      this.load_cb    = load_cb;
      this.error_cb   = error_cb;
+     this.stopped    = false;
 
-     this.cancelled  = false;
-     this.image_url  = item.img_url_base + '_p' + page + item.img_url_ext;
+     this.images     = null;
      this.pages      = [{page: page, image_index: 0}];
      this.page_inc   = 1;
      this.page_dec   = 1;
-
-     this.images     = null;
-     this.html       = null;
      this.load_html  = conf.popup.manga_spread;
-     /* Popup.Loaderで画像URLのパースに失敗するとGalleryItem#img_url_*がnull */
-     getimg(this.image_url,
-            bind(Popup.MangaLoader.prototype.load_image, this),
-            bind(function() {
-                   this.onerror('Failed to load manga image');
-                 }, this));
+
      if (this.load_html) {
-       if (item.manga_html) {
-         this.parse_html(item.manga_html);
+       if (item.manga_pages) {
+         this.load_pages(item.manga_pages);
+         return;
        } else {
          geturl(urlmode(item.medium, 'manga'),
                 bind(function(text) {
@@ -3502,89 +3494,101 @@
                      }, this));
        }
      }
-     return this;
+     this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
+     getimg(this.image_url,
+            bind(Popup.MangaLoader.prototype.onload_image, this),
+            bind(function() {
+                   this.onerror('Failed to load manga image');
+                 }, this));
    };
-   Popup.MangaLoader.prototype.load_image = function(image) {
+   Popup.MangaLoader.prototype.check_complete = function(image) {
+     if (!this.images) return;
+     for(var i = 0; i < this.images.length; ++i) {
+       if (this.images[i].constructor === String) return;
+     }
+     this.onload();
+   };
+   Popup.MangaLoader.prototype.onload_image = function(image) {
      if (this.images) {
        var i;
        for(i = 0; i < this.images.length; ++i) {
          if (image.src === this.images[i]) this.images[i] = image;
        }
-       for(i = 0; i < this.images.length; ++i) {
-         if (this.images[i].constructor === String) return;
-       }
-       this.onload();
-     } else  if (!this.load_html || this.html) {
-       this.images = [image];
-       this.onload();
+       this.check_complete();
      } else {
-       this.images = image;
+       this.images = [image];
      }
    };
    Popup.MangaLoader.prototype.parse_html = function(html) {
-     this.html = html;
-     this.item.manga_html = html;
-
+     var manga_pages = [];
      var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
      var page = 0;
      for(var i = 0; i + 1 < containers.length; i += 2) {
        var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
-       if (images.length >= 6) {
-         if (this.page >= page && this.page <= (page + 1)) {
-           var url, url1 = images[2], url2 = images[5];
-           if (this.image_url === url1) {
-             this.pages.push({page: this.page + 1, image_index: 1});
-             this.page_inc = 2;
-             this.images = [this.images || url1, url = url2];
-           } else if (this.image_url === url2) {
-             this.pages.unshift({page: this.page - 1, image_index: 0});
-             this.pages[1].image_index = 1;
-             this.page_dec = 2;
-             this.images = [url = url1, this.images || url2];
-           } else {
-             this.onerror('Unexpected image url');
-             return;
-           }
-           if (images[1] == 'unshift') {
-             this.pages.reverse();
-             this.images.reverse();
-           }
-
-           getimg(url,
-                  bind(Popup.MangaLoader.prototype.load_image, this),
-                  bind(function() {
-                         this.onerror('Failed to load manga image');
-                       }, this));
-           return;
-         }
-         page += 2;
-       } else if (images.length >= 3) {
-         if (page == this.page) {
-           if (this.images) {
-             this.images = [this.images];
-             this.onload();
-           }
-           return;
-         }
-         ++page;
-       } else {
+       var pages = [], j;
+       for(j = 0; j + 2 < images.length; j += 3) {
+         pages.push({url: images[j + 2], page: page++, image_index: pages.length});
+       }
+       if (pages.length < 1) {
          this.onerror('Invalid html');
          return;
        }
+       if (images[1] == 'unshift') pages.reverse();
+       for(j = 0; j < pages.length; ++j) {
+         manga_pages.push({list: pages, page_inc: pages.length - j, page_dec: j + 1});
+       }
      }
-     this.onerror('Invalid html');
+     this.load_pages(manga_pages);
+   };
+   Popup.MangaLoader.prototype.load_pages = function(pages) {
+     this.item.manga_pages = pages;
+
+     if (!pages[this.page]) {
+       this.onerror('Invalid page data');
+       return;
+     }
+
+     this.page_inc = pages[this.page].page_inc;
+     this.page_dec = pages[this.page].page_dec;
+
+     var image = this.images && this.images[0];
+     this.pages = [];
+     this.images = [];
+     each(pages[this.page].list,
+          function(page, idx) {
+            this.pages.push({page: page.page, image_index: page.image_index});
+            this.images.push(page.url);
+          },
+          this);
+     each(this.images,
+          function(url, idx) {
+            if (url == this.image_url) {
+              if (image) this.images[idx] = image;
+            } else {
+              getimg(url,
+                     bind(Popup.MangaLoader.prototype.onload_image, this),
+                     bind(function() {
+                            this.onerror('Failed to load manga image');
+                          }, this));
+            }
+          },
+          this);
+     this.check_complete();
    };
    Popup.MangaLoader.prototype.onload = function() {
-     if (!this.cancelled && this.load_cb) this.load_cb(this);
+     if (!this.stopped && this.load_cb) {
+       this.stopped = true;
+       this.load_cb(this);
+     }
    };
    Popup.MangaLoader.prototype.onerror = function(msg) {
-     if (!this.cancelled && this.error_cb) {
-       this.cancel();
+     if (!this.stopped && this.error_cb) {
+       this.stopped = true;
        this.error_cb(msg);
      }
    };
    Popup.MangaLoader.prototype.cancel = function() {
-     this.cancelled = true;
+     this.stopped = true;
    };
 
    function mod_edit_bookmark(root, autotag, title, comment, on_close) {
@@ -4587,7 +4591,6 @@
 
    function log(msg) {
      if (conf.debug) {
-       //opera.postError(msg);
        window.console && window.console.log && window.console.log(msg);
      }
    }
