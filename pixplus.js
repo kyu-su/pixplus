@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.4.0
+// @version     0.4.1
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -9,16 +9,8 @@
 // @exclude     *pixivreader*
 // ==/UserScript==
 
-/** 0.4.0
- * pixivreaderと衝突するらしいので、excludeに追加。
- * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
- * OperaExtension版で動作しない場合があるバグをたぶん修正。
- * 閲覧できないマンガがあったバグを修正。
- * ズーム機能でFirefoxをサポート。
- * 企画目録関連ページに対応。
- * マンガページの変更(見開き表示など)に対応。それに伴ってconf.default_manga_typeとconf.popup_manga_tbを削除。
- * 作品管理ページで動作しなくなっていた不具合を修正。
- * Chrome/SafariでAutoPatchWorkに対応。
+/** 0.4.1
+ *
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -189,6 +181,7 @@
           }, false);
       })();
    } else {
+     if (window.location.href.indexOf('pixivreader') >= 0) return; // for safari
      (function(func) {
         if (userjs) {
           func();
@@ -225,6 +218,8 @@
    }
  })
 (function(window, safeWindow, _extension_data) {
+   if (window.top !== window) return;
+
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"],
