@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>Author</key>
-	<string>wowo</string>
-	<key>CFBundleDisplayName</key>
-	<string>pixplus</string>
-	<key>CFBundleIdentifier</key>
-	<string>org.crckyl.pixplus</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleShortVersionString</key>
-	<string>@VERSION@</string>
-	<key>CFBundleVersion</key>
-	<string>@VERSION@</string>
-        <key>Chrome</key>
-        <dict>
-                <key>Global Page</key>
-                <string>index.html</string>
-        </dict>
-	<key>Content</key>
-	<dict>
-		<key>Scripts</key>
-		<dict>
-			<key>End</key>
-			<array>
-				<string>pixplus.js</string>
-			</array>
-		</dict>
-		<key>Whitelist</key>
-		<array>
-			<string>http://www.pixiv.net/*</string>
-		</array>
-	</dict>
-	<key>Description</key>
-	<string>test</string>
-	<key>ExtensionInfoDictionaryVersion</key>
-	<string>1.0</string>
-	<key>Permissions</key>
-	<dict>
-		<key>Website Access</key>
-		<dict>
-			<key>Allowed Domains</key>
-			<array>
-				<string>www.pixiv.net</string>
-			</array>
-			<key>Level</key>
-			<string>Some</string>
-		</dict>
-	</dict>
-	<key>Update Manifest URL</key>
-	<string>http://crckyl.ath.cx:8088/pixplus/update.php?browser=safari&amp;version=@VERSION@</string>
-	<key>Website</key>
-	<string>@WEBSITE@</string>
-</dict>
+  <dict>
+    <key>Author</key>
+    <string>wowo</string>
+    <key>CFBundleDisplayName</key>
+    <string>pixplus</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.crckyl.pixplus</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@VERSION@</string>
+    <key>CFBundleVersion</key>
+    <string>@VERSION@</string>
+    <key>Chrome</key>
+    <dict>
+      <key>Global Page</key>
+      <string>index.html</string>
+    </dict>
+    <key>Content</key>
+    <dict>
+      <key>Scripts</key>
+      <dict>
+        <key>End</key>
+        <array>
+          <string>pixplus.js</string>
+        </array>
+      </dict>
+      <key>Whitelist</key>
+      <array>
+        <string>http://www.pixiv.net/*</string>
+      </array>
+    </dict>
+    <key>Description</key>
+    <string>test</string>
+    <key>ExtensionInfoDictionaryVersion</key>
+    <string>1.0</string>
+    <key>Permissions</key>
+    <dict>
+      <key>Website Access</key>
+      <dict>
+        <key>Allowed Domains</key>
+        <array>
+          <string>www.pixiv.net</string>
+        </array>
+        <key>Level</key>
+        <string>Some</string>
+      </dict>
+    </dict>
+    <key>Update Manifest URL</key>
+    <string>http://crckyl.ath.cx:8088/pixplus/update.php?browser=safari&amp;version=@VERSION@</string>
+    <key>Website</key>
+    <string>@WEBSITE@</string>
+  </dict>
 </plist>

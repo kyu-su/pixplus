@@ -4,7 +4,8 @@
   "content_scripts": [
     {
       "js": [ "pixplus.js" ],
-      "matches": [ "http://www.pixiv.net/*" ]
+      "matches": [ "http://www.pixiv.net/*" ],
+      "exclude_globs": [ "*pixivreader*" ]
     }
   ],
   "icons": {
