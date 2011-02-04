@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.4
+// @version     0.4.0
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -9,7 +9,7 @@
 // @exclude     *pixivreader*
 // ==/UserScript==
 
-/** 0.4
+/** 0.4.0
  * pixivreaderと衝突するらしいので、excludeに追加。
  * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
  * OperaExtension版で動作しない場合があるバグをたぶん修正。
