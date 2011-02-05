@@ -98,6 +98,7 @@
            func(window, window, {conf: data.data});
          }
        };
+       opera.extension.postMessage(JSON.stringify({'command': 'config'}));
      } else {
        func(unsafeWindow || window, window);
      }

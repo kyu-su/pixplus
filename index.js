@@ -1,11 +1,7 @@
 if (window.opera) {
-  opera.extension.onconnect = function(event){
-    try {
-      event.source.postMessage(JSON.stringify({command: 'config', data: create_config_map()}));
-    } catch(ex) { }
-  };
   opera.extension.onmessage = function(event) {
-    create_response(JSON.parse(event.data));
+    var res = create_response(JSON.parse(event.data));
+    if (res.data) event.source.postMessage(JSON.stringify(res));
   };
 
   (function() {
@@ -51,7 +47,7 @@ if (window.opera) {
     'message',
     function(ev) {
       var res = create_response({command: ev.name, data: ev.message});
-      ev.target.page.dispatchMessage(res.command, res.data);
+      if (res.data) ev.target.page.dispatchMessage(res.command, res.data);
     },false);
 }
 
