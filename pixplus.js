@@ -11,6 +11,7 @@
 
 /** 0.4.1
  * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
+ * Firefoxでコメント表示機能が動作していなかったバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -593,11 +594,16 @@
      }
 
      if (!name || !func) return;
+     var real = window[name] || function() { };
+     var wrap = function() {
+       func.apply(window, [real, this].concat(Array.prototype.slice.apply(arguments)));
+     };
      if (window[name]) {
        // 名前つき関数が定義濟みのときにwindow.__define[GS]etter__()するとOperaとFirefoxでエラーが出る。
        window[name] = wrap;
+     } else if (browser.gecko) {
+       wrap_global_function.list.push({name: name, func: func});
      } else {
-       var orig = function() { };
        window.__defineGetter__(
          name,
          function() {
@@ -606,20 +612,28 @@
        window.__defineSetter__(
          name,
          function(func) {
-           orig = func;
+           real = func;
          });
      }
-     function wrap() {
-       func.apply(window, [orig, this].concat(Array.prototype.slice.apply(arguments)));
-     };
    }
+   wrap_global_function.list = [];
+   wrap_global_function.check = function() {
+     if (!wrap_global_function.list.length) return;
+     wrap_global_function.list = abst(
+       wrap_global_function.list,
+       function(item) {
+         if (window[item.name]) {
+           var real = window[item.name];
+           window[item.name] = function() {
+             item.func.apply(window, [real, this].concat(Array.prototype.slice.apply(arguments)));
+           };
+           return false;
+         }
+         return true;
+       });
+     if (wrap_global_function.list.length) setTimeout(wrap_global_function.check, 300);
+   };
 
-   defineMagicFunction(
-     'sendRequest',
-     function(real, othis, url) {
-       url = mod_rpc_url(url);
-       real.apply(othis, [url].concat(Array.prototype.slice.apply(arguments, [3])));
-     });
    // tag edit
    defineMagicFunction(
      'on_loaded_tag',
@@ -2045,12 +2059,18 @@
                  var _ajax = window.jQuery.ajax;
                  window.jQuery.ajax = function(obj) {
                    if (obj) obj.url = mod_rpc_url(obj.url);
-                   _ajax.apply(this, Array.prototype.slice.apply(arguments));
+                   return _ajax.apply(this, Array.prototype.slice.apply(arguments));
                  };
                  init_pixplus_real();
                })
          .script(pp.url.js.prototypejs)
-         .wait()
+         .wait(function() {
+                 var _request = window.Ajax.Request.prototype.request;
+                 window.Ajax.Request.prototype.request = function(url) {
+                   url = mod_rpc_url(url);
+                   return _request.apply(this, [url].concat(Array.prototype.slice.apply(arguments, [1])));
+                 };
+               })
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
          .wait(function() {
@@ -2063,7 +2083,8 @@
                  }
                })
         )
-       .script(pp.url.js.tag_edit);
+       .script(pp.url.js.tag_edit)
+       .wait(wrap_global_function.check);
 
      setTimeout(Floater.init, 100);
    }
