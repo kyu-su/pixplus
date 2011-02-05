@@ -577,15 +577,6 @@
 
    var options = parseopts(window.location.href);
 
-   function mod_rpc_url(url) {
-     if (url == './rpc_rating.php') {
-       return '/rpc_rating.php';
-     } else if (url == './rpc_tag_edit.php') {
-       return '/rpc_tag_edit.php';
-     }
-     return url;
-   }
-
    var defineMagicFunction = wrap_global_function;
    function wrap_global_function(name, func) {
      if (window.opera && window.opera.version() < 11) { // for debug
@@ -2046,6 +2037,15 @@
           });
 
      load_css(pp.url.css.bookmark_add);
+
+     function mod_rpc_url(url) {
+       if (url == './rpc_rating.php') {
+         return '/rpc_rating.php';
+       } else if (url == './rpc_tag_edit.php') {
+         return '/rpc_tag_edit.php';
+       }
+       return url;
+     }
 
      (function($js) {
         if (!$x('//script[contains(@src, "/rating_manga")]')) {
