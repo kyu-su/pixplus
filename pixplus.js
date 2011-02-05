@@ -176,8 +176,8 @@
             {command: 'config'},
             function(data) {
               if (data.command == 'config') {
-                func(JSON.stringify({base_uri:  chrome.extension.getURL('/'),
-                                     conf:      data.data}));
+                func(JSON.stringify({base_uri: chrome.extension.getURL('/'),
+                                     conf:     data.data}));
               }
             });
         } else if (window.safari) {
@@ -185,8 +185,8 @@
             'message',
             function(ev) {
               if (ev.name == 'config') {
-                func(JSON.stringify({base_uri:  safari.extension.baseURI,
-                                     conf:      ev.message}));
+                func(JSON.stringify({base_uri: safari.extension.baseURI,
+                                     conf:     ev.message}));
               }
             }, false);
           safari.self.tab.dispatchMessage('config', null);
