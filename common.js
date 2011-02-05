@@ -1,5 +1,4 @@
 conf.u = true;
-if (window.chrome || window.safari) conf.l.shift();
 conf.s = (window.opera
           ? widget.preferences
           : (window.chrome

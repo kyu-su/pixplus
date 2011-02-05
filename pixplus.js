@@ -492,7 +492,6 @@
             });
      }
    };
-   if (!(window.opera && opera.extension)) LS.l.shift();
    LS.init_map();
 
    pp.save_conf = function() {
