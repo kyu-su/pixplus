@@ -608,6 +608,7 @@
      }
    }
    wrap_global_function.list = [];
+   wrap_global_function.check_count = 0;
    wrap_global_function.check = function() {
      if (!wrap_global_function.list.length) return;
      wrap_global_function.list = abst(
@@ -622,6 +623,7 @@
          }
          return true;
        });
+     if (++wrap_global_function.check_count > 30) return;
      if (wrap_global_function.list.length) setTimeout(wrap_global_function.check, 300);
    };
 
