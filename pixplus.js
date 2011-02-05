@@ -101,66 +101,47 @@
      }
    } else if (String(window) =='[object ChromeWindow]') {
      (function() {
+        var pref = Components.classes['@mozilla.org/preferences-service;1']
+          .getService(Components.interfaces.nsIPrefBranch);
+        function check_key(key) {
+          if (!(key && key.constructor === String && key.match(/^[a-z_]+$/))) {
+            throw 'invalid argument';
+          }
+          return 'extensions.pixplus.' + key;
+        }
+        var storage = {
+          getBoolPref: function(key) {
+            return pref.getBoolPref(check_key(key));
+          },
+          setBoolPref: function(key, val) {
+            return pref.setBoolPref(check_key(key), !!val);
+          },
+          getCharPref: function(key) {
+            return decodeURIComponent(escape(pref.getCharPref(check_key(key))));
+          },
+          setCharPref: function(key, val) {
+            return pref.setCharPref(check_key(key), unescape(encodeURIComponent(String(val))));
+          }
+        };
         function open_options() {
           window.openDialog('chrome://pixplus/content/options.xul');
         }
-        function load(window, url) {
-          var safeWindow = new XPCNativeWrapper(window);
-          var sandbox = new Components.utils.Sandbox(safeWindow);
-          sandbox.window = window;
-          sandbox.document = window.document;
-          sandbox.safeWindow = safeWindow;
-
-          var pref = Components.classes['@mozilla.org/preferences-service;1']
-            .getService(Components.interfaces.nsIPrefBranch);
-          function check_key(key) {
-            if (!(key && key.constructor === String && key.match(/^[a-z_]+$/))) {
-              throw 'invalid argument';
-            }
-            return 'extensions.pixplus.' + key;
-          }
-          sandbox.storage = {
-            getBoolPref: function(key) {
-              return pref.getBoolPref(check_key(key));
-            },
-            setBoolPref: function(key, val) {
-              return pref.setBoolPref(check_key(key), !!val);
-            },
-            getCharPref: function(key) {
-              return decodeURIComponent(escape(pref.getCharPref(check_key(key))));
-            },
-            setCharPref: function(key, val) {
-              return pref.setCharPref(check_key(key), unescape(encodeURIComponent(String(val))));
-            }
-          };
+        function load(content_window, url) {
+          var sandbox = new Components.utils.Sandbox(content_window);
+          sandbox.window = content_window.wrappedJSObject;
+          sandbox.safeWindow = content_window;
+          sandbox.document = sandbox.window.document;
+          sandbox.storage = storage;
           sandbox.open_options = open_options;
-          sandbox.safeWindow.alert = function(msg) {
-            alert(String(msg));
-          };
-
-          sandbox.__proto__ = sandbox.window;
+          sandbox.__proto__ = new XPCNativeWrapper(sandbox.window);
           try {
             var data = '{storage: this.storage, open_options: this.open_options}';
             var src = '(' + func.toString() + ')(this.window, this.safeWindow, ' + data + ')';
-            sandbox_eval(src, url, sandbox);
+            Components.utils.evalInSandbox(src, sandbox);
           } catch(ex) {
-            //alert(ex);
+            alert(String(ex));
             throw ex;
           }
-        }
-        function sandbox_eval(code, codebase, sandbox) {
-	  if (Components.utils && Components.utils.Sandbox) {
-	    // DP beta+
-	    Components.utils.evalInSandbox(code, sandbox);
-	  } else if (Components.utils && Components.utils.evalInSandbox) {
-	    // DP alphas
-	    Components.utils.evalInSandbox(code, codebase, sandbox);
-	  } else if (Sandbox) {
-	    // 1.0.x
-	    evalInSandbox(code, sandbox, codebase);
-	  } else {
-	    throw new Error("Could not create sandbox.");
-	  }
         }
         window.addEventListener(
           'load',
@@ -171,11 +152,11 @@
                 'DOMContentLoaded',
                 function(ev) {
                   var window = ev.target.defaultView.window;
-	          if (window.wrappedJSObject) window = window.wrappedJSObject;
-	          var location = new XPCNativeWrapper(window, 'location').location;
-                  var hostname = new XPCNativeWrapper(location, 'hostname').hostname; /* WARN */
-                  var href = new XPCNativeWrapper(location, 'href').href; /* WARN */
-                  if (hostname == 'www.pixiv.net') load(window, href);
+                  if (window.location.hostname == 'www.pixiv.net' &&
+                      window.location.href.indexOf('pixivreader') < 0) {
+                    var url = window.location.href;
+                    load(window, url);
+                  }
                 }, true);
             }
           }, false);
@@ -218,7 +199,7 @@
    }
  })
 (function(window, safeWindow, _extension_data) {
-   if (window.top !== window) return;
+   if (safeWindow.top !== safeWindow) return;
 
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
