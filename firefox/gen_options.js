@@ -35,7 +35,7 @@ conf.each(
     sec.ui += '        </row>';
   },
   function(sec) {
-    if (sec.name == 'extension' || sec.name == 'bookmark') return true;
+    if (sec.name == 'bookmark') return true;
     print('  <prefpane id="' + sec.name + '" label="&' + sec.label + ';">');
     print('    <preferences>');
     sec.ui = '';

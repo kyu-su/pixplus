@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 /** 0.4.1
- *
+ * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -90,15 +90,18 @@
      // OperaUserJS/OperaExtension/Greasemonkey
      if (window.top !== window) return;
      if (window.opera && opera.extension) {
-       opera.extension.onmessage = function(ev){
-         var data = JSON.parse(ev.data);
-         if (data.command == 'config') {
-           //var uri = ev.origin.replace(/^(widget:\/\/[^\/]+).*$/, '$1/');
-           //func(window, window, {base_uri: uri, conf: data.data});
-           func(window, window, {conf: data.data});
-         }
-       };
-       opera.extension.postMessage(JSON.stringify({'command': 'config'}));
+       (function() {
+          function open_options() {
+            opera.extension.postMessage(JSON.stringify({'command': 'open-options'}));
+          }
+          opera.extension.onmessage = function(ev){
+            var data = JSON.parse(ev.data);
+            if (data.command == 'config') {
+              func(window, window, {conf: data.data, open_options: open_options});
+            }
+          };
+          opera.extension.postMessage(JSON.stringify({'command': 'config'}));
+        })();
      } else {
        func(unsafeWindow || window, window);
      }
@@ -269,10 +272,6 @@
        "show_comment_form":    [true, "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"],
        "manga_spread":         [true, "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"]
      },
-     "extension": {
-       "show_toolbar_icon":    [true, "\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b"],
-       "show_config_ui":       [false, "\u30da\u30fc\u30b8\u5185\u306b\u8a2d\u5b9a\u30dc\u30bf\u30f3\u3092\u8868\u793a\u3059\u308b"]
-     },
      "bookmark": {
        "tag_order": ["__Tag1\n-\n*\n-\n__Tag2", ""],
        "tag_aliases": ["__Tag1\n__Tag2 __Tag3 __Tag4\n__Tag5\n__Tag6 __Tag7", ""]
@@ -281,7 +280,6 @@
    };
    var conf = {
      popup: { },
-     extension: { },
      bm_tag_order: [ ],
      bm_tag_aliases: { }
    };
@@ -360,13 +358,7 @@
    var LS = {
      /* __STORAGE_COMMON_ENTRIES_BEGIN__ */
      u: false, // usable or not
-     l: [{name:   'extension',
-          label:  "\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3",
-          path:   ['conf', 'extension'],
-          schema: conf_schema.extension,
-          conf:   conf.extension, /* __REMOVE__ */
-          keys:   []},
-         {name:   'general',
+     l: [{name:   'general',
           label:  "\u5168\u822c",
           path:   ['conf'],
           schema: conf_schema,
@@ -796,7 +788,7 @@
        }, false);
      export_form.textContent = 'Export/Import:';
      export_form.appendChild(export_input);
-     if ((options_page || window.opera || !_extension_data) && window.JSON && st.u) {
+     if (window.JSON && st.u) {
        var btn_import = window.document.createElement('input');
        btn_import.type = 'submit';
        btn_import.value = 'Import';
@@ -1151,8 +1143,7 @@
    /* __CONFIG_UI_END__ */
 
    function init_config_ui() {
-     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options) &&
-         !(window.opera && LS.u && LS.get('extension', 'show_config_ui'))) return;
+     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
      var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
      if (menu) {
@@ -1186,7 +1177,7 @@
        anc.addEventListener(
          'click',
          function() {
-           if (_extension_data && (_extension_data.base_uri || _extension_data.open_options)) {
+           if (_extension_data) {
              if (_extension_data.open_options) {
                _extension_data.open_options();
              } else {

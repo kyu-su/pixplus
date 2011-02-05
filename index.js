@@ -3,40 +3,6 @@ if (window.opera) {
     var res = create_response(JSON.parse(event.data));
     if (res.data) event.source.postMessage(JSON.stringify(res));
   };
-
-  (function() {
-     var btn;
-     update_button();
-     window.addEventListener(
-       'storage',
-       function(ev) {
-         if (ev.key == 'conf_extension_show_toolbar_icon') update_button();
-       }, false);
-     //opera.extension.tabs.addEventListener('focus', update_button, false);
-     function update_button(ev) {
-       //var tab = opera.extension.tabs.getFocused();
-       //var show = tab && tab.url.match(/^http:\/\/www\.pixiv\.net\//) && conf.get('extension', 'show_toolbar_icon');
-       var show = conf.get('extension', 'show_toolbar_icon');
-       if (show) {
-         if (!btn) {
-           btn = opera.contexts.toolbar.createItem(
-             {
-               title: 'pixplus',
-               icon:  'icons/64.png',
-               popup: {
-                 href:   'options.html',
-                 width:  800,
-                 height: 600
-               }
-             });
-           opera.contexts.toolbar.addItem(btn);
-         }
-       } else if (btn) {
-         opera.contexts.toolbar.removeItem(btn);
-         btn = null;
-       }
-     }
-   })();
 } else if (window.chrome) {
   chrome.extension.onRequest.addListener(
     function(message, sender, func) {
@@ -67,6 +33,10 @@ function create_response(data) {
     conf.set(section, key, value);
   } else if (data.command == 'config-remove') {
     conf.remove(data.data.section, data.data.key);
+  } else if (data.command == 'open-options') {
+    if (window.opera) {
+      opera.extension.tabs.create({url: 'options.html', focused: true});
+    }
   }
   return {command: data.command, data: null};
 }
