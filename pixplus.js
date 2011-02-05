@@ -87,6 +87,8 @@
 
 (function(func, unsafeWindow, userjs) {
    if (window.opera || unsafeWindow) {
+     // OperaUserJS/OperaExtension/Greasemonkey
+     if (window.top !== window) return;
      if (window.opera && opera.extension) {
        opera.extension.onmessage = function(ev){
          var data = JSON.parse(ev.data);
@@ -100,6 +102,7 @@
        func(unsafeWindow || window, window);
      }
    } else if (String(window) =='[object ChromeWindow]') {
+     // FirefoxAdd-On
      (function() {
         var pref = Components.classes['@mozilla.org/preferences-service;1']
           .getService(Components.interfaces.nsIPrefBranch);
@@ -152,7 +155,8 @@
                 'DOMContentLoaded',
                 function(ev) {
                   var window = ev.target.defaultView.window;
-                  if (window.location.hostname == 'www.pixiv.net' &&
+                  if (window.top === window &&
+                      window.location.hostname == 'www.pixiv.net' &&
                       window.location.href.indexOf('pixivreader') < 0) {
                     var url = window.location.href;
                     load(window, url);
@@ -162,7 +166,8 @@
           }, false);
       })();
    } else {
-     if (window.location.href.indexOf('pixivreader') >= 0) return; // for safari
+     // Chrome/Safari
+     if (window.top !== window || window.location.href.indexOf('pixivreader') >= 0) return;
      (function(func) {
         if (userjs) {
           func();
@@ -199,8 +204,6 @@
    }
  })
 (function(window, safeWindow, _extension_data) {
-   if (safeWindow.top !== safeWindow) return;
-
    var conf_schema = {
      /* __CONFIG_BEGIN__ */
      "debug":                  [false, "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"],
