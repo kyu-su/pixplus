@@ -525,8 +525,15 @@
                     : val);
           };
           LS.set = function(s, n, v) {
+            var key = LS.map[s].path.join('_') + '_' + n;
+            if (LS.map[s].schema[n][0].constructor === Boolean) {
+              _extension_data.storage.setBoolPref(key, v);
+            } else {
+              _extension_data.storage.setCharPref(key, v);
+            }
           };
           LS.remove = function(s, n) {
+            LS.set(s, n, LS.map[s].schema[n][0]);
           };
         } else {
           // opera/chrome/safari
@@ -2367,10 +2374,13 @@
      $ev(this.img_div).click(bind(function(ev) { Popup.onclick.emit(this, ev); }, this));
      $ev(this.viewer_comments).click(
        bind(function(ev) {
-              if (ev.target === this.viewer_comments ||
-                  ev.target === this.viewer_comments_w) {
+              var target = ev.target.wrappedJSObject || ev.target;
+              if (target === this.viewer_comments ||
+                  target === this.viewer_comments_w) {
                 this.toggle_viewer_comment_form();
+                return false;
               }
+              return true;
             }, this));
 
      Popup.oncreate.emit(this, item, manga_page);
@@ -3639,7 +3649,6 @@
 
      input_tag.focus();
 
-     // いらないもの削除
      var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', root);
      try {
        if (bottom.firstChild.nodeType == 3 &&
@@ -3669,13 +3678,6 @@
            }
          }, false);
      }
-
-     /*
-     var autoinput_wrap = $c('div', null, 'pp-autoinput-wrap');
-     create_anc('\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304b\u3089', autoinput_from_caption, autoinput_wrap);
-     create_anc('\u81ea\u52d5\u5165\u529b', autoinput_from_tag, autoinput_wrap);
-     input_tag.parentNode.appendChild(autoinput_wrap);
-      */
 
      if (conf.bookmark_hide) {
        var hide = $x('.//input[@type="radio" and @name="restrict" and @value="1"]', root);
@@ -4133,8 +4135,7 @@
            'click',
            function(ev, conn) {
              if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
-             ev.preventDefault();
-             func(ev, conn);
+             if (!func(ev, conn)) ev.preventDefault();
            });
        },
        key: function(func) {
