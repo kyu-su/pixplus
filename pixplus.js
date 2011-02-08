@@ -3641,6 +3641,8 @@
        arguments.callee.css_written = true;
      }
 
+     input_tag.setAttribute('autocomplete', 'off');
+
      var submit = $xa('.//input[@type="submit"]', root);
      if (submit.length == 2) {
        submit[0].parentNode.parentNode.removeChild(submit[0].parentNode);
@@ -3724,7 +3726,11 @@
      $ev(input_tag).key(
        function(ev, key) {
          if (ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey) return;
-         if (ev_key_func && ev_key_func(ev, key)) return;
+         if (ev_key_func && ev_key_func(key)) {
+           ev.preventDefault();
+           ev.stopPropagation();
+           return;
+         }
          if (key == $ev.KEY_ESCAPE) {
            ev.stopPropagation();
            input_tag.blur();
@@ -3808,35 +3814,32 @@
                 if (l.length) items.push(l);
               });
          if (items.length) {
-           ev_key_func = function(ev, key) {
+           ev_key_func = function(key) {
              if (selected) {
                switch(key) {
-               case $ev.KEY_SPACE:  toggle(ev);                return true;
-               case $ev.KEY_ESCAPE: unselect(ev);              return true;
-               case $ev.KEY_LEFT:   select(ev, false, -1,  0); return true;
-               case $ev.KEY_UP:     select(ev, false,  0, -1); return true;
-               case $ev.KEY_RIGHT:  select(ev, false,  1,  0); return true;
-               case $ev.KEY_DOWN:   select(ev, false,  0,  1); return true;
+               case $ev.KEY_SPACE:  toggle();              return true;
+               case $ev.KEY_ESCAPE: unselect();            return true;
+               case $ev.KEY_LEFT:   select(false, -1,  0); return true;
+               case $ev.KEY_UP:     select(false,  0, -1); return true;
+               case $ev.KEY_RIGHT:  select(false,  1,  0); return true;
+               case $ev.KEY_DOWN:   select(false,  0,  1); return true;
                }
              } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
-               select(ev, true, 0, key == $ev.KEY_DOWN ? 0 : items.length - 1);
+               select(true, 0, key == $ev.KEY_DOWN ? 0 : items.length - 1);
                return true;
              }
              return false;
            };
-           function toggle(ev) {
-             ev.preventDefault();
+           function toggle() {
              if (selected) send_click($x('./a', selected));
            }
-           function unselect(ev) {
-             if (ev) ev.preventDefault();
+           function unselect() {
              if (selected) {
                selected.removeAttribute('selected');
                selected = null;
              }
            }
-           function select(ev, absolute, px, py) {
-             ev.preventDefault();
+           function select(absolute, px, py) {
              if (selected) selected.removeAttribute('selected');
              if (absolute) {
                sx = px;
