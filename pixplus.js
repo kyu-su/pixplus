@@ -12,6 +12,7 @@
 /** 0.4.1
  * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
  * Firefoxでコメント表示機能が動作していなかったバグを修正。
+ * Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -3641,8 +3642,6 @@
        arguments.callee.css_written = true;
      }
 
-     input_tag.setAttribute('autocomplete', 'off');
-
      var submit = $xa('.//input[@type="submit"]', root);
      if (submit.length == 2) {
        submit[0].parentNode.parentNode.removeChild(submit[0].parentNode);
@@ -3808,6 +3807,7 @@
        if (conf.extagedit) {
          var items = [];
          var selected, sx = 0, sy = 0;
+         input_tag.setAttribute('autocomplete', 'off');
          each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', root),
               function(ul) {
                 var l = $t('li', ul);
