@@ -1945,26 +1945,6 @@
          real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
        });
 
-     // viewer comments
-     /*
-     defineMagicFunction(
-       'on_loaded_one_comment_view',
-       function(real, othis) {
-         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-         if (Popup.instance && Popup.instance.viewer_comments_enabled) {
-           each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
-                    Popup.instance.viewer_comments_a),
-                function(btn) {
-                  $ev(btn).click(
-                    function() {
-                      geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                             function() { alert('Error!'); }, true);
-                    });
-                });
-         }
-       });
-      */
-
      defineMagicFunction(
        'bookmarkToggle',
        function(real, othis, container_id, type) {
