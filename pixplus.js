@@ -15,6 +15,7 @@
  * Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。
  * ポップアップのタグ編集のUIをブックマーク編集と同じに変更。
  * ポップアップでブックマーク編集モードのまま他のイラストに移動するとキャプションが表示されなくなるバグを修正。
+ * マンガモードでも可能なら原寸の画像を使用するように変更。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -3489,34 +3490,32 @@
          return;
        } else {
          geturl(urlmode(item.medium, 'manga'),
-                bind(function(text) {
-                       this.parse_html(text);
-                     }, this),
-                bind(function() {
-                       this.onerror('Failed to load manga page');
-                     }, this));
+                bind(Popup.MangaLoader.prototype.parse_html, this),
+                bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga page'));
        }
      }
      this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
-     getimg(this.image_url,
+     this.image_url_big = item.img_url_base + '_big_p' + page + item.img_url_ext;
+     getimg([this.image_url_big, this.image_url],
             bind(Popup.MangaLoader.prototype.onload_image, this),
-            bind(function() {
-                   this.onerror('Failed to load manga image');
-                 }, this));
+            bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image'));
    };
    Popup.MangaLoader.prototype.check_complete = function(image) {
      if (!this.images) return;
      for(var i = 0; i < this.images.length; ++i) {
-       if (this.images[i].constructor === String) return;
+       if (this.images[i].constructor === Array) return;
      }
      this.onload();
    };
    Popup.MangaLoader.prototype.onload_image = function(image) {
      if (this.images) {
-       var i;
-       for(i = 0; i < this.images.length; ++i) {
-         if (image.src === this.images[i]) this.images[i] = image;
-       }
+       each(this.images,
+            function(ary, idx) {
+              if (ary.constructor === Array && ary.indexOf(image.src) >= 0) {
+                this.images[idx] = image;
+              }
+            },
+            this);
        this.check_complete();
      } else {
        this.images = [image];
@@ -3530,7 +3529,10 @@
        var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
        var pages = [], j;
        for(j = 0; j + 2 < images.length; j += 3) {
-         pages.push({url: images[j + 2], page: page++, image_index: pages.length});
+         pages.push({url: images[j + 2],
+                     url_big: images[j + 2].replace(/(_p\d+\.\w+)$/, '_big$1'),
+                     page: page++,
+                     image_index: pages.length});
        }
        if (pages.length < 1) {
          this.onerror('Invalid html');
@@ -3560,19 +3562,23 @@
      each(pages[this.page].list,
           function(page, idx) {
             this.pages.push({page: page.page, image_index: page.image_index});
-            this.images.push(page.url);
+            this.images.push([page.url_big, page.url]);
           },
           this);
      each(this.images,
-          function(url, idx) {
-            if (url == this.image_url) {
-              if (image) this.images[idx] = image;
-            } else {
-              getimg(url,
+          function(urls, idx) {
+            var load_urls = [];
+            for(var i = 0; i < urls.length; ++i) {
+              if (urls[i] === this.image_url || urls[i] === this.image_url_big) {
+                if (image) this.images[idx] = image;
+              } else {
+                load_urls.push(urls[i]);
+              }
+            }
+            if (load_urls.length) {
+              getimg(load_urls,
                      bind(Popup.MangaLoader.prototype.onload_image, this),
-                     bind(function() {
-                            this.onerror('Failed to load manga image');
-                          }, this));
+                     bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image'));
             }
           },
           this);
@@ -4506,24 +4512,59 @@
      urlcache[url] = null;
    }
    var imgcache = new Object();
-   function getimg(url, cb_load, cb_error, cb_abort) {
-     if (imgcache[url]) {
-       if (cb_load) cb_load(imgcache[url]);
+   function getimg(urls, cb_load, cb_error, cb_abort) {
+     if (urls.constructor === Array) {
+       var stop = false, map = {};
+       each(urls,
+            function(url, idx) {
+              if (map[url]) return;
+              map[url] = true;
+              getimg(url,
+                     function(image) {
+                       urls[idx] = image;
+                       check();
+                     },
+                     function() {
+                       urls[idx] = null;
+                       check();
+                     });
+            });
+       function check() {
+         if (stop) return;
+         for(var i = 0; i < urls.length; ++i) {
+           var obj = urls[i];
+           if (obj) {
+             if (obj.constructor === String) {
+               return;
+             } else {
+               stop = true;
+               cb_load(obj);
+             }
+             return;
+           }
+         }
+         cb_error();
+         stop = true;
+       }
      } else {
-       var img = new Image();
-       img.addEventListener(
-         'load',
-         function() {
-           img.parentNode.removeChild(img);
-           imgcache[url] = img;
-           if (cb_load) cb_load(img);
-         }, false);
-       if (cb_error && !cb_abort) cb_abort = cb_error;
-       if (cb_error) img.addEventListener('error', cb_error, false);
-       if (cb_abort) img.addEventListener('abort', cb_abort, false);
-       img.src = url;
-       img.style.display = 'none';
-       window.document.body.appendChild(img);
+       if (imgcache[urls]) {
+         if (cb_load) cb_load(imgcache[urls]);
+       } else {
+         var img = new Image();
+         img.addEventListener(
+           'load',
+           function() {
+             img.parentNode.removeChild(img);
+             imgcache[urls] = img;
+             if (cb_load) cb_load(img);
+           }, false);
+         if (cb_error && !cb_abort) cb_abort = cb_error;
+         if (cb_error) img.addEventListener('error', cb_error, false);
+         if (cb_abort) img.addEventListener('abort', cb_abort, false);
+         img.src = urls;
+         img.style.display = 'none';
+         window.document.body.appendChild(img);
+       }
      }
    }
    function parseimgurl(text, big) {
