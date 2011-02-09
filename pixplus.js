@@ -2090,13 +2090,15 @@
    };
    GalleryItem.prototype.preload = function() {
      if (conf.popup.preload) {
-       var self = this;
        if (!this.loaded) {
          this.loaded = true;
-         new Popup.Loader(this, conf.popup.auto_manga_p && (conf.popup.auto_manga & 4) ? preload_manga : null);
-         function preload_manga() {
-           new Popup.MangaLoader(self, 0);
-         }
+         new Popup.Loader(
+           this,
+           (conf.popup.auto_manga_p && (conf.popup.auto_manga & 4)
+            ? bind(function() {
+                     new Popup.MangaLoader(this, 0);
+                   }, this)
+            : null));
        }
      }
    };
@@ -3371,7 +3373,6 @@
    };
 
    Popup.Loader = function(item, load_cb, error_cb, reload) {
-     var self = this;
      this.load_cb   = load_cb;
      this.error_cb  = error_cb;
      this.cancelled = false;
@@ -3402,19 +3403,23 @@
 
      geturl(
        this.url,
-       function(text) {
-         if (text.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
-           self.onerror(RegExp.$1.replace(/<[^>]*>/g, ''));
-         } else {
-           self.text = text;
-           self.text_cmp = true;
-           if (self.img_cmp) {
-             self.onload();
-           } else if (!self.parallel) {
-             self.parse_text();
-           } // else 画像が並列ロード中かキャンセルされた
-         }
-       }, function() { self.onerror('Failed to load HTML'); }, reload);
+       bind(function(text) {
+              if (text.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
+                this.onerror(RegExp.$1.replace(/<[^>]*>/g, ''));
+              } else {
+                this.text = text;
+                this.text_cmp = true;
+                if (this.img_cmp) {
+                  this.onload();
+                } else if (!this.parallel) {
+                  this.parse_text();
+                } // else 画像が並列ロード中かキャンセルされた
+              }
+            }),
+       bind(function() {
+              this.onerror('Failed to load HTML');
+            }, this),
+       reload);
      return this;
    };
    Popup.Loader.prototype.load_image = function(url) {
