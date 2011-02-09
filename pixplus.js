@@ -2247,7 +2247,7 @@
      this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
                                                       bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
-                                                      bind(this.edit_bookmark, this));
+                                                      bind(this.toggle_bookmark_edit, this));
      this.caption               = $c('div',     this.header,        'pp-caption');
      this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator-b');
      this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
@@ -2389,7 +2389,9 @@
      function(ev, key) {
        var p = this, s = ev.shiftKey, m_e = p.manga.enabled;
        if (p.is_bookmark_editing()) {
-         if (key == $ev.KEY_ESCAPE && m()) q(ev, p.close_edit_bookmark);
+         if (key == $ev.KEY_ESCAPE && m()) q(ev, p.toggle_bookmark_edit);
+       } else if (p.is_tag_editing()) {
+         if (key == $ev.KEY_ESCAPE && m()) q(ev, p.toggle_tag_edit);
        } else {
          switch(key) {
          case 'a': if (m())  q(ev, p.prev, true);               return;
@@ -2439,7 +2441,7 @@
          response ? p.open_image_response() : p.open_author_illust();
        }
        function bookmark(detail) {
-         detail ? p.open_bookmark_detail() : p.toggle_edit_bookmark();
+         detail ? p.open_bookmark_detail() : p.toggle_bookmark_edit();
        }
        function caption(comments) {
          comments ? p.toggle_viewer_comments() : p.toggle_caption();
@@ -3272,55 +3274,48 @@
      }
    };
 
-   Popup.prototype.edit_bookmark = function() {
-     if (this.bm_loading) return;
-     if (!this.is_bookmark_editing()) {
-       var self = this;
+   Popup.prototype.toggle_bookmark_edit = function() {
+     if (this.is_bookmark_editing()) {
+       this.bm_edit.style.display = 'none';
+       this.caption.style.display = '';
+       this.img_div.style.display = '';
+       this.locate();
+     } else if (!this.bm_loading) {
        var autotag = !this.bm_btn.hasAttribute('enable');
        this.bm_loading  = true;
        this.set_status('Loading...');
        geturl(
          '/bookmark_add.php?type=illust&illust_id=' + this.item.id,
-         function(text) {
-           self.bm_loading = false;
-           if (text.match(/(<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>)/i)) {
-             self.complete();
-             // エラー回避
-             if (!window.update_input_tag) window.update_input_tag = function() { };
-             self.bm_edit.innerHTML = RegExp.$1;
-             self.bm_edit.style.display = '';
-             self.caption.style.display = 'none';
-             self.img_div.style.display = 'none';
-             mod_edit_bookmark(
-               self.bm_edit, autotag, self.title, self.comment,
-               function() {
-                 self.close_edit_bookmark();
-                 self.reload();
-               });
-             self.locate();
-           } else {
-             self.error('Failed to parse bookmark HTML');
-           }
-         }, function() {
-           self.bm_loading = false;
-           self.error('Failed to load bookmark HTML');
-         }, true);
-     } else {
-       this.close_edit_bookmark();
+         bind(function(text) {
+                this.bm_loading = false;
+                if (text.match(/(<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>)/i)) {
+                  this.complete();
+                  // エラー回避
+                  if (!window.update_input_tag) window.update_input_tag = function() { };
+                  this.bm_edit.innerHTML = RegExp.$1;
+                  this.bm_edit.style.display = '';
+                  this.caption.style.display = 'none';
+                  this.img_div.style.display = 'none';
+                  mod_edit_bookmark(
+                    this.bm_edit, autotag, this.title, this.comment,
+                    function() {
+                      this.toggle_bookmark_edit();
+                      this.reload();
+                    });
+                  this.locate();
+                } else {
+                  this.error('Failed to parse bookmark HTML');
+                }
+              }, this),
+         bind(function() {
+                this.bm_loading = false;
+                this.error('Failed to load bookmark HTML');
+              }, this),
+         true);
      }
-   };
-
-   Popup.prototype.close_edit_bookmark = function() {
-     this.bm_edit.style.display = 'none';
-     this.caption.style.display = '';
-     this.img_div.style.display = '';
-     this.locate();
    };
    Popup.prototype.is_bookmark_editing = function() {
      return this.bm_edit.style.display != 'none';
-   };
-   Popup.prototype.toggle_edit_bookmark = function() {
-     this.is_bookmark_editing() ? this.close_edit_bookmark() : this.edit_bookmark();
    };
 
    Popup.prototype.toggle_tag_edit = function() {
