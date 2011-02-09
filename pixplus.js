@@ -3415,7 +3415,7 @@
                   this.parse_text();
                 } // else 画像が並列ロード中かキャンセルされた
               }
-            }),
+            }, this),
        bind(function() {
               this.onerror('Failed to load HTML');
             }, this),
