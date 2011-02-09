@@ -358,6 +358,14 @@
    function rpc_chk(f) {
      return (pp.rpc_state & f) == f;
    }
+   function rpc_create_data(ids, data) {
+     if (!data) data = {};
+     each(ids,
+          function(id) {
+            data[id] = $('rpc_' + id).getAttribute('title');
+          });
+     return data;
+   }
 
    var LS = {
      /* __STORAGE_COMMON_ENTRIES_BEGIN__ */
@@ -587,166 +595,41 @@
 
    var options = parseopts(window.location.href);
 
-   var defineMagicFunction = wrap_global_function;
-   function wrap_global_function(name, func) {
-     if (window.opera && window.opera.version() < 11) { // for debug
-       window.opera.defineMagicFunction(name, func);
+   function wrap_global(name, func) {
+     if (!name || !func) return;
+     if (window[name]) {
+       window[name] = wrap_global.wrap(func, window[name]);
+     } else {
+       if (!wrap_global.items) wrap_global.items = [];
+       wrap_global.items.push({name: name, func: func});
+       if (!wrap_global.timer) {
+         wrap_global.check_count = 0;
+         wrap_global.timer = window.setTimeout(wrap_global.check, 300);
+       }
        return;
      }
-
-     if (!name || !func) return;
-     var real = window[name] || function() { };
-     var wrap = function() {
+   }
+   wrap_global.wrap = function(func, real) {
+     return function() {
        func.apply(window, [real, this].concat(Array.prototype.slice.apply(arguments)));
      };
-     if (window[name]) {
-       // 名前つき関数が定義濟みのときにwindow.__define[GS]etter__()するとOperaとFirefoxでエラーが出る。
-       window[name] = wrap;
-     } else if (browser.gecko) {
-       wrap_global_function.list.push({name: name, func: func});
-     } else {
-       window.__defineGetter__(
-         name,
-         function() {
-           return wrap;
-         });
-       window.__defineSetter__(
-         name,
-         function(func) {
-           real = func;
-         });
-     }
-   }
-   wrap_global_function.list = [];
-   wrap_global_function.check_count = 0;
-   wrap_global_function.check = function() {
-     if (!wrap_global_function.list.length) return;
-     wrap_global_function.list = abst(
-       wrap_global_function.list,
-       function(item) {
-         if (window[item.name]) {
-           var real = window[item.name];
-           window[item.name] = function() {
-             item.func.apply(window, [real, this].concat(Array.prototype.slice.apply(arguments)));
-           };
-           return false;
-         }
-         return true;
-       });
-     if (++wrap_global_function.check_count > 30) return;
-     if (wrap_global_function.list.length) setTimeout(wrap_global_function.check, 300);
    };
-
-   // rate
-   defineMagicFunction(
-     'countup_rating',
-     function(real, othis, score) {
-       var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9'.replace('%s', String(score));
-       if (conf.rate_confirm && !confirm(msg)) return;
-       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-     });
-   defineMagicFunction(
-     'send_quality_rating',
-     function(real, othis) {
-       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-
-       var _ajax = window.jQuery.ajax;
-       window.jQuery.ajax = function(obj) {
-         var othis = this;
-         var success = obj.success;
-         obj.success = function() {
-           try {
-             success.apply(othis, Array.prototype.slice.apply(arguments));
-             if (Popup.instance && Popup.instance.has_qrate) {
-               if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-               each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                    function(item) {
-                      if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
-                        var value = $x('following-sibling::div', item);
-                        if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
-                      }
-                    });
-             }
-           } catch(ex) {
-             alert('Error!\nCheck referer setting.');
-             throw ex;
-           }
-         };
-         return _ajax.apply(this, [obj]);
-       };
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-       window.jQuery.ajax = _ajax;
-     });
-   defineMagicFunction(
-     'rating_ef',
-     function(real, othis) {
-       window.jQuery('#quality_rating').slideDown(200, after_show);
-       function after_show() {
-         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
-         if (f) f.focus();
+   wrap_global.check = function() {
+     for(var i = 0; i < wrap_global.items.length; ++i) {
+       var item = wrap_global.items[i];
+       if (window[item.name]) {
+         window[item.name] = wrap_global.wrap(item.func, window[item.name]);
+         wrap_global.items.splice(i, 1);
+         --i;
        }
-     });
-   defineMagicFunction(
-     'rating_ef2',
-     function(real, othis) {
-       if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-     });
-   // viewer comments
-   defineMagicFunction(
-     'on_loaded_one_comment_view',
-     function(real, othis) {
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-       if (Popup.instance && Popup.instance.viewer_comments_enabled) {
-         each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
-                  Popup.instance.viewer_comments_a),
-              function(btn) {
-                $ev(btn).click(
-                  function() {
-                    geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
-                           function() { alert('Error!'); }, true);
-                  });
-              });
-       }
-     });
-
-   defineMagicFunction(
-     'bookmarkToggle',
-     function(real, othis, container_id, type) {
-       if (!options.id && conf.bm_tag_order.length) {
-         var container = $(container_id);
-         container.className = type;
-         each($t('ul', container),
-              function(ul) {
-                if (type == 'cloud') {
-                  ul.className = 'tagCloud';
-                } else {
-                  ul.removeAttribute('class');
-                }
-              });
-         each($xa('ul/li', container),
-              function(li, idx) {
-                var cn = li.className.replace(/bg_(?:gray|white)/, '');
-                if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
-                li.className = cn;
-              });
-
-         $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
-
-         var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
-	 toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-	 toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
-
-         window.jQuery.cookie('bookToggle', type,
-                              {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
-       } else {
-         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-       }
-       var ev = window.document.createEvent('Event');
-       ev.initEvent('pixplusBMTagToggled', true, true);
-       window.document.dispatchEvent(ev);
-     });
+     }
+     if (++wrap_global.check_count < 30 && wrap_global.items.length) {
+       wrap_global.timer = window.setTimeout(wrap_global.check, 300);
+     } else {
+       wrap_global.timer = null;
+     }
+   };
+   var defineMagicFunction = wrap_global;
 
    /* __CONFIG_UI_BEGIN__ */
    function ConfigUI(root, st, options_page, msg_filter) {
@@ -1575,6 +1458,7 @@
        });
      return bm_tag_list;
    }
+
    function init_illust_page_bookmark() {
      var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_iconsBlock ")]//a[contains(@href, "bookmark_add.php")]');
      var display = $x('//div[contains(concat(" ", @class, " "), "works_display")]');
@@ -1624,6 +1508,7 @@
        bm_form_div = null;
      }
    }
+
    function init_per_page() {
      var bm_tag_list = $('bookmark_list');
      if (window.location.pathname.match(/^\/bookmark(?:_tag_setting)?\.php/)) {
@@ -1763,6 +1648,7 @@
        }
      }
    }
+
    function init_novel() {
      if (conf.expand_novel) {
        var cont = $('preview_area'), after = cont.nextSibling;
@@ -1795,6 +1681,7 @@
             });
      }
    }
+
    function init_pixplus_real() {
      var ev = window.document.createEvent('Event');
      ev.initEvent('pixplusInitialize', true, true);
@@ -1999,6 +1886,123 @@
         window.document.dispatchEvent(ev);
       })();
    }
+
+   function init_js() {
+     // rate
+     defineMagicFunction(
+       'countup_rating',
+       function(real, othis, score) {
+         var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9'.replace('%s', String(score));
+         if (conf.rate_confirm && !confirm(msg)) return;
+         if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+       });
+     defineMagicFunction(
+       'send_quality_rating',
+       function(real, othis) {
+         if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+
+         var _ajax = window.jQuery.ajax;
+         window.jQuery.ajax = function(obj) {
+           var othis = this;
+           var success = obj.success;
+           obj.success = function() {
+             try {
+               success.apply(othis, Array.prototype.slice.apply(arguments));
+               if (Popup.instance && Popup.instance.has_qrate) {
+                 if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+                 each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
+                      function(item) {
+                        if (item.id.match(/^qr_item(\d+)$/) && (parseInt(RegExp.$1) & 1)) {
+                          var value = $x('following-sibling::div', item);
+                          if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                        }
+                      });
+               }
+             } catch(ex) {
+               alert('Error!\nCheck referer setting.');
+               throw ex;
+             }
+           };
+           return _ajax.apply(this, [obj]);
+         };
+         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+         window.jQuery.ajax = _ajax;
+       });
+     defineMagicFunction(
+       'rating_ef',
+       function(real, othis) {
+         window.jQuery('#quality_rating').slideDown(200, after_show);
+         function after_show() {
+           var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
+           if (f) f.focus();
+         }
+       });
+     defineMagicFunction(
+       'rating_ef2',
+       function(real, othis) {
+         if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
+         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+       });
+
+     // viewer comments
+     /*
+     defineMagicFunction(
+       'on_loaded_one_comment_view',
+       function(real, othis) {
+         real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+         if (Popup.instance && Popup.instance.viewer_comments_enabled) {
+           each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
+                    Popup.instance.viewer_comments_a),
+                function(btn) {
+                  $ev(btn).click(
+                    function() {
+                      geturl(btn.href, bind(Popup.instance.reload_viewer_comments, Popup.instance),
+                             function() { alert('Error!'); }, true);
+                    });
+                });
+         }
+       });
+      */
+
+     defineMagicFunction(
+       'bookmarkToggle',
+       function(real, othis, container_id, type) {
+         if (!options.id && conf.bm_tag_order.length) {
+           var container = $(container_id);
+           container.className = type;
+           each($t('ul', container),
+                function(ul) {
+                  if (type == 'cloud') {
+                    ul.className = 'tagCloud';
+                  } else {
+                    ul.removeAttribute('class');
+                  }
+                });
+           each($xa('ul/li', container),
+                function(li, idx) {
+                  var cn = li.className.replace(/bg_(?:gray|white)/, '');
+                  if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                  li.className = cn;
+                });
+
+           $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
+
+           var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
+	   toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
+	   toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
+
+           window.jQuery.cookie('bookToggle', type,
+                                {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
+         } else {
+           real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+         }
+         var ev = window.document.createEvent('Event');
+         ev.initEvent('pixplusBMTagToggled', true, true);
+         window.document.dispatchEvent(ev);
+       });
+   }
+
    function init_pixplus() {
      window.document.body.setAttribute('pixplus', '');
 
@@ -2059,7 +2063,7 @@
                })
         )
        .script(pp.url.js.tag_edit)
-       .wait(wrap_global_function.check);
+       .wait(init_js);
 
      setTimeout(Floater.init, 100);
    }
@@ -2883,34 +2887,31 @@
             form.appendChild(comment);
             form.appendChild(submit);
 
-            submit.addEventListener(
-              'click',
-              function(ev) {
+            $ev(submit).click(
+              function() {
                 if (trim(comment.value)) {
-                  var xhr = new window.XMLHttpRequest();
-                  xhr.open('POST', form.getAttribute('action'), true);
-                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-                  xhr.onload = function() {
-                    self.reload_viewer_comments();
-                    comment.removeAttribute('disabled');
-                    comment.value = '';
-                    submit.removeAttribute('disabled');
-                  };
-                  xhr.onerror = function() {
-                    alert('Error!');
-                  };
-                  xhr.send(create_post_data(form));
+                  window.jQuery.post(
+                    form.getAttribute('action'),
+                    window.jQuery(form).serialize(),
+                    function() {
+                      self.reload_viewer_comments();
+                      comment.removeAttribute('disabled');
+                      comment.value = '';
+                      submit.removeAttribute('disabled');
+                    }).error(function() {
+                               alert('Error!');
+                             });
                   comment.setAttribute('disabled', '');
                   submit.setAttribute('disabled', '');
                 } else {
                   alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
                 }
-              }, false);
+              });
 
-            self.viewer_comments_c.appendChild(form);
-            self.viewer_comments_enabled = true;
+            this.viewer_comments_c.appendChild(form);
+            this.viewer_comments_enabled = true;
           }
-        })();
+        }).apply(this);
      }
 
      if (this.manga.usable && this.init_manga_page >= 0) {
@@ -3212,52 +3213,51 @@
      if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
        this.caption.setAttribute('show', '');
      }
-     var self = this;
      if (!this.viewer_comments_a.innerHTML) {
-       var i_id = $('rpc_i_id').getAttribute('title');
-       var u_id = $('rpc_u_id').getAttribute('title');
-       window.sendRequest(
-         '/rpc_comment_history.php', 'post', 'i_id=' + i_id + '&u_id=' + u_id,
-         function(obj) {
-           //window.on_loaded_one_comment_view(obj);
-           self.viewer_comments_a.innerHTML = obj.responseText;
-           each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', self.viewer_comments_a),
-                function(del) {
-                  var url = del.getAttribute('href');
-                  del.onclick = '';
-                  if (url.match(/^\w/)) url = '/' + url;
-                  $ev(del).click(
-                    function() {
-                      if (!confirm('\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f')) return;
-                      geturl(url,
-                             function(text) {
-                               self.reload_viewer_comments();
-                             },
-                             function() {
-                               alert('Error!');
-                             },
-                             true);
-                    });
-                });
-           show();
-         });
+       window.jQuery.post(
+         '/rpc_comment_history.php',
+         rpc_create_data(['i_id', 'u_id']),
+         bind(function(data) {
+                this.viewer_comments_a.innerHTML = data;
+                each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]',
+                       this.viewer_comments_a),
+                     bind(trap_delete, this));
+                show.call(this);
+              }, this));
      } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
-       show();
+       show.call(this);
      }else{
        this.comments_btn.removeAttribute('enable');
        window.jQuery(this.viewer_comments).slideUp(
          200,
-         function() {
-           self.expand_header = false;
-           self.locate();
-         });
+         bind(function() {
+                this.expand_header = false;
+                this.locate();
+              }, this));
+     }
+     function trap_delete(del) {
+       var url = del.getAttribute('href');
+       del.onclick = '';
+       if (url.match(/^\w/)) url = '/' + url;
+       $ev(del).click(
+         bind(function() {
+                if (!confirm('\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059' +
+                             '\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f')) return;
+                window.jQuery.ajax(
+                  {url: url,
+                   context: this,
+                   success: Popup.prototype.reload_viewer_comments,
+                   error: function() {
+                     alert('Error!');
+                   }});
+              }, this));
      }
      function show() {
-       self.expand_header = true;
-       self.locate();
-       self.comments_btn.setAttribute('enable', '');
-       window.jQuery(self.viewer_comments).slideDown(200);
-       window.jQuery(self.comment_wrap).animate({scrollTop: self.comment.offsetHeight}, 200);
+       this.expand_header = true;
+       this.locate();
+       this.comments_btn.setAttribute('enable', '');
+       window.jQuery(this.viewer_comments).slideDown(200);
+       window.jQuery(this.comment_wrap).animate({scrollTop: this.comment.offsetHeight}, 200);
      }
    };
 
@@ -3326,15 +3326,11 @@
        this.locate();
        this.reload();
      } else if (!this.tag_loading) {
-       var data = {mode: 'first'};
-       each(['i_id', 'u_id', 'e_id'],
-            function(id) {
-              data[id] = $('rpc_' + id).innerHTML;
-            });
        this.tag_loading = true;
        this.tag_edit_btn.textContent = '[Loading]';
        window.jQuery.post(
-         '/rpc_tag_edit.php', data,
+         '/rpc_tag_edit.php',
+         rpc_create_data(['i_id', 'u_id', 'e_id'], {mode: 'first'}),
          bind(function(data) {
                 this.tag_edit.innerHTML = data.html.join('');
                 this.tag_edit.style.display = '';
@@ -3343,7 +3339,8 @@
                 this.locate();
                 this.tag_loading = false;
                 this.tag_edit_btn.textContent = '[E]';
-              }, this), 'json');
+              }, this),
+         'json').error(function() { alert('Error!'); });
      }
    };
    Popup.prototype.is_tag_editing = function() {
