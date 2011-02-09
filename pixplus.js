@@ -13,7 +13,8 @@
  * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
  * Firefoxでコメント表示機能が動作していなかったバグを修正。
  * Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。
- * タグ編集のUIをブックマーク編集と同じに変更。
+ * ポップアップのタグ編集のUIをブックマーク編集と同じに変更。
+ * ポップアップでブックマーク編集モードのまま他のイラストに移動するとキャプションが表示されなくなるバグを修正。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -2635,6 +2636,7 @@
      this.init_comments();
      this.manga.init();
 
+     this.caption.style.display = '';
      this.bm_edit.innerHTML = '';
      this.bm_edit.style.display = 'none';
      this.tag_edit.innerHTML = '';
