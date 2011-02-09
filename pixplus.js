@@ -3245,6 +3245,7 @@
      var hidden = this.viewer_comments_c.style.display == 'none', comment;
      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
      if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
+     conf.popup.show_comment_form = !!hidden;
      if (LS.u) LS.set('popup', 'show_comment_form', !!hidden);
    };
    Popup.prototype.reload_viewer_comments = function() {
