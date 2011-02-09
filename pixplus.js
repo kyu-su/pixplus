@@ -2948,6 +2948,7 @@
    Popup.prototype.set_manga_button_text = function() {
      var pages = [];
      each(this.manga.pages, function(p) { pages.push(p.page + 1); });
+     if (!pages.length) pages.push(0);
      this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
    };
 
@@ -3496,9 +3497,7 @@
      }
      this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
      this.image_url_big = item.img_url_base + '_big_p' + page + item.img_url_ext;
-     getimg([this.image_url_big, this.image_url],
-            bind(Popup.MangaLoader.prototype.onload_image, this),
-            bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image'));
+     this.load_image(this.image_url, this.image_url_big);
    };
    Popup.MangaLoader.prototype.check_complete = function(image) {
      if (!this.images) return;
@@ -3507,15 +3506,20 @@
      }
      this.onload();
    };
+   Popup.MangaLoader.prototype.load_image = function(url, url_big) {
+     var onload = bind(Popup.MangaLoader.prototype.onload_image, this);
+     var onerror = bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image');
+     getimg(conf.popup.big_image ? url_big : url, onload,
+            conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
+   };
    Popup.MangaLoader.prototype.onload_image = function(image) {
      if (this.images) {
        each(this.images,
-            function(ary, idx) {
-              if (ary.constructor === Array && ary.indexOf(image.src) >= 0) {
-                this.images[idx] = image;
+            function(obj, idx) {
+              if (obj.constructor === Array && obj.indexOf(image.src) >= 0) {
+                this[idx] = image;
               }
-            },
-            this);
+            });
        this.check_complete();
      } else {
        this.images = [image];
@@ -3562,23 +3566,23 @@
      each(pages[this.page].list,
           function(page, idx) {
             this.pages.push({page: page.page, image_index: page.image_index});
-            this.images.push([page.url_big, page.url]);
+
+            var urls = [page.url, page.url_big];
+            if (image) {
+              for(var i = 0; i < urls.length; ++i) {
+                if (urls[i] === this.image_url || urls[i] === this.image_url_big) {
+                  this.images.push(image);
+                  return;
+                }
+              }
+            }
+            this.images.push(urls);
           },
           this);
      each(this.images,
-          function(urls, idx) {
-            var load_urls = [];
-            for(var i = 0; i < urls.length; ++i) {
-              if (urls[i] === this.image_url || urls[i] === this.image_url_big) {
-                if (image) this.images[idx] = image;
-              } else {
-                load_urls.push(urls[i]);
-              }
-            }
-            if (load_urls.length) {
-              getimg(load_urls,
-                     bind(Popup.MangaLoader.prototype.onload_image, this),
-                     bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image'));
+          function(urls) {
+            if (urls.constructor === Array) {
+              Popup.MangaLoader.prototype.load_image.apply(this, urls);
             }
           },
           this);
@@ -4436,7 +4440,7 @@
    function each(list, func, obj) {
      if (!list) return list;
      for(var i = 0; i < list.length; ++i) {
-       if (func.apply(obj || window, [list[i], i])) break;
+       if (func.call(obj || list, list[i], i)) break;
      }
      return list;
    }
@@ -4511,14 +4515,28 @@
    function uncache(url) {
      urlcache[url] = null;
    }
-   var imgcache = new Object();
-   function getimg(urls, cb_load, cb_error, cb_abort) {
-     if (urls.constructor === Array) {
-       var stop = false, map = {};
+   function getimg(url, cb_load, cb_error, cb_abort) {
+     if (url.constructor === Array) {
+       var stop = false, urls = [].concat(url);
+       function check() {
+         if (stop) return;
+         for(var i = 0; i < urls.length; ++i) {
+           if (urls[i]) {
+             if (urls[i].constructor === String) {
+               return;
+             } else {
+               stop = true;
+               cb_load(urls[i]);
+             }
+             return;
+           }
+         }
+         stop = true;
+         cb_error();
+       }
        each(urls,
             function(url, idx) {
-              if (map[url]) return;
-              map[url] = true;
+              if (stop) return;
               getimg(url,
                      function(image) {
                        urls[idx] = image;
@@ -4529,44 +4547,28 @@
                        check();
                      });
             });
-       function check() {
-         if (stop) return;
-         for(var i = 0; i < urls.length; ++i) {
-           var obj = urls[i];
-           if (obj) {
-             if (obj.constructor === String) {
-               return;
-             } else {
-               stop = true;
-               cb_load(obj);
-             }
-             return;
-           }
-         }
-         cb_error();
-         stop = true;
-       }
      } else {
-       if (imgcache[urls]) {
-         if (cb_load) cb_load(imgcache[urls]);
+       if (getimg.cache[url]) {
+         if (cb_load) cb_load(getimg.cache[url]);
        } else {
          var img = new Image();
          img.addEventListener(
            'load',
            function() {
              img.parentNode.removeChild(img);
-             imgcache[urls] = img;
+             getimg.cache[url] = img;
              if (cb_load) cb_load(img);
            }, false);
          if (cb_error && !cb_abort) cb_abort = cb_error;
          if (cb_error) img.addEventListener('error', cb_error, false);
          if (cb_abort) img.addEventListener('abort', cb_abort, false);
-         img.src = urls;
+         img.src = url;
          img.style.display = 'none';
          window.document.body.appendChild(img);
        }
      }
    }
+   getimg.cache = {};
    function parseimgurl(text, big) {
      try {
        var url = text.match(/<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i)[1];
