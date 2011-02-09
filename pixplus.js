@@ -13,6 +13,7 @@
  * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
  * Firefoxでコメント表示機能が動作していなかったバグを修正。
  * Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。
+ * タグ編集のUIをブックマーク編集と同じに変更。
  */
 
 /** ポップアップのデフォルトのキーバインド一覧
@@ -635,44 +636,6 @@
      if (wrap_global_function.list.length) setTimeout(wrap_global_function.check, 300);
    };
 
-   // tag edit
-   defineMagicFunction(
-     'on_loaded_tag',
-     function(real, othis) {
-       if (Popup.instance && Popup.instance.tag_edit_enabled) {
-         Popup.instance.tag_editing = true;
-         Popup.instance.locate();
-       }
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-     });
-   defineMagicFunction(
-     'ef2',
-     function(real, othis) {
-       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-       if (Popup.instance && Popup.instance.tag_edit_enabled) {
-         var top = Popup.instance.comment.offsetHeight + Popup.instance.viewer_comments.offsetHeight;
-         window.jQuery(Popup.instance.comment_wrap).animate({scrollTop: top}, 200);
-       }
-     });
-   defineMagicFunction(
-     'ef4',
-     function(real, othis) {
-       new window.Effect.BlindDown(
-         'tag_area', {
-	   delay:0.2,
-	   duration:0.2,
-           afterFinish: function() {
-             if (Popup.instance && Popup.instance.tag_editing) {
-               Popup.instance.tag_editing = false;
-               Popup.instance.locate();
-               Popup.instance.reload();
-             }
-             if (lc(window.document.activeElement.tagName || '') == 'input') {
-               window.document.activeElement.blur();
-             }
-           }
-         });
-     });
    // rate
    defineMagicFunction(
      'countup_rating',
@@ -1901,7 +1864,6 @@
                '#pp-popup #tag_area > * + *{margin-left:0.6em;}' +
                '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
                '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
-               '#pp-popup #tag_edit > div{margin:0px !important;}' +
                '#pp-popup #pp-post-cap{line-height:1.1em;position:relative;}' +
                '#pp-popup #pp-post-cap #pp-author-img{box-sizing:border-box;' +
                '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
@@ -1955,7 +1917,9 @@
                '#pp-popup #pp-viewer-comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
                '#pp-popup #pp-viewer-comments input + input{margin-left:0.4em;}' +
                '#pp-popup #pp-viewer-comments .worksComment{padding:2px 0px;}' +
-               '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}'
+               '#pp-popup #pp-viewer-comments .worksComment:last-child{border:none;}' +
+               // tag edit
+               '#pp-popup #tag_edit > div{margin:0px !important;}'
               );
 
      init_config_ui();
@@ -2291,7 +2255,6 @@
      this.viewer_comments_w     = $c('div',     this.viewer_comments);
      this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
      this.viewer_comments_a     = $c('div',     this.viewer_comments_w, 'one_comment_area');
-     this.tag_edit              = $c('div',     this.comment_wrap,  'tag_edit');
      this.tags                  = $c('div',     this.caption,       'tag_area');
      this.rating                = $c('div',     this.caption,       'pp-rating', 'pp-separator works_area');
      this.post_cap              = $c('div',     this.caption,       'pp-post-cap', 'pp-separator');
@@ -2312,6 +2275,7 @@
      this.a_stacc               = $c('a',       this.author);
      this.a_stacc.textContent   = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
      this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
+     this.tag_edit              = $c('div',     this.root_div,      'tag_edit');
      this.img_div               = $c('div',     this.root_div,      'pp-img-div');
 
      if (conf.popup.overlay_control > 0) {
@@ -2337,7 +2301,6 @@
      this.rating_enabled = false;
      this.viewer_comments_enabled = false;
      this.expand_header = false;
-     this.tag_editing = false;
      this.tag_edit_enabled = false;
      this.has_qrate = false;
      this.has_image_response = false;
@@ -2382,6 +2345,16 @@
                 return false;
               }
               return true;
+            }, this));
+     $ev(this.tag_edit, true).listen(
+       'DOMNodeInserted',
+       bind(function() {
+              var end = $x('.//input[contains(@onclick, "endTagEdit")]', this.tag_edit);
+              if (end) {
+                end.setAttribute('onclick', '');
+                end.onclick = '';
+                $ev(end).click(bind(Popup.prototype.toggle_tag_edit, this));
+              }
             }, this));
 
      Popup.oncreate.emit(this, item, manga_page);
@@ -2527,13 +2500,13 @@
            this.err_msg,
            this.comment,
            this.tags,
-           this.tag_edit,
            this.rating,
            this.post_cap,
            this.a_img,
            this.author,
            this.a_stacc,
            this.bm_edit,
+           this.tag_edit,
            this.img_div],
           function(elem) {
             elem.style.display = 'none';
@@ -2658,10 +2631,14 @@
      if (scroll) lazy_scroll(this.item.thumb || this.item.caption);
 
      this.expand_header = false;
-     this.tag_editing = false;
 
      this.init_comments();
      this.manga.init();
+
+     this.bm_edit.innerHTML = '';
+     this.bm_edit.style.display = 'none';
+     this.tag_edit.innerHTML = '';
+     this.tag_edit.style.display = 'none';
 
      if (pp.rpc_usable) {
        var rpc_html = '';
@@ -2807,12 +2784,16 @@
        // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
        if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
            loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
-         html += '<a href="javascript:void(0)" id="pp-tag-edit-btn" onclick="startTagEdit()">[E]</a>';
          this.tag_edit_enabled = true;
        }
-       if (html) {
-         html = html.replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
-         this.tags.innerHTML = html;
+       if (html || this.tag_edit_enabled) {
+         this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
+         if (this.tag_edit_enabled) {
+           var a_tag_edit = $c('a', this.tags, 'pp-tag-edit-btn');
+           a_tag_edit.href = 'javascript:void(0)';
+           a_tag_edit.textContent = '[E]';
+           $ev(a_tag_edit).click(bind(Popup.prototype.toggle_tag_edit, this));
+         }
          this.tags.style.display = '';
        }
      }
@@ -2925,8 +2906,6 @@
           }
         })();
      }
-
-     this.bm_edit.innerHTML = '';
 
      if (this.manga.usable && this.init_manga_page >= 0) {
        this.set_manga_mode(true, this.init_manga_page);
@@ -3108,25 +3087,18 @@
    Popup.prototype.locate = function() {
      var de = window.document.documentElement;
      this.root_div.style.minHeight = '';
-     if (this.tag_editing) {
-       this.root_div.style.minWidth = '746px';
-     } else {
-       this.root_div.style.minWidth = '';
-     }
-     if (this.is_bookmark_editing()) {
+     if (this.is_bookmark_editing() || this.is_tag_editing()) {
        // temporary do nothing
      } else {
        this.adjust_image_size();
 
        this.caption.style.width = this.header.offsetWidth + 'px';
        var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
-       if (this.tag_editing || this.expand_header) {
+       if (this.expand_header) {
          cap_height = this.img_div.offsetHeight - post_cap_height;
-         if (this.tag_editing) cap_height += this.tags.offsetHeight;
        } else {
          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
        }
-       if (this.tag_editing && cap_height < 300) cap_height = 300;
        this.comment_wrap.style.maxHeight = (cap_height < 48 ? 48 : cap_height) + 'px';
 
        /*
@@ -3312,9 +3284,9 @@
              // エラー回避
              if (!window.update_input_tag) window.update_input_tag = function() { };
              self.bm_edit.innerHTML = RegExp.$1;
-             self.bm_edit.style.display    = '';
-             self.caption.style.visibility = 'hidden';
-             self.img_div.style.display    = 'none';
+             self.bm_edit.style.display = '';
+             self.caption.style.display = 'none';
+             self.img_div.style.display = 'none';
              mod_edit_bookmark(
                self.bm_edit, autotag, self.title, self.comment,
                function() {
@@ -3335,9 +3307,9 @@
    };
 
    Popup.prototype.close_edit_bookmark = function() {
-     this.bm_edit.style.display    = 'none';
-     this.caption.style.visibility = conf.popup.oldcap ? 'visible' : '';
-     this.img_div.style.display    = '';
+     this.bm_edit.style.display = 'none';
+     this.caption.style.display = '';
+     this.img_div.style.display = '';
      this.locate();
    };
    Popup.prototype.is_bookmark_editing = function() {
@@ -3346,6 +3318,35 @@
    Popup.prototype.toggle_edit_bookmark = function() {
      this.is_bookmark_editing() ? this.close_edit_bookmark() : this.edit_bookmark();
    };
+
+   Popup.prototype.toggle_tag_edit = function() {
+     if (this.is_tag_editing()) {
+       this.tag_edit.style.display = 'none';
+       this.caption.style.display = '';
+       this.img_div.style.display = '';
+       this.locate();
+       this.reload();
+     } else {
+       var data = {mode: 'first'};
+       each(['i_id', 'u_id', 'e_id'],
+            function(id) {
+              data[id] = $('rpc_' + id).innerHTML;
+            });
+       window.jQuery.post(
+         '/rpc_tag_edit.php', data,
+         bind(function(data) {
+                this.tag_edit.innerHTML = data.html.join('');
+                this.tag_edit.style.display = '';
+                this.caption.style.display = 'none';
+                this.img_div.style.display = 'none';
+                this.locate();
+              }, this), 'json');
+     }
+   };
+   Popup.prototype.is_tag_editing = function() {
+     return this.tag_edit.style.display != 'none';
+   };
+
    Popup.prototype.open_author_profile = function(same_page) {
      if (this.author.style.display != 'none') this.open_url(this.a_profile.href, same_page);
    };
