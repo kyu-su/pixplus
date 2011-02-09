@@ -3509,8 +3509,12 @@
    Popup.MangaLoader.prototype.load_image = function(url, url_big) {
      var onload = bind(Popup.MangaLoader.prototype.onload_image, this);
      var onerror = bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image');
-     getimg(conf.popup.big_image ? url_big : url, onload,
-            conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
+     if (getimg.cache[url_big] === false) {
+       getimg(url, onload, onerror);
+     } else {
+       getimg(conf.popup.big_image ? url_big : url, onload,
+              conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
+     }
    };
    Popup.MangaLoader.prototype.onload_image = function(image) {
      if (this.images) {
@@ -4551,6 +4555,10 @@
        if (getimg.cache[url]) {
          if (cb_load) cb_load(getimg.cache[url]);
        } else {
+         function error() {
+           getimg.cache[url] = false;
+           cb_error();
+         }
          var img = new Image();
          img.addEventListener(
            'load',
@@ -4560,7 +4568,7 @@
              if (cb_load) cb_load(img);
            }, false);
          if (cb_error && !cb_abort) cb_abort = cb_error;
-         if (cb_error) img.addEventListener('error', cb_error, false);
+         if (cb_error) img.addEventListener('error', error, false);
          if (cb_abort) img.addEventListener('abort', cb_abort, false);
          img.src = url;
          img.style.display = 'none';
