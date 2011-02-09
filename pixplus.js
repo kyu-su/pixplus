@@ -2303,6 +2303,7 @@
      this.viewer_comments_enabled = false;
      this.expand_header = false;
      this.tag_edit_enabled = false;
+     this.tag_loading = false;
      this.has_qrate = false;
      this.has_image_response = false;
      this.zoom_scale = 1;
@@ -2774,6 +2775,7 @@
      }
 
      this.tag_edit_enabled = false;
+     this.tag_edit_btn = null;
      this.tags.style.display = 'none';
      if (loader.text.match(/<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i)) {
        var html = '';
@@ -2791,10 +2793,10 @@
        if (html || this.tag_edit_enabled) {
          this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
          if (this.tag_edit_enabled) {
-           var a_tag_edit = $c('a', this.tags, 'pp-tag-edit-btn');
-           a_tag_edit.href = 'javascript:void(0)';
-           a_tag_edit.textContent = '[E]';
-           $ev(a_tag_edit).click(bind(Popup.prototype.toggle_tag_edit, this));
+           this.tag_edit_btn = $c('a', this.tags, 'pp-tag-edit-btn');
+           this.tag_edit_btn.href = 'javascript:void(0)';
+           this.tag_edit_btn.textContent = '[E]';
+           $ev(this.tag_edit_btn).click(bind(Popup.prototype.toggle_tag_edit, this));
          }
          this.tags.style.display = '';
        }
@@ -3328,12 +3330,14 @@
        this.img_div.style.display = '';
        this.locate();
        this.reload();
-     } else {
+     } else if (!this.tag_loading) {
        var data = {mode: 'first'};
        each(['i_id', 'u_id', 'e_id'],
             function(id) {
               data[id] = $('rpc_' + id).innerHTML;
             });
+       this.tag_loading = true;
+       this.tag_edit_btn.textContent = '[Loading]';
        window.jQuery.post(
          '/rpc_tag_edit.php', data,
          bind(function(data) {
@@ -3342,6 +3346,8 @@
                 this.caption.style.display = 'none';
                 this.img_div.style.display = 'none';
                 this.locate();
+                this.tag_loading = false;
+                this.tag_edit_btn.textContent = '[E]';
               }, this), 'json');
      }
    };
