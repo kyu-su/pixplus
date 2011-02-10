@@ -16,53 +16,7 @@
  * ポップアップのタグ編集のUIをブックマーク編集と同じに変更。
  * ポップアップでブックマーク編集モードのまま他のイラストに移動するとキャプションが表示されなくなるバグを修正。
  * マンガモードでも可能なら原寸の画像を使用するように変更。
- */
-
-/** ポップアップのデフォルトのキーバインド一覧
- ** 通常
- * a/BackSapace/Left    前のイラストに移動。
- * Space/Right          次のイラストに移動。
- * Up/Down              キャプションをスクロールする。
- * Home/End             最初/最後のイラストに移動。
- * Escape               閉じる。
- * e                    プロフィールを開く。
- * r                    作品一覧を開く。
- * Shift+r              イメージレスポンス一覧を開く。
- * t                    ブックマークを開く。
- * y                    スタックフィードを開く。
- * b                    ブックマーク編集モードに移行。
- * Shift+b              ブックマーク詳細ページを開く。
- * f                    イラスト画像を開く。
- * Shift+f              イラストページを開く。
- * g                    リロードする。
- * c                    キャプションの常時表示/自動表示を切り替える。
- * Shift+c              コメント表示を切り替え。
- * d                    アンケートに答える。
- * v                    マンガモードに移行。
- * Shift+v              マンガサムネイルページを開く。
- * Shift+数字           イラストを評価する。デフォルト設定では無効。1=10点/0=1点
- * +/-                  画像を縮小/拡大する。
-
- ** ブックマーク編集モード
- * Escape               ブックマーク編集モードを終了。
- * Up/Down              タグ選択モード開始。
- ** タグ選択モード
- * Escape               タグ選択モードを終了。
- * Space                選択中のタグをトグル。
- * Up/Down              上下のタグリストに移動。
- * Left/Right           左右のタグを選択。
-
- ** マンガモード
- * Escape/v             マンガモードを終了。
- * BackSapace/Left      前のページに移動。
- * Space/Right          次のページに移動。
- * Home/End             最初/最後のページに移動。
- * f                    表示しているページの画像を開く。
- * Shift+f              表示しているページを開く。
-
- ** アンケート
- * Up                   一つ上の選択肢にフォーカスを移す。
- * Down                 一つ下の選択肢にフォーカスを移す。
+ * ヘルプボタンを追加。
  */
 
 /** コメントの処理について
@@ -1003,6 +957,152 @@
      } // stringify()
    }
    /* __CONFIG_UI_END__ */
+
+   function show_help() {
+     var help_data = [
+       {"mode": "\u901a\u5e38",
+        "keys": [
+          {"key":  "a/BackSapace/Left",
+           "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+          {"key":  "Space/Right",
+           "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+          {"key":  "Up/Down",
+           "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
+          {"key":  "Home/End",
+           "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+          {"key":  "Escape",
+           "desc": "\u9589\u3058\u308b"},
+          {"key":  "e",
+           "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"},
+          {"key":  "r",
+           "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"},
+          {"key":  "Shift+r",
+           "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
+          {"key":  "t",
+           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"},
+          {"key":  "y",
+           "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
+          {"key":  "b",
+           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
+          {"key":  "Shift+b",
+           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+          {"key":  "f",
+           "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"},
+          {"key":  "Shift+f",
+           "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+          {"key":  "g",
+           "desc": "\u30ea\u30ed\u30fc\u30c9\u3059\u308b"},
+          {"key":  "c",
+           "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"},
+          {"key":  "Shift+c",
+           "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"},
+          {"key":  "d",
+           "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"},
+          {"key":  "v",
+           "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
+          {"key":  "Shift+v",
+           "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+          {"key":  "Shift+数字",
+           "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3067\u306f\u7121\u52b9(1=10\u70b9/0=1\u70b9)"},
+          {"key":  "+/-",
+           "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"}]},
+       {"mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9",
+        "keys": [
+          {"key":  "Escape",
+           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+          {"key":  "Up/Down",
+           "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u958b\u59cb"}]},
+       {"mode": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9",
+        "keys": [
+          {"key":  "Escape",
+           "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+          {"key":  "Space",
+           "desc": "\u9078\u629e\u4e2d\u306e\u30bf\u30b0\u3092\u30c8\u30b0\u30eb"},
+          {"key":  "Up/Down",
+           "desc": "\u4e0a\u4e0b\u306e\u30bf\u30b0\u30ea\u30b9\u30c8\u306b\u79fb\u52d5"},
+          {"key":  "Left/Right",
+           "desc": "\u5de6\u53f3\u306e\u30bf\u30b0\u3092\u9078\u629e"}]},
+       {"mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
+        "keys": [
+          {"key":  "Escape/v",
+           "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+          {"key":  "a/BackSapace/Left",
+           "desc": "\u524d\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+          {"key":  "Space/Right",
+           "desc": "\u6b21\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+          {"key":  "Home/End",
+           "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+          {"key":  "f",
+           "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u306e\u753b\u50cf\u3092\u958b\u304f"},
+          {"key":  "Shift+f",
+           "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f"}]},
+       {"mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9",
+        "keys": [
+          {"key":  "Up",
+           "desc": "\u4e00\u3064\u4e0a\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"},
+          {"key":  "Down",
+           "desc": "\u4e00\u3064\u4e0b\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"}]}
+     ];
+     write_css('#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:10001;' +
+               '  left:0px;top:0px;width:100%;height:100%;}' +
+               '#pp-help{background-color:white;border:2px solid gray;z-index:10002;padding:2px;line-height:1.2em;}' +
+               '#pp-help td{padding:0px 4px;}' +
+               '#pp-help td.mode{padding:0px;font-weight:bold;}' +
+               '#pp-help td.mode[highlight]{background-color:#ffdfdf;}' +
+               '#pp-help td label{color:navy;}');
+
+     var de = window.document.documentElement;
+     var background = $c('div', document.body, 'pp-help-background');
+     var root = $c('div', document.body, 'pp-help');
+     var table = $c('table', root);
+     each(help_data,
+          function(mode) {
+            var cell = table.insertRow(-1).insertCell(-1);
+            cell.setAttribute('colspan', '2');
+            cell.className = 'mode';
+            cell.textContent = mode.mode;
+            each(mode.keys,
+                 function(key) {
+                   var row = table.insertRow(-1);
+                   row.insertCell(-1).textContent = key.key;
+                   row.insertCell(-1).textContent = key.desc;
+                 });
+            mode.caption = cell;
+          });
+     each(help_data,
+          function(mode) {
+            if (mode.mode.length < 5) return;
+            each($xa('.//tr/td[2]/text()[contains(., "' + mode.mode + '")]', table),
+                 function(node) {
+                   var terms = node.nodeValue.split(mode.mode);
+                   for(var i = 0; i < terms.length; ++i) {
+                     if (i) {
+                       var label = $c('label');
+                       label.textContent = mode.mode;
+                       node.parentNode.insertBefore(label, node);
+                       $ev(label).hover(
+                         function() {
+                           mode.caption.setAttribute('highlight', '');
+                         },
+                         function() {
+                           mode.caption.removeAttribute('highlight');
+                         });
+                     }
+                     node.parentNode.insertBefore(window.document.createTextNode(terms[i]), node);
+                   }
+                   node.parentNode.removeChild(node);
+                 });
+          });
+     root.style.position = 'fixed';
+     root.style.left = Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
+     root.style.top  = Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
+     $ev(background).click(close);
+
+     function close() {
+       background.parentNode.removeChild(background);
+       root.parentNode.removeChild(root);
+     }
+   }
 
    function init_config_ui() {
      if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
@@ -2235,6 +2335,7 @@
                                                       bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                       bind(this.toggle_bookmark_edit, this));
+     this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
      this.caption               = $c('div',     this.header,        'pp-caption');
      this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator-b');
      this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
@@ -4168,6 +4269,9 @@
              conn);
          }
          return conn;
+       },
+       hover: function(func1, func2) {
+         return listen('mouseout', func2, listen('mouseover', func1));
        },
        scroll: function(func) {
          return listen('scroll', func);
