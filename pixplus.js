@@ -2300,7 +2300,7 @@
        usable:      false,
        enabled:     false,
        page:        -1,
-       pages:       null,
+       pages:       [],
        page_count:  -1,
        page_inc:    1,
        page_dec:    -1,
@@ -2309,6 +2309,7 @@
          this.usable      = false;
          this.enabled     = false;
          this.page        = -1;
+         this.pages       = [];
          this.page_count  = -1;
          this.page_inc    = 1;
          this.page_dec    = -1;
