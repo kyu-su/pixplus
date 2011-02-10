@@ -1683,7 +1683,7 @@
 
                var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
 	       toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-	       toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
+	       toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
                window.jQuery.cookie('bookToggle', type,
                                     {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
