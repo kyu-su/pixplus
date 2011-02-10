@@ -1005,7 +1005,9 @@
           {"key":  "Shift+数字",
            "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3067\u306f\u7121\u52b9(1=10\u70b9/0=1\u70b9)"},
           {"key":  "+/-",
-           "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"}]},
+           "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"},
+          {"key":  "?",
+           "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"}]},
        {"mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9",
         "keys": [
           {"key":  "Escape",
@@ -1070,8 +1072,8 @@
             mode.caption = cell;
           });
      each(help_data,
-          function(mode) {
-            if (mode.mode.length < 5) return;
+          function(mode, idx) {
+            if (idx == 0) return;
             each($xa('.//tr/td[2]/text()[contains(., "' + mode.mode + '")]', table),
                  function(node) {
                    var terms = node.nodeValue.split(mode.mode);
@@ -1096,11 +1098,17 @@
      root.style.position = 'fixed';
      root.style.left = Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
      root.style.top  = Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
-     $ev(background).click(close);
+
+     Popup.stop_key = true;
+     var conn_click = $ev(background).click(close);
+     var conn_key   = $ev(window).key(function(ev, key) { if (key === $ev.KEY_ESCAPE) close(); });
 
      function close() {
+       conn_click.disconnect();
+       conn_key.disconnect();
        background.parentNode.removeChild(background);
        root.parentNode.removeChild(root);
+       Popup.stop_key = false;
      }
    }
 
@@ -2451,7 +2459,7 @@
      Popup.oncreate.emit(this, item, manga_page);
    }
    Popup._keypress = function(ev, key) {
-     Popup.instance.keypress(ev, key);
+     if (!Popup.stop_key) Popup.instance.keypress(ev, key);
    };
    Popup._locate = function() {
      Popup.instance.locate();
@@ -2497,6 +2505,7 @@
          case 'v': if (m(1)) q(ev, manga, s);                   return;
          case '-': if (m(1)) q(ev, zoom, -1);                   return;
          case '+': if (m(1)) q(ev, zoom,  1);                   return;
+         case '?': if (m(1)) q(ev, show_help);                  return;
          }
          if (conf.popup.rate && conf.popup.rate_key && s && key.length == 1) {
            var score = '1234567890!"#$%&\'()~'.indexOf(key);
@@ -4262,7 +4271,7 @@
          if (browser.webkit) {
            conn = listen(
              'keydown',
-             function(ev) {
+             function(ev, conn) {
                var c = ev.keyCode || ev.charCode, key;
                if ($ev.key_map[c]) func(ev, $ev.key_map[c], conn);
              },
