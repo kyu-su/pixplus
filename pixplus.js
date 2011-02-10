@@ -1052,8 +1052,8 @@
                '#pp-help td label{color:navy;}');
 
      var de = window.document.documentElement;
-     var background = $c('div', document.body, 'pp-help-background');
-     var root = $c('div', document.body, 'pp-help');
+     var background = $c('div', window.document.body, 'pp-help-background');
+     var root = $c('div', window.document.body, 'pp-help');
      var table = $c('table', root);
      each(help_data,
           function(mode) {
