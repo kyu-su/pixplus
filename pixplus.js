@@ -550,13 +550,14 @@
 
    var options = parseopts(window.location.href);
 
-   function wrap_global(name, func) {
+   function wrap_global(name, func, cb_init) {
      if (!name || !func) return;
      if (window[name]) {
        window[name] = wrap_global.wrap(func, window[name]);
+       if (cb_init) cb_init();
      } else {
        if (!wrap_global.items) wrap_global.items = [];
-       wrap_global.items.push({name: name, func: func});
+       wrap_global.items.push({name: name, func: func, cb_init: cb_init});
        if (!wrap_global.timer) {
          wrap_global.check_count = 0;
          wrap_global.timer = window.setTimeout(wrap_global.check, 300);
@@ -570,10 +571,12 @@
      };
    };
    wrap_global.check = function() {
+     if (!wrap_global.items) return;
      for(var i = 0; i < wrap_global.items.length; ++i) {
        var item = wrap_global.items[i];
        if (window[item.name]) {
          window[item.name] = wrap_global.wrap(item.func, window[item.name]);
+         if (item.cb_init) item.cb_init();
          wrap_global.items.splice(i, 1);
          --i;
        }
@@ -1656,8 +1659,43 @@
                    ul.appendChild(li);
                  });
              });
-           var flat = $t('ul', bm_tag_list)[0].className != 'tagCloud';
-           window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
+           defineMagicFunction(
+             'bookmarkToggle',
+             function(real, othis, container_id, type) {
+               var container = $(container_id);
+               container.className = type;
+               each($t('ul', container),
+                    function(ul) {
+                      if (type == 'cloud') {
+                        ul.className = 'tagCloud';
+                      } else {
+                        ul.removeAttribute('class');
+                      }
+                    });
+               each($xa('ul/li', container),
+                    function(li, idx) {
+                      var cn = li.className.replace(/bg_(?:gray|white)/, '');
+                      if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                      li.className = cn;
+                    });
+
+               $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
+
+               var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
+	       toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
+	       toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
+
+               window.jQuery.cookie('bookToggle', type,
+                                    {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
+
+               var ev = window.document.createEvent('Event');
+               ev.initEvent('pixplusBMTagToggled', true, true);
+               window.document.dispatchEvent(ev);
+             },
+             function() {
+               var flat = $t('ul', bm_tag_list)[0].className != 'tagCloud';
+               window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
+             });
          }
 
          Floater.auto_run(
@@ -1815,6 +1853,8 @@
      write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
                '#header .header_otehrs_ul li + li{margin-left:16px;}' +
                '*[float]{position:fixed;top:0px;}' +
+               // workaround
+               '.book_flat_on,.book_flat_off,.book_cloud_on,.book_cloud_off{padding-bottom:15px;}' +
                // アイコン
                '.pixplus-check{width:14px;height:14px;background-position:-1701px -547px;' +
                '  background-image:url("' + pp.url.img.sprite + '");}' +
@@ -2052,43 +2092,6 @@
        function(real, othis) {
          if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
          real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-       });
-
-     defineMagicFunction(
-       'bookmarkToggle',
-       function(real, othis, container_id, type) {
-         if (!options.id && conf.bm_tag_order.length) {
-           var container = $(container_id);
-           container.className = type;
-           each($t('ul', container),
-                function(ul) {
-                  if (type == 'cloud') {
-                    ul.className = 'tagCloud';
-                  } else {
-                    ul.removeAttribute('class');
-                  }
-                });
-           each($xa('ul/li', container),
-                function(li, idx) {
-                  var cn = li.className.replace(/bg_(?:gray|white)/, '');
-                  if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
-                  li.className = cn;
-                });
-
-           $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
-
-           var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
-	   toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-	   toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_flat_on';
-
-           window.jQuery.cookie('bookToggle', type,
-                                {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
-         } else {
-           real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
-         }
-         var ev = window.document.createEvent('Event');
-         ev.initEvent('pixplusBMTagToggled', true, true);
-         window.document.dispatchEvent(ev);
        });
    }
 
