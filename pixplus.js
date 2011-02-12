@@ -803,7 +803,8 @@
               '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002',
               '\u30d8\u30eb\u30d7\u30dc\u30bf\u30f3\u3092\u8ffd\u52a0\u3002',
               '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4'
+              '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
+              'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
             ]},
            {date: '2011/02/04', version: '0.4.0', changes: [
               'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
@@ -3209,6 +3210,7 @@
        curidx: 0
      };
 
+     this.img_div.style.display = '';
      each(images,
           function(entry, idx) {
             var image = entry.image || entry;
@@ -3236,7 +3238,6 @@
          if (zoom < 1) zoom = 1;
        }
      }
-     this.img_div.style.display = '';
      if (zoom > 1) {
        this.set_zoom(zoom);
      } else {
