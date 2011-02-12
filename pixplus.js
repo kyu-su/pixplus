@@ -1085,7 +1085,8 @@
      '#pp-conf-tag-alias .pp-conf-cell-aliases input{width:100%;}' +
      '#pp-conf-changelog{max-height:600px;overflow:auto;}' +
      '#pp-conf-changelog dt{font-weight:bold;}' +
-     '#pp-conf-changelog ul li{list-style-type:disc;margin-left:2em;}'
+     '#pp-conf-changelog ul{padding-left:2em;}' +
+     '#pp-conf-changelog ul li{list-style-type:disc;}'
    ;
    /* __CONFIG_UI_END__ */
 
