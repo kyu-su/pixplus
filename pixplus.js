@@ -1922,6 +1922,16 @@
        } else {
          setTimeout(init_novel, 100);
        }
+     } else if (window.location.pathname.match(/^\/search_user\.php/)) {
+       Pager.wait(
+         function() {
+           var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
+           if (research) {
+             var parent = research.parentNode;
+             parent.removeChild(research);
+             parent.insertBefore(research, parent.firstChild);
+           }
+         });
      }
    }
 
