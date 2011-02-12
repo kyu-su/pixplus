@@ -1068,11 +1068,11 @@
      '#pp-conf-head input{margin-left:0.2em;}' +
      '#pp-conf-head a{margin-left:1em;}' +
      '#pp-conf-pager{margin-top:0.4em;}' +
-     '#pp-conf-pagelist li{display:inline-block;position:relative;z-index:99;}' +
+     '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
      '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
      '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
      '#pp-conf-pagelist li.select a{padding:1px 5px 2px 5px;}' +
-     '#pp-conf-pager section{display:none;border:1px solid silver;padding:4px;position:relative;top:-1px;z-index:98;}' +
+     '#pp-conf-pager section{display:none;border:1px solid silver;padding:4px;margin-top:-1px;z-index:98;}' +
      '#pp-conf-pager section.select{display:block;}' +
      '#pp-conf-pager input, #pp-conf-pager textarea{' +
      '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
