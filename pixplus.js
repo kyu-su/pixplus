@@ -633,7 +633,7 @@
                      '     ' + gen_js('\n     ', 2),
                      '   }',
                      ' })();'].join('\n');
-           pp.open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+           (options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
          }, false);
        head.appendChild(btn_userjs);
      }
