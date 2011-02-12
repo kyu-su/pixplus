@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.4.1
+// @version     0.5.0
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -9,7 +9,7 @@
 // @exclude     *pixivreader*
 // ==/UserScript==
 
-/** 0.4.1
+/** 0.5.0
  * conf.extensionを廃止。Opera拡張版ののツールバーアイコンを削除。
  * Firefoxでコメント表示機能が動作していなかったバグを修正。
  * Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。
@@ -17,6 +17,7 @@
  * ポップアップでブックマーク編集モードのまま他のイラストに移動するとキャプションが表示されなくなるバグを修正。
  * マンガモードでも可能なら原寸の画像を使用するように変更。
  * ヘルプボタンを追加。
+ * メンバーイラストページなどを開いた時に評価などが出来ない場合があるバグを修正。
  */
 
 /** コメントの処理について
