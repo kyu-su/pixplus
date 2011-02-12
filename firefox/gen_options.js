@@ -36,7 +36,7 @@ conf.each(
   },
   function(sec) {
     if (sec.name == 'bookmark') return true;
-    print('  <prefpane id="' + sec.name + '" label="&' + sec.label + ';">');
+    print('  <prefpane id="' + sec.name + '" label="' + sec.label + '">');
     print('    <preferences>');
     sec.ui = '';
     return false;

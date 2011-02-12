@@ -1,25 +1,2 @@
 *{margin:0px;padding:0px;}
 body{padding:2px;font-size:smaller;}
-table{border-spacing:0px;}
-table td{padding:1px;}
-table input{box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}
-
-#pp-conf-head form{display:inline;}
-#pp-conf-head input{margin-left:0.2em;}
-#pp-conf-head a{margin-left:1em;}
-
-tr.pp-conf-section{color:gray;font-weight:bold;font-size:larger;}
-tr.pp-conf-entry > td:first-child, tr.pp-conf-section-custom > td:first-child{padding-left:2em !important;}
-tr.pp-conf-entry-odd{background-color:#efefef;}
-
-.pp-conf-cell-value select, .pp-conf-cell-value input{width:100%;}
-#pp-conf-table > tbody > tr > td > button{margin:1px 2px;}
-
-#pp-conf-bookmark-tag_order{display:block;width:60%;}
-
-#pp-conf-bookmark-tag_aliases{width:100%;}
-#pp-conf-bookmark-tag_aliases button{display:block;word-break:keep-all;}
-#pp-conf-bookmark-tag_aliases input{display:block;width:100%;}
-#pp-conf-bookmark-tag_aliases .pp-conf-cell-remove{width:0;}
-#pp-conf-bookmark-tag_aliases .pp-conf-cell-tag{width:30%;}
-#pp-conf-bookmark-tag_aliases .pp-conf-cell-aliases{width:100%;}

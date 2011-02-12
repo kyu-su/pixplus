@@ -27,4 +27,8 @@ function init() {
 function init_real() {
   new ConfigUI(document.getElementById('options-root'), conf, true,
                window.chrome ? chrome.i18n.getMessage : null);
+
+  var style = document.createElement('style');
+  style.textContent = ConfigUI.css;
+  document.body.appendChild(style);
 }
