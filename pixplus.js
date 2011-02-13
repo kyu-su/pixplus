@@ -729,8 +729,8 @@
          return false;
        });
 
-     var tocont = make_section('Tag order', 'tag-order');
-     tocont.innerHTML = msg_filter("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8");
+     var section_tags = make_section('Tags', 'tags');
+     section_tags.appendChild(window.document.createTextNode(msg_filter("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8")));
      var tag_order_textarea = window.document.createElement('textarea');
      tag_order_textarea.value = (options_page
                                  ? st.get('bookmark', 'tag_order')
@@ -741,18 +741,17 @@
          if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
          update_export();
        }, false);
-     tocont.appendChild(tag_order_textarea);
+     section_tags.appendChild(tag_order_textarea);
 
-     var tacont = make_section('Tag alias', 'tag-alias');
-     tacont.textContent = msg_filter("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002");
+     section_tags.appendChild(window.document.createTextNode(msg_filter("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002")));
      var tag_alias_table = window.document.createElement('table');
      tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
-     tacont.appendChild(tag_alias_table);
+     section_tags.appendChild(tag_alias_table);
      (function() {
         var add = window.document.createElement('button');
         add.textContent = 'Add';
         add.addEventListener('click', function() { add_row(); }, false);
-        tacont.appendChild(add);
+        section_tags.appendChild(add);
 
         var aliases = options_page ? st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases')) : conf.bm_tag_aliases;
         for(var key in aliases) add_row(key, aliases[key]);
@@ -1080,9 +1079,9 @@
      '#pp-conf-pager button{display:block !important;word-break:keep-all !important;}' +
      '#pp-conf-pager textarea{width:100%;}' +
      '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
-     '#pp-conf-tag-order textarea{height:600px;}' +
-     '#pp-conf-tag-alias .pp-conf-cell-aliases{width:100%;}' +
-     '#pp-conf-tag-alias .pp-conf-cell-aliases input{width:100%;}' +
+     '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
+     '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
+     '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
      '#pp-conf-changelog{max-height:600px;overflow:auto;}' +
      '#pp-conf-changelog dt{font-weight:bold;}' +
      '#pp-conf-changelog ul{padding-left:2em;}' +
