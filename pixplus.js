@@ -796,23 +796,26 @@
       })(section_tags);
 
      make_section('Help', 'help').appendChild(ConfigUI.create_help_table(msg_filter));
-     make_section('About', 'about').innerHTML =
-       '<dl>' +
-       '<dt>Name</dt><dd>pixplus</dd>' +
-       '<dt>URL</dt><dd><ul>' +
-       map(['http://crckyl.pa.land.to/pixplus/',
-            'http://my.opera.com/crckyl/',
-            'http://crckyl.ath.cx:8088/pixplus/'],
-           function(url) {
-             return '<li><a href="' + url + '">' + url + '</a></li>';
-           }).join('') +
-       '</ul></dd>' +
-       '<dt>Contact</dt><dd><ul>' +
-       '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
-       '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
-       '</ul></dd>' +
-       '<dt>License</dt><dd>Public domain</dd>' +
-       '</dl>';
+
+     (function(section) {
+        var urls = ['http://crckyl.pa.land.to/pixplus/',
+                    'http://my.opera.com/crckyl/',
+                    'http://crckyl.ath.cx:8088/pixplus/'];
+        var html = '<dl>' +
+          '<dt>Name</dt><dd>pixplus</dd>' +
+          '<dt>URL</dt><dd><ul>';
+        for(var i = 0; i < urls.length; ++i) {
+          html += '<li><a href="' + urls[i] + '">' + urls[i] + '</a></li>';
+        }
+        html += '</ul></dd>' +
+          '<dt>Contact</dt><dd><ul>' +
+          '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
+          '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
+          '</ul></dd>' +
+          '<dt>License</dt><dd>Public domain</dd>' +
+          '</dl>';
+        section.innerHTML = html;
+      })(make_section('About', 'about'));
 
      (function(changelog, data) {
         var dl = window.document.createElement('dl');
@@ -1251,6 +1254,7 @@
      '.pp-help-table td.pp-help-mode[highlight]{background-color:#ffdfdf;}' +
      '.pp-help-table td label{color:navy;}' +
      '#pp-conf-about dt{font-weight:bold;}' +
+     '#pp-conf-about *+dt{margin-top:0.6em;}' +
      '#pp-conf-about dd{margin-left:1.6em;}' +
      '#pp-conf-about dd ul li{list-style-type:none;}' +
      '#pp-conf-changelog{max-height:600px;overflow:auto;}' +
@@ -4746,13 +4750,6 @@
      var new_ary = [];
      each(ary, function(i, idx) {if (func(i, idx)) new_ary.push(i);});
      return new_ary;
-   }
-   function map(list, func, obj) {
-     if (!list) return list;
-     for(var i = 0; i < list.length; ++i) {
-       list[i] = func.call(obj || list, list[i], i);
-     }
-     return list;
    }
    function send_click(elem) {
      var ev = elem.ownerDocument.createEvent('MouseEvents');
