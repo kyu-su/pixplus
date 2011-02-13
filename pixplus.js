@@ -2493,7 +2493,7 @@
                                                       bind(this.toggle_viewer_comments, this));
      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                       bind(this.toggle_bookmark_edit, this));
-     this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
+     //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
      this.caption               = $c('div',     this.header,        'pp-caption');
      this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator-b');
      this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
