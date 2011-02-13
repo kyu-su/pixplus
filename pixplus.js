@@ -730,28 +730,32 @@
        });
 
      var section_tags = make_section('Tags', 'tags');
-     section_tags.appendChild(window.document.createTextNode(msg_filter("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8")));
      var tag_order_textarea = window.document.createElement('textarea');
-     tag_order_textarea.value = (options_page
-                                 ? st.get('bookmark', 'tag_order')
-                                 : st.bm_tag_order_to_str(conf.bm_tag_order));
-     tag_order_textarea.addEventListener(
-       'keyup',
-       function() {
-         if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
-         update_export();
-       }, false);
-     section_tags.appendChild(tag_order_textarea);
+     (function(section) {
+        section.appendChild(create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
+        tag_order_textarea.value = (options_page
+                                    ? st.get('bookmark', 'tag_order')
+                                    : st.bm_tag_order_to_str(conf.bm_tag_order));
+        tag_order_textarea.addEventListener(
+          'keyup',
+          function() {
+            if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
+            update_export();
+          }, false);
+        section.appendChild(tag_order_textarea);
+      })(section_tags);
 
-     section_tags.appendChild(window.document.createTextNode(msg_filter("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002")));
      var tag_alias_table = window.document.createElement('table');
-     tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
-     section_tags.appendChild(tag_alias_table);
-     (function() {
+     (function(section) {
+        section.appendChild(create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
+
+        tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
+        section.appendChild(tag_alias_table);
+
         var add = window.document.createElement('button');
         add.textContent = 'Add';
         add.addEventListener('click', function() { add_row(); }, false);
-        section_tags.appendChild(add);
+        section.appendChild(add);
 
         var aliases = options_page ? st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases')) : conf.bm_tag_aliases;
         for(var key in aliases) add_row(key, aliases[key]);
@@ -789,84 +793,11 @@
           if (st.u) st.set('bookmark', 'tag_aliases', get_tag_alias_str());
           update_export();
         }
-      })();
+      })(section_tags);
 
-     (function(changelog) {
-        var data =
-          [{date: '2011/02/xx', version: '0.5.0', changes: [
-              'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
-              'Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              'Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-              '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002',
-              '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002',
-              '\u30d8\u30eb\u30d7\u30dc\u30bf\u30f3\u3092\u8ffd\u52a0\u3002',
-              '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
-              'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
-            ]},
-           {date: '2011/02/04', version: '0.4.0', changes: [
-              'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
-              '\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002',
-              'OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002',
-              '\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002',
-              '\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-              '\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002',
-              '\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-              'Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
-            ]},
-           {date: '2011/01/15', version: '0.3.2', changes: [
-              '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-            ]},
-           {date: '2011/01/14', version: '0.3.1', changes: [
-              'Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              'conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              'ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
-              'OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002'
-            ]},
-           {date: '2010/12/26', version: '0.3.0', changes: [
-              'conf.fast_user_bookmark\u8ffd\u52a0\u3002',
-              '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002',
-              '\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-              '\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
-              '\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-              '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b',
-              '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002',
-              'conf.expand_novel\u8ffd\u52a0\u3002',
-              '\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002',
-              '\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-              'Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002',
-              '\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-            ]},
-           {date: '2010/12/01', version: '0.2.0', changes: [
-              'Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002',
-              'Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
-              '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002',
-              '\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002',
-              'd\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002'
-            ]},
-           {date: '2010/11/14', version: '0.1.2', changes: [
-              '\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-              '\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              '\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
-              'conf.popup.overlay_control\u8ffd\u52a0\u3002',
-              '\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-              '\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-            ]},
-           {date: '2010/11/02', version: '0.1.1', changes: [
-              '\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002',
-              'conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-              'pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002'
-            ]},
-           {date: '2010/10/27', version: '0.1.0', changes: [
-              'Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002',
-              '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002',
-              'AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
-            ]}];
+     make_section('Help', 'help').appendChild(ConfigUI.create_help_table(msg_filter));
 
+     (function(changelog, data) {
         var dl = window.document.createElement('dl');
         for(var i = 0; i < data.length; ++i) {
           var dt = window.document.createElement('dt');
@@ -883,7 +814,7 @@
           dl.appendChild(dd);
         }
         changelog.appendChild(dl);
-      })(make_section('ChangeLog', 'changelog'));
+      })(make_section('ChangeLog', 'changelog'), ConfigUI.changelog_data);
 
      update_export();
 
@@ -921,6 +852,11 @@
        li.className = 'select';
        section.className = 'select';
        arguments.callee.selected = [li, section];
+     }
+     function create_description(msg) {
+       var div = window.document.createElement('div');
+       div.innerHTML = msg_filter(msg);
+       return div;
      }
      function get_tag_alias_str() {
        var tag_aliases = '';
@@ -1063,6 +999,215 @@
        }
      } // stringify()
    }
+   ConfigUI.changelog_data = [
+     {date: '2011/02/xx', version: '0.5.0', changes: [
+        'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
+        'Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002',
+        '\u30d8\u30eb\u30d7\u30dc\u30bf\u30f3\u3092\u8ffd\u52a0\u3002',
+        '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
+        'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+      ]},
+     {date: '2011/02/04', version: '0.4.0', changes: [
+        'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
+        '\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002',
+        'OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002',
+        '\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002',
+        '\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        '\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002',
+        '\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        'Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
+      ]},
+     {date: '2011/01/15', version: '0.3.2', changes: [
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]},
+     {date: '2011/01/14', version: '0.3.1', changes: [
+        'Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
+        'OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002'
+      ]},
+     {date: '2010/12/26', version: '0.3.0', changes: [
+        'conf.fast_user_bookmark\u8ffd\u52a0\u3002',
+        '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002',
+        '\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
+        '\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002',
+        'conf.expand_novel\u8ffd\u52a0\u3002',
+        '\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002',
+        '\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        'Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002',
+        '\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]},
+     {date: '2010/12/01', version: '0.2.0', changes: [
+        'Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002',
+        'Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
+        '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002',
+        '\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002',
+        'd\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002'
+      ]},
+     {date: '2010/11/14', version: '0.1.2', changes: [
+        '\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
+        'conf.popup.overlay_control\u8ffd\u52a0\u3002',
+        '\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]},
+     {date: '2010/11/02', version: '0.1.1', changes: [
+        '\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002',
+        'conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002'
+      ]},
+     {date: '2010/10/27', version: '0.1.0', changes: [
+        'Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002',
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002',
+        'AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
+      ]}];
+   ConfigUI.help_data = [
+     {"mode": "\u901a\u5e38",
+      "keys": [
+        {"key":  "a/BackSapace/Left",
+         "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+        {"key":  "Space/Right",
+         "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+        {"key":  "Up/Down",
+         "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
+        {"key":  "Home/End",
+         "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+        {"key":  "Escape",
+         "desc": "\u9589\u3058\u308b"},
+        {"key":  "e",
+         "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"},
+        {"key":  "r",
+         "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"},
+        {"key":  "Shift+r",
+         "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
+        {"key":  "t",
+         "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"},
+        {"key":  "y",
+         "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
+        {"key":  "b",
+         "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
+        {"key":  "Shift+b",
+         "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+        {"key":  "f",
+         "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"},
+        {"key":  "Shift+f",
+         "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+        {"key":  "g",
+         "desc": "\u30ea\u30ed\u30fc\u30c9\u3059\u308b"},
+        {"key":  "c",
+         "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"},
+        {"key":  "Shift+c",
+         "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"},
+        {"key":  "d",
+         "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"},
+        {"key":  "v",
+         "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
+        {"key":  "Shift+v",
+         "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+        {"key":  "Shift+Number",
+         "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3067\u306f\u7121\u52b9(1=10\u70b9/0=1\u70b9)"},
+        {"key":  "+/-",
+         "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"},
+        {"key":  "?",
+         "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"}]},
+     {"mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9",
+      "keys": [
+        {"key":  "Escape",
+         "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+        {"key":  "Up/Down",
+         "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u958b\u59cb"}]},
+     {"mode": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9",
+      "keys": [
+        {"key":  "Escape",
+         "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+        {"key":  "Space",
+         "desc": "\u9078\u629e\u4e2d\u306e\u30bf\u30b0\u3092\u30c8\u30b0\u30eb"},
+        {"key":  "Up/Down",
+         "desc": "\u4e0a\u4e0b\u306e\u30bf\u30b0\u30ea\u30b9\u30c8\u306b\u79fb\u52d5"},
+        {"key":  "Left/Right",
+         "desc": "\u5de6\u53f3\u306e\u30bf\u30b0\u3092\u9078\u629e"}]},
+     {"mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
+      "keys": [
+        {"key":  "Escape/v",
+         "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
+        {"key":  "a/BackSapace/Left",
+         "desc": "\u524d\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+        {"key":  "Space/Right",
+         "desc": "\u6b21\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+        {"key":  "Home/End",
+         "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
+        {"key":  "f",
+         "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u306e\u753b\u50cf\u3092\u958b\u304f"},
+        {"key":  "Shift+f",
+         "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f"}]},
+     {"mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9",
+      "keys": [
+        {"key":  "Up",
+         "desc": "\u4e00\u3064\u4e0a\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"},
+        {"key":  "Down",
+         "desc": "\u4e00\u3064\u4e0b\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"}]}
+   ];
+   ConfigUI.create_help_table = function(msg_filter) {
+     if (!msg_filter) msg_filter = function(s) { return s; };
+     var table = window.document.createElement('table');
+     table.className = 'pp-help-table';
+     var captions = [], i, j;
+     for(i = 0; i < ConfigUI.help_data.length; ++i) {
+       var cell = table.insertRow(-1).insertCell(-1);
+       cell.setAttribute('colspan', '2');
+       cell.className = 'pp-help-mode';
+       cell.textContent = msg_filter(ConfigUI.help_data[i].mode);
+       for(j = 0; j < ConfigUI.help_data[i].keys.length; ++j) {
+         var row = table.insertRow(-1);
+         row.insertCell(-1).textContent = ConfigUI.help_data[i].keys[j].key;
+         row.insertCell(-1).textContent = msg_filter(ConfigUI.help_data[i].keys[j].desc);
+       }
+       captions.push(cell);
+     }
+     for(i = 1; i < ConfigUI.help_data.length; ++i) {
+       var rep = msg_filter(ConfigUI.help_data[i].mode);
+       for(var r = 0; r < table.rows.length; ++r) {
+         if (table.rows[r].cells.length < 2) continue;
+         var node = table.rows[r].cells[1].firstChild;
+         var terms = node.nodeValue.split(rep);
+         if (terms.length < 2) continue;
+         for(j = 0; j < terms.length; ++j) {
+           if (j) {
+             (function(caption) {
+                var label = window.document.createElement('label');
+                label.textContent = rep;
+                node.parentNode.insertBefore(label, node);
+                label.addEventListener(
+                  'mouseover',
+                  function() {
+                    caption.setAttribute('highlight', '');
+                  }, false);
+                label.addEventListener(
+                  'mouseout',
+                  function() {
+                    caption.removeAttribute('highlight');
+                  }, false);
+              })(captions[i]);
+           }
+           node.parentNode.insertBefore(window.document.createTextNode(terms[j]), node);
+         }
+         node.parentNode.removeChild(node);
+       }
+     }
+     return table;
+   };
    ConfigUI.css =
      '#pp-conf-head form{display:inline;}' +
      '#pp-conf-head input{margin-left:0.2em;}' +
@@ -1085,147 +1230,19 @@
      '#pp-conf-changelog{max-height:600px;overflow:auto;}' +
      '#pp-conf-changelog dt{font-weight:bold;}' +
      '#pp-conf-changelog ul{padding-left:2em;}' +
-     '#pp-conf-changelog ul li{list-style-type:disc;}'
-   ;
+     '#pp-conf-changelog ul li{list-style-type:disc;}' +
+     '.pp-help-table{line-height:1.2em;}' +
+     '.pp-help-table td{padding:0px 4px;}' +
+     '.pp-help-table td.pp-help-mode{padding:0px;font-weight:bold;}' +
+     '.pp-help-table td.pp-help-mode[highlight]{background-color:#ffdfdf;}' +
+     '.pp-help-table td label{color:navy;}';
    /* __CONFIG_UI_END__ */
 
    function show_help() {
-     var help_data = [
-       {"mode": "\u901a\u5e38",
-        "keys": [
-          {"key":  "a/BackSapace/Left",
-           "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-          {"key":  "Space/Right",
-           "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-          {"key":  "Up/Down",
-           "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
-          {"key":  "Home/End",
-           "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-          {"key":  "Escape",
-           "desc": "\u9589\u3058\u308b"},
-          {"key":  "e",
-           "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"},
-          {"key":  "r",
-           "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"},
-          {"key":  "Shift+r",
-           "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
-          {"key":  "t",
-           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"},
-          {"key":  "y",
-           "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
-          {"key":  "b",
-           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
-          {"key":  "Shift+b",
-           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-          {"key":  "f",
-           "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"},
-          {"key":  "Shift+f",
-           "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-          {"key":  "g",
-           "desc": "\u30ea\u30ed\u30fc\u30c9\u3059\u308b"},
-          {"key":  "c",
-           "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"},
-          {"key":  "Shift+c",
-           "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"},
-          {"key":  "d",
-           "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"},
-          {"key":  "v",
-           "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
-          {"key":  "Shift+v",
-           "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-          {"key":  "Shift+数字",
-           "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3067\u306f\u7121\u52b9(1=10\u70b9/0=1\u70b9)"},
-          {"key":  "+/-",
-           "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"},
-          {"key":  "?",
-           "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"}]},
-       {"mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9",
-        "keys": [
-          {"key":  "Escape",
-           "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
-          {"key":  "Up/Down",
-           "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u958b\u59cb"}]},
-       {"mode": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9",
-        "keys": [
-          {"key":  "Escape",
-           "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
-          {"key":  "Space",
-           "desc": "\u9078\u629e\u4e2d\u306e\u30bf\u30b0\u3092\u30c8\u30b0\u30eb"},
-          {"key":  "Up/Down",
-           "desc": "\u4e0a\u4e0b\u306e\u30bf\u30b0\u30ea\u30b9\u30c8\u306b\u79fb\u52d5"},
-          {"key":  "Left/Right",
-           "desc": "\u5de6\u53f3\u306e\u30bf\u30b0\u3092\u9078\u629e"}]},
-       {"mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
-        "keys": [
-          {"key":  "Escape/v",
-           "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"},
-          {"key":  "a/BackSapace/Left",
-           "desc": "\u524d\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
-          {"key":  "Space/Right",
-           "desc": "\u6b21\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
-          {"key":  "Home/End",
-           "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"},
-          {"key":  "f",
-           "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u306e\u753b\u50cf\u3092\u958b\u304f"},
-          {"key":  "Shift+f",
-           "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f"}]},
-       {"mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9",
-        "keys": [
-          {"key":  "Up",
-           "desc": "\u4e00\u3064\u4e0a\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"},
-          {"key":  "Down",
-           "desc": "\u4e00\u3064\u4e0b\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"}]}
-     ];
-     write_css('#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:10001;' +
-               '  left:0px;top:0px;width:100%;height:100%;}' +
-               '#pp-help{background-color:white;border:2px solid gray;z-index:10002;padding:2px;line-height:1.2em;}' +
-               '#pp-help td{padding:0px 4px;}' +
-               '#pp-help td.mode{padding:0px;font-weight:bold;}' +
-               '#pp-help td.mode[highlight]{background-color:#ffdfdf;}' +
-               '#pp-help td label{color:navy;}');
-
      var de = window.document.documentElement;
      var background = $c('div', window.document.body, 'pp-help-background');
      var root = $c('div', window.document.body, 'pp-help');
-     var table = $c('table', root);
-     each(help_data,
-          function(mode) {
-            var cell = table.insertRow(-1).insertCell(-1);
-            cell.setAttribute('colspan', '2');
-            cell.className = 'mode';
-            cell.textContent = mode.mode;
-            each(mode.keys,
-                 function(key) {
-                   var row = table.insertRow(-1);
-                   row.insertCell(-1).textContent = key.key;
-                   row.insertCell(-1).textContent = key.desc;
-                 });
-            mode.caption = cell;
-          });
-     each(help_data,
-          function(mode, idx) {
-            if (idx == 0) return;
-            each($xa('.//tr/td[2]/text()[contains(., "' + mode.mode + '")]', table),
-                 function(node) {
-                   var terms = node.nodeValue.split(mode.mode);
-                   for(var i = 0; i < terms.length; ++i) {
-                     if (i) {
-                       var label = $c('label');
-                       label.textContent = mode.mode;
-                       node.parentNode.insertBefore(label, node);
-                       $ev(label).hover(
-                         function() {
-                           mode.caption.setAttribute('highlight', '');
-                         },
-                         function() {
-                           mode.caption.removeAttribute('highlight');
-                         });
-                     }
-                     node.parentNode.insertBefore(window.document.createTextNode(terms[i]), node);
-                   }
-                   node.parentNode.removeChild(node);
-                 });
-          });
+     root.appendChild(ConfigUI.create_help_table());
      root.style.position = 'fixed';
      root.style.left = Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
      root.style.top  = Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
@@ -1289,7 +1306,7 @@
            }
          }, false);
 
-       var div, tag_order_textarea, tag_alias_table;
+       var div;
        function create() {
          if (div) return;
          div = $c('div', null, 'pp-conf-root');
@@ -2006,6 +2023,10 @@
                'hr + br, hr ~ br{display:none;}' +
                // 設定
                ConfigUI.css +
+               // help
+               '#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:10001;' +
+               '  left:0px;top:0px;width:100%;height:100%;}' +
+               '#pp-help{background-color:white;border:2px solid gray;z-index:10002;padding:2px;}' +
                // ポップアップ/検索欄がz-index:1000なので
                '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                '  border:2px solid gray;z-index:10000;}' +
