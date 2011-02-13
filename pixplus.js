@@ -2274,20 +2274,24 @@
          .script(pp.url.js.jquery)
          .wait(function() {
                  window.jQuery.noConflict();
-                 var _ajax = window.jQuery.ajax;
-                 window.jQuery.ajax = function(obj) {
-                   if (obj) obj.url = mod_rpc_url(obj.url);
-                   return _ajax.apply(this, Array.prototype.slice.apply(arguments));
-                 };
+                 if (window.location.pathname.match(/^\/stacc\//)) {
+                   var _ajax = window.jQuery.ajax;
+                   window.jQuery.ajax = function(obj) {
+                     if (obj) obj.url = mod_rpc_url(obj.url);
+                     return _ajax.apply(this, Array.prototype.slice.apply(arguments));
+                   };
+                 }
                  init_pixplus_real();
                })
          .script(pp.url.js.prototypejs)
          .wait(function() {
-                 var _request = window.Ajax.Request.prototype.request;
-                 window.Ajax.Request.prototype.request = function(url) {
-                   url = mod_rpc_url(url);
-                   return _request.apply(this, [url].concat(Array.prototype.slice.apply(arguments, [1])));
-                 };
+                 if (window.location.pathname.match(/^\/stacc\//)) {
+                   var _request = window.Ajax.Request.prototype.request;
+                   window.Ajax.Request.prototype.request = function(url) {
+                     url = mod_rpc_url(url);
+                     return _request.apply(this, [url].concat(Array.prototype.slice.apply(arguments, [1])));
+                   };
+                 }
                })
          .script(pp.url.js.effects)
          .script(pp.url.js.rpc)
