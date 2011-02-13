@@ -9,12 +9,6 @@
 // @exclude     *pixivreader*
 // ==/UserScript==
 
-/** コメントの処理について
- * 8文字以上の横罫線はhrタグに置換される。
- * brタグが含まれていなければ、4文字以上の空白を改行に置換する。
- * aタグのhref属性の先頭のjump.phpは削除される。
- */
-
 /** 対応しているページ一覧
  * マイページ(ログイン時のトップページ/R-18)
  * メンバーイラスト/作品一覧/ブックマーク
@@ -265,7 +259,7 @@
      write_css:     write_css,
      open:          window_open,
 
-     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8},
+     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8, rpc_t_id: 16},
      rpc_usable:    false,
      rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
      rpc_req_tag:   7,  // i|u|e
@@ -1031,7 +1025,8 @@
         '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
         'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'Extension\u7248\u3067conf.expand_novel\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]},
      {date: '2011/02/04', version: '0.4.0', changes: [
         'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
@@ -1953,7 +1948,7 @@
        }
        conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
      } else if (window.location.pathname.match(/^\/novel\/show\.php/)) {
-       if (illust_html_list.length < illust_id_list.length) {
+       if (window.illust_html_list.length < window.illust_id_list.length) {
          var _jump_to = window.jump_to;
          window.jump_to = function() {
            _jump_to.apply(this, Array.prototype.slice.apply(arguments));
