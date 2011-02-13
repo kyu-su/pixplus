@@ -2479,7 +2479,6 @@
    function Popup(item, manga_page) {
      this.root_div              = $c('div',     null,               'pp-popup');
      this.header                = $c('div',     this.root_div,      'pp-header');
-     // 文字によってはキャプションの幅計算が壊れるのでタイトルをblockなエレメントでラップする
      this.title_div             = $c('div',     this.header,        'pp-title_wrapper');
      this.title                 = $c('a',       this.title_div,     'pp-title');
      this.title.setAttribute('nopopup', '');
