@@ -3544,10 +3544,10 @@
                   this.img_div.style.display = 'none';
                   mod_edit_bookmark(
                     this.bm_edit, autotag, this.title, this.comment,
-                    function() {
-                      this.toggle_bookmark_edit();
-                      this.reload();
-                    });
+                    bind(function() {
+                           this.toggle_bookmark_edit();
+                           this.reload();
+                         }, this));
                   this.locate();
                 } else {
                   this.error('Failed to parse bookmark HTML');
