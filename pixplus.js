@@ -931,7 +931,7 @@
         }
 
         var aliases = (this.options_page
-                       ? this.st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'))
+                       ? this.st.parse_bm_tag_aliases(this.st.get('bookmark', 'tag_aliases'))
                        : conf.bm_tag_aliases);
         for(var key in aliases) add_row(key, aliases[key]);
       }},
@@ -943,7 +943,7 @@
         this.export_input.addEventListener(
           'mouseup',
           function(ev) {
-            self.export_input.select(0, self.export_input.value.length);
+            self.export_input.select(); /* WARN */
           }, false);
         this.export_form.appendChild(this.export_input);
 
