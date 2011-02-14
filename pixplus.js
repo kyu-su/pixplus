@@ -574,187 +574,335 @@
 
    /* __CONFIG_UI_BEGIN__ */
    function ConfigUI(root, st, options_page, msg_filter) {
-     if (!msg_filter) msg_filter = function(s) { return s; };
      this.root = root;
+     this.st = st;
+     this.options_page = options_page;
+     this.msg_filter = msg_filter || function(s) { return s; };
 
-     var head = window.document.createElement('div');
-     head.id = 'pp-conf-head';
-     root.appendChild(head);
+     this.pager = window.document.createElement('div');
+     this.pager.id = 'pp-conf-pager';
+     this.root.appendChild(this.pager);
+     this.page_list = window.document.createElement('ul');
+     this.page_list.id = 'pp-conf-pagelist';
+     this.pager.appendChild(this.page_list);
+     this.pages = [];
 
-     var export_form = window.document.createElement('form');
-     var export_input = window.document.createElement('input');
-     export_input.addEventListener(
-       'mouseup',
-       function(ev) {
-         export_input.select(0, export_input.value.length); /* WARN */
-       }, false);
-     export_form.textContent = 'Export/Import:';
-     export_form.appendChild(export_input);
-     if (window.JSON && st.u) {
-       var btn_import = window.document.createElement('input');
-       btn_import.type = 'submit';
-       btn_import.value = 'Import';
-       export_form.addEventListener(
-         'submit',
-         function(ev) {
-           try {
-             ev.preventDefault();
-             import_json();
-           } catch(ex) {
-             alert(ex);
+     this.input_table =
+       (function(self) {
+          var input_table = { };
+          var idx, table;
+          st.each(
+            function(sec, key) {
+              var value = options_page ? st.get(sec.name, key) : sec.conf[key];
+              var type = typeof sec.schema[key][0];
+              var row = table.insertRow(-1), cell = row.insertCell(-1), input;
+              row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
+              if (sec.schema[key][2]) {
+                input = window.document.createElement('select');
+                for(var i = 0; i < sec.schema[key][2].length; ++i) {
+                  var entry = sec.schema[key][2][i];
+                  var opt = window.document.createElement('option');
+                  if (typeof entry === 'string') {
+                    opt.value = entry;
+                    opt.textContent = self.msg_filter(entry);
+                  } else {
+                    opt.value = entry.value;
+                    opt.textContent = self.msg_filter(entry.title);
+                  }
+                  input.appendChild(opt);
+                }
+              } else {
+                input = window.document.createElement('input');
+              }
+              input.id = 'pp-conf-' + sec.name + '-' + key;
+              if (type == 'boolean') {
+                input.setAttribute('type', 'checkbox');
+                input.checked = value;
+
+                var label = window.document.createElement('label');
+                label.appendChild(input);
+                label.appendChild(window.document.createTextNode(key));
+
+                cell.appendChild(label);
+                cell.setAttribute('colspan', '2');
+              } else {
+                cell.textContent = key;
+                input.value = value;
+                cell = row.insertCell(-1);
+                cell.className = 'pp-conf-cell-value';
+                cell.appendChild(input);
+              }
+              input_table[sec.name + '_' + key] = input;
+
+              var def = window.document.createElement('button');
+              def.textContent = 'Default';
+              def.addEventListener(
+                'click',
+                function() {
+                  if (type == 'boolean') {
+                    input.checked = sec.schema[key][0];
+                  } else {
+                    input.value = sec.schema[key][0];
+                  }
+                  if (self.st.u) self.st.remove(sec.name, key, value);
+                  self.update_export();
+                }, false);
+              row.insertCell(-1).appendChild(def);
+              row.insertCell(-1).textContent = self.msg_filter(sec.schema[key][1]);
+
+              input.addEventListener(
+                sec.schema[key][2] || type == 'boolean' ? 'change' : 'keyup',
+                function() {
+                  var value;
+                  if (type == 'boolean') {
+                    value = input.checked;
+                  } else {
+                    value = self.st.conv[type][0](input.value);
+                  }
+                  if (self.st.u) self.st.set(sec.name, key, value);
+                  self.update_export();
+                }, false);
+
+              ++idx;
+            },
+            function(sec) {
+              if (sec.name == 'bookmark') return true;
+              table = window.document.createElement('table');
+              self.make_page(sec.label, sec.name).content.appendChild(table);
+              return false;
+            });
+          return input_table;
+        })(this);
+
+     for(var i = 0; i < ConfigUI.pages.length; ++i) {
+       var page = this.make_page(ConfigUI.pages[i].label, ConfigUI.pages[i].id);
+       ConfigUI.pages[i].content.call(this, page);
+     }
+
+     this.show_page(this.pages[0]);
+     this.update_export();
+   }
+
+   ConfigUI.stringify = function(val) {
+     if (window.JSON && window.JSON.stringify) {
+       return JSON.stringify(val);
+     } else {
+       var str = '';
+       if (val.constructor === String) {
+         return '"' + val.replace(/[\\\"]/g, '\\$0')
+           .replace(/\n/g, '\\n')
+           .replace(/\r/g, '\\r') + '"';
+       } else if (val.constructor === Array) {
+         for(var i = 0; i < val.length; ++i) {
+           if (i) str += ',';
+           str += ConfigUI.stringify(val[i]);
+         }
+         return '[' + str + ']';
+       } else if (val.constructor === Object) {
+         var first = true;
+         for(var key in val) {
+           if (!val.hasOwnProperty(key)) continue;
+           if (first) {
+             first = false;
+           } else {
+             str += ',';
            }
-         }, false);
-       export_form.appendChild(btn_import);
+           str += ConfigUI.stringify(key) + ':' + ConfigUI.stringify(val[key]);
+         }
+         return '{' + str + '}';
+       } else if (val.constructor === Number) {
+         return String(val);
+       } else {
+         throw 1;
+       }
      }
-     head.appendChild(export_form);
+   };
 
-     if (window.opera) {
-       var btn_userjs = window.document.createElement('a');
-       btn_userjs.href = 'javascript:void(0)';
-       btn_userjs.textContent = 'UserJS';
-       btn_userjs.addEventListener(
-         'click',
-         function() {
-           var js = ['// ==UserScript==',
-                     '// @name    pixplus settings',
-                     '// @version ' + (new Date()).toLocaleString(),
-                     '// @include http://www.pixiv.net/*',
-                     '// ==/UserScript==',
-                     '(function() {',
-                     '   window.document.addEventListener("pixplusInitialize",init,false);',
-                     '   function init() {',
-                     '     ' + gen_js('\n     ', 2),
-                     '   }',
-                     ' })();'].join('\n');
-           (options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
-         }, false);
-       head.appendChild(btn_userjs);
+   ConfigUI.prototype.create_description = function(msg) {
+     var div = window.document.createElement('div');
+     div.innerHTML = this.msg_filter(msg);
+     return div;
+   };
+   ConfigUI.prototype.make_page = function(text, id) {
+     var page = {
+       label:   window.document.createElement('a'),
+       li:      window.document.createElement('li'),
+       content: window.document.createElement('section')
+     };
+     page.label.href = '#pp-conf-' + id;
+     page.label.textContent = text;
+     page.li.appendChild(page.label);
+     this.page_list.appendChild(page.li);
+
+     page.content.id = 'pp-conf-' + id;
+     this.pager.appendChild(page.content);
+
+     page.label.addEventListener(
+       'click',
+       (function(obj) {
+          return function(ev) {
+            ev.preventDefault();
+            obj.show_page(page);
+          };
+        })(this), false);
+
+     this.pages.push(page);
+     return page;
+   };
+   ConfigUI.prototype.show_page = function(page) {
+     if (this.selected_page) {
+       this.selected_page.li.className = '';
+       this.selected_page.content.className = '';
      }
+     page.li.className = 'select';
+     page.content.className = 'select';
+     this.selected_page = page;
+   };
 
-     var pager = window.document.createElement('div');
-     pager.id = 'pp-conf-pager';
-     root.appendChild(pager);
-     var page_list = window.document.createElement('ul');
-     page_list.id = 'pp-conf-pagelist';
-     pager.appendChild(page_list);
+   ConfigUI.prototype.get_tag_alias_str = function() {
+     var tag_aliases = '';
+     for(var i = 0; i < this.tag_alias_table.rows.length; ++i) {
+       var row = this.tag_alias_table.rows[i];
+       var inputs = row.getElementsByTagName('input');
+       var key = inputs[0].value;
+       var val = inputs[1].value;
+       if (key && val) tag_aliases += key + '\n' + val + '\n';
+     }
+     return tag_aliases;
+   };
 
-     var input_table = { };
-
-     var idx, table;
-     st.each(
+   ConfigUI.prototype.update_export = function() {
+   };
+   ConfigUI.prototype.export_export = function() {
+     var obj = { }, self = this;
+     this.st.each(
        function(sec, key) {
-         var value = options_page ? st.get(sec.name, key) : sec.conf[key];
-         var type = typeof sec.schema[key][0];
-         var row = table.insertRow(-1), cell = row.insertCell(-1), input;
-         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
-         if (sec.schema[key][2]) {
-           input = window.document.createElement('select');
-           for(var i = 0; i < sec.schema[key][2].length; ++i) {
-             var entry = sec.schema[key][2][i];
-             var opt = window.document.createElement('option');
-             if (typeof entry === 'string') {
-               opt.value = entry;
-               opt.textContent = msg_filter(entry);
-             } else {
-               opt.value = entry.value;
-               opt.textContent = msg_filter(entry.title);
-             }
-             input.appendChild(opt);
-           }
-         } else {
-           input = window.document.createElement('input');
-         }
-         input.id = 'pp-conf-' + sec.name + '-' + key;
-         if (type == 'boolean') {
-           input.setAttribute('type', 'checkbox');
-           input.checked = value;
-
-           var label = window.document.createElement('label');
-           label.appendChild(input);
-           label.appendChild(window.document.createTextNode(key));
-
-           cell.appendChild(label);
-           cell.setAttribute('colspan', '2');
-         } else {
-           cell.textContent = key;
-           input.value = value;
-           cell = row.insertCell(-1);
-           cell.className = 'pp-conf-cell-value';
-           cell.appendChild(input);
-         }
-         input_table[sec.name + '_' + key] = input;
-
-         var def = window.document.createElement('button');
-         def.textContent = 'Default';
-         def.addEventListener(
-           'click',
-           function() {
-             if (type == 'boolean') {
-               input.checked = sec.schema[key][0];
-             } else {
-               input.value = sec.schema[key][0];
-             }
-             if (st.u) st.remove(sec.name, key, value);
-             update_export();
-           }, false);
-         row.insertCell(-1).appendChild(def);
-         row.insertCell(-1).textContent = msg_filter(sec.schema[key][1]);
-
-         input.addEventListener(
-           sec.schema[key][2] || type == 'boolean' ? 'change' : 'keyup',
-           function() {
-             var value;
-             if (type == 'boolean') {
-               value = input.checked;
-             } else {
-               value = st.conv[type][0](input.value);
-             }
-             if (st.u) st.set(sec.name, key, value);
-             update_export();
-           }, false);
-
-         ++idx;
-       },
-       function(sec) {
-         if (sec.name == 'bookmark') return true;
-         table = window.document.createElement('table');
-         make_section(sec.label, sec.name).appendChild(table);
-         return false;
+         var input = self.input_table[sec.name + '_' + key], val;
+         if (!input) return;
+         val = (typeof sec.schema[key][0] === 'boolean'
+                ? input.checked
+                : self.st.get_conv(sec.name, key)[0](input.value));
+         if (val !== sec.schema[key][0]) obj[sec.name + '_' + key] = val;
        });
+     obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
+     obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
+     this.export_input.value = ConfigUI.stringify(obj);
+   };
+   ConfigUI.prototype.export_import = function() {
+     var obj = window.JSON.parse(this.export_input.value);
+     this.st.each(
+       function(sec, key) {
+         if (sec.name == 'bookmark') return;
+         var val = obj[sec.name + '_' + key];
+         if (typeof val !== 'undefined' && val !== null) {
+           this.st.set(sec.name, key, val);
+         }
+       });
+     if (obj['bookmark_tag_order']) this.st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+     if (obj['bookmark_tag_aliases']) this.st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+     window.location.reload();
+   };
 
-     var section_tags = make_section('Tags', 'tags');
-     var tag_order_textarea = window.document.createElement('textarea');
-     (function(section) {
-        section.appendChild(create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
-        tag_order_textarea.value = (options_page
-                                    ? st.get('bookmark', 'tag_order')
-                                    : st.bm_tag_order_to_str(conf.bm_tag_order));
-        tag_order_textarea.addEventListener(
+   ConfigUI.prototype.generate_js = function(new_line, indent_level) {
+     var js = ['var pp=window.opera?window.opera.pixplus:window.pixplus;'];
+     var order = this.st.parse_bm_tag_order(this.tag_order_textarea.value);
+     var alias = this.st.parse_bm_tag_aliases(this.get_tag_alias_str());
+     var indent = 0, self = this;
+     if (!indent_level) indent_level = 0;
+
+     function push(str) {
+       var sp = '';
+       for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
+       js.push(sp + str);
+     }
+
+     this.st.each(
+       function(sec, key) {
+         if (sec.name == 'bookmark') return;
+         var input = self.input_table[sec.name + '_' + key], val;
+         if (typeof sec.schema[key][0] == 'boolean') {
+           val = input.checked;
+         } else {
+           val = self.st.get_conv(sec.name, key)[0](input.value);
+         }
+         if (val !== sec.schema[key][0]) {
+           push('pp.' + sec.path.join('.') + '.' + key + '=' + ConfigUI.stringify(val) + ';');
+         }
+       });
+     if (order.length) {
+       push('pp.conf.bm_tag_order=[');
+       ++indent;
+       for(var i = 0; i < order.length; ++i) {
+         var ary = order[i];
+         push('[');
+         ++indent;
+         for(var j = 0; j < ary.length; ++j) {
+           var tag = ary[j];
+           push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
+         }
+         --indent;
+         push('],');
+       }
+       --indent;
+       push('];');
+     }
+     var alias_f = true;
+     for(var key in alias) {
+       if (alias_f) {
+         push('pp.conf.bm_tag_aliases={');
+         alias_f = false;
+         ++indent;
+       }
+       push(ConfigUI.stringify(key) + ':[');
+       ++indent;
+       for(var j = 0; j < alias[key].length; ++j) {
+         var tag = alias[key][j];
+         push(ConfigUI.stringify(tag) + ',');
+       }
+       --indent;
+       push('],');
+     }
+     if (!alias_f) {
+       js.push('};');
+       --indent;
+     }
+     return js.join(new_line || '');
+   };
+
+   ConfigUI.pages = [
+     {label: 'Tags', id: 'tags',
+      content: function(page) {
+        var self = this;
+        page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
+        this.tag_order_textarea = window.document.createElement('textarea');
+        this.tag_order_textarea.value = (this.options_page
+                                         ? this.st.get('bookmark', 'tag_order')
+                                         : this.st.bm_tag_order_to_str(conf.bm_tag_order));
+        this.tag_order_textarea.addEventListener(
           'keyup',
           function() {
-            if (st.u) st.set('bookmark', 'tag_order', tag_order_textarea.value);
-            update_export();
+            if (self.st.u) self.st.set('bookmark', 'tag_order', self.tag_order_textarea.value);
+            self.update_export();
           }, false);
-        section.appendChild(tag_order_textarea);
-      })(section_tags);
+        page.content.appendChild(this.tag_order_textarea);
 
-     var tag_alias_table = window.document.createElement('table');
-     (function(section) {
-        section.appendChild(create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
-
-        tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
-        section.appendChild(tag_alias_table);
+        page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
+        this.tag_alias_table = window.document.createElement('table');
+        this.tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
+        page.content.appendChild(this.tag_alias_table);
 
         var add = window.document.createElement('button');
         add.textContent = 'Add';
         add.addEventListener('click', function() { add_row(); }, false);
-        section.appendChild(add);
+        page.content.appendChild(add);
 
-        var aliases = options_page ? st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases')) : conf.bm_tag_aliases;
-        for(var key in aliases) add_row(key, aliases[key]);
+        function save() {
+          if (self.st.u) self.st.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
+          self.update_export();
+        }
 
         function add_row(tag, list) {
-          var row = tag_alias_table.insertRow(-1), cell, remove, input1, input2;
+          var row = self.tag_alias_table.insertRow(-1), cell, remove, input1, input2;
           remove = window.document.createElement('button');
           remove.textContent = 'Remove';
           remove.addEventListener(
@@ -782,15 +930,80 @@
           cell.appendChild(input2);
         }
 
-        function save() {
-          if (st.u) st.set('bookmark', 'tag_aliases', get_tag_alias_str());
-          update_export();
+        var aliases = (this.options_page
+                       ? this.st.parse_bm_tag_aliases(st.get('bookmark', 'tag_aliases'))
+                       : conf.bm_tag_aliases);
+        for(var key in aliases) add_row(key, aliases[key]);
+      }},
+     {label: 'Export', id: 'export',
+      content: function(page) {
+        var self = this;
+        this.export_form = window.document.createElement('form');
+        this.export_input = window.document.createElement('input');
+        this.export_input.addEventListener(
+          'mouseup',
+          function(ev) {
+            self.export_input.select(0, self.export_input.value.length);
+          }, false);
+        this.export_form.appendChild(this.export_input);
+
+        var btn_export = window.document.createElement('input');
+        btn_export.type = 'button';
+        btn_export.value = 'Export';
+        btn_export.addEventListener(
+          'click',
+          function(ev) {
+            self.export_export();
+          }, false);
+        this.export_form.appendChild(btn_export);
+
+        if (window.JSON && this.st.u) {
+          var btn_import = window.document.createElement('input');
+          btn_import.type = 'submit';
+          btn_import.value = 'Import';
+          this.export_form.appendChild(btn_import);
+          this.export_form.addEventListener(
+            'submit',
+            function(ev) {
+              try {
+                ev.preventDefault();
+                self.export_import();
+              } catch(ex) {
+                alert(ex);
+              }
+            }, false);
         }
-      })(section_tags);
+        page.content.appendChild(this.export_form);
 
-     make_section('Help', 'help').appendChild(ConfigUI.create_help_table(msg_filter));
-
-     (function(section) {
+        if (window.opera) {
+          var btn_userjs = window.document.createElement('input');
+          btn_userjs.type = 'button';
+          btn_userjs.value = 'UserJS';
+          btn_userjs.addEventListener(
+            'click',
+            function() {
+              var js = ['// ==UserScript==',
+                        '// @name    pixplus settings',
+                        '// @version ' + (new Date()).toLocaleString(),
+                        '// @include http://www.pixiv.net/*',
+                        '// ==/UserScript==',
+                        '(function() {',
+                        '   window.document.addEventListener("pixplusInitialize",init,false);',
+                        '   function init() {',
+                        '     ' + self.generate_js('\n     ', 2),
+                        '   }',
+                        ' })();'].join('\n');
+              (self.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+            }, false);
+          this.export_form.appendChild(btn_userjs);
+        }
+      }},
+     {label: 'Help', id: 'help',
+      content: function(page) {
+        page.content.appendChild(ConfigUI.create_help_table(this.msg_filter));
+      }},
+     {label: 'About', id: 'about',
+      content: function(page) {
         var urls = ['http://crckyl.pa.land.to/pixplus/',
                     'http://my.opera.com/crckyl/',
                     'http://crckyl.ath.cx:8088/pixplus/'];
@@ -807,211 +1020,30 @@
           '</ul></dd>' +
           '<dt>License</dt><dd>Public domain</dd>' +
           '</dl>';
-        section.innerHTML = html;
-      })(make_section('About', 'about'));
-
-     (function(changelog, data) {
+        page.content.innerHTML = html;
+      }},
+     {label: 'ChangeLog', id: 'changelog',
+      content: function(page) {
         var dl = window.document.createElement('dl');
-        for(var i = 0; i < data.length; ++i) {
+        for(var i = 0; i < ConfigUI.changelog_data.length; ++i) {
+          var release = ConfigUI.changelog_data[i];
           var dt = window.document.createElement('dt');
-          dt.textContent = data[i].version + ' - ' + data[i].date;
+          dt.textContent = release.version + ' - ' + release.date;
           dl.appendChild(dt);
           var ul = window.document.createElement('ul');
-          for(var j = 0; j < data[i].changes.length; ++j) {
+          for(var j = 0; j < release.changes.length; ++j) {
             var li = window.document.createElement('li');
-            li.textContent = data[i].changes[j];
+            li.textContent = release.changes[j];
             ul.appendChild(li);
           }
           var dd = window.document.createElement('dd');
           dd.appendChild(ul);
           dl.appendChild(dd);
         }
-        changelog.appendChild(dl);
-      })(make_section('ChangeLog', 'changelog'), ConfigUI.changelog_data);
+        page.content.appendChild(dl);
+      }}
+   ];
 
-     update_export();
-
-     function make_section(text, id) {
-       var label = window.document.createElement('a');
-       label.href = '#pp-conf-' + id;
-       label.textContent = text;
-       var li = window.document.createElement('li');
-       li.appendChild(label);
-       page_list.appendChild(li);
-
-       var section = window.document.createElement('section');
-       section.id = 'pp-conf-' + id;
-       pager.appendChild(section);
-
-       label.addEventListener(
-         'click',
-         function(ev) {
-           ev.preventDefault();
-           show_section(li, section);
-         }, false);
-
-       if (!arguments.callee.selected) {
-         show_section(li, section);
-         arguments.callee.selected = true;
-       }
-       return section;
-     }
-     function show_section(li, section) {
-       if (arguments.callee.selected) {
-         for(var i = 0; i < arguments.callee.selected.length; ++i) {
-           arguments.callee.selected[i].className = '';
-         }
-       }
-       li.className = 'select';
-       section.className = 'select';
-       arguments.callee.selected = [li, section];
-     }
-     function create_description(msg) {
-       var div = window.document.createElement('div');
-       div.innerHTML = msg_filter(msg);
-       return div;
-     }
-     function get_tag_alias_str() {
-       var tag_aliases = '';
-       for(var i = 0; i < tag_alias_table.rows.length; ++i) {
-         var row = tag_alias_table.rows[i];
-         var inputs = row.getElementsByTagName('input');
-         var key = inputs[0].value;
-         var val = inputs[1].value;
-         if (key && val) tag_aliases += key + '\n' + val + '\n';
-       }
-       return tag_aliases;
-     }
-     function update_export() {
-       var obj = { };
-       st.each(
-         function(sec, key) {
-           var input = input_table[sec.name + '_' + key], val;
-           if (!input) return;
-           val = (typeof sec.schema[key][0] === 'boolean'
-                  ? input.checked
-                  : st.get_conv(sec.name, key)[0](input.value));
-           if (val !== sec.schema[key][0]) obj[sec.name + '_' + key] = val;
-         });
-       obj['bookmark_tag_order'] = tag_order_textarea.value.replace(/\r/g, '');
-       obj['bookmark_tag_aliases'] = get_tag_alias_str();
-       export_input.value = stringify(obj);
-     }
-     function import_json() {
-       var obj = window.JSON.parse(export_input.value);
-       st.each(
-         function(sec, key) {
-           if (sec.name == 'bookmark') return;
-           var val = obj[sec.name + '_' + key];
-           if (typeof val !== 'undefined' && val !== null) {
-             st.set(sec.name, key, val);
-           }
-         });
-       if (obj['bookmark_tag_order']) st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
-       if (obj['bookmark_tag_aliases']) st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
-       window.location.reload();
-     }
-
-     function gen_js(new_line, indent_level) {
-       var js = ['var pp=window.opera?window.opera.pixplus:window.pixplus;'];
-       var order = st.parse_bm_tag_order(tag_order_textarea.value);
-       var alias = st.parse_bm_tag_aliases(get_tag_alias_str());
-       var indent = 0;
-       if (!indent_level) indent_level = 0;
-       st.each(
-         function(sec, key) {
-           if (sec.name == 'bookmark') return;
-           var input = input_table[sec.name + '_' + key], val;
-           if (typeof sec.schema[key][0] == 'boolean') {
-             val = input.checked;
-           } else {
-             val = st.get_conv(sec.name, key)[0](input.value);
-           }
-           if (val !== sec.schema[key][0]) {
-             push('pp.' + sec.path.join('.') + '.' + key + '=' + stringify(val) + ';');
-           }
-         });
-       if (order.length) {
-         push('pp.conf.bm_tag_order=[');
-         ++indent;
-         for(var i = 0; i < order.length; ++i) {
-           var ary = order[i];
-           push('[');
-           ++indent;
-           for(var j = 0; j < ary.length; ++j) {
-             var tag = ary[j];
-             push((tag ? stringify(tag) : 'null') + ',');
-           }
-           --indent;
-           push('],');
-         }
-         --indent;
-         push('];');
-       }
-       var alias_f = true;
-       for(var key in alias) {
-         if (alias_f) {
-           push('pp.conf.bm_tag_aliases={');
-           alias_f = false;
-           ++indent;
-         }
-         push(stringify(key) + ':[');
-         ++indent;
-         for(var j = 0; j < alias[key].length; ++j) {
-           var tag = alias[key][j];
-           push(stringify(tag) + ',');
-         }
-         --indent;
-         push('],');
-       }
-       if (!alias_f) {
-         js.push('};');
-         --indent;
-       }
-       return js.join(new_line || '');
-
-       function push(str) {
-         var sp = '';
-         for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
-         js.push(sp + str);
-       }
-     }
-
-     function stringify(val) {
-       if (window.JSON && window.JSON.stringify) {
-         return JSON.stringify(val);
-       } else {
-         var str = '';
-         if (val.constructor === String) {
-           return '"' + val.replace(/[\\\"]/g, '\\$0')
-             .replace(/\n/g, '\\n')
-             .replace(/\r/g, '\\r') + '"';
-         } else if (val.constructor === Array) {
-           for(var i = 0; i < val.length; ++i) {
-             if (i) str += ',';
-             str += stringify(val[i]);
-           }
-           return '[' + str + ']';
-         } else if (val.constructor === Object) {
-           var first = true;
-           for(var key in val) {
-             if (!val.hasOwnProperty(key)) continue;
-             if (first) {
-               first = false;
-             } else {
-               str += ',';
-             }
-             str += stringify(key) + ':' + stringify(val[key]);
-           }
-           return '{' + str + '}';
-         } else if (val.constructor === Number) {
-           return String(val);
-         } else {
-           throw 1;
-         }
-       }
-     } // stringify()
-   }
    ConfigUI.changelog_data = [
      {date: '2011/02/xx', version: '0.5.0', changes: [
         'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
@@ -1088,6 +1120,7 @@
         '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002',
         'AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
       ]}];
+
    ConfigUI.help_data = [
      {"mode": "\u901a\u5e38",
       "keys": [
@@ -1174,6 +1207,7 @@
         {"key":  "Down",
          "desc": "\u4e00\u3064\u4e0b\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"}]}
    ];
+
    ConfigUI.create_help_table = function(msg_filter) {
      if (!msg_filter) msg_filter = function(s) { return s; };
      var table = window.document.createElement('table');
@@ -1223,10 +1257,8 @@
      }
      return table;
    };
+
    ConfigUI.css =
-     '#pp-conf-head form{display:inline;}' +
-     '#pp-conf-head input{margin-left:0.2em;}' +
-     '#pp-conf-head a{margin-left:1em;}' +
      '#pp-conf-pager{margin-top:0.4em;}' +
      '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
      '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
@@ -1242,6 +1274,8 @@
      '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
      '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
      '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
+     '#pp-conf-export form{display:block;}' +
+     '#pp-conf-export input{margin-left:0.2em;}' +
      '.pp-help-table{line-height:1.2em;}' +
      '.pp-help-table td{padding:0px 4px;}' +
      '.pp-help-table td.pp-help-mode{padding:0px;font-weight:bold;}' +
