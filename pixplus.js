@@ -183,7 +183,6 @@
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
                                  {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]],
-     "expand_novel":           [false, "\u5c0f\u8aac\u30da\u30fc\u30b8\u306e\u30ed\u30fc\u30c9\u6642\u306b\u5168\u30da\u30fc\u30b8\u3092\u8868\u793a\u3059\u308b"],
      "popup_ranking_log":      [true, "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"],
      "popup": {
        "preload":              [true, "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"],
@@ -1025,8 +1024,7 @@
         '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
         'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        'Extension\u7248\u3067conf.expand_novel\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]},
      {date: '2011/02/04', version: '0.4.0', changes: [
         'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
@@ -1947,17 +1945,6 @@
          if (wrap) mod_edit_bookmark(wrap, autotag);
        }
        conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
-     } else if (window.location.pathname.match(/^\/novel\/show\.php/)) {
-       if (window.illust_html_list.length < window.illust_id_list.length) {
-         var _jump_to = window.jump_to;
-         window.jump_to = function() {
-           _jump_to.apply(this, Array.prototype.slice.apply(arguments));
-           window.jump_to = _jump_to;
-           setTimeout(init_novel, 100);
-         };
-       } else {
-         setTimeout(init_novel, 100);
-       }
      } else if (window.location.pathname.match(/^\/search_user\.php/)) {
        Pager.wait(
          function() {
@@ -1968,39 +1955,6 @@
              parent.insertBefore(research, parent.firstChild);
            }
          });
-     }
-   }
-
-   function init_novel() {
-     if (conf.expand_novel) {
-       var cont = $('preview_area'), after = cont.nextSibling;
-       each($xa('div[starts-with(@id, "page_")]', cont),
-            function(page, idx) {
-              if (idx > 0) {
-                var newcont = cont.cloneNode(false);
-                cont.removeChild(page);
-
-                page.style.display = '';
-                if (page.className.split(/\s+/).indexOf('parsed') < 0) {
-		  page.innerHTML = window.parse_page(page.innerHTML);
-		  page.className += ' parsed';
-	        }
-                each($xa('.//*[contains(concat(" ", @class, " "), " novelimage ")]', page),
-                     function(img) {
-                       if (img.className.split(/\s+/).indexOf('added') < 0) {
-                         var id = img.getAttribute('illust_id');
-                         if (id && window.illust_html_list[id]) {
-                           img.innerHTML = window.illust_html_list[id];
-		           img.className += 'added';
-                         }
-                       }
-                     });
-
-                newcont.appendChild(page);
-                newcont.style.marginTop = '1em';
-                cont.parentNode.insertBefore(newcont, after);
-              }
-            });
      }
    }
 
