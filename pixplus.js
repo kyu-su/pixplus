@@ -2120,6 +2120,25 @@
      init_taglist();
      init_per_page();
 
+     $ev(window.document.body).click(
+       function(ev) {
+         var anc = $x('ancestor-or-self::a[1]', ev.target);
+         if (anc && !anc.hasAttribute('nopopup') &&
+             anc.href.match(/^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/)) {
+           if (Popup.instance || $t('img', anc).length ||
+               !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + RegExp.$1 + '")]//img')) {
+             var opts = parseopts(anc.href);
+             if (opts.illust_id && opts.mode == 'medium') {
+               ev.preventDefault();
+               Popup.run_url(anc.href);
+               log(['Open popup: ', anc]);
+               return false;
+             }
+           }
+         }
+         return true;
+       });
+
      if (conf.bookmark_hide) {
        each($xa('.//a[contains(@href, "bookmark.php")]'),
             function(anc) {
@@ -4413,7 +4432,10 @@
            'click',
            function(ev, conn) {
              if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return;
-             if (!func(ev, conn)) ev.preventDefault();
+             if (!func(ev, conn)) {
+               ev.preventDefault();
+               ev.stopPropagation();
+             }
            });
        },
        key: function(func) {
@@ -4441,9 +4463,6 @@
              conn);
          }
          return conn;
-       },
-       hover: function(func1, func2) {
-         return listen('mouseout', func2, listen('mouseover', func1));
        },
        scroll: function(func) {
          return listen('scroll', func);
