@@ -1259,7 +1259,6 @@
    };
 
    ConfigUI.css =
-     '#pp-conf-pager{margin-top:0.4em;}' +
      '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
      '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
      '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
