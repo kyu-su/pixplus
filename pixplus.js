@@ -159,11 +159,11 @@
                                  {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
                                  {"value": 2, "title": "\u30a4\u30e9\u30b9\u30c8"}]],
      "bookmark_hide":          [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"],
-     "float_tag_list":         [1, "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
+     "float_tag_list":         [2, "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9"},
                                  {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
-     "locate_recommend_right": [1, "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
+     "locate_recommend_right": [2, "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
                                 [{"value": 0, "title": "\u7121\u52b9"},
                                  {"value": 1, "title": "\u6709\u52b9"},
                                  {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
@@ -1024,7 +1024,8 @@
         '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4',
         'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.expand_novel\u3092\u524a\u9664\u3002'
       ]},
      {date: '2011/02/04', version: '0.4.0', changes: [
         'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
@@ -4291,6 +4292,7 @@
    };
    Floater.prototype.update_float = function () {
      if (this.disable_float) return;
+     var de = window.document.documentElement;
      var sc = browser.webkit ? window.document.body : window.document.documentElement;
      var pos = getpos(this.placeholder || this.wrap);
      if (!this.floating && sc.scrollTop > pos.top) {
@@ -4298,12 +4300,8 @@
        if (this.use_placeholder) {
          this.placeholder = this.wrap.cloneNode(false);
          this.placeholder.style.width = this.wrap.offsetWidth + 'px';
-         this.placeholder.style.height = this.wrap.offsetHeight + 'px';
-         if (this.wrap.nextSibling) {
-           this.wrap.parentNode.insertBefore(this.placeholder, this.wrap.nextSibling);
-         } else {
-           this.wrap.parentNode.appendChild(this.placeholder);
-         }
+         this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
+         this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
        }
        this.wrap.setAttribute('float', '');
        this.scroll_restore();
