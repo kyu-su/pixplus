@@ -3326,11 +3326,16 @@
      }
    };
    Popup.prototype.set_zoom = function(zoom) {
-     if (this.images.list.length != 1) return;
      zoom = zoom < 1 ? 1 : Math.floor(zoom);
-     if (zoom == this.zoom_scale) return;
-     this.zoom_scale = zoom;
+     if (browser.webkit ||
+         this.images.list.length != 1 ||
+         zoom == this.zoom_scale) {
+       this.locate();
+       this.update_info();
+       return;
+     }
 
+     this.zoom_scale = zoom;
      var img = this.images.list[0];
      if (this.zoom_scale == 1) {
        if (img.image_unscaled) {
