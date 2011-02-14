@@ -789,13 +789,13 @@
      this.export_input.value = ConfigUI.stringify(obj);
    };
    ConfigUI.prototype.export_import = function() {
-     var obj = window.JSON.parse(this.export_input.value);
+     var obj = window.JSON.parse(this.export_input.value), self = this;
      this.st.each(
        function(sec, key) {
          if (sec.name == 'bookmark') return;
          var val = obj[sec.name + '_' + key];
          if (typeof val !== 'undefined' && val !== null) {
-           this.st.set(sec.name, key, val);
+           self.st.set(sec.name, key, val);
          }
        });
      if (obj['bookmark_tag_order']) this.st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
