@@ -2396,8 +2396,8 @@
    };
    function Gallery(args, filter_col, filter) {
      this.args = args;
-     this.args.xpath_cap = this.args.xpath_cap || './ul/li/text()[1]';
-     this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[position()=1 and contains(@href, "mode=medium")]/img';
+     this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
+     this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[contains(@href, "mode=medium")]/img';
      this.filter_col = filter_col;
      this.filter = filter;
 
