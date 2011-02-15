@@ -1414,8 +1414,11 @@
        mypage();
      } else if (window.location.pathname.match(/^\/member\.php/)) {
        // http://www.pixiv.net/member.php?id=11
-       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthers ")]/*[contains(concat(" ", @class, " "), " worksListOthersImg ")]'},
-                   unpack_captions);
+       mypage();
+       each($xa('//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]'),
+            function(root) {
+              add_gallery({root: root, xpath_col: '.'}, unpack_captions);
+            });
      } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
        if (options.illust_id) {
          // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
