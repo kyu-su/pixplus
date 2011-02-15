@@ -215,8 +215,8 @@
        "manga_spread":         [true, "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"]
      },
      "bookmark": {
-       "tag_order": ["__Tag1\n-\n*\n-\n__Tag2", ""],
-       "tag_aliases": ["__Tag1\n__Tag2 __Tag3 __Tag4\n__Tag5\n__Tag6 __Tag7", ""]
+       "tag_order": ["", ""],
+       "tag_aliases": ["", ""]
      }
      /* __CONFIG_END__ */
    };
@@ -1007,8 +1007,10 @@
         var urls = ['http://crckyl.pa.land.to/pixplus/',
                     'http://my.opera.com/crckyl/',
                     'http://crckyl.ath.cx:8088/pixplus/'];
+        var release = ConfigUI.changelog_data[0];
         var html = '<dl>' +
           '<dt>Name</dt><dd>pixplus</dd>' +
+          '<dt>Version</dt><dd>' + release.version + ' - ' + release.date + '</dd>' +
           '<dt>URL</dt><dd><ul>';
         for(var i = 0; i < urls.length; ++i) {
           html += '<li><a href="' + urls[i] + '">' + urls[i] + '</a></li>';

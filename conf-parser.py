@@ -23,6 +23,7 @@ def print_conf(conf, prefix):
       print_conf(conf[key], name)
     else:
       value = conf[key][0]
+      #if isinstance(value, unicode): value = value.replace("\n", '&#10;&#13;')
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % value
       value_firefox = json.dumps(value)
