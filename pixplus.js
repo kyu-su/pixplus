@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.5.0
+// @version     0.5.1
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -1047,6 +1047,8 @@
    ];
 
    ConfigUI.changelog_data = [
+     {date: '2011/02/xx', version: '0.5.1', changes: [
+      ]},
      {date: '2011/02/15', version: '0.5.0', changes: [
         'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
         'Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
@@ -2079,7 +2081,7 @@
                '#pp-popup #pp-post-cap #pp-author a{font-weight:bold;}' +
                '#pp-popup #pp-post-cap #pp-author a + a{margin-left:0.6em;}' +
                '#pp-popup #pp-bm-edit{margin-top:2px;}' +
-               '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:320px;' +
+               '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:480px;' +
                '  line-height:0px;border:1px solid silver;}' +
                '#pp-popup #pp-img-div a{display:inline-block;}' +
                '#pp-popup #pp-img-div a img{display:block;}' +
