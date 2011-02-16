@@ -2566,16 +2566,8 @@
      if (conf.popup.overlay_control > 0) {
        this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
        this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
-       $ev(this.olc_prev).click(
-         bind(function(ev) {
-                ev.stopPropagation();
-                this.prev(false, false, true);
-              }, this));
-       $ev(this.olc_next).click(
-         bind(function(ev) {
-                ev.stopPropagation();
-                this.next(false, false, true);
-              }, this));
+       $ev(this.olc_prev).click(bind(Popup.prototype.prev, this, false, false, true));
+       $ev(this.olc_next).click(bind(Popup.prototype.next, this, false, false, true));
      }
 
      this.init_display();
