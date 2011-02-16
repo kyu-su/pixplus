@@ -2081,7 +2081,7 @@
                '#pp-popup #pp-post-cap #pp-author a{font-weight:bold;}' +
                '#pp-popup #pp-post-cap #pp-author a + a{margin-left:0.6em;}' +
                '#pp-popup #pp-bm-edit{margin-top:2px;}' +
-               '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:480px;' +
+               '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:480px;min-height:360px;' +
                '  line-height:0px;border:1px solid silver;}' +
                '#pp-popup #pp-img-div a{display:inline-block;}' +
                '#pp-popup #pp-img-div a img{display:block;}' +
@@ -3270,6 +3270,13 @@
               image.image.style.height = height + 'px';
             });
      }
+
+     var ch = this.img_div.clientHeight;
+     each(this.images.list,
+          function(image) {
+            var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
+            image.image.style.marginTop = m + 'px';
+          });
    };
    Popup.prototype.set_images = function(images, no_zoom) {
      each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
@@ -3414,7 +3421,7 @@
        } else {
          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
        }
-       this.comment_wrap.style.maxHeight = (cap_height < 48 ? 48 : cap_height) + 'px';
+       this.comment_wrap.style.maxHeight = Math.max(cap_height, 128) + 'px';
 
        /*
        if (!this.expand_header) {
