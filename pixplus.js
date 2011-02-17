@@ -4991,9 +4991,8 @@
      safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
    }
 
-   // 10.63+ loading => interactive => complete
-   if (window.opera && (window.document.readyState == 'loading' ||
-                        (window.opera.version() < 10.50 && window.document.readyState == 'interactive'))) {
+   // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
+   if (window.opera && (window.opera.version() < 10.50 || window.document.readyState == 'loading')) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
      init_pixplus();
