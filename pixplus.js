@@ -4992,6 +4992,7 @@
    }
 
    // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
+   // http://my.opera.com/crckyl/blog/show.dml/26153641
    if (window.opera && (window.opera.version() < 10.50 || window.document.readyState == 'loading')) {
      window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
    } else {
