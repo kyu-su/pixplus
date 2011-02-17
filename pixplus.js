@@ -1625,9 +1625,10 @@
      function init_right_gallery(illusts) {
        var floater = new Floater(float_wrap, illusts);
        var timer;
+       init_pager();
        gallery.onadditem.connect(init_pager, true);
        function init_pager() {
-         var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
+         var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
          if (more) {
            $ev(illusts, true).scroll(
              function(ev, conn) {
