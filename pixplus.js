@@ -1623,14 +1623,14 @@
        if (float_wrap) init_right_gallery(illusts);
      }
      function init_right_gallery(illusts) {
-       var floater = new Floater(float_wrap, illusts);
-       var timer;
+       var floater = new Floater(float_wrap, illusts), conn;
        init_pager();
        gallery.onadditem.connect(init_pager, true);
        function init_pager() {
          var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
          if (more) {
-           $ev(illusts, true).scroll(
+           if (conn) conn.disconnect();
+           conn = $ev(illusts, true).scroll(
              function(ev, conn) {
                if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
                  send_click(more);
@@ -1639,7 +1639,6 @@
              });
          }
          floater.update_height();
-         timer = null;
        }
      }
 
