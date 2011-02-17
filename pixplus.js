@@ -2179,30 +2179,28 @@
             var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
             var restrict = $xa('.//input[@name="restrict"]', form);
             if (btn && form && restrict.length == 2) {
-              var xhr = new window.XMLHttpRequest();
-              xhr.open('POST', form.getAttribute('action'), true);
-              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-              xhr.onload = function() {
-                if (xhr.responseText.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
-                  window.jQuery('#favorite-button')
-		    .addClass('added')
-		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
-	          window.jQuery('form', this.preference)
-		    .attr('action', '/bookmark_setting.php')
-                    .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
-                    .find('input[name="mode"]').remove();
-                  btn.style.opacity = '1';
-                } else if (xhr.responseText.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i)) {
-                  alert(RegExp.$1);
-                } else {
-                  alert('Error!');
-                }
-              };
-              xhr.onerror = function() {
-                alert('Error!');
-              };
               each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
-              xhr.send(create_post_data(form));
+              window.jQuery.post(
+                form.getAttribute('action'),
+                window.jQuery(form).serialize(),
+                function(data) {
+                  if (data.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
+                    window.jQuery('#favorite-button')
+		      .addClass('added')
+		      .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+	            window.jQuery('form', this.preference)
+		      .attr('action', '/bookmark_setting.php')
+                      .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
+                      .find('input[name="mode"]').remove();
+                    btn.style.opacity = '1';
+                  } else if (data.match(/<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i)) {
+                    alert(RegExp.$1);
+                  } else {
+                    alert('Error!');
+                  }
+                }).error(function() {
+                           alert('Error!');
+                         });
               btn.style.opacity = '0.2';
             } else {
               _open.apply(this, Array.prototype.slice.apply(arguments));
