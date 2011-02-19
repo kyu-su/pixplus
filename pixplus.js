@@ -28,9 +28,6 @@
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
  */
 
-bind(function() {
-  
-
 (function(func, unsafeWindow, userjs) {
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
