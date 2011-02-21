@@ -4281,15 +4281,13 @@
           ary_ary.push(null);
           return;
         }
-        list = abst(list, function(li) {
-          try {
-            if (t(li) == tag) {
-              ary_ary.push(li);
-              return false;
-            }
-          } catch(e) { }
-          return true;
-        });
+        for(var i = 0; i < list.length; ++i) {
+          if (t(list[i]) == tag) {
+            ary_ary.push(list[i]);
+            list.splice(i, 1);
+            break;
+          }
+        }
       });
       if (ary_ary.length > 0) ary.push(ary_ary);
     });
@@ -4302,7 +4300,9 @@
       if (null_idx >= 0) {
         Array.prototype.splice.apply(ary[idx], [null_idx, 1].concat(list));
         list = [];
+        return true;
       }
+      return false;
     });
     if (list.length) ary.push(list);
     function t(elem) {
@@ -4785,11 +4785,6 @@
       if (func.call(obj || list, list[i], i)) return list[i];
     }
     return null;
-  }
-  function abst(ary, func) {
-    var new_ary = [];
-    each(ary, function(i, idx) {if (func(i, idx)) new_ary.push(i);});
-    return new_ary;
   }
   function send_click(elem) {
     var ev = elem.ownerDocument.createEvent('MouseEvents');
