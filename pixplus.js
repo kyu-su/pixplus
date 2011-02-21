@@ -4202,10 +4202,12 @@
     if (key == $ev.KEY_ENTER) {
       ev.preventDefault();
       this.submit();
+      return true;
     }
     if (key == $ev.KEY_ESCAPE) {
       ev.preventDefault();
       this.close();
+      return true;
     }
     return false;
   };
