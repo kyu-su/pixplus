@@ -1160,11 +1160,11 @@
       "key":  "f",
       "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"
     }, {
+      "key":  "g",
+      "desc": "\u30ea\u30ed\u30fc\u30c9"
+    }, {
       "key":  "Shift+f",
       "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"
-    }, {
-      "key":  "g",
-      "desc": "\u30ea\u30ed\u30fc\u30c9\u3059\u308b"
     }, {
       "key":  "c",
       "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"
@@ -1202,7 +1202,7 @@
   }, {
     "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
     "keys": [{
-      "key":  "Escape/v",
+      "key":  "v/Escape",
       "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
     }, {
       "key":  "a/BackSapace/Left",
@@ -1223,6 +1223,9 @@
   }, {
     "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9",
     "keys": [{
+      "key":  "d/Escape",
+      "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
+    }, {
       "key":  "Up",
       "desc": "\u4e00\u3064\u4e0a\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"
     }, {
@@ -2646,6 +2649,7 @@
 
     Popup.oncreate.emit(this, item, manga_page);
   }
+
   Popup._keypress = function(ev, key) {
     if (!Popup.stop_key) return Popup.instance.keypress(ev, key);
     return false;
@@ -2661,6 +2665,7 @@
     Popup.ev_conn_key.disconnect();
     window.removeEventListener('resize', Popup._locate, false);
   };
+
   Popup.oncreate = new Signal(function(item, manga_page) {
     //window.document.body.insertBefore(this.root_div, window.document.body.firstChild);
     window.document.body.appendChild(this.root_div);
@@ -2671,87 +2676,101 @@
   Popup.onsetitem = new Signal();
   Popup.onload = new Signal();
   Popup.onkeypress = new Signal(function(ev, key) {
-    var p = this, s = ev.shiftKey, m_e = p.manga.enabled;
-    if (p.is_bookmark_editing()) {
-      //if (key == $ev.KEY_ESCAPE && m()) q(ev, p.toggle_bookmark_edit);
-    } else if (p.is_tag_editing()) {
-      if (key == $ev.KEY_ESCAPE && m()) q(ev, p.toggle_tag_edit);
-    } else {
-      switch(key) {
-      case 'a': if (m())  q(ev, p.prev, true);               return;
-        //case 's': if (m())  q(ev, p.next, true);               return;
-      case 'e': if (m())  q(ev, p.open_author_profile,   s); return;
-      case 'r': if (m(1)) q(ev, a_illust,                s); return;
-      case 't': if (m())  q(ev, p.open_author_bookmark,  s); return;
-      case 'y': if (m())  q(ev, p.open_author_staccfeed, s); return;
-      case 'b': if (m(1)) q(ev, bookmark, s);                return;
-      case 'd': if (m())  q(ev, p.toggle_qrate);             return;
-      case 'f': if (m(1)) q(ev, p.open, !s);                 return;
-      case 'g': if (m())  q(ev, p.reload);                   return;
-      case 'c': if (m(1)) q(ev, caption, s);                 return;
-      case 'v': if (m(1)) q(ev, manga, s);                   return;
-      case '-': if (m(1)) q(ev, zoom, -1);                   return;
-      case '+': if (m(1)) q(ev, zoom,  1);                   return;
-      case '?': if (m(1)) q(ev, show_help);                  return;
+    if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
+    if (this.is_bookmark_editing()) {
+      return false;
+    } else if (this.is_tag_editing()) {
+      if ((key == $ev.KEY_ESCAPE || key == 'w') && !ev.shiftKey) {
+        this.toggle_tag_edit();
+        return true;
       }
-      if (conf.popup.rate && conf.popup.rate_key && s && key.length == 1) {
+    } else {
+      if (conf.popup.rate && conf.popup.rate_key && ev.shiftKey && key.length == 1) {
         var score = '1234567890!"#$%&\'()~'.indexOf(key);
         if (score >= 0) {
           window.countup_rating(10 - (score % 10));
-          return;
+          return true;
         }
       }
-      if (ev.qrate) {
-        var n;
-        switch(key) {
-        case $ev.KEY_UP:     if (m()) q(ev, sel_qr, ev.qrate.previousSibling); return;
-        case $ev.KEY_DOWN:   if (m()) q(ev, sel_qr, ev.qrate.nextSibling);     return;
-        case $ev.KEY_ESCAPE: if (m()) q(ev, window.rating_ef2);                return;
+      return (function() {
+        for(var i = 0; i < arguments.length; ++i) {
+          var map = arguments[i];
+          if (!map.run) continue;
+          for(var j = 0; j < map.map.length; ++j) {
+            var entry = map.map[j];
+            if (key == entry.k) {
+              if (!entry.s && ev.shiftKey) return false;
+              entry.f.apply(this, entry.a || []);
+              return true;
+            }
+          }
         }
-      } else {
-        switch(key) {
-        case $ev.KEY_BACKSPACE: if (m()) q(ev, p.prev, true);                                return;
-        case $ev.KEY_SPACE:     if (m()) q(ev, p.next, true);                                return;
-        case $ev.KEY_LEFT:      if (m()) q(ev, p.prev);                                      return;
-        case $ev.KEY_RIGHT:     if (m()) q(ev, p.next);                                      return;
-        case $ev.KEY_UP:        if (m()) q(ev, p.scroll_caption, -conf.popup.scroll_height); return;
-        case $ev.KEY_DOWN:      if (m()) q(ev, p.scroll_caption,  conf.popup.scroll_height); return;
-        case $ev.KEY_END:       if (m()) q(ev, p.last);                                      return;
-        case $ev.KEY_HOME:      if (m()) q(ev, p.first);                                     return;
-        case $ev.KEY_ESCAPE:    if (m()) q(ev, m_e ? p.toggle_manga_mode : p.close);         return;
-        }
-      }
+        return false;
+      }).call(this, {
+        run: ev.qrate,
+        map: [
+          {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
+          {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
+          {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
+        ]
+      }, {
+        run: !ev.qrate,
+        map: [
+          {k: $ev.KEY_BACKSPACE, f: this.prev, a: [true]},
+          {k: $ev.KEY_SPACE,     f: this.next, a: [true]},
+          {k: $ev.KEY_LEFT,      f: this.prev},
+          {k: $ev.KEY_RIGHT,     f: this.next},
+          {k: $ev.KEY_UP,        f: this.scroll_caption, a: [-conf.popup.scroll_height]},
+          {k: $ev.KEY_DOWN,      f: this.scroll_caption, a: [conf.popup.scroll_height]},
+          {k: $ev.KEY_END,       f: this.last},
+          {k: $ev.KEY_HOME,      f: this.first},
+          {k: $ev.KEY_ESCAPE,    f: close}
+        ]
+      }, {
+        run: true,
+        map: [
+          {k: 'a',       f: this.prev, a: [true]},
+          {k: 'e',       f: this.open_author_profile},
+          {k: 'r', s: 1, f: a_illust, a: [ev.shiftKey]},
+          {k: 't',       f: this.open_author_bookmark},
+          {k: 'y',       f: this.open_author_staccfeed},
+          {k: 'b', s: 1, f: bookmark, a: [ev.shiftKey]},
+          {k: 'd',       f: this.toggle_qrate},
+          {k: 'f', s: 1, f: this.open, a: [!ev.shiftKey]},
+          {k: 'g', s: 1, f: this.reload},
+          {k: 'c', s: 1, f: caption, a: [ev.shiftKey]},
+          {k: 'v', s: 1, f: manga, a: [ev.shiftKey]},
+          {k: '-', s: 1, f: zoom, a: [-1]},
+          {k: '+', s: 1, f: zoom, a: [1]},
+          {k: '?', s: 1, f: show_help}
+        ]
+      });
+    }
+    function close() {
+      this.manga.enabled ? this.toggle_manga_mode() : this.close();
     }
     function a_illust(response) {
-      response ? p.open_image_response() : p.open_author_illust();
+      response ? this.open_image_response() : this.open_author_illust();
     }
     function bookmark(detail) {
-      detail ? p.open_bookmark_detail() : p.toggle_bookmark_edit();
+      detail ? this.open_bookmark_detail() : this.toggle_bookmark_edit();
     }
     function caption(comments) {
-      comments ? p.toggle_viewer_comments() : p.toggle_caption();
+      comments ? this.toggle_viewer_comments() : this.toggle_caption();
     }
     function manga(tb) {
-      tb ? p.open_manga_tb() : p.toggle_manga_mode();
+      tb ? this.open_manga_tb() : this.toggle_manga_mode();
     }
     function zoom(z) {
-      p.set_zoom(p.zoom_scale + z);
+      this.set_zoom(this.zoom_scale + z);
     }
-    function sel_qr(node) {
+    function sel_qr(prev) {
+      var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
       if (Popup.is_qrate_button(node)) node.focus();
     }
-    function q(e, f) {
-      if (e) e.preventDefault();
-      return f.apply(p, Array.prototype.slice.apply(arguments, [2]));
-    }
-    function m(shift, ctrl, alt, meta) {
-      if (!shift && ev.shiftKey) return false;
-      if (!ctrl  && ev.ctrlKey)  return false;
-      if (!alt   && ev.altKey)   return false;
-      if (!meta  && ev.metaKey)  return false;
-      return true;
-    }
+    return false;
   });
+
   Popup.onclick = new Signal(function(ev) { this.close(); });
   Popup.onclose = new Signal(function() {
     Popup.unset_event_handler();
@@ -3464,26 +3483,26 @@
       pp.rpc_state = 0;
     }
   };
-  Popup.prototype.open = function(big, same_page) {
+  Popup.prototype.open = function(big) {
     if (this.manga.usable && this.manga.page < 0) {
-      this.open_url(big ? urlmode(this.item.medium, 'manga') : this.item.medium, same_page);
+      pp.open(big ? urlmode(this.item.medium, 'manga') : this.item.medium);
     } else if (big) {
       var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
-      this.open_url(this.images.list[idx].anchor.href, same_page);
+      pp.open(this.images.list[idx].anchor.href);
     } else if (this.manga.usable) {
-      this.open_url(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page, same_page);
+      pp.open(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page);
     } else {
-      this.open_url(this.item.medium, same_page);
+      pp.open(this.item.medium);
     }
   };
-  Popup.prototype.open_image_response = function(same_page) {
-    this.has_image_response && this.open_url(this.res_btn.href, same_page);
+  Popup.prototype.open_image_response = function() {
+    this.has_image_response && pp.open(this.res_btn.href);
   };
-  Popup.prototype.open_manga_tb = function(same_page) {
+  Popup.prototype.open_manga_tb = function() {
     if (this.manga.usable) {
       var url = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
       this.item.manga.viewed = true;
-      this.open_url(url, same_page);
+      pp.open(url);
     }
   };
   Popup.prototype.toggle_caption = function() {
@@ -3659,22 +3678,22 @@
     return this.tag_edit.style.display != 'none';
   };
 
-  Popup.prototype.open_author_profile = function(same_page) {
-    if (this.author.style.display != 'none') this.open_url(this.a_profile.href, same_page);
+  Popup.prototype.open_author_profile = function() {
+    if (this.author.style.display != 'none') pp.open(this.a_profile.href);
   };
-  Popup.prototype.open_author_illust = function(same_page) {
-    if (this.author.style.display != 'none') this.open_url(this.a_illust.href, same_page);
+  Popup.prototype.open_author_illust = function() {
+    if (this.author.style.display != 'none') pp.open(this.a_illust.href);
   };
-  Popup.prototype.open_author_bookmark = function(same_page) {
-    if (this.author.style.display != 'none') this.open_url(this.a_bookmark.href, same_page);
+  Popup.prototype.open_author_bookmark = function() {
+    if (this.author.style.display != 'none') pp.open(this.a_bookmark.href);
   };
-  Popup.prototype.open_author_staccfeed = function(same_page) {
+  Popup.prototype.open_author_staccfeed = function() {
     if (this.author.style.display != 'none' && this.a_stacc.style.display != 'none') {
-      this.open_url(this.a_stacc.href, same_page);
+      pp.open(this.a_stacc.href);
     }
   };
-  Popup.prototype.open_bookmark_detail = function(same_page) {
-    this.open_url('http://www.pixiv.net/bookmark_detail.php?illust_id=' + this.item.id, same_page);
+  Popup.prototype.open_bookmark_detail = function() {
+    pp.open('http://www.pixiv.net/bookmark_detail.php?illust_id=' + this.item.id);
   };
   Popup.prototype.set_manga_mode = function(manga_mode, page) {
     if (!this.manga.usable || !!this.manga.enabled == !!manga_mode) return;
@@ -3689,13 +3708,6 @@
   };
   Popup.prototype.toggle_manga_mode = function(page) {
     if (this.manga.usable) this.set_manga_mode(!this.manga.enabled, page);
-  };
-  Popup.prototype.open_url = function(url, same_page) {
-    if (same_page) {
-      window.location.href = url;
-    } else {
-      pp.open(url);
-    }
   };
   Popup.prototype.scroll_caption = function(pos) {
     this.comment_wrap.scrollTop += pos;
