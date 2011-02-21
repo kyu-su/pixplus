@@ -3997,6 +3997,16 @@
       return false;
     }));
 
+    each(this.tags_illust.concat(this.tags_bookmark), function(it) {
+      var tag = it.firstChild.nodeValue;
+      it.onclick = '';
+      $ev(it).click(function() {
+        window.add_form(tag);
+        return true;
+      });
+      it.href = '/tags.php?tag=' + tag;
+    });
+
     $js.script(pp.url.js.bookmark_add_v4).wait(bind(function() {
       // 二回目以降bookmark_add_v4.jsの初期化関数が呼ばれない
       window.alltags = window.getAllTags();
