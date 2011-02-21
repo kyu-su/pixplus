@@ -1324,7 +1324,7 @@
     Popup.stop_key = true;
     var conn_click = $ev(background).click(close);
     var conn_key   = $ev(window).key(function(ev, key) {
-      if (key === $ev.KEY_ESCAPE) return close();
+      if (key === $ev.KEY_ESCAPE || key === '?') return close();
       return false;
     });
 
@@ -2676,7 +2676,6 @@
   Popup.onsetitem = new Signal();
   Popup.onload = new Signal();
   Popup.onkeypress = new Signal(function(ev, key) {
-    if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
     if (this.is_bookmark_editing()) {
       return false;
     } else if (this.is_tag_editing()) {
@@ -4493,6 +4492,7 @@
       },
       key: function(func) {
         var conn = listen('keypress', function(ev, conn) {
+          if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
           var c = ev.keyCode || ev.charCode, key;
           if (c == ev.which && c > 0x20) {
             key = lc(String.fromCharCode(c));
@@ -4506,6 +4506,7 @@
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
+            if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
             var c = ev.keyCode || ev.charCode, key;
             if ($ev.key_map[c]) return func(ev, $ev.key_map[c], conn);
             return false;
