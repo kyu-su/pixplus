@@ -4181,16 +4181,19 @@
         return true;
       }
       if (this.key_map_tag_list[key]) {
+        ev.preventDefault();
         this.select_tag_list(this.key_map_tag_list[key]);
         return true;
       }
     }
     if (this.key_map_tags) {
       if (key == $ev.KEY_ESCAPE) {
+        ev.preventDefault();
         this.select_tag_list(null);
         return true;
       }
       if (this.key_map_tags[key]) {
+        ev.preventDefault();
         send_click($t('a', this.key_map_tags[key])[0]);
         this.select_tag_list(null);
         return true;
