@@ -1196,23 +1196,8 @@
       "key":  "Escape",
       "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
     }, {
-      "key":  "Up/Down",
-      "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u958b\u59cb"
-    }]
-  }, {
-    "mode": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9",
-    "keys": [{
-      "key":  "Escape",
-      "desc": "\u30bf\u30b0\u9078\u629e\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
-    }, {
-      "key":  "Space",
-      "desc": "\u9078\u629e\u4e2d\u306e\u30bf\u30b0\u3092\u30c8\u30b0\u30eb"
-    }, {
-      "key":  "Up/Down",
-      "desc": "\u4e0a\u4e0b\u306e\u30bf\u30b0\u30ea\u30b9\u30c8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Left/Right",
-      "desc": "\u5de6\u53f3\u306e\u30bf\u30b0\u3092\u9078\u629e"
+      "key":  "Enter",
+      "desc": "\u9001\u4fe1"
     }]
   }, {
     "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
@@ -4066,11 +4051,12 @@
         this.key_map_root = {};
         each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
           if (idx >= BookmarkForm.keys_root.length) return true;
-          var span = $c('span');
-          span.setAttribute('ppaccesskey', BookmarkForm.keys_root[idx]);
-          input.parentNode.insertBefore(span, input);
+          var div = $c('div');
+          div.style.display = 'inline-block';
+          div.setAttribute('ppaccesskey', BookmarkForm.keys_root[idx]);
+          input.parentNode.insertBefore(div, input);
           input.parentNode.removeChild(input);
-          span.appendChild(input);
+          div.appendChild(input);
           this.key_map_root[BookmarkForm.keys_root[idx]] = input;
           return false;
         }, this);
@@ -4137,8 +4123,9 @@
               '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
               '.pp-bm-wrap *[ppaccesskey]:before{' +
               '  display:none;content:attr(ppaccesskey);font-size:10px;font-weight:bold;padding:1px;' +
+              //'  position:absolute;margin-top:-0.4em;margin-left:-0.8em;' +
               '  color:white;background-color:gray;line-height:1em;height:1em;}' +
-              '.pp-bm-wrap.pp-access-key-on span[ppaccesskey]:before{display:inline-block;}' +
+              '.pp-bm-wrap.pp-access-key-on div[ppaccesskey]:before{display:inline-block;}' +
               '.pp-bm-wrap.pp-access-key-on ul[ppaccesskey]:before{display:inline-block;}' +
               '.pp-bm-wrap ul.pp-access-key-on li[ppaccesskey]:before{display:inline-block;}' +
               ''
