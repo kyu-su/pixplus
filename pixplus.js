@@ -164,7 +164,10 @@
                                [{"value": 0, "title": "\u7121\u52b9"},
                                 {"value": 1, "title": "\u6709\u52b9"},
                                 {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
-    "extagedit":              [true, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6709\u52b9\u306b\u3059\u308b"],
+    "bookmark_form":          [1, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c",
+                               [{"value": 0, "title": "\u7121\u52b9"},
+                                {"value": 1, "title": "\u30a2\u30ed\u30fc\u30ad\u30fc"},
+                                {"value": 2, "title": "\u30a2\u30eb\u30d5\u30a1\u30d9\u30c3\u30c8"}]],
     "mod_bookmark_add_page":  [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"],
     "tag_separator_style":    ["border-top:2px solid #dae1e7;", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"],
     "stacc_link":             ["", "\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148",
@@ -1030,7 +1033,7 @@
   ConfigUI.changelog_data = [{
     date: '2011/02/xx', version: '0.5.1', changes: [
       '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u4e00\u65b0\u3002'
+      'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002'
     ]
   }, {
     date: '2011/02/15', version: '0.5.0', changes: [
@@ -3937,6 +3940,8 @@
 
   function BookmarkForm(root, opts) {
     this.root          = root;
+    this.key_type      = conf.bookmark_form;
+
     this.title         = opts.title || $x('//div[contains(concat(" ", @class, " "), " works_data ")]/h3');
     this.comment       = opts.comment || $x('//div[contains(concat(" ", @class, " "), " works_tag ")]/preceding-sibling::p');
     this.form          = $x('.//form[@action="bookmark_add.php"]', this.root);
@@ -4056,9 +4061,22 @@
 
       if (opts.autotag) this.autoinput_from_tag();
 
-      if (conf.extagedit) {
+      var keyhandler = BookmarkForm.prototype.keypress_common;
+      if (this.key_type == 1) {
+        this.tag_items = [];
+        this.tag_preselected_index = {x: 0, y: 0};
+        this.input_tag.setAttribute('autocomplete', 'off');
+        this.input_tag.focus();
+        each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
+             function(ul) {
+               var l = $t('li', ul);
+               if (l.length) this.tag_items.push(l);
+             }, this);
+        if (this.tag_items.length) {
+          $ev(this.input_tag).key(bind(BookmarkForm.prototype.keypress1, this));
+        }
+      } else if (this.key_type == 2) {
         this.set_root_key_enabled(true);
-
         this.key_map_root = {};
         each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
           if (idx >= BookmarkForm.keys_root.length) return true;
@@ -4081,15 +4099,20 @@
              },
              this);
 
-        if (opts.signal_key) {
-          this.connections.push(opts.signal_key.connect(bind(BookmarkForm.prototype.keypress, this)));
-        } else {
-          $ev(window).key(bind(BookmarkForm.prototype.keypress, this));
-        }
+        keyhandler = BookmarkForm.prototype.keypress2;
         //this.connections.push($ev(this.root).listen(['focus', 'blur'], bind(function() {
         //  alert();
         //  this.set_root_key_enabled(lc(window.document.activeElement) != 'input');
         //}, this)));
+      } else {
+        this.input_tag.focus();
+      }
+      if (keyhandler) {
+        if (opts.signal_key) {
+          this.connections.push(opts.signal_key.connect(bind(BookmarkForm.prototype.keypress2, this)));
+        } else {
+          $ev(window).key(bind(BookmarkForm.prototype.keypress2, this));
+        }
       }
     }, this));
 
@@ -4128,8 +4151,8 @@
               '.pp-bm-wrap .bookmark_recommend_tag > br{display:none;}' +
               '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
               '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
-              //'.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}' +
-              //'.pp-bm-wrap .bookmark_recommend_tag > ul > li[selected]{border:2px solid #56E655;padding:0px;}' +
+              '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}' +
+              '.pp-bm-wrap .bookmark_recommend_tag > ul > li[pppreselected]{border:2px solid #56E655;padding:0px;}' +
               '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
               '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
               '.pp-bm-wrap *[ppaccesskey]:before{' +
@@ -4179,6 +4202,67 @@
     });
   };
 
+  BookmarkForm.prototype.keypress_common = function(ev, key) {
+    if (ev.target && lc(ev.target.tagName || '') == 'input') return false;
+    if (key == $ev.KEY_ENTER || key == $ev.KEY_SPACE) {
+      this.submit();
+      return true;
+    } else if (key == $ev.KEY_ESCAPE) {
+      this.close();
+      return true;
+    }
+    return false;
+  };
+
+  // conf.bookmark_form == 1
+  BookmarkForm.prototype.unpreselect_tag = function() {
+    if (this.tag_preselected) {
+      this.tag_preselected.removeAttribute('pppreselected');
+      this.tag_preselected = null;
+    }
+  };
+  BookmarkForm.prototype.preselect_tag = function(x, y) {
+    this.unpreselect_tag();
+    if (y < 0) {
+      y = this.tag_items.length - 1;
+    } else if (y >= this.tag_items.length) {
+      y = 0;
+    }
+    if (y != this.tag_preselected_index.y) x = 0;
+    if (x < 0) {
+      x = this.tag_items[y].length - 1;
+    } else if (x >= this.tag_items[y].length) {
+      x = 0;
+    }
+    this.tag_preselected_index.x = x;
+    this.tag_preselected_index.y = y;
+    this.tag_preselected = this.tag_items[y][x];
+    this.tag_preselected.setAttribute('pppreselected', 'yes');
+  };
+
+  BookmarkForm.prototype.keypress1 = function(ev, key) {
+    if (this.tag_preselected) {
+      var x = 0, y = 0;
+      switch(key) {
+      case $ev.KEY_SPACE:  send_click(this.tag_preselected); return true;
+      case $ev.KEY_ESCAPE: this.unpreselect_tag(); return true;
+      case $ev.KEY_LEFT:   x = -1; break;
+      case $ev.KEY_UP:     y = -1; break;
+      case $ev.KEY_RIGHT:  x = 1; break;
+      case $ev.KEY_DOWN:   y = 1; break;
+      }
+      if (x != 0 || y != 0) {
+        this.preselect_tag(this.tag_preselected_index.x + x, this.tag_preselected_index.y + y);
+        return true;
+      }
+    } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
+      this.preselect_tag(0, key == $ev.KEY_DOWN ? 0 : this.tag_items.length - 1);
+      return true;
+    }
+    return false;
+  };
+
+  // conf.bookmark_form == 2
   BookmarkForm.set_key_label_enabled = function(node, enabled) {
     var classes = node.className.replace(/ *pp-access-key-on */, ' ');
     if (enabled) classes += ' pp-access-key-on';
@@ -4209,9 +4293,8 @@
     }
   };
 
-  BookmarkForm.prototype.keypress = function(ev, key) {
-    var ae = window.document.activeElement;
-    if (ae && lc(ae.tagName || '') == 'input') return false;
+  BookmarkForm.prototype.keypress2 = function(ev, key) {
+    if (ev.target && lc(ev.target.tagName || '') == 'input') return false;
     if (this.root_key_enabled) {
       if (this.key_map_root[key]) {
         if (this.key_map_root[key].type == 'radio') {
@@ -4237,14 +4320,7 @@
         return true;
       }
     }
-    if (key == $ev.KEY_ENTER) {
-      this.submit();
-      return true;
-    } else if (key == $ev.KEY_ESCAPE) {
-      this.close();
-      return true;
-    }
-    return false;
+    return this.keypress_common(ev, key);
   };
 
   BookmarkForm.prototype.submit = function() {
