@@ -2496,7 +2496,7 @@
         item.added_popup_button = pbtn;
       }
       if (pbtn) {
-        $ev($x('ancestor::a', pbtn) || pbtn).click(function() {
+        $ev($x('ancestor-or-self::a', pbtn)).click(function() {
           Popup.run(item);
           return true;
         });
