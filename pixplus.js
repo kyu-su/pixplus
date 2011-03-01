@@ -2988,7 +2988,7 @@
         }
         this.date_wrap.style.display = '';
       }
-      if (tmp.length > 1 && tmp[1].match(/(\d+)\u00d7(\d+)|\u6f2b\u753b (\d+)P/)) {
+      if (tmp.length > 1 && tmp[1].match(/(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga) (\d+)P/)) {
         if (RegExp.$3) {
           this.manga.page_count = parseInt(RegExp.$3);
           this.manga.usable = this.manga.page_count > 0;
