@@ -3998,14 +3998,20 @@
       return false;
     }));
 
-    each(this.tags_illust.concat(this.tags_bookmark), function(it) {
-      var tag = it.firstChild.nodeValue;
-      it.onclick = '';
-      $ev(it).click(function() {
-        window.add_form(tag);
-        return true;
+    each([this.tags_illust, this.tags_bookmark], function(group, idx) {
+      each(group, function(it) {
+        var tag = it.firstChild.nodeValue;
+        it.onclick = '';
+        $ev(it).click(function() {
+          window.add_form(tag);
+          return true;
+        });
+        if (idx == 0) {
+          it.href = '/tags.php?tag=' + tag;
+        } else {
+          it.href = '/bookmark.php?tag=' + tag + (conf.bookmark_hide ? '&rest=hide' : '');
+        }
       });
-      it.href = '/tags.php?tag=' + tag;
     });
 
     $js.script(pp.url.js.bookmark_add_v4).wait(bind(function() {
