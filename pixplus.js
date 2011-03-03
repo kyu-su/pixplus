@@ -257,6 +257,10 @@
     load_css:      load_css,
     write_css:     write_css,
     open:          window_open,
+    key_enabled:   function(ev) {
+      return !((ev.target && (ev.target.tagName || '').toLowerCase() == 'input') ||
+               window.document.getElementById('HaH-div-element'));
+    },
 
     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8, rpc_t_id: 16},
     rpc_usable:    false,
@@ -2497,6 +2501,8 @@
       }
       if (pbtn) {
         $ev($x('ancestor-or-self::a', pbtn)).click(function() {
+          // for HaH bookmarklet
+          if (window.opera && window.document.activeElement == this) this.blur();
           Popup.run(item);
           return true;
         });
@@ -2710,7 +2716,7 @@
         }
         return false;
       }).call(this, {
-        run: ev.qrate,
+        run: !!ev.qrate,
         map: [
           {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
           {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
@@ -3515,15 +3521,13 @@
     return elem && lc(elem.tagName || '') == 'input' && elem.id.match(/^qr_kw\d+$/) ? true : false;
   };
   Popup.prototype.keypress = function(ev, key) {
-    var ae = window.document.activeElement;
-    if (ae && lc(ae.tagName || '') == 'input') {
-      if (Popup.is_qrate_button(ae)) {
-        ev.qrate = ae;
-        return Popup.onkeypress.emit(this, ev, key);
-      }
-      return false;
-    } else {
+    if (Popup.is_qrate_button(ev.target)) {
+      ev.qrate = ev.target;
       return Popup.onkeypress.emit(this, ev, key);
+    } else if (pp.key_enabled(ev)) {
+      return Popup.onkeypress.emit(this, ev, key);
+    } else {
+      return false;
     }
   };
   Popup.prototype.toggle_qrate = function() {
@@ -4106,9 +4110,9 @@
       }
       if (keyhandler) {
         if (opts.signal_key) {
-          this.connections.push(opts.signal_key.connect(bind(BookmarkForm.prototype.keypress2, this)));
+          this.connections.push(opts.signal_key.connect(bind(keyhandler, this)));
         } else {
-          $ev(window).key(bind(BookmarkForm.prototype.keypress2, this));
+          $ev(window).key(bind(keyhandler, this));
         }
       }
     }, this));
@@ -4200,7 +4204,7 @@
   };
 
   BookmarkForm.prototype.keypress_common = function(ev, key) {
-    if (ev.target && lc(ev.target.tagName || '') == 'input') return false;
+    if (!pp.key_enabled(ev)) return false;
     if (key == $ev.KEY_ENTER || key == $ev.KEY_SPACE) {
       this.submit();
       return true;
@@ -4294,7 +4298,7 @@
   };
 
   BookmarkForm.prototype.keypress2 = function(ev, key) {
-    if (ev.target && lc(ev.target.tagName || '') == 'input') return false;
+    if (!pp.key_enabled(ev)) return false;
     if (this.root_key_enabled) {
       if (this.key_map_root[key]) {
         if (this.key_map_root[key].type == 'radio') {
@@ -4563,7 +4567,7 @@
       click: function(func) {
         return listen('click', function(ev, conn) {
           if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
-          return func(ev, conn);
+          return func.call(this, ev, conn);
         });
       },
       key: function(func) {
@@ -4578,13 +4582,13 @@
           } else {
             key = c;
           }
-          return func(ev, key, conn);
+          return func.call(this, ev, key, conn);
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
             var c = ev.keyCode || ev.charCode, key;
-            if ($ev.key_map[c]) return func(ev, $ev.key_map[c], conn);
+            if ($ev.key_map[c]) return func.call(this, ev, $ev.key_map[c], conn);
             return false;
           }, conn);
         }
@@ -4620,15 +4624,15 @@
           if (timer) {
             ev_last = ev;
           } else {
-            ev_last = null;
+            ev_last = ev;
             timer = setTimeout(function() {
               if (conn.disconnected) return;
               timer = null;
-              func(ev_last, conn);
+              func.call(ctx, ev_last, conn);
             }, async.constructor === Number ? async : 40);
           }
         } else {
-          if (func(ev, conn)) {
+          if (func.call(ctx, ev, conn)) {
             ev.preventDefault();
             ev.stopPropagation();
           }
