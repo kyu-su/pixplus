@@ -1031,10 +1031,10 @@
   }];
 
   ConfigUI.changelog_data = [{
-    date: '2011/02/xx', version: '0.5.1', changes: [
+    date: '2011/03/xx', version: '0.5.1', changes: [
       '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002',
-      '\u82f1\u8a9e\u74b0\u5883\u3067\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      'pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/02/15', version: '0.5.0', changes: [
@@ -2989,7 +2989,7 @@
         }
         this.date_wrap.style.display = '';
       }
-      if (tmp.length > 1 && tmp[1].match(/(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga) (\d+)P/)) {
+      if (tmp.length > 1 && tmp[1].match(/(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/)) {
         if (RegExp.$3) {
           this.manga.page_count = parseInt(RegExp.$3);
           this.manga.usable = this.manga.page_count > 0;
