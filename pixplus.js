@@ -258,7 +258,7 @@
 
     lazy_scroll: lazy_scroll,
     load_css: load_css,
-    write_css: function() {
+    write_css: function(source) {
       if (!arguments.callee.css) {
         arguments.callee.css = window.document.createElement('style');
         arguments.callee.css.setAttribute('type', 'text/css');
@@ -663,6 +663,7 @@
               value = self.st.conv[type][0](input.value);
             }
             if (self.st.u) self.st.set(sec.name, key, value);
+            if (!options_page) sec.conf[key] = value;
             self.update_export();
           }, false);
 
