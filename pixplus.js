@@ -3116,26 +3116,22 @@
     this.has_qrate = false;
     this.rating_enabled = false;
     this.rating.style.display = 'none';
-    //var re_rtv, re_rtc, re_rtt;
+    var re_rtv, re_rtc, re_rtt;
     if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-        /*
-         (re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
-         (re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
-         (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))
-         */
-        loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>[\r\n]<h\d>.*<\/h\d>)/i)) {
-      /*
-       var html = '<div id="rating"><div id="unit"><h4>' +
-       '<span>\u95b2\u89a7\u6570: ' + re_rtv[0] + '</span>' +
-       '<span>\u8a55\u4fa1\u56de\u6570: ' + re_rtc[0] + '</span>' +
-       '<span>\u7dcf\u5408\u70b9: ' + re_rtt[0] + '</span>';
-       if (loader.text.match(/(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i)) {
-       // add '/' for staccfeed
-       html += '<span>' + RegExp.$1 + '/' + RegExp.$2 + '</span>';
-       }
-       html += '</h4>';
-       */
-      var html = '<div id="rating">' + RegExp.$1;
+        (re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
+        (re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
+        (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
+        //loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>[\r\n]<h\d>.*<\/h\d>)/i)) {
+      var html = '<div id="rating"><div id="unit"><h4>' +
+        '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
+        '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
+        '<span>' + "\u7dcf\u5408\u70b9: " + re_rtt[0] + '</span>';
+      if (loader.text.match(/(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i)) {
+        // add '/' for staccfeed
+        html += '<span>' + RegExp.$1 + '/' + RegExp.$2 + '</span>';
+      }
+      html += '</h4>';
+      //var html = '<div id="rating">' + RegExp.$1;
       if (loader.text.match(/(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i)) html += RegExp.$1;
       html += '</div>';
       if (rpc_chk(pp.rpc_req_qrate)) {
@@ -4216,6 +4212,9 @@
   };
 
   // conf.bookmark_form == 1
+  BookmarkForm.prototype.toggle_preselected = function() {
+    send_click($x('.//a', this.tag_preselected));
+  };
   BookmarkForm.prototype.unpreselect_tag = function() {
     if (this.tag_preselected) {
       this.tag_preselected.removeAttribute('pppreselected');
@@ -4245,7 +4244,7 @@
     if (this.tag_preselected) {
       var x = 0, y = 0;
       switch(key) {
-      case $ev.KEY_SPACE:  send_click(this.tag_preselected); return true;
+      case $ev.KEY_SPACE:  this.toggle_preselected(); return true;
       case $ev.KEY_ESCAPE: this.unpreselect_tag(); return true;
       case $ev.KEY_LEFT:   x = -1; break;
       case $ev.KEY_UP:     y = -1; break;
