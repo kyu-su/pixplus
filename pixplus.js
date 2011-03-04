@@ -1667,7 +1667,7 @@
       init_pager();
       gallery.onadditem.connect(init_pager, true);
       function init_pager() {
-        var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, "\u3082\u3063\u3068\u898b")]', r_container);
+        var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
         if (more) {
           if (conn) conn.disconnect();
           conn = $ev(illusts, true).scroll(function(ev, conn) {
@@ -3972,7 +3972,7 @@
       this.onclose = new Signal(BookmarkForm.prototype.destroy);
       this.btn_close = $c('input', this.btn_submit.parentNode, null, 'btn_type01 bookmark_submit_btn');
       this.btn_close.type = 'button';
-      this.btn_close.value = '\u9589\u3058\u308b';
+      this.btn_close.value = "\u9589\u3058\u308b";
       this.connections.push($ev(this.btn_close).click(bind(function(ev, conn) {
         conn.disconnect();
         this.close();
