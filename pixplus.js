@@ -2235,7 +2235,7 @@
   function init_js() {
     // rate
     defineMagicFunction('countup_rating', function(real, othis, score) {
-      var msg = '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9'.replace('%s', String(score));
+      var msg = "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9".replace('%s', String(score));
       if (conf.rate_confirm && !confirm(msg)) return;
       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
       real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
@@ -2565,11 +2565,11 @@
     this.author                = $c('span',    this.post_cap,      'pp-author');
     this.a_profile             = $c('a',       this.author);
     this.a_illust              = $c('a',       this.author);
-    this.a_illust.textContent  = '\u4f5c\u54c1';
+    this.a_illust.textContent  = "\u4f5c\u54c1";
     this.a_bookmark            = $c('a',       this.author);
-    this.a_bookmark.textContent = '\u30d6\u30c3\u30af\u30de\u30fc\u30af';
+    this.a_bookmark.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af";
     this.a_stacc               = $c('a',       this.author);
-    this.a_stacc.textContent   = '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9';
+    this.a_stacc.textContent   = "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9";
     this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
     this.tag_edit              = $c('div',     this.root_div,      'tag_edit');
     this.img_div               = $c('div',     this.root_div,      'pp-img-div');
@@ -3031,10 +3031,10 @@
       var a_status_class = '';
       this.a_img.src            = RegExp.$3;
       this.a_profile.href       = RegExp.$1;
-      this.a_profile.innerHTML  = RegExp.$4; // 属性を使うのでtrimしない。
+      this.a_profile.innerHTML  = RegExp.$4;
       this.a_illust.href        = '/member_illust.php?id=' + RegExp.$2;
       this.a_bookmark.href      = '/bookmark.php?id=' + RegExp.$2;
-      if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"[^>]+title=\"\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\"/i)) {
+      if (loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/]+)\"/i)) {
         this.a_stacc.href       = RegExp.$1;
         this.a_stacc.style.display = '';
       }
@@ -3207,7 +3207,7 @@
               comment.setAttribute('disabled', '');
               submit.setAttribute('disabled', '');
             } else {
-              alert('\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+              alert("\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
             }
             return true;
           });
@@ -3569,8 +3569,7 @@
       del.onclick = '';
       if (url.match(/^\w/)) url = '/' + url;
       $ev(del).click(bind(function() {
-        if (confirm('\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059' +
-                    '\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f')) {
+        if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
           window.jQuery.ajax({
             url: url,
             context: this,
@@ -4334,7 +4333,7 @@
 
   BookmarkForm.prototype.submit = function() {
     var submit_text = this.btn_submit.value;
-    this.btn_submit.value = '\u3000\u9001\u4fe1\u4e2d\u3000';
+    this.btn_submit.value = "\u9001\u4fe1\u4e2d";
     this.btn_submit.setAttribute('disabled', '');
     window.jQuery.post(
       this.form.getAttribute('action'),
