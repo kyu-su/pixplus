@@ -3015,11 +3015,9 @@
       if (tmp.length > 2) {
         // tools.php?tool=hoge
         var html = '';
-        each(
-          trim(tmp[2]).split('&nbsp;'),
-          function(tool) {
-            html += '<span>' + tool + '</span>';
-          });
+        each(trim(tmp[2]).split('&nbsp;'), function(tool) {
+          html += '<span>' + tool + '</span>';
+        });
         this.info_tools.innerHTML = html;
         this.info_tools.style.display = '';
       }
@@ -3041,7 +3039,7 @@
       var a_status_class = '';
       this.a_img.src            = re[3];
       this.a_profile.href       = re[1];
-      this.a_profile.innerHTML  = trim(re[4]) || '(User)';
+      this.a_profile.innerHTML  = trim(re[4]) || '(Author)';
       this.a_illust.href        = '/member_illust.php?id=' + re[2];
       this.a_bookmark.href      = '/bookmark.php?id=' + re[2];
       if ((re = loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/\"]+)\"/i))) {
@@ -4924,7 +4922,7 @@
     return str.toLowerCase();
   }
   function trim(str) {
-    return str.replace(/(?:^[\s\u3000]+|[\s\u3000]+$)/g, '');
+    return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
   }
   function edit_comment(str) {
     str = str.replace(/(?:<br ?\/?>)*([\-\u2015\u2500\u2501\uff3f])\1{7,}(?:<br ?\/?>)*/g, '<hr />');
