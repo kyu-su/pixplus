@@ -2088,26 +2088,10 @@
                  '#pp-popup #pp-header #pp-caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                  '#pp-popup #pp-caption .pp-separator{border-top:1px solid gray;margin-top:1px;padding-top:1px;}' +
                  '#pp-popup #pp-caption .pp-separator-b{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-                 '#pp-popup #pp-comment-wrap{overflow:auto;line-height:1.2em;}' +
+                 '#pp-popup #pp-comment-wrap{overflow:auto;line-height:1.1em;}' +
                  '#pp-popup #tag_area > * + *{margin-left:0.6em;}' +
                  '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
                  '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
-                 '#pp-popup #pp-post-cap{line-height:1.1em;position:relative;}' +
-                 '#pp-popup #pp-post-cap #pp-author-img{box-sizing:border-box;' +
-                 '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
-                 '#pp-popup #pp-post-cap #pp-author-img:hover{max-height:100%;}' +
-                 '#pp-popup #pp-post-cap #pp-date-wrap > span + span{margin-left:0.6em;}' +
-                 '#pp-popup #pp-post-cap #pp-date-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
-                 '#pp-popup #pp-post-cap #pp-date-repost{font-size:smaller;line-height:1.1em;}' +
-                 '#pp-popup #pp-post-cap #pp-date-repost:before{content:\"(\u518d \";}' +
-                 '#pp-popup #pp-post-cap #pp-date-repost:after{content:")";}' +
-                 '#pp-popup #pp-post-cap #pp-info-wrap > span + span{margin-left:0.6em;}' +
-                 '#pp-popup #pp-post-cap #pp-info-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
-                 '#pp-popup #pp-post-cap #pp-info-tools > * + *{margin-left:0.6em;}' +
-                 '#pp-popup #pp-post-cap #pp-author-status{position:absolute;left:3px;top:2px;display:inline-block;}' +
-                 '#pp-popup #pp-post-cap #pp-author-img:hover + #pp-author-status{display:none;}' +
-                 '#pp-popup #pp-post-cap #pp-author a{font-weight:bold;}' +
-                 '#pp-popup #pp-post-cap #pp-author a + a{margin-left:0.6em;}' +
                  '#pp-popup #pp-bm-edit{margin-top:2px;}' +
                  '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:480px;min-height:360px;' +
                  '  line-height:0px;border:1px solid silver;}' +
@@ -2119,10 +2103,12 @@
                  '#pp-popup #pp-olc-next{right:3px;}' +
                  (conf.popup.remove_pixpedia ? "#pp-popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
                  // rating
-                 '#pp-popup #pp-rating{padding:0px !important;}' +
+                 '#pp-popup #pp-rating{line-height:1.1em;padding:0px !important;}' +
                  '#pp-popup #pp-rating input{display:block;line-height:1em;}' +
                  '#pp-popup #pp-rating input:focus{background-color:#feffdf;}' +
-                 '#pp-popup #pp-rating span + span{margin-left:0.4em;}' +
+                 '#pp-popup #pp-rating #unit span > div:before{content:":";margin-right:0.4em;}' +
+                 '#pp-popup #pp-rating #unit span + span{margin-left:0.8em;}' +
+                 '#pp-popup #pp-rating #after_q_rating{font-size:inherit;}' +
                  '#pp-popup #pp-rating ul.unit-rating{margin:0px;float:none;}' +
                  '#pp-popup #pp-rating #quality_rating{float:none !important;}' +
                  '#pp-popup #pp-rating h4{margin:0px;}' +
@@ -2134,6 +2120,23 @@
                  '#pp-popup #pp-rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
                  '#pp-popup #pp-rating #result div[highlight]{background-color:#efefef;}' +
                  '#pp-popup #pp-rating #quality_rating{width:100% !important;}' +
+                 // info
+                 '#pp-popup #pp-info{line-height:1.1em;position:relative;}' +
+                 '#pp-popup #pp-info #pp-author-img{box-sizing:border-box;' +
+                 '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
+                 '#pp-popup #pp-info #pp-author-img:hover{max-height:100%;}' +
+                 '#pp-popup #pp-info #pp-date-wrap > span + span{margin-left:0.6em;}' +
+                 '#pp-popup #pp-info #pp-date-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
+                 '#pp-popup #pp-info #pp-date-repost{font-size:smaller;line-height:1.1em;}' +
+                 '#pp-popup #pp-info #pp-date-repost:before{content:\"(\u518d \";}' +
+                 '#pp-popup #pp-info #pp-date-repost:after{content:")";}' +
+                 '#pp-popup #pp-info #pp-info-wrap > span + span{margin-left:0.6em;}' +
+                 '#pp-popup #pp-info #pp-info-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
+                 '#pp-popup #pp-info #pp-info-tools > * + *{margin-left:0.6em;}' +
+                 '#pp-popup #pp-info #pp-author-status{position:absolute;left:3px;top:2px;display:inline-block;}' +
+                 '#pp-popup #pp-info #pp-author-img:hover + #pp-author-status{display:none;}' +
+                 '#pp-popup #pp-info #pp-author a{font-weight:bold;}' +
+                 '#pp-popup #pp-info #pp-author a + a{margin-left:0.6em;}' +
                  // comments
                  '#pp-popup #pp-viewer-comments > div{margin-left:0.8em;padding-left:4px;border-left:3px solid #d6dee5;}' +
                  '#pp-popup #pp-viewer-comments input + input{margin-left:0.4em;}' +
@@ -2560,7 +2563,7 @@
     this.viewer_comments_a     = $c('div',     this.viewer_comments_w, 'one_comment_area');
     this.tags                  = $c('div',     this.caption,       'tag_area');
     this.rating                = $c('div',     this.caption,       'pp-rating', 'pp-separator works_area');
-    this.post_cap              = $c('div',     this.caption,       'pp-post-cap', 'pp-separator');
+    this.post_cap              = $c('div',     this.caption,       'pp-info', 'pp-separator');
     this.a_img                 = $c('img',     this.post_cap,      'pp-author-img');
     this.a_status              = $c('span',    this.post_cap,      'pp-author-status');
     this.date_wrap             = $c('span',    this.post_cap,      'pp-date-wrap');
@@ -3128,11 +3131,13 @@
     this.rating_enabled = false;
     this.rating.style.display = 'none';
     var re_rtv, re_rtc, re_rtt;
+    //<h4>Views：<div style="display:inline;" id="jd_rtv">3495</div>　Rating Count：<div style="display:inline;" id="jd_rtc">211</div>　Ratings：<div style="display:inline;" id="jd_rtt">2091</div></h4>
     if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-        (re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
-        (re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
-        (re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
-        //loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>[\r\n]<h\d>.*<\/h\d>)/i)) {
+        //(re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
+        //(re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
+        //(re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
+        (re = loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i))) {
+      /*
       var html = '<div id="rating"><div id="unit"><h4>' +
         '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
         '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
@@ -3142,7 +3147,8 @@
         html += '<span>' + re[1] + '/' + re[2] + '</span>';
       }
       html += '</h4>';
-      //var html = '<div id="rating">' + re[1];
+       */
+      var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
       if ((re = loader.text.match(/(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i))) html += re[1];
       html += '</div>';
       if (rpc_chk(pp.rpc_req_qrate)) {
