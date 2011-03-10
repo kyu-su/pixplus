@@ -48,13 +48,13 @@
     } else {
       func(unsafeWindow || window, window);
     }
-  } else if (String(window) =='[object ChromeWindow]') {
+  } else if (String(window) === '[object ChromeWindow]') {
     // FirefoxAdd-On
     (function() {
       var pref = Components.classes['@mozilla.org/preferences-service;1']
         .getService(Components.interfaces.nsIPrefBranch);
       function check_key(key) {
-        if (!(key && key.constructor === String && key.match(/^[a-z_]+$/))) {
+        if (!(key && (typeof key === 'string' || key instanceof String) && key.match(/^[a-z_]+$/))) {
           throw 'invalid argument';
         }
         return 'extensions.pixplus.' + key;
@@ -471,7 +471,7 @@
         LS.get = function(s, n) {
           var key = LS.map[s].path.join('_') + '_' + n, val;
           var def = LS.map[s].schema[n][0];
-          if (def.constructor === Boolean) {
+          if (typeof def === 'boolean') {
             val = _extension_data.storage.getBoolPref(key);
           } else {
             val = LS.get_conv(s, n)[0](_extension_data.storage.getCharPref(key));
@@ -482,7 +482,7 @@
         };
         LS.set = function(s, n, v) {
           var key = LS.map[s].path.join('_') + '_' + n;
-          if (LS.map[s].schema[n][0].constructor === Boolean) {
+          if (typeof LS.map[s].schema[n][0] === 'boolean') {
             _extension_data.storage.setBoolPref(key, v);
           } else {
             _extension_data.storage.setCharPref(key, v);
@@ -691,17 +691,19 @@
       return JSON.stringify(val);
     } else {
       var str = '';
-      if (val.constructor === String) {
+      if (typeof val === 'string' || val instanceof String) {
         return '"' + val.replace(/[\\\"]/g, '\\$0')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r') + '"';
-      } else if (val.constructor === Array) {
+      } else if (val instanceof Array) {
         for(var i = 0; i < val.length; ++i) {
           if (i) str += ',';
           str += ConfigUI.stringify(val[i]);
         }
         return '[' + str + ']';
-      } else if (val.constructor === Object) {
+      } else if (typeof val === 'number') {
+        return String(val);
+      } else if (typeof val === 'object') {
         var first = true;
         for(var key in val) {
           if (!val.hasOwnProperty(key)) continue;
@@ -713,8 +715,6 @@
           str += ConfigUI.stringify(key) + ':' + ConfigUI.stringify(val[key]);
         }
         return '{' + str + '}';
-      } else if (val.constructor === Number) {
-        return String(val);
       } else {
         throw 1;
       }
@@ -3853,7 +3853,7 @@
   Popup.MangaLoader.prototype.check_complete = function(image) {
     if (!this.images) return;
     for(var i = 0; i < this.images.length; ++i) {
-      if (this.images[i].constructor === Array) return;
+      if (this.images[i] instanceof Array) return;
     }
     this.onload();
   };
@@ -3870,7 +3870,7 @@
   Popup.MangaLoader.prototype.onload_image = function(image) {
     if (this.images) {
       each(this.images, function(obj, idx) {
-        if (obj.constructor === Array && obj.indexOf(image.src) >= 0) {
+        if (obj instanceof Array && obj.indexOf(image.src) >= 0) {
           this[idx] = image;
         }
       });
@@ -3934,7 +3934,7 @@
       this.images.push(urls);
     }, this);
     each(this.images, function(urls) {
-      if (urls.constructor === Array) {
+      if (urls instanceof Array) {
         Popup.MangaLoader.prototype.load_image.apply(this, urls);
       }
     }, this);
@@ -4544,7 +4544,7 @@
           timer = setTimeout(function() {
             timer = null;
             func.apply(last_args[0], last_args[1]);
-          }, async.constructor === Number ? async : 40);
+          }, typeof async === 'number' ? async : 40);
         } else {
           return func.apply(this, last_args[1]);
         }
@@ -4627,7 +4627,7 @@
         return listen('submit', func);
       },
       listen: function(name, func) {
-        if (name.constructor === Array) {
+        if (name instanceof Array) {
           var conn;
           each(name, function(name) {
             conn = listen(name, func, conn);
@@ -4652,7 +4652,7 @@
               if (conn.disconnected) return;
               timer = null;
               func.call(ctx, ev_last, conn);
-            }, async.constructor === Number ? async : 40);
+            }, typeof async === 'number' ? async : 40);
           }
         } else {
           if (func.call(ctx, ev, conn)) {
@@ -4961,13 +4961,13 @@
     urlcache[url] = null;
   }
   function getimg(url, cb_load, cb_error, cb_abort) {
-    if (url.constructor === Array) {
+    if (url instanceof Array) {
       var stop = false, urls = [].concat(url);
       function check() {
         if (stop) return;
         for(var i = 0; i < urls.length; ++i) {
           if (urls[i]) {
-            if (urls[i].constructor === String) {
+            if (typeof urls[i] === 'string' || urls[i] instanceof String) {
               return;
             } else {
               stop = true;
