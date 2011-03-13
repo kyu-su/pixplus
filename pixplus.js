@@ -3282,31 +3282,6 @@
     this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
   };
 
-  Popup.prototype.adjust_image_size = function() {
-    var width = 0, height = 0;
-    each(this.images.list, function(image) {
-      width += image.size.width;
-      if (image.size.height > height) height = image.size.height;
-    });
-
-    var de = window.document.documentElement;
-    var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
-    var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
-    this.img_div.style.width = (width + 16) + 'px';
-    if (width > mw || height > mh) {
-      var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
-      each(this.images.list, function(image) {
-        var h = Math.floor(image.size.height * scale);
-        image.image.style.height = h + 'px';
-      });
-    }
-
-    var ch = this.img_div.clientHeight;
-    each(this.images.list, function(image) {
-      var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
-      image.image.style.marginTop = m + 'px';
-    });
-  };
   Popup.prototype.set_images = function(images, no_zoom) {
     each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
     this.images = {
@@ -3349,6 +3324,35 @@
       this.locate();
       this.update_info();
     }
+  };
+
+  Popup.prototype.adjust_image_size = function() {
+    var width = 0, height = 0;
+    each(this.images.list, function(image) {
+      width += image.size.width;
+      if (image.size.height > height) height = image.size.height;
+    });
+
+    var de = window.document.documentElement;
+    var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
+    var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
+    if (width > mw || height > mh) {
+      var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh, rw = 0;
+      each(this.images.list, function(image) {
+        var h = Math.floor(image.size.height * scale);
+        image.image.style.height = h + 'px';
+        rw += image.image.offsetWidth;
+      });
+      this.img_div.style.minWidth = rw + 'px';
+    } else {
+      this.img_div.style.minWidth = width + 'px';
+    }
+
+    var ch = this.img_div.clientHeight;
+    each(this.images.list, function(image) {
+      var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
+      image.image.style.marginTop = m + 'px';
+    });
   };
 
   Popup.create_zoom_image = function(img, width, height, r_width, r_height) {
