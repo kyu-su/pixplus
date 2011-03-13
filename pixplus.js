@@ -1852,7 +1852,7 @@
     function show() {
       if (bm_form_div) return;
       bm_form_div = $c('div');
-      bm_form_div.textContent = 'Loading...';
+      bm_form_div.textContent = 'Loading';
       bm_form_div.style.marginTop = '1em';
       loader = new Loader(bm_add_anc.href, bm_form_div);
       display.parentNode.insertBefore(bm_form_div, display);
@@ -2093,8 +2093,8 @@
                  '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
                  '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
                  '#pp-popup #pp-bm-edit{margin-top:2px;}' +
-                 '#pp-popup #pp-img-div{margin-top:2px;text-align:center;min-width:480px;min-height:360px;' +
-                 '  line-height:0px;border:1px solid silver;}' +
+                 '#pp-popup #pp-img-div{margin-top:2px;text-align:center;' +
+                 '  min-width:480px;min-height:360px;line-height:0px;border:1px solid silver;}' +
                  '#pp-popup #pp-img-div a{display:inline-block;}' +
                  '#pp-popup #pp-img-div a img{display:block;}' +
                  '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
@@ -3292,23 +3292,20 @@
     var de = window.document.documentElement;
     var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
     var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
+    this.img_div.style.width = (width + 16) + 'px';
     if (width > mw || height > mh) {
       var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
       each(this.images.list, function(image) {
         var h = Math.floor(image.size.height * scale);
-        var m = Math.max(Math.floor((mh - h) / 2), 0);
         image.image.style.height = h + 'px';
-        image.image.style.marginTop = m + 'px';
       });
     }
 
-    /*
     var ch = this.img_div.clientHeight;
     each(this.images.list, function(image) {
       var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
       image.image.style.marginTop = m + 'px';
     });
-     */
   };
   Popup.prototype.set_images = function(images, no_zoom) {
     each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
@@ -3629,7 +3626,7 @@
       this.locate();
     } else if (!this.bm_loading) {
       this.bm_loading  = true;
-      this.set_status('Loading...');
+      this.set_status('Loading');
       geturl('/bookmark_add.php?type=illust&illust_id=' + this.item.id, bind(function(text) {
         var re;
         this.bm_loading = false;
