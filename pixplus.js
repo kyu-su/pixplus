@@ -3295,16 +3295,20 @@
     if (width > mw || height > mh) {
       var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
       each(this.images.list, function(image) {
-        var height = Math.floor(image.size.height * scale);
-        image.image.style.height = height + 'px';
+        var h = Math.floor(image.size.height * scale);
+        var m = Math.max(Math.floor((mh - h) / 2), 0);
+        image.image.style.height = h + 'px';
+        image.image.style.marginTop = m + 'px';
       });
     }
 
+    /*
     var ch = this.img_div.clientHeight;
     each(this.images.list, function(image) {
       var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
       image.image.style.marginTop = m + 'px';
     });
+     */
   };
   Popup.prototype.set_images = function(images, no_zoom) {
     each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
