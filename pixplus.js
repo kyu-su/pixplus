@@ -2122,7 +2122,8 @@
                  '#pp-popup #pp-rating #quality_rating{width:100% !important;}' +
                  // info
                  '#pp-popup #pp-info{line-height:1.1em;position:relative;}' +
-                 '#pp-popup #pp-info #pp-author-img{box-sizing:border-box;' +
+                 '#pp-popup #pp-info #pp-author-img{' +
+                 '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;' +
                  '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
                  '#pp-popup #pp-info #pp-author-img:hover{max-height:100%;}' +
                  '#pp-popup #pp-info #pp-date-wrap > span + span{margin-left:0.6em;}' +
@@ -3339,8 +3340,8 @@
     if (width > mw || height > mh) {
       var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh, rw = 0;
       each(this.images.list, function(image) {
-        var h = Math.floor(image.size.height * scale);
-        image.image.style.height = h + 'px';
+        var w = Math.floor(image.size.width * scale);
+        image.image.style.width = w + 'px';
         rw += image.image.offsetWidth;
       });
       this.img_div.style.minWidth = rw + 'px';
