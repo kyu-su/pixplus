@@ -3323,6 +3323,8 @@
   };
 
   Popup.prototype.adjust_image_size = function() {
+    if (!this.images.list) return;
+
     var width = 0, height = 0;
     each(this.images.list, function(image) {
       width += image.size.width;
@@ -3332,16 +3334,20 @@
     var de = window.document.documentElement;
     var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
     var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
+    var rw = width;
     if (width > mw || height > mh) {
-      var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh, rw = 0;
+      var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
+      rw = 0
       each(this.images.list, function(image) {
         var w = Math.floor(image.size.width * scale);
         image.image.style.width = w + 'px';
         rw += image.image.offsetWidth;
       });
-      this.img_div.style.minWidth = rw + 'px';
+    }
+    if (this.images.list.length > 1) {
+      this.img_div.style.width = rw + 'px';
     } else {
-      this.img_div.style.minWidth = width + 'px';
+      this.img_div.style.width = '';
     }
 
     var ch = this.img_div.clientHeight;
