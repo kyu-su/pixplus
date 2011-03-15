@@ -2985,26 +2985,20 @@
     }
 
     var img_size, _title = 'Error!';
-    this.date_wrap.style.display = 'none';
     this.info.style.display = '';
     this.info_tools.style.display = 'none';
     /* ツールは「&nbsp;」区切り
      * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
      */
     if ((re = loader.text.match(/<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i))) {
-      var tmp = re[1].split('\uff5c');
+      var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
       _title = trim(re[2]);
-      if ((re = tmp[0].match(/((\d{4}\u5e74\d{2}\u6708\d{2})\u65e5 \d{2}:\d{2})/))) {
-        var _date = re[2];
-        this.date.textContent = re[1];
-        // 再投稿表示。「日」が抜けてる。pixivのバグ？
-        if ((re = loader.text.match(/(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/))) {
-          this.date_repost.textContent = (re[1] == _date ? '' : re[1] + '\u65e5 ') + re[2];
-          this.date_repost.style.display = '';
-        } else {
-          this.date_repost.style.display = 'none';
-        }
-        this.date_wrap.style.display = '';
+      this.date.textContent = tmp[0];
+      if ((re = loader.text.match(/(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/))) {
+        this.date_repost.textContent = (re[1] == _date ? '' : re[1] + '\u65e5 ') + re[2];
+        this.date_repost.style.display = '';
+      } else {
+        this.date_repost.style.display = 'none';
       }
       if (tmp.length > 1 && (re = tmp[1].match(/(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/))) {
         if (re[3]) {
