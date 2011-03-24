@@ -290,7 +290,11 @@
       },
       img: {
         sprite: 'http://source.pixiv.net/source/images/sprite_20101101.png'
-      }
+      },
+      limit_thumb: [
+        'http://source.pixiv.net/source/images/limit_unknown_s.png',
+        'http://source.pixiv.net/source/images/limit_mypixiv_s.png'
+      ]
     }
   };
   if (window.pixplus || (window.opera && window.opera.pixplus)) {
@@ -2379,6 +2383,7 @@
     this.manga   = { viewed: false };
     this.img_med = null;
     this.img_big = null;
+    this.limited = thumb && pp.url.limit_thumb.indexOf(thumb.src) >= 0 ? true : false;
 
     if (gallery) {
       this.page_item = ++gallery.page_item;
@@ -2418,6 +2423,7 @@
       }
     }
   };
+
   function Gallery(args, filter_col, filter) {
     this.args = args;
     this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
@@ -2425,13 +2431,15 @@
     this.filter_col = filter_col;
     this.filter = filter;
 
-    this.items     = [];
-    this.idmap     = {};
-    this.first     = null;
-    this.last      = null;
-    this.prev_dups = [];
-    this.page_item = 0;
-    this.page_col  = 0;
+    this.items          = [];
+    this.idmap          = {};
+    this.first          = null;
+    this.first_limited  = null;
+    this.last           = null;
+    this.last_limited   = null;
+    this.prev_dups      = [];
+    this.page_item      = 0;
+    this.page_col       = 0;
 
     this.onadditem = new Signal();
 
@@ -2467,6 +2475,7 @@
 
     var self = this;
     var prev = this.last;
+    var prev_limited = this.last_limited;
     this.page_item = 0;
     ++this.page_col;
     each(elements, function(elem, cnt) {
@@ -2519,18 +2528,23 @@
         });
       }
 
-      if (!self.first) self.first = item;
+      if (!self.first_limited) self.first_limited = item;
+      if (!self.first && !item.limited) self.first = item;
       if (self.filter) self.filter(item);
 
       if (self.args.skip_dups && self.idmap[item.id]) {
         self.prev_dups.push(item);
       } else {
-        if (prev) prev.next = item;
-        if (self.prev_dups.length) {
-          each(self.prev_dups, function(p) { p.next = item; });
-          self.prev_dups = [];
+        if (!item.limited) {
+          if (prev) prev.next = item;
+          if (prev_limited) prev_limited.next = item;
+          if (self.prev_dups.length) {
+            each(self.prev_dups, function(p) { p.next = item; });
+            self.prev_dups = [];
+          }
+          self.last = prev = item;
         }
-        self.last = prev = item;
+        self.last_limited = prev_limited = item;
         self.items.push(item);
         self.idmap[item.id] = item;
         self.onadditem.emit(self, item);
@@ -2872,6 +2886,7 @@
   Popup.prototype.complete = function() {
     this.status.style.display = 'none';
   };
+
   Popup.prototype.first = function() {
     if (this.manga.usable && this.manga.enabled) {
       this.set_manga_page(0);
@@ -2886,6 +2901,7 @@
       this.set(this.item.gallery.last, true);
     }
   };
+
   Popup.prototype.prev = function(close, loop, no_auto) {
     if (this.manga.usable && this.manga.enabled) {
       var page = this.manga.page - this.manga.page_dec;
@@ -2925,6 +2941,7 @@
     if (!item && loop && g) item = r ? g.last : g.first;
     this.set(item, true, close);
   };
+
   Popup.prototype.set = function(item, scroll, close, reload, manga_page) {
     if (!item) {
       if (close) this.close();
@@ -2935,42 +2952,52 @@
       this.title.textContent = trim(item.caption.textContent);
       this.title.href = item.medium;
     }
-    var self = this;
-    this.set_status('Loading');
     this.item = Popup.lastitem = item;
     this.init_manga_page = manga_page;
-    this.loader = new Popup.Loader(
-      this.item,
-      function() { self.load(this, scroll); },
-      function(msg) {
-        self.error(msg);
-      },
-      reload);
+
     Popup.onsetitem.emit(this, this.item);
     if (this.conn_g_add_item) {
       this.conn_g_add_item.disconnect();
       this.conn_g_add_item = null;
     }
     if (this.item.gallery) this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
+
+    if (item.limited && item.thumb) {
+      this.load_pre();
+      this.caption.style.display = 'none';
+      this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
+      this.update_olc();
+      Popup.onload.emit(this);
+      if (this.item.prev) this.item.prev.preload();
+      if (this.item.next) this.item.next.preload();
+    } else {
+      var self = this;
+      this.set_status('Loading');
+      this.loader = new Popup.Loader(
+        this.item,
+        function() { self.load(this, scroll); },
+        function(msg) {
+          self.error(msg);
+        },
+        reload);
+    }
   };
 
-  Popup.prototype.load = function(loader, scroll) {
-    var self = this, re;
-    //this.root_div.style.visibility = 'hidden';
-    this.complete();
-
+  Popup.prototype.load_pre = function(scroll) {
     if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
-
-    this.expand_header = false;
-
+    this.complete();
     this.init_comments();
     this.manga.init();
-
     this.caption.style.display = '';
     this.bm_edit.innerHTML = '';
     this.bm_edit.style.display = 'none';
     this.tag_edit.innerHTML = '';
     this.tag_edit.style.display = 'none';
+    this.expand_header = false;
+  };
+  Popup.prototype.load = function(loader, scroll) {
+    var self = this, re;
+    this.load_pre();
 
     if (pp.rpc_usable) {
       var rpc_html = '';
@@ -3745,7 +3772,6 @@
 
     this.item.loaded = true;
 
-    // キャッシュ機能が二重になっちゃってる。
     if (conf.popup.big_image && this.item.img_big) {
       this.image = this.item.img_big;
       this.img_cmp = true;
