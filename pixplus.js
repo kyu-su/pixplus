@@ -3191,6 +3191,7 @@
 
       var anc = $x('./div[@id="rating"]/h4/a', self.rating);
       if (anc && anc.getAttribute('onclick') == 'rating_ef4()') {
+        anc.setAttribute('onclick', '');
         anc.onclick = '';
         anc.addEventListener('click', function(ev) {
           var qr = $x('./div[@id="quality_rating"]', self.rating);
@@ -3609,6 +3610,7 @@
     }
     function trap_delete(del) {
       var url = del.getAttribute('href');
+      del.setAttribute('onclick', '');
       del.onclick = '';
       if (url.match(/^\w/)) url = '/' + url;
       $ev(del).click(bind(function() {
@@ -4052,6 +4054,7 @@
     each([this.tags_illust, this.tags_bookmark], function(group, idx) {
       each(group, function(it) {
         var tag = it.firstChild.nodeValue;
+        it.setAttribute('onclick', '');
         it.onclick = '';
         $ev(it).click(function() {
           window.add_form(tag);
