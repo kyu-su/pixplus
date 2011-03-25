@@ -1050,7 +1050,8 @@
       'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002',
       'pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
       '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4fee\u6b63\u3002',
-      'Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+      'Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f\u306e\u30a4\u30e9\u30b9\u30c8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/02/15', version: '0.5.0', changes: [
@@ -3107,16 +3108,14 @@
       this.res_btn.style.display = '';
     }
 
-    this.bm_btn.style.display = 'none';
-    if ((re = loader.text.match(/<div[^>]+class=\"works_iconsBlock\"[^>]*>([\s\S]*?)<\/div>/i))) {
-      if (re[1].match(/bookmark_detail\.php\?/i)) {
-        this.bm_btn.setAttribute('enable', '');
-      } else {
-        this.bm_btn.removeAttribute('enable');
-      }
-      this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
-      this.bm_btn.style.display = '';
+    if (loader.text.match(/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i)) {
+      this.bm_btn.setAttribute('enable', '');
+    } else {
+      this.bm_btn.removeAttribute('enable');
     }
+    this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
+    this.bm_btn.style.display = '';
+
     this.comment.style.display = 'none';
     if ((re = loader.text.match(/<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i))) {
       if ((this.comment.innerHTML = edit_comment(re[1]))) this.comment.style.display = '';
