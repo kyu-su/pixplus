@@ -2963,7 +2963,7 @@
     if (this.item.gallery) this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
 
     if (item.limited && item.thumb) {
-      this.load_pre();
+      this.load_pre(scroll);
       this.caption.style.display = 'none';
       this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
       this.update_olc();
@@ -2997,7 +2997,7 @@
   };
   Popup.prototype.load = function(loader, scroll) {
     var self = this, re;
-    this.load_pre();
+    this.load_pre(scroll);
 
     if (pp.rpc_usable) {
       var rpc_html = '';
