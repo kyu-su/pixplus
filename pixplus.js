@@ -683,7 +683,7 @@
 
     for(var i = 0; i < ConfigUI.pages.length; ++i) {
       var page = this.make_page(ConfigUI.pages[i].label, ConfigUI.pages[i].id);
-      ConfigUI.pages[i].content.call(this, page);
+      ConfigUI.pages[i].content.call(this, page, {options_page: options_page});
     }
 
     this.show_page(this.pages[0]);
@@ -998,19 +998,20 @@
     }
   }, {
     label: 'About', id: 'about',
-    content: function(page) {
+    content: function(page, args) {
       var urls = [
         'http://crckyl.pa.land.to/pixplus/',
         'http://my.opera.com/crckyl/',
         'http://crckyl.ath.cx:8088/pixplus/'
       ];
+      var prefix = args.options_page ? '' : '/jump.php?';
       var release = ConfigUI.changelog_data[0];
       var html = '<dl>' +
         '<dt>Name</dt><dd>pixplus</dd>' +
         '<dt>Version</dt><dd>' + release.version + ' - ' + release.date + '</dd>' +
         '<dt>URL</dt><dd><ul>';
       for(var i = 0; i < urls.length; ++i) {
-        html += '<li><a href="' + urls[i] + '">' + urls[i] + '</a></li>';
+        html += '<li><a href="' + urls[i] + '" onclick="this.href=&quot;' + prefix + urls[i] + '&quot;">' + urls[i] + '</a></li>';
       }
       html += '</ul></dd>' +
         '<dt>Contact</dt><dd><ul>' +
