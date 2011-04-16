@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.5.1
+// @version     0.5.2
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -202,7 +202,9 @@
       "reverse":              [0, "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b",
                                [{"value": 0, "title": "\u7121\u52b9"},
                                 {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]],
+                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"},
+                                {"value": 1 | (1 << 4), "title": "\u6709\u52b9(\u30a2\u30ed\u30fc\u30ad\u30fc\u4ee5\u5916)"},
+                                {"value": 2 | (1 << 4), "title": "\u6b63\u898f\u8868\u73fe(\u30a2\u30ed\u30fc\u30ad\u30fc\u4ee5\u5916)"}]],
       "reverse_regexp":       ["/(?:bookmark_new_illust|member_illust|mypage)\\.php",
                                "reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"],
       "auto_zoom":            [0, "\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"],
@@ -446,8 +448,8 @@
       each(['auto_manga', 'reverse'], function(key) {
         try {
           if (!conf.popup[key + '_regexp']) throw 1;
-          var v = conf.popup[key], r = new RegExp(conf.popup[key + '_regexp']);
-          conf.popup[key + '_p'] = v & 2 ? !!window.location.href.match(r) : !!(v & 1);
+          var v = conf.popup[key] & 0xf, r = new RegExp(conf.popup[key + '_regexp']);
+          conf.popup[key + '_p'] = v === 2 ? !!window.location.href.match(r) : v === 1;
         } catch(ex) {
           conf.popup[key + '_p'] = false;
         }
@@ -1046,6 +1048,10 @@
   }];
 
   ConfigUI.changelog_data = [{
+    date: '2011/04/xx', version: '0.5.2', changes: [
+      'conf.popup.reverse\u306b\u30a2\u30ed\u30fc\u30ad\u30fc\u3092\u9664\u5916\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002'
+    ]
+  }, {
     date: '2011/03/26', version: '0.5.1', changes: [
       '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002',
@@ -1680,7 +1686,7 @@
         var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
         if (more) {
           if (conn) conn.disconnect();
-          conn = $ev(illusts, true).scroll(function(ev, conn) {
+          conn = $ev(illusts, {async: true}).scroll(function(ev, conn) {
             if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
               send_click(more);
               conn.disconnect();
@@ -1756,7 +1762,7 @@
       if (node) {
         func(node);
       } else {
-        $ev(root, true).listen(['DOMNodeInserted', 'DOMAttrModified'], function(ev, conn) {
+        $ev(root, {async: true}).listen(['DOMNodeInserted', 'DOMAttrModified'], function(ev, conn) {
           node = $x(xpath, root);
           if (node) {
             func(node);
@@ -2418,7 +2424,7 @@
         this.loaded = true;
         new Popup.Loader(
           this,
-          (conf.popup.auto_manga_p && (conf.popup.auto_manga & 4)
+          (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16)
            ? bind(function() {
              new Popup.MangaLoader(this, 0);
            }, this)
@@ -2449,7 +2455,7 @@
     if (this.args.xpath_col) {
       this.detect_new_collection();
       //if (this.page_col == 0) throw 1;
-      $ev(window.document.body, true).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
+      $ev(window.document.body, {async: true}).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
       Gallery.oncreate.emit(this);
     } else {
       throw 1;
@@ -2673,7 +2679,7 @@
       }
       return false;
     }, this));
-    $ev(this.tag_edit, true).listen('DOMNodeInserted', bind(function() {
+    $ev(this.tag_edit, {async: true}).listen('DOMNodeInserted', bind(function() {
       var end = $x('.//input[contains(@onclick, "endTagEdit")]', this.tag_edit);
       if (end) {
         end.setAttribute('onclick', '');
@@ -2696,7 +2702,7 @@
     Popup.instance.locate();
   };
   Popup.set_event_handler = function() {
-    Popup.ev_conn_key = $ev(window).key(Popup._keypress);
+    Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(Popup._keypress);
     window.addEventListener('resize', Popup._locate, false);
   };
   Popup.unset_event_handler = function() {
@@ -2755,8 +2761,8 @@
         map: [
           {k: $ev.KEY_BACKSPACE, f: this.prev, a: [true]},
           {k: $ev.KEY_SPACE,     f: this.next, a: [true]},
-          {k: $ev.KEY_LEFT,      f: this.prev},
-          {k: $ev.KEY_RIGHT,     f: this.next},
+          {k: $ev.KEY_LEFT,      f: this.prev, a: [false, false, conf.popup.reverse & 16]},
+          {k: $ev.KEY_RIGHT,     f: this.next, a: [false, false, conf.popup.reverse & 16]},
           {k: $ev.KEY_UP,        f: this.scroll_caption, a: [-conf.popup.scroll_height]},
           {k: $ev.KEY_DOWN,      f: this.scroll_caption, a: [conf.popup.scroll_height]},
           {k: $ev.KEY_END,       f: this.last},
@@ -2908,7 +2914,7 @@
   Popup.prototype.prev = function(close, loop, no_auto) {
     if (this.manga.usable && this.manga.enabled) {
       var page = this.manga.page - this.manga.page_dec;
-      if (page < 0 && (conf.popup.auto_manga & 4)) {
+      if (page < 0 && (conf.popup.auto_manga & 16)) {
         this.manga.enabled = false;
         this.prev(close, loop);
       } else {
@@ -2926,7 +2932,7 @@
     if (this.manga.usable) {
       if (this.manga.enabled) {
         var page = this.manga.page + this.manga.page_inc;
-        if (page >= this.manga.page_count && (conf.popup.auto_manga & 4)) {
+        if (page >= this.manga.page_count && (conf.popup.auto_manga & 16)) {
           this.manga.enabled = false;
           this.next(close, loop);
         } else {
@@ -3255,7 +3261,7 @@
     if (this.manga.usable && this.init_manga_page >= 0) {
       this.set_manga_mode(true, this.init_manga_page);
       this.init_manga_page = -1;
-    } else if (conf.popup.auto_manga_p && (conf.popup.auto_manga & 4) && this.manga.usable && !this.item.manga.viewed) {
+    } else if (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16) && this.manga.usable && !this.item.manga.viewed) {
       this.set_manga_mode(true);
     } else {
       var url = this.manga.usable ? urlmode(this.item.medium, 'manga') : null;
@@ -4621,7 +4627,8 @@
     if (!this.disconnected) this.signal.disconnect(this.id);
   };
 
-  function $ev(ctx, async) {
+  function $ev(ctx, args) {
+    var opts = args || {};
     var obj = {
       ctx: ctx,
       click: function(func) {
@@ -4680,7 +4687,7 @@
       var timer, ev_last;
       var listener = function(ev) {
         if (conn.disconnected) return;
-        if (async) {
+        if (opts.async) {
           if (timer) {
             ev_last = ev;
           } else {
@@ -4689,7 +4696,7 @@
               if (conn.disconnected) return;
               timer = null;
               func.call(ctx, ev_last, conn);
-            }, typeof async === 'number' ? async : 40);
+            }, typeof opts.async === 'number' ? opts.async : 40);
           }
         } else {
           if (func.call(ctx, ev, conn)) {
@@ -4698,7 +4705,7 @@
           }
         }
       };
-      obj.ctx.addEventListener(name, listener, false);
+      obj.ctx.addEventListener(name, listener, !!opts.capture);
       conn.listeners.push([name, listener]);
       return conn;
     }
