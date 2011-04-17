@@ -241,7 +241,17 @@
       "popup_open_manga_thumbnail": ["Shift+v",         "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"],
       "popup_zoom_in":              ["plus,Shift+plus", "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b"],
       "popup_zoom_out":             ["-,Shift+-",       "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b"],
-      "popup_help":                 ["?,Shift+?",       "\u30d8\u30eb\u30d7\u3092\u8868\u793a"]
+      "popup_help":                 ["?,Shift+?",       "\u30d8\u30eb\u30d7\u3092\u8868\u793a"],
+      "popup_rate01":               ["Shift+0,Shift+~", ""],
+      "popup_rate02":               ["Shift+9,Shift+)", ""],
+      "popup_rate03":               ["Shift+8,Shift+(", ""],
+      "popup_rate04":               ["Shift+7,Shift+'", ""],
+      "popup_rate05":               ["Shift+6,Shift+&", ""],
+      "popup_rate06":               ["Shift+5,Shift+%", ""],
+      "popup_rate07":               ["Shift+4,Shift+$", ""],
+      "popup_rate08":               ["Shift+3,Shift+#", ""],
+      "popup_rate09":               ["Shift+2,Shift+\"", ""],
+      "popup_rate10":               ["Shift+1,Shift+!", ""],
     },
     "bookmark": {
       "tag_order": ["", ""],
@@ -2771,17 +2781,11 @@
         return true;
       }
     } else {
-      if (conf.popup.rate && conf.popup.rate_key && ev.shiftKey && key.length === 1) {
-        var score = '1234567890!"#$%&\'()~'.indexOf(key);
-        if (score >= 0) {
-          window.countup_rating(10 - (score % 10));
-          return true;
-        }
-      }
       var m = {Shift: ev.shiftKey, Ctrl: ev.ctrlKey, Alt: ev.altKey, Meta: ev.metaKey};
       var pressed = [({'+':'plus',',':'comma'})[key] || key];
       for(var k in m) m[k] && pressed.push(k);
-      pressed = pressed.sort().join('\n');
+      pressed = pressed.sort().join('+');
+      log('key: ' + pressed);
       return (function() {
         for(var i = 0; i < arguments.length; ++i) {
           var map = arguments[i];
@@ -2790,10 +2794,10 @@
             var entry = map.map[j], match = false;
             if (!entry.k) continue;
             each(entry.k.split(','), function(trigger) {
-              return (match = (trigger.split('+').sort().join('\n') === pressed));
+              return (match = (trigger.split('+').sort().join('+') === pressed));
             });
             if (match) {
-              entry.f.apply(this, entry.a || []);
+              entry.f.apply(entry.ctx || this, entry.a || []);
               return true;
             }
           }
@@ -2805,6 +2809,20 @@
           {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
           {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
           {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
+        ]
+      }, {
+        run: conf.popup.rate && conf.popup.rate_key,
+        map: [
+          {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
+          {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
+          {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
+          {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
+          {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
+          {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
+          {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
+          {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
+          {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
+          {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
         ]
       }, {
         run: true,
@@ -2835,7 +2853,7 @@
           {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
           {k: conf.key.popup_zoom_in,              f: zoom, a: [1]},
           {k: conf.key.popup_zoom_out,             f: zoom, a: [-1]},
-          {k: conf.key.popup_help,                 f: show_help}
+          {k: conf.key.popup_help,                 f: show_help},
         ]
       });
     }
@@ -4685,7 +4703,7 @@
             if (browser.webkit) return false;
             key = $ev.key_map[c];
           } else {
-            key = c;
+            key = String(c);
           }
           return func.call(this, ev, key, conn);
         });
