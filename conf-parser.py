@@ -1,7 +1,9 @@
 import sys
 import json
+from xml.sax.saxutils import escape
+from xml.sax.saxutils import quoteattr
 
-format = '  <preference name="%(name)s" value="%(value)s" />'
+format = '  <preference name="%(name)s" value=%(value)s />'
 if sys.argv[1] == 'safari':
   format = '''    <dict>
       <key>Title</key>
@@ -15,60 +17,56 @@ if sys.argv[1] == 'safari':
     </dict>'''
 elif sys.argv[1] == 'firefox':
   format = 'pref("extensions.pixplus.%(name)s", %(value_firefox)s);'
+  pass
 
-def print_conf(conf, prefix):
-  for key in sorted(conf.keys()):
-    name = '%s_%s' % (prefix, key)
-    if isinstance(conf[key], dict):
-      print_conf(conf[key], name)
-    else:
-      value = conf[key][0]
-      #if isinstance(value, unicode): value = value.replace("\n", '&#10;&#13;')
+def print_conf(conf):
+  for sec in conf:
+    for item in sec['items']:
+      # for compatibility
+      if sec['name'] == 'general':
+        name = 'conf_%s' % item['key']
+      else:
+        name = 'conf_%s_%s' % (sec['name'], item['key'])
+        pass
+
+      value = item['value']
       type_safari = 'TextField'
-      value_safari = '<string>%s</string>' % value
+      value_safari = '<string>%s</string>' % escape(str(value))
       value_firefox = json.dumps(value)
       more = ''
-      if len(conf[key]) > 2:
+      if item.has_key('hint'):
         type_safari = 'PopUpButton'
         more = '''
       <key>Titles</key>
       <array>'''
-        for entry in conf[key][2]:
-          if isinstance(entry, dict):
-            more += '\n        <string>%s</string>' % entry['title']
-          else:
-            more += '\n        <string>%s</string>' % entry
-            pass
+        for hint in item['hint']:
+          more += '\n        <string>%s</string>' % hint['title']
           pass
         more += '\n      </array>'
         more += '''
       <key>Values</key>
       <array>'''
-        for entry in conf[key][2]:
-          if isinstance(entry, dict):
-            more += '\n        <string>%s</string>' % str(entry['value'])
-          else:
-            more += '\n        <string>%s</string>' % entry
-            pass
+        for hint in item['hint']:
+          more += '\n        <string>%s</string>' % str(hint['value'])
           pass
         more += '\n      </array>'
       elif isinstance(value, bool):
+        type_safari = 'CheckBox'
         if value:
           value = 'true'
         else:
           value = 'false'
           pass
-        type_safari = 'CheckBox'
         value_safari = '<%s/>' % value
         pass
       if isinstance(value, int) or isinstance(value, float):
         value_firefox = '"%s"' % value
         pass
       print (format % {'name':          name,
-                       'value':         value,
+                       'value':         quoteattr(str(value)),
                        'type_safari':   type_safari,
                        'value_safari':  value_safari,
                        'value_firefox': value_firefox,
                        'more':          more}).encode('utf-8')
 
-print_conf(json.loads(sys.stdin.read()), 'conf')
+print_conf(json.loads(sys.stdin.read()))

@@ -101,16 +101,16 @@ endif
 all: $(ALL_TARGETS)
 
 $(CONFIG_JSON): $(SRC_USERJS)
-	echo '{' > $@
+	echo '[' > $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	echo '}' >> $@
+	echo ']' >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
 	echo '// auto generated code' > $@
-	echo 'var conf_schema = {' >> $@
+	echo 'var conf_schema = [' >> $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
-	echo '};' >> $@
-	echo 'var conf = {' >> $@
+	echo '];' >> $@
+	echo 'var LS = {' >> $@
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
             -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
             -e '/__REMOVE__/d' \

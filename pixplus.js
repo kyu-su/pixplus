@@ -148,128 +148,127 @@
     });
    }
 })(function(window, safeWindow, _extension_data) {
-  var conf_schema = {
+  var conf_schema = [
     /* __CONFIG_BEGIN__ */
-    "debug":                  [false, "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"],
-    "scroll":                 [1, "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b",
-                               [{"value": 0, "title": "\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"},
-                                {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
-                                {"value": 2, "title": "\u30a4\u30e9\u30b9\u30c8"}]],
-    "bookmark_hide":          [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"],
-    "float_tag_list":         [2, "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
-    "locate_recommend_right": [2, "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]],
-    "bookmark_form":          [1, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u30a2\u30ed\u30fc\u30ad\u30fc"},
-                                {"value": 2, "title": "\u30a2\u30eb\u30d5\u30a1\u30d9\u30c3\u30c8"}]],
-    "mod_bookmark_add_page":  [false, "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"],
-    "tag_separator_style":    ["border-top:2px solid #dae1e7;", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"],
-    "stacc_link":             ["", "\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148",
-                               [{"value": "",         "title": "\u5909\u66f4\u3057\u306a\u3044"},
-                                {"value": "all",      "title": "\u3059\u3079\u3066"},
-                                {"value": "favorite", "title": "\u304a\u6c17\u306b\u5165\u308a"},
-                                {"value": "mypixiv",  "title": "\u30de\u30a4\u30d4\u30af"},
-                                {"value": "self",     "title": "\u3042\u306a\u305f"}]],
-    "rate_confirm":           [true, "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"],
-    "disable_effect":         [false, "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"],
-    "workaround":             [false, "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"],
-    "fast_user_bookmark":     [0, "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
-                                {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]],
-    "popup_ranking_log":      [true, "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"],
-    "popup": {
-      "preload":              [true, "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"],
-      "big_image":            [false, "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"],
-      "caption_height":       [0.4, "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055"],
-      "caption_opacity":      [0.9, "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6"],
-      "remove_pixpedia":      [false, "\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b"],
-      "rate":                 [true, "\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"],
-      "rate_key":             [false, "\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b"],
-      "font_size":            ["", "\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(e.g. 10px)"],
-      "auto_manga":           [0, "\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]],
-      "auto_manga_regexp":    ["/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php",
-                               "auto_manga\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"],
-      "reverse":              [0, "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b",
-                               [{"value": 0, "title": "\u7121\u52b9"},
-                                {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]],
-      "reverse_regexp":       ["/(?:bookmark_new_illust|member_illust|mypage)\\.php",
-                               "reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"],
-      "auto_zoom":            [0, "\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"],
-      "auto_zoom_size":       [800, "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u30b5\u30a4\u30ba\u4e0a\u9650"],
-      "auto_zoom_scale":      [4, "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650"],
-      "overlay_control":      [0.3, "\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)"],
-      "scroll_height":        [32, "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055"],
-      "author_status_icon":   [true, "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)"],
-      "show_comment_form":    [true, "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"],
-      "manga_spread":         [true, "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"]
-    },
-    "key": {
-      "popup_caption_scroll_up":    ["Up",              "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"],
-      "popup_caption_scroll_down":  ["Down",            "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"],
-      "popup_prev":                 ["Backspace,a",     "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
-      "popup_prev_direction":       ["Left",            "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"],
-      "popup_next":                 ["Space",           "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
-      "popup_next_direction":       ["Right",           "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"],
-      "popup_first":                ["Home",            "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
-      "popup_last":                 ["End",             "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
-      "popup_close":                ["Escape",          "\u9589\u3058\u308b"],
-      "popup_open_profile":         ["e",               "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"],
-      "popup_open_illust":          ["r",               "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"],
-      "popup_open_bookmark":        ["t",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"],
-      "popup_open_staccfeed":       ["y",               "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"],
-      "popup_open_response":        ["Shift+r",         "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"],
-      "popup_bookmark_start":       ["b",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"],
-      "popup_bookmark_end":         ["Escape",          ""],
-      "popup_bookmark_submit":      ["Enter,Space",     ""],
-      "popup_open_bookmark_detail": ["Shift+b",         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"],
-      "popup_qrate_start":          ["d",               "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"],
-      "popup_qrate_end":            ["Escape,d",        ""],
-      "popup_qrate_select_prev":    ["Up",              ""],
-      "popup_qrate_select_next":    ["Down",            ""],
-      "popup_tag_edit_start":       ["",                ""],
-      "popup_tag_edit_end":         ["Escape",          ""],
-      "popup_open":                 ["Shift+f",         "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"],
-      "popup_open_big":             ["f",               "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"],
-      "popup_reload":               ["g",               "\u30ea\u30ed\u30fc\u30c9"],
-      "popup_caption_toggle":       ["c",               "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"],
-      "popup_comment_toggle":       ["Shift+c",         "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"],
-      "popup_manga_start":          ["v",               "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
-      "popup_manga_end":            ["v,Escape",        "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
-      "popup_open_manga_thumbnail": ["Shift+v",         "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"],
-      "popup_zoom_in":              ["plus,Shift+plus", "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b"],
-      "popup_zoom_out":             ["-,Shift+-",       "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b"],
-      "popup_help":                 ["?,Shift+?",       "\u30d8\u30eb\u30d7\u3092\u8868\u793a"],
-      "popup_rate01":               ["Shift+0,Shift+~", ""],
-      "popup_rate02":               ["Shift+9,Shift+)", ""],
-      "popup_rate03":               ["Shift+8,Shift+(", ""],
-      "popup_rate04":               ["Shift+7,Shift+'", ""],
-      "popup_rate05":               ["Shift+6,Shift+&", ""],
-      "popup_rate06":               ["Shift+5,Shift+%", ""],
-      "popup_rate07":               ["Shift+4,Shift+$", ""],
-      "popup_rate08":               ["Shift+3,Shift+#", ""],
-      "popup_rate09":               ["Shift+2,Shift+\"", ""],
-      "popup_rate10":               ["Shift+1,Shift+!", ""],
-    },
-    "bookmark": {
-      "tag_order": ["", ""],
-      "tag_aliases": ["", ""]
-    }
+    {"name": "general", "label": "General", "items": [
+      {"key": "debug", "value": false, "desc": "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"},
+      {"key": "scroll", "value": 1, "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b",
+       "hint": [{"value": 0, "title": "\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"},
+                {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
+                {"value": 2, "title": "\u30a4\u30e9\u30b9\u30c8"}]},
+      {"key": "bookmark_hide", "value": false, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"},
+      {"key": "float_tag_list", "value": 2, "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u6709\u52b9"},
+                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]},
+      {"key": "locate_recommend_right", "value": 2, "desc": "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u6709\u52b9"},
+                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]},
+      {"key": "bookmark_form", "value": 1, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u30a2\u30ed\u30fc\u30ad\u30fc"},
+                {"value": 2, "title": "\u30a2\u30eb\u30d5\u30a1\u30d9\u30c3\u30c8"}]},
+      {"key": "mod_bookmark_add_page", "value": false, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"},
+      {"key": "tag_separator_style", "value": "border-top:2px solid #dae1e7;", "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"},
+      {"key": "stacc_link", "value": "", "desc": "\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148",
+       "hint": [{"value": "",         "title": "\u5909\u66f4\u3057\u306a\u3044"},
+                {"value": "all",      "title": "\u3059\u3079\u3066"},
+                {"value": "favorite", "title": "\u304a\u6c17\u306b\u5165\u308a"},
+                {"value": "mypixiv",  "title": "\u30de\u30a4\u30d4\u30af"},
+                {"value": "self",     "title": "\u3042\u306a\u305f"}]},
+      {"key": "rate_confirm", "value": true, "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"},
+      {"key": "disable_effect", "value": false, "desc": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"},
+      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"},
+      {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
+                {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]},
+      {"key": "popup_ranking_log", "value": true, "desc": "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"}
+    ]},
+    {"name": "popup", "label": "Popup", "items": [
+      {"key": "preload", "value": true, "desc": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"},
+      {"key": "big_image", "value": false, "desc": "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"},
+      {"key": "caption_height", "value": 0.4, "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055"},
+      {"key": "caption_opacity", "value": 0.9, "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6"},
+      {"key": "remove_pixpedia", "value": false, "desc": "\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b"},
+      {"key": "rate", "value": true, "desc": "\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
+      {"key": "rate_key", "value": false, "desc": "\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b"},
+      {"key": "font_size", "value": "", "desc": "\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(e.g. 10px)"},
+      {"key": "auto_manga", "value": 0, "desc": "\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u6709\u52b9"},
+                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]},
+      {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php",
+       "desc": "auto_manga\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"},
+      {"key": "reverse", "value": 0, "desc": "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b",
+       "hint": [{"value": 0, "title": "\u7121\u52b9"},
+                {"value": 1, "title": "\u6709\u52b9"},
+                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]},
+      {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php", "desc": "reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"},
+      {"key": "auto_zoom", "value": 0, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"},
+      {"key": "auto_zoom_size", "value": 800, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u30b5\u30a4\u30ba\u4e0a\u9650"},
+      {"key": "auto_zoom_scale", "value": 4, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650"},
+      {"key": "overlay_control", "value": 0.3, "desc": "\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)"},
+      {"key": "scroll_height", "value": 32, "desc": "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055"},
+      {"key": "author_status_icon", "value": true, "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)"},
+      {"key": "show_comment_form", "value": true, "desc": "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"},
+      {"key": "manga_spread", "value": true, "desc": "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"}
+    ]},
+    {"name": "key", "label": "Key", "items": [
+      {"key": "popup_caption_scroll_up", "value": "Up", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
+      {"key": "popup_caption_scroll_down", "value": "Down", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
+      {"key": "popup_prev", "value": "Backspace,a", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+      {"key": "popup_prev_direction", "value": "Left", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
+      {"key": "popup_next", "value": "Space", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+      {"key": "popup_next_direction", "value": "Right", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
+      {"key": "popup_first", "value": "Home", "desc": "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+      {"key": "popup_last", "value": "End", "desc": "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
+      {"key": "popup_close", "value": "Escape", "desc": "\u9589\u3058\u308b"},
+      {"key": "popup_open_profile", "value": "e", "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"},
+      {"key": "popup_open_illust", "value": "r", "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"},
+      {"key": "popup_open_bookmark", "value": "t", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"},
+      {"key": "popup_open_staccfeed", "value": "y", "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
+      {"key": "popup_open_response", "value": "Shift+r", "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
+      {"key": "popup_bookmark_start", "value": "b", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
+      {"key": "popup_bookmark_end", "value": "Escape", "desc": ""},
+      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": ""},
+      {"key": "popup_open_bookmark_detail", "value": "Shift+b", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+      {"key": "popup_qrate_start", "value": "d", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"},
+      {"key": "popup_qrate_end", "value": "Escape,d", "desc": ""},
+      {"key": "popup_qrate_select_prev", "value": "Up", "desc": ""},
+      {"key": "popup_qrate_select_next", "value": "Down", "desc": ""},
+      {"key": "popup_tag_edit_start", "value": "", "desc": ""},
+      {"key": "popup_tag_edit_end", "value": "Escape", "desc": ""},
+      {"key": "popup_open", "value": "Shift+f", "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+      {"key": "popup_open_big", "value": "f", "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"},
+      {"key": "popup_reload", "value": "g", "desc": "\u30ea\u30ed\u30fc\u30c9"},
+      {"key": "popup_caption_toggle", "value": "c", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"},
+      {"key": "popup_comment_toggle", "value": "Shift+c", "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"},
+      {"key": "popup_manga_start", "value": "v", "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
+      {"key": "popup_manga_end", "value": "v,Escape", "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
+      {"key": "popup_open_manga_thumbnail", "value": "Shift+v", "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
+      {"key": "popup_zoom_in", "value": "plus,Shift+plus", "desc": "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b"},
+      {"key": "popup_zoom_out", "value": "-,Shift+-", "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b"},
+      {"key": "popup_help", "value": "?,Shift+?", "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"},
+      {"key": "popup_rate01", "value": "Shift+0,Shift+~", "desc": ""},
+      {"key": "popup_rate02", "value": "Shift+9,Shift+)", "desc": ""},
+      {"key": "popup_rate03", "value": "Shift+8,Shift+(", "desc": ""},
+      {"key": "popup_rate04", "value": "Shift+7,Shift+'", "desc": ""},
+      {"key": "popup_rate05", "value": "Shift+6,Shift+&", "desc": ""},
+      {"key": "popup_rate06", "value": "Shift+5,Shift+%", "desc": ""},
+      {"key": "popup_rate07", "value": "Shift+4,Shift+$", "desc": ""},
+      {"key": "popup_rate08", "value": "Shift+3,Shift+#", "desc": ""},
+      {"key": "popup_rate09", "value": "Shift+2,Shift+\"", "desc": ""},
+      {"key": "popup_rate10", "value": "Shift+1,Shift+!", "desc": ""}
+    ]},
+    {"name": "bookmark", "label": "Bookmark", "items": [
+      {"key": "tag_order", "value": "", "desc": ""},
+      {"key": "tag_aliases", "value": "", "desc": ""}
+    ]}
     /* __CONFIG_END__ */
-  };
+  ];
   var conf = {
-    popup: { },
-    key: { },
     bm_tag_order: [ ],
     bm_tag_aliases: { }
   };
@@ -348,15 +347,12 @@
       ]
     }
   };
-  if (window.pixplus || (window.opera && window.opera.pixplus)) {
+  if (window.pixplus || (window.opera && window.opera.pixplus)) { // for compatibility
     //window.opera.postError('pixplus is already loaded');
     return;
   }
-  if (window.opera) {
-    window.opera.pixplus = pp;
-  } else {
-    window.pixplus = pp;
-  }
+  window.pixplus = pp;
+  if (window.opera) window.opera.pixplus = pp; // for compatibility
   function rpc_chk(f) {
     return (pp.rpc_state & f) === f;
   }
@@ -371,35 +367,7 @@
   var LS = {
     /* __STORAGE_COMMON_ENTRIES_BEGIN__ */
     u: false, // usable or not
-    l: [{
-      name:   'general',
-      label:  'General',
-      path:   ['conf'],
-      schema: conf_schema,
-      conf:   conf, /* __REMOVE__ */
-      keys:   []
-    }, {
-      name:   'popup',
-      label:  'Popup',
-      path:   ['conf', 'popup'],
-      schema: conf_schema.popup,
-      conf:   conf.popup, /* __REMOVE__ */
-      keys:   []
-    }, {
-      name:   'key',
-      label:  'Key',
-      path:   ['conf', 'key'],
-      schema: conf_schema.key,
-      conf:   conf.key, /* __REMOVE__ */
-      keys:   []
-    }, {
-      name:   'bookmark',
-      label:  'Bookmark',
-      path:   ['conf', 'bookmark'],
-      schema: conf_schema.bookmark,
-      keys:   []
-    }],
-    map: {},
+    map: { },
     conv: {
       'string':  [String, String],
       'boolean': [function(s) { return s === 'true'; },
@@ -410,27 +378,25 @@
       }, String]
     },
     init_map: function() {
-      for(var i = 0; i < this.l.length; ++i) {
-        var sec = this.l[i];
-        this.map[sec.name] = sec;
-        for(var key in sec.schema) {
-          this.conv[typeof sec.schema[key][0]] && sec.keys.push(key);
-        }
-        sec.keys.sort();
-      }
+      conf_schema.forEach(function(sec) {
+        var map = { };
+        sec.items.forEach(function(item) {
+          map[item.key] = item;
+        });
+        LS.map[sec.name] = {schema: sec, map: map};
+      });
     },
     get_conv: function(s, n) {
-      return this.map[s] ? this.conv[typeof this.map[s].schema[n][0]] : this.conv['string'];
+      return LS.conv[typeof LS.map[s].map[n].value];
     },
-    each: function(cb_key, cb_sec, cb_sec_after) {
-      for(var i = 0; i < this.l.length; ++i) {
-        var sec = this.l[i];
-        if (cb_sec && cb_sec(sec)) continue;
-        for(var j = 0; j < sec.keys.length; ++j) {
-          cb_key(sec, sec.keys[j]);
-        }
+    each: function(cb_item, cb_sec, cb_sec_after) {
+      conf_schema.forEach(function(sec) {
+        if (cb_sec && cb_sec(sec)) return;
+        sec.items.forEach(function(item) {
+          cb_item(item, sec);
+        });
         if (cb_sec_after) cb_sec_after(sec);
-      }
+      });
     },
     parse_bm_tag_order: function(str) {
       var ary = [], ary_ary = [], lines = str.split('\n');
@@ -482,18 +448,18 @@
       return str;
     }
     /* __STORAGE_COMMON_ENTRIES_END__ */,
-    init_section: function(sec) {
-      each(sec.keys, function(key) {
-        sec.conf[key] = sec.schema[key][0];
-        if (LS.u) {
-          var v = LS.get(sec.name, key);
-          if (typeof v !== 'undefined' && v !== null) sec.conf[key] = v;
-        }
-      });
-    },
     init: function() {
-      each(LS.l, function(sec) {
-        if (sec.name !== 'bookmark') LS.init_section(sec);
+      conf_schema.forEach(function(sec) {
+        if (sec.name === 'bookmark') return;
+        var obj = sec.name === 'general' ? conf : conf[sec.name] = { }; // for compatibility
+        LS.map[sec.name].conf = obj;
+        sec.items.forEach(function(item) {
+          obj[item.key] = item.value;
+          if (LS.u) {
+            var v = LS.get(sec.name, item.key);
+            if (typeof v !== 'undefined' && v !== null) obj[item.key] = v;
+          }
+        });
       });
       if (LS.u) {
         var order = LS.get('bookmark', 'tag_order');
@@ -584,7 +550,7 @@
       LS.get = function(s, n) {
         var value = window.localStorage.getItem(create_name(s, n));
         return (typeof value === 'undefined' || value === null
-                ? (LS.map[s] ? LS.map[s].schema[n][0] : '')
+                ? LS.map[s].map[n].value
                 : LS.get_conv(s, n)[0](value));
       };
       LS.set = function(s, n, v) {
@@ -642,9 +608,8 @@
   var defineMagicFunction = wrap_global;
 
   /* __CONFIG_UI_BEGIN__ */
-  function ConfigUI(root, st, options_page, msg_filter) {
+  function ConfigUI(root, options_page, msg_filter) {
     this.root = root;
-    this.st = st;
     this.options_page = options_page;
     this.msg_filter = msg_filter || function(s) { return s; };
 
@@ -659,75 +624,67 @@
     this.input_table = (function(self) {
       var input_table = { };
       var idx, table;
-      st.each(function(sec, key) {
-        var value = options_page ? st.get(sec.name, key) : sec.conf[key];
-        var type = typeof sec.schema[key][0];
+      LS.each(function(item, sec) {
+        var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
+        var type = typeof item.value;
         var row = table.insertRow(-1), cell = row.insertCell(-1), input;
         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
-        if (sec.schema[key][2]) {
+        if (item.hint) {
           input = window.document.createElement('select');
-          for(var i = 0; i < sec.schema[key][2].length; ++i) {
-            var entry = sec.schema[key][2][i];
+          item.hint.forEach(function(hint) {
             var opt = window.document.createElement('option');
-            if (typeof entry === 'string') {
-              opt.value = entry;
-              opt.textContent = self.msg_filter(entry);
-            } else {
-              opt.value = entry.value;
-              opt.textContent = self.msg_filter(entry.title);
-            }
+            opt.value = hint.value;
+            opt.textContent = self.msg_filter(hint.title);
             input.appendChild(opt);
-          }
+          });
         } else {
           input = window.document.createElement('input');
         }
-        input.id = 'pp-conf-' + sec.name + '-' + key;
+        input.id = 'pp-conf-' + sec.name + '-' + item.key;
         if (type === 'boolean') {
           input.setAttribute('type', 'checkbox');
           input.checked = value;
 
           var label = window.document.createElement('label');
           label.appendChild(input);
-          label.appendChild(window.document.createTextNode(key));
+          label.appendChild(window.document.createTextNode(item.key));
 
           cell.appendChild(label);
           cell.setAttribute('colspan', '2');
         } else {
-          cell.textContent = key;
+          cell.textContent = item.key;
           input.value = value;
           cell = row.insertCell(-1);
           cell.className = 'pp-conf-cell-value';
           cell.appendChild(input);
         }
-        input_table[sec.name + '_' + key] = input;
+        input_table[sec.name + '_' + item.key] = input;
 
         var def = window.document.createElement('button');
         def.textContent = 'Default';
         def.addEventListener('click', function() {
           if (type === 'boolean') {
-            input.checked = sec.schema[key][0];
+            input.checked = item.value;
           } else {
-            input.value = sec.schema[key][0];
+            input.value = item.value;
           }
-          if (self.st.u) self.st.remove(sec.name, key, value);
+          if (LS.u) LS.remove(sec.name, item.key);
           self.update_export();
         }, false);
         row.insertCell(-1).appendChild(def);
-        row.insertCell(-1).textContent = self.msg_filter(sec.schema[key][1]);
+        row.insertCell(-1).textContent = self.msg_filter(item.desc);
 
-        input.addEventListener(
-          sec.schema[key][2] || type === 'boolean' ? 'change' : 'keyup',
-          function() {
-            var value;
-            if (type === 'boolean') {
-              value = input.checked;
-            } else {
-              value = self.st.conv[type][0](input.value);
-            }
-            if (self.st.u) self.st.set(sec.name, key, value);
-            if (!options_page) sec.conf[key] = value;
-            self.update_export();
-          }, false);
+        input.addEventListener(item.hint || type === 'boolean' ? 'change' : 'keyup', function() {
+          var value;
+          if (type === 'boolean') {
+            value = input.checked;
+          } else {
+            value = LS.conv[type][0](input.value);
+          }
+          if (LS.u) LS.set(sec.name, item.key, value);
+          if (!options_page) LS.map[sec.name].conf[item.key] = value;
+          self.update_export();
+        }, false);
 
         ++idx;
       }, function(sec) {
@@ -783,150 +740,152 @@
     }
   };
 
-  ConfigUI.prototype.create_description = function(msg) {
-    var div = window.document.createElement('div');
-    div.innerHTML = this.msg_filter(msg);
-    return div;
-  };
-  ConfigUI.prototype.make_page = function(text, id) {
-    var page = {
-      label:   window.document.createElement('a'),
-      li:      window.document.createElement('li'),
-      content: window.document.createElement('section')
-    };
-    page.label.href = '#pp-conf-' + id;
-    page.label.textContent = text;
-    page.li.appendChild(page.label);
-    this.page_list.appendChild(page.li);
-
-    page.content.id = 'pp-conf-' + id;
-    this.pager.appendChild(page.content);
-
-    page.label.addEventListener('click', (function(obj) {
-      return function(ev) {
-        ev.preventDefault();
-        obj.show_page(page);
+  ConfigUI.prototype = {
+    create_description: function(msg) {
+      var div = window.document.createElement('div');
+      div.innerHTML = this.msg_filter(msg);
+      return div;
+    },
+    make_page: function(text, id) {
+      var page = {
+        label:   window.document.createElement('a'),
+        li:      window.document.createElement('li'),
+        content: window.document.createElement('section')
       };
-    })(this), false);
+      page.label.href = '#pp-conf-' + id;
+      page.label.textContent = text;
+      page.li.appendChild(page.label);
+      this.page_list.appendChild(page.li);
 
-    this.pages.push(page);
-    return page;
-  };
-  ConfigUI.prototype.show_page = function(page) {
-    if (this.selected_page) {
-      this.selected_page.li.className = '';
-      this.selected_page.content.className = '';
-    }
-    page.li.className = 'select';
-    page.content.className = 'select';
-    this.selected_page = page;
-  };
+      page.content.id = 'pp-conf-' + id;
+      this.pager.appendChild(page.content);
 
-  ConfigUI.prototype.get_tag_alias_str = function() {
-    var tag_aliases = '';
-    for(var i = 0; i < this.tag_alias_table.rows.length; ++i) {
-      var row = this.tag_alias_table.rows[i];
-      var inputs = row.getElementsByTagName('input');
-      var key = inputs[0].value;
-      var val = inputs[1].value;
-      if (key && val) tag_aliases += key + '\n' + val + '\n';
-    }
-    return tag_aliases;
-  };
+      page.label.addEventListener('click', (function(obj) {
+        return function(ev) {
+          ev.preventDefault();
+          obj.show_page(page);
+        };
+      })(this), false);
 
-  ConfigUI.prototype.update_export = function() {
-  };
-  ConfigUI.prototype.export_export = function() {
-    var obj = { }, self = this;
-    this.st.each(function(sec, key) {
-      var input = self.input_table[sec.name + '_' + key], val;
-      if (!input) return;
-      val = (typeof sec.schema[key][0] === 'boolean'
-             ? input.checked
-             : self.st.get_conv(sec.name, key)[0](input.value));
-      if (val !== sec.schema[key][0]) obj[sec.name + '_' + key] = val;
-    });
-    obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
-    obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
-    this.export_input.value = ConfigUI.stringify(obj);
-  };
-  ConfigUI.prototype.export_import = function() {
-    var obj = window.JSON.parse(this.export_input.value), self = this;
-    this.st.each(function(sec, key) {
-      if (sec.name === 'bookmark') return;
-      var val = obj[sec.name + '_' + key];
-      if (typeof val !== 'undefined' && val !== null) {
-        self.st.set(sec.name, key, val);
+      this.pages.push(page);
+      return page;
+    },
+    show_page: function(page) {
+      if (this.selected_page) {
+        this.selected_page.li.className = '';
+        this.selected_page.content.className = '';
       }
-    });
-    if (obj['bookmark_tag_order']) this.st.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
-    if (obj['bookmark_tag_aliases']) this.st.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
-    window.location.reload();
-  };
+      page.li.className = 'select';
+      page.content.className = 'select';
+      this.selected_page = page;
+    },
 
-  ConfigUI.prototype.generate_js = function(new_line, indent_level) {
-    var js = ['var pp=window.opera?window.opera.pixplus:window.pixplus;'];
-    var order = this.st.parse_bm_tag_order(this.tag_order_textarea.value);
-    var alias = this.st.parse_bm_tag_aliases(this.get_tag_alias_str());
-    var indent = 0, self = this;
-    if (!indent_level) indent_level = 0;
-
-    function push(str) {
-      var sp = '';
-      for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
-      js.push(sp + str);
-    }
-
-    this.st.each(function(sec, key) {
-      if (sec.name === 'bookmark') return;
-      var input = self.input_table[sec.name + '_' + key], val;
-      if (typeof sec.schema[key][0] === 'boolean') {
-        val = input.checked;
-      } else {
-        val = self.st.get_conv(sec.name, key)[0](input.value);
+    get_tag_alias_str: function() {
+      var tag_aliases = '';
+      for(var i = 0; i < this.tag_alias_table.rows.length; ++i) {
+        var row = this.tag_alias_table.rows[i];
+        var inputs = row.getElementsByTagName('input');
+        var key = inputs[0].value;
+        var val = inputs[1].value;
+        if (key && val) tag_aliases += key + '\n' + val + '\n';
       }
-      if (val !== sec.schema[key][0]) {
-        push('pp.' + sec.path.join('.') + '.' + key + '=' + ConfigUI.stringify(val) + ';');
+      return tag_aliases;
+    },
+
+    update_export: function() {
+    },
+    export_export: function() {
+      var obj = { }, self = this;
+      LS.each(function(item, sec) {
+        var input = self.input_table[sec.name + '_' + item.key], val;
+        if (!input) return;
+        val = (typeof item.value === 'boolean'
+               ? input.checked
+               : LS.get_conv(sec.name, item.key)[0](input.value));
+        if (val !== item.value) obj[sec.name + '_' + item.key] = val;
+      });
+      obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
+      obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
+      this.export_input.value = ConfigUI.stringify(obj);
+    },
+    export_import: function() {
+      var obj = window.JSON.parse(this.export_input.value);
+      LS.each(function(item, sec) {
+        if (sec.name === 'bookmark') return;
+        var val = obj[sec.name + '_' + item.key];
+        if (typeof val !== 'undefined' && val !== null) {
+          LS.set(sec.name, item.key, val);
+        }
+      });
+      if (obj['bookmark_tag_order']) LS.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+      if (obj['bookmark_tag_aliases']) LS.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+      window.location.reload();
+    },
+
+    generate_js: function(new_line, indent_level) {
+      var js = [];
+      var order = LS.parse_bm_tag_order(this.tag_order_textarea.value);
+      var alias = LS.parse_bm_tag_aliases(this.get_tag_alias_str());
+      var indent = 0, self = this;
+      if (!indent_level) indent_level = 0;
+
+      function push(str) {
+        var sp = '';
+        for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
+        js.push(sp + str);
       }
-    });
-    if (order.length) {
-      push('pp.conf.bm_tag_order=[');
-      ++indent;
-      for(var i = 0; i < order.length; ++i) {
-        var ary = order[i];
-        push('[');
+
+      this.st.each(function(sec, key) {
+        if (sec.name === 'bookmark') return;
+        var input = self.input_table[sec.name + '_' + key], val;
+        if (typeof sec.schema[key][0] === 'boolean') {
+          val = input.checked;
+        } else {
+          val = self.st.get_conv(sec.name, key)[0](input.value);
+        }
+        if (val !== sec.schema[key][0]) {
+          push('window.pixplus.' + sec.path.join('.') + '.' + key + '=' + ConfigUI.stringify(val) + ';');
+        }
+      });
+      if (order.length) {
+        push('window.pixplus.conf.bm_tag_order=[');
         ++indent;
-        for(var j = 0; j < ary.length; ++j) {
-          var tag = ary[j];
-          push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
+        for(var i = 0; i < order.length; ++i) {
+          var ary = order[i];
+          push('[');
+          ++indent;
+          for(var j = 0; j < ary.length; ++j) {
+            var tag = ary[j];
+            push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
+          }
+          --indent;
+          push('],');
+        }
+        --indent;
+        push('];');
+      }
+      var alias_f = true;
+      for(var key in alias) {
+        if (alias_f) {
+          push('window.pixplus.conf.bm_tag_aliases={');
+          alias_f = false;
+          ++indent;
+        }
+        push(ConfigUI.stringify(key) + ':[');
+        ++indent;
+        for(var j = 0; j < alias[key].length; ++j) {
+          var tag = alias[key][j];
+          push(ConfigUI.stringify(tag) + ',');
         }
         --indent;
         push('],');
       }
-      --indent;
-      push('];');
-    }
-    var alias_f = true;
-    for(var key in alias) {
-      if (alias_f) {
-        push('pp.conf.bm_tag_aliases={');
-        alias_f = false;
-        ++indent;
+      if (!alias_f) {
+        js.push('};');
+        --indent;
       }
-      push(ConfigUI.stringify(key) + ':[');
-      ++indent;
-      for(var j = 0; j < alias[key].length; ++j) {
-        var tag = alias[key][j];
-        push(ConfigUI.stringify(tag) + ',');
-      }
-      --indent;
-      push('],');
+      return js.join(new_line || '');
     }
-    if (!alias_f) {
-      js.push('};');
-      --indent;
-    }
-    return js.join(new_line || '');
   };
 
   ConfigUI.pages = [{
@@ -936,8 +895,8 @@
       page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
       this.tag_order_textarea = window.document.createElement('textarea');
       this.tag_order_textarea.value = (this.options_page
-                                       ? this.st.get('bookmark', 'tag_order')
-                                       : this.st.bm_tag_order_to_str(conf.bm_tag_order));
+                                       ? LS.get('bookmark', 'tag_order')
+                                       : LS.bm_tag_order_to_str(conf.bm_tag_order));
       this.tag_order_textarea.addEventListener('keyup', function() {
         if (self.st.u) self.st.set('bookmark', 'tag_order', self.tag_order_textarea.value);
         self.update_export();
@@ -987,7 +946,7 @@
       }
 
       var aliases = (this.options_page
-                     ? this.st.parse_bm_tag_aliases(this.st.get('bookmark', 'tag_aliases'))
+                     ? LS.parse_bm_tag_aliases(LS.get('bookmark', 'tag_aliases'))
                      : conf.bm_tag_aliases);
       for(var key in aliases) add_row(key, aliases[key]);
     }
@@ -1010,7 +969,7 @@
       }, false);
       this.export_form.appendChild(btn_export);
 
-      if (window.JSON && this.st.u) {
+      if (window.JSON && LS.u) {
         var btn_import = window.document.createElement('input');
         btn_import.type = 'submit';
         btn_import.value = 'Import';
@@ -1470,7 +1429,7 @@
       function create() {
         if (div) return;
         div = $c('div', null, 'pp-conf-root');
-        new ConfigUI(div, LS);
+        new ConfigUI(div);
         ($('manga_top') || $('pageHeader')).appendChild(div);
       }
     }
@@ -2468,28 +2427,31 @@
     if (this.thumb) this.parse_img_url(this.thumb.src);
     return this;
   }
-  GalleryItem.prototype.parse_img_url = function(url) {
-    // 冒頭メモ参照
-    var re;
-    if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/.exec(url))) {
-      this.img_url_base = re[1];
-      this.img_url_ext  = re[2];
-    }
-  };
-  GalleryItem.prototype.popup = function() {
-    Popup.run(this);
-  };
-  GalleryItem.prototype.preload = function() {
-    if (conf.popup.preload) {
-      if (!this.loaded) {
-        this.loaded = true;
-        new Popup.Loader(
-          this,
-          (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16)
-           ? bind(function() {
-             new Popup.MangaLoader(this, 0);
-           }, this)
-           : null));
+
+  GalleryItem.prototype = {
+    parse_img_url: function(url) {
+      // 冒頭メモ参照
+      var re;
+      if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/.exec(url))) {
+        this.img_url_base = re[1];
+        this.img_url_ext  = re[2];
+      }
+    },
+    popup: function() {
+      Popup.run(this);
+    },
+    preload: function() {
+      if (conf.popup.preload) {
+        if (!this.loaded) {
+          this.loaded = true;
+          new Popup.Loader(
+            this,
+            (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16)
+             ? bind(function() {
+               new Popup.MangaLoader(this, 0);
+             }, this)
+             : null));
+        }
       }
     }
   };
@@ -2528,98 +2490,101 @@
     return (cap && cap.href) || (thumb_anc && thumb_anc.href);
   };
   Gallery.oncreate = new Signal();
-  Gallery.prototype.detect_new_collection = function() {
-    var self = this;
-    each($xa(this.args.xpath_col, this.args.root), function(col) {
-      if (!col.hasAttribute('pixplus_loaded')) {
-        self.add_collection(col);
-      }
-    });
-  };
-  Gallery.prototype.add_collection = function(col) {
-    if (this.filter_col) this.filter_col(col);
-    var elements = $xa(this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap, col);
-    if (!elements.length) return;
-    log('collection detected - ' + elements.length);
-    col.setAttribute('pixplus_loaded', 'true');
 
-    var self = this;
-    var prev = this.last;
-    var prev_limited = this.last_limited;
-    this.page_item = 0;
-    ++this.page_col;
-    each(elements, function(elem, cnt) {
-      var thumb, cap;
-      if (self.args.thumb_only) {
-        thumb = elem;
-      } else {
-        thumb = $x(self.args.xpath_tmb, elem);
-        cap = elem;
-      }
-      if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
+  Gallery.prototype = {
+    detect_new_collection: function() {
+      var self = this;
+      each($xa(this.args.xpath_col, this.args.root), function(col) {
+        if (!col.hasAttribute('pixplus_loaded')) {
+          self.add_collection(col);
+        }
+      });
+    },
+    add_collection: function(col) {
+      if (this.filter_col) this.filter_col(col);
+      var elements = $xa(this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap, col);
+      if (!elements.length) return;
+      log('collection detected - ' + elements.length);
+      col.setAttribute('pixplus_loaded', 'true');
 
-      var url = (self.args.get_url || Gallery.get_url)(cap, thumb);
-      if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
+      var self = this;
+      var prev = this.last;
+      var prev_limited = this.last_limited;
+      this.page_item = 0;
+      ++this.page_col;
+      each(elements, function(elem, cnt) {
+        var thumb, cap;
+        if (self.args.thumb_only) {
+          thumb = elem;
+        } else {
+          thumb = $x(self.args.xpath_tmb, elem);
+          cap = elem;
+        }
+        if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
 
-      if (cap) {
-        if (cap.nodeType === 3) {
-          var new_caption = $c('a');
-          new_caption.href = url;
-          new_caption.textContent = trim(cap.nodeValue);
-          new_caption.setAttribute('nopopup', '');
-          cap.parentNode.replaceChild(new_caption, cap);
-          cap = new_caption;
-        } else if (cap instanceof window.HTMLAnchorElement) {
-          cap.setAttribute('nopopup', '');
-        } else if (!$x('ancestor::a', cap)) {
-          if (cap.childNodes.length === 1 && cap.firstChild.nodeType === 3) {
-            cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
+        var url = (self.args.get_url || Gallery.get_url)(cap, thumb);
+        if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
+
+        if (cap) {
+          if (cap.nodeType === 3) {
+            var new_caption = $c('a');
+            new_caption.href = url;
+            new_caption.textContent = trim(cap.nodeValue);
+            new_caption.setAttribute('nopopup', '');
+            cap.parentNode.replaceChild(new_caption, cap);
+            cap = new_caption;
+          } else if (cap instanceof window.HTMLAnchorElement) {
+            cap.setAttribute('nopopup', '');
+          } else if (!$x('ancestor::a', cap)) {
+            if (cap.childNodes.length === 1 && cap.firstChild.nodeType === 3) {
+              cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
+            }
           }
         }
-      }
 
-      var item = new GalleryItem(url, thumb, cap, prev, self);
+        var item = new GalleryItem(url, thumb, cap, prev, self);
 
-      var pbtn = thumb;
-      if (!thumb && cap) {
-        pbtn = $c('a');
-        pbtn.href = url;
-        pbtn.textContent = '\u25a0';
-        pbtn.style.marginRight = '4px';
-        cap.parentNode.insertBefore(pbtn, cap);
-        item.added_popup_button = pbtn;
-      }
-      if (pbtn) {
-        $ev($x('ancestor-or-self::a', pbtn)).click(function() {
-          // for HaH bookmarklet
-          if (window.opera && window.document.activeElement === this) this.blur();
-          Popup.run(item);
-          return true;
-        });
-      }
-
-      if (!self.first_limited) self.first_limited = item;
-      if (!self.first && !item.limited) self.first = item;
-      if (self.filter) self.filter(item);
-
-      if (self.args.skip_dups && self.idmap[item.id]) {
-        self.prev_dups.push(item);
-      } else {
-        if (!item.limited) {
-          if (prev) prev.next = item;
-          if (prev_limited) prev_limited.next = item;
-          if (self.prev_dups.length) {
-            each(self.prev_dups, function(p) { p.next = item; });
-            self.prev_dups = [];
-          }
-          self.last = prev = item;
+        var pbtn = thumb;
+        if (!thumb && cap) {
+          pbtn = $c('a');
+          pbtn.href = url;
+          pbtn.textContent = '\u25a0';
+          pbtn.style.marginRight = '4px';
+          cap.parentNode.insertBefore(pbtn, cap);
+          item.added_popup_button = pbtn;
         }
-        self.last_limited = prev_limited = item;
-        self.items.push(item);
-        self.idmap[item.id] = item;
-        self.onadditem.emit(self, item);
-      }
-    });
+        if (pbtn) {
+          $ev($x('ancestor-or-self::a', pbtn)).click(function() {
+            // for HaH bookmarklet
+            if (window.opera && window.document.activeElement === this) this.blur();
+            Popup.run(item);
+            return true;
+          });
+        }
+
+        if (!self.first_limited) self.first_limited = item;
+        if (!self.first && !item.limited) self.first = item;
+        if (self.filter) self.filter(item);
+
+        if (self.args.skip_dups && self.idmap[item.id]) {
+          self.prev_dups.push(item);
+        } else {
+          if (!item.limited) {
+            if (prev) prev.next = item;
+            if (prev_limited) prev_limited.next = item;
+            if (self.prev_dups.length) {
+              each(self.prev_dups, function(p) { p.next = item; });
+              self.prev_dups = [];
+            }
+            self.last = prev = item;
+          }
+          self.last_limited = prev_limited = item;
+          self.items.push(item);
+          self.idmap[item.id] = item;
+          self.onadditem.emit(self, item);
+        }
+      });
+    }
   };
 
   function Popup(item, manga_page) {
@@ -2923,548 +2888,550 @@
     return btn;
   };
 
-  Popup.prototype.init_display = function() {
-    each([
-      this.manga_btn,
-      this.res_btn,
-      this.bm_btn,
-      this.err_msg,
-      this.comment,
-      this.tags,
-      this.rating,
-      this.post_cap,
-      this.a_img,
-      this.author,
-      this.a_stacc,
-      this.bm_edit,
-      this.tag_edit,
-      this.img_div
-    ], function(elem) {
-      elem.style.display = 'none';
-    });
-  };
-  Popup.prototype.init_comments = function(keep_form) {
-    this.comment_wrap.scrollTop = 0;
-    this.viewer_comments.style.display = 'none';
-    this.viewer_comments_c.innerHTML = '';
-    this.viewer_comments_a.innerHTML = '';
-    if (pp.rpc_usable) {
-      this.comments_btn.style.display = '';
-      this.comments_btn.removeAttribute('enable');
-      if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
-    } else {
-      this.comments_btn.style.display = 'none';
-    }
-  };
-  Popup.prototype.set_status = function(msg) {
-    this.status.textContent = msg;
-    this.status.style.display = '';
-    this.err_msg.style.display = 'none';
-    this.locate();
-  };
-  Popup.prototype.error = function(msg) {
-    this.set_status('Error!');
-    if (msg) {
-      this.err_msg.textContent = msg;
-      this.err_msg.style.display = '';
-    }
-  };
-  Popup.prototype.complete = function() {
-    this.status.style.display = 'none';
-  };
-
-  Popup.prototype.first = function() {
-    if (this.manga.usable && this.manga.enabled) {
-      this.set_manga_page(0);
-    } else if (this.item.gallery) {
-      this.set(this.item.gallery.first, true);
-    }
-  };
-  Popup.prototype.last = function() {
-    if (this.manga.usable && this.manga.enabled) {
-      this.set_manga_page(this.manga.page_count - 1);
-    } else if (this.item.gallery) {
-      this.set(this.item.gallery.last, true);
-    }
-  };
-
-  Popup.prototype.prev = function(close, no_auto) {
-    if (this.manga.usable && this.manga.enabled) {
-      var page = this.manga.page - this.manga.page_dec;
-      if (page < 0 && (conf.popup.auto_manga & 16)) {
-        this.manga.enabled = false;
-        this.prev(close);
+  Popup.prototype = {
+    init_display: function() {
+      each([
+        this.manga_btn,
+        this.res_btn,
+        this.bm_btn,
+        this.err_msg,
+        this.comment,
+        this.tags,
+        this.rating,
+        this.post_cap,
+        this.a_img,
+        this.author,
+        this.a_stacc,
+        this.bm_edit,
+        this.tag_edit,
+        this.img_div
+      ], function(elem) {
+        elem.style.display = 'none';
+      });
+    },
+    init_comments: function(keep_form) {
+      this.comment_wrap.scrollTop = 0;
+      this.viewer_comments.style.display = 'none';
+      this.viewer_comments_c.innerHTML = '';
+      this.viewer_comments_a.innerHTML = '';
+      if (pp.rpc_usable) {
+        this.comments_btn.style.display = '';
+        this.comments_btn.removeAttribute('enable');
+        if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
       } else {
-        this.set_manga_page(page);
+        this.comments_btn.style.display = 'none';
       }
-    } else {
-      var g = this.item.gallery;
-      var r = !no_auto && conf.popup.reverse_p;
-      var item = r ? this.item.next : this.item.prev;
-      this.set(item, true, close);
-    }
-  };
-  Popup.prototype.next = function(close, no_auto) {
-    if (this.manga.usable) {
-      if (this.manga.enabled) {
-        var page = this.manga.page + this.manga.page_inc;
-        if (page >= this.manga.page_count && (conf.popup.auto_manga & 16)) {
+    },
+    set_status: function(msg) {
+      this.status.textContent = msg;
+      this.status.style.display = '';
+      this.err_msg.style.display = 'none';
+      this.locate();
+    },
+    error: function(msg) {
+      this.set_status('Error!');
+      if (msg) {
+        this.err_msg.textContent = msg;
+        this.err_msg.style.display = '';
+      }
+    },
+    complete: function() {
+      this.status.style.display = 'none';
+    },
+
+    first: function() {
+      if (this.manga.usable && this.manga.enabled) {
+        this.set_manga_page(0);
+      } else if (this.item.gallery) {
+        this.set(this.item.gallery.first, true);
+      }
+    },
+    last: function() {
+      if (this.manga.usable && this.manga.enabled) {
+        this.set_manga_page(this.manga.page_count - 1);
+      } else if (this.item.gallery) {
+        this.set(this.item.gallery.last, true);
+      }
+    },
+
+    prev: function(close, no_auto) {
+      if (this.manga.usable && this.manga.enabled) {
+        var page = this.manga.page - this.manga.page_dec;
+        if (page < 0 && (conf.popup.auto_manga & 16)) {
           this.manga.enabled = false;
-          this.next(close);
+          this.prev(close);
         } else {
           this.set_manga_page(page);
         }
-        return;
-      } else if (!no_auto && conf.popup.auto_manga_p && !this.item.manga.viewed) {
-        this.set_manga_mode(true);
-        return;
-      }
-    }
-    var g = this.item.gallery;
-    var r = !no_auto && conf.popup.reverse_p;
-    var item = r ? this.item.prev : this.item.next;
-    this.set(item, true, close);
-  };
-
-  Popup.prototype.set = function(item, scroll, close, reload, manga_page) {
-    if (!item) {
-      if (close) this.close();
-      return;
-    }
-    if (this.loader) this.loader.cancel();
-    if (!this.item && item.caption) {
-      this.title.textContent = trim(item.caption.textContent);
-      this.title.href = item.medium;
-    }
-    this.item = Popup.lastitem = item;
-    this.init_manga_page = manga_page;
-
-    Popup.onsetitem.emit(this, this.item);
-    if (this.conn_g_add_item) {
-      this.conn_g_add_item.disconnect();
-      this.conn_g_add_item = null;
-    }
-    if (this.item.gallery) this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
-
-    if (item.limited && item.thumb) {
-      this.load_pre(scroll);
-      this.caption.style.display = 'none';
-      this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
-      this.update_olc();
-      Popup.onload.emit(this);
-      if (this.item.prev) this.item.prev.preload();
-      if (this.item.next) this.item.next.preload();
-    } else {
-      var self = this;
-      this.set_status('Loading');
-      this.loader = new Popup.Loader(
-        this.item,
-        function() { self.load(this, scroll); },
-        function(msg) {
-          self.error(msg);
-        },
-        reload);
-    }
-  };
-
-  Popup.prototype.load_pre = function(scroll) {
-    if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
-    this.complete();
-    this.init_comments();
-    this.manga.init();
-    this.caption.style.display = '';
-    this.bm_edit.innerHTML = '';
-    this.bm_edit.style.display = 'none';
-    this.tag_edit.innerHTML = '';
-    this.tag_edit.style.display = 'none';
-    this.expand_header = false;
-  };
-  Popup.prototype.load = function(loader, scroll) {
-    var self = this, re;
-    this.load_pre(scroll);
-
-    if (pp.rpc_usable) {
-      var rpc_html = '';
-      pp.rpc_state = 0;
-      for(var id in pp.rpc_ids) {
-        if ((re = new RegExp('(<div[^>]+id="' + id + '"[^>]*>[^<]+</div>)', 'i').exec(loader.text))) {
-          rpc_html += re[1];
-          pp.rpc_state |= pp.rpc_ids[id];
-        }
-      }
-      pp.rpc_div.innerHTML = rpc_html;
-    }
-
-    var img_size, _title = 'Error!';
-    this.info.style.display = '';
-    this.info_tools.style.display = 'none';
-    /* ツールは「&nbsp;」区切り
-     * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
-     */
-    if ((re = /<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i.exec(loader.text))) {
-      var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
-      _title = trim(re[2]);
-      this.date.textContent = tmp[0];
-      if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
-        this.date_repost.textContent = (re[1] === _date ? '' : re[1] + '\u65e5 ') + re[2];
-        this.date_repost.style.display = '';
       } else {
-        this.date_repost.style.display = 'none';
+        var g = this.item.gallery;
+        var r = !no_auto && conf.popup.reverse_p;
+        var item = r ? this.item.next : this.item.prev;
+        this.set(item, true, close);
       }
-      if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/.exec(tmp[1]))) {
-        if (re[3]) {
-          this.manga.page_count = parseInt(re[3]);
-          this.manga.usable = this.manga.page_count > 0;
-        } else {
-          img_size = {width: parseInt(re[1]), height: parseInt(re[2])};
-        }
-      }
-      if (tmp.length > 2) {
-        // tools.php?tool=hoge
-        var html = '';
-        each(trim(tmp[2]).split('&nbsp;'), function(tool) {
-          html += '<span>' + tool + '</span>';
-        });
-        this.info_tools.innerHTML = html;
-        this.info_tools.style.display = '';
-      }
-    }
-
-    if (this.item.caption) {
-      this.title.textContent = trim(this.item.caption.textContent);
-    } else {
-      this.title.innerHTML = _title;
-    }
-    this.title.href = this.item.medium;
-
-    this.set_manga_button_text();
-    this.manga_btn.style.display = this.manga.usable ? 'inline' : 'none';
-    this.manga_btn.removeAttribute('enable');
-    this.manga_btn.href = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
-
-    if ((re = /<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i.exec(loader.text))) {
-      var a_status_class = '';
-      this.a_img.src            = re[3];
-      this.a_profile.href       = re[1];
-      this.a_profile.innerHTML  = trim(re[4]) || '(Author)';
-      this.a_illust.href        = '/member_illust.php?id=' + re[2];
-      this.a_bookmark.href      = '/bookmark.php?id=' + re[2];
-      if ((re = /<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/\"]+)\"/i.exec(loader.text))) {
-        this.a_stacc.href = re[1];
-        this.a_stacc.style.display = '';
-      }
-      if (conf.popup.author_status_icon) {
-        if (/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i.test(loader.text)) {
-          a_status_class = 'pixplus-flag';
-        } else if (/<span[^>]+class=\"list_fav\">/i.test(loader.text)) {
-          a_status_class = 'pixplus-heart';
-        } else if (/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i.test(loader.text)) {
-          a_status_class = 'pixplus-check';
-        }
-      }
-      if (a_status_class) {
-        this.a_status.className = a_status_class;
-        this.a_status.style.display = '';
-      } else {
-        this.a_status.style.display = 'none';
-      }
-      this.a_img.style.display  = '';
-      this.author.style.display = '';
-      this.post_cap.style.display = '';
-    } else {
-      this.a_img.style.display  = 'none';
-      this.author.style.display = 'none';
-    }
-
-    this.has_image_response = false;
-    this.res_btn.style.display = 'none';
-    // レスポンスする方とされる方に両対応
-    if ((re = /<p[^>]+class=\"worksAlso\"><a[^>]+href=\"\/?(response\.php\?illust_id=(\d+))\">/i.exec(loader.text))) {
-      this.has_image_response = true;
-      this.res_btn.href = '/' + re[1];
-      if (re[2] === this.item.id) {
-        this.res_btn.removeAttribute('enable');
-      } else {
-        this.res_btn.setAttribute('enable', '');
-      }
-      this.res_btn.style.display = '';
-    }
-
-    if (/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i.test(loader.text)) {
-      this.bm_btn.setAttribute('enable', '');
-    } else {
-      this.bm_btn.removeAttribute('enable');
-    }
-    this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
-    this.bm_btn.style.display = '';
-
-    this.comment.style.display = 'none';
-    if ((re = /<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i.exec(loader.text))) {
-      if ((this.comment.innerHTML = edit_comment(re[1]))) this.comment.style.display = '';
-    }
-
-    this.tag_edit_enabled = false;
-    this.tag_edit_btn = null;
-    this.tags.style.display = 'none';
-    if ((re = /<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i.exec(loader.text))) {
-      var html = '';
-      each(re[1].replace(/\s*\n\s*/g, '').split('\u3000'), function(t) {
-        t = trim(t);
-        if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
-      });
-      if (!/<a /i.test(html)) html = '';
-      // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
-      if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
-          /<a[^>]+onclick="startTagEdit\(\)"/i.exec(loader.text)) {
-        this.tag_edit_enabled = true;
-      }
-      if (html || this.tag_edit_enabled) {
-        this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
-        if (this.tag_edit_enabled) {
-          this.tag_edit_btn = $c('a', this.tags, 'pp-tag-edit-btn');
-          this.tag_edit_btn.href = 'javascript:void(0)';
-          this.tag_edit_btn.textContent = '[E]';
-          $ev(this.tag_edit_btn).click(bind(Popup.prototype.toggle_tag_edit, this));
-        }
-        this.tags.style.display = '';
-      }
-    }
-
-    this.has_qrate = false;
-    this.rating_enabled = false;
-    this.rating.style.display = 'none';
-    var re_rtv, re_rtc, re_rtt;
-    //<h4>Views：<div style="display:inline;" id="jd_rtv">3495</div>　Rating Count：<div style="display:inline;" id="jd_rtc">211</div>　Ratings：<div style="display:inline;" id="jd_rtt">2091</div></h4>
-    if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-        //(re_rtv = /<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
-        //(re_rtc = /<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
-        //(re_rtt = /<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i.exec(loader.text))) {
-        (re = /(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i.exec(loader.text))) {
-      /*
-      var html = '<div id="rating"><div id="unit"><h4>' +
-        '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
-        '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
-        '<span>' + "\u7dcf\u5408\u70b9: " + re_rtt[0] + '</span>';
-      if ((re = /(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i.exec(loader.text))) {
-        // add '/' for staccfeed
-        html += '<span>' + re[1] + '/' + re[2] + '</span>';
-      }
-      html += '</h4>';
-       */
-      var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
-      if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) html += re[1];
-      html += '</div>';
-      if (rpc_chk(pp.rpc_req_qrate)) {
-        var re1 = /<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i.exec(loader.text);
-        if (re1 && (re = /(<div[^>]+id=\"quality_rating\"[^>]*>[\s\S]*?<\/div>)/i.exec(loader.text))) {
-          html += re1[0] + '</div>' + re[1];
-          this.has_qrate = true;
-        } else if ((re1 = /<h4[^>]*><a[^>]+onClick=\"onOff\('result'\).*<\/h4>/i.exec(loader.text))) {
-          if ((re = /(<div[^>+]id=\"result\"[\s\S]*?\n<\/div>)/i.exec(loader.text))) {
-            html += re1[0] + '</div>' + re[1];
-            this.has_qrate = true;
+    },
+    next: function(close, no_auto) {
+      if (this.manga.usable) {
+        if (this.manga.enabled) {
+          var page = this.manga.page + this.manga.page_inc;
+          if (page >= this.manga.page_count && (conf.popup.auto_manga & 16)) {
+            this.manga.enabled = false;
+            this.next(close);
+          } else {
+            this.set_manga_page(page);
           }
+          return;
+        } else if (!no_auto && conf.popup.auto_manga_p && !this.item.manga.viewed) {
+          this.set_manga_mode(true);
+          return;
         }
       }
-      if (!this.has_qrate) html += '</div>';
-      this.rating.innerHTML = html;
-      this.rating.style.display = '';
-      this.rating_enabled = true;
+      var g = this.item.gallery;
+      var r = !no_auto && conf.popup.reverse_p;
+      var item = r ? this.item.prev : this.item.next;
+      this.set(item, true, close);
+    },
 
-      var anc = $x('./div[@id="rating"]/h4/a', self.rating);
-      if (anc && anc.getAttribute('onclick') === 'rating_ef4()') {
-        anc.setAttribute('onclick', '');
-        anc.onclick = '';
-        anc.addEventListener('click', function(ev) {
-          var qr = $x('./div[@id="quality_rating"]', self.rating);
-          window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef']();
-          ev.preventDefault();
-        }, false);
+    set: function(item, scroll, close, reload, manga_page) {
+      if (!item) {
+        if (close) this.close();
+        return;
       }
-    }
+      if (this.loader) this.loader.cancel();
+      if (!this.item && item.caption) {
+        this.title.textContent = trim(item.caption.textContent);
+        this.title.href = item.medium;
+      }
+      this.item = Popup.lastitem = item;
+      this.init_manga_page = manga_page;
 
-    this.viewer_comments_enabled = false;
-    if (pp.rpc_usable && (re = /(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i.exec(loader.text))) {
-      (function() {
-        var form = re[1], html = '';
-        each(/<input[^>]+type=\"hidden\"[^>]+>/ig.exec(form), function(hidden) { html += hidden; });
-        if (html) {
-          var comment = $c('input'), submit = $c('input');
-          comment.setAttribute('type', 'text');
-          comment.setAttribute('name', 'comment');
-          comment.setAttribute('maxlength', '255');
-          submit.setAttribute('type', 'submit');
-          submit.setAttribute('name', 'submit');
-          submit.className = 'btn_type04';
-          submit.value     = 'Send';
+      Popup.onsetitem.emit(this, this.item);
+      if (this.conn_g_add_item) {
+        this.conn_g_add_item.disconnect();
+        this.conn_g_add_item = null;
+      }
+      if (this.item.gallery) this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
 
-          form = $c('form');
-          form.setAttribute('action', '/member_illust.php');
-          form.setAttribute('method', 'POST');
-          form.innerHTML = html;
-          form.appendChild(comment);
-          form.appendChild(submit);
-
-          $ev(submit).click(function() {
-            if (trim(comment.value)) {
-              window.jQuery.post(
-                form.getAttribute('action'),
-                window.jQuery(form).serialize(),
-                function() {
-                  self.reload_viewer_comments();
-                  comment.removeAttribute('disabled');
-                  comment.value = '';
-                  submit.removeAttribute('disabled');
-                }
-              ).error(function() {
-                alert('Error!');
-              });
-              comment.setAttribute('disabled', '');
-              submit.setAttribute('disabled', '');
-            } else {
-              alert("\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
-            }
-            return true;
-          });
-
-          this.viewer_comments_c.appendChild(form);
-          this.viewer_comments_enabled = true;
-        }
-      }).apply(this);
-    }
-
-    if (this.manga.usable && this.init_manga_page >= 0) {
-      this.set_manga_mode(true, this.init_manga_page);
-      this.init_manga_page = -1;
-    } else if (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16) && this.manga.usable && !this.item.manga.viewed) {
-      this.set_manga_mode(true);
-    } else {
-      var url = this.manga.usable ? urlmode(this.item.medium, 'manga') : null;
-      this.set_images([{image: loader.image, size: img_size, url: url}], this.manga.usable);
-      this.update_olc();
-      Popup.onload.emit(this);
-      if (this.manga.usable) this.manga.preload();
-    }
-    if (this.item.prev) this.item.prev.preload();
-    if (this.item.next) this.item.next.preload();
-  };
-
-  Popup.prototype.set_manga_page = function(page) {
-    if (page < 0) {
-      this.set(this.item);
-    } else if (page !== this.manga.page) {
-      if (page < this.manga.page_count) {
+      if (item.limited && item.thumb) {
+        this.load_pre(scroll);
+        this.caption.style.display = 'none';
+        this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
+        this.update_olc();
+        Popup.onload.emit(this);
+        if (this.item.prev) this.item.prev.preload();
+        if (this.item.next) this.item.next.preload();
+      } else {
         var self = this;
         this.set_status('Loading');
-        // エラーの時に次のページに移動する
-        this.manga.page = page;
-        if (this.loader) this.loader.cancel();
-        this.loader = new Popup.MangaLoader(
-          this.item, page,
-          function(loader) { self.manga_onload(loader, page); },
-          function(msg) { self.error(msg); });
+        this.loader = new Popup.Loader(
+          this.item,
+          function() { self.load(this, scroll); },
+          function(msg) {
+            self.error(msg);
+          },
+          reload);
+      }
+    },
+
+    load_pre: function(scroll) {
+      if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
+      this.complete();
+      this.init_comments();
+      this.manga.init();
+      this.caption.style.display = '';
+      this.bm_edit.innerHTML = '';
+      this.bm_edit.style.display = 'none';
+      this.tag_edit.innerHTML = '';
+      this.tag_edit.style.display = 'none';
+      this.expand_header = false;
+    },
+    load: function(loader, scroll) {
+      var self = this, re;
+      this.load_pre(scroll);
+
+      if (pp.rpc_usable) {
+        var rpc_html = '';
+        pp.rpc_state = 0;
+        for(var id in pp.rpc_ids) {
+          if ((re = new RegExp('(<div[^>]+id="' + id + '"[^>]*>[^<]+</div>)', 'i').exec(loader.text))) {
+            rpc_html += re[1];
+            pp.rpc_state |= pp.rpc_ids[id];
+          }
+        }
+        pp.rpc_div.innerHTML = rpc_html;
+      }
+
+      var img_size, _title = 'Error!';
+      this.info.style.display = '';
+      this.info_tools.style.display = 'none';
+      /* ツールは「&nbsp;」区切り
+       * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
+       */
+      if ((re = /<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i.exec(loader.text))) {
+        var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
+        _title = trim(re[2]);
+        this.date.textContent = tmp[0];
+        if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
+          this.date_repost.textContent = (re[1] === _date ? '' : re[1] + '\u65e5 ') + re[2];
+          this.date_repost.style.display = '';
+        } else {
+          this.date_repost.style.display = 'none';
+        }
+        if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/.exec(tmp[1]))) {
+          if (re[3]) {
+            this.manga.page_count = parseInt(re[3]);
+            this.manga.usable = this.manga.page_count > 0;
+          } else {
+            img_size = {width: parseInt(re[1]), height: parseInt(re[2])};
+          }
+        }
+        if (tmp.length > 2) {
+          // tools.php?tool=hoge
+          var html = '';
+          each(trim(tmp[2]).split('&nbsp;'), function(tool) {
+            html += '<span>' + tool + '</span>';
+          });
+          this.info_tools.innerHTML = html;
+          this.info_tools.style.display = '';
+        }
+      }
+
+      if (this.item.caption) {
+        this.title.textContent = trim(this.item.caption.textContent);
       } else {
+        this.title.innerHTML = _title;
+      }
+      this.title.href = this.item.medium;
+
+      this.set_manga_button_text();
+      this.manga_btn.style.display = this.manga.usable ? 'inline' : 'none';
+      this.manga_btn.removeAttribute('enable');
+      this.manga_btn.href = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
+
+      if ((re = /<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i.exec(loader.text))) {
+        var a_status_class = '';
+        this.a_img.src            = re[3];
+        this.a_profile.href       = re[1];
+        this.a_profile.innerHTML  = trim(re[4]) || '(Author)';
+        this.a_illust.href        = '/member_illust.php?id=' + re[2];
+        this.a_bookmark.href      = '/bookmark.php?id=' + re[2];
+        if ((re = /<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/\"]+)\"/i.exec(loader.text))) {
+          this.a_stacc.href = re[1];
+          this.a_stacc.style.display = '';
+        }
+        if (conf.popup.author_status_icon) {
+          if (/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i.test(loader.text)) {
+            a_status_class = 'pixplus-flag';
+          } else if (/<span[^>]+class=\"list_fav\">/i.test(loader.text)) {
+            a_status_class = 'pixplus-heart';
+          } else if (/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i.test(loader.text)) {
+            a_status_class = 'pixplus-check';
+          }
+        }
+        if (a_status_class) {
+          this.a_status.className = a_status_class;
+          this.a_status.style.display = '';
+        } else {
+          this.a_status.style.display = 'none';
+        }
+        this.a_img.style.display  = '';
+        this.author.style.display = '';
+        this.post_cap.style.display = '';
+      } else {
+        this.a_img.style.display  = 'none';
+        this.author.style.display = 'none';
+      }
+
+      this.has_image_response = false;
+      this.res_btn.style.display = 'none';
+      // レスポンスする方とされる方に両対応
+      if ((re = /<p[^>]+class=\"worksAlso\"><a[^>]+href=\"\/?(response\.php\?illust_id=(\d+))\">/i.exec(loader.text))) {
+        this.has_image_response = true;
+        this.res_btn.href = '/' + re[1];
+        if (re[2] === this.item.id) {
+          this.res_btn.removeAttribute('enable');
+        } else {
+          this.res_btn.setAttribute('enable', '');
+        }
+        this.res_btn.style.display = '';
+      }
+
+      if (/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i.test(loader.text)) {
+        this.bm_btn.setAttribute('enable', '');
+      } else {
+        this.bm_btn.removeAttribute('enable');
+      }
+      this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
+      this.bm_btn.style.display = '';
+
+      this.comment.style.display = 'none';
+      if ((re = /<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i.exec(loader.text))) {
+        if ((this.comment.innerHTML = edit_comment(re[1]))) this.comment.style.display = '';
+      }
+
+      this.tag_edit_enabled = false;
+      this.tag_edit_btn = null;
+      this.tags.style.display = 'none';
+      if ((re = /<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i.exec(loader.text))) {
+        var html = '';
+        each(re[1].replace(/\s*\n\s*/g, '').split('\u3000'), function(t) {
+          t = trim(t);
+          if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
+        });
+        if (!/<a /i.test(html)) html = '';
+        // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
+        if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
+            /<a[^>]+onclick="startTagEdit\(\)"/i.exec(loader.text)) {
+          this.tag_edit_enabled = true;
+        }
+        if (html || this.tag_edit_enabled) {
+          this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
+          if (this.tag_edit_enabled) {
+            this.tag_edit_btn = $c('a', this.tags, 'pp-tag-edit-btn');
+            this.tag_edit_btn.href = 'javascript:void(0)';
+            this.tag_edit_btn.textContent = '[E]';
+            $ev(this.tag_edit_btn).click(bind(Popup.prototype.toggle_tag_edit, this));
+          }
+          this.tags.style.display = '';
+        }
+      }
+
+      this.has_qrate = false;
+      this.rating_enabled = false;
+      this.rating.style.display = 'none';
+      var re_rtv, re_rtc, re_rtt;
+      //<h4>Views：<div style="display:inline;" id="jd_rtv">3495</div>　Rating Count：<div style="display:inline;" id="jd_rtc">211</div>　Ratings：<div style="display:inline;" id="jd_rtt">2091</div></h4>
+      if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
+          //(re_rtv = /<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
+          //(re_rtc = /<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
+          //(re_rtt = /<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i.exec(loader.text))) {
+          (re = /(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i.exec(loader.text))) {
+        /*
+         var html = '<div id="rating"><div id="unit"><h4>' +
+         '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
+         '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
+         '<span>' + "\u7dcf\u5408\u70b9: " + re_rtt[0] + '</span>';
+         if ((re = /(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i.exec(loader.text))) {
+         // add '/' for staccfeed
+         html += '<span>' + re[1] + '/' + re[2] + '</span>';
+         }
+         html += '</h4>';
+         */
+        var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
+        if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) html += re[1];
+        html += '</div>';
+        if (rpc_chk(pp.rpc_req_qrate)) {
+          var re1 = /<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i.exec(loader.text);
+          if (re1 && (re = /(<div[^>]+id=\"quality_rating\"[^>]*>[\s\S]*?<\/div>)/i.exec(loader.text))) {
+            html += re1[0] + '</div>' + re[1];
+            this.has_qrate = true;
+          } else if ((re1 = /<h4[^>]*><a[^>]+onClick=\"onOff\('result'\).*<\/h4>/i.exec(loader.text))) {
+            if ((re = /(<div[^>+]id=\"result\"[\s\S]*?\n<\/div>)/i.exec(loader.text))) {
+              html += re1[0] + '</div>' + re[1];
+              this.has_qrate = true;
+            }
+          }
+        }
+        if (!this.has_qrate) html += '</div>';
+        this.rating.innerHTML = html;
+        this.rating.style.display = '';
+        this.rating_enabled = true;
+
+        var anc = $x('./div[@id="rating"]/h4/a', self.rating);
+        if (anc && anc.getAttribute('onclick') === 'rating_ef4()') {
+          anc.setAttribute('onclick', '');
+          anc.onclick = '';
+          anc.addEventListener('click', function(ev) {
+            var qr = $x('./div[@id="quality_rating"]', self.rating);
+            window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef']();
+            ev.preventDefault();
+          }, false);
+        }
+      }
+
+      this.viewer_comments_enabled = false;
+      if (pp.rpc_usable && (re = /(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i.exec(loader.text))) {
+        (function() {
+          var form = re[1], html = '';
+          each(/<input[^>]+type=\"hidden\"[^>]+>/ig.exec(form), function(hidden) { html += hidden; });
+          if (html) {
+            var comment = $c('input'), submit = $c('input');
+            comment.setAttribute('type', 'text');
+            comment.setAttribute('name', 'comment');
+            comment.setAttribute('maxlength', '255');
+            submit.setAttribute('type', 'submit');
+            submit.setAttribute('name', 'submit');
+            submit.className = 'btn_type04';
+            submit.value     = 'Send';
+
+            form = $c('form');
+            form.setAttribute('action', '/member_illust.php');
+            form.setAttribute('method', 'POST');
+            form.innerHTML = html;
+            form.appendChild(comment);
+            form.appendChild(submit);
+
+            $ev(submit).click(function() {
+              if (trim(comment.value)) {
+                window.jQuery.post(
+                  form.getAttribute('action'),
+                  window.jQuery(form).serialize(),
+                  function() {
+                    self.reload_viewer_comments();
+                    comment.removeAttribute('disabled');
+                    comment.value = '';
+                    submit.removeAttribute('disabled');
+                  }
+                ).error(function() {
+                  alert('Error!');
+                });
+                comment.setAttribute('disabled', '');
+                submit.setAttribute('disabled', '');
+              } else {
+                alert("\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+              }
+              return true;
+            });
+
+            this.viewer_comments_c.appendChild(form);
+            this.viewer_comments_enabled = true;
+          }
+        }).apply(this);
+      }
+
+      if (this.manga.usable && this.init_manga_page >= 0) {
+        this.set_manga_mode(true, this.init_manga_page);
+        this.init_manga_page = -1;
+      } else if (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16) && this.manga.usable && !this.item.manga.viewed) {
+        this.set_manga_mode(true);
+      } else {
+        var url = this.manga.usable ? urlmode(this.item.medium, 'manga') : null;
+        this.set_images([{image: loader.image, size: img_size, url: url}], this.manga.usable);
+        this.update_olc();
+        Popup.onload.emit(this);
+        if (this.manga.usable) this.manga.preload();
+      }
+      if (this.item.prev) this.item.prev.preload();
+      if (this.item.next) this.item.next.preload();
+    },
+
+    set_manga_page: function(page) {
+      if (page < 0) {
         this.set(this.item);
+      } else if (page !== this.manga.page) {
+        if (page < this.manga.page_count) {
+          var self = this;
+          this.set_status('Loading');
+          // エラーの時に次のページに移動する
+          this.manga.page = page;
+          if (this.loader) this.loader.cancel();
+          this.loader = new Popup.MangaLoader(
+            this.item, page,
+            function(loader) { self.manga_onload(loader, page); },
+            function(msg) { self.error(msg); });
+        } else {
+          this.set(this.item);
+        }
       }
-    }
-  };
-  Popup.prototype.manga_onload = function(loader, page) {
-    this.complete();
-    //this.manga.page = page;
-    this.manga.pages = loader.pages;
-    this.manga.page_inc = loader.page_inc;
-    this.manga.page_dec = loader.page_dec;
-    this.item.manga.viewed = true;
-    this.set_manga_button_text();
-    this.set_images(loader.images, true);
-    this.images.order = [];
-    each(loader.pages, function(page) { this.images.order.push(page.image_index); }, this);
-    this.manga.preload();
-  };
-  Popup.prototype.set_manga_button_text = function() {
-    var pages = [];
-    each(this.manga.pages, function(p) { pages.push(p.page + 1); });
-    if (!pages.length) pages.push(0);
-    this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
-  };
+    },
+    manga_onload: function(loader, page) {
+      this.complete();
+      //this.manga.page = page;
+      this.manga.pages = loader.pages;
+      this.manga.page_inc = loader.page_inc;
+      this.manga.page_dec = loader.page_dec;
+      this.item.manga.viewed = true;
+      this.set_manga_button_text();
+      this.set_images(loader.images, true);
+      this.images.order = [];
+      each(loader.pages, function(page) { this.images.order.push(page.image_index); }, this);
+      this.manga.preload();
+    },
+    set_manga_button_text: function() {
+      var pages = [];
+      each(this.manga.pages, function(p) { pages.push(p.page + 1); });
+      if (!pages.length) pages.push(0);
+      this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
+    },
 
-  Popup.prototype.set_images = function(images, no_zoom) {
-    each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
-    this.images = {
-      list:   [],
-      order:  [],
-      curidx: 0
-    };
+    set_images: function(images, no_zoom) {
+      each(this.images.list, function(img) { img.anchor.parentNode.removeChild(img.anchor); });
+      this.images = {
+        list:   [],
+        order:  [],
+        curidx: 0
+      };
 
-    this.img_div.style.display = '';
-    each(images, function(entry, idx) {
-      var image = entry.image || entry;
-      image.style.cssText = '';
-      var anc = $c('a', this.img_div);
-      anc.href = entry.url || image.src.replace(/_[sm](\.\w+)$/, '$1');
-      anc.appendChild(image);
+      this.img_div.style.display = '';
+      each(images, function(entry, idx) {
+        var image = entry.image || entry;
+        image.style.cssText = '';
+        var anc = $c('a', this.img_div);
+        anc.href = entry.url || image.src.replace(/_[sm](\.\w+)$/, '$1');
+        anc.appendChild(image);
 
-      var size = {width: image.width, height: image.height};
-      this.images.list.push({
-        image:        image,
-        anchor:       anc,
-        size:         size,
-        display_size: entry.size || size
-      });
-      this.images.order.push(idx);
-    }, this);
+        var size = {width: image.width, height: image.height};
+        this.images.list.push({
+          image:        image,
+          anchor:       anc,
+          size:         size,
+          display_size: entry.size || size
+        });
+        this.images.order.push(idx);
+      }, this);
 
-    var zoom = this.zoom_scale = 1;
-    if (!no_zoom && conf.popup.auto_zoom) {
-      var width = this.images.list[0].size.width, height = this.images.list[0].size.height;
-      var len = width > height ? width : height;
-      if (len <= conf.popup.auto_zoom) {
-        zoom = Math.floor(conf.popup.auto_zoom_size / len);
-        if (zoom > conf.popup.auto_zoom_scale) zoom = Math.floor(conf.popup.auto_zoom_scale);
-        if (zoom < 1) zoom = 1;
+      var zoom = this.zoom_scale = 1;
+      if (!no_zoom && conf.popup.auto_zoom) {
+        var width = this.images.list[0].size.width, height = this.images.list[0].size.height;
+        var len = width > height ? width : height;
+        if (len <= conf.popup.auto_zoom) {
+          zoom = Math.floor(conf.popup.auto_zoom_size / len);
+          if (zoom > conf.popup.auto_zoom_scale) zoom = Math.floor(conf.popup.auto_zoom_scale);
+          if (zoom < 1) zoom = 1;
+        }
       }
-    }
-    if (zoom > 1) {
-      this.set_zoom(zoom);
-    } else {
-      this.locate();
-      this.update_info();
-    }
-  };
+      if (zoom > 1) {
+        this.set_zoom(zoom);
+      } else {
+        this.locate();
+        this.update_info();
+      }
+    },
 
-  Popup.prototype.adjust_image_size = function() {
-    if (!this.images.list) return;
+    adjust_image_size: function() {
+      if (!this.images.list) return;
 
-    var width = 0, height = 0;
-    each(this.images.list, function(image) {
-      width += image.size.width;
-      if (image.size.height > height) height = image.size.height;
-    });
-
-    var de = window.document.documentElement;
-    var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
-    var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
-    var rw = width;
-    if (width > mw || height > mh) {
-      var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
-      rw = 0
+      var width = 0, height = 0;
       each(this.images.list, function(image) {
-        var w = Math.floor(image.size.width * scale);
-        image.image.style.width = w + 'px';
-        rw += image.image.offsetWidth;
+        width += image.size.width;
+        if (image.size.height > height) height = image.size.height;
+      });
+
+      var de = window.document.documentElement;
+      var mw = de.clientWidth  + this.img_div.clientWidth  - this.root_div.offsetWidth  - 32;
+      var mh = de.clientHeight + this.img_div.clientHeight - this.root_div.offsetHeight - 32;
+      var rw = width;
+      if (width > mw || height > mh) {
+        var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
+        rw = 0
+        each(this.images.list, function(image) {
+          var w = Math.floor(image.size.width * scale);
+          image.image.style.width = w + 'px';
+          rw += image.image.offsetWidth;
+        });
+      }
+      if (this.images.list.length > 1) {
+        this.img_div.style.width = rw + 'px';
+      } else {
+        this.img_div.style.width = '';
+      }
+
+      var ch = this.img_div.clientHeight;
+      each(this.images.list, function(image) {
+        var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
+        image.image.style.marginTop = m + 'px';
       });
     }
-    if (this.images.list.length > 1) {
-      this.img_div.style.width = rw + 'px';
-    } else {
-      this.img_div.style.width = '';
-    }
-
-    var ch = this.img_div.clientHeight;
-    each(this.images.list, function(image) {
-      var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
-      image.image.style.marginTop = m + 'px';
-    });
   };
 
   Popup.create_zoom_image = function(img, width, height, r_width, r_height) {
