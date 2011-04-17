@@ -229,15 +229,20 @@
       "popup_open_bookmark":        ["t",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"],
       "popup_open_staccfeed":       ["y",               "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"],
       "popup_open_response":        ["Shift+r",         "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"],
-      "popup_bookmark_toggle":      ["b",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_bookmark_start":       ["b",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_bookmark_end":         ["Escape",          ""],
+      "popup_bookmark_submit":      ["Enter,Space",     ""],
       "popup_open_bookmark_detail": ["Shift+b",         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"],
       "popup_qrate_toggle":         ["d",               "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_tag_edit_start":       ["", ""],
+      "popup_tag_edit_end":         ["Escape", ""],
       "popup_open":                 ["Shift+f",         "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"],
       "popup_open_big":             ["f",               "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"],
       "popup_reload":               ["g",               "\u30ea\u30ed\u30fc\u30c9"],
       "popup_caption_toggle":       ["c",               "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"],
       "popup_comment_toggle":       ["Shift+c",         "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"],
-      "popup_manga_toggle":         ["v",               "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_manga_start":          ["v",               "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_manga_end":            ["v,Escape",        "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
       "popup_open_manga_thumbnail": ["Shift+v",         "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"],
       "popup_zoom_in":              ["plus,Shift+plus", "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b"],
       "popup_zoom_out":             ["-,Shift+-",       "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b"],
@@ -485,7 +490,7 @@
     },
     init: function() {
       each(LS.l, function(sec) {
-        if (sec.name != 'bookmark') LS.init_section(sec);
+        if (sec.name !== 'bookmark') LS.init_section(sec);
       });
       if (LS.u) {
         var order = LS.get('bookmark', 'tag_order');
@@ -1995,7 +2000,7 @@
             ev.initEvent('pixplusBMTagToggled', true, true);
             window.document.dispatchEvent(ev);
           }, function() {
-            var flat = $t('ul', bm_tag_list)[0].className != 'tagCloud';
+            var flat = $t('ul', bm_tag_list)[0].className !== 'tagCloud';
             window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
           });
         }
@@ -2773,101 +2778,110 @@
   Popup.onsetitem = new Signal();
   Popup.onload = new Signal();
   Popup.onkeypress = new Signal(function(ev, key) {
-    if (this.is_bookmark_editing()) {
-      return false;
-    } else if (this.is_tag_editing()) {
-      if ((key === $ev.KEY_ESCAPE || key === 'w') && !ev.shiftKey) {
-        this.toggle_tag_edit();
-        return true;
-      }
-    } else {
-      var m = {Shift: ev.shiftKey, Ctrl: ev.ctrlKey, Alt: ev.altKey, Meta: ev.metaKey};
-      var pressed = [({'+':'plus',',':'comma'})[key] || key];
-      for(var k in m) m[k] && pressed.push(k);
-      pressed = pressed.sort().join('+');
-      log('key: ' + pressed);
-      return (function() {
-        for(var i = 0; i < arguments.length; ++i) {
-          var map = arguments[i];
-          if (!map.run) continue;
-          for(var j = 0; j < map.map.length; ++j) {
-            var entry = map.map[j], match = false;
-            if (!entry.k) continue;
-            each(entry.k.split(','), function(trigger) {
-              return (match = (trigger.split('+').sort().join('+') === pressed));
-            });
-            if (match) {
-              entry.f.apply(entry.ctx || this, entry.a || []);
-              return true;
-            }
-          }
-        }
-        return false;
-      }).call(this, {
-        run: !!ev.qrate,
-        map: [
-          {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
-          {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
-          {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
-        ]
-      }, {
-        run: conf.popup.rate && conf.popup.rate_key,
-        map: [
-          {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
-          {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
-          {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
-          {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
-          {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
-          {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
-          {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
-          {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
-          {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
-          {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
-        ]
-      }, {
-        run: true,
-        map: [
-          {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
-          {k: conf.key.popup_next,                 f: this.next, a: [true]},
-          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
-          {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
-          {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
-          {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
-          {k: conf.key.popup_first,                f: this.first},
-          {k: conf.key.popup_last,                 f: this.last},
-          {k: conf.key.popup_close,                f: close},
-          {k: conf.key.popup_open_profile,         f: this.open_author_profile},
-          {k: conf.key.popup_open_illust,          f: this.open_author_illust},
-          {k: conf.key.popup_open_bookmark,        f: this.open_author_bookmark},
-          {k: conf.key.popup_open_staccfeed,       f: this.open_author_staccfeed},
-          {k: conf.key.popup_open_response,        f: this.open_image_response},
-          {k: conf.key.popup_bookmark_toggle,      f: this.toggle_bookmark_edit},
-          {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
-          {k: conf.key.popup_qrate_toggle,         f: this.toggle_qrate},
-          {k: conf.key.popup_open,                 f: this.open},
-          {k: conf.key.popup_open_big,             f: this.open, a: [true]},
-          {k: conf.key.popup_reload,               f: this.reload},
-          {k: conf.key.popup_caption_toggle,       f: this.toggle_caption},
-          {k: conf.key.popup_comment_toggle,       f: this.toggle_viewer_comments},
-          {k: conf.key.popup_manga_toggle,         f: this.toggle_manga_mode},
-          {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
-          {k: conf.key.popup_zoom_in,              f: zoom, a: [1]},
-          {k: conf.key.popup_zoom_out,             f: zoom, a: [-1]},
-          {k: conf.key.popup_help,                 f: show_help},
-        ]
-      });
-    }
-    function close() {
-      this.manga.enabled ? this.toggle_manga_mode() : this.close();
-    }
-    function zoom(z) {
-      this.set_zoom(this.zoom_scale + z);
-    }
+    var m = {Shift: ev.shiftKey, Ctrl: ev.ctrlKey, Alt: ev.altKey, Meta: ev.metaKey};
+    var pressed = [({'+':'plus',',':'comma'})[key] || key];
+    for(var k in m) m[k] && pressed.push(k);
+    pressed = pressed.sort().join('+');
+    log('key: ' + pressed);
     function sel_qr(prev) {
       var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
       if (Popup.is_qrate_button(node)) node.focus();
     }
-    return false;
+    return (function() {
+      for(var i = 0; i < arguments.length; ++i) {
+        var map = arguments[i];
+        if (!map.run) continue;
+        for(var j = 0; j < map.map.length; ++j) {
+          var entry = map.map[j], match = false;
+          if (!entry.k) continue;
+          each(entry.k.split(','), function(trigger) {
+            return (match = (trigger.split('+').sort().join('+') === pressed));
+          });
+          if (match) {
+            entry.f.apply(entry.ctx || map.ctx || this, entry.a || []);
+            return true;
+          }
+        }
+        if (map.stop) break;
+      }
+      return false;
+    }).call(this, {
+      run: this.is_bookmark_editing(),
+      stop: true,
+      ctx: this.bookmark_form,
+      map: [
+        {k: conf.key.popup_bookmark_submit, f: BookmarkForm.prototype.submit},
+        {k: conf.key.popup_bookmark_end,    f: BookmarkForm.prototype.close}
+      ]
+    }, {
+      run: this.is_tag_editing(),
+      stop: true,
+      map: [
+        {k: conf.key.popup_tag_edit_end, f: this.toggle_tag_edit}
+      ]
+    }, {
+      run: !!ev.qrate,
+      map: [
+        {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
+        {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
+        {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
+      ]
+    }, {
+      run: conf.popup.rate && conf.popup.rate_key,
+      map: [
+        {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
+        {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
+        {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
+        {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
+        {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
+        {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
+        {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
+        {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
+        {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
+        {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
+      ]
+    }, {
+      run: this.manga.enabled,
+      map: [
+        {k: conf.key.popup_manga_end, f: this.toggle_manga_mode},
+      ]
+    }, {
+      run: !this.manga.enabled,
+      map: [
+        {k: conf.key.popup_manga_start, f: this.toggle_manga_mode},
+      ]
+    }, {
+      run: true,
+      map: [
+        {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
+        {k: conf.key.popup_next,                 f: this.next, a: [true]},
+        {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
+        {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
+        {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
+        {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
+        {k: conf.key.popup_first,                f: this.first},
+        {k: conf.key.popup_last,                 f: this.last},
+        {k: conf.key.popup_close,                f: this.close},
+        {k: conf.key.popup_open_profile,         f: this.open_author_profile},
+        {k: conf.key.popup_open_illust,          f: this.open_author_illust},
+        {k: conf.key.popup_open_bookmark,        f: this.open_author_bookmark},
+        {k: conf.key.popup_open_staccfeed,       f: this.open_author_staccfeed},
+        {k: conf.key.popup_open_response,        f: this.open_image_response},
+        {k: conf.key.popup_bookmark_start,       f: this.toggle_bookmark_edit},
+        {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
+        {k: conf.key.popup_qrate_toggle,         f: this.toggle_qrate},
+        {k: conf.key.popup_open,                 f: this.open},
+        {k: conf.key.popup_open_big,             f: this.open, a: [true]},
+        {k: conf.key.popup_reload,               f: this.reload},
+        {k: conf.key.popup_caption_toggle,       f: this.toggle_caption},
+        {k: conf.key.popup_comment_toggle,       f: this.toggle_viewer_comments},
+        {k: conf.key.popup_tag_edit_start,       f: this.toggle_tag_edit},
+        {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
+        {k: conf.key.popup_zoom_in,              f: this.set_zoom, a: [this.zoom_scale + 1]},
+        {k: conf.key.popup_zoom_out,             f: this.set_zoom, a: [this.zoom_scale - 1]},
+        {k: conf.key.popup_help,                 f: show_help}
+      ]
+    });
   });
 
   Popup.onclick = new Signal(function(ev) { this.close(); });
@@ -3331,7 +3345,7 @@
   Popup.prototype.set_manga_page = function(page) {
     if (page < 0) {
       this.set(this.item);
-    } else if (page != this.manga.page) {
+    } else if (page !== this.manga.page) {
       if (page < this.manga.page_count) {
         var self = this;
         this.set_status('Loading');
@@ -3493,7 +3507,7 @@
   Popup.prototype.set_zoom = function(zoom) {
     zoom = zoom < 1 ? 1 : Math.floor(zoom);
     if (browser.webkit ||
-        this.images.list.length != 1 ||
+        this.images.list.length !== 1 ||
         zoom === this.zoom_scale) {
       this.locate();
       this.update_info();
@@ -3754,7 +3768,7 @@
     }
   };
   Popup.prototype.is_bookmark_editing = function() {
-    return this.bm_edit.style.display != 'none';
+    return this.bm_edit.style.display !== 'none';
   };
 
   Popup.prototype.toggle_tag_edit = function() {
@@ -3783,20 +3797,20 @@
     }
   };
   Popup.prototype.is_tag_editing = function() {
-    return this.tag_edit.style.display != 'none';
+    return this.tag_edit.style.display !== 'none';
   };
 
   Popup.prototype.open_author_profile = function() {
-    if (this.author.style.display != 'none') pp.open(this.a_profile.href);
+    if (this.author.style.display !== 'none') pp.open(this.a_profile.href);
   };
   Popup.prototype.open_author_illust = function() {
-    if (this.author.style.display != 'none') pp.open(this.a_illust.href);
+    if (this.author.style.display !== 'none') pp.open(this.a_illust.href);
   };
   Popup.prototype.open_author_bookmark = function() {
-    if (this.author.style.display != 'none') pp.open(this.a_bookmark.href);
+    if (this.author.style.display !== 'none') pp.open(this.a_bookmark.href);
   };
   Popup.prototype.open_author_staccfeed = function() {
-    if (this.author.style.display != 'none' && this.a_stacc.style.display != 'none') {
+    if (this.author.style.display !== 'none' && this.a_stacc.style.display !== 'none') {
       pp.open(this.a_stacc.href);
     }
   };
@@ -4223,7 +4237,7 @@
         keyhandler = BookmarkForm.prototype.keypress2;
         //this.connections.push($ev(this.root).listen(['focus', 'blur'], bind(function() {
         //  alert();
-        //  this.set_root_key_enabled(lc(window.document.activeElement) != 'input');
+        //  this.set_root_key_enabled(lc(window.document.activeElement) !== 'input');
         //}, this)));
       } else {
         this.input_tag.focus();
@@ -4327,6 +4341,7 @@
 
   BookmarkForm.prototype.keypress_common = function(ev, key) {
     if (!pp.key_enabled(ev)) return false;
+    /*
     if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
       this.submit();
       return true;
@@ -4335,6 +4350,7 @@
       return true;
     }
     return false;
+     */
   };
 
   // conf.bookmark_form === 1
@@ -4354,7 +4370,7 @@
     } else if (y >= this.tag_items.length) {
       y = 0;
     }
-    if (y != this.tag_preselected_index.y) x = 0;
+    if (y !== this.tag_preselected_index.y) x = 0;
     if (x < 0) {
       x = this.tag_items[y].length - 1;
     } else if (x >= this.tag_items[y].length) {
@@ -4377,7 +4393,7 @@
       case $ev.KEY_RIGHT:  x = 1; break;
       case $ev.KEY_DOWN:   y = 1; break;
       }
-      if (x != 0 || y != 0) {
+      if (x !== 0 || y !== 0) {
         this.preselect_tag(this.tag_preselected_index.x + x, this.tag_preselected_index.y + y);
         return true;
       }
@@ -4932,7 +4948,7 @@
   }
   function getpos(elem, root) {
     var left = elem.offsetLeft, top = elem.offsetTop;
-    while((elem = elem.offsetParent) && elem != root) {
+    while((elem = elem.offsetParent) && elem !== root) {
       left += elem.offsetLeft;
       top += elem.offsetTop;
     }
@@ -5116,7 +5132,7 @@
     var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
     if (conf.debug && ret) {
       var attr_f = ret.getAttribute(attr);
-      if (attr_f != url) alert('New one?\n' + attr_f);
+      if (attr_f !== url) alert('New one?\n' + attr_f);
     }
     return ret;
   }
