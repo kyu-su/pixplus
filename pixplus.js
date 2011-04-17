@@ -54,7 +54,7 @@
       var pref = Components.classes['@mozilla.org/preferences-service;1']
         .getService(Components.interfaces.nsIPrefBranch);
       function check_key(key) {
-        if (!(key && (typeof key === 'string' || key instanceof String) && key.match(/^[a-z_]+$/))) {
+        if (!(key && (typeof key === 'string' || key instanceof String) && /^[a-z_]+$/.test(key))) {
           throw 'invalid argument';
         }
         return 'extensions.pixplus.' + key;
@@ -452,7 +452,7 @@
         try {
           if (!conf.popup[key + '_regexp']) throw 1;
           var v = conf.popup[key] & 0xf, r = new RegExp(conf.popup[key + '_regexp']);
-          conf.popup[key + '_p'] = v === 2 ? !!window.location.href.match(r) : v === 1;
+          conf.popup[key + '_p'] = v === 2 ? r.test(window.location.href) : v === 1;
         } catch(ex) {
           conf.popup[key + '_p'] = false;
         }
@@ -1464,17 +1464,17 @@
     }
 
     var re;
-    if (window.location.pathname.match(/^\/(?:mypage|cate_r18)\.php/)) {
+    if (/^\/(?:mypage|cate_r18)\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       mypage();
-    } else if (window.location.pathname.match(/^\/member\.php/)) {
+    } else if (/^\/member\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/member.php?id=11
       mypage();
       each($xa('//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]'), function(root) {
         add_gallery({root: root, xpath_col: '.'}, unpack_captions);
       });
-    } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
+    } else if (/^\/member_illust\.php/.test(window.location.pathname)) {
       if (options.illust_id) {
         // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
         // 下部のイメージレスポンス
@@ -1493,7 +1493,7 @@
           xpath_cap: './ul/li/a[img]/following-sibling::text()[1]'
         }, unpack_captions);
       }
-    } else if ((re = window.location.pathname.match(/^\/ranking(_tag|_area)?\.php/))) {
+    } else if ((re = /^\/ranking(_tag|_area)?\.php/.exec(window.location.pathname))) {
       if ((re[1] == '_tag' || re[1] == '_area') && !options.type) {
         // 人気タグ別ランキング / 地域ランキング
         // http://www.pixiv.net/ranking_area.php
@@ -1513,8 +1513,8 @@
           xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'
         });
       }
-    } else if (window.location.pathname.match(/^\/bookmark\.php/) && !options.id &&
-               (!options.type || options.type.match(/^illust(?:_all)?$/))) {
+    } else if (/^\/bookmark\.php/.test(window.location.pathname) && !options.id &&
+               (!options.type || /^illust(?:_all)?$/.test(options.type))) {
       // ブックマーク管理
       // http://www.pixiv.net/bookmark.php
       // http://www.pixiv.net/bookmark.php?type=illust_all
@@ -1533,11 +1533,11 @@
         xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
         xpath_cap: './ul/li/text()[preceding-sibling::a/img]'
       }, unpack_captions, conf.debug ? debug_filter : null);
-    } else if (window.location.pathname.match(/^\/bookmark_detail\.php/)) {
+    } else if (/^\/bookmark_detail\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
       // 下部の「****の他の作品」
       add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'});
-    } else if (window.location.pathname.match(/^\/stacc/)) {
+    } else if (/^\/stacc/.test(window.location.pathname)) {
       // http://www.pixiv.net/stacc/
       add_gallery({
         xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
@@ -1550,14 +1550,14 @@
         xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
         thumb_only: true
       });
-    } else if (window.location.pathname.match(/^\/event_detail\.php/)) {
+    } else if (/^\/event_detail\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/event_detail.php?event_id=805
       add_gallery({
         xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
         xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
         thumb_only: true
       });
-    } else if (window.location.pathname.match(/^\/event_member\.php/)) {
+    } else if (/^\/event_member\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/event_member.php?event_id=805
       add_gallery({
         xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
@@ -1565,7 +1565,7 @@
         thumb_only: true,
         get_url:    get_url_from_image
       });
-    } else if (window.location.pathname.match(/^\/(?:view|rating|comment)_all\.php/)) {
+    } else if (/^\/(?:view|rating|comment)_all\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/view_all.php
       // http://www.pixiv.net/rating_all.php
       // http://www.pixiv.net/comment_all.php
@@ -1574,7 +1574,7 @@
         xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
         allow_nothumb: -1
       });
-    } else if (window.location.pathname.match(/^\/ranking_log\.php/)) {
+    } else if (/^\/ranking_log\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/ranking_log.php
       if (conf.popup_ranking_log) {
         add_gallery({
@@ -1585,7 +1585,7 @@
           get_url:    get_url_from_image
         });
       }
-    } else if (window.location.pathname.match(/^\/user_event\.php/)) {
+    } else if (/^\/user_event\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/user_event.php
       // http://www.pixiv.net/user_event.php?mode=attn
       add_gallery({
@@ -1600,7 +1600,7 @@
           xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
         });
       }
-    } else if (window.location.pathname.match(/^\/user_event_related\.php/)) {
+    } else if (/^\/user_event_related\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/user_event_related.php?id=23
       pp.write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
       add_gallery({
@@ -1638,7 +1638,7 @@
 
     function get_url_from_image(cap, thumb) {
       var re;
-      if (thumb && (re = thumb.src.match(/http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i))) {
+      if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
         return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
       } else {
         return null;
@@ -1782,7 +1782,7 @@
       './/ul[contains(concat(" ", @class, " "), " illusts ") and li]',
       r_container,
       function(illusts) {
-        if (!window.location.pathname.match(/^\/bookmark_add\.php/) && de.clientWidth >= 1175) {
+        if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
           if (conf.locate_recommend_right == 1) {
             locate_right();
           } else if (conf.locate_recommend_right == 2 &&
@@ -1855,7 +1855,7 @@
       geturl(url, function(text) {
         var re;
         if (cancelled) return;
-        if ((re = text.match(/<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi))) {
+        if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi.exec(text))) {
           wrap.innerHTML = re[0];
           var form = new BookmarkForm(wrap, {
             autotag: !$x('preceding-sibling::a[contains(@href, "bookmark_detail.php")]', bm_add_anc),
@@ -1888,8 +1888,8 @@
 
   function init_per_page() {
     var bm_tag_list = $('bookmark_list');
-    if (window.location.pathname.match(/^\/bookmark(?:_tag_setting)?\.php/)) {
-      if (options.type && options.type.match(/^(?:reg_)?user$/)) {
+    if (/^\/bookmark(?:_tag_setting)?\.php/.test(window.location.pathname)) {
+      if (options.type && /^(?:reg_)?user$/.test(options.type)) {
         // http://www.pixiv.net/bookmark.php?type=user
         /* oAutoPagerizeと衝突する。
          * //div[@class="two_column_body"]/div[@class="two_column_space"]//div[@class="list_box"]/*
@@ -1970,7 +1970,7 @@
           }
         });
       }
-    } else if (window.location.pathname.match(/^\/member_illust\.php/)) {
+    } else if (/^\/member_illust\.php/.test(window.location.pathname)) {
       switch(options.mode) {
       case 'medium':
         init_illust_page_bookmark();
@@ -1997,7 +1997,7 @@
 
         var re, img = $x('//div[contains(concat(" ", @class, " "), " works_display ")]/a[starts-with(@href, "member_illust.php?mode=big")]/img');
         // 冒頭メモ参照
-        if (img && (re = img.src.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i))) {
+        if (img && (re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
           img.parentNode.href = re[1] + re[2];
         }
         break;
@@ -2014,7 +2014,7 @@
           }
         })(function() {
           var re;
-          if ((re = window.location.hash.match(/^#pp_page=(\d+)$/))) {
+          if ((re = /^#pp_page=(\d+)$/.exec(window.location.hash))) {
             var page = parseInt(re[1]);
             each(window.pixiv.context.images, function(ary, idx) {
               if ((page + 1) <= ary.length) {
@@ -2025,19 +2025,19 @@
               page -= ary.length;
               return false;
             });
-          } else if (window.location.hash.match(/^#pp_manga_tb$/)) {
+          } else if (window.location.hash === '#pp_manga_tb') {
             window.pixiv.manga.toggleView();
           }
         });
         break;
       }
-    } else if (window.location.pathname.match(/^\/bookmark_add\.php/)) {
+    } else if (/^\/bookmark_add\.php/.test(window.location.pathname)) {
       if (conf.mod_bookmark_add_page && options.type == 'illust') {
         var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
         if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
       }
       conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
-    } else if (window.location.pathname.match(/^\/search_user\.php/)) {
+    } else if (/^\/search_user\.php/.test(window.location.pathname)) {
       Pager.wait(function() {
         var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
         if (research) {
@@ -2178,7 +2178,7 @@
     $ev(window.document.body).click(function(ev) {
       var anc = $x('ancestor-or-self::a[1]', ev.target), re;
       if (anc && !anc.hasAttribute('nopopup') &&
-          (re = anc.href.match(/^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/))) {
+          (re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/.exec(anc.href))) {
         if (Popup.instance || $t('img', anc).length ||
             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + re[1] + '")]//img')) {
           var opts = parseopts(anc.href);
@@ -2195,10 +2195,10 @@
 
     if (conf.bookmark_hide) {
       each($xa('.//a[contains(@href, "bookmark.php")]'), function(anc) {
-        if (!anc.href.match(/[\?&]rest=/) &&
-            (anc.href.match(/[\?&]type=illust/) ||
-             !anc.href.match(/[\?&]type=/))) {
-          anc.href += (anc.href.match(/\?/) ? "&" : "?") + "rest=hide";
+        if (!/[\?&]rest=/.test(anc.href) &&
+            (/[\?&]type=illust/.test(anc.href) ||
+             !/[\?&]type=/.test(anc.href))) {
+          anc.href += (anc.href.indexOf('?') >= 0 ? "&" : "?") + "rest=hide";
         }
       });
     }
@@ -2230,7 +2230,7 @@
               window.jQuery(form).serialize(),
               function(data) {
                 var re;
-                if (data.match(/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i)) {
+                if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
                   window.jQuery('#favorite-button')
 		    .addClass('added')
 		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
@@ -2239,7 +2239,7 @@
                     .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
-                } else if ((re = data.match(/<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i))) {
+                } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
                   alert(re[1]);
                 } else {
                   alert('Error!');
@@ -2286,7 +2286,7 @@
                 $xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
                 function(item) {
                   var re;
-                  if ((re = item.id.match(/^qr_item(\d+)$/)) && (parseInt(re[1]) & 1)) {
+                  if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1]) & 1)) {
                     var value = $x('following-sibling::div', item);
                     if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
                   }
@@ -2320,9 +2320,9 @@
 
     each($xa('//a[contains(@href, "jump.php")]'), function(anc) {
       var re;
-      if ((re = anc.href.match(/^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/))) {
+      if ((re = /^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/.exec(anc.href))) {
         var url = re[1];
-        if (url.match(/^\w+%3a%2f%2f/i)) url = decodeURIComponent(url);
+        if (/^\w+%3a%2f%2f/i.test(url)) url = decodeURIComponent(url);
         anc.href = url;
       }
     });
@@ -2339,7 +2339,7 @@
     }
     function jq_onload() {
       window.jQuery.noConflict();
-      if (window.location.pathname.match(/^\/stacc\//)) {
+      if (/^\/stacc\//.test(window.location.pathname)) {
         var _ajax = window.jQuery.ajax;
         window.jQuery.ajax = function(obj) {
           if (obj) obj.url = mod_rpc_url(obj.url);
@@ -2365,7 +2365,7 @@
        .script(pp.url.js.jquery)
        .wait(jq_onload)
        .script(pp.url.js.prototypejs)
-       .wait(window.location.pathname.match(/^\/stacc\//) ? pt_onload : null)
+       .wait(/^\/stacc\//.test(window.location.pathname) ? pt_onload : null)
        .script(pp.url.js.effects)
        .script(pp.url.js.rpc)
        .wait(function() {
@@ -2385,7 +2385,7 @@
   }
 
   function GalleryItem(url, thumb, caption, prev, gallery) {
-    var id = parseInt(url.match(/[\?&]illust_id=(\d+)/)[1]);
+    var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1]);
     if (gallery && gallery.args.skip_dups && prev && id == prev.id) prev = prev.prev;
 
     this.loaded  = false;
@@ -2418,7 +2418,7 @@
   GalleryItem.prototype.parse_img_url = function(url) {
     // 冒頭メモ参照
     var re;
-    if ((re = url.match(/^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/))) {
+    if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/.exec(url))) {
       this.img_url_base = re[1];
       this.img_url_ext  = re[2];
     }
@@ -2506,7 +2506,7 @@
       if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
 
       var url = (self.args.get_url || Gallery.get_url)(cap, thumb);
-      if (!url || !url.match(/[\?&]illust_id=(\d+)/)) return;
+      if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
 
       if (cap) {
         if (cap.nodeType == 3) {
@@ -3020,7 +3020,7 @@
       var rpc_html = '';
       pp.rpc_state = 0;
       for(var id in pp.rpc_ids) {
-        if ((re = loader.text.match(new RegExp('(<div[^>]+id="' + id + '"[^>]*>[^<]+</div>)', 'i')))) {
+        if ((re = new RegExp('(<div[^>]+id="' + id + '"[^>]*>[^<]+</div>)', 'i').exec(loader.text))) {
           rpc_html += re[1];
           pp.rpc_state |= pp.rpc_ids[id];
         }
@@ -3034,17 +3034,17 @@
     /* ツールは「&nbsp;」区切り
      * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
      */
-    if ((re = loader.text.match(/<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i))) {
+    if ((re = /<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i.exec(loader.text))) {
       var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
       _title = trim(re[2]);
       this.date.textContent = tmp[0];
-      if ((re = loader.text.match(/(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/))) {
+      if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
         this.date_repost.textContent = (re[1] == _date ? '' : re[1] + '\u65e5 ') + re[2];
         this.date_repost.style.display = '';
       } else {
         this.date_repost.style.display = 'none';
       }
-      if (tmp.length > 1 && (re = tmp[1].match(/(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/))) {
+      if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/.exec(tmp[1]))) {
         if (re[3]) {
           this.manga.page_count = parseInt(re[3]);
           this.manga.usable = this.manga.page_count > 0;
@@ -3075,23 +3075,23 @@
     this.manga_btn.removeAttribute('enable');
     this.manga_btn.href = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
 
-    if ((re = loader.text.match(/<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i))) {
+    if ((re = /<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i.exec(loader.text))) {
       var a_status_class = '';
       this.a_img.src            = re[3];
       this.a_profile.href       = re[1];
       this.a_profile.innerHTML  = trim(re[4]) || '(Author)';
       this.a_illust.href        = '/member_illust.php?id=' + re[2];
       this.a_bookmark.href      = '/bookmark.php?id=' + re[2];
-      if ((re = loader.text.match(/<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/\"]+)\"/i))) {
+      if ((re = /<a[^>]+href=\"http:\/\/www\.pixiv\.net(\/stacc\/[^\/\"]+)\"/i.exec(loader.text))) {
         this.a_stacc.href = re[1];
         this.a_stacc.style.display = '';
       }
       if (conf.popup.author_status_icon) {
-        if (loader.text.match(/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i)) {
+        if (/<a[^>]+id=\"mypixiv-button\"[^>]+class=\"[^\"]*added[^\"]*\"/i.test(loader.text)) {
           a_status_class = 'pixplus-flag';
-        } else if (loader.text.match(/<span[^>]+class=\"list_fav\">/i)) {
+        } else if (/<span[^>]+class=\"list_fav\">/i.test(loader.text)) {
           a_status_class = 'pixplus-heart';
-        } else if (loader.text.match(/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i)) {
+        } else if (/<form[^>]+action=\"\/?bookmark_setting\.php\"[^>]*>/i.test(loader.text)) {
           a_status_class = 'pixplus-check';
         }
       }
@@ -3112,7 +3112,7 @@
     this.has_image_response = false;
     this.res_btn.style.display = 'none';
     // レスポンスする方とされる方に両対応
-    if ((re = loader.text.match(/<p[^>]+class=\"worksAlso\"><a[^>]+href=\"\/?(response\.php\?illust_id=(\d+))\">/i))) {
+    if ((re = /<p[^>]+class=\"worksAlso\"><a[^>]+href=\"\/?(response\.php\?illust_id=(\d+))\">/i.exec(loader.text))) {
       this.has_image_response = true;
       this.res_btn.href = '/' + re[1];
       if (re[2] == this.item.id) {
@@ -3123,7 +3123,7 @@
       this.res_btn.style.display = '';
     }
 
-    if (loader.text.match(/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i)) {
+    if (/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i.test(loader.text)) {
       this.bm_btn.setAttribute('enable', '');
     } else {
       this.bm_btn.removeAttribute('enable');
@@ -3132,23 +3132,23 @@
     this.bm_btn.style.display = '';
 
     this.comment.style.display = 'none';
-    if ((re = loader.text.match(/<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i))) {
+    if ((re = /<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i.exec(loader.text))) {
       if ((this.comment.innerHTML = edit_comment(re[1]))) this.comment.style.display = '';
     }
 
     this.tag_edit_enabled = false;
     this.tag_edit_btn = null;
     this.tags.style.display = 'none';
-    if ((re = loader.text.match(/<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i))) {
+    if ((re = /<span[^>]+id=\"tags\"[^>]*>(.*)<\/span>/i.exec(loader.text))) {
       var html = '';
       each(re[1].replace(/\s*\n\s*/g, '').split('\u3000'), function(t) {
         t = trim(t);
         if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
       });
-      if (!html.match(/<a /i)) html = '';
+      if (!/<a /i.test(html)) html = '';
       // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
       if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
-          loader.text.match(/<a[^>]+onclick="startTagEdit\(\)"/i)) {
+          /<a[^>]+onclick="startTagEdit\(\)"/i.exec(loader.text)) {
         this.tag_edit_enabled = true;
       }
       if (html || this.tag_edit_enabled) {
@@ -3169,31 +3169,31 @@
     var re_rtv, re_rtc, re_rtt;
     //<h4>Views：<div style="display:inline;" id="jd_rtv">3495</div>　Rating Count：<div style="display:inline;" id="jd_rtc">211</div>　Ratings：<div style="display:inline;" id="jd_rtt">2091</div></h4>
     if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-        //(re_rtv = loader.text.match(/<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i)) &&
-        //(re_rtc = loader.text.match(/<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i)) &&
-        //(re_rtt = loader.text.match(/<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i))) {
-        (re = loader.text.match(/(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i))) {
+        //(re_rtv = /<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
+        //(re_rtc = /<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
+        //(re_rtt = /<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i.exec(loader.text))) {
+        (re = /(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i.exec(loader.text))) {
       /*
       var html = '<div id="rating"><div id="unit"><h4>' +
         '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
         '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
         '<span>' + "\u7dcf\u5408\u70b9: " + re_rtt[0] + '</span>';
-      if ((re = loader.text.match(/(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i))) {
+      if ((re = /(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i.exec(loader.text))) {
         // add '/' for staccfeed
         html += '<span>' + re[1] + '/' + re[2] + '</span>';
       }
       html += '</h4>';
        */
       var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
-      if ((re = loader.text.match(/(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i))) html += re[1];
+      if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) html += re[1];
       html += '</div>';
       if (rpc_chk(pp.rpc_req_qrate)) {
-        var re1 = loader.text.match(/<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i);
-        if (re1 && (re = loader.text.match(/(<div[^>]+id=\"quality_rating\"[^>]*>[\s\S]*?<\/div>)/i))) {
+        var re1 = /<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i.exec(loader.text);
+        if (re1 && (re = /(<div[^>]+id=\"quality_rating\"[^>]*>[\s\S]*?<\/div>)/i.exec(loader.text))) {
           html += re1[0] + '</div>' + re[1];
           this.has_qrate = true;
-        } else if ((re1 = loader.text.match(/<h4[^>]*><a[^>]+onClick=\"onOff\('result'\).*<\/h4>/i))) {
-          if ((re = loader.text.match(/(<div[^>+]id=\"result\"[\s\S]*?\n<\/div>)/i))) {
+        } else if ((re1 = /<h4[^>]*><a[^>]+onClick=\"onOff\('result'\).*<\/h4>/i.exec(loader.text))) {
+          if ((re = /(<div[^>+]id=\"result\"[\s\S]*?\n<\/div>)/i.exec(loader.text))) {
             html += re1[0] + '</div>' + re[1];
             this.has_qrate = true;
           }
@@ -3217,10 +3217,10 @@
     }
 
     this.viewer_comments_enabled = false;
-    if (pp.rpc_usable && (re = loader.text.match(/(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i))) {
+    if (pp.rpc_usable && (re = /(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i.exec(loader.text))) {
       (function() {
         var form = re[1], html = '';
-        each(form.match(/<input[^>]+type=\"hidden\"[^>]+>/ig), function(hidden) { html += hidden; });
+        each(/<input[^>]+type=\"hidden\"[^>]+>/ig.exec(form), function(hidden) { html += hidden; });
         if (html) {
           var comment = $c('input'), submit = $c('input');
           comment.setAttribute('type', 'text');
@@ -3627,7 +3627,7 @@
       var url = del.getAttribute('href');
       del.setAttribute('onclick', '');
       del.onclick = '';
-      if (url.match(/^\w/)) url = '/' + url;
+      if (/^\w/.test(url)) url = '/' + url;
       $ev(del).click(bind(function() {
         if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
           window.jQuery.ajax({
@@ -3680,7 +3680,7 @@
       geturl('/bookmark_add.php?type=illust&illust_id=' + this.item.id, bind(function(text) {
         var re;
         this.bm_loading = false;
-        if ((re = text.match(/<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/i))) {
+        if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/i.exec(text))) {
           this.complete();
           // エラー回避
           if (!window.update_input_tag) window.update_input_tag = function() { };
@@ -3805,7 +3805,7 @@
 
     geturl(this.url, bind(function(text) {
       var re;
-      if ((re = text.match(/<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i))) {
+      if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
         this.onerror(re[1].replace(/<[^>]*>/g, ''));
       } else {
         this.text = text;
@@ -3846,11 +3846,11 @@
   };
   Popup.Loader.prototype.parse_text = function() {
     var url, re;
-    if ((re = this.text.match(/<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i))) {
+    if ((re = /<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i.exec(this.text))) {
       url = re[1];
       if (conf.popup.big_image &&
-          !this.text.match(/<div[^>]+class=\"[^\"]*works_display[^\"]*\"[^>]*><a[^>]+href=\"member_illust\.php\?mode=manga/i) &&
-          (re = url.match(/^(.+)_m(\.[^\.]+)$/))) {
+          !/<div[^>]+class=\"[^\"]*works_display[^\"]*\"[^>]*><a[^>]+href=\"member_illust\.php\?mode=manga/i.test(this.text) &&
+          (re = /^(.+)_m(\.[^\.]+)$/.exec(url))) {
         url = re[1] + re[2];
       }
     }
@@ -4920,7 +4920,7 @@
         if (p.scrollHeight > p.offsetHeight) {
           // for webkit
           var style = p.ownerDocument.defaultView.getComputedStyle(p, '');
-          if (style.overflowY.match(/auto|scroll/)) {
+          if (/auto|scroll/i.test(style.overflowY)) {
             lazy_scroll(elem, offset, p, p);
             break;
           }
@@ -4975,7 +4975,7 @@
   }
   function edit_comment(str) {
     str = str.replace(/(?:<br ?\/?>)*([\-\u2015\u2500\u2501\uff3f])\1{7,}(?:<br ?\/?>)*/g, '<hr />');
-    if (!str.match(/<br[ \/>]/i)) {
+    if (!/<br[ \/>]/i.test(str)) {
       str = str
         .replace(/^[\s\u3000]+|[\s\u3000]+$/g, '')
         .replace(/[\s\u3000]{4,}/g, '<br />');
