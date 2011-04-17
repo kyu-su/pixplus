@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.5.2
+// @version     0.6
 // @license     Public domain
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -39,7 +39,7 @@
         }
         opera.extension.onmessage = function(ev){
           var data = JSON.parse(ev.data);
-          if (data.command == 'config') {
+          if (data.command === 'config') {
             func(window, window, {conf: data.data, open_options: open_options});
           }
         };
@@ -99,7 +99,7 @@
           appcontent.addEventListener('DOMContentLoaded', function(ev) {
             var window = ev.target.defaultView.window;
             if (window.top === window &&
-                window.location.hostname == 'www.pixiv.net' &&
+                window.location.hostname === 'www.pixiv.net' &&
                 window.location.href.indexOf('pixivreader') < 0) {
               var url = window.location.href;
               load(window, url);
@@ -118,7 +118,7 @@
         chrome.extension.sendRequest( /* WARN */
           {command: 'config'},
           function(data) {
-            if (data.command == 'config') {
+            if (data.command === 'config') {
               func(JSON.stringify({
                 base_uri: chrome.extension.getURL('/'),
                 conf:     data.data
@@ -127,7 +127,7 @@
           });
       } else if (window.safari) {
         safari.self.addEventListener('message', function(ev) {
-          if (ev.name == 'config') {
+          if (ev.name === 'config') {
             func(JSON.stringify({
               base_uri: safari.extension.baseURI,
               conf:     ev.message
@@ -202,9 +202,7 @@
       "reverse":              [0, "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b",
                                [{"value": 0, "title": "\u7121\u52b9"},
                                 {"value": 1, "title": "\u6709\u52b9"},
-                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"},
-                                {"value": 17, "title": "\u6709\u52b9(\u30a2\u30ed\u30fc\u30ad\u30fc\u4ee5\u5916)"},
-                                {"value": 18, "title": "\u6b63\u898f\u8868\u73fe(\u30a2\u30ed\u30fc\u30ad\u30fc\u4ee5\u5916)"}]],
+                                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]],
       "reverse_regexp":       ["/(?:bookmark_new_illust|member_illust|mypage)\\.php",
                                "reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"],
       "auto_zoom":            [0, "\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"],
@@ -216,6 +214,35 @@
       "show_comment_form":    [true, "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"],
       "manga_spread":         [true, "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"]
     },
+    "key": {
+      "popup_caption_scroll_up":    ["Up",              "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"],
+      "popup_caption_scroll_down":  ["Down",            "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"],
+      "popup_prev":                 ["Backspace,a",     "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
+      "popup_prev_direction":       ["Left",            "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"],
+      "popup_next":                 ["Space",           "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
+      "popup_next_direction":       ["Right",           "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"],
+      "popup_first":                ["Home",            "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
+      "popup_last":                 ["End",             "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"],
+      "popup_close":                ["Escape",          "\u9589\u3058\u308b"],
+      "popup_open_profile":         ["e",               "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"],
+      "popup_open_illust":          ["r",               "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"],
+      "popup_open_bookmark":        ["t",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"],
+      "popup_open_staccfeed":       ["y",               "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"],
+      "popup_open_response":        ["Shift+r",         "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"],
+      "popup_bookmark_toggle":      ["b",               "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_open_bookmark_detail": ["Shift+b",         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"],
+      "popup_qrate_toggle":         ["d",               "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_open":                 ["Shift+f",         "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"],
+      "popup_open_big":             ["f",               "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"],
+      "popup_reload":               ["g",               "\u30ea\u30ed\u30fc\u30c9"],
+      "popup_caption_toggle":       ["c",               "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"],
+      "popup_comment_toggle":       ["Shift+c",         "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"],
+      "popup_manga_toggle":         ["v",               "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_open_manga_thumbnail": ["Shift+v",         "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"],
+      "popup_zoom_in":              ["plus,Shift+plus", "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b"],
+      "popup_zoom_out":             ["-,Shift+-",       "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b"],
+      "popup_help":                 ["?,Shift+?",       "\u30d8\u30eb\u30d7\u3092\u8868\u793a"]
+    },
     "bookmark": {
       "tag_order": ["", ""],
       "tag_aliases": ["", ""]
@@ -224,6 +251,7 @@
   };
   var conf = {
     popup: { },
+    key: { },
     bm_tag_order: [ ],
     bm_tag_aliases: { }
   };
@@ -312,7 +340,7 @@
     window.pixplus = pp;
   }
   function rpc_chk(f) {
-    return (pp.rpc_state & f) == f;
+    return (pp.rpc_state & f) === f;
   }
   function rpc_create_data(ids, data) {
     if (!data) data = {};
@@ -340,6 +368,13 @@
       conf:   conf.popup, /* __REMOVE__ */
       keys:   []
     }, {
+      name:   'key',
+      label:  'Key',
+      path:   ['conf', 'key'],
+      schema: conf_schema.key,
+      conf:   conf.key, /* __REMOVE__ */
+      keys:   []
+    }, {
       name:   'bookmark',
       label:  'Bookmark',
       path:   ['conf', 'bookmark'],
@@ -349,7 +384,7 @@
     map: {},
     conv: {
       'string':  [String, String],
-      'boolean': [function(s) { return s == 'true'; },
+      'boolean': [function(s) { return s === 'true'; },
                   function(v) { return v ? 'true' : 'false'; }],
       'number':  [function(s) {
         var v = parseFloat(s);
@@ -384,10 +419,10 @@
       for(var i = 0; i < lines.length; ++i) {
         var tag = lines[i];
         tag = tag.replace(/[\r\n]/g, '');
-        if (tag == '-') {
+        if (tag === '-') {
           if (ary_ary.length) ary.push(ary_ary);
           ary_ary = [];
-        } else if (tag == '*') {
+        } else if (tag === '*') {
           ary_ary.push(null);
         } else if (tag) {
           ary_ary.push(tag);
@@ -629,7 +664,7 @@
           input = window.document.createElement('input');
         }
         input.id = 'pp-conf-' + sec.name + '-' + key;
-        if (type == 'boolean') {
+        if (type === 'boolean') {
           input.setAttribute('type', 'checkbox');
           input.checked = value;
 
@@ -651,7 +686,7 @@
         var def = window.document.createElement('button');
         def.textContent = 'Default';
         def.addEventListener('click', function() {
-          if (type == 'boolean') {
+          if (type === 'boolean') {
             input.checked = sec.schema[key][0];
           } else {
             input.value = sec.schema[key][0];
@@ -663,10 +698,10 @@
         row.insertCell(-1).textContent = self.msg_filter(sec.schema[key][1]);
 
         input.addEventListener(
-          sec.schema[key][2] || type == 'boolean' ? 'change' : 'keyup',
+          sec.schema[key][2] || type === 'boolean' ? 'change' : 'keyup',
           function() {
             var value;
-            if (type == 'boolean') {
+            if (type === 'boolean') {
               value = input.checked;
             } else {
               value = self.st.conv[type][0](input.value);
@@ -678,7 +713,7 @@
 
         ++idx;
       }, function(sec) {
-        if (sec.name == 'bookmark') return true;
+        if (sec.name === 'bookmark') return true;
         table = window.document.createElement('table');
         self.make_page(sec.label, sec.name).content.appendChild(table);
         return false;
@@ -800,7 +835,7 @@
   ConfigUI.prototype.export_import = function() {
     var obj = window.JSON.parse(this.export_input.value), self = this;
     this.st.each(function(sec, key) {
-      if (sec.name == 'bookmark') return;
+      if (sec.name === 'bookmark') return;
       var val = obj[sec.name + '_' + key];
       if (typeof val !== 'undefined' && val !== null) {
         self.st.set(sec.name, key, val);
@@ -825,9 +860,9 @@
     }
 
     this.st.each(function(sec, key) {
-      if (sec.name == 'bookmark') return;
+      if (sec.name === 'bookmark') return;
       var input = self.input_table[sec.name + '_' + key], val;
-      if (typeof sec.schema[key][0] == 'boolean') {
+      if (typeof sec.schema[key][0] === 'boolean') {
         val = input.checked;
       } else {
         val = self.st.get_conv(sec.name, key)[0](input.value);
@@ -1051,8 +1086,8 @@
   }];
 
   ConfigUI.changelog_data = [{
-    date: '2011/04/xx', version: '0.5.2', changes: [
-      'conf.popup.reverse\u306b\u30a2\u30ed\u30fc\u30ad\u30fc\u3092\u9664\u5916\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002'
+    date: '2011/04/xx', version: '0.6', changes: [
+      '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002'
     ]
   }, {
     date: '2011/03/26', version: '0.5.1', changes: [
@@ -1320,7 +1355,7 @@
     '#pp-conf-pager section.select{display:block;}' +
     '#pp-conf-pager input, #pp-conf-pager textarea{' +
     '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
-    '#pp-conf-pager button{display:block !important;word-break:keep-all !important;}' +
+    '#pp-conf-pager button{display:block !important;word-break:keep-all !important;padding:0px;}' +
     '#pp-conf-pager textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
     '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
@@ -1389,7 +1424,7 @@
         fire_event();
       }
       function toggle() {
-        if (!div || div.style.display == 'none') {
+        if (!div || div.style.display === 'none') {
           show();
         } else {
           hide();
@@ -1494,7 +1529,7 @@
         }, unpack_captions);
       }
     } else if ((re = /^\/ranking(_tag|_area)?\.php/.exec(window.location.pathname))) {
-      if ((re[1] == '_tag' || re[1] == '_area') && !options.type) {
+      if ((re[1] === '_tag' || re[1] === '_area') && !options.type) {
         // 人気タグ別ランキング / 地域ランキング
         // http://www.pixiv.net/ranking_area.php
         area_right();
@@ -1617,7 +1652,7 @@
     }
 
     // 汎用
-    if (pp.galleries.length == 0) {
+    if (pp.galleries.length === 0) {
       if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
           $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
         // http://www.pixiv.net/event_christmas2010.php
@@ -1783,9 +1818,9 @@
       r_container,
       function(illusts) {
         if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
-          if (conf.locate_recommend_right == 1) {
+          if (conf.locate_recommend_right === 1) {
             locate_right();
-          } else if (conf.locate_recommend_right == 2 &&
+          } else if (conf.locate_recommend_right === 2 &&
                      $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
             Pager.wait(function() {
               locate_right();
@@ -1924,7 +1959,7 @@
             var container = $(container_id);
             container.className = type;
             each($t('ul', container), function(ul) {
-              if (type == 'cloud') {
+              if (type === 'cloud') {
                 ul.className = 'tagCloud';
               } else {
                 ul.removeAttribute('class');
@@ -1932,13 +1967,13 @@
             });
             each($xa('ul/li', container), function(li, idx) {
               var cn = li.className.replace(/bg_(?:gray|white)/, '');
-              if (type == 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+              if (type === 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
               li.className = cn;
             });
 
-            $('book_outlist').style.display = type == 'flat' ? 'none' : 'block';
+            $('book_outlist').style.display = type === 'flat' ? 'none' : 'block';
 
-            var flat = type == 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
+            var flat = type === 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
 	    toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
 	    toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
@@ -1981,10 +2016,10 @@
           });
 
         var elem, pos, de = window.document.documentElement;
-        if (conf.scroll == 1) {
+        if (conf.scroll === 1) {
           elem = $x('//div[contains(concat(" ", @class, " "), " works_area ")]');
           pos = 0;
-        } else if (conf.scroll == 2) {
+        } else if (conf.scroll === 2) {
           elem = $x('//div[contains(concat(" ", @class, " "), " works_display ")]');
           pos = 1;
         }
@@ -2032,7 +2067,7 @@
         break;
       }
     } else if (/^\/bookmark_add\.php/.test(window.location.pathname)) {
-      if (conf.mod_bookmark_add_page && options.type == 'illust') {
+      if (conf.mod_bookmark_add_page && options.type === 'illust') {
         var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
         if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
       }
@@ -2182,7 +2217,7 @@
         if (Popup.instance || $t('img', anc).length ||
             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + re[1] + '")]//img')) {
           var opts = parseopts(anc.href);
-          if (opts.illust_id && opts.mode == 'medium') {
+          if (opts.illust_id && opts.mode === 'medium') {
             ev.preventDefault();
             Popup.run_url(anc.href);
             log(['Open popup: ', anc]);
@@ -2208,7 +2243,7 @@
       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);
       } else if ((stacc_anc = $x('//div[@id="nav"]/ul/li/a[contains(@href, "/stacc")]'))) {
-        if (conf.stacc_link == 'all') {
+        if (conf.stacc_link === 'all') {
           stacc_anc.href = '/stacc/p/all';
         } else {
           stacc_anc.href = '/stacc/my/home/' + conf.stacc_link + '/all';
@@ -2223,8 +2258,8 @@
           var btn = $('favorite-button');
           var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
           var restrict = $xa('.//input[@name="restrict"]', form);
-          if (btn && form && restrict.length == 2) {
-            each(restrict, function(r) { r.checked = r.value == conf.fast_user_bookmark - 1; });
+          if (btn && form && restrict.length === 2) {
+            each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
             window.jQuery.post(
               form.getAttribute('action'),
               window.jQuery(form).serialize(),
@@ -2330,9 +2365,9 @@
     pp.load_css(pp.url.css.bookmark_add);
 
     function mod_rpc_url(url) {
-      if (url == './rpc_rating.php') {
+      if (url === './rpc_rating.php') {
         return '/rpc_rating.php';
-      } else if (url == './rpc_tag_edit.php') {
+      } else if (url === './rpc_tag_edit.php') {
         return '/rpc_tag_edit.php';
       }
       return url;
@@ -2386,7 +2421,7 @@
 
   function GalleryItem(url, thumb, caption, prev, gallery) {
     var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1]);
-    if (gallery && gallery.args.skip_dups && prev && id == prev.id) prev = prev.prev;
+    if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
 
     this.loaded  = false;
     this.gallery = gallery;
@@ -2462,7 +2497,7 @@
 
     if (this.args.xpath_col) {
       this.detect_new_collection();
-      //if (this.page_col == 0) throw 1;
+      //if (this.page_col === 0) throw 1;
       $ev(window.document.body, {async: true}).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
       Gallery.oncreate.emit(this);
     } else {
@@ -2509,7 +2544,7 @@
       if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
 
       if (cap) {
-        if (cap.nodeType == 3) {
+        if (cap.nodeType === 3) {
           var new_caption = $c('a');
           new_caption.href = url;
           new_caption.textContent = trim(cap.nodeValue);
@@ -2519,7 +2554,7 @@
         } else if (cap instanceof window.HTMLAnchorElement) {
           cap.setAttribute('nopopup', '');
         } else if (!$x('ancestor::a', cap)) {
-          if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
+          if (cap.childNodes.length === 1 && cap.firstChild.nodeType === 3) {
             cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
           }
         }
@@ -2539,7 +2574,7 @@
       if (pbtn) {
         $ev($x('ancestor-or-self::a', pbtn)).click(function() {
           // for HaH bookmarklet
-          if (window.opera && window.document.activeElement == this) this.blur();
+          if (window.opera && window.document.activeElement === this) this.blur();
           Popup.run(item);
           return true;
         });
@@ -2722,7 +2757,7 @@
     //window.document.body.insertBefore(this.root_div, window.document.body.firstChild);
     window.document.body.appendChild(this.root_div);
     this.locate();
-    this.set(item, false, false, false, typeof manga_page == 'number' ? manga_page : -1);
+    this.set(item, false, false, false, typeof manga_page === 'number' ? manga_page : -1);
     Popup.set_event_handler();
   });
   Popup.onsetitem = new Signal();
@@ -2731,26 +2766,33 @@
     if (this.is_bookmark_editing()) {
       return false;
     } else if (this.is_tag_editing()) {
-      if ((key == $ev.KEY_ESCAPE || key == 'w') && !ev.shiftKey) {
+      if ((key === $ev.KEY_ESCAPE || key === 'w') && !ev.shiftKey) {
         this.toggle_tag_edit();
         return true;
       }
     } else {
-      if (conf.popup.rate && conf.popup.rate_key && ev.shiftKey && key.length == 1) {
+      if (conf.popup.rate && conf.popup.rate_key && ev.shiftKey && key.length === 1) {
         var score = '1234567890!"#$%&\'()~'.indexOf(key);
         if (score >= 0) {
           window.countup_rating(10 - (score % 10));
           return true;
         }
       }
+      var m = {Shift: ev.shiftKey, Ctrl: ev.ctrlKey, Alt: ev.altKey, Meta: ev.metaKey};
+      var pressed = [({'+':'plus',',':'comma'})[key] || key];
+      for(var k in m) m[k] && pressed.push(k);
+      pressed = pressed.sort().join('\n');
       return (function() {
         for(var i = 0; i < arguments.length; ++i) {
           var map = arguments[i];
           if (!map.run) continue;
           for(var j = 0; j < map.map.length; ++j) {
-            var entry = map.map[j];
-            if (key == entry.k) {
-              if (!entry.s && ev.shiftKey) return false;
+            var entry = map.map[j], match = false;
+            if (!entry.k) continue;
+            each(entry.k.split(','), function(trigger) {
+              return (match = (trigger.split('+').sort().join('\n') === pressed));
+            });
+            if (match) {
               entry.f.apply(this, entry.a || []);
               return true;
             }
@@ -2765,52 +2807,40 @@
           {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
         ]
       }, {
-        run: !ev.qrate,
-        map: [
-          {k: $ev.KEY_BACKSPACE, f: this.prev, a: [true]},
-          {k: $ev.KEY_SPACE,     f: this.next, a: [true]},
-          {k: $ev.KEY_LEFT,      f: this.prev, a: [false, false, conf.popup.reverse & 16]},
-          {k: $ev.KEY_RIGHT,     f: this.next, a: [false, false, conf.popup.reverse & 16]},
-          {k: $ev.KEY_UP,        f: this.scroll_caption, a: [-conf.popup.scroll_height]},
-          {k: $ev.KEY_DOWN,      f: this.scroll_caption, a: [conf.popup.scroll_height]},
-          {k: $ev.KEY_END,       f: this.last},
-          {k: $ev.KEY_HOME,      f: this.first},
-          {k: $ev.KEY_ESCAPE,    f: close}
-        ]
-      }, {
         run: true,
         map: [
-          {k: 'a',       f: this.prev, a: [true]},
-          {k: 'e',       f: this.open_author_profile},
-          {k: 'r', s: 1, f: a_illust, a: [ev.shiftKey]},
-          {k: 't',       f: this.open_author_bookmark},
-          {k: 'y',       f: this.open_author_staccfeed},
-          {k: 'b', s: 1, f: bookmark, a: [ev.shiftKey]},
-          {k: 'd',       f: this.toggle_qrate},
-          {k: 'f', s: 1, f: this.open, a: [!ev.shiftKey]},
-          {k: 'g', s: 1, f: this.reload},
-          {k: 'c', s: 1, f: caption, a: [ev.shiftKey]},
-          {k: 'v', s: 1, f: manga, a: [ev.shiftKey]},
-          {k: '-', s: 1, f: zoom, a: [-1]},
-          {k: '+', s: 1, f: zoom, a: [1]},
-          {k: '?', s: 1, f: show_help}
+          {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
+          {k: conf.key.popup_next,                 f: this.next, a: [true]},
+          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, false, true]},
+          {k: conf.key.popup_next_direction,       f: this.next, a: [false, false, true]},
+          {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
+          {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
+          {k: conf.key.popup_first,                f: this.first},
+          {k: conf.key.popup_last,                 f: this.last},
+          {k: conf.key.popup_close,                f: close},
+          {k: conf.key.popup_open_profile,         f: this.open_author_profile},
+          {k: conf.key.popup_open_illust,          f: this.open_author_illust},
+          {k: conf.key.popup_open_bookmark,        f: this.open_author_bookmark},
+          {k: conf.key.popup_open_staccfeed,       f: this.open_author_staccfeed},
+          {k: conf.key.popup_open_response,        f: this.open_image_response},
+          {k: conf.key.popup_bookmark_toggle,      f: this.toggle_bookmark_edit},
+          {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
+          {k: conf.key.popup_qrate_toggle,         f: this.toggle_qrate},
+          {k: conf.key.popup_open,                 f: this.open},
+          {k: conf.key.popup_open_big,             f: this.open, a: [true]},
+          {k: conf.key.popup_reload,               f: this.reload},
+          {k: conf.key.popup_caption_toggle,       f: this.toggle_caption},
+          {k: conf.key.popup_comment_toggle,       f: this.toggle_viewer_comments},
+          {k: conf.key.popup_manga_toggle,         f: this.toggle_manga_mode},
+          {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
+          {k: conf.key.popup_zoom_in,              f: zoom, a: [1]},
+          {k: conf.key.popup_zoom_out,             f: zoom, a: [-1]},
+          {k: conf.key.popup_help,                 f: show_help}
         ]
       });
     }
     function close() {
       this.manga.enabled ? this.toggle_manga_mode() : this.close();
-    }
-    function a_illust(response) {
-      response ? this.open_image_response() : this.open_author_illust();
-    }
-    function bookmark(detail) {
-      detail ? this.open_bookmark_detail() : this.toggle_bookmark_edit();
-    }
-    function caption(comments) {
-      comments ? this.toggle_viewer_comments() : this.toggle_caption();
-    }
-    function manga(tb) {
-      tb ? this.open_manga_tb() : this.toggle_manga_mode();
     }
     function zoom(z) {
       this.set_zoom(this.zoom_scale + z);
@@ -3039,7 +3069,7 @@
       _title = trim(re[2]);
       this.date.textContent = tmp[0];
       if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
-        this.date_repost.textContent = (re[1] == _date ? '' : re[1] + '\u65e5 ') + re[2];
+        this.date_repost.textContent = (re[1] === _date ? '' : re[1] + '\u65e5 ') + re[2];
         this.date_repost.style.display = '';
       } else {
         this.date_repost.style.display = 'none';
@@ -3115,7 +3145,7 @@
     if ((re = /<p[^>]+class=\"worksAlso\"><a[^>]+href=\"\/?(response\.php\?illust_id=(\d+))\">/i.exec(loader.text))) {
       this.has_image_response = true;
       this.res_btn.href = '/' + re[1];
-      if (re[2] == this.item.id) {
+      if (re[2] === this.item.id) {
         this.res_btn.removeAttribute('enable');
       } else {
         this.res_btn.setAttribute('enable', '');
@@ -3205,7 +3235,7 @@
       this.rating_enabled = true;
 
       var anc = $x('./div[@id="rating"]/h4/a', self.rating);
-      if (anc && anc.getAttribute('onclick') == 'rating_ef4()') {
+      if (anc && anc.getAttribute('onclick') === 'rating_ef4()') {
         anc.setAttribute('onclick', '');
         anc.onclick = '';
         anc.addEventListener('click', function(ev) {
@@ -3448,7 +3478,7 @@
     zoom = zoom < 1 ? 1 : Math.floor(zoom);
     if (browser.webkit ||
         this.images.list.length != 1 ||
-        zoom == this.zoom_scale) {
+        zoom === this.zoom_scale) {
       this.locate();
       this.update_info();
       return;
@@ -3456,7 +3486,7 @@
 
     this.zoom_scale = zoom;
     var img = this.images.list[0];
-    if (this.zoom_scale == 1) {
+    if (this.zoom_scale === 1) {
       if (img.image_unscaled) {
         img.image.parentNode.replaceChild(img.image_unscaled, img.image);
         img.image = img.image_unscaled;
@@ -3651,7 +3681,7 @@
   };
 
   Popup.prototype.toggle_viewer_comment_form = function() {
-    var hidden = this.viewer_comments_c.style.display == 'none', comment;
+    var hidden = this.viewer_comments_c.style.display === 'none', comment;
     this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
     if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
     conf.popup.show_comment_form = !!hidden;
@@ -3758,7 +3788,7 @@
     pp.open('http://www.pixiv.net/bookmark_detail.php?illust_id=' + this.item.id);
   };
   Popup.prototype.set_manga_mode = function(manga_mode, page) {
-    if (!this.manga.usable || !!this.manga.enabled == !!manga_mode) return;
+    if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) return;
     if ((this.manga.enabled = manga_mode)) {
       this.manga.enabled = true;
       this.manga_btn.setAttribute('enable', '');
@@ -3948,7 +3978,7 @@
         this.onerror('Invalid html');
         return;
       }
-      if (images[1] == 'unshift') pages.reverse();
+      if (images[1] === 'unshift') pages.reverse();
       for(j = 0; j < pages.length; ++j) {
         manga_pages.push({list: pages, page_inc: pages.length - j, page_dec: j + 1});
       }
@@ -4059,7 +4089,7 @@
     }, this)));
 
     this.connections.push($ev(this.root).key(function(ev, key) {
-      if (key == $ev.KEY_ESCAPE && $x('ancestor-or-self::input', ev.target)) {
+      if (key === $ev.KEY_ESCAPE && $x('ancestor-or-self::input', ev.target)) {
         ev.target.blur();
         return true;
       }
@@ -4075,7 +4105,7 @@
           window.add_form(tag);
           return true;
         });
-        if (idx == 0) {
+        if (idx === 0) {
           it.href = '/tags.php?tag=' + tag;
         } else {
           it.href = '/bookmark.php?tag=' + tag + (conf.bookmark_hide ? '&rest=hide' : '');
@@ -4093,7 +4123,7 @@
         each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]' +
                  '/a[starts-with(@id, "myBookmarkTagsSortBy")]', this.root),
              function(anc) {
-               if (anc.previousSibling.nodeType == 3) {
+               if (anc.previousSibling.nodeType === 3) {
                  // &nbsp;
                  anc.parentNode.removeChild(anc.previousSibling);
                }
@@ -4137,7 +4167,7 @@
       if (opts.autotag) this.autoinput_from_tag();
 
       var keyhandler = BookmarkForm.prototype.keypress_common;
-      if (this.key_type == 1) {
+      if (this.key_type === 1) {
         this.tag_items = [];
         this.tag_preselected_index = {x: 0, y: 0};
         this.input_tag.setAttribute('autocomplete', 'off');
@@ -4150,7 +4180,7 @@
         if (this.tag_items.length) {
           $ev(this.input_tag).key(bind(BookmarkForm.prototype.keypress1, this));
         }
-      } else if (this.key_type == 2) {
+      } else if (this.key_type === 2) {
         this.set_root_key_enabled(true);
         this.key_map_root = {};
         each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
@@ -4194,7 +4224,7 @@
     (function() {
       var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
       try {
-        if (bottom.firstChild.nodeType == 3 &&
+        if (bottom.firstChild.nodeType === 3 &&
             bottom.firstChild.nextSibling instanceof window.HTMLBRElement) {
           bottom.removeChild(bottom.firstChild);
           bottom.removeChild(bottom.firstChild);
@@ -4281,17 +4311,17 @@
 
   BookmarkForm.prototype.keypress_common = function(ev, key) {
     if (!pp.key_enabled(ev)) return false;
-    if (key == $ev.KEY_ENTER || key == $ev.KEY_SPACE) {
+    if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
       this.submit();
       return true;
-    } else if (key == $ev.KEY_ESCAPE) {
+    } else if (key === $ev.KEY_ESCAPE) {
       this.close();
       return true;
     }
     return false;
   };
 
-  // conf.bookmark_form == 1
+  // conf.bookmark_form === 1
   BookmarkForm.prototype.toggle_preselected = function() {
     send_click($x('.//a', this.tag_preselected));
   };
@@ -4335,14 +4365,14 @@
         this.preselect_tag(this.tag_preselected_index.x + x, this.tag_preselected_index.y + y);
         return true;
       }
-    } else if (key == $ev.KEY_UP || key == $ev.KEY_DOWN) {
-      this.preselect_tag(0, key == $ev.KEY_DOWN ? 0 : this.tag_items.length - 1);
+    } else if (key === $ev.KEY_UP || key === $ev.KEY_DOWN) {
+      this.preselect_tag(0, key === $ev.KEY_DOWN ? 0 : this.tag_items.length - 1);
       return true;
     }
     return false;
   };
 
-  // conf.bookmark_form == 2
+  // conf.bookmark_form === 2
   BookmarkForm.set_key_label_enabled = function(node, enabled) {
     var classes = node.className.replace(/ *pp-access-key-on */, ' ');
     if (enabled) classes += ' pp-access-key-on';
@@ -4377,7 +4407,7 @@
     if (!pp.key_enabled(ev)) return false;
     if (this.root_key_enabled) {
       if (this.key_map_root[key]) {
-        if (this.key_map_root[key].type == 'radio') {
+        if (this.key_map_root[key].type === 'radio') {
           this.key_map_root[key].checked = true;
         } else {
           this.key_map_root[key].focus();
@@ -4390,7 +4420,7 @@
       }
     }
     if (this.key_map_tags) {
-      if (key == $ev.KEY_ESCAPE) {
+      if (key === $ev.KEY_ESCAPE) {
         this.select_tag_list(null);
         return true;
       }
@@ -4449,7 +4479,7 @@
           return;
         }
         for(var i = 0; i < list.length; ++i) {
-          if (t(list[i]) == tag) {
+          if (t(list[i]) === tag) {
             ary_ary.push(list[i]);
             list.splice(i, 1);
             break;
@@ -4460,7 +4490,7 @@
     });
     list.sort(function(a, b) {
       a = t(a); b = t(b);
-      return a == b ? 0 : (a < b ? -1 : 1);
+      return a === b ? 0 : (a < b ? -1 : 1);
     });
     each(ary, function(ary_ary, idx) {
       var null_idx = ary_ary.indexOf(null);
@@ -4499,9 +4529,9 @@
     Floater.initialized = true;
   };
   Floater.auto_run = function(func) {
-    if (conf.float_tag_list == 1) {
+    if (conf.float_tag_list === 1) {
       func();
-    } else if (conf.float_tag_list == 2) {
+    } else if (conf.float_tag_list === 2) {
       Pager.wait(func);
     }
   };
@@ -4610,7 +4640,7 @@
   };
   Signal.prototype.disconnect = function(id) {
     each(this.funcs, function(func, idx) {
-      if (func.id == id) {
+      if (func.id === id) {
         this.funcs[idx].conn.disconnected = true;
         this.funcs.splice(idx, 1);
         return true;
@@ -4651,7 +4681,7 @@
         var conn = listen('keypress', function(ev, conn) {
           if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
           var c = ev.keyCode || ev.charCode, key;
-          if (c == ev.which && c > 0x20) {
+          if (c === ev.which && c > 0x20) {
             key = lc(String.fromCharCode(c));
           } else if ($ev.key_map[c]) {
             if (browser.webkit) return false;
@@ -4812,11 +4842,11 @@
       var elem = chk_ext_src('script', 'src', url);
       if (raise) ++this.load_cnt;
       if (elem) {
-	if (elem.getAttribute('type') == 'script/cache') { // webkit
+	if (elem.getAttribute('type') === 'script/cache') { // webkit
           log('$js#labjs: ' + url);
           var callee = arguments.callee, self = this;
           setTimeout(function() { callee.apply(self, [url]); }, 0);
-        } else if (elem.readyState == 'loading' || elem.readyState == 'interactive') {
+        } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
           log('$js#preexists: ' + url);
           wait.apply(this, [elem]);
         } else if (elem.readyState) { // for opera
@@ -4898,8 +4928,8 @@
     return {left: left, top: top};
   }
   function lazy_scroll(elem, offset, root, scroll) {
-    if (!elem || elem == arguments.callee.last) return;
-    offset = parseFloat(typeof offset == 'undefined' ? 0.2 : offset);
+    if (!elem || elem === arguments.callee.last) return;
+    offset = parseFloat(typeof offset === 'undefined' ? 0.2 : offset);
     if (root && scroll) {
       var pos = getpos(elem, root);
       var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
@@ -5124,7 +5154,7 @@
 
   // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
   // http://my.opera.com/crckyl/blog/show.dml/26153641
-  if (window.opera && (window.opera.version() < 10.50 || window.document.readyState == 'loading')) {
+  if (window.opera && (window.opera.version() < 10.50 || window.document.readyState === 'loading')) {
     window.document.addEventListener('DOMContentLoaded', init_pixplus, false);
   } else {
     init_pixplus();
