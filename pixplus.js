@@ -233,9 +233,12 @@
       "popup_bookmark_end":         ["Escape",          ""],
       "popup_bookmark_submit":      ["Enter,Space",     ""],
       "popup_open_bookmark_detail": ["Shift+b",         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"],
-      "popup_qrate_toggle":         ["d",               "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"],
-      "popup_tag_edit_start":       ["", ""],
-      "popup_tag_edit_end":         ["Escape", ""],
+      "popup_qrate_start":          ["d",               "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"],
+      "popup_qrate_end":            ["Escape,d",        ""],
+      "popup_qrate_select_prev":    ["Up",              ""],
+      "popup_qrate_select_next":    ["Down",            ""],
+      "popup_tag_edit_start":       ["",                ""],
+      "popup_tag_edit_end":         ["Escape",          ""],
       "popup_open":                 ["Shift+f",         "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"],
       "popup_open_big":             ["f",               "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"],
       "popup_reload":               ["g",               "\u30ea\u30ed\u30fc\u30c9"],
@@ -2822,9 +2825,14 @@
     }, {
       run: !!ev.qrate,
       map: [
-        {k: $ev.KEY_UP,     f: sel_qr, a: [true]},
-        {k: $ev.KEY_DOWN,   f: sel_qr, a: [false]},
-        {k: $ev.KEY_ESCAPE, f: window.rating_ef2}
+        {k: conf.key.popup_qrate_select_prev, f: this.qrate_move_selection, a: [-1]},
+        {k: conf.key.popup_qrate_select_next, f: this.qrate_move_selection, a: [1]},
+        {k: conf.key.popup_qrate_end, f: this.toggle_qrate}
+      ]
+    }, {
+      run: !ev.qrate,
+      map: [
+        {k: conf.key.popup_qrate_start, f: this.toggle_qrate}
       ]
     }, {
       run: conf.popup.rate && conf.popup.rate_key,
@@ -2869,7 +2877,6 @@
         {k: conf.key.popup_open_response,        f: this.open_image_response},
         {k: conf.key.popup_bookmark_start,       f: this.toggle_bookmark_edit},
         {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
-        {k: conf.key.popup_qrate_toggle,         f: this.toggle_qrate},
         {k: conf.key.popup_open,                 f: this.open},
         {k: conf.key.popup_open_big,             f: this.open, a: [true]},
         {k: conf.key.popup_reload,               f: this.reload},
@@ -3636,7 +3643,7 @@
     }
   };
   Popup.is_qrate_button = function(elem) {
-    return elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id) ? true : false;
+    return !!elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id);
   };
   Popup.prototype.keypress = function(ev, key) {
     if (Popup.is_qrate_button(ev.target)) {
@@ -3655,6 +3662,16 @@
         this.caption.setAttribute('show', '');
         send_click(anc);
       }
+    }
+  };
+  Popup.prototype.qrate_move_selection = function(move) {
+    var btn = window.document.activeElement;
+    if (Popup.is_qrate_button(btn)) {
+      for(; move !== 0; move += move < 0 ? 1 : -1) {
+        var next = move < 0 ? btn.previousSibling : btn.nextSibling;
+        if (Popup.is_qrate_button(next)) btn = next;
+      }
+      if (btn) btn.focus();
     }
   };
 
