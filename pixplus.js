@@ -2811,8 +2811,8 @@
         map: [
           {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
           {k: conf.key.popup_next,                 f: this.next, a: [true]},
-          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, false, true]},
-          {k: conf.key.popup_next_direction,       f: this.next, a: [false, false, true]},
+          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
+          {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
           {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
           {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
           {k: conf.key.popup_first,                f: this.first},
@@ -2949,12 +2949,12 @@
     }
   };
 
-  Popup.prototype.prev = function(close, loop, no_auto) {
+  Popup.prototype.prev = function(close, no_auto) {
     if (this.manga.usable && this.manga.enabled) {
       var page = this.manga.page - this.manga.page_dec;
       if (page < 0 && (conf.popup.auto_manga & 16)) {
         this.manga.enabled = false;
-        this.prev(close, loop);
+        this.prev(close);
       } else {
         this.set_manga_page(page);
       }
@@ -2962,17 +2962,16 @@
       var g = this.item.gallery;
       var r = !no_auto && conf.popup.reverse_p;
       var item = r ? this.item.next : this.item.prev;
-      if (!item && loop && g) item = r ? g.first : g.last;
       this.set(item, true, close);
     }
   };
-  Popup.prototype.next = function(close, loop, no_auto) {
+  Popup.prototype.next = function(close, no_auto) {
     if (this.manga.usable) {
       if (this.manga.enabled) {
         var page = this.manga.page + this.manga.page_inc;
         if (page >= this.manga.page_count && (conf.popup.auto_manga & 16)) {
           this.manga.enabled = false;
-          this.next(close, loop);
+          this.next(close);
         } else {
           this.set_manga_page(page);
         }
@@ -2985,7 +2984,6 @@
     var g = this.item.gallery;
     var r = !no_auto && conf.popup.reverse_p;
     var item = r ? this.item.prev : this.item.next;
-    if (!item && loop && g) item = r ? g.last : g.first;
     this.set(item, true, close);
   };
 
