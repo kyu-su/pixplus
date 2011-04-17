@@ -272,8 +272,11 @@
       window.open.apply(window, Array.prototype.slice.apply(arguments));
     },
     key_enabled: function(ev) {
-      return !((ev.target && (ev.target.tagName || '').toLowerCase() == 'input') ||
-               window.document.getElementById('HaH-div-element'));
+      return !((ev.target instanceof window.HTMLTextAreaElement ||
+                (ev.target instanceof window.HTMLInputElement &&
+                 // http://www.w3.org/TR/html5/the-input-element.html#attr-input-type
+                 (!ev.target.type || /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type)))) ||
+               !!window.document.getElementById('HaH-div-element'));
     },
 
     url: {
@@ -1422,7 +1425,9 @@
 
   function unpack_captions(col, xpath_cap) {
     each($xa(xpath_cap || './/a[img]/text()', col), function(node) {
-      remove_node_if_tag_name(node.previousSibling, 'br');
+      if (node.previousSibling instanceof window.HTMLBRElement) {
+        node.parentNode.removeChild(node.previousSibling);
+      }
       var p = node.parentNode;
       p.removeChild(node);
       if (p.nextSibling) {
@@ -1517,7 +1522,9 @@
         var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
         if (c) {
           var d = $c('div');
-          remove_node_if_tag_name(item.caption.nextSibling, 'br');
+          if (item.caption.nextSibling instanceof window.HTMLBRElement) {
+            item.caption.parentNode.removeChild(item.caption.nextSibling);
+          }
           d.innerHTML = 'ID: ' + item.id + '<br />BID: ' + c.value;
           item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
         }
@@ -2080,6 +2087,7 @@
                  '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                  'hr + br, hr ~ br{display:none;}' +
                  // 設定
+                 '#pp-conf-root{margin-bottom:4px;}' +
                  ConfigUI.css +
                  // help
                  '#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:10001;' +
@@ -2508,7 +2516,7 @@
           new_caption.setAttribute('nopopup', '');
           cap.parentNode.replaceChild(new_caption, cap);
           cap = new_caption;
-        } else if (lc(cap.tagName) == 'a') {
+        } else if (cap instanceof window.HTMLAnchorElement) {
           cap.setAttribute('nopopup', '');
         } else if (!$x('ancestor::a', cap)) {
           if (cap.childNodes.length == 1 && cap.firstChild.nodeType == 3) {
@@ -3568,7 +3576,7 @@
     }
   };
   Popup.is_qrate_button = function(elem) {
-    return elem && lc(elem.tagName || '') == 'input' && elem.id.match(/^qr_kw\d+$/) ? true : false;
+    return elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id) ? true : false;
   };
   Popup.prototype.keypress = function(ev, key) {
     if (Popup.is_qrate_button(ev.target)) {
@@ -4187,14 +4195,16 @@
       var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
       try {
         if (bottom.firstChild.nodeType == 3 &&
-            lc(bottom.firstChild.nextSibling.tagName) == 'br') {
+            bottom.firstChild.nextSibling instanceof window.HTMLBRElement) {
           bottom.removeChild(bottom.firstChild);
           bottom.removeChild(bottom.firstChild);
         }
       } catch (x) { }
       var note = $x('.//dd/text()[contains(., \"10\u500b\")]', this.root);
       if (note) {
-        remove_node_if_tag_name(note.previousSibling, 'br');
+        if (note.previousSibling instanceof window.HTMLBRElement) {
+          note.parentNode.removeChild(note.previousSibling);
+        }
         note.parentNode.removeChild(note);
       }
     }).call(this);
@@ -4918,11 +4928,6 @@
         p = p.parentNode;
       }
       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement); /* WARN */
-    }
-  }
-  function remove_node_if_tag_name(node, tag) {
-    if (node && node.tagName && lc(node.tagName) == tag && node.parentNode) {
-      node.parentNode.removeChild(node);
     }
   }
   function is_ancestor(ancestor, elem) {
