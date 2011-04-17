@@ -2656,11 +2656,11 @@
       this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
       this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
       $ev(this.olc_prev).click(bind(function() {
-        this.prev(false, false, true);
+        this.prev(false, true);
         return true;
       }, this));
       $ev(this.olc_next).click(bind(function() {
-        this.next(false, false, true);
+        this.next(false, true);
         return true;
       }, this));
     }
