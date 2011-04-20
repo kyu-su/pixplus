@@ -1430,7 +1430,18 @@
       function create() {
         if (div) return;
         div = $c('div', null, 'pp-conf-root');
-        new ConfigUI(div);
+        var ui = new ConfigUI(div);
+        var close = document.createElement('a');
+        close.href = '#';
+        close.textContent = '\u00d7';
+        close.addEventListener('click', function(e) {
+          e.preventDefault();
+          hide();
+        }, false);
+        var li = document.createElement('li');
+        li.id = 'pp-conf-close';
+        li.appendChild(close);
+        ui.page_list.insertBefore(li, ui.page_list.firstChild);
         ($('manga_top') || $('pageHeader')).appendChild(div);
       }
     }
