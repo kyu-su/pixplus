@@ -238,6 +238,7 @@
       {"key": "popup_qrate_end", "value": "Escape,d", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u7d42\u4e86"},
       {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9: \u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e"},
       {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9: \u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e"},
+      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": ""},
       {"key": "popup_tag_edit_start", "value": "", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
       {"key": "popup_tag_edit_end", "value": "Escape", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86"},
       {"key": "popup_open", "value": "Shift+f", "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
@@ -2792,7 +2793,8 @@
       map: [
         {k: conf.key.popup_qrate_select_prev, f: this.qrate_move_selection, a: [-1]},
         {k: conf.key.popup_qrate_select_next, f: this.qrate_move_selection, a: [1]},
-        {k: conf.key.popup_qrate_end, f: this.toggle_qrate}
+        {k: conf.key.popup_qrate_submit,      f: this.qrate_submit},
+        {k: conf.key.popup_qrate_end,         f: this.toggle_qrate}
       ]
     }, {
       run: !ev.qrate,
@@ -3640,6 +3642,10 @@
       }
       if (btn) btn.focus();
     }
+  };
+  Popup.prototype.qrate_submit = function() {
+    var btn = window.document.activeElement;
+    if (Popup.is_qrate_button(btn)) send_click(btn);
   };
 
   Popup.prototype.toggle_viewer_comments = function() {
