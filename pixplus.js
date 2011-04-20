@@ -836,16 +836,17 @@
         js.push(sp + str);
       }
 
-      this.st.each(function(sec, key) {
+      LS.each(function(item, sec) {
         if (sec.name === 'bookmark') return;
-        var input = self.input_table[sec.name + '_' + key], val;
-        if (typeof sec.schema[key][0] === 'boolean') {
+        var input = self.input_table[sec.name + '_' + item.key], val;
+        if (typeof item.value === 'boolean') {
           val = input.checked;
         } else {
-          val = self.st.get_conv(sec.name, key)[0](input.value);
+          val = LS.get_conv(sec.name, item.key)[0](input.value);
         }
-        if (val !== sec.schema[key][0]) {
-          push('window.pixplus.' + sec.path.join('.') + '.' + key + '=' + ConfigUI.stringify(val) + ';');
+        if (val !== item.value) {
+          var path = (sec.name == 'general' ? '' : sec.name + '.') + item.key; // for compatibility
+          push('window.pixplus.conf.' + path + '=' + ConfigUI.stringify(val) + ';');
         }
       });
       if (order.length) {
@@ -998,11 +999,11 @@
             '// @include http://www.pixiv.net/*',
             '// ==/UserScript==',
             '(function() {',
-            '   window.document.addEventListener("pixplusInitialize",init,false);',
-            '   function init() {',
-            '     ' + self.generate_js('\n     ', 2),
-            '   }',
-            ' })();'
+            '  window.document.addEventListener("pixplusInitialize",init,false);',
+            '  function init() {',
+            '    ' + self.generate_js('\n    ', 2),
+            '  }',
+            '})();'
           ].join('\n');
           (self.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
         }, false);
@@ -1385,6 +1386,7 @@
   function init_config_ui() {
     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
+    var root;
     var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
     if (menu) {
       function fire_event() {
@@ -1394,15 +1396,15 @@
       }
       function show() {
         create();
-        div.style.display = '';
+        root.style.display = '';
         fire_event();
       }
       function hide() {
-        div.style.display = 'none';
+        root.style.display = 'none';
         fire_event();
       }
       function toggle() {
-        if (!div || div.style.display === 'none') {
+        if (!root || root.style.display === 'none') {
           show();
         } else {
           hide();
@@ -1426,23 +1428,29 @@
         }
       }, false);
 
-      var div;
       function create() {
-        if (div) return;
-        div = $c('div', null, 'pp-conf-root');
-        var ui = new ConfigUI(div);
-        var close = document.createElement('a');
+        if (root) return;
+        root = $c('div', null, 'pp-conf-root');
+
+        var ui = new ConfigUI(root);
+
+        var li = $c('li', null, 'pp-conf-close');
+        ui.page_list.insertBefore(li, ui.page_list.firstChild);
+        var close = $c('a', li);
         close.href = '#';
         close.textContent = '\u00d7';
-        close.addEventListener('click', function(e) {
-          e.preventDefault();
+        $ev(close).click(function() {
           hide();
-        }, false);
-        var li = document.createElement('li');
-        li.id = 'pp-conf-close';
-        li.appendChild(close);
-        ui.page_list.insertBefore(li, ui.page_list.firstChild);
-        ($('manga_top') || $('pageHeader')).appendChild(div);
+          return true;
+        });
+
+        if (!LS.u) {
+          var note = $c('div', root);
+          note.textContent = "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002";
+          if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
+        }
+
+        ($('manga_top') || $('pageHeader')).appendChild(root);
       }
     }
   }
@@ -5159,8 +5167,11 @@
   }
 
   function log(msg) {
-    if (conf.debug) {
+    if (!conf.debug) return;
+    if (window.console && window.console.log) {
       window.console && window.console.log && window.console.log(msg);
+    } else if (window.opera) {
+      window.opera.postError(String(msg));
     }
   }
 
