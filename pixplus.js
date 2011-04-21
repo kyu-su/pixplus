@@ -2,7 +2,7 @@
 // @name        pixplus.js
 // @author      wowo
 // @version     0.6
-// @license     Public domain
+// @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
@@ -1038,7 +1038,7 @@
         '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
         '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
         '</ul></dd>' +
-        '<dt>License</dt><dd>Public domain</dd>' +
+        '<dt>License</dt><dd>Apache License 2.0</dd>' +
         '</dl>';
       page.content.innerHTML = html;
     }
@@ -1068,7 +1068,8 @@
   ConfigUI.changelog_data = [{
     date: '2011/04/xx', version: '0.6', changes: [
       '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-      '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+      '\u30e9\u30a4\u30bb\u30f3\u30b9\u3092Apache License 2.0\u306b\u5909\u66f4\u3002'
     ]
   }, {
     date: '2011/03/26', version: '0.5.1', changes: [
@@ -1336,7 +1337,7 @@
     '#pp-conf-pager section.select{display:block;}' +
     '#pp-conf-pager input, #pp-conf-pager textarea{' +
     '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
-    '#pp-conf-pager button{display:block !important;word-break:keep-all !important;padding:0px;}' +
+    '#pp-conf-pager button{display:block !important;white-space:nowrap;padding:0px;}' +
     '#pp-conf-pager textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
     '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
@@ -1490,8 +1491,8 @@
         add_gallery({
           root:          root,
           xpath_col:     '.',
-          xpath_cap:     './/p/a[contains(@href, "mode=medium")]',
-          xpath_tmb:     'ancestor::div[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::div[contains(concat(" ", @class, " "), " ran_img ")]/a/img',
+          xpath_cap:     './/li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
+          xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
           allow_nothumb: 3
         });
       });
@@ -2577,12 +2578,14 @@
 
         var pbtn = thumb;
         if (!thumb && cap) {
+          /*
           pbtn = $c('a');
           pbtn.href = url;
           pbtn.textContent = '\u25a0';
           pbtn.style.marginRight = '4px';
           cap.parentNode.insertBefore(pbtn, cap);
           item.added_popup_button = pbtn;
+           */
         }
         if (pbtn) {
           $ev($x('ancestor-or-self::a', pbtn)).click(function() {
