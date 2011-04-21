@@ -1388,7 +1388,7 @@
   function init_config_ui() {
     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
-    var root;
+    var root, click_handler;
     var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
     if (menu) {
       function fire_event() {
@@ -1400,10 +1400,19 @@
         create();
         root.style.display = '';
         fire_event();
+        if (click_handler) click_handler.disconnect();
+        click_handler = $ev(window.document.body).click(function(ev) {
+          if (!$x('ancestor-or-self::div[@id="pp-conf-root"]', ev.target)) {
+            hide();
+            return true;
+          }
+          return false;
+        });
       }
       function hide() {
         root.style.display = 'none';
         fire_event();
+        if (click_handler) click_handler.disconnect();
       }
       function toggle() {
         if (!root || root.style.display === 'none') {
@@ -1418,7 +1427,7 @@
       var anc = $c('a', li);
       anc.href = 'javascript:void(0)';
       anc.textContent = 'pixplus';
-      anc.addEventListener('click', function() {
+      $ev(anc).click(function() {
         if (_extension_data) {
           if (_extension_data.open_options) {
             _extension_data.open_options();
@@ -1428,7 +1437,8 @@
         } else {
           toggle();
         }
-      }, false);
+        return true;
+      });
 
       function create() {
         if (root) return;
