@@ -1405,7 +1405,6 @@
         click_handler = $ev(window.document.body).click(function(ev) {
           if (!$x('ancestor-or-self::div[@id="pp-conf-root"]', ev.target)) {
             hide();
-            return true;
           }
           return false;
         });
@@ -4802,7 +4801,7 @@
         }
       };
       obj.ctx.addEventListener(name, listener, !!opts.capture);
-      conn.listeners.push([name, listener]);
+      conn.listeners.push([name, listener, !!opts.capture]);
       return conn;
     }
     return obj;
@@ -4838,7 +4837,7 @@
   $ev.Connection.prototype.disconnect = function() {
     this.disconnected = true;
     each(this.listeners, function(item) {
-      this.ctx.removeEventListener(item[0], item[1], false);
+      this.ctx.removeEventListener(item[0], item[1], item[2]);
     }, this);
   };
 
