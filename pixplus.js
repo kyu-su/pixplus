@@ -348,6 +348,7 @@
       ]
     }
   };
+
   if (window.pixplus || (window.opera && window.opera.pixplus)) { // for compatibility
     //window.opera.postError('pixplus is already loaded');
     return;
@@ -1066,7 +1067,8 @@
 
   ConfigUI.changelog_data = [{
     date: '2011/04/xx', version: '0.6', changes: [
-      '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002'
+      '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+      '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/03/26', version: '0.5.1', changes: [
@@ -2208,7 +2210,7 @@
 
     $ev(window.document.body).click(function(ev) {
       var anc = $x('ancestor-or-self::a[1]', ev.target), re;
-      if (anc && !anc.hasAttribute('nopopup') &&
+      if (anc && !anc.hasAttribute('nopopup') && (anc.getAttribute('href') || '').charAt(0) != '#' &&
           (re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/.exec(anc.href))) {
         if (Popup.instance || $t('img', anc).length ||
             !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + re[1] + '")]//img')) {
@@ -4348,8 +4350,9 @@
   };
 
   BookmarkForm.prototype.keypress_common = function(ev, key) {
-    if (!pp.key_enabled(ev)) return false;
+    return false;
     /*
+    if (!pp.key_enabled(ev)) return false;
     if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
       this.submit();
       return true;
