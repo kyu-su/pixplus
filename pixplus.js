@@ -1868,7 +1868,7 @@
   }
 
   function init_illust_page_bookmark() {
-    var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_iconsBlock ")]//a[contains(@href, "bookmark_add.php")]');
+    var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_illusticonsBlock ")]//a[contains(@href, "bookmark_add.php")]');
     var display = $x('//div[contains(concat(" ", @class, " "), "works_display")]');
     if (!bm_add_anc || !display) return;
     var bm_form_div, loader;
@@ -1906,7 +1906,7 @@
       if (bm_form_div) return;
       bm_form_div = $c('div');
       bm_form_div.textContent = 'Loading';
-      bm_form_div.style.marginTop = '1em';
+      bm_form_div.style.margin = '1em';
       loader = new Loader(bm_add_anc.href, bm_form_div);
       display.parentNode.insertBefore(bm_form_div, display);
     }
@@ -2006,11 +2006,10 @@
       switch(options.mode) {
       case 'medium':
         init_illust_page_bookmark();
-        each(
-          $xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
-          function(anc) {
-            anc.setAttribute('nopopup', '');
-          });
+        each($xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
+             function(anc) {
+               anc.setAttribute('nopopup', '');
+             });
 
         var elem, pos, de = window.document.documentElement;
         if (conf.scroll === 1) {
