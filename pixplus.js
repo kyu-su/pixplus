@@ -94,8 +94,8 @@
         }
       }
       window.addEventListener('load', function() {
-	var appcontent = window.document.getElementById('appcontent');
-	if (appcontent) {
+        var appcontent = window.document.getElementById('appcontent');
+        if (appcontent) {
           appcontent.addEventListener('DOMContentLoaded', function(ev) {
             var window = ev.target.defaultView.window;
             if (window.top === window &&
@@ -530,7 +530,7 @@
         LS.set = function(s, n, v) {
           var data = { section: s, key: n, value: v };
           if (window.opera) {
-	    opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
+            opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
           } else {
             var ev = window.document.createEvent('Event');
             ev.initEvent('pixplusConfigSet', true, true);
@@ -541,7 +541,7 @@
         LS.remove = function(s, n) {
           var data = { section: s, key: n };
           if (window.opera) {
-	    opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
+            opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
           } else {
           }
         };
@@ -2019,8 +2019,8 @@
             $('book_outlist').style.display = type === 'flat' ? 'none' : 'block';
 
             var flat = type === 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
-	    toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-	    toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
+            toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
+            toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
             window.jQuery.cookie('bookToggle', type, {
               expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')
@@ -2321,10 +2321,10 @@
                 var re;
                 if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
                   window.jQuery('#favorite-button')
-		    .addClass('added')
-		    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
-	          window.jQuery('form', this.preference)
-		    .attr('action', '/bookmark_setting.php')
+                    .addClass('added')
+                    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+                  window.jQuery('form', this.preference)
+                    .attr('action', '/bookmark_setting.php')
                     .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
                     .find('input[name="mode"]').remove();
                   btn.style.opacity = '1';
@@ -4268,9 +4268,9 @@
         this.tag_wrap_bm.removeChild($t('ul', this.tag_wrap_bm)[0]);
       } else {
         window.bookmarkTagSort.sortedTag = {
-	  name: { asc: [], desc: [] },
-	  num:  { asc: [], desc: [] }
-	};
+          name: { asc: [], desc: [] },
+          num:  { asc: [], desc: [] }
+        };
         window.bookmarkTagSort.tag = [];
         window.bookmarkTagSort.init();
       }
@@ -4974,7 +4974,7 @@
       var elem = chk_ext_src('script', 'src', url);
       if (raise) ++this.load_cnt;
       if (elem) {
-	if (elem.getAttribute('type') === 'script/cache') { // webkit
+        if (elem.getAttribute('type') === 'script/cache') { // webkit
           log('$js#labjs: ' + url);
           var callee = arguments.callee, self = this;
           setTimeout(function() { callee.apply(self, [url]); }, 0);
