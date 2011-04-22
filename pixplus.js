@@ -1391,8 +1391,8 @@
     if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
     var root, click_handler;
-    var menu = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
-    if (menu) {
+    var sitenav = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
+    if (sitenav) {
       function fire_event() {
         var ev = window.document.createEvent('Event');
         ev.initEvent('pixplusConfigToggled', true, true);
@@ -1423,11 +1423,44 @@
         }
       }
 
-      var li  = $c('li');
-      menu.insertBefore(li, menu.firstChild);
-      var anc = $c('a', li);
-      anc.href = 'javascript:void(0)';
+      function create_menu_item(text, func) {
+        var item = $c('li');
+        var anc = $c('a', item);
+        anc.href = '#';
+        anc.textContent = text;
+        $ev(anc).click(function() {
+          func();
+          return true;
+        });
+        return item;
+      }
+
+      var menu_items = [], mi_restore;
+      if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) {
+        menu_items.push(create_menu_item('Save layout', function() {
+          window.localStorage['__pixplus_cookie_pixiv_mypage'] = window.jQuery.cookie('pixiv_mypage');
+          mi_restore.style.display = 'block';
+        }));
+        menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
+          window.jQuery.cookie('pixiv_mypage', window.localStorage['__pixplus_cookie_pixiv_mypage'],
+                               {expires: 30, domain: 'pixiv.net', path: '/'});
+          window.location.reload();
+        }));
+        if (!window.localStorage['__pixplus_cookie_pixiv_mypage']) mi_restore.style.display = 'none';
+      }
+
+      var li  = $c('li', null, 'pp-sitenav-menu-caption');
+      sitenav.insertBefore(li, sitenav.firstChild);
+      var anc = $c('a', menu_items.length ? $c('div', li) : li);
+      anc.href = '#';
       anc.textContent = 'pixplus';
+      if (menu_items.length) {
+        li.appendChild(anc.cloneNode(true));
+        var menu = $c('ul', li, 'pp-sitenav-menu');
+        each(menu_items, function(item) {
+          menu.appendChild(item);
+        });
+      }
       $ev(anc).click(function() {
         if (_extension_data) {
           if (_extension_data.open_options) {
@@ -2119,18 +2152,28 @@
                  '*[float]{position:fixed;top:0px;}' +
                  // workaround
                  '.book_flat_on,.book_flat_off,.book_cloud_on,.book_cloud_off{padding-bottom:15px;}' +
-                 // アイコン
+                 // icon
                  '.pixplus-check{width:14px;height:14px;background-position:-1701px -547px;' +
                  '  background-image:url("' + pp.url.img.sprite + '");}' +
                  '.pixplus-heart{width:16px;height:14px;background-position:-1701px -480px;' +
                  '  background-image:url("' + pp.url.img.sprite + '");}' +
                  '.pixplus-flag{width:14px;height:16px;background-position:-1701px -1px;' +
                  '  background-image:url("' + pp.url.img.sprite + '");}' +
-                 // コメント
+                 // caption
                  (conf.popup.font_size ? '#pp-popup{font-size:' + conf.popup.font_size + ';}' : '') +
                  '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                  'hr + br, hr ~ br{display:none;}' +
-                 // 設定
+                 // menu
+                 '#pp-sitenav-menu-caption a{display:block;}' +
+                 '#pp-sitenav-menu-caption div{padding:3px;margin-top:-3px;margin-left:-3px;background-color:white;' +
+                 '  z-index:10002;position:absolute;display:none;}' +
+                 '#pp-sitenav-menu-caption:hover div{padding:2px;border:solid silver;border-width:1px 1px 0px 1px;' +
+                 '  display:block;}' +
+                 '#pp-sitenav-menu{display:none;position:absolute;z-index:10001;background-color:white;' +
+                 '  border:1px solid silver;padding:2px;margin-top:1px;margin-left:-3px;}' +
+                 '#pp-sitenav-menu-caption:hover #pp-sitenav-menu{display:block;}' +
+                 '#pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
+                 // config
                  '#pp-conf-root{margin-bottom:4px;}' +
                  ConfigUI.css +
                  // help
