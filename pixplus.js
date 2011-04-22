@@ -3652,6 +3652,9 @@
       } else {
         this.caption.setAttribute('show', '');
       }
+      if (!this.is_caption_visible() && Popup.is_qrate_button(window.document.activeElement)) {
+        window.document.activeElement.blur();
+      }
     },
 
     is_caption_visible: function() {
