@@ -2922,6 +2922,54 @@
     return btn;
   };
 
+  Popup.create_zoom_image = function(img, width, height, r_width, r_height) {
+    /* security error
+    var canvas = $c('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    var data = ctx.getImageData(0, 0, width, height);
+    for(var y = height - 1; y >= 0; --y) {
+      for(var x = width - 1; x >= 0; --x) {
+        for(var i = 0; i < 4; ++i) {
+          var rx = x * r_width / width, ry = y * r_height / height;
+          data[y * width * 4 + x * 4 + i] = data[ry * width * 4 + rx * 4 + i];
+        }
+      }
+    }
+    ctx.putImageData(data, 0, 0);
+    return canvas;
+    */
+
+    if (browser.opera) {
+      var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
+      svg_img.setAttribute('width', '100%');
+      svg_img.setAttribute('height', '100%');
+      svg_img.style.imageRendering = 'optimizeSpeed';
+      svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', img.src);
+      var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
+      svg.setAttribute('width', width);
+      svg.setAttribute('height', height);
+      svg.appendChild(svg_img);
+      return svg;
+    } else {
+      img = img.cloneNode(false);
+      img.style.cssText = '';
+      img.style.width = width + 'px';
+      img.style.height = height + 'px';
+      if (browser.gecko) {
+        img.style.imageRendering = 'optimizeSpeed';
+      } else if (browser.webkit) {
+        //img.style.imageRendering = '-webkit-crisp-edges';
+      }
+      return img;
+    }
+  };
+  Popup.is_qrate_button = function(elem) {
+    return !!elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id);
+  };
+
   Popup.prototype = {
     init_display: function() {
       each([
@@ -3465,396 +3513,376 @@
         var m = Math.max(Math.floor((ch - image.image.offsetHeight) / 2), 0);
         image.image.style.marginTop = m + 'px';
       });
-    }
-  };
+    },
 
-  Popup.create_zoom_image = function(img, width, height, r_width, r_height) {
-    /* security error
-    var canvas = $c('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    var data = ctx.getImageData(0, 0, width, height);
-    for(var y = height - 1; y >= 0; --y) {
-      for(var x = width - 1; x >= 0; --x) {
-        for(var i = 0; i < 4; ++i) {
-          var rx = x * r_width / width, ry = y * r_height / height;
-          data[y * width * 4 + x * 4 + i] = data[ry * width * 4 + rx * 4 + i];
+    set_zoom: function(zoom) {
+      zoom = zoom < 1 ? 1 : Math.floor(zoom);
+      if (browser.webkit ||
+          this.images.list.length !== 1 ||
+          zoom === this.zoom_scale) {
+        this.locate();
+        this.update_info();
+        return;
+      }
+
+      this.zoom_scale = zoom;
+      var img = this.images.list[0];
+      if (this.zoom_scale === 1) {
+        if (img.image_unscaled) {
+          img.image.parentNode.replaceChild(img.image_unscaled, img.image);
+          img.image = img.image_unscaled;
+          img.image_unscaled = null;
         }
+      } else {
+        var w = img.size.width * this.zoom_scale, h = img.size.height * this.zoom_scale;
+        var scaled = Popup.create_zoom_image(img.image_unscaled || img.image, w, h, img.size.width, img.size.height);
+        img.image.parentNode.replaceChild(scaled, img.image);
+        if (!img.image_unscaled) img.image_unscaled = img.image;
+        img.image = scaled;
       }
-    }
-    ctx.putImageData(data, 0, 0);
-    return canvas;
-    */
-
-    if (browser.opera) {
-      var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
-      svg_img.setAttribute('width', '100%');
-      svg_img.setAttribute('height', '100%');
-      svg_img.style.imageRendering = 'optimizeSpeed';
-      svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', img.src);
-      var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
-      svg.setAttribute('width', width);
-      svg.setAttribute('height', height);
-      svg.appendChild(svg_img);
-      return svg;
-    } else {
-      img = img.cloneNode(false);
-      img.style.cssText = '';
-      img.style.width = width + 'px';
-      img.style.height = height + 'px';
-      if (browser.gecko) {
-        img.style.imageRendering = 'optimizeSpeed';
-      } else if (browser.webkit) {
-        //img.style.imageRendering = '-webkit-crisp-edges';
-      }
-      return img;
-    }
-  };
-  Popup.prototype.set_zoom = function(zoom) {
-    zoom = zoom < 1 ? 1 : Math.floor(zoom);
-    if (browser.webkit ||
-        this.images.list.length !== 1 ||
-        zoom === this.zoom_scale) {
       this.locate();
       this.update_info();
-      return;
-    }
+    },
 
-    this.zoom_scale = zoom;
-    var img = this.images.list[0];
-    if (this.zoom_scale === 1) {
-      if (img.image_unscaled) {
-        img.image.parentNode.replaceChild(img.image_unscaled, img.image);
-        img.image = img.image_unscaled;
-        img.image_unscaled = null;
-      }
-    } else {
-      var w = img.size.width * this.zoom_scale, h = img.size.height * this.zoom_scale;
-      var scaled = Popup.create_zoom_image(img.image_unscaled || img.image, w, h, img.size.width, img.size.height);
-      img.image.parentNode.replaceChild(scaled, img.image);
-      if (!img.image_unscaled) img.image_unscaled = img.image;
-      img.image = scaled;
-    }
-    this.locate();
-    this.update_info();
-  };
-  Popup.prototype.update_info = function() {
-    var info_size = [];
-    each(this.images.list, function(img) {
-      var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
-      info_size.push(img.display_size.width + 'x' + img.display_size.height + '(' + scale + 'x)');
-    });
-    this.info_size.textContent = info_size.join('/');
-    this.post_cap.style.display = '';
-  };
+    update_info: function() {
+      var info_size = [];
+      each(this.images.list, function(img) {
+        var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
+        info_size.push(img.display_size.width + 'x' + img.display_size.height + '(' + scale + 'x)');
+      });
+      this.info_size.textContent = info_size.join('/');
+      this.post_cap.style.display = '';
+    },
 
-  Popup.prototype.locate = function() {
-    var de = window.document.documentElement;
-    this.root_div.style.minHeight = '';
-    if (this.is_bookmark_editing() || this.is_tag_editing()) {
-      // temporary do nothing
-    } else {
-      this.adjust_image_size();
-
-      this.caption.style.width = this.header.offsetWidth + 'px';
-      var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
-      if (this.expand_header) {
-        cap_height = this.img_div.offsetHeight - post_cap_height;
+    locate: function() {
+      var de = window.document.documentElement;
+      this.root_div.style.minHeight = '';
+      if (this.is_bookmark_editing() || this.is_tag_editing()) {
+        // temporary do nothing
       } else {
-        cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
-      }
-      this.comment_wrap.style.maxHeight = Math.max(cap_height, 128) + 'px';
+        this.adjust_image_size();
 
-      /*
-      if (!this.expand_header) {
-        this.img_div.style.margin = '';
-        var ph = this.caption.offsetHeight + 48;
-        if (this.img_div.offsetHeight < ph) {
-          this.img_div.style.margin = (ph - this.img_div.offsetHeight) / 2 + 'px 0px';
+        this.caption.style.width = this.header.offsetWidth + 'px';
+        var cap_height, post_cap_height = this.caption.offsetHeight - this.comment_wrap.offsetHeight - 3;
+        if (this.expand_header) {
+          cap_height = this.img_div.offsetHeight - post_cap_height;
+        } else {
+          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
+        }
+        this.comment_wrap.style.maxHeight = Math.max(cap_height, 128) + 'px';
+
+        /*
+         if (!this.expand_header) {
+         this.img_div.style.margin = '';
+         var ph = this.caption.offsetHeight + 48;
+         if (this.img_div.offsetHeight < ph) {
+         this.img_div.style.margin = (ph - this.img_div.offsetHeight) / 2 + 'px 0px';
+         }
+         }
+         */
+
+        if (conf.popup.overlay_control > 0) {
+          var width;
+          if (conf.popup.overlay_control < 1) {
+            width = Math.floor(this.root_div.clientWidth * conf.popup.overlay_control);
+          } else {
+            width = Math.floor(conf.popup.overlay_control);
+          }
+          this.olc_prev.style.width  = width + 'px';
+          this.olc_prev.style.height = this.img_div.offsetHeight + 'px';
+          this.olc_next.style.width  = width + 'px';
+          this.olc_next.style.height = this.img_div.offsetHeight + 'px';
         }
       }
-      */
+      this.root_div.style.left = Math.floor((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
+      this.root_div.style.top  = Math.floor((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
+    },
 
+    update_olc: function(page) {
       if (conf.popup.overlay_control > 0) {
-        var width;
-        if (conf.popup.overlay_control < 1) {
-          width = Math.floor(this.root_div.clientWidth * conf.popup.overlay_control);
-        } else {
-          width = Math.floor(conf.popup.overlay_control);
-        }
-        this.olc_prev.style.width  = width + 'px';
-        this.olc_prev.style.height = this.img_div.offsetHeight + 'px';
-        this.olc_next.style.width  = width + 'px';
-        this.olc_next.style.height = this.img_div.offsetHeight + 'px';
+        var m = this.manga.usable && this.manga.enabled;
+        this.olc_prev.style.display = m || this.item.prev ? 'inline' : 'none';
+        this.olc_next.style.display = m || this.item.next ? 'inline' : 'none';
       }
-    }
-    this.root_div.style.left = Math.floor((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
-    this.root_div.style.top  = Math.floor((de.clientHeight - this.root_div.offsetHeight) / 2) + 'px';
-  };
+    },
 
-  Popup.prototype.update_olc = function(page) {
-    if (conf.popup.overlay_control > 0) {
-      var m = this.manga.usable && this.manga.enabled;
-      this.olc_prev.style.display = m || this.item.prev ? 'inline' : 'none';
-      this.olc_next.style.display = m || this.item.next ? 'inline' : 'none';
-    }
-  };
-  Popup.prototype.reload = function() {
-    this.set(this.item, null, null, true);
-  };
-  Popup.prototype.close = function() {
-    if (Popup.onclose.emit(this)) return;
-    if (this.loader) this.loader.cancel();
-    if (this.conn_g_add_item) this.conn_g_add_item.disconnect();
-    window.document.body.removeChild(this.root_div);
-    if (pp.rpc_usable) {
-      pp.rpc_div.innerHTML = '';
-      pp.rpc_state = 0;
-    }
-  };
-  Popup.prototype.open = function(big) {
-    if (this.manga.usable && this.manga.page < 0) {
-      pp.open(big ? urlmode(this.item.medium, 'manga') : this.item.medium);
-    } else if (big) {
-      var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
-      pp.open(this.images.list[idx].anchor.href);
-    } else if (this.manga.usable) {
-      pp.open(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page);
-    } else {
-      pp.open(this.item.medium);
-    }
-  };
-  Popup.prototype.open_image_response = function() {
-    this.has_image_response && pp.open(this.res_btn.href);
-  };
-  Popup.prototype.open_manga_tb = function() {
-    if (this.manga.usable) {
-      var url = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
-      this.item.manga.viewed = true;
-      pp.open(url);
-    }
-  };
-  Popup.prototype.toggle_caption = function() {
-    if (this.caption.hasAttribute('show')) {
-      this.caption.removeAttribute('show');
-    } else {
-      this.caption.setAttribute('show', '');
-    }
-  };
-  Popup.is_qrate_button = function(elem) {
-    return !!elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id);
-  };
-  Popup.prototype.keypress = function(ev, key) {
-    if (Popup.is_qrate_button(ev.target)) {
-      ev.qrate = ev.target;
-      return Popup.onkeypress.emit(this, ev, key);
-    } else if (pp.key_enabled(ev)) {
-      return Popup.onkeypress.emit(this, ev, key);
-    } else {
-      return false;
-    }
-  };
-  Popup.prototype.toggle_qrate = function() {
-    if (this.has_qrate) {
-      var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
-      if (anc) {
+    reload: function() {
+      this.set(this.item, null, null, true);
+    },
+
+    close: function() {
+      if (Popup.onclose.emit(this)) return;
+      if (this.loader) this.loader.cancel();
+      if (this.conn_g_add_item) this.conn_g_add_item.disconnect();
+      window.document.body.removeChild(this.root_div);
+      if (pp.rpc_usable) {
+        pp.rpc_div.innerHTML = '';
+        pp.rpc_state = 0;
+      }
+    },
+
+    open: function(big) {
+      if (this.manga.usable && this.manga.page < 0) {
+        pp.open(big ? urlmode(this.item.medium, 'manga') : this.item.medium);
+      } else if (big) {
+        var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
+        pp.open(this.images.list[idx].anchor.href);
+      } else if (this.manga.usable) {
+        pp.open(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page);
+      } else {
+        pp.open(this.item.medium);
+      }
+    },
+
+    open_image_response: function() {
+      this.has_image_response && pp.open(this.res_btn.href);
+    },
+
+    open_manga_tb: function() {
+      if (this.manga.usable) {
+        var url = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
+        this.item.manga.viewed = true;
+        pp.open(url);
+      }
+    },
+
+    toggle_caption: function() {
+      if (this.caption.hasAttribute('show')) {
+        this.caption.removeAttribute('show');
+      } else {
         this.caption.setAttribute('show', '');
-        send_click(anc);
       }
-    }
-  };
-  Popup.prototype.qrate_move_selection = function(move) {
-    var btn = window.document.activeElement;
-    if (Popup.is_qrate_button(btn)) {
-      for(; move !== 0; move += move < 0 ? 1 : -1) {
-        var next = move < 0 ? btn.previousSibling : btn.nextSibling;
-        if (Popup.is_qrate_button(next)) btn = next;
-      }
-      if (btn) btn.focus();
-    }
-  };
-  Popup.prototype.qrate_submit = function() {
-    var btn = window.document.activeElement;
-    if (Popup.is_qrate_button(btn)) send_click(btn);
-  };
+    },
 
-  Popup.prototype.toggle_viewer_comments = function() {
-    if (!this.viewer_comments_enabled) return;
-    if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
-      this.caption.setAttribute('show', '');
-    }
-    if (!this.viewer_comments_a.innerHTML) {
-      window.jQuery.post(
-        '/rpc_comment_history.php',
-        rpc_create_data(['i_id', 'u_id']),
-        bind(function(data) {
-          this.viewer_comments_a.innerHTML = data;
-          each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', this.viewer_comments_a),
-               bind(trap_delete, this));
-          show.call(this);
-        }, this)
-      );
-    } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
-      show.call(this);
-    }else{
-      this.comments_btn.removeAttribute('enable');
-      window.jQuery(this.viewer_comments).slideUp(200, bind(function() {
-        this.expand_header = false;
+    is_caption_visible: function() {
+      return !!window.document.querySelector('#pp-caption[show],#pp-caption:hover');
+    },
+
+    keypress: function(ev, key) {
+      if (Popup.is_qrate_button(ev.target)) {
+        ev.qrate = ev.target;
+        return Popup.onkeypress.emit(this, ev, key);
+      } else if (pp.key_enabled(ev)) {
+        return Popup.onkeypress.emit(this, ev, key);
+      } else {
+        return false;
+      }
+    },
+
+    toggle_qrate: function() {
+      if (this.has_qrate) {
+        var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
+        if (anc) {
+          this.caption.setAttribute('show', '');
+          send_click(anc);
+        }
+      }
+    },
+
+    qrate_move_selection: function(move) {
+      var btn = window.document.activeElement;
+      if (Popup.is_qrate_button(btn)) {
+        for(; move !== 0; move += move < 0 ? 1 : -1) {
+          var next = move < 0 ? btn.previousSibling : btn.nextSibling;
+          if (Popup.is_qrate_button(next)) btn = next;
+        }
+        if (btn) btn.focus();
+      }
+    },
+
+    qrate_submit: function(force) {
+      var btn = window.document.activeElement;
+      if (!Popup.is_qrate_button(btn)) return;
+      if (!force && !this.is_caption_visible()) return;
+      send_click(btn);
+    },
+
+    toggle_viewer_comments: function() {
+      if (!this.viewer_comments_enabled) return;
+      if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
+        this.caption.setAttribute('show', '');
+      }
+      if (!this.viewer_comments_a.innerHTML) {
+        window.jQuery.post(
+          '/rpc_comment_history.php',
+          rpc_create_data(['i_id', 'u_id']),
+          bind(function(data) {
+            this.viewer_comments_a.innerHTML = data;
+            each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', this.viewer_comments_a),
+                 bind(trap_delete, this));
+            show.call(this);
+          }, this)
+        );
+      } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
+        show.call(this);
+      }else{
+        this.comments_btn.removeAttribute('enable');
+        window.jQuery(this.viewer_comments).slideUp(200, bind(function() {
+          this.expand_header = false;
+          this.locate();
+        }, this));
+      }
+      function trap_delete(del) {
+        var url = del.getAttribute('href');
+        del.setAttribute('onclick', '');
+        del.onclick = '';
+        if (/^\w/.test(url)) url = '/' + url;
+        $ev(del).click(bind(function() {
+          if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
+            window.jQuery.ajax({
+              url: url,
+              context: this,
+              success: Popup.prototype.reload_viewer_comments,
+              error: function() {
+                alert('Error!');
+              }});
+          }
+          return true;
+        }, this));
+      }
+      function show() {
+        this.expand_header = true;
         this.locate();
-      }, this));
-    }
-    function trap_delete(del) {
-      var url = del.getAttribute('href');
-      del.setAttribute('onclick', '');
-      del.onclick = '';
-      if (/^\w/.test(url)) url = '/' + url;
-      $ev(del).click(bind(function() {
-        if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
-          window.jQuery.ajax({
-            url: url,
-            context: this,
-            success: Popup.prototype.reload_viewer_comments,
-            error: function() {
-              alert('Error!');
-            }});
-        }
-        return true;
-      }, this));
-    }
-    function show() {
-      this.expand_header = true;
-      this.locate();
-      this.comments_btn.setAttribute('enable', '');
-      window.jQuery(this.viewer_comments).slideDown(200);
-      window.jQuery(this.comment_wrap).animate({scrollTop: this.comment.offsetHeight}, 200);
-    }
-  };
-
-  Popup.prototype.toggle_viewer_comment_form = function() {
-    var hidden = this.viewer_comments_c.style.display === 'none', comment;
-    this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
-    if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
-    conf.popup.show_comment_form = !!hidden;
-    if (LS.u) LS.set('popup', 'show_comment_form', !!hidden);
-  };
-  Popup.prototype.reload_viewer_comments = function() {
-    if (this.viewer_comments_enabled) {
-      this.init_comments(true);
-      this.toggle_viewer_comments();
-    }
-  };
-
-  Popup.prototype.toggle_bookmark_edit = function() {
-    if (this.is_bookmark_editing()) {
-      if (this.bookmark_form) {
-        this.bookmark_form.destroy();
-        this.bookmark_form = null;
+        this.comments_btn.setAttribute('enable', '');
+        window.jQuery(this.viewer_comments).slideDown(200);
+        window.jQuery(this.comment_wrap).animate({scrollTop: this.comment.offsetHeight}, 200);
       }
-      this.bm_edit.style.display = 'none';
-      this.caption.style.display = '';
-      this.img_div.style.display = '';
-      this.locate();
-    } else if (!this.bm_loading) {
-      this.bm_loading  = true;
-      this.set_status('Loading');
-      geturl('/bookmark_add.php?type=illust&illust_id=' + this.item.id, bind(function(text) {
-        var re;
-        this.bm_loading = false;
-        if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/i.exec(text))) {
-          this.complete();
-          // エラー回避
-          if (!window.update_input_tag) window.update_input_tag = function() { };
-          this.bm_edit.innerHTML = re[0];
-          this.bm_edit.style.display = '';
-          this.caption.style.display = 'none';
-          this.img_div.style.display = 'none';
-          this.bookmark_form = new BookmarkForm(this.bm_edit, {
-            title: this.title, comment: this.comment,
-            autotag: !this.bm_btn.hasAttribute('enable'),
-            closable: true, signal_key: Popup.onkeypress
-          });
-          this.bookmark_form.onclose.connect(bind(function() {
-            this.toggle_bookmark_edit();
-            this.reload();
-          }, this));
-          this.locate();
-        } else {
-          this.error('Failed to parse bookmark HTML');
+    },
+
+    toggle_viewer_comment_form: function() {
+      var hidden = this.viewer_comments_c.style.display === 'none', comment;
+      this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
+      if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
+      conf.popup.show_comment_form = !!hidden;
+      if (LS.u) LS.set('popup', 'show_comment_form', !!hidden);
+    },
+
+    reload_viewer_comments: function() {
+      if (this.viewer_comments_enabled) {
+        this.init_comments(true);
+        this.toggle_viewer_comments();
+      }
+    },
+
+    toggle_bookmark_edit: function() {
+      if (this.is_bookmark_editing()) {
+        if (this.bookmark_form) {
+          this.bookmark_form.destroy();
+          this.bookmark_form = null;
         }
-      }, this), bind(function() {
-        this.bm_loading = false;
-        this.error('Failed to load bookmark HTML');
-      }, this), true);
-    }
-  };
-  Popup.prototype.is_bookmark_editing = function() {
-    return this.bm_edit.style.display !== 'none';
-  };
+        this.bm_edit.style.display = 'none';
+        this.caption.style.display = '';
+        this.img_div.style.display = '';
+        this.locate();
+      } else if (!this.bm_loading) {
+        this.bm_loading  = true;
+        this.set_status('Loading');
+        geturl('/bookmark_add.php?type=illust&illust_id=' + this.item.id, bind(function(text) {
+          var re;
+          this.bm_loading = false;
+          if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/i.exec(text))) {
+            this.complete();
+            // エラー回避
+            if (!window.update_input_tag) window.update_input_tag = function() { };
+            this.bm_edit.innerHTML = re[0];
+            this.bm_edit.style.display = '';
+            this.caption.style.display = 'none';
+            this.img_div.style.display = 'none';
+            this.bookmark_form = new BookmarkForm(this.bm_edit, {
+              title: this.title, comment: this.comment,
+              autotag: !this.bm_btn.hasAttribute('enable'),
+              closable: true, signal_key: Popup.onkeypress
+            });
+            this.bookmark_form.onclose.connect(bind(function() {
+              this.toggle_bookmark_edit();
+              this.reload();
+            }, this));
+            this.locate();
+          } else {
+            this.error('Failed to parse bookmark HTML');
+          }
+        }, this), bind(function() {
+          this.bm_loading = false;
+          this.error('Failed to load bookmark HTML');
+        }, this), true);
+      }
+    },
 
-  Popup.prototype.toggle_tag_edit = function() {
-    if (this.is_tag_editing()) {
-      this.tag_edit.style.display = 'none';
-      this.caption.style.display = '';
-      this.img_div.style.display = '';
-      this.locate();
-      this.reload();
-    } else if (!this.tag_loading) {
-      this.tag_loading = true;
-      this.tag_edit_btn.textContent = '[Loading]';
-      window.jQuery.post(
-        '/rpc_tag_edit.php',
-        rpc_create_data(['i_id', 'u_id', 'e_id'], {mode: 'first'}),
-        bind(function(data) {
-          this.tag_edit.innerHTML = data.html.join('');
-          this.tag_edit.style.display = '';
-          this.caption.style.display = 'none';
-          this.img_div.style.display = 'none';
-          this.locate();
-          this.tag_loading = false;
-          this.tag_edit_btn.textContent = '[E]';
-        }, this),
-        'json').error(function() { alert('Error!'); });
-    }
-  };
-  Popup.prototype.is_tag_editing = function() {
-    return this.tag_edit.style.display !== 'none';
-  };
+    is_bookmark_editing: function() {
+      return this.bm_edit.style.display !== 'none';
+    },
 
-  Popup.prototype.open_author_profile = function() {
-    if (this.author.style.display !== 'none') pp.open(this.a_profile.href);
-  };
-  Popup.prototype.open_author_illust = function() {
-    if (this.author.style.display !== 'none') pp.open(this.a_illust.href);
-  };
-  Popup.prototype.open_author_bookmark = function() {
-    if (this.author.style.display !== 'none') pp.open(this.a_bookmark.href);
-  };
-  Popup.prototype.open_author_staccfeed = function() {
-    if (this.author.style.display !== 'none' && this.a_stacc.style.display !== 'none') {
-      pp.open(this.a_stacc.href);
+    toggle_tag_edit: function() {
+      if (this.is_tag_editing()) {
+        this.tag_edit.style.display = 'none';
+        this.caption.style.display = '';
+        this.img_div.style.display = '';
+        this.locate();
+        this.reload();
+      } else if (!this.tag_loading) {
+        this.tag_loading = true;
+        this.tag_edit_btn.textContent = '[Loading]';
+        window.jQuery.post(
+          '/rpc_tag_edit.php',
+          rpc_create_data(['i_id', 'u_id', 'e_id'], {mode: 'first'}),
+          bind(function(data) {
+            this.tag_edit.innerHTML = data.html.join('');
+            this.tag_edit.style.display = '';
+            this.caption.style.display = 'none';
+            this.img_div.style.display = 'none';
+            this.locate();
+            this.tag_loading = false;
+            this.tag_edit_btn.textContent = '[E]';
+          }, this),
+          'json').error(function() { alert('Error!'); });
+      }
+    },
+
+    is_tag_editing: function() {
+      return this.tag_edit.style.display !== 'none';
+    },
+
+    open_author_profile: function() {
+      if (this.author.style.display !== 'none') pp.open(this.a_profile.href);
+    },
+
+    open_author_illust: function() {
+      if (this.author.style.display !== 'none') pp.open(this.a_illust.href);
+    },
+
+    open_author_bookmark: function() {
+      if (this.author.style.display !== 'none') pp.open(this.a_bookmark.href);
+    },
+
+    open_author_staccfeed: function() {
+      if (this.author.style.display !== 'none' && this.a_stacc.style.display !== 'none') {
+        pp.open(this.a_stacc.href);
+      }
+    },
+
+    open_bookmark_detail: function() {
+      pp.open('http://www.pixiv.net/bookmark_detail.php?illust_id=' + this.item.id);
+    },
+
+    set_manga_mode: function(manga_mode, page) {
+      if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) return;
+      if ((this.manga.enabled = manga_mode)) {
+        this.manga.enabled = true;
+        this.manga_btn.setAttribute('enable', '');
+        this.update_olc();
+        this.set_manga_page(page || 0);
+      } else {
+        this.set(this.item);
+      }
+    },
+
+    toggle_manga_mode: function(page) {
+      if (this.manga.usable) this.set_manga_mode(!this.manga.enabled, page);
+    },
+
+    scroll_caption: function(pos) {
+      this.comment_wrap.scrollTop += pos;
     }
-  };
-  Popup.prototype.open_bookmark_detail = function() {
-    pp.open('http://www.pixiv.net/bookmark_detail.php?illust_id=' + this.item.id);
-  };
-  Popup.prototype.set_manga_mode = function(manga_mode, page) {
-    if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) return;
-    if ((this.manga.enabled = manga_mode)) {
-      this.manga.enabled = true;
-      this.manga_btn.setAttribute('enable', '');
-      this.update_olc();
-      this.set_manga_page(page || 0);
-    } else {
-      this.set(this.item);
-    }
-  };
-  Popup.prototype.toggle_manga_mode = function(page) {
-    if (this.manga.usable) this.set_manga_mode(!this.manga.enabled, page);
-  };
-  Popup.prototype.scroll_caption = function(pos) {
-    this.comment_wrap.scrollTop += pos;
   };
 
   Popup.Loader = function(item, load_cb, error_cb, reload) {
