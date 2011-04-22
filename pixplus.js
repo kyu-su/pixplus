@@ -804,7 +804,8 @@
         val = (typeof item.value === 'boolean'
                ? input.checked
                : LS.get_conv(sec.name, item.key)[0](input.value));
-        if (val !== item.value) obj[sec.name + '_' + item.key] = val;
+        //if (val !== item.value) obj[sec.name + '_' + item.key] = val;
+        obj[sec.name + '_' + item.key] = val;
       });
       obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
       obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
@@ -4341,7 +4342,7 @@
                  '.pp-bm-wrap .bookmark_recommend_tag > br{display:none;}' +
                  '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
                  '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;margin-right:4px;}' +
+                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;}' +
                  '.pp-bm-wrap .bookmark_recommend_tag > ul > li[pppreselected]{border:2px solid #56E655;padding:0px;}' +
                  '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
                  '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
