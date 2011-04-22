@@ -16,6 +16,7 @@ BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null && echo yes || ec
 BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null && which "$(JS)" >/dev/null && echo yes || echo no)
 
+LICENSE                 = LICENSE.TXT
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
 ICON_SVG                = pixplus.svg
@@ -44,7 +45,7 @@ OPERA_ICON_FILES        = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
 OPERA_I18N_SOURCES      = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
 OPERA_I18N_FILES        = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
 OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) \
-                          $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES)
+                          $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES) $(LICENSE)
 
 CHROME_ROOT             = chrome
 CHROME_SIGN_KEY         = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
@@ -53,7 +54,7 @@ CHROME_ICON_DIR         = icons
 CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
 CHROME_I18N_FILES       = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
 CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) \
-                          $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES)
+                          $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES) $(LICENSE)
 
 SAFARI_ROOT             = safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
@@ -62,7 +63,7 @@ SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
 SAFARI_CERTS            = $(patsubst %,$(SAFARI_ROOT)/sign/%,safari_cert.der safari_ca1.der safari_ca2.der)
 SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
 SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) \
-                          $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%)
+                          $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(LICENSE)
 
 FIREFOX_ROOT            = firefox
 FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
@@ -77,7 +78,7 @@ FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.pn
 FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
 FIREFOX_I18N_FILES      = $(I18N_LANGUAGES_FULL:%=$(FIREFOX_ROOT)/locale/%/entities.dtd)
 FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) \
-                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES)
+                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES) $(LICENSE)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender \
                           Effect sendRequest getPageUrl
@@ -140,11 +141,15 @@ clean: clean-opera clean-chrome clean-safari clean-firefox
 # ================ Opera ================
 
 $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
-	sed -e '/@ICONS@/,$$d' \
+	sed -e '/@LICENSE@/,$$d' \
             -e 's/@VERSION@/$(VERSION)/' \
             -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
           < $< > $@
+	@grep '://' $(LICENSE) | sed -e '2,$$d' -e 's/^ */  <license href="/' -e 's/ *$$/">/' >> $@
+	@cat $(LICENSE) >> $@
+	@echo '  </license>' >> $@
+	sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)/$$size.png\" />" >> $@; done
 	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
 	python conf-parser.py opera < $(CONFIG_JSON) >> $@
@@ -173,7 +178,7 @@ $(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
 	@for file in $(^:$(OPERA_ROOT)/%=%); do \
            mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
-           cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file; \
+           cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file || cp $$file $(OEX_TMP_DIR)/$$file; \
          done
 #	cd $(OEX_TMP_DIR) && ../$(OPERA_ROOT)/sign/create_signature.sh $(^:$(OPERA_ROOT)/%=%) > signature1.xml
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
@@ -215,7 +220,7 @@ $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
 	@for file in $(^:$(CHROME_ROOT)/%=%); do \
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
-           cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
+           cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file || cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
 	@test -f $(CHROME_SIGN_KEY) && \
            "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) || \
@@ -249,8 +254,9 @@ $(SAFARI_ICON_FILES): $(ICON_SVG)
 $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
 	rm -rf $(SAFARIEXTZ_TMP_DIR)
 	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
-           mkdir -p $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/`dirname $$file`; \
-           cp $(SAFARI_ROOT)/$$file $(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension)/$$file; \
+           d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
+           mkdir -p $$d/`dirname $$file`; \
+           cp $(SAFARI_ROOT)/$$file $$d/$$file || cp $$file $$d/$$file; \
          done
 	cd $(SAFARIEXTZ_TMP_DIR) && \
           $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
@@ -310,7 +316,7 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
 	@for file in $(FIREFOX_DIST_FILES:$(FIREFOX_ROOT)/%=%); do \
            mkdir -p $(XPI_TMP_DIR)/`dirname $$file`; \
-           cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file; \
+           cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file || cp $$file $(XPI_TMP_DIR)/$$file; \
          done
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
