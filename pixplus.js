@@ -1437,19 +1437,27 @@
         return item;
       }
 
-      var menu_items = [], mi_restore;
-      if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) {
+      var menu_items = [];
+      if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
+        var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
         menu_items.push(create_menu_item('Save layout', function() {
-          window.localStorage['__pixplus_cookie_pixiv_mypage'] = window.jQuery.cookie('pixiv_mypage');
-          mi_restore.style.display = 'block';
+          var value = window.jQuery.cookie('pixiv_mypage');
+          window.localStorage[key] = value;
+          mi_restore_input.value = value;
+          //mi_restore.style.display = 'block';
         }));
         menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-          window.jQuery.cookie('pixiv_mypage', window.localStorage['__pixplus_cookie_pixiv_mypage'],
+          window.jQuery.cookie('pixiv_mypage', mi_restore_input.value,
                                {expires: 30, domain: 'pixiv.net', path: '/'});
           window.location.reload();
         }));
-        if (!window.localStorage['__pixplus_cookie_pixiv_mypage']) mi_restore.style.display = 'none';
-      }
+        mi_restore_input = $c('input', mi_restore);
+        mi_restore_input.value = window.localStorage[key] || '';
+        $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
+          this.select(); /* WARN */
+        });
+        //if (!window.localStorage[key]) mi_restore.style.display = 'none';
+      })();
 
       var li  = $c('li', null, 'pp-sitenav-menu-caption');
       sitenav.insertBefore(li, sitenav.firstChild);
@@ -2166,7 +2174,7 @@
                  '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                  'hr + br, hr ~ br{display:none;}' +
                  // menu
-                 '#pp-sitenav-menu-caption a{display:block;}' +
+                 '#pp-sitenav-menu-caption > a{display:block;}' +
                  '#pp-sitenav-menu-caption div{padding:3px;margin-top:-3px;margin-left:-3px;background-color:white;' +
                  '  z-index:10002;position:absolute;display:none;}' +
                  '#pp-sitenav-menu-caption:hover div{padding:2px;border:solid silver;border-width:1px 1px 0px 1px;' +
@@ -2175,6 +2183,7 @@
                  '  border:1px solid silver;padding:2px;margin-top:1px;margin-left:-3px;}' +
                  '#pp-sitenav-menu-caption:hover #pp-sitenav-menu{display:block;}' +
                  '#pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
+                 '#pp-sitenav-menu li input{width:2em;margin-left:2px;padding:1px;}' +
                  // config
                  '#pp-conf-root{margin-bottom:4px;}' +
                  ConfigUI.css +
