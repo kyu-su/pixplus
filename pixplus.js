@@ -2208,7 +2208,7 @@
                  '#pp-popup #pp-header #pp-caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                  '#pp-popup #pp-caption .pp-separator{border-top:1px solid gray;margin-top:1px;padding-top:1px;}' +
                  '#pp-popup #pp-caption .pp-separator-b{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
-                 '#pp-popup #pp-comment-wrap{overflow:auto;line-height:1.1em;}' +
+                 '#pp-popup #pp-comment-wrap{overflow:auto;line-height:normal;}' +
                  '#pp-popup #tag_area > * + *{margin-left:0.6em;}' +
                  '#pp-popup #tag_area > span > a + a{margin-left:0.2em;}' +
                  '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
@@ -3622,7 +3622,7 @@
         if (this.expand_header) {
           cap_height = this.img_div.offsetHeight - post_cap_height;
         } else {
-          cap_height = this.img_div.offsetHeight * conf.popup.caption_height - post_cap_height;
+          cap_height = Math.floor(this.img_div.offsetHeight * conf.popup.caption_height) - post_cap_height;
         }
         this.comment_wrap.style.maxHeight = Math.max(cap_height, 128) + 'px';
 
