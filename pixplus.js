@@ -3226,7 +3226,7 @@
           // tools.php?tool=hoge
           var html = '';
           each(trim(tmp[2]).split('&nbsp;'), function(tool) {
-            html += '<span>' + tool + '</span>';
+            html += '<span><a href="/search.php?word=' + encodeURIComponent(tool) + '&s_mode=s_tag">' + tool + '</a></span>';
           });
           this.info_tools.innerHTML = html;
           this.info_tools.style.display = '';
@@ -3602,8 +3602,11 @@
     update_info: function() {
       var info_size = [];
       each(this.images.list, function(img) {
+        var sup = [], re;
         var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
-        info_size.push(img.display_size.width + 'x' + img.display_size.height + '(' + scale + 'x)');
+        if (scale !== 1) sup.push(scale + 'x');
+        if ((re = /\.([^\/\.]+)$/.exec(img.image.src))) sup.push(re[1]);
+        info_size.push(img.display_size.width + 'x' + img.display_size.height + (sup.length ? '(' + sup.join('/') + ')' : ''));
       });
       this.info_size.textContent = info_size.join('/');
       this.post_cap.style.display = '';
