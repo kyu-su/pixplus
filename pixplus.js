@@ -3992,56 +3992,63 @@
     }, this), reload);
     return this;
   };
-  Popup.Loader.prototype.load_image = function(url) {
-    var self = this;
-    getimg(url, function(img) {
-      self.img_cmp = true;
-      self.image = img;
-      if (conf.popup.big_image) {
-        self.item.img_big = img;
+
+  Popup.Loader.prototype = {
+    load_image: function(url) {
+      var self = this;
+      getimg(url, function(img) {
+        self.img_cmp = true;
+        self.image = img;
+        if (conf.popup.big_image) {
+          self.item.img_big = img;
+        } else {
+          self.item.img_med = img;
+        }
+        self.onload();
+      }, function() {
+        if (self.parallel && conf.popup.big_image) {
+          log('parallel load failed - ' + self.item.img_url_base);
+          self.parallel = false;
+          if (self.text_cmp) self.parse_text();
+        } else {
+          self.onerror('Failed to load image');
+        }
+      }, function() {
+        self.onerror('Load image aborted');
+      });
+    },
+
+    parse_text: function() {
+      var url, re;
+      if ((re = /<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i.exec(this.text))) {
+        url = re[1];
+        if (conf.popup.big_image &&
+            !/<div[^>]+class=\"[^\"]*works_display[^\"]*\"[^>]*><a[^>]+href=\"member_illust\.php\?mode=manga/i.test(this.text) &&
+            (re = /^(.+)_m(\.[^\.]+)$/.exec(url))) {
+          url = re[1] + re[2];
+        }
+      }
+      if (url) {
+        this.load_image(url);
+        if (!this.item.img_url_base) this.item.parse_img_url(url);
       } else {
-        self.item.img_med = img;
+        this.onerror('Failed to parse image URL');
       }
-      self.onload();
-    }, function() {
-      if (self.parallel && conf.popup.big_image) {
-        log('parallel load failed - ' + self.item.img_url_base);
-        self.parallel = false;
-        if (self.text_cmp) self.parse_text();
-      } else {
-        self.onerror('Failed to load image');
-      }
-    }, function() {
-      self.onerror('Load image aborted');
-    });
-  };
-  Popup.Loader.prototype.parse_text = function() {
-    var url, re;
-    if ((re = /<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i.exec(this.text))) {
-      url = re[1];
-      if (conf.popup.big_image &&
-          !/<div[^>]+class=\"[^\"]*works_display[^\"]*\"[^>]*><a[^>]+href=\"member_illust\.php\?mode=manga/i.test(this.text) &&
-          (re = /^(.+)_m(\.[^\.]+)$/.exec(url))) {
-        url = re[1] + re[2];
-      }
+    },
+
+    onload: function() {
+      if (!this.cancelled && this.text_cmp && this.img_cmp && this.load_cb) this.load_cb.apply(this);
+    },
+
+    onerror: function(msg) {
+      uncache(this.url);
+      if (!this.cancelled && this.error_cb) this.error_cb.apply(this, [msg]);
+      this.cancelled = true;
+    },
+
+    cancel: function() {
+      this.cancelled = true;
     }
-    if (url) {
-      this.load_image(url);
-      if (!this.item.img_url_base) this.item.parse_img_url(url);
-    } else {
-      this.onerror('Failed to parse image URL');
-    }
-  };
-  Popup.Loader.prototype.onload = function() {
-    if (!this.cancelled && this.text_cmp && this.img_cmp && this.load_cb) this.load_cb.apply(this);
-  };
-  Popup.Loader.prototype.onerror = function(msg) {
-    uncache(this.url);
-    if (!this.cancelled && this.error_cb) this.error_cb.apply(this, [msg]);
-    this.cancelled = true;
-  };
-  Popup.Loader.prototype.cancel = function() {
-    this.cancelled = true;
   };
 
   Popup.MangaLoader = function(item, page, load_cb, error_cb) {
@@ -4071,110 +4078,120 @@
     this.image_url_big = item.img_url_base + '_big_p' + page + item.img_url_ext;
     this.load_image(this.image_url, this.image_url_big);
   };
-  Popup.MangaLoader.prototype.check_complete = function(image) {
-    if (!this.images) return;
-    for(var i = 0; i < this.images.length; ++i) {
-      if (this.images[i] instanceof Array) return;
-    }
-    this.onload();
-  };
-  Popup.MangaLoader.prototype.load_image = function(url, url_big) {
-    var onload = bind(Popup.MangaLoader.prototype.onload_image, this);
-    var onerror = bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image');
-    if (getimg.cache[url_big] === false) {
-      getimg(url, onload, onerror);
-    } else {
-      getimg(conf.popup.big_image ? url_big : url, onload,
-             conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
-    }
-  };
-  Popup.MangaLoader.prototype.onload_image = function(image) {
-    if (this.images) {
-      each(this.images, function(obj, idx) {
-        if (obj instanceof Array && obj.indexOf(image.src) >= 0) {
-          this[idx] = image;
-        }
-      });
-      this.check_complete();
-    } else {
-      this.images = [image];
-    }
-  };
-  Popup.MangaLoader.prototype.parse_html = function(html) {
-    var manga_pages = [];
-    var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
-    var page = 0;
-    for(var i = 0; i + 1 < containers.length; i += 2) {
-      var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
-      var pages = [], j;
-      for(j = 0; j + 2 < images.length; j += 3) {
-        pages.push({
-          url: images[j + 2],
-          url_big: images[j + 2].replace(/(_p\d+\.\w+)$/, '_big$1'),
-          page: page++,
-          image_index: pages.length
-        });
+
+  Popup.MangaLoader.prototype = {
+    check_complete: function(image) {
+      if (!this.images) return;
+      for(var i = 0; i < this.images.length; ++i) {
+        if (this.images[i] instanceof Array) return;
       }
-      if (pages.length < 1) {
-        this.onerror('Invalid html');
+      this.onload();
+    },
+
+    load_image: function(url, url_big) {
+      var onload = bind(Popup.MangaLoader.prototype.onload_image, this);
+      var onerror = bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image');
+      if (getimg.cache[url_big] === false) {
+        getimg(url, onload, onerror);
+      } else {
+        getimg(conf.popup.big_image ? url_big : url, onload,
+               conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
+      }
+    },
+
+    onload_image: function(image) {
+      if (this.images) {
+        each(this.images, function(obj, idx) {
+          if (obj instanceof Array && obj.indexOf(image.src) >= 0) {
+            this[idx] = image;
+          }
+        });
+        this.check_complete();
+      } else {
+        this.images = [image];
+      }
+    },
+
+    parse_html: function(html) {
+      var manga_pages = [];
+      var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
+      var page = 0;
+      for(var i = 0; i + 1 < containers.length; i += 2) {
+        var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
+        var pages = [], j;
+        for(j = 0; j + 2 < images.length; j += 3) {
+          pages.push({
+            url: images[j + 2],
+            url_big: images[j + 2].replace(/(_p\d+\.\w+)$/, '_big$1'),
+            page: page++,
+            image_index: pages.length
+          });
+        }
+        if (pages.length < 1) {
+          this.onerror('Invalid html');
+          return;
+        }
+        if (images[1] === 'unshift') pages.reverse();
+        for(j = 0; j < pages.length; ++j) {
+          manga_pages.push({list: pages, page_inc: pages.length - j, page_dec: j + 1});
+        }
+      }
+      this.load_pages(manga_pages);
+    },
+
+    load_pages: function(pages) {
+      this.item.manga_pages = pages;
+
+      if (!pages[this.page]) {
+        this.onerror('Invalid page data');
         return;
       }
-      if (images[1] === 'unshift') pages.reverse();
-      for(j = 0; j < pages.length; ++j) {
-        manga_pages.push({list: pages, page_inc: pages.length - j, page_dec: j + 1});
-      }
-    }
-    this.load_pages(manga_pages);
-  };
-  Popup.MangaLoader.prototype.load_pages = function(pages) {
-    this.item.manga_pages = pages;
 
-    if (!pages[this.page]) {
-      this.onerror('Invalid page data');
-      return;
-    }
+      this.page_inc = pages[this.page].page_inc;
+      this.page_dec = pages[this.page].page_dec;
 
-    this.page_inc = pages[this.page].page_inc;
-    this.page_dec = pages[this.page].page_dec;
+      var image = this.images && this.images[0];
+      this.pages = [];
+      this.images = [];
+      each(pages[this.page].list, function(page, idx) {
+        this.pages.push({page: page.page, image_index: page.image_index});
 
-    var image = this.images && this.images[0];
-    this.pages = [];
-    this.images = [];
-    each(pages[this.page].list, function(page, idx) {
-      this.pages.push({page: page.page, image_index: page.image_index});
-
-      var urls = [page.url, page.url_big];
-      if (image) {
-        for(var i = 0; i < urls.length; ++i) {
-          if (urls[i] === this.image_url || urls[i] === this.image_url_big) {
-            this.images.push(image);
-            return;
+        var urls = [page.url, page.url_big];
+        if (image) {
+          for(var i = 0; i < urls.length; ++i) {
+            if (urls[i] === this.image_url || urls[i] === this.image_url_big) {
+              this.images.push(image);
+              return;
+            }
           }
         }
+        this.images.push(urls);
+      }, this);
+      each(this.images, function(urls) {
+        if (urls instanceof Array) {
+          Popup.MangaLoader.prototype.load_image.apply(this, urls);
+        }
+      }, this);
+      this.check_complete();
+    },
+
+    onload: function() {
+      if (!this.stopped && this.load_cb) {
+        this.stopped = true;
+        this.load_cb(this);
       }
-      this.images.push(urls);
-    }, this);
-    each(this.images, function(urls) {
-      if (urls instanceof Array) {
-        Popup.MangaLoader.prototype.load_image.apply(this, urls);
+    },
+
+    onerror: function(msg) {
+      if (!this.stopped && this.error_cb) {
+        this.stopped = true;
+        this.error_cb(msg);
       }
-    }, this);
-    this.check_complete();
-  };
-  Popup.MangaLoader.prototype.onload = function() {
-    if (!this.stopped && this.load_cb) {
+    },
+
+    cancel: function() {
       this.stopped = true;
-      this.load_cb(this);
     }
-  };
-  Popup.MangaLoader.prototype.onerror = function(msg) {
-    if (!this.stopped && this.error_cb) {
-      this.stopped = true;
-      this.error_cb(msg);
-    }
-  };
-  Popup.MangaLoader.prototype.cancel = function() {
-    this.stopped = true;
   };
 
   function BookmarkForm(root, opts) {
@@ -4424,183 +4441,190 @@
     BookmarkForm.trap_jquery_ready = function() { };
   };
 
-  BookmarkForm.prototype.autoinput = function(func) {
-    var tags = this.input_tag.value.split(/\s+|\u3000+/);
-    each(this.tags_bookmark, function(bt) {
-      var tag = bt.parentNode.getAttribute('jsatagname');
-      if (tags.indexOf(tag) >= 0) return;
-      var aliases = conf.bm_tag_aliases[tag];
-      each([tag].concat(conf.bm_tag_aliases[tag] || []), function(tag) {
-        if (func.call(this, bt, tag)) {
-          send_click(bt);
-          return true;
-        } else {
-          return false;
-        }
-      }, this);
-    }, this);
-  };
-  BookmarkForm.prototype.autoinput_from_tag = function() {
-    this.autoinput(function(anc, tag) {
-      for(var i = 0; i < this.tags_illust.length; ++i) {
-        var itag = this.tags_illust[i].firstChild.nodeValue;
-        if (lc(itag).indexOf(lc(tag)) >= 0) return true;
-      }
-      return false;
-    });
-  };
-
-  BookmarkForm.prototype.keypress_common = function(ev, key) {
-    return false;
-    /*
-    if (!pp.key_enabled(ev)) return false;
-    if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
-      this.submit();
-      return true;
-    } else if (key === $ev.KEY_ESCAPE) {
-      this.close();
-      return true;
-    }
-    return false;
-     */
-  };
-
-  // conf.bookmark_form === 1
-  BookmarkForm.prototype.toggle_preselected = function() {
-    send_click($x('.//a', this.tag_preselected));
-  };
-  BookmarkForm.prototype.unpreselect_tag = function() {
-    if (this.tag_preselected) {
-      this.tag_preselected.removeAttribute('pppreselected');
-      this.tag_preselected = null;
-    }
-  };
-  BookmarkForm.prototype.preselect_tag = function(x, y) {
-    this.unpreselect_tag();
-    if (y < 0) {
-      y = this.tag_items.length - 1;
-    } else if (y >= this.tag_items.length) {
-      y = 0;
-    }
-    if (y !== this.tag_preselected_index.y) x = 0;
-    if (x < 0) {
-      x = this.tag_items[y].length - 1;
-    } else if (x >= this.tag_items[y].length) {
-      x = 0;
-    }
-    this.tag_preselected_index.x = x;
-    this.tag_preselected_index.y = y;
-    this.tag_preselected = this.tag_items[y][x];
-    this.tag_preselected.setAttribute('pppreselected', 'yes');
-  };
-
-  BookmarkForm.prototype.keypress1 = function(ev, key) {
-    if (this.tag_preselected) {
-      var x = 0, y = 0;
-      switch(key) {
-      case $ev.KEY_SPACE:  this.toggle_preselected(); return true;
-      case $ev.KEY_ESCAPE: this.unpreselect_tag(); return true;
-      case $ev.KEY_LEFT:   x = -1; break;
-      case $ev.KEY_UP:     y = -1; break;
-      case $ev.KEY_RIGHT:  x = 1; break;
-      case $ev.KEY_DOWN:   y = 1; break;
-      }
-      if (x !== 0 || y !== 0) {
-        this.preselect_tag(this.tag_preselected_index.x + x, this.tag_preselected_index.y + y);
-        return true;
-      }
-    } else if (key === $ev.KEY_UP || key === $ev.KEY_DOWN) {
-      this.preselect_tag(0, key === $ev.KEY_DOWN ? 0 : this.tag_items.length - 1);
-      return true;
-    }
-    return false;
-  };
-
-  // conf.bookmark_form === 2
   BookmarkForm.set_key_label_enabled = function(node, enabled) {
     var classes = node.className.replace(/ *pp-access-key-on */, ' ');
     if (enabled) classes += ' pp-access-key-on';
     node.className = classes;
   };
-  BookmarkForm.prototype.set_root_key_enabled = function(enabled) {
-    this.root_key_enabled = !!enabled;
-    BookmarkForm.set_key_label_enabled(this.root, enabled);
-  };
 
-  BookmarkForm.prototype.select_tag_list = function(ul) {
-    if (ul) {
-      this.set_root_key_enabled(false);
-      BookmarkForm.set_key_label_enabled(ul, false);
-      this.key_map_tags = {};
-      each($t('li', ul), function(li, idx) {
-        if (idx >= BookmarkForm.keys_tag.length) return;
-        this.key_map_tags[BookmarkForm.keys_tag[idx]] = li;
-        li.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
+  BookmarkForm.prototype = {
+    autoinput: function(func) {
+      var tags = this.input_tag.value.split(/\s+|\u3000+/);
+      each(this.tags_bookmark, function(bt) {
+        var tag = bt.parentNode.getAttribute('jsatagname');
+        if (tags.indexOf(tag) >= 0) return;
+        var aliases = conf.bm_tag_aliases[tag];
+        each([tag].concat(conf.bm_tag_aliases[tag] || []), function(tag) {
+          if (func.call(this, bt, tag)) {
+            send_click(bt);
+            return true;
+          } else {
+            return false;
+          }
+        }, this);
       }, this);
-      BookmarkForm.set_key_label_enabled(ul, true);
-      this.selected_list = ul;
-    } else {
-      if (this.selected_list) BookmarkForm.set_key_label_enabled(this.selected_list, false);
-      this.set_root_key_enabled(true);
-      this.key_map_tags = null;
-      this.selected_list = null;
-    }
-  };
+    },
 
-  BookmarkForm.prototype.keypress2 = function(ev, key) {
-    if (!pp.key_enabled(ev)) return false;
-    if (this.root_key_enabled) {
-      if (this.key_map_root[key]) {
-        if (this.key_map_root[key].type === 'radio') {
-          this.key_map_root[key].checked = true;
-        } else {
-          this.key_map_root[key].focus();
+    autoinput_from_tag: function() {
+      this.autoinput(function(anc, tag) {
+        for(var i = 0; i < this.tags_illust.length; ++i) {
+          var itag = this.tags_illust[i].firstChild.nodeValue;
+          if (lc(itag).indexOf(lc(tag)) >= 0) return true;
         }
-        return true;
-      }
-      if (this.key_map_tag_list[key]) {
-        this.select_tag_list(this.key_map_tag_list[key]);
-        return true;
-      }
-    }
-    if (this.key_map_tags) {
-      if (key === $ev.KEY_ESCAPE) {
-        this.select_tag_list(null);
-        return true;
-      }
-      if (this.key_map_tags[key]) {
-        send_click($t('a', this.key_map_tags[key])[0]);
-        this.select_tag_list(null);
-        return true;
-      }
-    }
-    return this.keypress_common(ev, key);
-  };
-
-  BookmarkForm.prototype.submit = function() {
-    var submit_text = this.btn_submit.value;
-    this.btn_submit.value = "\u9001\u4fe1\u4e2d";
-    this.btn_submit.setAttribute('disabled', '');
-    window.jQuery.post(
-      this.form.getAttribute('action'),
-      window.jQuery(this.form).serialize(),
-      bind(function(data) {
-        this.btn_submit.value = submit_text;
-        this.btn_submit.removeAttribute('disabled');
-        this.close();
-      }, this)).error(function() {
-        alert('Error!');
+        return false;
       });
-  };
+    },
 
-  BookmarkForm.prototype.close = function() {
-    if (this.onclose) this.onclose.emit(this);
-  };
-  BookmarkForm.prototype.destroy = function() {
-    each(this.connections, function(conn) {
-      conn.disconnect();
-    });
-    this.connections = [];
+    keypress_common: function(ev, key) {
+      return false;
+      /*
+      if (!pp.key_enabled(ev)) return false;
+      if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
+        this.submit();
+        return true;
+      } else if (key === $ev.KEY_ESCAPE) {
+        this.close();
+        return true;
+      }
+      return false;
+       */
+    };
+
+    // conf.bookmark_form === 1
+    toggle_preselected: function() {
+      send_click($x('.//a', this.tag_preselected));
+    },
+
+    unpreselect_tag: function() {
+      if (this.tag_preselected) {
+        this.tag_preselected.removeAttribute('pppreselected');
+        this.tag_preselected = null;
+      }
+    },
+
+    preselect_tag: function(x, y) {
+      this.unpreselect_tag();
+      if (y < 0) {
+        y = this.tag_items.length - 1;
+      } else if (y >= this.tag_items.length) {
+        y = 0;
+      }
+      if (y !== this.tag_preselected_index.y) x = 0;
+      if (x < 0) {
+        x = this.tag_items[y].length - 1;
+      } else if (x >= this.tag_items[y].length) {
+        x = 0;
+      }
+      this.tag_preselected_index.x = x;
+      this.tag_preselected_index.y = y;
+      this.tag_preselected = this.tag_items[y][x];
+      this.tag_preselected.setAttribute('pppreselected', 'yes');
+    },
+
+    keypress1: function(ev, key) {
+      if (this.tag_preselected) {
+        var x = 0, y = 0;
+        switch(key) {
+        case $ev.KEY_SPACE:  this.toggle_preselected(); return true;
+        case $ev.KEY_ESCAPE: this.unpreselect_tag(); return true;
+        case $ev.KEY_LEFT:   x = -1; break;
+        case $ev.KEY_UP:     y = -1; break;
+        case $ev.KEY_RIGHT:  x = 1; break;
+        case $ev.KEY_DOWN:   y = 1; break;
+        }
+        if (x !== 0 || y !== 0) {
+          this.preselect_tag(this.tag_preselected_index.x + x, this.tag_preselected_index.y + y);
+          return true;
+        }
+      } else if (key === $ev.KEY_UP || key === $ev.KEY_DOWN) {
+        this.preselect_tag(0, key === $ev.KEY_DOWN ? 0 : this.tag_items.length - 1);
+        return true;
+      }
+      return false;
+    },
+
+    // conf.bookmark_form === 2
+    set_root_key_enabled: function(enabled) {
+      this.root_key_enabled = !!enabled;
+      BookmarkForm.set_key_label_enabled(this.root, enabled);
+    },
+
+    select_tag_list: function(ul) {
+      if (ul) {
+        this.set_root_key_enabled(false);
+        BookmarkForm.set_key_label_enabled(ul, false);
+        this.key_map_tags = {};
+        each($t('li', ul), function(li, idx) {
+          if (idx >= BookmarkForm.keys_tag.length) return;
+          this.key_map_tags[BookmarkForm.keys_tag[idx]] = li;
+          li.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
+        }, this);
+        BookmarkForm.set_key_label_enabled(ul, true);
+        this.selected_list = ul;
+      } else {
+        if (this.selected_list) BookmarkForm.set_key_label_enabled(this.selected_list, false);
+        this.set_root_key_enabled(true);
+        this.key_map_tags = null;
+        this.selected_list = null;
+      }
+    },
+
+    keypress2: function(ev, key) {
+      if (!pp.key_enabled(ev)) return false;
+      if (this.root_key_enabled) {
+        if (this.key_map_root[key]) {
+          if (this.key_map_root[key].type === 'radio') {
+            this.key_map_root[key].checked = true;
+          } else {
+            this.key_map_root[key].focus();
+          }
+          return true;
+        }
+        if (this.key_map_tag_list[key]) {
+          this.select_tag_list(this.key_map_tag_list[key]);
+          return true;
+        }
+      }
+      if (this.key_map_tags) {
+        if (key === $ev.KEY_ESCAPE) {
+          this.select_tag_list(null);
+          return true;
+        }
+        if (this.key_map_tags[key]) {
+          send_click($t('a', this.key_map_tags[key])[0]);
+          this.select_tag_list(null);
+          return true;
+        }
+      }
+      return this.keypress_common(ev, key);
+    },
+
+    submit: function() {
+      var submit_text = this.btn_submit.value;
+      this.btn_submit.value = "\u9001\u4fe1\u4e2d";
+      this.btn_submit.setAttribute('disabled', '');
+      window.jQuery.post(
+        this.form.getAttribute('action'),
+        window.jQuery(this.form).serialize(),
+        bind(function(data) {
+          this.btn_submit.value = submit_text;
+          this.btn_submit.removeAttribute('disabled');
+          this.close();
+        }, this)).error(function() {
+          alert('Error!');
+        });
+    },
+
+    close: function() {
+      if (this.onclose) this.onclose.emit(this);
+    },
+
+    destroy: function() {
+      each(this.connections, function(conn) {
+        conn.disconnect();
+      });
+      this.connections = [];
+    }
   };
 
   function add_gallery(args, filter_col, filter) {
@@ -4685,72 +4709,80 @@
   Floater.update_height = function() {
     each(Floater.instances, function(inst) { inst.update_height(); });
   };
-  Floater.prototype.init = function() {
-    this.wrap.style.boxSizing = 'border-box';
-    this.wrap.style.webkitBoxSizing = 'border-box';
-    this.wrap.style.MozBoxSizing = 'border-box';
-    this.wrap.style.width = this.wrap.offsetWidth + 'px';
-    if (this.cont) {
-      this.cont.style.display = 'block';
-      this.cont.style.overflowX = 'hidden';
-      this.cont.style.overflowY = 'auto';
-    }
-    this.update_float();
-  };
-  Floater.prototype.unfloat = function () {
-    if (this.placeholder) {
-      this.placeholder.parentNode.removeChild(this.placeholder);
-      this.placeholder = null;
-    }
-    this.scroll_save();
-    this.wrap.removeAttribute('float');
-    this.scroll_restore();
-    this.floating = false;
-  };
-  Floater.prototype.update_height = function () {
-    if (this.cont) {
-      var de = window.document.documentElement;
-      var sc = browser.webkit ? window.document.body : de;
-      var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
-      if (mh < 60) {
-        this.disable_float = true;
-        this.unfloat();
-        this.cont.style.maxHeight = '';
-        return;
+
+  Floater.prototype = {
+    init: function() {
+      this.wrap.style.boxSizing = 'border-box';
+      this.wrap.style.webkitBoxSizing = 'border-box';
+      this.wrap.style.MozBoxSizing = 'border-box';
+      this.wrap.style.width = this.wrap.offsetWidth + 'px';
+      if (this.cont) {
+        this.cont.style.display = 'block';
+        this.cont.style.overflowX = 'hidden';
+        this.cont.style.overflowY = 'auto';
       }
-      if (!this.floating) mh -= getpos(this.wrap).top - sc.scrollTop;
-      this.cont.style.maxHeight = mh + 'px';
-    }
-  };
-  Floater.prototype.update_float = function () {
-    if (this.disable_float) return;
-    var de = window.document.documentElement;
-    var sc = browser.webkit ? window.document.body : window.document.documentElement;
-    var pos = getpos(this.placeholder || this.wrap);
-    if (!this.floating && sc.scrollTop > pos.top) {
+      this.update_float();
+    },
+
+    unfloat: function () {
+      if (this.placeholder) {
+        this.placeholder.parentNode.removeChild(this.placeholder);
+        this.placeholder = null;
+      }
       this.scroll_save();
-      if (this.use_placeholder) {
-        this.placeholder = this.wrap.cloneNode(false);
-        this.placeholder.style.width = this.wrap.offsetWidth + 'px';
-        this.placeholder.style.height = '0px';
-        this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
-      }
-      this.wrap.setAttribute('float', '');
-      if (this.use_placeholder) {
-        this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
-      }
+      this.wrap.removeAttribute('float');
       this.scroll_restore();
-      this.floating = true;
-    } else if (this.floating && sc.scrollTop < pos.top) {
-      this.unfloat();
+      this.floating = false;
+    },
+
+    update_height: function () {
+      if (this.cont) {
+        var de = window.document.documentElement;
+        var sc = browser.webkit ? window.document.body : de;
+        var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
+        if (mh < 60) {
+          this.disable_float = true;
+          this.unfloat();
+          this.cont.style.maxHeight = '';
+          return;
+        }
+        if (!this.floating) mh -= getpos(this.wrap).top - sc.scrollTop;
+        this.cont.style.maxHeight = mh + 'px';
+      }
+    },
+
+    update_float: function () {
+      if (this.disable_float) return;
+      var de = window.document.documentElement;
+      var sc = browser.webkit ? window.document.body : window.document.documentElement;
+      var pos = getpos(this.placeholder || this.wrap);
+      if (!this.floating && sc.scrollTop > pos.top) {
+        this.scroll_save();
+        if (this.use_placeholder) {
+          this.placeholder = this.wrap.cloneNode(false);
+          this.placeholder.style.width = this.wrap.offsetWidth + 'px';
+          this.placeholder.style.height = '0px';
+          this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
+        }
+        this.wrap.setAttribute('float', '');
+        if (this.use_placeholder) {
+          this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
+        }
+        this.scroll_restore();
+        this.floating = true;
+      } else if (this.floating && sc.scrollTop < pos.top) {
+        this.unfloat();
+      }
+      this.update_height();
+    },
+
+    scroll_save: function () {
+      if (this.cont) this.scroll_pos = this.cont.scrollTop;
+    },
+
+    scroll_restore: function () {
+      if (this.cont) this.cont.scrollTop = this.scroll_pos;
     }
-    this.update_height();
-  };
-  Floater.prototype.scroll_save = function () {
-    if (this.cont) this.scroll_pos = this.cont.scrollTop;
-  };
-  Floater.prototype.scroll_restore = function () {
-    if (this.cont) this.cont.scrollTop = this.scroll_pos;
   };
 
   function Signal(def) {
@@ -4759,56 +4791,65 @@
     this.id = 1;
     return this;
   }
-  Signal.prototype.connect = function(func, async) {
-    var conn = new Signal.Connection(this, this.id);
-    var timer, last_args;
-    this.funcs.push({
-      id: this.id,
-      cb: function() {
-        last_args = [this, Array.prototype.slice.apply(arguments)];
-        if (async) {
-          if (timer) return null;
-          timer = setTimeout(function() {
-            timer = null;
-            func.apply(last_args[0], last_args[1]);
-          }, typeof async === 'number' ? async : 40);
-        } else {
-          return func.apply(this, last_args[1]);
+
+  Signal.prototype = {
+    connect: function(func, async) {
+      var conn = new Signal.Connection(this, this.id);
+      var timer, last_args;
+      this.funcs.push({
+        id: this.id,
+        cb: function() {
+          last_args = [this, Array.prototype.slice.apply(arguments)];
+          if (async) {
+            if (timer) return null;
+            timer = setTimeout(function() {
+              timer = null;
+              func.apply(last_args[0], last_args[1]);
+            }, typeof async === 'number' ? async : 40);
+          } else {
+            return func.apply(this, last_args[1]);
+          }
+          return null;
+        },
+        conn: conn
+      });
+      ++this.id;
+      return conn;
+    },
+
+    disconnect: function(id) {
+      each(this.funcs, function(func, idx) {
+        if (func.id === id) {
+          this.funcs[idx].conn.disconnected = true;
+          this.funcs.splice(idx, 1);
+          return true;
         }
-        return null;
-      },
-      conn: conn
-    });
-    ++this.id;
-    return conn;
-  };
-  Signal.prototype.disconnect = function(id) {
-    each(this.funcs, function(func, idx) {
-      if (func.id === id) {
-        this.funcs[idx].conn.disconnected = true;
-        this.funcs.splice(idx, 1);
-        return true;
+        return false;
+      }, this);
+    },
+
+    emit: function(inst) {
+      var args = Array.prototype.slice.apply(arguments, [1]);
+      var res;
+      for(var i = 0; i < this.funcs.length; ++i) {
+        res = this.funcs[i].cb.apply(inst, args);
+        if (res) return res;
       }
+      if (this.def && (res = this.def.apply(inst, args))) return res;
       return false;
-    }, this);
-  };
-  Signal.prototype.emit = function(inst) {
-    var args = Array.prototype.slice.apply(arguments, [1]);
-    var res;
-    for(var i = 0; i < this.funcs.length; ++i) {
-      res = this.funcs[i].cb.apply(inst, args);
-      if (res) return res;
     }
-    if (this.def && (res = this.def.apply(inst, args))) return res;
-    return false;
   };
+
   Signal.Connection = function(signal, id) {
     this.signal = signal;
     this.id = id;
     this.disconnected = false;
   };
-  Signal.Connection.prototype.disconnect = function() {
-    if (!this.disconnected) this.signal.disconnect(this.id);
+
+  Signal.Connection.prototype = {
+    disconnect: function() {
+      if (!this.disconnected) this.signal.disconnect(this.id);
+    }
   };
 
   function $ev(ctx, args) {
@@ -4918,16 +4959,20 @@
     39: $ev.KEY_RIGHT,
     40: $ev.KEY_DOWN
   };
+
   $ev.Connection = function(ctx) {
     this.ctx = ctx;
     this.disconnected = false;
     this.listeners = [];
   };
-  $ev.Connection.prototype.disconnect = function() {
-    this.disconnected = true;
-    each(this.listeners, function(item) {
-      this.ctx.removeEventListener(item[0], item[1], item[2]);
-    }, this);
+
+  $ev.Connection.prototype = {
+    disconnect: function() {
+      this.disconnected = true;
+      each(this.listeners, function(item) {
+        this.ctx.removeEventListener(item[0], item[1], item[2]);
+      }, this);
+    }
   };
 
   var Pager = new function() {
@@ -4955,76 +5000,84 @@
     this.script = function(url) {
       return new ctx().script(url);
     };
+
     function ctx(block) {
       this.urls     = [];
       this.scripts  = [];
       this.load_cnt = 0;
       this.block    = block;
-    };
-    ctx.prototype.script = function(url) {
-      log('$js#script: ' + url);
-      this.urls.push(url);
-      if (this.block) {
-        ++this.load_cnt;
-      } else {
-        this.add_load(url, true);
-      }
-      return this;
-    };
-    ctx.prototype.wait = function(func) {
-      log('$js#wait');
-      if (this.load_cnt > 0) {
-        var new_obj = new ctx(true);
-        this.wait = {ctx: new_obj, func: func};
-        return new_obj;
-      } else {
-        if (func) func();
-        return this;
-      }
-    };
-    ctx.prototype.add_load = function(url, raise) {
-      var elem = chk_ext_src('script', 'src', url);
-      if (raise) ++this.load_cnt;
-      if (elem) {
-        if (elem.getAttribute('type') === 'script/cache') { // webkit
-          log('$js#labjs: ' + url);
-          var callee = arguments.callee, self = this;
-          setTimeout(function() { callee.apply(self, [url]); }, 0);
-        } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
-          log('$js#preexists: ' + url);
-          wait.apply(this, [elem]);
-        } else if (elem.readyState) { // for opera
-          load_cb.apply(this);
+    }
+
+    ctx.prototype = {
+      script: function(url) {
+        log('$js#script: ' + url);
+        this.urls.push(url);
+        if (this.block) {
+          ++this.load_cnt;
         } else {
-          setTimeout(bind(load_cb, this), 0);
+          this.add_load(url, true);
         }
-      } else {
-        log('$js#load: ' + url);
-        elem = $c('script');
-        elem.async = false;
-        wait.apply(this, [elem]);
-        elem.src  = url;
-        holder.appendChild(elem);
-      }
-      function wait(elem) {
-        elem.addEventListener('load', bind(load_cb, this), false);
-      }
-      function load_cb() {
-        if (--this.load_cnt < 1) this.unblock();
-      }
-    };
-    ctx.prototype.fire = function() {
-      log('$js#fire');
-      this.block = false;
-      each(this.urls, function(url) {
-        this.add_load(url);
-      }, this);
-    };
-    ctx.prototype.unblock = function() {
-      log('$js#unblock');
-      if (this.wait) {
-        if (this.wait.func) this.wait.func();
-        if (this.wait.ctx)  this.wait.ctx.fire();
+        return this;
+      },
+
+      wait: function(func) {
+        log('$js#wait');
+        if (this.load_cnt > 0) {
+          var new_obj = new ctx(true);
+          this.wait = {ctx: new_obj, func: func};
+          return new_obj;
+        } else {
+          if (func) func();
+          return this;
+        }
+      },
+
+      add_load: function(url, raise) {
+        var elem = chk_ext_src('script', 'src', url);
+        if (raise) ++this.load_cnt;
+        if (elem) {
+          if (elem.getAttribute('type') === 'script/cache') { // webkit
+            log('$js#labjs: ' + url);
+            var callee = arguments.callee, self = this;
+            setTimeout(function() { callee.apply(self, [url]); }, 0);
+          } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
+            log('$js#preexists: ' + url);
+            wait.apply(this, [elem]);
+          } else if (elem.readyState) { // for opera
+            load_cb.apply(this);
+          } else {
+            setTimeout(bind(load_cb, this), 0);
+          }
+        } else {
+          log('$js#load: ' + url);
+          elem = $c('script');
+          elem.async = false;
+          wait.apply(this, [elem]);
+          elem.src  = url;
+          holder.appendChild(elem);
+        }
+        function wait(elem) {
+          elem.addEventListener('load', bind(load_cb, this), false);
+        }
+        function load_cb() {
+          if (--this.load_cnt < 1) this.unblock();
+        }
+      },
+
+      fire: function() {
+        log('$js#fire');
+        this.block = false;
+        each(this.urls, function(url) {
+          this.add_load(url);
+        }, this);
+      },
+
+      unblock: function() {
+        log('$js#unblock');
+        if (this.wait) {
+          if (this.wait.func) this.wait.func();
+          if (this.wait.ctx)  this.wait.ctx.fire();
+        }
       }
     };
   };
