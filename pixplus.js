@@ -2672,6 +2672,27 @@
     }
   };
 
+  function LoaderBase(cb_load, cb_error) {
+    this.stopped = false;
+    this.cb_load = cb_load;
+    this.cb_error = cb_error;
+  }
+  LoaderBase.prototype = {
+    complete: function() {
+      if (!this.stopped && this.cb_load) this.cb_load.call(this);
+      this.stopped = true;
+    },
+
+    error: function(msg) {
+      if (!this.stopped && this.cb_error) this.cb_error.call(this, msg);
+      this.stopped = true;
+    },
+
+    cancel: function() {
+      this.stopped = true;
+    }
+  };
+
   function GalleryItem(url, thumb, caption, prev, gallery) {
     var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1]);
     if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
@@ -3654,7 +3675,7 @@
           if (this.loader) this.loader.cancel();
           this.loader = new Popup.MangaLoader(
             this.item, page,
-            function(loader) { self.manga_onload(loader, page); },
+            function() { self.manga_onload(this, page); },
             function(msg) { self.error(msg); });
         } else {
           this.set(this.item);
@@ -4136,10 +4157,8 @@
     }
   };
 
-  Popup.Loader = function(item, load_cb, error_cb, reload) {
-    this.load_cb   = load_cb;
-    this.error_cb  = error_cb;
-    this.cancelled = false;
+  Popup.Loader = function(item, cb_load, cb_error, reload) {
+    LoaderBase.call(this, cb_load, cb_error);
     this.item      = item;
     this.url       = item.medium;
     this.text      = '';
@@ -4164,22 +4183,23 @@
       this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
     }
 
-    geturl(this.url, bind(function(text) {
-      var re;
-      if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
-        this.onerror(re[1].replace(/<[^>]*>/g, ''));
-      } else {
-        this.text = text;
-        this.text_cmp = true;
-        if (this.img_cmp) {
-          this.onload();
-        } else if (!this.parallel) {
-          this.parse_text();
-        } // else 画像が並列ロード中かキャンセルされた
-      }
-    }, this), bind(function() {
-      this.onerror('Failed to load HTML');
-    }, this), reload);
+    geturl(this.url,
+           bind(function(text) {
+             var re;
+             if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
+               this.error(re[1].replace(/<[^>]*>/g, ''));
+             } else {
+               this.text = text;
+               this.text_cmp = true;
+               if (this.img_cmp) {
+                 this.complete();
+               } else if (!this.parallel) {
+                 this.parse_text();
+               } // else 画像が並列ロード中かキャンセルされた
+             }
+           }, this),
+           bind(Popup.Loader.prototype.error, this, 'Failed to load HTML'),
+           reload);
     return this;
   };
 
@@ -4194,18 +4214,16 @@
         } else {
           self.item.img_med = img;
         }
-        self.onload();
+        self.complete();
       }, function() {
         if (self.parallel && conf.popup.big_image) {
           log('parallel load failed - ' + self.item.img_url_base);
           self.parallel = false;
           if (self.text_cmp) self.parse_text();
         } else {
-          self.onerror('Failed to load image');
+          self.error('Failed to load image');
         }
-      }, function() {
-        self.onerror('Load image aborted');
-      });
+      }, bind(Popup.Loader.prototype.error, this, 'Load image aborted'));
     },
 
     parse_text: function() {
@@ -4222,31 +4240,25 @@
         this.load_image(url);
         if (!this.item.img_url_base) this.item.parse_img_url(url);
       } else {
-        this.onerror('Failed to parse image URL');
+        this.error('Failed to parse image URL');
       }
     },
 
-    onload: function() {
-      if (!this.cancelled && this.text_cmp && this.img_cmp && this.load_cb) this.load_cb.apply(this);
+    complete: function() {
+      if (this.text_cmp && this.img_cmp) LoaderBase.prototype.complete.call(this);
     },
 
-    onerror: function(msg) {
+    error: function(msg) {
       uncache(this.url);
-      if (!this.cancelled && this.error_cb) this.error_cb.apply(this, [msg]);
-      this.cancelled = true;
-    },
-
-    cancel: function() {
-      this.cancelled = true;
+      LoaderBase.prototype.error.call(this);
     }
   };
+  Popup.Loader.prototype.__proto__ = LoaderBase.prototype;
 
-  Popup.MangaLoader = function(item, page, load_cb, error_cb) {
+  Popup.MangaLoader = function(item, page, cb_load, cb_error) {
+    LoaderBase.call(this, cb_load, cb_error);
     this.item       = item;
     this.page       = page;
-    this.load_cb    = load_cb;
-    this.error_cb   = error_cb;
-    this.stopped    = false;
 
     this.images     = null;
     this.pages      = [{page: page, image_index: 0}];
@@ -4261,7 +4273,7 @@
       } else {
         geturl(urlmode(item.medium, 'manga'),
                bind(Popup.MangaLoader.prototype.parse_html, this),
-               bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga page'));
+               bind(Popup.MangaLoader.prototype.error, this, 'Failed to load manga page'));
       }
     }
     this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
@@ -4275,17 +4287,17 @@
       for(var i = 0; i < this.images.length; ++i) {
         if (this.images[i] instanceof Array) return;
       }
-      this.onload();
+      this.complete();
     },
 
     load_image: function(url, url_big) {
-      var onload = bind(Popup.MangaLoader.prototype.onload_image, this);
-      var onerror = bind(Popup.MangaLoader.prototype.onerror, this, 'Failed to load manga image');
+      var load = bind(Popup.MangaLoader.prototype.onload_image, this);
+      var error = bind(Popup.MangaLoader.prototype.error, this, 'Failed to load manga image');
       if (getimg.cache[url_big] === false) {
-        getimg(url, onload, onerror);
+        getimg(url, load, error);
       } else {
-        getimg(conf.popup.big_image ? url_big : url, onload,
-               conf.popup.big_image ? function() { getimg(url, onload, onerror); } : onerror);
+        getimg(conf.popup.big_image ? url_big : url, load,
+               conf.popup.big_image ? function() { getimg(url, load, error); } : error);
       }
     },
 
@@ -4318,7 +4330,7 @@
           });
         }
         if (pages.length < 1) {
-          this.onerror('Invalid html');
+          this.error('Invalid html');
           return;
         }
         if (images[1] === 'unshift') pages.reverse();
@@ -4333,7 +4345,7 @@
       this.item.manga_pages = pages;
 
       if (!pages[this.page]) {
-        this.onerror('Invalid page data');
+        this.error('Invalid page data');
         return;
       }
 
@@ -4363,26 +4375,9 @@
         }
       }, this);
       this.check_complete();
-    },
-
-    onload: function() {
-      if (!this.stopped && this.load_cb) {
-        this.stopped = true;
-        this.load_cb(this);
-      }
-    },
-
-    onerror: function(msg) {
-      if (!this.stopped && this.error_cb) {
-        this.stopped = true;
-        this.error_cb(msg);
-      }
-    },
-
-    cancel: function() {
-      this.stopped = true;
     }
   };
+  Popup.MangaLoader.prototype.__proto__ = LoaderBase.prototype;
 
   function BookmarkForm(root, opts) {
     this.root          = root;
