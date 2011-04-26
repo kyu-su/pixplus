@@ -2482,6 +2482,196 @@
     setTimeout(Floater.init, 100);
   }
 
+  function Signal(def) {
+    this.def = def;
+    this.funcs = [];
+    this.id = 1;
+    return this;
+  }
+
+  Signal.prototype = {
+    connect: function(func, async) {
+      var conn = new Signal.Connection(this, this.id);
+      var timer, last_args;
+      this.funcs.push({
+        id: this.id,
+        cb: function() {
+          last_args = [this, Array.prototype.slice.apply(arguments)];
+          if (async) {
+            if (timer) return null;
+            timer = setTimeout(function() {
+              timer = null;
+              func.apply(last_args[0], last_args[1]);
+            }, typeof async === 'number' ? async : 40);
+          } else {
+            return func.apply(this, last_args[1]);
+          }
+          return null;
+        },
+        conn: conn
+      });
+      ++this.id;
+      return conn;
+    },
+
+    disconnect: function(id) {
+      each(this.funcs, function(func, idx) {
+        if (func.id === id) {
+          this.funcs[idx].conn.disconnected = true;
+          this.funcs.splice(idx, 1);
+          return true;
+        }
+        return false;
+      }, this);
+    },
+
+    emit: function(inst) {
+      var args = Array.prototype.slice.apply(arguments, [1]);
+      var res;
+      for(var i = 0; i < this.funcs.length; ++i) {
+        res = this.funcs[i].cb.apply(inst, args);
+        if (res) return res;
+      }
+      if (this.def && (res = this.def.apply(inst, args))) return res;
+      return false;
+    }
+  };
+
+  Signal.Connection = function(signal, id) {
+    this.signal = signal;
+    this.id = id;
+    this.disconnected = false;
+  };
+
+  Signal.Connection.prototype = {
+    disconnect: function() {
+      if (!this.disconnected) this.signal.disconnect(this.id);
+    }
+  };
+
+  function $ev(ctx, args) {
+    var opts = args || {};
+    var obj = {
+      ctx: ctx,
+      click: function(func) {
+        return listen('click', function(ev, conn) {
+          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
+          return func.call(this, ev, conn);
+        });
+      },
+      key: function(func) {
+        var conn = listen('keypress', function(ev, conn) {
+          if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
+          var c = ev.keyCode || ev.charCode, key;
+          if (c === ev.which && c > 0x20) {
+            key = lc(String.fromCharCode(c));
+          } else if ($ev.key_map[c]) {
+            if (browser.webkit) return false;
+            key = $ev.key_map[c];
+          } else {
+            key = String(c);
+          }
+          return func.call(this, ev, key, conn);
+        });
+        if (browser.webkit) {
+          conn = listen('keydown', function(ev, conn) {
+            if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
+            var c = ev.keyCode || ev.charCode, key;
+            if ($ev.key_map[c]) return func.call(this, ev, $ev.key_map[c], conn);
+            return false;
+          }, conn);
+        }
+        return conn;
+      },
+      scroll: function(func) {
+        return listen('scroll', func);
+      },
+      resize: function(func) {
+        return listen('resize', func);
+      },
+      submit: function(func) {
+        return listen('submit', func);
+      },
+      listen: function(name, func) {
+        if (name instanceof Array) {
+          var conn;
+          each(name, function(name) {
+            conn = listen(name, func, conn);
+          });
+          return conn;
+        } else {
+          return listen(name, func);
+        }
+      }
+    };
+    function listen(name, func, conn) {
+      if (!conn) conn = new $ev.Connection(ctx);
+      var timer, ev_last;
+      var listener = function(ev) {
+        if (conn.disconnected) return;
+        if (opts.async) {
+          if (timer) {
+            ev_last = ev;
+          } else {
+            ev_last = ev;
+            timer = setTimeout(function() {
+              if (conn.disconnected) return;
+              timer = null;
+              func.call(ctx, ev_last, conn);
+            }, typeof opts.async === 'number' ? opts.async : 40);
+          }
+        } else {
+          if (func.call(ctx, ev, conn)) {
+            ev.preventDefault();
+            ev.stopPropagation();
+          }
+        }
+      };
+      obj.ctx.addEventListener(name, listener, !!opts.capture);
+      conn.listeners.push([name, listener, !!opts.capture]);
+      return conn;
+    }
+    return obj;
+  };
+
+  $ev.KEY_BACKSPACE = 'Backspace';
+  $ev.KEY_ENTER     = 'Enter';
+  $ev.KEY_ESCAPE    = 'Escape';
+  $ev.KEY_SPACE     = 'Space';
+  $ev.KEY_END       = 'End';
+  $ev.KEY_HOME      = 'Home';
+  $ev.KEY_LEFT      = 'Left';
+  $ev.KEY_UP        = 'Up';
+  $ev.KEY_RIGHT     = 'Right';
+  $ev.KEY_DOWN      = 'Down';
+  $ev.key_map = {
+    8:  $ev.KEY_BACKSPACE,
+    13: $ev.KEY_ENTER,
+    27: $ev.KEY_ESCAPE,
+    32: $ev.KEY_SPACE,
+    35: $ev.KEY_END,
+    36: $ev.KEY_HOME,
+    37: $ev.KEY_LEFT,
+    38: $ev.KEY_UP,
+    39: $ev.KEY_RIGHT,
+    40: $ev.KEY_DOWN
+  };
+
+  $ev.Connection = function(ctx) {
+    this.ctx = ctx;
+    this.disconnected = false;
+    this.listeners = [];
+  };
+
+  $ev.Connection.prototype = {
+    disconnect: function() {
+      this.disconnected = true;
+      each(this.listeners, function(item) {
+        this.ctx.removeEventListener(item[0], item[1], item[2]);
+      }, this);
+    }
+  };
+
   function GalleryItem(url, thumb, caption, prev, gallery) {
     var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1]);
     if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
@@ -4488,7 +4678,7 @@
       }
       return false;
        */
-    };
+    },
 
     // conf.bookmark_form === 1
     toggle_preselected: function() {
@@ -4782,196 +4972,6 @@
 
     scroll_restore: function () {
       if (this.cont) this.cont.scrollTop = this.scroll_pos;
-    }
-  };
-
-  function Signal(def) {
-    this.def = def;
-    this.funcs = [];
-    this.id = 1;
-    return this;
-  }
-
-  Signal.prototype = {
-    connect: function(func, async) {
-      var conn = new Signal.Connection(this, this.id);
-      var timer, last_args;
-      this.funcs.push({
-        id: this.id,
-        cb: function() {
-          last_args = [this, Array.prototype.slice.apply(arguments)];
-          if (async) {
-            if (timer) return null;
-            timer = setTimeout(function() {
-              timer = null;
-              func.apply(last_args[0], last_args[1]);
-            }, typeof async === 'number' ? async : 40);
-          } else {
-            return func.apply(this, last_args[1]);
-          }
-          return null;
-        },
-        conn: conn
-      });
-      ++this.id;
-      return conn;
-    },
-
-    disconnect: function(id) {
-      each(this.funcs, function(func, idx) {
-        if (func.id === id) {
-          this.funcs[idx].conn.disconnected = true;
-          this.funcs.splice(idx, 1);
-          return true;
-        }
-        return false;
-      }, this);
-    },
-
-    emit: function(inst) {
-      var args = Array.prototype.slice.apply(arguments, [1]);
-      var res;
-      for(var i = 0; i < this.funcs.length; ++i) {
-        res = this.funcs[i].cb.apply(inst, args);
-        if (res) return res;
-      }
-      if (this.def && (res = this.def.apply(inst, args))) return res;
-      return false;
-    }
-  };
-
-  Signal.Connection = function(signal, id) {
-    this.signal = signal;
-    this.id = id;
-    this.disconnected = false;
-  };
-
-  Signal.Connection.prototype = {
-    disconnect: function() {
-      if (!this.disconnected) this.signal.disconnect(this.id);
-    }
-  };
-
-  function $ev(ctx, args) {
-    var opts = args || {};
-    var obj = {
-      ctx: ctx,
-      click: function(func) {
-        return listen('click', function(ev, conn) {
-          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
-          return func.call(this, ev, conn);
-        });
-      },
-      key: function(func) {
-        var conn = listen('keypress', function(ev, conn) {
-          if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
-          var c = ev.keyCode || ev.charCode, key;
-          if (c === ev.which && c > 0x20) {
-            key = lc(String.fromCharCode(c));
-          } else if ($ev.key_map[c]) {
-            if (browser.webkit) return false;
-            key = $ev.key_map[c];
-          } else {
-            key = String(c);
-          }
-          return func.call(this, ev, key, conn);
-        });
-        if (browser.webkit) {
-          conn = listen('keydown', function(ev, conn) {
-            if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
-            var c = ev.keyCode || ev.charCode, key;
-            if ($ev.key_map[c]) return func.call(this, ev, $ev.key_map[c], conn);
-            return false;
-          }, conn);
-        }
-        return conn;
-      },
-      scroll: function(func) {
-        return listen('scroll', func);
-      },
-      resize: function(func) {
-        return listen('resize', func);
-      },
-      submit: function(func) {
-        return listen('submit', func);
-      },
-      listen: function(name, func) {
-        if (name instanceof Array) {
-          var conn;
-          each(name, function(name) {
-            conn = listen(name, func, conn);
-          });
-          return conn;
-        } else {
-          return listen(name, func);
-        }
-      }
-    };
-    function listen(name, func, conn) {
-      if (!conn) conn = new $ev.Connection(ctx);
-      var timer, ev_last;
-      var listener = function(ev) {
-        if (conn.disconnected) return;
-        if (opts.async) {
-          if (timer) {
-            ev_last = ev;
-          } else {
-            ev_last = ev;
-            timer = setTimeout(function() {
-              if (conn.disconnected) return;
-              timer = null;
-              func.call(ctx, ev_last, conn);
-            }, typeof opts.async === 'number' ? opts.async : 40);
-          }
-        } else {
-          if (func.call(ctx, ev, conn)) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-        }
-      };
-      obj.ctx.addEventListener(name, listener, !!opts.capture);
-      conn.listeners.push([name, listener, !!opts.capture]);
-      return conn;
-    }
-    return obj;
-  };
-
-  $ev.KEY_BACKSPACE = 'Backspace';
-  $ev.KEY_ENTER     = 'Enter';
-  $ev.KEY_ESCAPE    = 'Escape';
-  $ev.KEY_SPACE     = 'Space';
-  $ev.KEY_END       = 'End';
-  $ev.KEY_HOME      = 'Home';
-  $ev.KEY_LEFT      = 'Left';
-  $ev.KEY_UP        = 'Up';
-  $ev.KEY_RIGHT     = 'Right';
-  $ev.KEY_DOWN      = 'Down';
-  $ev.key_map = {
-    8:  $ev.KEY_BACKSPACE,
-    13: $ev.KEY_ENTER,
-    27: $ev.KEY_ESCAPE,
-    32: $ev.KEY_SPACE,
-    35: $ev.KEY_END,
-    36: $ev.KEY_HOME,
-    37: $ev.KEY_LEFT,
-    38: $ev.KEY_UP,
-    39: $ev.KEY_RIGHT,
-    40: $ev.KEY_DOWN
-  };
-
-  $ev.Connection = function(ctx) {
-    this.ctx = ctx;
-    this.disconnected = false;
-    this.listeners = [];
-  };
-
-  $ev.Connection.prototype = {
-    disconnect: function() {
-      this.disconnected = true;
-      each(this.listeners, function(item) {
-        this.ctx.removeEventListener(item[0], item[1], item[2]);
-      }, this);
     }
   };
 
