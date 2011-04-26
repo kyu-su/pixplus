@@ -3280,6 +3280,7 @@
     },
     error: function(msg) {
       this.set_status('Error!');
+      this.load_pre();
       if (msg) {
         this.root_div.className += ' pp-error';
         this.error_div.textContent = msg;
@@ -3367,6 +3368,7 @@
 
       if (item.limited && item.thumb) {
         this.load_pre(scroll);
+        this.complete();
         this.caption.style.display = 'none';
         this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
         this.update_olc();
@@ -3388,7 +3390,6 @@
 
     load_pre: function(scroll) {
       if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
-      this.complete();
       this.init_comments();
       this.manga.init();
       this.caption.style.display = '';
@@ -3401,6 +3402,7 @@
     load: function(loader, scroll) {
       var self = this, re;
       this.load_pre(scroll);
+      this.complete();
 
       if (pp.rpc_usable) {
         var rpc_html = '';
