@@ -4183,23 +4183,22 @@
       this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
     }
 
-    geturl(this.url,
-           bind(function(text) {
-             var re;
-             if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
-               this.error(re[1].replace(/<[^>]*>/g, ''));
-             } else {
-               this.text = text;
-               this.text_cmp = true;
-               if (this.img_cmp) {
-                 this.complete();
-               } else if (!this.parallel) {
-                 this.parse_text();
-               } // else 画像が並列ロード中かキャンセルされた
-             }
-           }, this),
-           bind(Popup.Loader.prototype.error, this, 'Failed to load HTML'),
-           reload);
+    geturl(this.url, bind(function(text) {
+      var re;
+      if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
+        this.error(re[1].replace(/<[^>]*>/g, ''));
+      } else {
+        this.text = text;
+        this.text_cmp = true;
+        if (this.img_cmp) {
+          this.complete();
+        } else if (!this.parallel) {
+          this.parse_text();
+        } // else 画像が並列ロード中かキャンセルされた
+      }
+    }, this), bind(function() {
+      this.error('Failed to load HTML');
+    }, this), reload);
     return this;
   };
 
@@ -4223,7 +4222,9 @@
         } else {
           self.error('Failed to load image');
         }
-      }, bind(Popup.Loader.prototype.error, this, 'Load image aborted'));
+      }, function() {
+        self.error('Load image aborted');
+      });
     },
 
     parse_text: function() {
@@ -4250,7 +4251,7 @@
 
     error: function(msg) {
       uncache(this.url);
-      LoaderBase.prototype.error.call(this);
+      LoaderBase.prototype.error.call(this, msg);
     }
   };
   Popup.Loader.prototype.__proto__ = LoaderBase.prototype;
@@ -4273,7 +4274,9 @@
       } else {
         geturl(urlmode(item.medium, 'manga'),
                bind(Popup.MangaLoader.prototype.parse_html, this),
-               bind(Popup.MangaLoader.prototype.error, this, 'Failed to load manga page'));
+               bind(function() {
+                 this.error('Failed to load manga page');
+               }, this));
       }
     }
     this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
@@ -4292,7 +4295,9 @@
 
     load_image: function(url, url_big) {
       var load = bind(Popup.MangaLoader.prototype.onload_image, this);
-      var error = bind(Popup.MangaLoader.prototype.error, this, 'Failed to load manga image');
+      var error = bind(function() {
+        this.error('Failed to load manga image');
+      }, this);
       if (getimg.cache[url_big] === false) {
         getimg(url, load, error);
       } else {
@@ -5207,6 +5212,7 @@
 
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
+    return cb_error();
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
