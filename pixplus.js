@@ -2217,11 +2217,16 @@
                  '  min-width:480px;min-height:360px;line-height:0px;border:1px solid silver;}' +
                  '#pp-popup #pp-img-div a{display:inline-block;}' +
                  '#pp-popup #pp-img-div a img{display:block;}' +
+                 '#pp-popup #pp-img-div #pp-error-message{display:none;width:480px;height:360px;' +
+                 '  line-height:360px;text-align:center;vertical-align:middle;}' +
                  '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:1004;opacity:0;background-color:gainsboro;}' +
                  '#pp-popup .pp-olc:hover{opacity:0.6;}' +
                  '#pp-popup #pp-olc-prev{left:3px;}' +
                  '#pp-popup #pp-olc-next{right:3px;}' +
                  (conf.popup.remove_pixpedia ? "#pp-popup a[href^=\"http://dic.pixiv.net/\"]{display:none;}" : "") +
+                 '#pp-popup.pp-error #pp-caption{display:none;}' +
+                 '#pp-popup.pp-error #pp-img-div a{display:none;}' +
+                 '#pp-popup.pp-error #pp-img-div #pp-error-message{display:block;}' +
                  // rating
                  '#pp-popup #pp-rating{line-height:1.1em;padding:0px !important;}' +
                  '#pp-popup #pp-rating input{display:block;line-height:1em;}' +
@@ -2904,7 +2909,6 @@
                                                      bind(this.toggle_bookmark_edit, this));
     //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
     this.caption               = $c('div',     this.header,        'pp-caption');
-    this.err_msg               = $c('div',     this.caption,       'pp-error', 'pp-separator-b');
     this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
     this.comment               = $c('div',     this.comment_wrap,  'pp-comment');
     this.viewer_comments       = $c('div',     this.comment_wrap,  'pp-viewer-comments');
@@ -2933,7 +2937,6 @@
     this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
     this.tag_edit              = $c('div',     this.root_div,      'tag_edit');
     this.img_div               = $c('div',     this.root_div,      'pp-img-div');
-
     if (conf.popup.overlay_control > 0) {
       this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
       this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
@@ -2946,6 +2949,7 @@
         return true;
       }, this));
     }
+    this.error_div             = $c('div',     this.img_div,       'pp-error-message');
 
     this.init_display();
     this.init_comments();
@@ -3242,7 +3246,6 @@
         this.manga_btn,
         this.res_btn,
         this.bm_btn,
-        this.err_msg,
         this.comment,
         this.tags,
         this.rating,
@@ -3273,18 +3276,20 @@
     set_status: function(msg) {
       this.status.textContent = msg;
       this.status.style.display = '';
-      this.err_msg.style.display = 'none';
       this.locate();
     },
     error: function(msg) {
       this.set_status('Error!');
       if (msg) {
-        this.err_msg.textContent = msg;
-        this.err_msg.style.display = '';
+        this.root_div.className += ' pp-error';
+        this.error_div.textContent = msg;
+        this.locate();
+        this.update_olc();
       }
     },
     complete: function() {
       this.status.style.display = 'none';
+      this.root_div.className = this.root_div.className.replace(/ *pp-error */, ' ');
     },
 
     first: function() {
@@ -5212,7 +5217,8 @@
 
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
-    return cb_error();
+    //geturl.cnt = geturl.cnt || 0;
+    //if (++geturl.cnt % 3 == 0) return cb_error();
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
