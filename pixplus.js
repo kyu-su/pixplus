@@ -3392,6 +3392,7 @@
       if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
       this.init_comments();
       this.manga.init();
+      this.manga_btn.style.display = 'none';
       this.caption.style.display = '';
       this.bm_edit.innerHTML = '';
       this.bm_edit.style.display = 'none';
