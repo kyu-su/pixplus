@@ -615,8 +615,8 @@
     this.options_page = options_page;
     this.msg_filter = msg_filter || function(s) { return s; };
 
-    this.pager = $c('div', this.root, 'pp-conf-pager');
-    this.page_list = $c('ul', this.pager, 'pp-conf-pagelist');
+    this.pager = $c('div', this.root, {id: 'pp-conf-pager'});
+    this.page_list = $c('ul', this.pager, {id: 'pp-conf-pagelist'});
     this.pages = [];
 
     this.input_table = (function(self) {
@@ -630,9 +630,7 @@
         if (item.hint) {
           input = $c('select');
           item.hint.forEach(function(hint) {
-            var opt = $c('option', input);
-            opt.value = hint.value;
-            opt.textContent = self.msg_filter(hint.title);
+            $c('option', input, {value: hint.value, text: self.msg_filter(hint.title)});
           });
         } else {
           input = $c('input');
@@ -654,8 +652,7 @@
         }
         input_table[sec.name + '_' + item.key] = input;
 
-        var def = $c('button', row.insertCell(-1));
-        def.textContent = 'Default';
+        var def = $c('button', row.insertCell(-1), {text: 'Default'});
         $ev(def).click(function() {
           if (type === 'boolean') {
             input.checked = item.value;
@@ -737,9 +734,7 @@
 
   ConfigUI.prototype = {
     create_description: function(msg) {
-      var div = $c('div');
-      div.innerHTML = this.msg_filter(msg);
-      return div;
+      return $c('div', null, {html: this.msg_filter(msg)});
     },
     make_page: function(text, id) {
       var page = find(this.pages, function(page) {
@@ -750,11 +745,9 @@
       page = {
         id:      id,
         li:      $c('li', this.page_list),
-        content: $c('section', this.pager, 'pp-conf-' + id)
+        content: $c('section', this.pager, {id: 'pp-conf-' + id})
       };
-      page.label = $c('a', page.li)
-      page.label.href = '#pp-conf-' + id;
-      page.label.textContent = text;
+      page.label = $c('a', page.li, {href: '#pp-conf-' + id, text: text});
 
       $ev(page.label).click(bind(function(ev) {
         ev.preventDefault();
@@ -903,11 +896,9 @@
       });
 
       page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
-      this.tag_alias_table = $c('table', page.content, 'pp-conf-bookmark-tag_aliases');
+      this.tag_alias_table = $c('table', page.content, {id: 'pp-conf-bookmark-tag_aliases'});
 
-      var add = $c('button', page.content);
-      add.textContent = 'Add';
-      $ev(add).click(function() { add_row(); });
+      $ev($c('button', page.content, {text: 'Add'})).click(function() { add_row(); });
 
       function save() {
         if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
@@ -1341,8 +1332,8 @@
 
   function show_help() {
     var de = window.document.documentElement;
-    var background = $c('div', window.document.body, 'pp-help-background');
-    var root = $c('div', window.document.body, 'pp-help');
+    var background = $c('div', window.document.body, {id: 'pp-help-background'});
+    var root = $c('div', window.document.body, {id: 'pp-help'});
     root.appendChild(ConfigUI.create_help_table());
     root.style.position = 'fixed';
     root.style.left = Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
@@ -1433,14 +1424,14 @@
         //if (!window.localStorage[key]) mi_restore.style.display = 'none';
       })();
 
-      var li  = $c('li', null, 'pp-sitenav-menu-caption');
+      var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
       sitenav.insertBefore(li, sitenav.firstChild);
       var anc = $c('a', menu_items.length ? $c('div', li) : li);
       anc.href = '#';
       anc.textContent = 'pixplus';
       if (menu_items.length) {
         li.appendChild(anc.cloneNode(true));
-        var menu = $c('ul', li, 'pp-sitenav-menu');
+        var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
         each(menu_items, function(item) {
           menu.appendChild(item);
         });
@@ -1460,11 +1451,11 @@
 
       function create() {
         if (root) return;
-        root = $c('div', null, 'pp-conf-root');
+        root = $c('div', null, {id: 'pp-conf-root'});
 
         var ui = new ConfigUI(root);
 
-        var li = $c('li', null, 'pp-conf-close');
+        var li = $c('li', null, {id: 'pp-conf-close'});
         ui.page_list.insertBefore(li, ui.page_list.firstChild);
         var close = $c('a', li);
         close.href = '#';
@@ -2680,13 +2671,22 @@
   function $t(tag, elem) {
     return (elem || window.document).getElementsByTagName(tag);
   }
-  function $c(tag, parent, id, cls) {
+  function $c(tag, parent, opts) {
     var elem = window.document.createElement(tag);
     if (parent) parent.appendChild(elem);
-    if (id) elem.id = id;
-    if (cls) elem.className = cls;
+    if (opts) {
+      for(var key in opts) {
+        var name = $c.map[key] || key;
+        elem[name] = opts[key];
+      }
+    }
     return elem;
   }
+  $c.map = {
+    cls:  'className',
+    text: 'textContent',
+    html: 'innerHTML'
+  };
   function $x(xpath, root) {
     if (arguments.length > 1 && !root) return null;
     var doc = root ? root.ownerDocument : (root = window.document);
@@ -2959,15 +2959,15 @@
   };
 
   function Popup(item, manga_page) {
-    this.root_div              = $c('div',     null,               'pp-popup');
-    this.header                = $c('div',     this.root_div,      'pp-header');
-    this.title_div             = $c('div',     this.header,        'pp-title_wrapper');
-    this.title                 = $c('a',       this.title_div,     'pp-title');
+    this.root_div              = $c('div',     null,               {id: 'pp-popup'});
+    this.header                = $c('div',     this.root_div,      {id: 'pp-header'});
+    this.title_div             = $c('div',     this.header,        {id: 'pp-title_wrapper'});
+    this.title                 = $c('a',       this.title_div,     {id: 'pp-title'});
     this.title.setAttribute('nopopup', '');
-    this.header_right          = $c('span',    this.title_div,     'pp-right');
-    this.status                = $c('span',    this.header_right,  'pp-status');
+    this.header_right          = $c('span',    this.title_div,     {id: 'pp-right'});
+    this.status                = $c('span',    this.header_right,  {id: 'pp-status'});
     this.status.style.display  = 'none';
-    this.manga_btn             = $c('a',       this.header_right,  'pp-manga-btn');
+    this.manga_btn             = $c('a',       this.header_right,  {id: 'pp-manga-btn'});
     $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); return true; }, this));
     this.res_btn               = Popup.create_button('[R]', this.header_right, 'pp-res-btn');
     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
@@ -2975,25 +2975,25 @@
     this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                      bind(this.toggle_bookmark_edit, this));
     //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
-    this.caption               = $c('div',     this.header,        'pp-caption');
-    this.comment_wrap          = $c('div',     this.caption,       'pp-comment-wrap');
-    this.comment               = $c('div',     this.comment_wrap,  'pp-comment');
-    this.viewer_comments       = $c('div',     this.comment_wrap,  'pp-viewer-comments');
+    this.caption               = $c('div',     this.header,        {id: 'pp-caption'});
+    this.comment_wrap          = $c('div',     this.caption,       {id: 'pp-comment-wrap'});
+    this.comment               = $c('div',     this.comment_wrap,  {id: 'pp-comment'});
+    this.viewer_comments       = $c('div',     this.comment_wrap,  {id: 'pp-viewer-comments'});
     this.viewer_comments_w     = $c('div',     this.viewer_comments);
     this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
-    this.viewer_comments_a     = $c('div',     this.viewer_comments_w, 'one_comment_area');
-    this.tags                  = $c('div',     this.caption,       'tag_area');
-    this.rating                = $c('div',     this.caption,       'pp-rating', 'pp-separator works_area');
-    this.post_cap              = $c('div',     this.caption,       'pp-info', 'pp-separator');
-    this.a_img                 = $c('img',     this.post_cap,      'pp-author-img');
-    this.a_status              = $c('span',    this.post_cap,      'pp-author-status');
-    this.date_wrap             = $c('span',    this.post_cap,      'pp-date-wrap');
-    this.date                  = $c('span',    this.date_wrap,     'pp-date');
-    this.date_repost           = $c('span',    this.date_wrap,     'pp-date-repost');
-    this.info                  = $c('span',    this.post_cap,      'pp-info-wrap');
-    this.info_size             = $c('span',    this.info,          'pp-info-size');
-    this.info_tools            = $c('span',    this.info,          'pp-info-tools');
-    this.author                = $c('span',    this.post_cap,      'pp-author');
+    this.viewer_comments_a     = $c('div',     this.viewer_comments_w, {id: 'one_comment_area'});
+    this.tags                  = $c('div',     this.caption,       {id: 'tag_area'});
+    this.rating                = $c('div',     this.caption,       {id: 'pp-rating', cls: 'pp-separator works_area'});
+    this.post_cap              = $c('div',     this.caption,       {id: 'pp-info', cls: 'pp-separator'});
+    this.a_img                 = $c('img',     this.post_cap,      {id: 'pp-author-img'});
+    this.a_status              = $c('span',    this.post_cap,      {id: 'pp-author-status'});
+    this.date_wrap             = $c('span',    this.post_cap,      {id: 'pp-date-wrap'});
+    this.date                  = $c('span',    this.date_wrap,     {id: 'pp-date'});
+    this.date_repost           = $c('span',    this.date_wrap,     {id: 'pp-date-repost'});
+    this.info                  = $c('span',    this.post_cap,      {id: 'pp-info-wrap'});
+    this.info_size             = $c('span',    this.info,          {id: 'pp-info-size'});
+    this.info_tools            = $c('span',    this.info,          {id: 'pp-info-tools'});
+    this.author                = $c('span',    this.post_cap,      {id: 'pp-author'});
     this.a_profile             = $c('a',       this.author);
     this.a_illust              = $c('a',       this.author);
     this.a_illust.textContent  = "\u4f5c\u54c1";
@@ -3001,12 +3001,12 @@
     this.a_bookmark.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af";
     this.a_stacc               = $c('a',       this.author);
     this.a_stacc.textContent   = "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9";
-    this.bm_edit               = $c('div',     this.root_div,      'pp-bm-edit');
-    this.tag_edit              = $c('div',     this.root_div,      'tag_edit');
-    this.img_div               = $c('div',     this.root_div,      'pp-img-div');
+    this.bm_edit               = $c('div',     this.root_div,      {id: 'pp-bm-edit'});
+    this.tag_edit              = $c('div',     this.root_div,      {id: 'tag_edit'});
+    this.img_div               = $c('div',     this.root_div,      {id: 'pp-img-div'});
     if (conf.popup.overlay_control > 0) {
-      this.olc_prev            = $c('span', this.img_div, 'pp-olc-prev', 'pp-olc');
-      this.olc_next            = $c('span', this.img_div, 'pp-olc-next', 'pp-olc');
+      this.olc_prev            = $c('span', this.img_div, {id: 'pp-olc-prev', cls: 'pp-olc'});
+      this.olc_next            = $c('span', this.img_div, {id: 'pp-olc-next', cls: 'pp-olc'});
       $ev(this.olc_prev).click(bind(function() {
         this.prev(false, true);
         return true;
@@ -3016,7 +3016,7 @@
         return true;
       }, this));
     }
-    this.error_div             = $c('div',     this.img_div,       'pp-error-message');
+    this.error_div = $c('div', this.img_div, {id: 'pp-error-message'});
 
     this.init_display();
     this.init_comments();
@@ -3249,7 +3249,7 @@
     return Popup.run(item);
   };
   Popup.create_button = function(text, parent, id, cb_click) {
-    var btn = $c('a', parent, id);
+    var btn = $c('a', parent, {id: id});
     btn.href = 'javascript:void(0)';
     btn.textContent = text;
     if (cb_click) $ev(btn).click(function() {
@@ -3610,7 +3610,7 @@
         if (html || this.tag_edit_enabled) {
           this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
           if (this.tag_edit_enabled) {
-            this.tag_edit_btn = $c('a', this.tags, 'pp-tag-edit-btn');
+            this.tag_edit_btn = $c('a', this.tags, {id: 'pp-tag-edit-btn'});
             this.tag_edit_btn.href = 'javascript:void(0)';
             this.tag_edit_btn.textContent = '[E]';
             $ev(this.tag_edit_btn).click(bind(Popup.prototype.toggle_tag_edit, this));
@@ -4491,7 +4491,7 @@
     });
     if (opts.closable) {
       this.onclose = new Signal(BookmarkForm.prototype.destroy);
-      this.btn_close = $c('input', this.btn_submit.parentNode, null, 'btn_type01 bookmark_submit_btn');
+      this.btn_close = $c('input', this.btn_submit.parentNode, {cls: 'btn_type01 bookmark_submit_btn'});
       this.btn_close.type = 'button';
       this.btn_close.value = "\u9589\u3058\u308b";
       this.connections.push($ev(this.btn_close).click(bind(function(ev, conn) {
@@ -4553,7 +4553,7 @@
                anc.parentNode.removeChild(anc);
              });
         each(reorder_tags($xa('ul/li', this.tag_wrap_bm)), function(list) {
-          var ul = $c('ul', this.tag_wrap_bm, null, 'tagCloud');
+          var ul = $c('ul', this.tag_wrap_bm, {cls: 'tagCloud'});
           each(list, function(li) {
             li.parentNode.removeChild(li);
             ul.appendChild(li);
@@ -5156,36 +5156,6 @@
       }
     };
   };
-
-  function $(id, elem) {
-    return window.document.getElementById(id);
-  }
-  function $t(tag, elem) {
-    return (elem || window.document).getElementsByTagName(tag);
-  }
-  function $c(tag, parent, id, cls) {
-    var elem = window.document.createElement(tag);
-    if (parent) parent.appendChild(elem);
-    if (id) elem.id = id;
-    if (cls) elem.className = cls;
-    return elem;
-  }
-  function $x(xpath, root) {
-    if (arguments.length > 1 && !root) return null;
-    var doc = root ? root.ownerDocument : (root = window.document);
-    // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
-    return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
-  }
-  function $xa(xpath, root) {
-    var doc = root ? root.ownerDocument : (root = window.document);
-    // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
-    var nodes = doc.evaluate(xpath, root, null, 7, null);
-    var res = new Array();
-    for(var i = 0; i < nodes.snapshotLength; ++i) {
-      res.push(nodes.snapshotItem(i));
-    }
-    return res;
-  }
 
   function getpos(elem, root) {
     var left = elem.offsetLeft, top = elem.offsetTop;
