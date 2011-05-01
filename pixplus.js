@@ -615,12 +615,8 @@
     this.options_page = options_page;
     this.msg_filter = msg_filter || function(s) { return s; };
 
-    this.pager = window.document.createElement('div');
-    this.pager.id = 'pp-conf-pager';
-    this.root.appendChild(this.pager);
-    this.page_list = window.document.createElement('ul');
-    this.page_list.id = 'pp-conf-pagelist';
-    this.pager.appendChild(this.page_list);
+    this.pager = $c('div', this.root, 'pp-conf-pager');
+    this.page_list = $c('ul', this.pager, 'pp-conf-pagelist');
     this.pages = [];
 
     this.input_table = (function(self) {
@@ -632,27 +628,23 @@
         var row = table.insertRow(-1), cell = row.insertCell(-1), input;
         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
         if (item.hint) {
-          input = window.document.createElement('select');
+          input = $c('select');
           item.hint.forEach(function(hint) {
-            var opt = window.document.createElement('option');
+            var opt = $c('option', input);
             opt.value = hint.value;
             opt.textContent = self.msg_filter(hint.title);
-            input.appendChild(opt);
           });
         } else {
-          input = window.document.createElement('input');
+          input = $c('input');
         }
         input.id = 'pp-conf-' + sec.name + '-' + item.key;
         if (type === 'boolean') {
+          cell.setAttribute('colspan', '2');
           input.setAttribute('type', 'checkbox');
           input.checked = value;
-
-          var label = window.document.createElement('label');
+          var label = $c('label', cell);
           label.appendChild(input);
           label.appendChild(window.document.createTextNode(item.key));
-
-          cell.appendChild(label);
-          cell.setAttribute('colspan', '2');
         } else {
           cell.textContent = item.key;
           input.value = value;
@@ -662,9 +654,9 @@
         }
         input_table[sec.name + '_' + item.key] = input;
 
-        var def = window.document.createElement('button');
+        var def = $c('button', row.insertCell(-1));
         def.textContent = 'Default';
-        def.addEventListener('click', function() {
+        $ev(def).click(function() {
           if (type === 'boolean') {
             input.checked = item.value;
           } else {
@@ -672,8 +664,8 @@
           }
           if (LS.u) LS.remove(sec.name, item.key);
           self.update_export();
-        }, false);
-        row.insertCell(-1).appendChild(def);
+          return true;
+        });
         row.insertCell(-1).textContent = self.msg_filter(item.desc);
 
         input.addEventListener(item.hint || type === 'boolean' ? 'change' : 'keyup', function() {
@@ -691,8 +683,7 @@
         ++idx;
       }, function(sec) {
         if (sec.name === 'bookmark') return true;
-        table = window.document.createElement('table');
-        self.make_page(sec.label, sec.name).content.appendChild(table);
+        self.make_page(sec.label, sec.name).table = $c('table', page.content);
         return false;
       });
       return input_table;
@@ -703,6 +694,7 @@
       ConfigUI.pages[i].content.call(this, page, {options_page: options_page});
     }
 
+    console.log(this.pages);
     this.show_page(this.pages[0]);
     this.update_export();
   }
@@ -744,30 +736,29 @@
 
   ConfigUI.prototype = {
     create_description: function(msg) {
-      var div = window.document.createElement('div');
+      var div = $c('div');
       div.innerHTML = this.msg_filter(msg);
       return div;
     },
     make_page: function(text, id) {
-      var page = {
-        label:   window.document.createElement('a'),
-        li:      window.document.createElement('li'),
-        content: window.document.createElement('section')
+      var page = find(this.pages, function(page) {
+        return page.id === id;
+      });
+      if (page) return page;
+
+      page = {
+        id:      id,
+        li:      $c('li', this.page_list),
+        content: $c('section', this.pager, 'pp-conf-' + id)
       };
+      page.label = $c('a', page.li)
       page.label.href = '#pp-conf-' + id;
       page.label.textContent = text;
-      page.li.appendChild(page.label);
-      this.page_list.appendChild(page.li);
 
-      page.content.id = 'pp-conf-' + id;
-      this.pager.appendChild(page.content);
-
-      page.label.addEventListener('click', (function(obj) {
-        return function(ev) {
-          ev.preventDefault();
-          obj.show_page(page);
-        };
-      })(this), false);
+      $ev(page.label).click(bind(function(ev) {
+        ev.preventDefault();
+        this.show_page(page);
+      }, this));
 
       this.pages.push(page);
       return page;
@@ -893,6 +884,11 @@
   };
 
   ConfigUI.pages = [{
+    id: 'key',
+    content: function(page) {
+      alert();
+    }
+  }, {
     label: 'Tags', id: 'tags',
     content: function(page) {
       var self = this;
@@ -2487,6 +2483,8 @@
     setTimeout(Floater.init, 100);
   }
 
+  /* __LIBRARY_BEGIN__ */
+
   function Signal(def) {
     this.def = def;
     this.funcs = [];
@@ -2574,14 +2572,14 @@
             if (browser.webkit) return false;
             key = $ev.key_map[c];
           } else {
-            key = String(c);
+            key = '_c' + String(c);
           }
           return func.call(this, ev, key, conn);
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
-            var c = ev.keyCode || ev.charCode, key;
+            var c = ev.keyCode || ev.charCode;
             if ($ev.key_map[c]) return func.call(this, ev, $ev.key_map[c], conn);
             return false;
           }, conn);
@@ -2676,6 +2674,68 @@
       }, this);
     }
   };
+
+  function $(id, elem) {
+    return window.document.getElementById(id);
+  }
+  function $t(tag, elem) {
+    return (elem || window.document).getElementsByTagName(tag);
+  }
+  function $c(tag, parent, id, cls) {
+    var elem = window.document.createElement(tag);
+    if (parent) parent.appendChild(elem);
+    if (id) elem.id = id;
+    if (cls) elem.className = cls;
+    return elem;
+  }
+  function $x(xpath, root) {
+    if (arguments.length > 1 && !root) return null;
+    var doc = root ? root.ownerDocument : (root = window.document);
+    // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
+    return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
+  }
+  function $xa(xpath, root) {
+    var doc = root ? root.ownerDocument : (root = window.document);
+    // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
+    var nodes = doc.evaluate(xpath, root, null, 7, null);
+    var res = new Array();
+    for(var i = 0; i < nodes.snapshotLength; ++i) {
+      res.push(nodes.snapshotItem(i));
+    }
+    return res;
+  }
+
+  function each(list, func, obj) {
+    if (!list) return list;
+    for(var i = 0; i < list.length; ++i) {
+      if (func.call(obj || list, list[i], i)) break;
+    }
+    return list;
+  }
+
+  function find(list, func, obj) {
+    for(var i = 0; i < list.length; ++i) {
+      if (func.call(obj || list, list[i], i)) return list[i];
+    }
+    return null;
+  }
+
+  function bind(func, obj) {
+    var args = Array.prototype.slice.apply(arguments, [2]);
+    return function() {
+      return func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
+    };
+  }
+
+  function lc(str) {
+    return (str || '').toLowerCase();
+  }
+
+  function trim(str) {
+    return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
+  }
+
+  /* __LIBRARY_END__ */
 
   function LoaderBase(cb_load, cb_error) {
     this.stopped = false;
@@ -5119,6 +5179,7 @@
     }
     return res;
   }
+
   function getpos(elem, root) {
     var left = elem.offsetLeft, top = elem.offsetTop;
     while((elem = elem.offsetParent) && elem !== root) {
@@ -5132,6 +5193,7 @@
     }
     return {left: left, top: top};
   }
+
   function lazy_scroll(elem, offset, root, scroll) {
     if (!elem || elem === arguments.callee.last) return;
     offset = parseFloat(typeof offset === 'undefined' ? 0.2 : offset);
@@ -5165,6 +5227,7 @@
       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement); /* WARN */
     }
   }
+
   function is_ancestor(ancestor, elem) {
     while(elem) {
       if (elem === ancestor) return true;
@@ -5173,24 +5236,12 @@
     return false;
   }
 
-  function each(list, func, obj) {
-    if (!list) return list;
-    for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) break;
-    }
-    return list;
-  }
-  function find(list, func, obj) {
-    for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) return list[i];
-    }
-    return null;
-  }
   function send_click(elem) {
     var ev = elem.ownerDocument.createEvent('MouseEvents');
     ev.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
     elem.dispatchEvent(ev);
   }
+
   function parseopts(str) {
     var opts = {};
     each(str.replace(/^.*?\?/, '').replace(/#.*$/, '').split('&'), function(p) {
@@ -5202,12 +5253,6 @@
     return opts;
   }
 
-  function lc(str) {
-    return str.toLowerCase();
-  }
-  function trim(str) {
-    return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
-  }
   function edit_comment(str) {
     str = str.replace(/(?:<br ?\/?>)*([\-\u2015\u2500\u2501\uff3f])\1{7,}(?:<br ?\/?>)*/g, '<hr />');
     if (!/<br[ \/>]/i.test(str)) {
@@ -5323,13 +5368,6 @@
       window.document.body.appendChild(css);
       return true;
     }
-  }
-
-  function bind(func, obj) {
-    var args = Array.prototype.slice.apply(arguments, [2]);
-    return function() {
-      return func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
-    };
   }
 
   function log(msg) {

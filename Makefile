@@ -19,10 +19,11 @@ BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null && which "$(JS)" >/d
 LICENSE                 = LICENSE.TXT
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
+LIB_JS                  = lib.js
 ICON_SVG                = pixplus.svg
 ICON_SIZE               = 16 32 48 64
 SRC_USERJS              = pixplus.js
-DIST_FILES              = common.js index.html index.js options.html options.css options.js
+DIST_FILES              = common.js index.html index.js options.html options.css options.js $(LIB_JS)
 
 I18N_DIR                = i18n
 I18N_LANGUAGES_FULL     = en-US ja-JP
@@ -118,6 +119,10 @@ $(CONFIG_JS): $(SRC_USERJS)
           < $(SRC_USERJS) | tr -d '\r' >> $@;
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
+
+$(LIB_JS): $(SRC_USERJS)
+	echo '// auto generated code' > $@
+	sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)
 	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
