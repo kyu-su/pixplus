@@ -903,14 +903,11 @@
       });
 
       page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
-      this.tag_alias_table = window.document.createElement('table');
-      this.tag_alias_table.id = 'pp-conf-bookmark-tag_aliases';
-      page.content.appendChild(this.tag_alias_table);
+      this.tag_alias_table = $c('table', page.content, 'pp-conf-bookmark-tag_aliases');
 
-      var add = window.document.createElement('button');
+      var add = $c('button', page.content);
       add.textContent = 'Add';
       $ev(add).click(function() { add_row(); });
-      page.content.appendChild(add);
 
       function save() {
         if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
@@ -919,29 +916,26 @@
 
       function add_row(tag, list) {
         var row = self.tag_alias_table.insertRow(-1), cell, remove, input1, input2;
-        remove = window.document.createElement('button');
+        cell = row.insertCell(-1);
+        cell.className = 'pp-conf-cell-remove';
+        remove = $c('button', cell);
         remove.textContent = 'Remove';
         $ev(remove).click(function() {
           row.parentNode.removeChild(row);
           save();
         });
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-remove';
-        cell.appendChild(remove);
 
-        input1 = window.document.createElement('input');
-        input1.value = tag || '';
-        $ev(input1).change(save);
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-tag';
-        cell.appendChild(input1);
+        input1 = $c('input', cell);
+        input1.value = tag || '';
+        $ev(input1).change(save);
 
-        input2 = window.document.createElement('input');
-        input2.value = list ? list.join(' ') : '';
-        $ev(input2).change(save);
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-aliases';
-        cell.appendChild(input2);
+        input2 = $c('input', cell);
+        input2.value = list ? list.join(' ') : '';
+        $ev(input2).change(save);
       }
 
       var aliases = (this.options_page
@@ -952,7 +946,6 @@
   }, {
     label: 'Export', id: 'export',
     content: function(page) {
-      var self = this;
       this.export_form = window.document.createElement('form');
       this.export_input = window.document.createElement('input');
       $ev(this.export_input).listen(['mousedown', 'mouseup'], function() {
@@ -963,9 +956,9 @@
       var btn_export = window.document.createElement('input');
       btn_export.type = 'button';
       btn_export.value = 'Export';
-      btn_export.addEventListener('click', function(ev) {
-        self.export_export();
-      }, false);
+      $ev(btn_export, {ctx: this}).click(function() {
+        this.export_export();
+      });
       this.export_form.appendChild(btn_export);
 
       if (window.JSON && LS.u) {
@@ -973,14 +966,14 @@
         btn_import.type = 'submit';
         btn_import.value = 'Import';
         this.export_form.appendChild(btn_import);
-        this.export_form.addEventListener('submit', function(ev) {
+        $ev(this.export_form, {ctx: this}).listen('submit', function() {
           try {
-            ev.preventDefault();
-            self.export_import();
+            this.export_import();
           } catch(ex) {
             alert(ex);
           }
-        }, false);
+          return true;
+        });
       }
       page.content.appendChild(this.export_form);
 
@@ -988,7 +981,7 @@
         var btn_userjs = window.document.createElement('input');
         btn_userjs.type = 'button';
         btn_userjs.value = 'UserJS';
-        btn_userjs.addEventListener('click', function() {
+        $ev(btn_userjs, {ctx: this}).click(function() {
           var js = [
             '// ==UserScript==',
             '// @name    pixplus settings',
@@ -998,12 +991,12 @@
             '(function() {',
             '  window.document.addEventListener("pixplusInitialize",init,false);',
             '  function init() {',
-            '    ' + self.generate_js('\n    ', 2),
+            '    ' + this.generate_js('\n    ', 2),
             '  }',
             '})();'
           ].join('\n');
-          (self.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
-        }, false);
+          (this.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+        });
         this.export_form.appendChild(btn_userjs);
       }
     }
@@ -1310,12 +1303,11 @@
               var label = window.document.createElement('label');
               label.textContent = rep;
               node.parentNode.insertBefore(label, node);
-              label.addEventListener('mouseover', function() {
+              $ev(label).hover(function() {
                 caption.setAttribute('highlight', '');
-              }, false);
-              label.addEventListener('mouseout', function() {
+              }, function() {
                 caption.removeAttribute('highlight');
-              }, false);
+              });
             })(captions[i]);
           }
           node.parentNode.insertBefore(window.document.createTextNode(terms[j]), node);
@@ -2609,6 +2601,10 @@
         }
         return listen(name, func);
       },
+      hover: function(hover, leave) {
+        var conn = listen('mouseover', hover);
+        return listen('mouseout', leave, conn);
+      },
       listen: function(name, func) {
         if (name instanceof Array) {
           var conn;
@@ -2634,11 +2630,11 @@
             timer = setTimeout(function() {
               if (conn.disconnected) return;
               timer = null;
-              func.call(ctx, ev_last, conn);
+              func.call(opts.ctx || ctx, ev_last, conn);
             }, typeof opts.async === 'number' ? opts.async : 40);
           }
         } else {
-          if (func.call(ctx, ev, conn)) {
+          if (func.call(opts.ctx || ctx, ev, conn)) {
             ev.preventDefault();
             ev.stopPropagation();
           }
@@ -3679,11 +3675,11 @@
         if (anc && anc.getAttribute('onclick') === 'rating_ef4()') {
           anc.setAttribute('onclick', '');
           anc.onclick = '';
-          anc.addEventListener('click', function(ev) {
+          $ev(anc).click(function() {
             var qr = $x('./div[@id="quality_rating"]', self.rating);
             window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef']();
-            ev.preventDefault();
-          }, false);
+            return true;
+          });
         }
       }
 
