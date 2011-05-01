@@ -621,11 +621,11 @@
 
     this.input_table = (function(self) {
       var input_table = { };
-      var idx, table;
+      var idx, page;
       LS.each(function(item, sec) {
         var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
         var type = typeof item.value;
-        var row = table.insertRow(-1), cell = row.insertCell(-1), input;
+        var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
         if (item.hint) {
           input = $c('select');
@@ -668,7 +668,8 @@
         });
         row.insertCell(-1).textContent = self.msg_filter(item.desc);
 
-        input.addEventListener(item.hint || type === 'boolean' ? 'change' : 'keyup', function() {
+        $ev(input).change(function() {
+          alert();
           var value;
           if (type === 'boolean') {
             value = input.checked;
@@ -678,12 +679,13 @@
           if (LS.u) LS.set(sec.name, item.key, value);
           if (!options_page) LS.map[sec.name].conf[item.key] = value;
           self.update_export();
-        }, false);
+        });
 
         ++idx;
       }, function(sec) {
         if (sec.name === 'bookmark') return true;
-        self.make_page(sec.label, sec.name).table = $c('table', page.content);
+        page = self.make_page(sec.label, sec.name);
+        page.table = $c('table', page.content);
         return false;
       });
       return input_table;
@@ -694,7 +696,6 @@
       ConfigUI.pages[i].content.call(this, page, {options_page: options_page});
     }
 
-    console.log(this.pages);
     this.show_page(this.pages[0]);
     this.update_export();
   }
@@ -886,22 +887,20 @@
   ConfigUI.pages = [{
     id: 'key',
     content: function(page) {
-      alert();
     }
   }, {
     label: 'Tags', id: 'tags',
     content: function(page) {
       var self = this;
       page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
-      this.tag_order_textarea = window.document.createElement('textarea');
+      this.tag_order_textarea = $c('textarea', page.content);
       this.tag_order_textarea.value = (this.options_page
                                        ? LS.get('bookmark', 'tag_order')
                                        : LS.bm_tag_order_to_str(conf.bm_tag_order));
-      this.tag_order_textarea.addEventListener('keyup', function() {
-        if (self.st.u) self.st.set('bookmark', 'tag_order', self.tag_order_textarea.value);
+      $ev(this.tag_order_textarea).change(function() {
+        if (LS.u) LS.set('bookmark', 'tag_order', self.tag_order_textarea.value);
         self.update_export();
-      }, false);
-      page.content.appendChild(this.tag_order_textarea);
+      });
 
       page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
       this.tag_alias_table = window.document.createElement('table');
@@ -910,11 +909,11 @@
 
       var add = window.document.createElement('button');
       add.textContent = 'Add';
-      add.addEventListener('click', function() { add_row(); }, false);
+      $ev(add).click(function() { add_row(); });
       page.content.appendChild(add);
 
       function save() {
-        if (self.st.u) self.st.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
+        if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
         self.update_export();
       }
 
@@ -922,24 +921,24 @@
         var row = self.tag_alias_table.insertRow(-1), cell, remove, input1, input2;
         remove = window.document.createElement('button');
         remove.textContent = 'Remove';
-        remove.addEventListener('click', function() {
+        $ev(remove).click(function() {
           row.parentNode.removeChild(row);
           save();
-        }, false);
+        });
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-remove';
         cell.appendChild(remove);
 
         input1 = window.document.createElement('input');
         input1.value = tag || '';
-        input1.addEventListener('keyup', save, false);
+        $ev(input1).change(save);
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-tag';
         cell.appendChild(input1);
 
         input2 = window.document.createElement('input');
         input2.value = list ? list.join(' ') : '';
-        input2.addEventListener('keyup', save, false);
+        $ev(input2).change(save);
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-aliases';
         cell.appendChild(input2);
@@ -956,9 +955,9 @@
       var self = this;
       this.export_form = window.document.createElement('form');
       this.export_input = window.document.createElement('input');
-      this.export_input.addEventListener('mouseup', function(ev) {
-        self.export_input.select(); /* WARN */
-      }, false);
+      $ev(this.export_input).listen(['mousedown', 'mouseup'], function() {
+        this.select(); /* WARN */
+      });
       this.export_form.appendChild(this.export_input);
 
       var btn_export = window.document.createElement('input');
@@ -1401,10 +1400,8 @@
         root.style.display = '';
         fire_event();
         if (click_handler) click_handler.disconnect();
-        click_handler = $ev(window.document.body).click(function(ev) {
-          if (!$x('ancestor-or-self::div[@id="pp-conf-root"]', ev.target)) {
-            hide();
-          }
+        click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
+          if (!is_ancestor(root, ev.target)) hide();
           return false;
         });
       }
@@ -2595,6 +2592,23 @@
       submit: function(func) {
         return listen('submit', func);
       },
+      change: function(func) {
+        var name;
+        if (obj.ctx instanceof window.HTMLInputElement) {
+          if (!obj.ctx || /^(?:text|search|tel|url|email|password|number)$/i.test(obj.ctx.type)) {
+            name = 'input';
+          } else {
+            name = 'change';
+          }
+        } else if (obj.ctx instanceof window.HTMLTextAreaElement) {
+          name = 'input';
+        } else if (obj.ctx instanceof window.HTMLSelectElement) {
+          name = 'change';
+        } else {
+          alert('[bug]unknown type');
+        }
+        return listen(name, func);
+      },
       listen: function(name, func) {
         if (name instanceof Array) {
           var conn;
@@ -2703,6 +2717,14 @@
       res.push(nodes.snapshotItem(i));
     }
     return res;
+  }
+
+  function is_ancestor(ancestor, elem) {
+    while(elem) {
+      if (elem === ancestor) return true;
+      elem = elem.parentNode;
+    }
+    return false;
   }
 
   function each(list, func, obj) {
@@ -5226,14 +5248,6 @@
       }
       lazy_scroll(elem, offset, doc.documentElement, browser.webkit ? doc.body : doc.documentElement); /* WARN */
     }
-  }
-
-  function is_ancestor(ancestor, elem) {
-    while(elem) {
-      if (elem === ancestor) return true;
-      elem = elem.parentNode;
-    }
-    return false;
   }
 
   function send_click(elem) {
