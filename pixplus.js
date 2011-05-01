@@ -906,27 +906,21 @@
       }
 
       function add_row(tag, list) {
-        var row = self.tag_alias_table.insertRow(-1), cell, remove, input1, input2;
+        var row = self.tag_alias_table.insertRow(-1), cell;
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-remove';
-        remove = $c('button', cell);
-        remove.textContent = 'Remove';
-        $ev(remove).click(function() {
+        $ev($c('button', cell, {text: 'Remove'})).click(function() {
           row.parentNode.removeChild(row);
           save();
         });
 
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-tag';
-        input1 = $c('input', cell);
-        input1.value = tag || '';
-        $ev(input1).change(save);
+        $ev($c('input', cell, {value: tag || ''})).change(save);
 
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-aliases';
-        input2 = $c('input', cell);
-        input2.value = list ? list.join(' ') : '';
-        $ev(input2).change(save);
+        $ev($c('input', cell, {value: list ? list.join(' ') : ''})).change(save);
       }
 
       var aliases = (this.options_page
@@ -943,17 +937,12 @@
         this.select(); /* WARN */
       });
 
-      var btn_export = $c('input', this.export_form);
-      btn_export.type = 'button';
-      btn_export.value = 'Export';
-      $ev(btn_export, {ctx: this}).click(function() {
+      $ev($c('input', this.export_form, {type: 'button', value: 'Export'}), {ctx: this}).click(function() {
         this.export_export();
       });
 
       if (window.JSON && LS.u) {
-        var btn_import = $c('input', this.export_form);
-        btn_import.type = 'submit';
-        btn_import.value = 'Import';
+        $c('input', this.export_form, {type: 'submit', value: 'Import'});
         $ev(this.export_form, {ctx: this}).listen('submit', function() {
           try {
             this.export_import();
@@ -965,10 +954,7 @@
       }
 
       if (window.opera) {
-        var btn_userjs = $c('input', this.export_form);
-        btn_userjs.type = 'button';
-        btn_userjs.value = 'UserJS';
-        $ev(btn_userjs, {ctx: this}).click(function() {
+        $ev($c('input', this.export_form, {type: 'button', value: 'UserJS'}), {ctx: this}).click(function() {
           var js = [
             '// ==UserScript==',
             '// @name    pixplus settings',
@@ -1021,16 +1007,13 @@
     label: 'ChangeLog', id: 'changelog',
     content: function(page) {
       var dl = $c('dl', page.content);
-      for(var i = 0; i < ConfigUI.changelog_data.length; ++i) {
-        var release = ConfigUI.changelog_data[i];
-        var dt = $c('dt', dl);
-        dt.textContent = release.version + ' - ' + release.date;
+      each(ConfigUI.changelog_data, function(release) {
+        $c('dt', dl, {text: release.version + ' - ' + release.date});
         var ul = $c('ul', $c('dd', dl));
-        for(var j = 0; j < release.changes.length; ++j) {
-          var li = $c('li', ul);
-          li.textContent = release.changes[j];
-        }
-      }
+        each(release.changes, function(change) {
+          $c('li', ul, {text: change});
+        });
+      });
     }
   }];
 
@@ -1392,10 +1375,7 @@
 
       function create_menu_item(text, func) {
         var item = $c('li');
-        var anc = $c('a', item);
-        anc.href = '#';
-        anc.textContent = text;
-        $ev(anc).click(function() {
+        $ev($c('a', item, {href: '#', text: text})).click(function() {
           func();
           return true;
         });
@@ -1416,8 +1396,7 @@
                                {expires: 30, domain: 'pixiv.net', path: '/'});
           window.location.reload();
         }));
-        mi_restore_input = $c('input', mi_restore);
-        mi_restore_input.value = window.localStorage[key] || '';
+        mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
         $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
           this.select(); /* WARN */
         });
@@ -1426,9 +1405,7 @@
 
       var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
       sitenav.insertBefore(li, sitenav.firstChild);
-      var anc = $c('a', menu_items.length ? $c('div', li) : li);
-      anc.href = '#';
-      anc.textContent = 'pixplus';
+      var anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
       if (menu_items.length) {
         li.appendChild(anc.cloneNode(true));
         var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
@@ -1457,17 +1434,13 @@
 
         var li = $c('li', null, {id: 'pp-conf-close'});
         ui.page_list.insertBefore(li, ui.page_list.firstChild);
-        var close = $c('a', li);
-        close.href = '#';
-        close.textContent = '\u00d7';
-        $ev(close).click(function() {
+        $ev($c('a', li, {href: '#', text: '\u00d7'})).click(function() {
           hide();
           return true;
         });
 
         if (!LS.u) {
-          var note = $c('div', root);
-          note.textContent = "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002";
+          var note = $c('div', root, {text: "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002"});
           if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
         }
 
@@ -1574,11 +1547,10 @@
       function debug_filter(item) {
         var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
         if (c) {
-          var d = $c('div');
           if (item.caption.nextSibling instanceof window.HTMLBRElement) {
             item.caption.parentNode.removeChild(item.caption.nextSibling);
           }
-          d.innerHTML = 'ID: ' + item.id + '<br />BID: ' + c.value;
+          var d = $c('div', null, {html: 'ID: ' + item.id + '<br />BID: ' + c.value});
           item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
         }
       }
@@ -1778,15 +1750,13 @@
     }
     function locate_right_real() {
       var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
-      var wrap = $c('div');
+      var wrap = $c('div', null, {id: 'pp-recom-wrap'});
       var div = $c('div', wrap);
-      wrap.id = 'pp-recom-wrap';
       if (anc) {
         div.appendChild(anc.cloneNode(true));
         if (r_switch) {
           var r_switch_p_new = $c('span');
-          switch_wrap = $c('span', div);
-          switch_wrap.id = 'pp-recom-switch-wrap';
+          switch_wrap = $c('span', div, {id: 'pp-recom-switch-wrap'});
           r_switch_p.replaceChild(r_switch_p_new, r_switch);
           r_switch_p = r_switch_p_new;
           switch_wrap.appendChild(r_switch);
@@ -1925,8 +1895,7 @@
     }
     function show() {
       if (bm_form_div) return;
-      bm_form_div = $c('div');
-      bm_form_div.textContent = 'Loading';
+      bm_form_div = $c('div', null, {text: 'Loading'});
       bm_form_div.style.margin = '1em';
       loader = new Loader(bm_add_anc.href, bm_form_div);
       display.parentNode.insertBefore(bm_form_div, display);
@@ -2671,13 +2640,18 @@
   function $t(tag, elem) {
     return (elem || window.document).getElementsByTagName(tag);
   }
-  function $c(tag, parent, opts) {
+  function $c(tag, parent, opts, attrs) {
     var elem = window.document.createElement(tag);
     if (parent) parent.appendChild(elem);
     if (opts) {
       for(var key in opts) {
         var name = $c.map[key] || key;
         elem[name] = opts[key];
+      }
+    }
+    if (attrs) {
+      for(var key in attrs) {
+        elem.setAttribute(key, attrs[key]);
       }
     }
     return elem;
@@ -2896,9 +2870,7 @@
 
         if (cap) {
           if (cap.nodeType === 3) {
-            var new_caption = $c('a');
-            new_caption.href = url;
-            new_caption.textContent = trim(cap.nodeValue);
+            var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue)});
             new_caption.setAttribute('nopopup', '');
             cap.parentNode.replaceChild(new_caption, cap);
             cap = new_caption;
@@ -2959,15 +2931,15 @@
   };
 
   function Popup(item, manga_page) {
-    this.root_div              = $c('div',     null,               {id: 'pp-popup'});
-    this.header                = $c('div',     this.root_div,      {id: 'pp-header'});
-    this.title_div             = $c('div',     this.header,        {id: 'pp-title_wrapper'});
-    this.title                 = $c('a',       this.title_div,     {id: 'pp-title'});
+    this.root_div              = $c('div', null, {id: 'pp-popup'});
+    this.header                = $c('div', this.root_div, {id: 'pp-header'});
+    this.title_div             = $c('div', this.header, {id: 'pp-title_wrapper'});
+    this.title                 = $c('a', this.title_div, {id: 'pp-title'});
     this.title.setAttribute('nopopup', '');
-    this.header_right          = $c('span',    this.title_div,     {id: 'pp-right'});
-    this.status                = $c('span',    this.header_right,  {id: 'pp-status'});
+    this.header_right          = $c('span', this.title_div, {id: 'pp-right'});
+    this.status                = $c('span', this.header_right, {id: 'pp-status'});
     this.status.style.display  = 'none';
-    this.manga_btn             = $c('a',       this.header_right,  {id: 'pp-manga-btn'});
+    this.manga_btn             = $c('a', this.header_right, {id: 'pp-manga-btn'});
     $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); return true; }, this));
     this.res_btn               = Popup.create_button('[R]', this.header_right, 'pp-res-btn');
     this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
@@ -2975,35 +2947,32 @@
     this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                      bind(this.toggle_bookmark_edit, this));
     //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
-    this.caption               = $c('div',     this.header,        {id: 'pp-caption'});
-    this.comment_wrap          = $c('div',     this.caption,       {id: 'pp-comment-wrap'});
-    this.comment               = $c('div',     this.comment_wrap,  {id: 'pp-comment'});
-    this.viewer_comments       = $c('div',     this.comment_wrap,  {id: 'pp-viewer-comments'});
-    this.viewer_comments_w     = $c('div',     this.viewer_comments);
-    this.viewer_comments_c     = $c('div',     this.viewer_comments_w);
-    this.viewer_comments_a     = $c('div',     this.viewer_comments_w, {id: 'one_comment_area'});
-    this.tags                  = $c('div',     this.caption,       {id: 'tag_area'});
-    this.rating                = $c('div',     this.caption,       {id: 'pp-rating', cls: 'pp-separator works_area'});
-    this.post_cap              = $c('div',     this.caption,       {id: 'pp-info', cls: 'pp-separator'});
-    this.a_img                 = $c('img',     this.post_cap,      {id: 'pp-author-img'});
-    this.a_status              = $c('span',    this.post_cap,      {id: 'pp-author-status'});
-    this.date_wrap             = $c('span',    this.post_cap,      {id: 'pp-date-wrap'});
-    this.date                  = $c('span',    this.date_wrap,     {id: 'pp-date'});
-    this.date_repost           = $c('span',    this.date_wrap,     {id: 'pp-date-repost'});
-    this.info                  = $c('span',    this.post_cap,      {id: 'pp-info-wrap'});
-    this.info_size             = $c('span',    this.info,          {id: 'pp-info-size'});
-    this.info_tools            = $c('span',    this.info,          {id: 'pp-info-tools'});
-    this.author                = $c('span',    this.post_cap,      {id: 'pp-author'});
-    this.a_profile             = $c('a',       this.author);
-    this.a_illust              = $c('a',       this.author);
-    this.a_illust.textContent  = "\u4f5c\u54c1";
-    this.a_bookmark            = $c('a',       this.author);
-    this.a_bookmark.textContent = "\u30d6\u30c3\u30af\u30de\u30fc\u30af";
-    this.a_stacc               = $c('a',       this.author);
-    this.a_stacc.textContent   = "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9";
-    this.bm_edit               = $c('div',     this.root_div,      {id: 'pp-bm-edit'});
-    this.tag_edit              = $c('div',     this.root_div,      {id: 'tag_edit'});
-    this.img_div               = $c('div',     this.root_div,      {id: 'pp-img-div'});
+    this.caption               = $c('div', this.header, {id: 'pp-caption'});
+    this.comment_wrap          = $c('div', this.caption, {id: 'pp-comment-wrap'});
+    this.comment               = $c('div', this.comment_wrap, {id: 'pp-comment'});
+    this.viewer_comments       = $c('div', this.comment_wrap, {id: 'pp-viewer-comments'});
+    this.viewer_comments_w     = $c('div', this.viewer_comments);
+    this.viewer_comments_c     = $c('div', this.viewer_comments_w);
+    this.viewer_comments_a     = $c('div', this.viewer_comments_w, {id: 'one_comment_area'});
+    this.tags                  = $c('div', this.caption, {id: 'tag_area'});
+    this.rating                = $c('div', this.caption, {id: 'pp-rating', cls: 'pp-separator works_area'});
+    this.post_cap              = $c('div', this.caption, {id: 'pp-info', cls: 'pp-separator'});
+    this.a_img                 = $c('img', this.post_cap, {id: 'pp-author-img'});
+    this.a_status              = $c('span', this.post_cap, {id: 'pp-author-status'});
+    this.date_wrap             = $c('span', this.post_cap, {id: 'pp-date-wrap'});
+    this.date                  = $c('span', this.date_wrap, {id: 'pp-date'});
+    this.date_repost           = $c('span', this.date_wrap, {id: 'pp-date-repost'});
+    this.info                  = $c('span', this.post_cap, {id: 'pp-info-wrap'});
+    this.info_size             = $c('span', this.info, {id: 'pp-info-size'});
+    this.info_tools            = $c('span', this.info, {id: 'pp-info-tools'});
+    this.author                = $c('span', this.post_cap, {id: 'pp-author'});
+    this.a_profile             = $c('a', this.author);
+    this.a_illust              = $c('a', this.author, {text: "\u4f5c\u54c1"});
+    this.a_bookmark            = $c('a', this.author, {text: "\u30d6\u30c3\u30af\u30de\u30fc\u30af"});
+    this.a_stacc               = $c('a', this.author, {text: "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9"});
+    this.bm_edit               = $c('div', this.root_div, {id: 'pp-bm-edit'});
+    this.tag_edit              = $c('div', this.root_div, {id: 'tag_edit'});
+    this.img_div               = $c('div', this.root_div, {id: 'pp-img-div'});
     if (conf.popup.overlay_control > 0) {
       this.olc_prev            = $c('span', this.img_div, {id: 'pp-olc-prev', cls: 'pp-olc'});
       this.olc_next            = $c('span', this.img_div, {id: 'pp-olc-next', cls: 'pp-olc'});
@@ -3249,9 +3218,7 @@
     return Popup.run(item);
   };
   Popup.create_button = function(text, parent, id, cb_click) {
-    var btn = $c('a', parent, {id: id});
-    btn.href = 'javascript:void(0)';
-    btn.textContent = text;
+    var btn = $c('a', parent, {id: id, href: 'javascript:void(0)', text: text});
     if (cb_click) $ev(btn).click(function() {
       cb_click();
       return true;
@@ -3610,10 +3577,11 @@
         if (html || this.tag_edit_enabled) {
           this.tags.innerHTML = (html || '').replace(/(<a[^>]+href=\")(tags\.php[^\"]*)/ig, '$1/$2');
           if (this.tag_edit_enabled) {
-            this.tag_edit_btn = $c('a', this.tags, {id: 'pp-tag-edit-btn'});
-            this.tag_edit_btn.href = 'javascript:void(0)';
-            this.tag_edit_btn.textContent = '[E]';
-            $ev(this.tag_edit_btn).click(bind(Popup.prototype.toggle_tag_edit, this));
+            this.tag_edit_btn = $c('a', this.tags, {id: 'pp-tag-edit-btn', href: '#', text: '[E]'});
+            $ev(this.tag_edit_btn, {ctx: this}).click(function() {
+              this.toggle_tag_edit();
+              return true;
+            });
           }
           this.tags.style.display = '';
         }
@@ -3676,24 +3644,12 @@
       if (pp.rpc_usable && (re = /(<form[^>]+action=\"\/?member_illust\.php\"[^>]*>[\s\S]*?<\/form>)/i.exec(loader.text))) {
         (function() {
           var form = re[1], html = '';
-          each(/<input[^>]+type=\"hidden\"[^>]+>/ig.exec(form), function(hidden) { html += hidden; });
+          each(form.match(/<input[^>]+type=\"hidden\"[^>]+>/ig), function(hidden) { html += hidden; });
           if (html) {
-            var comment = $c('input'), submit = $c('input');
-            comment.setAttribute('type', 'text');
-            comment.setAttribute('name', 'comment');
-            comment.setAttribute('maxlength', '255');
-            submit.setAttribute('type', 'submit');
-            submit.setAttribute('name', 'submit');
-            submit.className = 'btn_type04';
-            submit.value     = 'Send';
-
-            form = $c('form');
-            form.setAttribute('action', '/member_illust.php');
-            form.setAttribute('method', 'POST');
-            form.innerHTML = html;
-            form.appendChild(comment);
-            form.appendChild(submit);
-
+            alert(html);
+            form = $c('form', this.viewer_comments_c, {html: html}, {action: '/member_illust.php', method: 'POST'});
+            var comment = $c('input', form, null, {type: 'text', name: 'comment', maxlength: '255'});
+            var submit = $c('input', form, {cls: 'btn_type04', value: 'Send'}, {type: 'submit', name: 'submit'});
             $ev(submit).click(function() {
               if (trim(comment.value)) {
                 window.jQuery.post(
@@ -3715,8 +3671,6 @@
               }
               return true;
             });
-
-            this.viewer_comments_c.appendChild(form);
             this.viewer_comments_enabled = true;
           }
         }).apply(this);
