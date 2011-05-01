@@ -946,26 +946,23 @@
   }, {
     label: 'Export', id: 'export',
     content: function(page) {
-      this.export_form = window.document.createElement('form');
-      this.export_input = window.document.createElement('input');
+      this.export_form = $c('form', page.content);
+      this.export_input = $c('input', this.export_form);
       $ev(this.export_input).listen(['mousedown', 'mouseup'], function() {
         this.select(); /* WARN */
       });
-      this.export_form.appendChild(this.export_input);
 
-      var btn_export = window.document.createElement('input');
+      var btn_export = $c('input', this.export_form);
       btn_export.type = 'button';
       btn_export.value = 'Export';
       $ev(btn_export, {ctx: this}).click(function() {
         this.export_export();
       });
-      this.export_form.appendChild(btn_export);
 
       if (window.JSON && LS.u) {
-        var btn_import = window.document.createElement('input');
+        var btn_import = $c('input', this.export_form);
         btn_import.type = 'submit';
         btn_import.value = 'Import';
-        this.export_form.appendChild(btn_import);
         $ev(this.export_form, {ctx: this}).listen('submit', function() {
           try {
             this.export_import();
@@ -975,10 +972,9 @@
           return true;
         });
       }
-      page.content.appendChild(this.export_form);
 
       if (window.opera) {
-        var btn_userjs = window.document.createElement('input');
+        var btn_userjs = $c('input', this.export_form);
         btn_userjs.type = 'button';
         btn_userjs.value = 'UserJS';
         $ev(btn_userjs, {ctx: this}).click(function() {
@@ -997,7 +993,6 @@
           ].join('\n');
           (this.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
         });
-        this.export_form.appendChild(btn_userjs);
       }
     }
   }, {
@@ -1034,23 +1029,17 @@
   }, {
     label: 'ChangeLog', id: 'changelog',
     content: function(page) {
-      var dl = window.document.createElement('dl');
+      var dl = $c('dl', page.content);
       for(var i = 0; i < ConfigUI.changelog_data.length; ++i) {
         var release = ConfigUI.changelog_data[i];
-        var dt = window.document.createElement('dt');
+        var dt = $c('dt', dl);
         dt.textContent = release.version + ' - ' + release.date;
-        dl.appendChild(dt);
-        var ul = window.document.createElement('ul');
+        var ul = $c('ul', $c('dd', dl));
         for(var j = 0; j < release.changes.length; ++j) {
-          var li = window.document.createElement('li');
+          var li = $c('li', ul);
           li.textContent = release.changes[j];
-          ul.appendChild(li);
         }
-        var dd = window.document.createElement('dd');
-        dd.appendChild(ul);
-        dl.appendChild(dd);
       }
-      page.content.appendChild(dl);
     }
   }];
 
