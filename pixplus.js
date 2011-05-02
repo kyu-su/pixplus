@@ -1255,10 +1255,10 @@
     each(ConfigUI.help_data, function(help, idx_h) {
       var rep = msg_filter(help.mode);
       each(table.rows, function(row) {
-        if (row.cells.length < 2) continue;
+        if (row.cells.length < 2) return;
         var node = row.cells[1].firstChild;
         var terms = node.nodeValue.split(rep);
-        if (terms.length < 2) continue;
+        if (terms.length < 2) return;
         each(terms, function(term, idx_t) {
           if (idx_t > 0) {
             var label = $c('label', null, {text: rep});
