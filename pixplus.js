@@ -28,7 +28,7 @@
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
  */
 
-(function(func, unsafeWindow, userjs) {
+(function(unsafeWindow, userjs, func) {
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
     if (window.top !== window) return;
@@ -147,7 +147,13 @@
       window.document.body.appendChild(s);
     });
    }
-})(function(window, safeWindow, _extension_data) {
+})(
+  this.unsafeWindow,
+  /* __GREASEMONKEY_REMOVE__
+  true,
+   __GREASEMONKEY_REMOVE__ */
+  false, /* __GREASEMONKEY_REMOVE__ */
+  function(window, safeWindow, _extension_data) {
   var conf_schema = [
     /* __CONFIG_BEGIN__ */
     {"name": "general", "label": "General", "items": [
@@ -1238,8 +1244,7 @@
 
   ConfigUI.create_help_table = function(msg_filter) {
     if (!msg_filter) msg_filter = function(s) { return s; };
-    var table = window.document.createElement('table');
-    table.className = 'pp-help-table';
+    var table = $c('table', null, {cls: 'pp-help-table'});
     var captions = [], i, j;
     for(i = 0; i < ConfigUI.help_data.length; ++i) {
       var cell = table.insertRow(-1).insertCell(-1);
@@ -5320,9 +5325,4 @@
   } else {
     init_pixplus();
   }
-}, this.unsafeWindow,
-   /* __GREASEMONKEY_REMOVE__
-    true
-    __GREASEMONKEY_REMOVE__ */
-   false /* __GREASEMONKEY_REMOVE__ */
-  );
+});
