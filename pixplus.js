@@ -28,7 +28,7 @@
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
  */
 
-(function(unsafeWindow, userjs, func) {
+(function(func, unsafeWindow, userjs) {
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
     if (window.top !== window) return;
@@ -147,13 +147,7 @@
       window.document.body.appendChild(s);
     });
    }
-})(
-  this.unsafeWindow,
-  /* __GREASEMONKEY_REMOVE__
-  true,
-   __GREASEMONKEY_REMOVE__ */
-  false, /* __GREASEMONKEY_REMOVE__ */
-  function(window, safeWindow, _extension_data) {
+})(function(window, safeWindow, _extension_data) {
   var conf_schema = [
     /* __CONFIG_BEGIN__ */
     {"name": "general", "label": "General", "items": [
@@ -1245,44 +1239,41 @@
   ConfigUI.create_help_table = function(msg_filter) {
     if (!msg_filter) msg_filter = function(s) { return s; };
     var table = $c('table', null, {cls: 'pp-help-table'});
-    var captions = [], i, j;
-    for(i = 0; i < ConfigUI.help_data.length; ++i) {
+    var captions = [];
+    each(ConfigUI.help_data, function(help) {
       var cell = table.insertRow(-1).insertCell(-1);
       cell.setAttribute('colspan', '2');
       cell.className = 'pp-help-mode';
-      cell.textContent = msg_filter(ConfigUI.help_data[i].mode);
-      for(j = 0; j < ConfigUI.help_data[i].keys.length; ++j) {
+      cell.textContent = msg_filter(help.mode);
+      each(help.keys, function(key) {
         var row = table.insertRow(-1);
-        row.insertCell(-1).textContent = ConfigUI.help_data[i].keys[j].key;
-        row.insertCell(-1).textContent = msg_filter(ConfigUI.help_data[i].keys[j].desc);
-      }
+        row.insertCell(-1).textContent = key.key;
+        row.insertCell(-1).textContent = msg_filter(key.desc);
+      });
       captions.push(cell);
-    }
-    for(i = 1; i < ConfigUI.help_data.length; ++i) {
-      var rep = msg_filter(ConfigUI.help_data[i].mode);
-      for(var r = 0; r < table.rows.length; ++r) {
-        if (table.rows[r].cells.length < 2) continue;
-        var node = table.rows[r].cells[1].firstChild;
+    });
+    each(ConfigUI.help_data, function(help, idx_h) {
+      var rep = msg_filter(help.mode);
+      each(table.rows, function(row) {
+        if (row.cells.length < 2) continue;
+        var node = row.cells[1].firstChild;
         var terms = node.nodeValue.split(rep);
         if (terms.length < 2) continue;
-        for(j = 0; j < terms.length; ++j) {
-          if (j) {
-            (function(caption) {
-              var label = window.document.createElement('label');
-              label.textContent = rep;
-              node.parentNode.insertBefore(label, node);
-              $ev(label).hover(function() {
-                caption.setAttribute('highlight', '');
-              }, function() {
-                caption.removeAttribute('highlight');
-              });
-            })(captions[i]);
+        each(terms, function(term, idx_t) {
+          if (idx_t > 0) {
+            var label = $c('label', null, {text: rep});
+            node.parentNode.insertBefore(label, node);
+            $ev(label).hover(function() {
+              captions[idx_h].setAttribute('highlight', '');
+            }, function() {
+              captions[idx_h].removeAttribute('highlight');
+            });
           }
-          node.parentNode.insertBefore(window.document.createTextNode(terms[j]), node);
-        }
+          node.parentNode.insertBefore(window.document.createTextNode(term), node);
+        });
         node.parentNode.removeChild(node);
-      }
-    }
+      });
+    });
     return table;
   };
 
@@ -5325,4 +5316,9 @@
   } else {
     init_pixplus();
   }
-});
+}, this.unsafeWindow,
+   /* __GREASEMONKEY_REMOVE__
+    true
+    __GREASEMONKEY_REMOVE__ */
+   false /* __GREASEMONKEY_REMOVE__ */
+  );
