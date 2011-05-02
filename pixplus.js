@@ -990,7 +990,7 @@
       var html = '<dl>' +
         '<dt>Name</dt><dd>pixplus</dd>' +
         '<dt>Version</dt><dd>' + release.version + ' - ' + release.date + '</dd>' +
-        '<dt>URL</dt><dd><ul>';
+        '<dt>Web</dt><dd><ul>';
       for(var i = 0; i < urls.length; ++i) {
         html += '<li><a href="' + urls[i] + '" onclick="this.href=&quot;' + prefix + urls[i] + '&quot;">' + urls[i] + '</a></li>';
       }
