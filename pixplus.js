@@ -956,7 +956,7 @@
         var row = self.tag_alias_table.insertRow(-1), cell;
         cell = row.insertCell(-1);
         cell.className = 'pp-conf-cell-remove';
-        $ev($c('button', cell, {text: 'Remove'})).click(function() {
+        $ev($c('button', cell, {text: '\u00d7'})).click(function() {
           row.parentNode.removeChild(row);
           save();
         });
