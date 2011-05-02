@@ -2633,22 +2633,20 @@
   function $t(tag, elem) {
     return (elem || window.document).getElementsByTagName(tag);
   }
-  function $c(tag, parent, opts, attrs) {
+  function $c(tag, parent, opts) {
     var elem = window.document.createElement(tag);
     if (parent) parent.appendChild(elem);
     if (opts) {
       for(var key in opts) {
-        var name = $c.map[key] || key;
-        if (name.call) {
-          name(elem, key, opts[key]);
+        if (key.lastIndexOf('a:', 0) === 0) {
+          elem.setAttribute(key.substring(2), opts[key]);
         } else {
-          elem[name] = opts[key];
+          var obj = elem, terms = ($c.map[key] || key).split('.');
+          for(var i = 0; i < terms.length - 1; ++i) {
+            obj = obj[terms[i]];
+          }
+          obj[terms[terms.length - 1]] = opts[key];
         }
-      }
-    }
-    if (attrs) {
-      for(var key in attrs) {
-        elem.setAttribute(key, attrs[key]);
       }
     }
     return elem;
@@ -2657,9 +2655,7 @@
     cls:  'className',
     text: 'textContent',
     html: 'innerHTML',
-    css: function(elem, key, value) {
-      elem.style.cssText = value;
-    }
+    css:  'style.cssText'
   };
   function $x(xpath, root) {
     if (arguments.length > 1 && !root) return null;
@@ -2870,7 +2866,7 @@
 
         if (cap) {
           if (cap.nodeType === 3) {
-            var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue)}, {nopopup: ''});
+            var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue), 'a:nopopup': ''});
             cap.parentNode.replaceChild(new_caption, cap);
             cap = new_caption;
           } else if (cap instanceof window.HTMLAnchorElement) {
@@ -2933,7 +2929,7 @@
     this.root_div              = $c('div', null, {id: 'pp-popup'});
     this.header                = $c('div', this.root_div, {id: 'pp-header'});
     this.title_div             = $c('div', this.header, {id: 'pp-title_wrapper'});
-    this.title                 = $c('a', this.title_div, {id: 'pp-title'}, {nopopup: ''});
+    this.title                 = $c('a', this.title_div, {id: 'pp-title', 'a:nopopup': ''});
     this.header_right          = $c('span', this.title_div, {id: 'pp-right'});
     this.status                = $c('span', this.header_right, {id: 'pp-status', css: 'display:none'});
     this.manga_btn             = $c('a', this.header_right, {id: 'pp-manga-btn'});
@@ -3643,9 +3639,9 @@
           var form = re[1], html = '';
           each(form.match(/<input[^>]+type=\"hidden\"[^>]+>/ig), function(hidden) { html += hidden; });
           if (html) {
-            form = $c('form', this.viewer_comments_c, {html: html}, {action: '/member_illust.php', method: 'POST'});
-            var comment = $c('input', form, null, {type: 'text', name: 'comment', maxlength: '255'});
-            var submit = $c('input', form, {cls: 'btn_type04', value: 'Send'}, {type: 'submit', name: 'submit'});
+            form = $c('form', this.viewer_comments_c, {html: html, 'a:action': '/member_illust.php', 'a:method': 'POST'});
+            var comment = $c('input', form, {'a:type': 'text', 'a:name': 'comment', 'a:maxlength': '255'});
+            var submit = $c('input', form, {cls: 'btn_type04', value: 'Send', 'a:type': 'submit', 'a:name': 'submit'});
             $ev(submit).click(function() {
               if (trim(comment.value)) {
                 window.jQuery.post(
@@ -4556,7 +4552,7 @@
         this.key_map_root = {};
         each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
           if (idx >= BookmarkForm.keys_root.length) return true;
-          var div = $c('div', null, {css: 'display:inline-block'}, {ppaccesskey: BookmarkForm.keys_root[idx]});
+          var div = $c('div', null, {css: 'display:inline-block', 'a:ppaccesskey': BookmarkForm.keys_root[idx]});
           input.parentNode.insertBefore(div, input);
           input.parentNode.removeChild(input);
           div.appendChild(input);
