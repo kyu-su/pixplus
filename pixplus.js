@@ -2715,7 +2715,7 @@
     if (ev.metaKey)  keys.push('Meta');
     if (c === ev.which && c > 0x20 && c < 0x7f) {
       role = 0;
-      key = lc(String.fromCharCode(c));
+      var key = lc(String.fromCharCode(c));
       keys.push($ev.key_map_encode[key] || key);
     } else if ($ev.key_map_code[c]) {
       role = 1;
@@ -2768,6 +2768,7 @@
       if (key.altKey)   code |= 1 << ($ev.BIT_OFFSET_MODS + 2);
       if (key.metaKey)  code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
       if (c === key.which && c > 0x20 && c < 0x7f) {
+        if (c >= 0x41 && c <= 0x5a) c += 0x20; // toLowerCase()
         code |= c;
       } else if (c <= (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
         code |= c << $ev.BIT_OFFSET_SPEC;
