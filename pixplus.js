@@ -380,9 +380,9 @@
       }, String]
     },
     init_map: function() {
-      conf_schema.forEach(function(sec) {
+      each(conf_schema, function(sec) {
         var map = { };
-        sec.items.forEach(function(item) {
+        each(sec.items, function(item) {
           map[item.key] = item;
         });
         LS.map[sec.name] = {schema: sec, map: map};
@@ -392,19 +392,19 @@
       return LS.conv[typeof LS.map[s].map[n].value];
     },
     each: function(cb_item, cb_sec, cb_sec_after) {
-      conf_schema.forEach(function(sec) {
+      for(var i = 0; i < conf_schema.length; ++i) {
+        var sec = conf_schema[i];
         if (cb_sec && cb_sec(sec)) return;
-        sec.items.forEach(function(item) {
-          cb_item(item, sec);
-        });
+        for(var j = 0; j < sec.items.length; ++j) {
+          cb_item(sec.items[j], sec);
+        }
         if (cb_sec_after) cb_sec_after(sec);
-      });
+      }
     },
     parse_bm_tag_order: function(str) {
-      var ary = [], ary_ary = [], lines = str.split('\n');
+      var ary = [], ary_ary = [], lines = str.split(/[\r\n]+/);
       for(var i = 0; i < lines.length; ++i) {
         var tag = lines[i];
-        tag = tag.replace(/[\r\n]/g, '');
         if (tag === '-') {
           if (ary_ary.length) ary.push(ary_ary);
           ary_ary = [];
@@ -419,9 +419,8 @@
     },
     parse_bm_tag_aliases: function(str) {
       var aliases = {};
-      var lines = str.split(/\r?\n/);
-      var len = Math.floor(lines.length / 2);
-      for(var i = 0; i < len; ++i) {
+      var lines = str.split(/[\r\n]+/);
+      for(var i = 0; i < Math.floor(lines.length / 2); ++i) {
         var tag = lines[i * 2], alias = lines[i * 2 + 1];
         if (tag && alias) {
           aliases[tag] = alias.split(/\s+/);
@@ -451,11 +450,11 @@
     }
     /* __STORAGE_COMMON_ENTRIES_END__ */,
     init: function() {
-      conf_schema.forEach(function(sec) {
+      each(conf_schema, function(sec) {
         if (sec.name === 'bookmark') return;
         var obj = sec.name === 'general' ? conf : conf[sec.name] = { }; // for compatibility
         LS.map[sec.name].conf = obj;
-        sec.items.forEach(function(item) {
+        each(sec.items, function(item) {
           obj[item.key] = item.value;
           if (LS.u) {
             var v = LS.get(sec.name, item.key);
@@ -629,7 +628,7 @@
         row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
         if (item.hint) {
           input = $c('select');
-          item.hint.forEach(function(hint) {
+          each(item.hint, function(hint) {
             $c('option', input, {value: hint.value, text: self.msg_filter(hint.title)});
           });
         } else {
@@ -697,6 +696,7 @@
     this.update_export();
   }
 
+  // for Opera10.1x
   ConfigUI.stringify = function(val) {
     if (window.JSON && window.JSON.stringify) {
       return JSON.stringify(val);
