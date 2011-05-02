@@ -531,10 +531,12 @@
           if (window.opera) {
             opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
           } else {
+            /*
             var ev = window.document.createEvent('Event');
             ev.initEvent('pixplusConfigSet', true, true);
-            ev.currentTarget = data;
+            ev.data = data;
             window.document.dispatchEvent(ev);
+             */
           }
         };
         LS.remove = function(s, n) {
@@ -664,8 +666,7 @@
         });
         row.insertCell(-1).textContent = self.msg_filter(item.desc);
 
-        $ev(input).change(function() {
-          alert();
+        $ev(input).change(function(ev) {
           var value;
           if (type === 'boolean') {
             value = input.checked;
@@ -880,6 +881,52 @@
   ConfigUI.pages = [{
     id: 'key',
     content: function(page) {
+      var editor_row;
+      function show_editor(row, input) {
+        if (editor_row) editor_row.parentNode.removeChild(editor_row);
+        editor_row = $c('tr');
+        var root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
+        var list = $c('ul', root);
+        function reset() {
+          list.innerHTML = '';
+          each(input.value.split(','), add);
+        }
+        function add(key) {
+          var li = $c('li', list);
+          $ev($c('button', li, {text: '\u00d7'})).click(function() {
+            list.removeChild(li);
+          });
+          $c('label', li, {text: key});
+        }
+        function apply() {
+          var keys = [];
+          each($xa('li/label', list), function(key) {
+            keys.push(key.textContent);
+          });
+          input.value = keys.join(',');
+          var ev = window.document.createEvent('Event');
+          ev.initEvent('input', true, true);
+          input.dispatchEvent(ev);
+        }
+        reset();
+        var add_line = $c('div', root), add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
+        $ev(add_input).key(function(ev, conn, key) {
+          this.value = key;
+          return true;
+        });
+        $ev($c('button', add_line, {cls: 'pp-conf-key-editor-add', 'text': 'Add'})).click(function() {
+          add(add_input.value);
+          add_input.value = '';
+          apply();
+        });
+        row.parentNode.insertBefore(editor_row, row.nextSibling);
+      }
+      each(page.table.rows, function(row) {
+        var input = $t('input', row)[0];
+        $ev(input).focus(function() {
+          show_editor(row, input);
+        });
+      });
     }
   }, {
     label: 'Tags', id: 'tags',
@@ -1287,9 +1334,14 @@
     '#pp-conf-pager section.select{display:block;}' +
     '#pp-conf-pager input, #pp-conf-pager textarea{' +
     '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
-    '#pp-conf-pager button{display:block !important;white-space:nowrap;padding:0px;}' +
+    '#pp-conf-pager button{display:block;white-space:nowrap;padding:0px;}' +
     '#pp-conf-pager textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
+    '.pp-conf-key-editor{padding-left:1em;}' +
+    '#pp-conf-pager .pp-conf-key-editor button{display:inline-block;}' +
+    '.pp-conf-key-editor ul label{margin-left:4px;}' +
+    '.pp-conf-key-editor ul li{list-style-type:none;}' +
+    '.pp-conf-key-editor .pp-conf-key-editor-add{margin-left:4px;}' +
     '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
     '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
     '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
@@ -1321,7 +1373,7 @@
 
     Popup.stop_key = true;
     var conn_click = $ev(background).click(close);
-    var conn_key   = $ev(window).key(function(ev, key) {
+    var conn_key   = $ev(window).key(function(ev, conn, key) {
       if (key === $ev.KEY_ESCAPE || key === '?') return close();
       return false;
     });
@@ -2487,45 +2539,45 @@
     var opts = args || {};
     var obj = {
       ctx: ctx,
+
       click: function(func) {
         return listen('click', function(ev, conn) {
           if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
           return func.call(this, ev, conn);
         });
       },
+
       key: function(func) {
         var conn = listen('keypress', function(ev, conn) {
-          if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
-          var c = ev.keyCode || ev.charCode, key;
-          if (c === ev.which && c > 0x20) {
-            key = lc(String.fromCharCode(c));
-          } else if ($ev.key_map[c]) {
-            if (browser.webkit) return false;
-            key = $ev.key_map[c];
-          } else {
-            key = '_c' + String(c);
-          }
-          return func.call(this, ev, key, conn);
+          var key = $ev.parse_key_event(ev);
+          if (key[0] !== 0 && browser.webkit) return false;
+          return func.call(this, ev, conn, key[1]);
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
-            if (ev.ctrlKey || ev.altKey || ev.metaKey) return false;
-            var c = ev.keyCode || ev.charCode;
-            if ($ev.key_map[c]) return func.call(this, ev, $ev.key_map[c], conn);
-            return false;
+            var key = $ev.parse_key_event(ev);
+            if (key[0] === 0) {
+              return func.call(this, ev, conn, key[1]);
+            } else {
+              return false;
+            }
           }, conn);
         }
         return conn;
       },
+
       scroll: function(func) {
         return listen('scroll', func);
       },
+
       resize: function(func) {
         return listen('resize', func);
       },
+
       submit: function(func) {
         return listen('submit', func);
       },
+
       change: function(func) {
         var name;
         if (obj.ctx instanceof window.HTMLInputElement) {
@@ -2543,10 +2595,18 @@
         }
         return listen(name, func);
       },
+
       hover: function(hover, leave) {
         var conn = listen('mouseover', hover);
         return listen('mouseout', leave, conn);
       },
+
+      focus: function(focus, blur) {
+        var conn = listen('focus', focus);
+        if (blur) conn = listen('blur', blur, conn);
+        return conn;
+      },
+
       listen: function(name, func) {
         if (name instanceof Array) {
           var conn;
@@ -2559,6 +2619,7 @@
         }
       }
     };
+
     function listen(name, func, conn) {
       if (!conn) conn = new $ev.Connection(ctx);
       var timer, ev_last;
@@ -2589,27 +2650,116 @@
     return obj;
   };
 
-  $ev.KEY_BACKSPACE = 'Backspace';
-  $ev.KEY_ENTER     = 'Enter';
-  $ev.KEY_ESCAPE    = 'Escape';
-  $ev.KEY_SPACE     = 'Space';
-  $ev.KEY_END       = 'End';
-  $ev.KEY_HOME      = 'Home';
-  $ev.KEY_LEFT      = 'Left';
-  $ev.KEY_UP        = 'Up';
-  $ev.KEY_RIGHT     = 'Right';
-  $ev.KEY_DOWN      = 'Down';
-  $ev.key_map = {
-    8:  $ev.KEY_BACKSPACE,
-    13: $ev.KEY_ENTER,
-    27: $ev.KEY_ESCAPE,
-    32: $ev.KEY_SPACE,
-    35: $ev.KEY_END,
-    36: $ev.KEY_HOME,
-    37: $ev.KEY_LEFT,
-    38: $ev.KEY_UP,
-    39: $ev.KEY_RIGHT,
-    40: $ev.KEY_DOWN
+  $ev.BIT_OFFSET_CHAR = 0;
+  $ev.BIT_OFFSET_SPEC = 8;
+  $ev.BIT_OFFSET_MODS = 24;
+  $ev.key_map_code = { };
+  $ev.key_map_name = { };
+  $ev.key_map_encode = { };
+  $ev.key_map_decode = { };
+  each([
+    {code: 8,  name: 'Backspace'},
+    {code: 13, name: 'Enter'},
+    {code: 27, name: 'Escape'},
+    {code: 32, name: 'Space'},
+    {code: 35, name: 'End'},
+    {code: 36, name: 'Home'},
+    {code: 37, name: 'Left'},
+    {code: 38, name: 'Up'},
+    {code: 39, name: 'Right'},
+    {code: 40, name: 'Down'}
+  ], function(entry) {
+    $ev['KEY_' + entry.name.toUpperCase()] = entry.name;
+    $ev.key_map_code[entry.code] = entry.name;
+    $ev.key_map_name[entry.name] = entry.code;
+  });
+  each([['+', 'plus'], [',', 'comma']], function(entry) {
+    $ev.key_map_encode[entry[0]] = entry[1];
+    $ev.key_map_decode[entry[1]] = entry[0];
+  });
+
+  $ev.parse_key_event = function(ev) {
+    var c = ev.keyCode || ev.charCode;
+    var role = 0, keys = [];
+    if (ev.ctrlKey)  keys.push('Ctrl');
+    if (ev.shiftKey) keys.push('Shift');
+    if (ev.altKey)   keys.push('Alt');
+    if (ev.metaKey)  keys.push('Meta');
+    if (c === ev.which && c > 0x20 && c < 0x7f) {
+      role = 0;
+      key = lc(String.fromCharCode(c));
+      keys.push($ev.key_map_encode[key] || key);
+    } else if ($ev.key_map_code[c]) {
+      role = 1;
+      keys.push($ev.key_map_code[c]);
+    } else {
+      role = 2;
+      keys.push('_c' + String(c));
+    }
+    return [role, keys.join('+')];
+  };
+
+  $ev.key_to_code = function(key) {
+    var code = 0;
+    if (typeof key === 'string' || key instanceof String) {
+      each(key.split('+'), function(key) {
+        var c;
+        key = $ev.key_map_decode[key] || key;
+        if (key === 'Ctrl') {
+          code |= 1 << $ev.BIT_OFFSET_MODS;
+        } else if (key === 'Shift') {
+          code |= 1 << ($ev.BIT_OFFSET_MODS + 1);
+        } else if (key === 'Alt') {
+          code |= 1 << ($ev.BIT_OFFSET_MODS + 2);
+        } else if (key === 'Meta') {
+          code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
+        } else if ($ev.key_map_name[key]) {
+          code |= $ev.key_map_name[key] << $ev.BIT_OFFSET_SPEC;
+        } else if (key.length == 1) {
+          c = key.charCodeAt(0);
+          if (c > 0x20 && c < 0x7f) {
+            code |= c;
+          } else {
+            alert('invalid key - ' + key);
+          }
+        } else if (key.lastIndexOf('_c', 0) === 0) {
+          c = parseInt(key.substring(2));
+          if (c < (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
+            code |= c << $ev.BIT_OFFSET_SPEC;
+          } else {
+            alert('invalid key - ' + key);
+          }
+        } else {
+          alert('unknown key name - ' + key);
+        }
+      });
+    } else {
+      var c = key.keyCode || key.charCode, key;
+      if (key.ctrlKey)  code |= 1 << $ev.BIT_OFFSET_MODS;
+      if (key.shiftKey) code |= 1 << ($ev.BIT_OFFSET_MODS + 1);
+      if (key.altKey)   code |= 1 << ($ev.BIT_OFFSET_MODS + 2);
+      if (key.metaKey)  code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
+      if (c === key.which && c > 0x20 && c < 0x7f) {
+        code |= c;
+      } else if (c <= (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
+        code |= c << $ev.BIT_OFFSET_SPEC;
+      } else {
+        alert('invalid key code - ' + c);
+      }
+    }
+    return code;
+  };
+
+  $ev.key_check = function(ev, key) {
+    if (!key) return false;
+    if (key.indexOf(',') >= 0) {
+      var keys = key.split(',');
+      for(var i = 0; i < keys.length; ++i) {
+        if ($ev.key_check(ev, keys[i])) return true;
+      }
+      return false;
+    }
+    return $ev.key_to_code(ev) === $ev.key_to_code(key);
   };
 
   $ev.Connection = function(ctx) {
@@ -3052,7 +3202,7 @@
     Popup.oncreate.emit(this, item, manga_page);
   }
 
-  Popup._keypress = function(ev, key) {
+  Popup._keypress = function(ev, conn, key) {
     if (!Popup.stop_key) return Popup.instance.keypress(ev, key);
     return false;
   };
@@ -3078,11 +3228,6 @@
   Popup.onsetitem = new Signal();
   Popup.onload = new Signal();
   Popup.onkeypress = new Signal(function(ev, key) {
-    var m = {Shift: ev.shiftKey, Ctrl: ev.ctrlKey, Alt: ev.altKey, Meta: ev.metaKey};
-    var pressed = [({'+':'plus',',':'comma'})[key] || key];
-    for(var k in m) m[k] && pressed.push(k);
-    pressed = pressed.sort().join('+');
-    log('key: ' + pressed);
     function sel_qr(prev) {
       var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
       if (Popup.is_qrate_button(node)) node.focus();
@@ -3092,12 +3237,8 @@
         var map = arguments[i];
         if (!map.run) continue;
         for(var j = 0; j < map.map.length; ++j) {
-          var entry = map.map[j], match = false;
-          if (!entry.k) continue;
-          each(entry.k.split(','), function(trigger) {
-            return (match = (trigger.split('+').sort().join('+') === pressed));
-          });
-          if (match) {
+          var entry = map.map[j];
+          if ($ev.key_check(ev, map.map[j].k)) {
             entry.f.apply(entry.ctx || map.ctx || this, entry.a || []);
             return true;
           }
@@ -4455,7 +4596,7 @@
       return true;
     }, this)));
 
-    this.connections.push($ev(this.root).key(function(ev, key) {
+    this.connections.push($ev(this.root).key(function(ev, conn, key) {
       if (key === $ev.KEY_ESCAPE && $x('ancestor-or-self::input', ev.target)) {
         ev.target.blur();
         return true;
@@ -4682,7 +4823,7 @@
       });
     },
 
-    keypress_common: function(ev, key) {
+    keypress_common: function(ev, conn, key) {
       return false;
       /*
       if (!pp.key_enabled(ev)) return false;
@@ -4728,7 +4869,7 @@
       this.tag_preselected.setAttribute('pppreselected', 'yes');
     },
 
-    keypress1: function(ev, key) {
+    keypress1: function(ev, conn, key) {
       if (this.tag_preselected) {
         var x = 0, y = 0;
         switch(key) {
@@ -4776,7 +4917,7 @@
       }
     },
 
-    keypress2: function(ev, key) {
+    keypress2: function(ev, conn, key) {
       if (!pp.key_enabled(ev)) return false;
       if (this.root_key_enabled) {
         if (this.key_map_root[key]) {
@@ -4803,7 +4944,7 @@
           return true;
         }
       }
-      return this.keypress_common(ev, key);
+      return this.keypress_common(ev, conn, key);
     },
 
     submit: function() {
