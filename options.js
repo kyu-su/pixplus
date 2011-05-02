@@ -23,10 +23,7 @@ function init() {
 }
 
 function init_real() {
+  $c('style', document.body, {text: ConfigUI.css});
   new ConfigUI(document.getElementById('options-root'), true,
                window.chrome ? chrome.i18n.getMessage : null);
-
-  var style = document.createElement('style');
-  style.textContent = ConfigUI.css;
-  document.body.appendChild(style);
 }

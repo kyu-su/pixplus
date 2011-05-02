@@ -274,17 +274,6 @@
     bm_tag_aliases: { }
   };
 
-  var browser = {
-    opera:  false,
-    gecko:  false,
-    webkit: false
-  };
-  browser[window.opera
-          ? 'opera'
-          : (window.getMatchedCSSRules
-             ? 'webkit'
-             : 'gecko')] = true;
-
   var XMLNS_SVG = "http://www.w3.org/2000/svg";
   var XMLNS_XLINK = "http://www.w3.org/1999/xlink";
 
@@ -618,6 +607,7 @@
 
     this.pager = $c('div', this.root, {id: 'pp-conf-pager'});
     this.page_list = $c('ul', this.pager, {id: 'pp-conf-pagelist'});
+    this.pager_content = $c('div', this.pager, {id: 'pp-conf-pager-content'});
     this.pages = [];
 
     this.input_table = (function(self) {
@@ -746,25 +736,36 @@
       page = {
         id:      id,
         li:      $c('li', this.page_list),
-        content: $c('section', this.pager, {id: 'pp-conf-' + id})
+        content: $c('div', this.pager_content, {id: 'pp-conf-' + id, cls: 'pp-conf-page'})
       };
       page.label = $c('a', page.li, {href: '#pp-conf-' + id, text: text});
 
-      $ev(page.label).click(bind(function(ev) {
-        ev.preventDefault();
+      $ev(page.label, {ctx: this}).click(function() {
+        if (this.selected_page === page) return true;
+        /*
+        this.selected_page.content.style.position = 'absolute';
+        page.content.style.position = 'absolute';
+        $ef(this.selected_page.content).fade_out(function() {
+          this.className = 'pp-conf-page';
+        });
+        $ef(page.content).fade_in(function() {
+          page.content.style.position = '';
+        });
+         */
         this.show_page(page);
-      }, this));
+        return true;
+      });
 
       this.pages.push(page);
       return page;
     },
-    show_page: function(page) {
+    show_page: function(page, animate) {
       if (this.selected_page) {
         this.selected_page.li.className = '';
-        this.selected_page.content.className = '';
+        if (!animate) this.selected_page.content.className = 'pp-conf-page';
       }
       page.li.className = 'select';
-      page.content.className = 'select';
+      page.content.className = 'pp-conf-page select';
       this.selected_page = page;
     },
 
@@ -881,12 +882,21 @@
   ConfigUI.pages = [{
     id: 'key',
     content: function(page) {
-      var editor_row;
-      function show_editor(row, input) {
-        if (editor_row) editor_row.parentNode.removeChild(editor_row);
+      var editor_row, editor_root;
+      function close_editor(row, input) {
+        if (editor_row) (function(row, root) {
+          $ef(root).hide(function() { /* WARN */
+            row.parentNode.removeChild(row);
+          });
+        })(editor_row, editor_root);
+        editor_row = null;
+        editor_root = null;
+      }
+      function open_editor(row, input) {
+        close_editor();
         editor_row = $c('tr');
-        var root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
-        var list = $c('ul', root);
+        editor_root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
+        var list = $c('ul', editor_root);
         function reset() {
           list.innerHTML = '';
           each(input.value.split(','), add);
@@ -909,22 +919,25 @@
           input.dispatchEvent(ev);
         }
         reset();
-        var add_line = $c('div', root), add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
+        var add_line = $c('div', editor_root, {cls: 'pp-conf-key-editor-add-line'});
+        var add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
         $ev(add_input).key(function(ev, conn, key) {
           this.value = key;
           return true;
         });
-        $ev($c('button', add_line, {cls: 'pp-conf-key-editor-add', 'text': 'Add'})).click(function() {
+        $ev($c('button', add_line, {'text': 'Add'})).click(function() {
           add(add_input.value);
           add_input.value = '';
           apply();
         });
+        $ev($c('button', add_line, {'text': 'Close'})).click(close_editor);
         row.parentNode.insertBefore(editor_row, row.nextSibling);
+        $ef(editor_root).show(); /* WARN */
       }
       each(page.table.rows, function(row) {
         var input = $t('input', row)[0];
         $ev(input).focus(function() {
-          show_editor(row, input);
+          open_editor(row, input);
         });
       });
     }
@@ -1330,18 +1343,19 @@
     '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
     '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
     '#pp-conf-pagelist li.select a{padding:1px 5px 2px 5px;}' +
-    '#pp-conf-pager section{display:none;border:1px solid silver;padding:4px;margin-top:-1px;z-index:98;}' +
-    '#pp-conf-pager section.select{display:block;}' +
-    '#pp-conf-pager input, #pp-conf-pager textarea{' +
-    '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;}' +
-    '#pp-conf-pager button{display:block;white-space:nowrap;padding:0px;}' +
-    '#pp-conf-pager textarea{width:100%;}' +
+    '#pp-conf-pager-content{border:1px solid silver;padding:4px;margin-top:-1px;z-index:98;}' +
+    '.pp-conf-page{display:none;width:100%;overflow:auto;}' +
+    '.pp-conf-page.select{display:inline-block;}' +
+    '.pp-conf-page input, .pp-conf-page textarea{' +
+    '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
+    '.pp-conf-page button{display:block;white-space:nowrap;padding:0px;}' +
+    '.pp-conf-page textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
     '.pp-conf-key-editor{padding-left:1em;}' +
-    '#pp-conf-pager .pp-conf-key-editor button{display:inline-block;}' +
+    '.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
     '.pp-conf-key-editor ul label{margin-left:4px;}' +
-    '.pp-conf-key-editor ul li{list-style-type:none;}' +
-    '.pp-conf-key-editor .pp-conf-key-editor-add{margin-left:4px;}' +
+    '.pp-conf-key-editor ul li{list-style-type:none;margin-bottom:2px;}' +
+    '.pp-conf-key-editor .pp-conf-key-editor-add-line button{margin-left:4px;}' +
     '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
     '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
     '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
@@ -1356,7 +1370,6 @@
     '#pp-conf-about *+dt{margin-top:0.6em;}' +
     '#pp-conf-about dd{margin-left:1.6em;}' +
     '#pp-conf-about dd ul li{list-style-type:none;}' +
-    '#pp-conf-changelog{max-height:600px;overflow:auto;}' +
     '#pp-conf-changelog dt{font-weight:bold;}' +
     '#pp-conf-changelog ul{padding-left:2em;}' +
     '#pp-conf-changelog ul li{list-style-type:disc;}';
@@ -1401,7 +1414,7 @@
       }
       function show() {
         create();
-        root.style.display = '';
+        $ef(root).show(); /* WARN */
         fire_event();
         if (click_handler) click_handler.disconnect();
         click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
@@ -1410,7 +1423,7 @@
         });
       }
       function hide() {
-        root.style.display = 'none';
+        $ef(root).hide(); /* WARN */
         fire_event();
         if (click_handler) click_handler.disconnect();
       }
@@ -2166,6 +2179,8 @@
                  // config
                  '#pp-conf-root{margin-bottom:4px;}' +
                  ConfigUI.css +
+                 '#pp-conf-pager-content{height:600px;}' +
+                 '.pp-conf-page{width:960px;max-height:600px;overflow:auto;}' +
                  // help
                  '#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:10001;' +
                  '  left:0px;top:0px;width:100%;height:100%;}' +
@@ -2227,7 +2242,7 @@
                  // info
                  '#pp-popup #pp-info{line-height:1.1em;position:relative;}' +
                  '#pp-popup #pp-info #pp-author-img{' +
-                 '  box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;' +
+                 '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;' +
                  '  float:left;max-height:3.3em;border:1px solid gray;margin-right:4px;}' +
                  '#pp-popup #pp-info #pp-author-img:hover{max-height:100%;}' +
                  '#pp-popup #pp-info #pp-date-wrap > span + span{margin-left:0.6em;}' +
@@ -2467,6 +2482,19 @@
   }
 
   /* __LIBRARY_BEGIN__ */
+
+  var browser = {
+    opera:  false,
+    gecko:  false,
+    webkit: false
+  };
+  if (typeof window !== 'undefined') {
+    browser[window.opera
+            ? 'opera'
+            : (window.getMatchedCSSRules
+               ? 'webkit'
+               : 'gecko')] = true;
+  }
 
   function Signal(def) {
     this.def = def;
@@ -2776,6 +2804,90 @@
       }, this);
     }
   };
+
+  function $ef(ctx) {
+    var obj = {
+      ctx: ctx,
+      style: { },
+
+      show: function(func, opts) {
+        obj.ctx.style.display = '';
+        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
+        animate({style: [{name: 'height', suffix: 'px', from: 0, to: obj.ctx.clientHeight, floor: true},
+                         {name: 'opacity', from: 0, to: 1}]}, func, opts);
+      },
+      hide: function(func, opts) {
+        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
+        animate({style: [{name: 'height', suffix: 'px', from: obj.ctx.clientHeight, to: 0, floor: true},
+                         {name: 'opacity', from: 1, to: 0}]},
+                function() {
+                  obj.ctx.style.display = 'none';
+                  if (func) func.call(this);
+                }, opts);
+      },
+      resize: function(func, opts) {
+        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
+        animate({style: [{name: 'height', suffix: 'px', from: opts.from, to: obj.ctx.clientHeight, floor: true}]},
+                func, opts);
+      },
+      fade_in: function(func, opts) {
+        obj.ctx.style.display = '';
+        animate({style: [{name: 'opacity', from: 0, to: 1}]}, func, opts);
+      },
+      fade_out: function(func, opts) {
+        animate({style: [{name: 'opacity', from: 1, to: 0}]}, function() {
+          obj.ctx.style.display = 'none';
+          if (func) func.call(this);
+        }, opts);
+      }
+    };
+
+    function save_style(dic) {
+      obj.style = { };
+      for(var key in dic) {
+        obj.style[key] = obj.ctx.style[key];
+        obj.ctx.style[key] = dic[key] || '';
+      }
+    }
+    function restore_style() {
+      if (!obj.style) return;
+      for(var key in obj.style) {
+        obj.ctx.style[key] = obj.style[key];
+      }
+      obj.style = { };
+    }
+    function animate(args, cb_end, opts) {
+      if (opts) for(var key in opts) args[key] = opts[key];
+      obj.duration = args.duration || 200;
+      obj.start = Date.now();
+      obj.end = obj.start + obj.duration;
+      apply(args, 0);
+      obj.timer = window.setInterval(function() {
+        var now = Date.now();
+        if (now >= obj.end) {
+          apply(args, 1);
+          window.clearInterval(obj.timer);
+          restore_style();
+          if (cb_end) cb_end.call(obj.ctx);
+        } else {
+          var pos = (now - obj.start) / obj.duration;
+          apply(args, pos);
+        }
+      }, args.interval || 0);
+    }
+    function apply(args, pos) {
+      if (args.style) {
+        each(args.style, function(entry) {
+          var value = entry.from + ((entry.to - entry.from) * pos);
+          if (entry.floor) value = Math.floor(value);
+          if (entry.suffix) value += entry.suffix;
+          if (pos === 0 && !obj.style[entry.name]) obj.style[entry.name] = obj.ctx.style[entry.name];
+          obj.ctx.style[entry.name] = value;
+        });
+      }
+    }
+    return obj;
+  }
 
   function $(id, elem) {
     return window.document.getElementById(id);
