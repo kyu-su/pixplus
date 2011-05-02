@@ -2686,16 +2686,24 @@
   $ev.key_map_encode = { };
   $ev.key_map_decode = { };
   each([
-    {code: 8,  name: 'Backspace'},
-    {code: 13, name: 'Enter'},
-    {code: 27, name: 'Escape'},
-    {code: 32, name: 'Space'},
-    {code: 35, name: 'End'},
-    {code: 36, name: 'Home'},
-    {code: 37, name: 'Left'},
-    {code: 38, name: 'Up'},
-    {code: 39, name: 'Right'},
-    {code: 40, name: 'Down'}
+    {code: 8,   name: 'Backspace'},
+    {code: 9,   name: 'Tab'},
+    {code: 13,  name: 'Enter'},
+    {code: 27,  name: 'Escape'},
+    {code: 32,  name: 'Space'},
+    {code: 33,  name: 'PageUp'},
+    {code: 34,  name: 'PageDown'},
+    {code: 35,  name: 'End'},
+    {code: 36,  name: 'Home'},
+    {code: 37,  name: 'Left'},
+    {code: 38,  name: 'Up'},
+    {code: 39,  name: 'Right'},
+    {code: 40,  name: 'Down'},
+    {code: 45,  name: 'Insert'},
+    {code: 46,  name: 'Delete'},
+    {code: 112, name: 'F1'}, {code: 113, name: 'F2'}, {code: 114, name: 'F3'}, {code: 115, name: 'F4'},
+    {code: 116, name: 'F5'}, {code: 117, name: 'F6'}, {code: 118, name: 'F7'}, {code: 119, name: 'F8'},
+    {code: 120, name: 'F9'}, {code: 121, name: 'F10'}, {code: 122, name: 'F11'}, {code: 123, name: 'F12'}
   ], function(entry) {
     $ev['KEY_' + entry.name.toUpperCase()] = entry.name;
     $ev.key_map_code[entry.code] = entry.name;
