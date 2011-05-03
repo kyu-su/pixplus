@@ -307,8 +307,8 @@
       window.open.apply(window, Array.prototype.slice.apply(arguments));
     },
     key_enabled: function(ev) {
-      return !((ev.target instanceof window.HTMLTextAreaElement ||
-                (ev.target instanceof window.HTMLInputElement &&
+      return !((check_node(ev.target, 'TextArea') ||
+                (check_node(ev.target, 'Input') &&
                  // http://www.w3.org/TR/html5/the-input-element.html#attr-input-type
                  (!ev.target.type || /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type)))) ||
                !!window.document.getElementById('HaH-div-element'));
@@ -1519,7 +1519,7 @@
 
   function unpack_captions(col, xpath_cap) {
     each($xa(xpath_cap || './/a[img]/text()', col), function(node) {
-      if (node.previousSibling instanceof window.HTMLBRElement) {
+      if (check_node(node.previousSibling, 'BR')) {
         node.parentNode.removeChild(node.previousSibling);
       }
       var p = node.parentNode;
@@ -1615,7 +1615,7 @@
       function debug_filter(item) {
         var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
         if (c) {
-          if (item.caption.nextSibling instanceof window.HTMLBRElement) {
+          if (check_node(item.caption.nextSibling, 'BR')) {
             item.caption.parentNode.removeChild(item.caption.nextSibling);
           }
           var d = $c('div', null, {html: 'ID: ' + item.id + '<br />BID: ' + c.value});
@@ -2615,15 +2615,15 @@
 
       change: function(func) {
         var name;
-        if (obj.ctx instanceof window.HTMLInputElement) {
+        if (check_node(obj.ctx, 'Input')) {
           if (!obj.ctx || /^(?:text|search|tel|url|email|password|number)$/i.test(obj.ctx.type)) {
             name = 'input';
           } else {
             name = 'change';
           }
-        } else if (obj.ctx instanceof window.HTMLTextAreaElement) {
+        } else if (check_node(obj.ctx, 'TextArea')) {
           name = 'input';
-        } else if (obj.ctx instanceof window.HTMLSelectElement) {
+        } else if (check_node(obj.ctx, 'Select')) {
           name = 'change';
         } else {
           alert('[bug]unknown type');
@@ -2975,10 +2975,18 @@
 
   function is_ancestor(ancestor, elem) {
     while(elem) {
-      if (elem === ancestor) return true;
+      // Firefox3.6: elem === ancestor is always false
+      if (elem == ancestor) return true;
       elem = elem.parentNode;
     }
     return false;
+  }
+
+  function check_node(node, name) {
+    // for Firefox3.6
+    return (node instanceof safeWindow['HTML' + name + 'Element'] ||
+            (typeof Components !== 'undefined' &&
+             node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
   }
 
   function each(list, func, obj) {
@@ -3183,7 +3191,7 @@
             var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue), 'a:nopopup': ''});
             cap.parentNode.replaceChild(new_caption, cap);
             cap = new_caption;
-          } else if (cap instanceof window.HTMLAnchorElement) {
+          } else if (check_node(cap, 'Anchor')) {
             cap.setAttribute('nopopup', '');
           } else if (!$x('ancestor::a', cap)) {
             if (cap.childNodes.length === 1 && cap.firstChild.nodeType === 3) {
@@ -3569,7 +3577,7 @@
     }
   };
   Popup.is_qrate_button = function(elem) {
-    return !!elem && elem instanceof window.HTMLInputElement && /^qr_kw\d+$/.test(elem.id);
+    return !!elem && check_node(elem, 'Input') && /^qr_kw\d+$/.test(elem.id);
   };
 
   Popup.prototype = {
@@ -4895,14 +4903,14 @@
       var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
       try {
         if (bottom.firstChild.nodeType === 3 &&
-            bottom.firstChild.nextSibling instanceof window.HTMLBRElement) {
+            check_node(bottom.firstChild.nextSibling, 'BR')) {
           bottom.removeChild(bottom.firstChild);
           bottom.removeChild(bottom.firstChild);
         }
       } catch (x) { }
       var note = $x('.//dd/text()[contains(., \"10\u500b\")]', this.root);
       if (note) {
-        if (note.previousSibling instanceof window.HTMLBRElement) {
+        if (check_node(note.previousSibling, 'BR')) {
           note.parentNode.removeChild(note.previousSibling);
         }
         note.parentNode.removeChild(note);
