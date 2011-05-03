@@ -2984,7 +2984,7 @@
 
   function check_node(node, name) {
     // for Firefox3.6
-    return (node instanceof safeWindow['HTML' + name + 'Element'] ||
+    return (node instanceof (typeof safeWindow === 'undefined' ? window : safeWindow)['HTML' + name + 'Element'] ||
             (typeof Components !== 'undefined' &&
              node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
   }
