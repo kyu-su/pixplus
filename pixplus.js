@@ -834,7 +834,7 @@
           val = LS.get_conv(sec.name, item.key)[0](input.value);
         }
         if (val !== item.value) {
-          var path = (sec.name == 'general' ? '' : sec.name + '.') + item.key; // for compatibility
+          var path = (sec.name === 'general' ? '' : sec.name + '.') + item.key; // for compatibility
           push('window.pixplus.conf.' + path + '=' + ConfigUI.stringify(val) + ';');
         }
       });
@@ -905,6 +905,7 @@
           var li = $c('li', list);
           $ev($c('button', li, {text: '\u00d7'})).click(function() {
             list.removeChild(li);
+            apply();
           });
           $c('label', li, {text: key});
         }
@@ -2583,7 +2584,8 @@
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
-            if (key[0] == 4) {
+            console.log(ev);
+            if (key[0] === 4) {
               return func.call(this, ev, conn, key[1]);
             } else {
               return false;
@@ -2716,17 +2718,18 @@
   $ev.parse_key_event = function(ev) {
     var c = ev.keyCode || ev.charCode;
     var role = 0, keys = [], key;
-    if (ev.ctrlKey)  keys.push('Ctrl');
+    if (ev.ctrlKey)  keys.push('Control');
     if (ev.shiftKey) keys.push('Shift');
     if (ev.altKey)   keys.push('Alt');
     if (ev.metaKey)  keys.push('Meta');
     if (ev.keyIdentifier) {
-      if (ev.keyIdentifier.lastIndexOf('U+', 0) == 0) {
+      if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         key = lc(String.fromCharCode(parseInt(ev.keyIdentifier.substring(2), 16)));
         keys.push($ev.key_map_encode[key] || key);
         role = 3;
       } else {
-        keys.push(ev.keyIdentifier);
+        // for chrome10(win)
+        if (['Control', 'Shift', 'Alt', 'Meta'].indexOf(ev.keyIdentifier) < 0) keys.push(ev.keyIdentifier);
         role = 4;
       }
     } else if (c === ev.which && c > 0x20 && c < 0x7f) {
@@ -2743,13 +2746,14 @@
     return [role, keys.join('+')];
   };
 
+  /*
   $ev.key_to_code = function(key) {
     var code = 0;
     if (typeof key === 'string' || key instanceof String) {
       each(key.split('+'), function(key) {
         var c;
         key = $ev.key_map_decode[key] || key;
-        if (key === 'Ctrl') {
+        if (key === 'Control') {
           code |= 1 << $ev.BIT_OFFSET_MODS;
         } else if (key === 'Shift') {
           code |= 1 << ($ev.BIT_OFFSET_MODS + 1);
@@ -2759,14 +2763,14 @@
           code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
         } else if ($ev.key_map_name[key]) {
           code |= $ev.key_map_name[key] << $ev.BIT_OFFSET_SPEC;
-        } else if (key.length == 1) {
+        } else if (key.length === 1) {
           c = key.charCodeAt(0);
           if (c > 0x20 && c < 0x7f) {
             code |= c;
           } else {
             alert('invalid key - ' + key);
           }
-        } else if (key.lastIndexOf('_c', 0) === 0) {
+        } else if (key.length > 2 && key.lastIndexOf('_c', 0) === 0) {
           c = parseInt(key.substring(2));
           if (c < (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
             code |= c << $ev.BIT_OFFSET_SPEC;
@@ -2794,6 +2798,7 @@
     }
     return code;
   };
+   */
 
   $ev.key_check = function(ev, key) {
     if (!key) return false;
@@ -2804,7 +2809,7 @@
       }
       return false;
     }
-    return $ev.key_to_code(ev) === $ev.key_to_code(key);
+    return $ev.parse_key_event(ev)[1].split('+').sort().join('+') === key.split('+').sort().join('+');
   };
 
   $ev.Connection = function(ctx) {
@@ -5446,7 +5451,7 @@
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
     //geturl.cnt = geturl.cnt || 0;
-    //if (++geturl.cnt % 3 == 0) return cb_error();
+    //if (++geturl.cnt % 3 === 0) return cb_error();
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
