@@ -1475,6 +1475,8 @@
     var root, click_handler;
     var sitenav = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
     if (sitenav) {
+      var config_anc;
+
       function fire_event() {
         var ev = window.document.createEvent('Event');
         ev.initEvent('pixplusConfigToggled', true, true);
@@ -1486,7 +1488,10 @@
         fire_event();
         if (click_handler) click_handler.disconnect();
         click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
-          if (!is_ancestor(root, ev.target)) hide();
+          if (!is_ancestor(root, ev.target) &&
+              !is_ancestor(config_anc, ev.target)) {
+            hide();
+          }
           return false;
         });
       }
@@ -1535,15 +1540,15 @@
 
       var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
       sitenav.insertBefore(li, sitenav.firstChild);
-      var anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
+      config_anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
       if (menu_items.length) {
-        li.appendChild(anc.cloneNode(true));
+        li.appendChild(config_anc.cloneNode(true));
         var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
         each(menu_items, function(item) {
           menu.appendChild(item);
         });
       }
-      $ev(anc).click(function() {
+      $ev(config_anc).click(function() {
         if (_extension_data) {
           if (_extension_data.open_options) {
             _extension_data.open_options();
@@ -2955,6 +2960,11 @@
     }
     function animate(args, cb_end, opts) {
       if (opts) for(var key in opts) args[key] = opts[key];
+      if (conf.disable_effect) {
+        apply(args, 0);
+        end(args, cb_end);
+        return;
+      }
       obj.duration = args.duration || 200;
       obj.start = Date.now();
       obj.end = obj.start + obj.duration;
@@ -2962,15 +2972,18 @@
       obj.timer = window.setInterval(function() {
         var now = Date.now();
         if (now >= obj.end) {
-          apply(args, 1);
           window.clearInterval(obj.timer);
-          restore_style();
-          if (cb_end) cb_end.call(obj.ctx);
+          end(args, cb_end);
         } else {
           var pos = (now - obj.start) / obj.duration;
           apply(args, pos);
         }
       }, args.interval || 0);
+    }
+    function end(args, cb_end) {
+      apply(args, 1);
+      restore_style();
+      if (cb_end) cb_end.call(obj.ctx);
     }
     function apply(args, pos) {
       if (args.style) {
