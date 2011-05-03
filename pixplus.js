@@ -924,6 +924,12 @@
         var add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
         $ev(add_input).key(function(ev, conn, key) {
           this.value = key;
+          // workaround for firefox4
+          if (browser.gecko && key == $ev.KEY_ESCAPE) {
+            window.setTimeout(function() {
+              add_input.value = key;
+            }, 0);
+          }
           return true;
         });
         $ev($c('button', add_line, {'text': 'Add'})).click(function() {
@@ -2584,7 +2590,6 @@
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
-            console.log(ev);
             if (key[0] === 4) {
               return func.call(this, ev, conn, key[1]);
             } else {
@@ -2724,14 +2729,23 @@
     if (ev.metaKey)  keys.push('Meta');
     if (ev.keyIdentifier) {
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
-        key = lc(String.fromCharCode(parseInt(ev.keyIdentifier.substring(2), 16)));
+        c = parseInt(ev.keyIdentifier.substring(2), 16);
+        if (c < 0x20) {
+          key = $ev.key_map_code[c] || ('_c' + String(c));
+          role = 4;
+        } else if (c === 0x7f) {
+          key = $ev.KEY_DELETE;
+          role = 4;
+        } else {
+          key = lc(String.fromCharCode(c));
+          role = 3;
+        }
         keys.push($ev.key_map_encode[key] || key);
-        role = 3;
       } else {
-        // for chrome10(win)
-        if (['Control', 'Shift', 'Alt', 'Meta'].indexOf(ev.keyIdentifier) < 0) keys.push(ev.keyIdentifier);
+        keys.push(ev.keyIdentifier);
         role = 4;
       }
+      keys = unique(keys); // for chrome10
     } else if (c === ev.which && c > 0x20 && c < 0x7f) {
       role = 0;
       key = lc(String.fromCharCode(c));
@@ -2972,6 +2986,21 @@
       if (func.call(obj || list, list[i], i)) break;
     }
     return list;
+  }
+
+  function unique(list) {
+    var ret = [];
+    for(var i = 0; i < list.length; ++i) {
+      var match = false;
+      for(var j = 0; j < ret.length; ++j) {
+        if (ret[j] === list[i]) {
+          match = true;
+          break;
+        }
+      }
+      if (!match) ret.push(list[i]);
+    }
+    return ret;
   }
 
   function find(list, func, obj) {
