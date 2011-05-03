@@ -4141,7 +4141,7 @@
         var sup = [], re;
         var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
         if (scale !== 1) sup.push(scale + 'x');
-        if ((re = /\.([^\/\.]+)$/.exec(img.image.src))) sup.push(re[1]);
+        if ((re = /\.([^\/\.\?]+)(?:\?.*)?$/.exec(img.image.src))) sup.push(re[1]);
         info_size.push(img.display_size.width + 'x' + img.display_size.height + (sup.length ? '(' + sup.join('/') + ')' : ''));
       });
       this.info_size.textContent = info_size.join('/');
