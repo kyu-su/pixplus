@@ -2578,13 +2578,12 @@
       key: function(func) {
         var conn = listen('keypress', function(ev, conn) {
           var key = $ev.parse_key_event(ev);
-          if (key[0] !== 0 && browser.webkit) return false;
           return func.call(this, ev, conn, key[1]);
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
-            if (key[0] === 0) {
+            if (key[0] == 4) {
               return func.call(this, ev, conn, key[1]);
             } else {
               return false;
@@ -2709,21 +2708,30 @@
     $ev.key_map_code[entry.code] = entry.name;
     $ev.key_map_name[entry.name] = entry.code;
   });
-  each([['+', 'plus'], [',', 'comma']], function(entry) {
+  each([['+', 'plus'], [',', 'comma'], [' ', 'Space'], ['\t', 'Tab']], function(entry) {
     $ev.key_map_encode[entry[0]] = entry[1];
     $ev.key_map_decode[entry[1]] = entry[0];
   });
 
   $ev.parse_key_event = function(ev) {
     var c = ev.keyCode || ev.charCode;
-    var role = 0, keys = [];
+    var role = 0, keys = [], key;
     if (ev.ctrlKey)  keys.push('Ctrl');
     if (ev.shiftKey) keys.push('Shift');
     if (ev.altKey)   keys.push('Alt');
     if (ev.metaKey)  keys.push('Meta');
-    if (c === ev.which && c > 0x20 && c < 0x7f) {
+    if (ev.keyIdentifier) {
+      if (ev.keyIdentifier.lastIndexOf('U+', 0) == 0) {
+        key = lc(String.fromCharCode(parseInt(ev.keyIdentifier.substring(2), 16)));
+        keys.push($ev.key_map_encode[key] || key);
+        role = 3;
+      } else {
+        keys.push(ev.keyIdentifier);
+        role = 4;
+      }
+    } else if (c === ev.which && c > 0x20 && c < 0x7f) {
       role = 0;
-      var key = lc(String.fromCharCode(c));
+      key = lc(String.fromCharCode(c));
       keys.push($ev.key_map_encode[key] || key);
     } else if ($ev.key_map_code[c]) {
       role = 1;
