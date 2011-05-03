@@ -735,10 +735,10 @@
 
       page = {
         id:      id,
-        li:      $c('li', this.page_list),
+        tab:     $c('li', this.page_list),
         content: $c('div', this.pager_content, {id: 'pp-conf-' + id, cls: 'pp-conf-page'})
       };
-      page.label = $c('a', page.li, {href: '#pp-conf-' + id, text: text});
+      page.label = $c('a', page.tab, {href: '#pp-conf-' + id, text: text});
 
       $ev(page.label, {ctx: this}).click(function() {
         if (this.selected_page === page) return true;
@@ -761,10 +761,10 @@
     },
     show_page: function(page, animate) {
       if (this.selected_page) {
-        this.selected_page.li.className = '';
+        this.selected_page.tab.className = '';
         if (!animate) this.selected_page.content.className = 'pp-conf-page';
       }
-      page.li.className = 'select';
+      page.tab.className = 'select';
       page.content.className = 'pp-conf-page select';
       this.selected_page = page;
     },
@@ -1082,6 +1082,66 @@
         });
       });
     }
+  }, {
+    label: 'Debug', id: 'debug',
+    content: function(page) {
+      var debug_input = this.input_table['general_debug'];
+      function show() {
+        page.tab.style.display = '';
+        page.content.style.display = '';
+      }
+      function hide() {
+        page.tab.style.display = 'none';
+        page.content.style.display = 'none';
+        if (this.selected_page === page) this.show_page(this.pages[0]);
+      }
+      function update() {
+        if (debug_input.checked) {
+          show();
+        } else {
+          hide();
+        }
+      }
+      update();
+      $ev(debug_input).change(update);
+
+      var input_line = $c('div', page.content);
+      var input      = $c('input', input_line);
+      var cancel_l   = $c('label', input_line);
+      var cancel     = $c('input', cancel_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+      var console_l  = $c('label', input_line);
+      var console    = $c('input', console_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+      var logger     = $c('table', page.content, {border: 1, css: 'margin-top:4px;'});
+      cancel_l.appendChild(window.document.createTextNode('Cancel'));
+      console_l.appendChild(window.document.createTextNode('Console'));
+      function clear() {
+        logger.innerHTML = '';
+        var row = logger.insertRow(0);
+        row.insertCell(-1).textContent = 'Key';
+        row.insertCell(-1).textContent = 'type';
+        row.insertCell(-1).textContent = 'keyCode';
+        row.insertCell(-1).textContent = 'charCode';
+        row.insertCell(-1).textContent = 'keyIdentifier';
+        row.insertCell(-1).textContent = 'which';
+        row.insertCell(-1).textContent = 'eventPhase';
+        row.insertCell(-1).textContent = 'detail';
+      }
+      clear();
+      $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
+      $ev(input).key(function(ev, conn, key) {
+        var row = logger.insertRow(1);
+        row.insertCell(-1).textContent = key;
+        row.insertCell(-1).textContent = ev.type;
+        row.insertCell(-1).textContent = ev.keyCode;
+        row.insertCell(-1).textContent = ev.charCode;
+        row.insertCell(-1).textContent = ev.keyIdentifier;
+        row.insertCell(-1).textContent = ev.which;
+        row.insertCell(-1).textContent = ev.eventPhase;
+        row.insertCell(-1).textContent = ev.detail;
+        if (console.checked) window.console.log(ev);
+        return cancel.checked;
+      });
+    }
   }];
 
   ConfigUI.changelog_data = [{
@@ -1356,11 +1416,11 @@
     '.pp-conf-page.select{display:inline-block;}' +
     '.pp-conf-page input, .pp-conf-page textarea{' +
     '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
-    '.pp-conf-page button{display:block;white-space:nowrap;padding:0px;}' +
+    '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
     '.pp-conf-page textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
     '.pp-conf-key-editor{padding-left:1em;}' +
-    '.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
+    //'.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
     '.pp-conf-key-editor ul label{margin-left:4px;}' +
     '.pp-conf-key-editor ul li{list-style-type:none;margin-bottom:2px;}' +
     '.pp-conf-key-editor .pp-conf-key-editor-add-line button{margin-left:4px;}' +
