@@ -24,3 +24,5 @@ function create_name(s, n) {
   return 'conf_' + (s === 'general' ? '' : s + '_') + n; // for compatibility
 }
 LS.init_map();
+
+safeWindow = window;
