@@ -2168,7 +2168,7 @@
         })(function() {
           var re;
           if ((re = /^#pp_page=(\d+)$/.exec(window.location.hash))) {
-            var page = parseInt(re[1]);
+            var page = parseInt(re[1], 10);
             each(window.pixiv.context.images, function(ary, idx) {
               if ((page + 1) <= ary.length) {
                 window.pixiv.manga.updatePosition(window.pixiv.manga.findPosition(idx));
@@ -2456,7 +2456,7 @@
                 $xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
                 function(item) {
                   var re;
-                  if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1]) & 1)) {
+                  if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1], 10) & 1)) {
                     var value = $x('following-sibling::div', item);
                     if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
                   }
@@ -2851,7 +2851,7 @@
             alert('invalid key - ' + key);
           }
         } else if (key.length > 2 && key.lastIndexOf('_c', 0) === 0) {
-          c = parseInt(key.substring(2));
+          c = parseInt(key.substring(2), 10);
           if (c < (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
             code |= c << $ev.BIT_OFFSET_SPEC;
           } else {
@@ -3131,7 +3131,7 @@
   };
 
   function GalleryItem(url, thumb, caption, prev, gallery) {
-    var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1]);
+    var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1], 10);
     if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
 
     this.loaded  = false;
@@ -3848,10 +3848,10 @@
         }
         if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/.exec(tmp[1]))) {
           if (re[3]) {
-            this.manga.page_count = parseInt(re[3]);
+            this.manga.page_count = parseInt(re[3], 10);
             this.manga.usable = this.manga.page_count > 0;
           } else {
-            img_size = {width: parseInt(re[1]), height: parseInt(re[2])};
+            img_size = {width: parseInt(re[1], 10), height: parseInt(re[2], 10)};
           }
         }
         if (tmp.length > 2) {
