@@ -742,16 +742,6 @@
 
       $ev(page.label, {ctx: this}).click(function() {
         if (this.selected_page === page) return true;
-        /*
-        this.selected_page.content.style.position = 'absolute';
-        page.content.style.position = 'absolute';
-        $ef(this.selected_page.content).fade_out(function() {
-          this.className = 'pp-conf-page';
-        });
-        $ef(page.content).fade_in(function() {
-          page.content.style.position = '';
-        });
-         */
         this.show_page(page);
         return true;
       });
@@ -882,21 +872,16 @@
   ConfigUI.pages = [{
     id: 'key',
     content: function(page) {
-      var editor_row, editor_root;
+      var editor_row;
       function close_editor(row, input) {
-        if (editor_row) (function(row, root) {
-          $ef(root).hide(function() { /* WARN */
-            row.parentNode.removeChild(row);
-          });
-        })(editor_row, editor_root);
-        editor_row = null;
-        editor_root = null;
+        if (!editor_row) return;
+        editor_row.parentNode.removeChild(editor_row);
       }
       function open_editor(row, input) {
         close_editor();
         editor_row = $c('tr');
-        editor_root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
-        var list = $c('ul', editor_root);
+        var root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
+        var list = $c('ul', root);
         function reset() {
           list.innerHTML = '';
           each(input.value.split(','), add);
@@ -920,7 +905,7 @@
           input.dispatchEvent(ev);
         }
         reset();
-        var add_line = $c('div', editor_root, {cls: 'pp-conf-key-editor-add-line'});
+        var add_line = $c('div', root, {cls: 'pp-conf-key-editor-add-line'});
         var add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
         $ev(add_input).key(function(ev, conn, key) {
           this.value = key;
@@ -939,7 +924,6 @@
         });
         $ev($c('button', add_line, {'text': 'Close'})).click(close_editor);
         row.parentNode.insertBefore(editor_row, row.nextSibling);
-        $ef(editor_root).show(); /* WARN */
       }
       each(page.table.rows, function(row) {
         var input = $t('input', row)[0];
@@ -1484,7 +1468,7 @@
       }
       function show() {
         create();
-        $ef(root).show(); /* WARN */
+        root.style.display = '';
         fire_event();
         if (click_handler) click_handler.disconnect();
         click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
@@ -1496,7 +1480,7 @@
         });
       }
       function hide() {
-        $ef(root).hide(); /* WARN */
+        root.style.display = 'none';
         fire_event();
         if (click_handler) click_handler.disconnect();
       }
@@ -2906,98 +2890,6 @@
       }, this);
     }
   };
-
-  function $ef(ctx) {
-    var obj = {
-      ctx: ctx,
-      style: { },
-
-      show: function(func, opts) {
-        obj.ctx.style.display = '';
-        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
-        animate({style: [{name: 'height', suffix: 'px', from: 0, to: obj.ctx.clientHeight, floor: true},
-                         {name: 'opacity', from: 0, to: 1}]}, func, opts);
-      },
-      hide: function(func, opts) {
-        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
-        animate({style: [{name: 'height', suffix: 'px', from: obj.ctx.clientHeight, to: 0, floor: true},
-                         {name: 'opacity', from: 1, to: 0}]},
-                function() {
-                  obj.ctx.style.display = 'none';
-                  if (func) func.call(this);
-                }, opts);
-      },
-      resize: function(func, opts) {
-        save_style({overflow: 'hidden', width: obj.ctx.clientWidth + 'px'});
-        animate({style: [{name: 'height', suffix: 'px', from: opts.from, to: obj.ctx.clientHeight, floor: true}]},
-                func, opts);
-      },
-      fade_in: function(func, opts) {
-        obj.ctx.style.display = '';
-        animate({style: [{name: 'opacity', from: 0, to: 1}]}, func, opts);
-      },
-      fade_out: function(func, opts) {
-        animate({style: [{name: 'opacity', from: 1, to: 0}]}, function() {
-          obj.ctx.style.display = 'none';
-          if (func) func.call(this);
-        }, opts);
-      }
-    };
-
-    function save_style(dic) {
-      obj.style = { };
-      for(var key in dic) {
-        obj.style[key] = obj.ctx.style[key];
-        obj.ctx.style[key] = dic[key] || '';
-      }
-    }
-    function restore_style() {
-      if (!obj.style) return;
-      for(var key in obj.style) {
-        obj.ctx.style[key] = obj.style[key];
-      }
-      obj.style = { };
-    }
-    function animate(args, cb_end, opts) {
-      if (opts) for(var key in opts) args[key] = opts[key];
-      if (conf.disable_effect) {
-        apply(args, 0);
-        end(args, cb_end);
-        return;
-      }
-      obj.duration = args.duration || 200;
-      obj.start = Date.now();
-      obj.end = obj.start + obj.duration;
-      apply(args, 0);
-      obj.timer = window.setInterval(function() {
-        var now = Date.now();
-        if (now >= obj.end) {
-          window.clearInterval(obj.timer);
-          end(args, cb_end);
-        } else {
-          var pos = (now - obj.start) / obj.duration;
-          apply(args, pos);
-        }
-      }, args.interval || 0);
-    }
-    function end(args, cb_end) {
-      apply(args, 1);
-      restore_style();
-      if (cb_end) cb_end.call(obj.ctx);
-    }
-    function apply(args, pos) {
-      if (args.style) {
-        each(args.style, function(entry) {
-          var value = entry.from + ((entry.to - entry.from) * pos);
-          if (entry.floor) value = Math.floor(value);
-          if (entry.suffix) value += entry.suffix;
-          if (pos === 0 && !obj.style[entry.name]) obj.style[entry.name] = obj.ctx.style[entry.name];
-          obj.ctx.style[entry.name] = value;
-        });
-      }
-    }
-    return obj;
-  }
 
   function $(id, elem) {
     return window.document.getElementById(id);
