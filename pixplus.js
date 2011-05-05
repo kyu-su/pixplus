@@ -1124,7 +1124,7 @@
         row.insertCell(-1).textContent = ev.which;
         row.insertCell(-1).textContent = ev.eventPhase;
         row.insertCell(-1).textContent = ev.detail;
-        if (console.checked) log(ev);
+        if (console.checked && window.console) window.console.log(ev);
         return cancel.checked;
       });
     }
@@ -2558,15 +2558,6 @@
                : 'gecko')] = true;
   }
 
-  function log(msg) {
-    if (!conf.debug) return;
-    if (window.console && window.console.log) {
-      window.console && window.console.log && window.console.log(msg);
-    } else if (window.opera) {
-      window.opera.postError(String(msg));
-    }
-  }
-
   function Signal(def) {
     this.def = def;
     this.funcs = [];
@@ -2649,16 +2640,14 @@
       key: function(func) {
         var conn = listen('keypress', function(ev, conn) {
           var key = $ev.parse_key_event(ev);
-          return func.call(this, ev, conn, key[1]);
+          if (key) return func.call(this, ev, conn, key);
+          return false;
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
-            if (key[0] === 4) {
-              return func.call(this, ev, conn, key[1]);
-            } else {
-              return false;
-            }
+            if (key) return func.call(this, ev, conn, key);
+            return false;
           }, conn);
         }
         return conn;
@@ -2786,42 +2775,43 @@
 
   $ev.parse_key_event = function(ev) {
     var c = ev.keyCode || ev.charCode;
-    var role = 0, keys = [], key;
+    var keys = [], key;
     if (ev.ctrlKey)  keys.push('Control');
     if (ev.shiftKey) keys.push('Shift');
     if (ev.altKey)   keys.push('Alt');
     if (ev.metaKey)  keys.push('Meta');
-    if (ev.keyIdentifier) {
+    if (ev.type === 'keydown') {
+      // webkit
+      if (!ev.keyIdentifier) return null;
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
-        if (c < 0x20) {
+        if (c > 0 && c < 0x20) {
           key = $ev.key_map_code[c] || ('_c' + String(c));
-          role = 4;
         } else if (c === 0x7f) {
           key = $ev.KEY_DELETE;
-          role = 4;
         } else {
-          key = lc(String.fromCharCode(c));
-          role = 3;
+          //key = lc(String.fromCharCode(c));
+          return null;
         }
         keys.push($ev.key_map_encode[key] || key);
       } else {
         keys.push(ev.keyIdentifier);
-        role = 4;
       }
       keys = unique(keys); // for chrome10
-    } else if (c === ev.which && c > 0x20 && c < 0x7f) {
-      role = 0;
-      key = lc(String.fromCharCode(c));
-      keys.push($ev.key_map_encode[key] || key);
-    } else if ($ev.key_map_code[c]) {
-      role = 1;
-      keys.push($ev.key_map_code[c]);
+      return keys.join('+');
+    } else if (ev.type === 'keypress') {
+      if (c === ev.which && c > 0x20 && c < 0x7f) {
+        key = lc(String.fromCharCode(c));
+        keys.push($ev.key_map_encode[key] || key);
+      } else if ($ev.key_map_code[c]) {
+        keys.push($ev.key_map_code[c]);
+      } else if (c > 0) {
+        keys.push('_c' + String(c));
+      }
+      return keys.join('+');
     } else {
-      role = 2;
-      keys.push('_c' + String(c));
+      return null;
     }
-    return [role, keys.join('+')];
   };
 
   /*
@@ -2879,7 +2869,9 @@
    */
 
   $ev.key_check = function(ev, key) {
-    if (!key) return false;
+    if (!ev || !key) return false;
+    var pressed = $ev.parse_key_event(ev);
+    if (!pressed) return false;
     if (key.indexOf(',') >= 0) {
       var keys = key.split(',');
       for(var i = 0; i < keys.length; ++i) {
@@ -2887,7 +2879,7 @@
       }
       return false;
     }
-    return $ev.parse_key_event(ev)[1].split('+').sort().join('+') === key.split('+').sort().join('+');
+    return pressed.split('+').sort().join('+') === key.split('+').sort().join('+');
   };
 
   $ev.Connection = function(ctx) {
@@ -5587,6 +5579,15 @@
 
   function alert() {
     safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
+  }
+
+  function log(msg) {
+    if (!conf.debug) return;
+    if (window.console && window.console.log) {
+      window.console && window.console.log && window.console.log(msg);
+    } else if (window.opera) {
+      window.opera.postError(String(msg));
+    }
   }
 
   // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
