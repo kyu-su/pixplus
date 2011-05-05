@@ -1124,7 +1124,7 @@
         row.insertCell(-1).textContent = ev.which;
         row.insertCell(-1).textContent = ev.eventPhase;
         row.insertCell(-1).textContent = ev.detail;
-        if (console.checked) window.console.log(ev);
+        if (console.checked) log(ev);
         return cancel.checked;
       });
     }
@@ -2556,6 +2556,15 @@
             : (window.getMatchedCSSRules
                ? 'webkit'
                : 'gecko')] = true;
+  }
+
+  function log(msg) {
+    if (!conf.debug) return;
+    if (window.console && window.console.log) {
+      window.console && window.console.log && window.console.log(msg);
+    } else if (window.opera) {
+      window.opera.postError(String(msg));
+    }
   }
 
   function Signal(def) {
@@ -5556,15 +5565,6 @@
     } else {
       $c('link', window.document.body, {rel: 'stylesheet', type: 'text/css', href: url});
       return true;
-    }
-  }
-
-  function log(msg) {
-    if (!conf.debug) return;
-    if (window.console && window.console.log) {
-      window.console && window.console.log && window.console.log(msg);
-    } else if (window.opera) {
-      window.opera.postError(String(msg));
     }
   }
 
