@@ -1100,33 +1100,43 @@
       var logger     = $c('table', page.content, {border: 1, css: 'margin-top:4px;'});
       cancel_l.appendChild(window.document.createTextNode('Cancel'));
       console_l.appendChild(window.document.createTextNode('Console'));
+
+      var log_attrs  = [
+        'type',
+        'keyCode',
+        'charCode',
+        'keyIdentifier',
+        'which',
+        'eventPhase',
+        'detail',
+        'timeStamp'
+      ];
+
       function clear() {
+        input.value = '';
         logger.innerHTML = '';
         var row = logger.insertRow(0);
         row.insertCell(-1).textContent = 'Key';
-        row.insertCell(-1).textContent = 'type';
-        row.insertCell(-1).textContent = 'keyCode';
-        row.insertCell(-1).textContent = 'charCode';
-        row.insertCell(-1).textContent = 'keyIdentifier';
-        row.insertCell(-1).textContent = 'which';
-        row.insertCell(-1).textContent = 'eventPhase';
-        row.insertCell(-1).textContent = 'detail';
+        each(log_attrs, function(attr) {
+          row.insertCell(-1).textContent = attr;
+        });
       }
+
+      function log(ev) {
+        var row = logger.insertRow(1);
+        var key = $ev.parse_key_event(ev) || 'None';
+        row.insertCell(-1).textContent = key;
+        each(log_attrs, function(attr) {
+          row.insertCell(-1).textContent = ev[attr];
+        });
+        if (cancel.checked && key) ev.preventDefault();
+        if (console.checked && window.console) window.console.log(ev);
+      }
+
       clear();
       $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
-      $ev(input).key(function(ev, conn, key) {
-        var row = logger.insertRow(1);
-        row.insertCell(-1).textContent = key;
-        row.insertCell(-1).textContent = ev.type;
-        row.insertCell(-1).textContent = ev.keyCode;
-        row.insertCell(-1).textContent = ev.charCode;
-        row.insertCell(-1).textContent = ev.keyIdentifier;
-        row.insertCell(-1).textContent = ev.which;
-        row.insertCell(-1).textContent = ev.eventPhase;
-        row.insertCell(-1).textContent = ev.detail;
-        if (console.checked && window.console) window.console.log(ev);
-        return cancel.checked;
-      });
+      input.addEventListener('keydown', log, false);
+      input.addEventListener('keypress', log, false);
     }
   }];
 
@@ -2785,8 +2795,11 @@
       if (!ev.keyIdentifier) return null;
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
-        if (c > 0 && c < 0x20) {
+        if (c <= 0) return null;
+        if (c < 0x20) {
           key = $ev.key_map_code[c] || ('_c' + String(c));
+        } else if (c < 0x7f) {
+          key = lc(String.fromCharCode(c));
         } else if (c === 0x7f) {
           key = $ev.KEY_DELETE;
         } else {
