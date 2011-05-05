@@ -874,8 +874,10 @@
     content: function(page) {
       var editor_row;
       function close_editor(row, input) {
-        if (!editor_row) return;
-        editor_row.parentNode.removeChild(editor_row);
+        if (editor_row) {
+          editor_row.parentNode.removeChild(editor_row);
+          editor_row = null;
+        }
       }
       function open_editor(row, input) {
         close_editor();
@@ -1482,7 +1484,10 @@
       function hide() {
         root.style.display = 'none';
         fire_event();
-        if (click_handler) click_handler.disconnect();
+        if (click_handler) {
+          click_handler.disconnect();
+          click_handler = null;
+        }
       }
       function toggle() {
         if (!root || root.style.display === 'none') {
