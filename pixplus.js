@@ -2814,60 +2814,6 @@
     }
   };
 
-  /*
-  $ev.key_to_code = function(key) {
-    var code = 0;
-    if (typeof key === 'string' || key instanceof String) {
-      each(key.split('+'), function(key) {
-        var c;
-        key = $ev.key_map_decode[key] || key;
-        if (key === 'Control') {
-          code |= 1 << $ev.BIT_OFFSET_MODS;
-        } else if (key === 'Shift') {
-          code |= 1 << ($ev.BIT_OFFSET_MODS + 1);
-        } else if (key === 'Alt') {
-          code |= 1 << ($ev.BIT_OFFSET_MODS + 2);
-        } else if (key === 'Meta') {
-          code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
-        } else if ($ev.key_map_name[key]) {
-          code |= $ev.key_map_name[key] << $ev.BIT_OFFSET_SPEC;
-        } else if (key.length === 1) {
-          c = key.charCodeAt(0);
-          if (c > 0x20 && c < 0x7f) {
-            code |= c;
-          } else {
-            alert('invalid key - ' + key);
-          }
-        } else if (key.length > 2 && key.lastIndexOf('_c', 0) === 0) {
-          c = parseInt(key.substring(2), 10);
-          if (c < (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
-            code |= c << $ev.BIT_OFFSET_SPEC;
-          } else {
-            alert('invalid key - ' + key);
-          }
-        } else {
-          alert('unknown key name - ' + key);
-        }
-      });
-    } else {
-      var c = key.keyCode || key.charCode, key;
-      if (key.ctrlKey)  code |= 1 << $ev.BIT_OFFSET_MODS;
-      if (key.shiftKey) code |= 1 << ($ev.BIT_OFFSET_MODS + 1);
-      if (key.altKey)   code |= 1 << ($ev.BIT_OFFSET_MODS + 2);
-      if (key.metaKey)  code |= 1 << ($ev.BIT_OFFSET_MODS + 3);
-      if (c === key.which && c > 0x20 && c < 0x7f) {
-        if (c >= 0x41 && c <= 0x5a) c += 0x20; // toLowerCase()
-        code |= c;
-      } else if (c <= (1 << ($ev.BIT_OFFSET_MODS - $ev.BIT_OFFSET_SPEC))) {
-        code |= c << $ev.BIT_OFFSET_SPEC;
-      } else {
-        alert('invalid key code - ' + c);
-      }
-    }
-    return code;
-  };
-   */
-
   $ev.key_check = function(ev, key) {
     if (!ev || !key) return false;
     var pressed = $ev.parse_key_event(ev);
