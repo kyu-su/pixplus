@@ -470,17 +470,6 @@
   };
   LS.init_map();
 
-  pp.save_conf = function() {
-    if (!LS.u) return;
-    LS.each(function(sec, key) {
-      if (!sec.conf) return;
-      var val = sec.conf[key];
-      if (val !== LS.get(sec.name, key)) LS.set(sec.name, key, val);
-    });
-    LS.set('bookmark', 'tag_order', LS.bm_tag_order_to_str(conf.bm_tag_order));
-    LS.set('bookmark', 'tag_aliases', LS.bm_tag_aliases_to_str(conf.bm_tag_aliases));
-  };
-
   (function() {
     if (_extension_data) {
       if (_extension_data.storage) {
@@ -1810,24 +1799,22 @@
     var float_wrap = null;
     if (!r_container) return;
 
-    (function() {
-      if (conf.debug) {
-        // trap
-        var ir = window.IllustRecommender;
-        var _show = ir.prototype.show;
-        var _error = ir.error;
-        ir.prototype.show = function(res) {
-          try {
-            _show.apply(this, arguments);
-          } catch(ex) {
-            this.error(ex);
-          }
-        };
-        ir.prototype.error = function(msg) {
-          alert(msg);
-          if (_error) _error.apply(this, arguments);
-        };
-      }
+    if (conf.debug) (function() {
+      // trap
+      var ir = window.IllustRecommender;
+      var _show = ir.prototype.show;
+      var _error = ir.error;
+      ir.prototype.show = function(res) {
+        try {
+          _show.apply(this, arguments);
+        } catch(ex) {
+          this.error(ex);
+        }
+      };
+      ir.prototype.error = function(msg) {
+        alert(msg);
+        if (_error) _error.apply(this, arguments);
+      };
     })();
 
     var de = window.document.documentElement;
