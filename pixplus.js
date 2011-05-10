@@ -1600,7 +1600,7 @@
   }
   function init_galleries() {
     function area_right() {
-      each($xa('//div[contains(concat(" ", @class, " "), " area_right ")]'), function(root) {
+      each($qa('.area_right'), function(root) {
         add_gallery({
           root:          root,
           xpath_col:     '.',
@@ -1629,7 +1629,7 @@
     } else if (/^\/member\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/member.php?id=11
       mypage();
-      each($xa('//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]'), function(root) {
+      each($qa('.worksListOthersImg'), function(root) {
         add_gallery({root: root, xpath_col: '.'}, unpack_captions);
       });
     } else if (/^\/member_illust\.php/.test(window.location.pathname)) {
@@ -2861,6 +2861,12 @@
   }
   function $t(tag, elem) {
     return (elem || window.document).getElementsByTagName(tag);
+  }
+  function $q(selector, elem) {
+    return window.document.querySelector(selector);
+  }
+  function $qa(selector, elem) {
+    return window.document.querySelectorAll(selector);
   }
   function $c(tag, parent, opts) {
     var elem = window.document.createElement(tag);
