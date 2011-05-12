@@ -316,15 +316,14 @@
 
     url: {
       js: {
-        jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
+        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.min.js',
         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
         effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
         rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
         tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
         bookmark_add_v4:    'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
-        illust_recommender: 'http://source.pixiv.net/source/js/illust_recommender.js?021216',
-        cookie_utils:       'http://source.pixiv.net/source/js/cookie_utils.js'
+        illust_recommender: 'http://source.pixiv.net/source/js/illust_recommender.js?021216'
       },
       css: {
         bookmark_add: 'http://source.pixiv.net/source/css/bookmark_add.css?20100720'
@@ -1510,13 +1509,14 @@
       if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
         var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
         menu_items.push(create_menu_item('Save layout', function() {
-          var value = window.getCookie('pixiv_mypage');
+          var value = window.jQuery.cookie('pixiv_mypage');
           window.localStorage[key] = value;
           mi_restore_input.value = value;
           //mi_restore.style.display = 'block';
         }));
         menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-          window.setCookie('pixiv_mypage', mi_restore_input.value, 30, '/', 'pixiv.net');
+          window.jQuery.cookie('pixiv_mypage', mi_restore_input.value,
+                               {expires: 30, domain: 'pixiv.net', path: '/'});
           window.location.reload();
         }));
         mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
@@ -2082,7 +2082,9 @@
             toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
             toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
-            window.setCookie('bookToggle', type, 30, '/', window.location.hostname.replace(/^(\w+)\./, '.'));
+            window.jQuery.cookie('bookToggle', type, {
+              expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')
+            });
 
             var ev = window.document.createEvent('Event');
             ev.initEvent('pixplusBMTagToggled', true, true);
@@ -2370,42 +2372,44 @@
       }
     }
 
-    if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) (function() {
-      var _open = window.pixiv.Favorite.prototype.open;
-      window.pixiv.Favorite.prototype.open = function() {
-        var btn = $('favorite-button');
-        var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
-        var restrict = $xa('.//input[@name="restrict"]', form);
-        if (btn && form && restrict.length === 2) {
-          each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
-          window.jQuery.post(
-            form.getAttribute('action'),
-            window.jQuery(form).serialize(),
-            function(data) {
-              var re;
-              if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
-                window.jQuery('#favorite-button')
-                  .addClass('added')
-                  .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
-                window.jQuery('form', this.preference)
-                  .attr('action', '/bookmark_setting.php')
-                  .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
-                  .find('input[name="mode"]').remove();
-                btn.style.opacity = '1';
-              } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
-                alert(re[1]);
-              } else {
+    if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
+      (function() {
+        var _open = window.pixiv.Favorite.prototype.open;
+        window.pixiv.Favorite.prototype.open = function() {
+          var btn = $('favorite-button');
+          var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
+          var restrict = $xa('.//input[@name="restrict"]', form);
+          if (btn && form && restrict.length === 2) {
+            each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
+            window.jQuery.post(
+              form.getAttribute('action'),
+              window.jQuery(form).serialize(),
+              function(data) {
+                var re;
+                if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
+                  window.jQuery('#favorite-button')
+                    .addClass('added')
+                    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+                  window.jQuery('form', this.preference)
+                    .attr('action', '/bookmark_setting.php')
+                    .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
+                    .find('input[name="mode"]').remove();
+                  btn.style.opacity = '1';
+                } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
+                  alert(re[1]);
+                } else {
+                  alert('Error!');
+                }
+              }).error(function() {
                 alert('Error!');
-              }
-            }).error(function() {
-              alert('Error!');
-            });
-          btn.style.opacity = '0.2';
-        } else {
-          _open.apply(this, Array.prototype.slice.apply(arguments));
-        }
-      };
-    })();
+              });
+            btn.style.opacity = '0.2';
+          } else {
+            _open.apply(this, Array.prototype.slice.apply(arguments));
+          }
+        };
+      })();
+    }
 
     (function() {
       var ev = window.document.createEvent('Event');
@@ -2531,7 +2535,6 @@
        })
       )
       .script(pp.url.js.tag_edit)
-      .script(pp.url.js.cookie_utils)
       .wait(init_js);
 
     setTimeout(Floater.init, 100);
