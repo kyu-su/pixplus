@@ -122,6 +122,7 @@ $(CONFIG_JS): $(SRC_USERJS)
 
 $(LIB_JS): $(SRC_USERJS)
 	echo '// auto generated code' > $@
+	echo 'var conf={log_level:2};' >> $@
 	sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)

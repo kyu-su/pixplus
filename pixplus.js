@@ -152,6 +152,10 @@
     /* __CONFIG_BEGIN__ */
     {"name": "general", "label": "General", "items": [
       {"key": "debug", "value": false, "desc": "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"},
+      {"key": "log_level", "value": 0, "desc": "\u30ed\u30b0\u30ec\u30d9\u30eb",
+       "hint": [{"value": 0, "title": "\u306a\u3057"},
+                {"value": 1, "title": "\u60c5\u5831"},
+                {"value": 2, "title": "\u30c7\u30d0\u30c3\u30b0"}]},
       {"key": "scroll", "value": 1, "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b",
        "hint": [{"value": 0, "title": "\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"},
                 {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
@@ -316,7 +320,7 @@
 
     url: {
       js: {
-        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.min.js',
+        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.min.js', /* WARN */
         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
         effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
@@ -587,6 +591,443 @@
     }
   };
   var defineMagicFunction = wrap_global;
+
+  /* __LIBRARY_BEGIN__ */
+
+  var LOG = new function() {
+    this.info = function(msg) {
+      log(1, msg);
+    };
+    this.debug = function(msg) {
+      log(2, msg);
+    };
+
+    function log(level, msg) {
+      if (level > conf.log_level) return;
+      if (window.console && window.console.log) {
+        window.console && window.console.log && window.console.log(msg);
+      } else if (window.opera) {
+        window.opera.postError(String(msg));
+      }
+    }
+  };
+
+  var browser = {
+    opera:  false,
+    gecko:  false,
+    webkit: false
+  };
+  if (typeof window !== 'undefined') {
+    browser[window.opera
+            ? 'opera'
+            : (window.getMatchedCSSRules
+               ? 'webkit'
+               : 'gecko')] = true;
+  }
+
+  function Signal(def) {
+    this.def = def;
+    this.funcs = [];
+    this.id = 1;
+    return this;
+  }
+
+  Signal.prototype = {
+    connect: function(func, async) {
+      var conn = new Signal.Connection(this, this.id);
+      var timer, last_args;
+      this.funcs.push({
+        id: this.id,
+        cb: function() {
+          last_args = [this, Array.prototype.slice.apply(arguments)];
+          if (async) {
+            if (timer) return null;
+            timer = setTimeout(function() {
+              timer = null;
+              func.apply(last_args[0], last_args[1]);
+            }, typeof async === 'number' ? async : 40);
+          } else {
+            return func.apply(this, last_args[1]);
+          }
+          return null;
+        },
+        conn: conn
+      });
+      ++this.id;
+      return conn;
+    },
+
+    disconnect: function(id) {
+      each(this.funcs, function(func, idx) {
+        if (func.id === id) {
+          this.funcs[idx].conn.disconnected = true;
+          this.funcs.splice(idx, 1);
+          return true;
+        }
+        return false;
+      }, this);
+    },
+
+    emit: function(inst) {
+      var args = Array.prototype.slice.apply(arguments, [1]);
+      var res;
+      for(var i = 0; i < this.funcs.length; ++i) {
+        res = this.funcs[i].cb.apply(inst, args);
+        if (res) return res;
+      }
+      if (this.def && (res = this.def.apply(inst, args))) return res;
+      return false;
+    }
+  };
+
+  Signal.Connection = function(signal, id) {
+    this.signal = signal;
+    this.id = id;
+    this.disconnected = false;
+  };
+
+  Signal.Connection.prototype = {
+    disconnect: function() {
+      if (!this.disconnected) this.signal.disconnect(this.id);
+    }
+  };
+
+  function $ev(ctx, args) {
+    var opts = args || {};
+    var obj = {
+      ctx: ctx,
+
+      click: function(func) {
+        return listen('click', function(ev, conn) {
+          if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
+          return func.call(this, ev, conn);
+        });
+      },
+
+      key: function(func) {
+        var conn = listen('keypress', function(ev, conn) {
+          var key = $ev.parse_key_event(ev);
+          if (key) return func.call(this, ev, conn, key);
+          return false;
+        });
+        if (browser.webkit) {
+          conn = listen('keydown', function(ev, conn) {
+            var key = $ev.parse_key_event(ev);
+            if (key) return func.call(this, ev, conn, key);
+            return false;
+          }, conn);
+        }
+        return conn;
+      },
+
+      scroll: function(func) {
+        return listen('scroll', func);
+      },
+
+      resize: function(func) {
+        return listen('resize', func);
+      },
+
+      submit: function(func) {
+        return listen('submit', func);
+      },
+
+      change: function(func) {
+        var name;
+        if (check_node(obj.ctx, 'Input')) {
+          if (!obj.ctx || /^(?:text|search|tel|url|email|password|number)$/i.test(obj.ctx.type)) {
+            name = 'input';
+          } else {
+            name = 'change';
+          }
+        } else if (check_node(obj.ctx, 'TextArea')) {
+          name = 'input';
+        } else if (check_node(obj.ctx, 'Select')) {
+          name = 'change';
+        } else {
+          alert('[bug]unknown type');
+        }
+        return listen(name, func);
+      },
+
+      hover: function(hover, leave) {
+        var conn = listen('mouseover', hover);
+        return listen('mouseout', leave, conn);
+      },
+
+      focus: function(focus, blur) {
+        var conn = listen('focus', focus);
+        if (blur) conn = listen('blur', blur, conn);
+        return conn;
+      },
+
+      listen: function(name, func) {
+        if (name instanceof Array) {
+          var conn;
+          each(name, function(name) {
+            conn = listen(name, func, conn);
+          });
+          return conn;
+        } else {
+          return listen(name, func);
+        }
+      }
+    };
+
+    function listen(name, func, conn) {
+      if (!conn) conn = new $ev.Connection(ctx);
+      var timer, ev_last;
+      var listener = function(ev) {
+        if (conn.disconnected) return;
+        if (opts.async) {
+          if (timer) {
+            ev_last = ev;
+          } else {
+            ev_last = ev;
+            timer = setTimeout(function() {
+              if (conn.disconnected) return;
+              timer = null;
+              func.call(opts.ctx || ctx, ev_last, conn);
+            }, typeof opts.async === 'number' ? opts.async : 40);
+          }
+        } else {
+          if (func.call(opts.ctx || ctx, ev, conn)) {
+            ev.preventDefault();
+            ev.stopPropagation();
+          }
+        }
+      };
+      obj.ctx.addEventListener(name, listener, !!opts.capture);
+      conn.listeners.push([name, listener, !!opts.capture]);
+      return conn;
+    }
+    return obj;
+  };
+
+  $ev.BIT_OFFSET_CHAR = 0;
+  $ev.BIT_OFFSET_SPEC = 8;
+  $ev.BIT_OFFSET_MODS = 24;
+  $ev.key_map_code = { };
+  $ev.key_map_name = { };
+  $ev.key_map_encode = { };
+  $ev.key_map_decode = { };
+  each([
+    {code: 8,   name: 'Backspace'},
+    {code: 9,   name: 'Tab'},
+    {code: 13,  name: 'Enter'},
+    {code: 27,  name: 'Escape'},
+    {code: 32,  name: 'Space'},
+    {code: 33,  name: 'PageUp'},
+    {code: 34,  name: 'PageDown'},
+    {code: 35,  name: 'End'},
+    {code: 36,  name: 'Home'},
+    {code: 37,  name: 'Left'},
+    {code: 38,  name: 'Up'},
+    {code: 39,  name: 'Right'},
+    {code: 40,  name: 'Down'},
+    {code: 45,  name: 'Insert'},
+    {code: 46,  name: 'Delete'},
+    {code: 112, name: 'F1'}, {code: 113, name: 'F2'}, {code: 114, name: 'F3'}, {code: 115, name: 'F4'},
+    {code: 116, name: 'F5'}, {code: 117, name: 'F6'}, {code: 118, name: 'F7'}, {code: 119, name: 'F8'},
+    {code: 120, name: 'F9'}, {code: 121, name: 'F10'}, {code: 122, name: 'F11'}, {code: 123, name: 'F12'}
+  ], function(entry) {
+    $ev['KEY_' + entry.name.toUpperCase()] = entry.name;
+    $ev.key_map_code[entry.code] = entry.name;
+    $ev.key_map_name[entry.name] = entry.code;
+  });
+  each([['+', 'plus'], [',', 'comma'], [' ', 'Space'], ['\t', 'Tab']], function(entry) {
+    $ev.key_map_encode[entry[0]] = entry[1];
+    $ev.key_map_decode[entry[1]] = entry[0];
+  });
+
+  $ev.parse_key_event = function(ev) {
+    var c = ev.keyCode || ev.charCode;
+    var keys = [], key;
+    if (ev.ctrlKey)  keys.push('Control');
+    if (ev.shiftKey) keys.push('Shift');
+    if (ev.altKey)   keys.push('Alt');
+    if (ev.metaKey)  keys.push('Meta');
+    if (ev.type === 'keydown') {
+      // webkit
+      if (!ev.keyIdentifier) return null;
+      if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
+        c = parseInt(ev.keyIdentifier.substring(2), 16);
+        if (c <= 0) return null;
+        if (c < 0x20) {
+          key = $ev.key_map_code[c] || ('_c' + String(c));
+        } else if (c < 0x7f) {
+          key = lc(String.fromCharCode(c));
+        } else if (c === 0x7f) {
+          key = $ev.KEY_DELETE;
+        } else {
+          //key = lc(String.fromCharCode(c));
+          return null;
+        }
+        keys.push($ev.key_map_encode[key] || key);
+      } else {
+        keys.push(ev.keyIdentifier);
+      }
+      keys = unique(keys); // for chrome10
+      return keys.join('+');
+    } else if (ev.type === 'keypress') {
+      if (c === ev.which && c > 0x20 && c < 0x7f) {
+        key = lc(String.fromCharCode(c));
+        keys.push($ev.key_map_encode[key] || key);
+      } else if ($ev.key_map_code[c]) {
+        keys.push($ev.key_map_code[c]);
+      } else if (c > 0) {
+        keys.push('_c' + String(c));
+      }
+      return keys.join('+');
+    } else {
+      return null;
+    }
+  };
+
+  $ev.key_check = function(ev, key) {
+    if (!ev || !key) return false;
+    var pressed = $ev.parse_key_event(ev);
+    if (!pressed) return false;
+    if (key.indexOf(',') >= 0) {
+      var keys = key.split(',');
+      for(var i = 0; i < keys.length; ++i) {
+        if ($ev.key_check(ev, keys[i])) return true;
+      }
+      return false;
+    }
+    return pressed.split('+').sort().join('+') === key.split('+').sort().join('+');
+  };
+
+  $ev.Connection = function(ctx) {
+    this.ctx = ctx;
+    this.disconnected = false;
+    this.listeners = [];
+  };
+
+  $ev.Connection.prototype = {
+    disconnect: function() {
+      this.disconnected = true;
+      each(this.listeners, function(item) {
+        this.ctx.removeEventListener(item[0], item[1], item[2]);
+      }, this);
+    }
+  };
+
+  function $(id, elem) {
+    return window.document.getElementById(id);
+  }
+  function $t(tag, elem) {
+    return (elem || window.document).getElementsByTagName(tag);
+  }
+  function $q(selector, elem) {
+    return window.document.querySelector(selector);
+  }
+  function $qa(selector, elem) {
+    return window.document.querySelectorAll(selector);
+  }
+  function $c(tag, parent, opts) {
+    var elem = window.document.createElement(tag);
+    if (parent) parent.appendChild(elem);
+    if (opts) {
+      for(var key in opts) {
+        if (key.lastIndexOf('a:', 0) === 0) {
+          elem.setAttribute(key.substring(2), opts[key]);
+        } else {
+          var obj = elem, terms = ($c.map[key] || key).split('.');
+          for(var i = 0; i < terms.length - 1; ++i) {
+            obj = obj[terms[i]];
+          }
+          obj[terms[terms.length - 1]] = opts[key];
+        }
+      }
+    }
+    return elem;
+  }
+  $c.map = {
+    cls:  'className',
+    text: 'textContent',
+    html: 'innerHTML',
+    css:  'style.cssText'
+  };
+  function $x(xpath, root) {
+    if (arguments.length > 1 && !root) return null;
+    var doc = root ? root.ownerDocument : (root = window.document);
+    // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
+    return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
+  }
+  function $xa(xpath, root) {
+    var doc = root ? root.ownerDocument : (root = window.document);
+    // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
+    var nodes = doc.evaluate(xpath, root, null, 7, null);
+    var res = new Array();
+    for(var i = 0; i < nodes.snapshotLength; ++i) {
+      res.push(nodes.snapshotItem(i));
+    }
+    return res;
+  }
+
+  function is_ancestor(ancestor, elem) {
+    while(elem) {
+      // Firefox3.6: elem === ancestor is always false
+      if (elem == ancestor) return true;
+      elem = elem.parentNode;
+    }
+    return false;
+  }
+
+  function check_node(node, name) {
+    // for Firefox3.6
+    return (node instanceof (typeof safeWindow === 'undefined' ? window : safeWindow)['HTML' + name + 'Element'] ||
+            (typeof Components !== 'undefined' &&
+             node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
+  }
+
+  function each(list, func, obj) {
+    if (!list) return list;
+    for(var i = 0; i < list.length; ++i) {
+      if (func.call(obj || list, list[i], i)) break;
+    }
+    return list;
+  }
+
+  function unique(list) {
+    var ret = [];
+    for(var i = 0; i < list.length; ++i) {
+      var match = false;
+      for(var j = 0; j < ret.length; ++j) {
+        if (ret[j] === list[i]) {
+          match = true;
+          break;
+        }
+      }
+      if (!match) ret.push(list[i]);
+    }
+    return ret;
+  }
+
+  function find(list, func, obj) {
+    for(var i = 0; i < list.length; ++i) {
+      if (func.call(obj || list, list[i], i)) return list[i];
+    }
+    return null;
+  }
+
+  function bind(func, obj) {
+    var args = Array.prototype.slice.apply(arguments, [2]);
+    return function() {
+      return func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
+    };
+  }
+
+  function lc(str) {
+    return (str || '').toLowerCase();
+  }
+
+  function trim(str) {
+    return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
+  }
+
+  /* __LIBRARY_END__ */
 
   /* __CONFIG_UI_BEGIN__ */
   function ConfigUI(root, options_page, msg_filter) {
@@ -2343,7 +2784,7 @@
           if (opts.illust_id && opts.mode === 'medium') {
             ev.preventDefault();
             Popup.run_url(anc.href);
-            log(['Open popup: ', anc]);
+            LOG.debug(['Open popup: ', anc]);
             return true;
           }
         }
@@ -2542,425 +2983,6 @@
     setTimeout(Floater.init, 100);
   }
 
-  /* __LIBRARY_BEGIN__ */
-
-  var browser = {
-    opera:  false,
-    gecko:  false,
-    webkit: false
-  };
-  if (typeof window !== 'undefined') {
-    browser[window.opera
-            ? 'opera'
-            : (window.getMatchedCSSRules
-               ? 'webkit'
-               : 'gecko')] = true;
-  }
-
-  function Signal(def) {
-    this.def = def;
-    this.funcs = [];
-    this.id = 1;
-    return this;
-  }
-
-  Signal.prototype = {
-    connect: function(func, async) {
-      var conn = new Signal.Connection(this, this.id);
-      var timer, last_args;
-      this.funcs.push({
-        id: this.id,
-        cb: function() {
-          last_args = [this, Array.prototype.slice.apply(arguments)];
-          if (async) {
-            if (timer) return null;
-            timer = setTimeout(function() {
-              timer = null;
-              func.apply(last_args[0], last_args[1]);
-            }, typeof async === 'number' ? async : 40);
-          } else {
-            return func.apply(this, last_args[1]);
-          }
-          return null;
-        },
-        conn: conn
-      });
-      ++this.id;
-      return conn;
-    },
-
-    disconnect: function(id) {
-      each(this.funcs, function(func, idx) {
-        if (func.id === id) {
-          this.funcs[idx].conn.disconnected = true;
-          this.funcs.splice(idx, 1);
-          return true;
-        }
-        return false;
-      }, this);
-    },
-
-    emit: function(inst) {
-      var args = Array.prototype.slice.apply(arguments, [1]);
-      var res;
-      for(var i = 0; i < this.funcs.length; ++i) {
-        res = this.funcs[i].cb.apply(inst, args);
-        if (res) return res;
-      }
-      if (this.def && (res = this.def.apply(inst, args))) return res;
-      return false;
-    }
-  };
-
-  Signal.Connection = function(signal, id) {
-    this.signal = signal;
-    this.id = id;
-    this.disconnected = false;
-  };
-
-  Signal.Connection.prototype = {
-    disconnect: function() {
-      if (!this.disconnected) this.signal.disconnect(this.id);
-    }
-  };
-
-  function $ev(ctx, args) {
-    var opts = args || {};
-    var obj = {
-      ctx: ctx,
-
-      click: function(func) {
-        return listen('click', function(ev, conn) {
-          if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
-          return func.call(this, ev, conn);
-        });
-      },
-
-      key: function(func) {
-        var conn = listen('keypress', function(ev, conn) {
-          var key = $ev.parse_key_event(ev);
-          if (key) return func.call(this, ev, conn, key);
-          return false;
-        });
-        if (browser.webkit) {
-          conn = listen('keydown', function(ev, conn) {
-            var key = $ev.parse_key_event(ev);
-            if (key) return func.call(this, ev, conn, key);
-            return false;
-          }, conn);
-        }
-        return conn;
-      },
-
-      scroll: function(func) {
-        return listen('scroll', func);
-      },
-
-      resize: function(func) {
-        return listen('resize', func);
-      },
-
-      submit: function(func) {
-        return listen('submit', func);
-      },
-
-      change: function(func) {
-        var name;
-        if (check_node(obj.ctx, 'Input')) {
-          if (!obj.ctx || /^(?:text|search|tel|url|email|password|number)$/i.test(obj.ctx.type)) {
-            name = 'input';
-          } else {
-            name = 'change';
-          }
-        } else if (check_node(obj.ctx, 'TextArea')) {
-          name = 'input';
-        } else if (check_node(obj.ctx, 'Select')) {
-          name = 'change';
-        } else {
-          alert('[bug]unknown type');
-        }
-        return listen(name, func);
-      },
-
-      hover: function(hover, leave) {
-        var conn = listen('mouseover', hover);
-        return listen('mouseout', leave, conn);
-      },
-
-      focus: function(focus, blur) {
-        var conn = listen('focus', focus);
-        if (blur) conn = listen('blur', blur, conn);
-        return conn;
-      },
-
-      listen: function(name, func) {
-        if (name instanceof Array) {
-          var conn;
-          each(name, function(name) {
-            conn = listen(name, func, conn);
-          });
-          return conn;
-        } else {
-          return listen(name, func);
-        }
-      }
-    };
-
-    function listen(name, func, conn) {
-      if (!conn) conn = new $ev.Connection(ctx);
-      var timer, ev_last;
-      var listener = function(ev) {
-        if (conn.disconnected) return;
-        if (opts.async) {
-          if (timer) {
-            ev_last = ev;
-          } else {
-            ev_last = ev;
-            timer = setTimeout(function() {
-              if (conn.disconnected) return;
-              timer = null;
-              func.call(opts.ctx || ctx, ev_last, conn);
-            }, typeof opts.async === 'number' ? opts.async : 40);
-          }
-        } else {
-          if (func.call(opts.ctx || ctx, ev, conn)) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-        }
-      };
-      obj.ctx.addEventListener(name, listener, !!opts.capture);
-      conn.listeners.push([name, listener, !!opts.capture]);
-      return conn;
-    }
-    return obj;
-  };
-
-  $ev.BIT_OFFSET_CHAR = 0;
-  $ev.BIT_OFFSET_SPEC = 8;
-  $ev.BIT_OFFSET_MODS = 24;
-  $ev.key_map_code = { };
-  $ev.key_map_name = { };
-  $ev.key_map_encode = { };
-  $ev.key_map_decode = { };
-  each([
-    {code: 8,   name: 'Backspace'},
-    {code: 9,   name: 'Tab'},
-    {code: 13,  name: 'Enter'},
-    {code: 27,  name: 'Escape'},
-    {code: 32,  name: 'Space'},
-    {code: 33,  name: 'PageUp'},
-    {code: 34,  name: 'PageDown'},
-    {code: 35,  name: 'End'},
-    {code: 36,  name: 'Home'},
-    {code: 37,  name: 'Left'},
-    {code: 38,  name: 'Up'},
-    {code: 39,  name: 'Right'},
-    {code: 40,  name: 'Down'},
-    {code: 45,  name: 'Insert'},
-    {code: 46,  name: 'Delete'},
-    {code: 112, name: 'F1'}, {code: 113, name: 'F2'}, {code: 114, name: 'F3'}, {code: 115, name: 'F4'},
-    {code: 116, name: 'F5'}, {code: 117, name: 'F6'}, {code: 118, name: 'F7'}, {code: 119, name: 'F8'},
-    {code: 120, name: 'F9'}, {code: 121, name: 'F10'}, {code: 122, name: 'F11'}, {code: 123, name: 'F12'}
-  ], function(entry) {
-    $ev['KEY_' + entry.name.toUpperCase()] = entry.name;
-    $ev.key_map_code[entry.code] = entry.name;
-    $ev.key_map_name[entry.name] = entry.code;
-  });
-  each([['+', 'plus'], [',', 'comma'], [' ', 'Space'], ['\t', 'Tab']], function(entry) {
-    $ev.key_map_encode[entry[0]] = entry[1];
-    $ev.key_map_decode[entry[1]] = entry[0];
-  });
-
-  $ev.parse_key_event = function(ev) {
-    var c = ev.keyCode || ev.charCode;
-    var keys = [], key;
-    if (ev.ctrlKey)  keys.push('Control');
-    if (ev.shiftKey) keys.push('Shift');
-    if (ev.altKey)   keys.push('Alt');
-    if (ev.metaKey)  keys.push('Meta');
-    if (ev.type === 'keydown') {
-      // webkit
-      if (!ev.keyIdentifier) return null;
-      if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
-        c = parseInt(ev.keyIdentifier.substring(2), 16);
-        if (c <= 0) return null;
-        if (c < 0x20) {
-          key = $ev.key_map_code[c] || ('_c' + String(c));
-        } else if (c < 0x7f) {
-          key = lc(String.fromCharCode(c));
-        } else if (c === 0x7f) {
-          key = $ev.KEY_DELETE;
-        } else {
-          //key = lc(String.fromCharCode(c));
-          return null;
-        }
-        keys.push($ev.key_map_encode[key] || key);
-      } else {
-        keys.push(ev.keyIdentifier);
-      }
-      keys = unique(keys); // for chrome10
-      return keys.join('+');
-    } else if (ev.type === 'keypress') {
-      if (c === ev.which && c > 0x20 && c < 0x7f) {
-        key = lc(String.fromCharCode(c));
-        keys.push($ev.key_map_encode[key] || key);
-      } else if ($ev.key_map_code[c]) {
-        keys.push($ev.key_map_code[c]);
-      } else if (c > 0) {
-        keys.push('_c' + String(c));
-      }
-      return keys.join('+');
-    } else {
-      return null;
-    }
-  };
-
-  $ev.key_check = function(ev, key) {
-    if (!ev || !key) return false;
-    var pressed = $ev.parse_key_event(ev);
-    if (!pressed) return false;
-    if (key.indexOf(',') >= 0) {
-      var keys = key.split(',');
-      for(var i = 0; i < keys.length; ++i) {
-        if ($ev.key_check(ev, keys[i])) return true;
-      }
-      return false;
-    }
-    return pressed.split('+').sort().join('+') === key.split('+').sort().join('+');
-  };
-
-  $ev.Connection = function(ctx) {
-    this.ctx = ctx;
-    this.disconnected = false;
-    this.listeners = [];
-  };
-
-  $ev.Connection.prototype = {
-    disconnect: function() {
-      this.disconnected = true;
-      each(this.listeners, function(item) {
-        this.ctx.removeEventListener(item[0], item[1], item[2]);
-      }, this);
-    }
-  };
-
-  function $(id, elem) {
-    return window.document.getElementById(id);
-  }
-  function $t(tag, elem) {
-    return (elem || window.document).getElementsByTagName(tag);
-  }
-  function $q(selector, elem) {
-    return window.document.querySelector(selector);
-  }
-  function $qa(selector, elem) {
-    return window.document.querySelectorAll(selector);
-  }
-  function $c(tag, parent, opts) {
-    var elem = window.document.createElement(tag);
-    if (parent) parent.appendChild(elem);
-    if (opts) {
-      for(var key in opts) {
-        if (key.lastIndexOf('a:', 0) === 0) {
-          elem.setAttribute(key.substring(2), opts[key]);
-        } else {
-          var obj = elem, terms = ($c.map[key] || key).split('.');
-          for(var i = 0; i < terms.length - 1; ++i) {
-            obj = obj[terms[i]];
-          }
-          obj[terms[terms.length - 1]] = opts[key];
-        }
-      }
-    }
-    return elem;
-  }
-  $c.map = {
-    cls:  'className',
-    text: 'textContent',
-    html: 'innerHTML',
-    css:  'style.cssText'
-  };
-  function $x(xpath, root) {
-    if (arguments.length > 1 && !root) return null;
-    var doc = root ? root.ownerDocument : (root = window.document);
-    // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
-    return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
-  }
-  function $xa(xpath, root) {
-    var doc = root ? root.ownerDocument : (root = window.document);
-    // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
-    var nodes = doc.evaluate(xpath, root, null, 7, null);
-    var res = new Array();
-    for(var i = 0; i < nodes.snapshotLength; ++i) {
-      res.push(nodes.snapshotItem(i));
-    }
-    return res;
-  }
-
-  function is_ancestor(ancestor, elem) {
-    while(elem) {
-      // Firefox3.6: elem === ancestor is always false
-      if (elem == ancestor) return true;
-      elem = elem.parentNode;
-    }
-    return false;
-  }
-
-  function check_node(node, name) {
-    // for Firefox3.6
-    return (node instanceof (typeof safeWindow === 'undefined' ? window : safeWindow)['HTML' + name + 'Element'] ||
-            (typeof Components !== 'undefined' &&
-             node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
-  }
-
-  function each(list, func, obj) {
-    if (!list) return list;
-    for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) break;
-    }
-    return list;
-  }
-
-  function unique(list) {
-    var ret = [];
-    for(var i = 0; i < list.length; ++i) {
-      var match = false;
-      for(var j = 0; j < ret.length; ++j) {
-        if (ret[j] === list[i]) {
-          match = true;
-          break;
-        }
-      }
-      if (!match) ret.push(list[i]);
-    }
-    return ret;
-  }
-
-  function find(list, func, obj) {
-    for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) return list[i];
-    }
-    return null;
-  }
-
-  function bind(func, obj) {
-    var args = Array.prototype.slice.apply(arguments, [2]);
-    return function() {
-      return func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
-    };
-  }
-
-  function lc(str) {
-    return (str || '').toLowerCase();
-  }
-
-  function trim(str) {
-    return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
-  }
-
-  /* __LIBRARY_END__ */
-
   function LoaderBase(cb_load, cb_error) {
     this.stopped = false;
     this.cb_load = cb_load;
@@ -3090,7 +3112,7 @@
       if (this.filter_col) this.filter_col(col);
       var elements = $xa(this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap, col);
       if (!elements.length) return;
-      log('collection detected - ' + elements.length);
+      LOG.debug('collection detected - ' + elements.length);
       col.setAttribute('pixplus_loaded', 'true');
 
       var self = this;
@@ -4436,7 +4458,7 @@
     } else if (this.item.img_url_base && !getcache(this.url)) {
       // conf.popup.big_image = trueの時、イラストがマンガなら大きな画像は存在しないので、失敗したらHTMLソースをパースする。
       // キャッシュを持ってる時は同期的にコールバックするのでやらない。推定したURLが404の時に余分なリクエストが発生するため。
-      log('trying parallel load - ' + this.item.img_url_base);
+      LOG.debug('trying parallel load - ' + this.item.img_url_base);
       this.parallel = true;
       this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
     }
@@ -4474,7 +4496,7 @@
         self.complete();
       }, function() {
         if (self.parallel && conf.popup.big_image) {
-          log('parallel load failed - ' + self.item.img_url_base);
+          LOG.debug('parallel load failed - ' + self.item.img_url_base);
           self.parallel = false;
           if (self.text_cmp) self.parse_text();
         } else {
@@ -5265,7 +5287,7 @@
 
     ctx.prototype = {
       script: function(url) {
-        log('$js#script: ' + url);
+        LOG.debug('$js#script: ' + url);
         this.urls.push(url);
         if (this.block) {
           ++this.load_cnt;
@@ -5276,7 +5298,7 @@
       },
 
       wait: function(func) {
-        log('$js#wait');
+        LOG.debug('$js#wait');
         if (this.load_cnt > 0) {
           var new_obj = new ctx(true);
           this.wait = {ctx: new_obj, func: func};
@@ -5292,11 +5314,11 @@
         if (raise) ++this.load_cnt;
         if (elem) {
           if (elem.getAttribute('type') === 'script/cache') { // webkit
-            log('$js#labjs: ' + url);
+            LOG.debug('$js#labjs: ' + url);
             var callee = arguments.callee, self = this;
             setTimeout(function() { callee.apply(self, [url]); }, 0);
           } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
-            log('$js#preexists: ' + url);
+            LOG.debug('$js#preexists: ' + url);
             wait.apply(this, [elem]);
           } else if (elem.readyState) { // for opera
             load_cb.apply(this);
@@ -5304,7 +5326,7 @@
             setTimeout(bind(load_cb, this), 0);
           }
         } else {
-          log('$js#load: ' + url);
+          LOG.debug('$js#load: ' + url);
           elem = $c('script', null, {async: false});
           wait.apply(this, [elem]);
           elem.src  = url;
@@ -5319,7 +5341,7 @@
       },
 
       fire: function() {
-        log('$js#fire');
+        LOG.debug('$js#fire');
         this.block = false;
         each(this.urls, function(url) {
           this.add_load(url);
@@ -5327,7 +5349,7 @@
       },
 
       unblock: function() {
-        log('$js#unblock');
+        LOG.debug('$js#unblock');
         if (this.wait) {
           if (this.wait.func) this.wait.func();
           if (this.wait.ctx)  this.wait.ctx.fire();
@@ -5533,15 +5555,6 @@
 
   function alert() {
     safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
-  }
-
-  function log(msg) {
-    if (!conf.debug) return;
-    if (window.console && window.console.log) {
-      window.console && window.console.log && window.console.log(msg);
-    } else if (window.opera) {
-      window.opera.postError(String(msg));
-    }
   }
 
   // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
