@@ -2203,8 +2203,9 @@
         xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
         xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
       });
-    } else if (/^\/search\.php/.test(window.location.pathname)) {
+    } else if (/^\/(?:search|tags)\.php/.test(window.location.pathname)) {
       // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
+      // http://www.pixiv.net/tags.php?tag=pixiv
       add_gallery({
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
         xpath_cap: './li/h1',
