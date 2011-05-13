@@ -1579,7 +1579,8 @@
       '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0(\u5fa9\u6d3b)\u3002',
       'Chrome\u3067\u30bb\u30f3\u30bf\u30fc\u30af\u30ea\u30c3\u30af\u306b\u3082\u53cd\u5fdc\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       'Webkit\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002',
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+      '\u691c\u7d22\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/03/26', version: '0.5.1', changes: [
@@ -2202,6 +2203,15 @@
         xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
         xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
       });
+    } else if (/^\/search\.php/.test(window.location.pathname)) {
+      // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
+      add_gallery({
+        xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
+        xpath_cap: './li/h1',
+        xpath_tmb: 'preceding-sibling::a[contains(@href, "mode=medium")]/p/img'
+      }, function(col) {
+        unpack_captions(col, './li/a/h1');
+      });
     }
 
     // 汎用
@@ -2217,7 +2227,6 @@
         // http://www.pixiv.net/new_illust_r18.php
         // http://www.pixiv.net/bookmark_new_illust_r18.php
         // http://www.pixiv.net/bookmark.php?id=11
-        // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
         // http://www.pixiv.net/response.php?illust_id=15092961
         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
         add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
