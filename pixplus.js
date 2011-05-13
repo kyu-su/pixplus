@@ -2961,9 +2961,9 @@
       }
       return $js;
     })($js
-       .script(pp.url.js.jquery)
+       .script(!window.jQuery && pp.url.js.jquery)
        .wait(jq_onload)
-       .script(pp.url.js.prototypejs)
+       .script(!window.Prototype && pp.url.js.prototypejs)
        .wait(/^\/stacc\//.test(window.location.pathname) ? pt_onload : null)
        .script(pp.url.js.effects)
        .script(pp.url.js.rpc)
@@ -5287,6 +5287,7 @@
 
     ctx.prototype = {
       script: function(url) {
+        if (!url) return this;
         LOG.debug('$js#script: ' + url);
         this.urls.push(url);
         if (this.block) {
