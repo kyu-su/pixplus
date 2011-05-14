@@ -3235,340 +3235,134 @@
     }
   };
 
-  function Popup(item, manga_page) {
-    this.root_div              = $c('div', null, {id: 'pp-popup'});
-    this.header                = $c('div', this.root_div, {id: 'pp-header'});
-    this.title_div             = $c('div', this.header, {id: 'pp-title_wrapper'});
-    this.title                 = $c('a', this.title_div, {id: 'pp-title', 'a:nopopup': ''});
-    this.header_right          = $c('span', this.title_div, {id: 'pp-right'});
-    this.status                = $c('span', this.header_right, {id: 'pp-status', css: 'display:none'});
-    this.manga_btn             = $c('a', this.header_right, {id: 'pp-manga-btn'});
-    $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); return true; }, this));
-    this.res_btn               = Popup.create_button('[R]', this.header_right, 'pp-res-btn');
-    this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
-                                                     bind(this.toggle_viewer_comments, this));
-    this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
-                                                     bind(this.toggle_bookmark_edit, this));
-    //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
-    this.caption               = $c('div', this.header, {id: 'pp-caption'});
-    this.comment_wrap          = $c('div', this.caption, {id: 'pp-comment-wrap'});
-    this.comment               = $c('div', this.comment_wrap, {id: 'pp-comment'});
-    this.viewer_comments       = $c('div', this.comment_wrap, {id: 'pp-viewer-comments'});
-    this.viewer_comments_w     = $c('div', this.viewer_comments);
-    this.viewer_comments_c     = $c('div', this.viewer_comments_w);
-    this.viewer_comments_a     = $c('div', this.viewer_comments_w, {id: 'one_comment_area'});
-    this.tags                  = $c('div', this.caption, {id: 'tag_area'});
-    this.rating                = $c('div', this.caption, {id: 'pp-rating', cls: 'pp-separator works_area'});
-    this.post_cap              = $c('div', this.caption, {id: 'pp-info', cls: 'pp-separator'});
-    this.a_img                 = $c('img', this.post_cap, {id: 'pp-author-img'});
-    this.a_status              = $c('span', this.post_cap, {id: 'pp-author-status'});
-    this.date_wrap             = $c('span', this.post_cap, {id: 'pp-date-wrap'});
-    this.date                  = $c('span', this.date_wrap, {id: 'pp-date'});
-    this.date_repost           = $c('span', this.date_wrap, {id: 'pp-date-repost'});
-    this.info                  = $c('span', this.post_cap, {id: 'pp-info-wrap'});
-    this.info_size             = $c('span', this.info, {id: 'pp-info-size'});
-    this.info_tools            = $c('span', this.info, {id: 'pp-info-tools'});
-    this.author                = $c('span', this.post_cap, {id: 'pp-author'});
-    this.a_profile             = $c('a', this.author);
-    this.a_illust              = $c('a', this.author, {text: "\u4f5c\u54c1"});
-    this.a_bookmark            = $c('a', this.author, {text: "\u30d6\u30c3\u30af\u30de\u30fc\u30af"});
-    this.a_stacc               = $c('a', this.author, {text: "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9"});
-    this.bm_edit               = $c('div', this.root_div, {id: 'pp-bm-edit'});
-    this.tag_edit              = $c('div', this.root_div, {id: 'tag_edit'});
-    this.img_div               = $c('div', this.root_div, {id: 'pp-img-div'});
-    if (conf.popup.overlay_control > 0) {
-      this.olc_prev            = $c('span', this.img_div, {id: 'pp-olc-prev', cls: 'pp-olc'});
-      this.olc_next            = $c('span', this.img_div, {id: 'pp-olc-next', cls: 'pp-olc'});
-      $ev(this.olc_prev).click(bind(function() {
-        this.prev(false, true);
-        return true;
-      }, this));
-      $ev(this.olc_next).click(bind(function() {
-        this.next(false, true);
-        return true;
-      }, this));
-    }
-    this.error_div = $c('div', this.img_div, {id: 'pp-error-message'});
-
-    this.init_display();
-    this.init_comments();
-
-    this.images = { };
-    this.bm_loading = false;
-    this.rating_enabled = false;
-    this.viewer_comments_enabled = false;
-    this.expand_header = false;
-    this.tag_edit_enabled = false;
-    this.tag_loading = false;
-    this.has_qrate = false;
-    this.has_image_response = false;
-    this.zoom_scale = 1;
-
-    var self = this;
-    this.manga = {
-      usable:      false,
-      enabled:     false,
-      page:        -1,
-      pages:       [],
-      page_count:  -1,
-      page_inc:    1,
-      page_dec:    -1,
-      preload_map: {},
-      init: function() {
-        this.usable      = false;
-        this.enabled     = false;
-        this.page        = -1;
-        this.pages       = [];
-        this.page_count  = -1;
-        this.page_inc    = 1;
-        this.page_dec    = -1;
-        this.preload_map = {};
-      },
-      preload: function() {
-        if (conf.popup.preload) {
-          var page = this.page + this.page_inc;
-          if (page < this.page_count && !this.preload_map[page]) {
-            new Popup.MangaLoader(self.item, page);
-          }
-        }
-      }
-    };
-
-    $ev(this.img_div).click(bind(function(ev) {
-      Popup.onclick.emit(this, ev);
-      return true;
-    }, this));
-    $ev(this.viewer_comments).click(bind(function(ev) {
-      var target = ev.target.wrappedJSObject || ev.target;
-      if (target === this.viewer_comments ||
-          target === this.viewer_comments_w) {
-        this.toggle_viewer_comment_form();
-        return true;
-      }
-      return false;
-    }, this));
-    $ev(this.tag_edit, {async: true}).listen('DOMNodeInserted', bind(function() {
-      var end = $x('.//input[contains(@onclick, "endTagEdit")]', this.tag_edit);
-      if (end) {
-        end.setAttribute('onclick', '');
-        end.onclick = '';
-        $ev(end).click(bind(function() {
-          this.toggle_tag_edit();
+  var Popup = $cls.create({
+    initialize: function(item, manga_page) {
+      this.root_div              = $c('div', null, {id: 'pp-popup'});
+      this.header                = $c('div', this.root_div, {id: 'pp-header'});
+      this.title_div             = $c('div', this.header, {id: 'pp-title_wrapper'});
+      this.title                 = $c('a', this.title_div, {id: 'pp-title', 'a:nopopup': ''});
+      this.header_right          = $c('span', this.title_div, {id: 'pp-right'});
+      this.status                = $c('span', this.header_right, {id: 'pp-status', css: 'display:none'});
+      this.manga_btn             = $c('a', this.header_right, {id: 'pp-manga-btn'});
+      $ev(this.manga_btn).click(bind(function() { this.toggle_manga_mode(); return true; }, this));
+      this.res_btn               = Popup.create_button('[R]', this.header_right, 'pp-res-btn');
+      this.comments_btn          = Popup.create_button('[C]', this.header_right, 'pp-comments-btn',
+                                                       bind(this.toggle_viewer_comments, this));
+      this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
+                                                       bind(this.toggle_bookmark_edit, this));
+      //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
+      this.caption               = $c('div', this.header, {id: 'pp-caption'});
+      this.comment_wrap          = $c('div', this.caption, {id: 'pp-comment-wrap'});
+      this.comment               = $c('div', this.comment_wrap, {id: 'pp-comment'});
+      this.viewer_comments       = $c('div', this.comment_wrap, {id: 'pp-viewer-comments'});
+      this.viewer_comments_w     = $c('div', this.viewer_comments);
+      this.viewer_comments_c     = $c('div', this.viewer_comments_w);
+      this.viewer_comments_a     = $c('div', this.viewer_comments_w, {id: 'one_comment_area'});
+      this.tags                  = $c('div', this.caption, {id: 'tag_area'});
+      this.rating                = $c('div', this.caption, {id: 'pp-rating', cls: 'pp-separator works_area'});
+      this.post_cap              = $c('div', this.caption, {id: 'pp-info', cls: 'pp-separator'});
+      this.a_img                 = $c('img', this.post_cap, {id: 'pp-author-img'});
+      this.a_status              = $c('span', this.post_cap, {id: 'pp-author-status'});
+      this.date_wrap             = $c('span', this.post_cap, {id: 'pp-date-wrap'});
+      this.date                  = $c('span', this.date_wrap, {id: 'pp-date'});
+      this.date_repost           = $c('span', this.date_wrap, {id: 'pp-date-repost'});
+      this.info                  = $c('span', this.post_cap, {id: 'pp-info-wrap'});
+      this.info_size             = $c('span', this.info, {id: 'pp-info-size'});
+      this.info_tools            = $c('span', this.info, {id: 'pp-info-tools'});
+      this.author                = $c('span', this.post_cap, {id: 'pp-author'});
+      this.a_profile             = $c('a', this.author);
+      this.a_illust              = $c('a', this.author, {text: "\u4f5c\u54c1"});
+      this.a_bookmark            = $c('a', this.author, {text: "\u30d6\u30c3\u30af\u30de\u30fc\u30af"});
+      this.a_stacc               = $c('a', this.author, {text: "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9"});
+      this.bm_edit               = $c('div', this.root_div, {id: 'pp-bm-edit'});
+      this.tag_edit              = $c('div', this.root_div, {id: 'tag_edit'});
+      this.img_div               = $c('div', this.root_div, {id: 'pp-img-div'});
+      if (conf.popup.overlay_control > 0) {
+        this.olc_prev            = $c('span', this.img_div, {id: 'pp-olc-prev', cls: 'pp-olc'});
+        this.olc_next            = $c('span', this.img_div, {id: 'pp-olc-next', cls: 'pp-olc'});
+        $ev(this.olc_prev).click(bind(function() {
+          this.prev(false, true);
+          return true;
+        }, this));
+        $ev(this.olc_next).click(bind(function() {
+          this.next(false, true);
           return true;
         }, this));
       }
-    }, this));
+      this.error_div = $c('div', this.img_div, {id: 'pp-error-message'});
 
-    Popup.oncreate.emit(this, item, manga_page);
-  }
+      this.init_display();
+      this.init_comments();
 
-  Popup._keypress = function(ev, conn, key) {
-    if (!Popup.stop_key) return Popup.instance.keypress(ev, key);
-    return false;
-  };
-  Popup._locate = function() {
-    Popup.instance.locate();
-  };
-  Popup.set_event_handler = function() {
-    Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(Popup._keypress);
-    window.addEventListener('resize', Popup._locate, false);
-  };
-  Popup.unset_event_handler = function() {
-    Popup.ev_conn_key.disconnect();
-    window.removeEventListener('resize', Popup._locate, false);
-  };
+      this.images = { };
+      this.bm_loading = false;
+      this.rating_enabled = false;
+      this.viewer_comments_enabled = false;
+      this.expand_header = false;
+      this.tag_edit_enabled = false;
+      this.tag_loading = false;
+      this.has_qrate = false;
+      this.has_image_response = false;
+      this.zoom_scale = 1;
 
-  Popup.oncreate = new Signal(function(item, manga_page) {
-    //window.document.body.insertBefore(this.root_div, window.document.body.firstChild);
-    window.document.body.appendChild(this.root_div);
-    this.locate();
-    this.set(item, false, false, false, typeof manga_page === 'number' ? manga_page : -1);
-    Popup.set_event_handler();
-  });
-  Popup.onsetitem = new Signal();
-  Popup.onload = new Signal();
-  Popup.onkeypress = new Signal(function(ev, key) {
-    function sel_qr(prev) {
-      var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
-      if (Popup.is_qrate_button(node)) node.focus();
-    }
-    return (function() {
-      for(var i = 0; i < arguments.length; ++i) {
-        var map = arguments[i];
-        if (!map.run) continue;
-        for(var j = 0; j < map.map.length; ++j) {
-          var entry = map.map[j];
-          if ($ev.key_check(ev, map.map[j].k)) {
-            entry.f.apply(entry.ctx || map.ctx || this, entry.a || []);
-            return true;
+      var self = this;
+      this.manga = {
+        usable:      false,
+        enabled:     false,
+        page:        -1,
+        pages:       [],
+        page_count:  -1,
+        page_inc:    1,
+        page_dec:    -1,
+        preload_map: {},
+        init: function() {
+          this.usable      = false;
+          this.enabled     = false;
+          this.page        = -1;
+          this.pages       = [];
+          this.page_count  = -1;
+          this.page_inc    = 1;
+          this.page_dec    = -1;
+          this.preload_map = {};
+        },
+        preload: function() {
+          if (conf.popup.preload) {
+            var page = this.page + this.page_inc;
+            if (page < this.page_count && !this.preload_map[page]) {
+              new Popup.MangaLoader(self.item, page);
+            }
           }
         }
-        if (map.stop) break;
-      }
-      return false;
-    }).call(this, {
-      run: this.is_bookmark_editing(),
-      stop: true,
-      ctx: this.bookmark_form,
-      map: [
-        {k: conf.key.popup_bookmark_submit, f: BookmarkForm.prototype.submit},
-        {k: conf.key.popup_bookmark_end,    f: BookmarkForm.prototype.close}
-      ]
-    }, {
-      run: this.is_tag_editing(),
-      stop: true,
-      map: [
-        {k: conf.key.popup_tag_edit_end, f: this.toggle_tag_edit}
-      ]
-    }, {
-      run: !!ev.qrate,
-      map: [
-        {k: conf.key.popup_qrate_select_prev, f: this.qrate_move_selection, a: [-1]},
-        {k: conf.key.popup_qrate_select_next, f: this.qrate_move_selection, a: [1]},
-        {k: conf.key.popup_qrate_submit,      f: this.qrate_submit},
-        {k: conf.key.popup_qrate_end,         f: this.toggle_qrate}
-      ]
-    }, {
-      run: !ev.qrate,
-      map: [
-        {k: conf.key.popup_qrate_start, f: this.toggle_qrate}
-      ]
-    }, {
-      run: conf.popup.rate && conf.popup.rate_key,
-      map: [
-        {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
-        {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
-        {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
-        {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
-        {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
-        {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
-        {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
-        {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
-        {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
-        {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
-      ]
-    }, {
-      run: this.manga.enabled,
-      map: [
-        {k: conf.key.popup_manga_end, f: this.toggle_manga_mode},
-      ]
-    }, {
-      run: !this.manga.enabled,
-      map: [
-        {k: conf.key.popup_manga_start, f: this.toggle_manga_mode},
-      ]
-    }, {
-      run: true,
-      map: [
-        {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
-        {k: conf.key.popup_next,                 f: this.next, a: [true]},
-        {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
-        {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
-        {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
-        {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
-        {k: conf.key.popup_first,                f: this.first},
-        {k: conf.key.popup_last,                 f: this.last},
-        {k: conf.key.popup_close,                f: this.close},
-        {k: conf.key.popup_open_profile,         f: this.open_author_profile},
-        {k: conf.key.popup_open_illust,          f: this.open_author_illust},
-        {k: conf.key.popup_open_bookmark,        f: this.open_author_bookmark},
-        {k: conf.key.popup_open_staccfeed,       f: this.open_author_staccfeed},
-        {k: conf.key.popup_open_response,        f: this.open_image_response},
-        {k: conf.key.popup_bookmark_start,       f: this.toggle_bookmark_edit},
-        {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
-        {k: conf.key.popup_open,                 f: this.open},
-        {k: conf.key.popup_open_big,             f: this.open, a: [true]},
-        {k: conf.key.popup_reload,               f: this.reload},
-        {k: conf.key.popup_caption_toggle,       f: this.toggle_caption},
-        {k: conf.key.popup_comment_toggle,       f: this.toggle_viewer_comments},
-        {k: conf.key.popup_tag_edit_start,       f: this.toggle_tag_edit},
-        {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
-        {k: conf.key.popup_zoom_in,              f: this.set_zoom, a: [this.zoom_scale + 1]},
-        {k: conf.key.popup_zoom_out,             f: this.set_zoom, a: [this.zoom_scale - 1]},
-        {k: conf.key.popup_help,                 f: show_help}
-      ]
-    });
-  });
+      };
 
-  Popup.onclick = new Signal(function(ev) { this.close(); });
-  Popup.onclose = new Signal(function() {
-    Popup.unset_event_handler();
-    Popup.instance = null;
-  });
-  Popup.run = function(item, manga_page) {
-    if (item) {
-      if (Popup.instance) {
-        Popup.instance.set(item, false, false, false, manga_page);
-      } else {
-        Popup.instance = new Popup(item, manga_page);
-      }
-    }
-    return Popup.instance;
-  };
-  Popup.run_url = function(url) {
-    var item = new GalleryItem(url, null, null, Popup.instance ? Popup.instance.item : null);
-    if (Popup.instant_prev) Popup.instant_prev.next = item;
-    Popup.instant_prev = item;
-    return Popup.run(item);
-  };
-  Popup.create_button = function(text, parent, id, cb_click) {
-    var btn = $c('a', parent, {id: id, href: 'javascript:void(0)', text: text});
-    if (cb_click) $ev(btn).click(function() {
-      cb_click();
-      return true;
-    });
-    return btn;
-  };
-
-  Popup.create_zoom_image = function(img, width, height, r_width, r_height) {
-    /* security error
-    var canvas = $c('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    var data = ctx.getImageData(0, 0, width, height);
-    for(var y = height - 1; y >= 0; --y) {
-      for(var x = width - 1; x >= 0; --x) {
-        for(var i = 0; i < 4; ++i) {
-          var rx = x * r_width / width, ry = y * r_height / height;
-          data[y * width * 4 + x * 4 + i] = data[ry * width * 4 + rx * 4 + i];
+      $ev(this.img_div).click(bind(function(ev) {
+        Popup.onclick.emit(this, ev);
+        return true;
+      }, this));
+      $ev(this.viewer_comments).click(bind(function(ev) {
+        var target = ev.target.wrappedJSObject || ev.target;
+        if (target === this.viewer_comments ||
+            target === this.viewer_comments_w) {
+          this.toggle_viewer_comment_form();
+          return true;
         }
-      }
-    }
-    ctx.putImageData(data, 0, 0);
-    return canvas;
-    */
+        return false;
+      }, this));
+      $ev(this.tag_edit, {async: true}).listen('DOMNodeInserted', bind(function() {
+        var end = $x('.//input[contains(@onclick, "endTagEdit")]', this.tag_edit);
+        if (end) {
+          end.setAttribute('onclick', '');
+          end.onclick = '';
+          $ev(end).click(bind(function() {
+            this.toggle_tag_edit();
+            return true;
+          }, this));
+        }
+      }, this));
 
-    if (browser.opera) {
-      var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
-      svg_img.setAttribute('width', '100%');
-      svg_img.setAttribute('height', '100%');
-      svg_img.style.imageRendering = 'optimizeSpeed';
-      svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', img.src);
-      var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
-      svg.setAttribute('width', width);
-      svg.setAttribute('height', height);
-      svg.appendChild(svg_img);
-      return svg;
-    } else {
-      img = img.cloneNode(false);
-      img.style.cssText = '';
-      img.style.width = width + 'px';
-      img.style.height = height + 'px';
-      if (browser.gecko) {
-        img.style.imageRendering = 'optimizeSpeed';
-      } else if (browser.webkit) {
-        //img.style.imageRendering = '-webkit-crisp-edges';
-      }
-      return img;
-    }
-  };
-  Popup.is_qrate_button = function(elem) {
-    return !!elem && check_node(elem, 'Input') && /^qr_kw\d+$/.test(elem.id);
-  };
+      Popup.oncreate.emit(this, item, manga_page);
+    },
 
-  Popup.prototype = {
     init_display: function() {
       each([
         this.manga_btn,
@@ -4082,7 +3876,7 @@
       var rw = width;
       if (width > mw || height > mh) {
         var sw = mw / width, sh = mh / height, scale = sw < sh ? sw : sh;
-        rw = 0
+        rw = 0;
         each(this.images.list, function(image) {
           var w = Math.floor(image.size.width * scale);
           image.image.style.width = w + 'px';
@@ -4476,7 +4270,222 @@
     scroll_caption: function(pos) {
       this.comment_wrap.scrollTop += pos;
     }
-  };
+  }, {
+    _keypress: function(ev, conn, key) {
+      if (!Popup.stop_key) return Popup.instance.keypress(ev, key);
+      return false;
+    },
+
+    _locate: function() {
+      Popup.instance.locate();
+    },
+
+    set_event_handler: function() {
+      Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(Popup._keypress);
+      window.addEventListener('resize', Popup._locate, false);
+    },
+
+    unset_event_handler: function() {
+      Popup.ev_conn_key.disconnect();
+      window.removeEventListener('resize', Popup._locate, false);
+    },
+
+    oncreate: new Signal(function(item, manga_page) {
+      //window.document.body.insertBefore(this.root_div, window.document.body.firstChild);
+      window.document.body.appendChild(this.root_div);
+      this.locate();
+      this.set(item, false, false, false, typeof manga_page === 'number' ? manga_page : -1);
+      Popup.set_event_handler();
+    }),
+
+    onsetitem: new Signal(),
+    onload: new Signal(),
+    onkeypress: new Signal(function(ev, key) {
+      function sel_qr(prev) {
+        var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
+        if (Popup.is_qrate_button(node)) node.focus();
+      }
+      return (function() {
+        for(var i = 0; i < arguments.length; ++i) {
+          var map = arguments[i];
+          if (!map.run) continue;
+          for(var j = 0; j < map.map.length; ++j) {
+            var entry = map.map[j];
+            if ($ev.key_check(ev, map.map[j].k)) {
+              entry.f.apply(entry.ctx || map.ctx || this, entry.a || []);
+              return true;
+            }
+          }
+          if (map.stop) break;
+        }
+        return false;
+      }).call(this, {
+        run: this.is_bookmark_editing(),
+        stop: true,
+        ctx: this.bookmark_form,
+        map: [
+          {k: conf.key.popup_bookmark_submit, f: BookmarkForm.prototype.submit},
+          {k: conf.key.popup_bookmark_end,    f: BookmarkForm.prototype.close}
+        ]
+      }, {
+        run: this.is_tag_editing(),
+        stop: true,
+        map: [
+          {k: conf.key.popup_tag_edit_end, f: this.toggle_tag_edit}
+        ]
+      }, {
+        run: !!ev.qrate,
+        map: [
+          {k: conf.key.popup_qrate_select_prev, f: this.qrate_move_selection, a: [-1]},
+          {k: conf.key.popup_qrate_select_next, f: this.qrate_move_selection, a: [1]},
+          {k: conf.key.popup_qrate_submit,      f: this.qrate_submit},
+          {k: conf.key.popup_qrate_end,         f: this.toggle_qrate}
+        ]
+      }, {
+        run: !ev.qrate,
+        map: [
+          {k: conf.key.popup_qrate_start, f: this.toggle_qrate}
+        ]
+      }, {
+        run: conf.popup.rate && conf.popup.rate_key,
+        map: [
+          {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
+          {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
+          {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
+          {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
+          {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
+          {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
+          {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
+          {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
+          {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
+          {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
+        ]
+      }, {
+        run: this.manga.enabled,
+        map: [
+          {k: conf.key.popup_manga_end, f: this.toggle_manga_mode}
+        ]
+      }, {
+        run: !this.manga.enabled,
+        map: [
+          {k: conf.key.popup_manga_start, f: this.toggle_manga_mode}
+        ]
+      }, {
+        run: true,
+        map: [
+          {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
+          {k: conf.key.popup_next,                 f: this.next, a: [true]},
+          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
+          {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
+          {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
+          {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
+          {k: conf.key.popup_first,                f: this.first},
+          {k: conf.key.popup_last,                 f: this.last},
+          {k: conf.key.popup_close,                f: this.close},
+          {k: conf.key.popup_open_profile,         f: this.open_author_profile},
+          {k: conf.key.popup_open_illust,          f: this.open_author_illust},
+          {k: conf.key.popup_open_bookmark,        f: this.open_author_bookmark},
+          {k: conf.key.popup_open_staccfeed,       f: this.open_author_staccfeed},
+          {k: conf.key.popup_open_response,        f: this.open_image_response},
+          {k: conf.key.popup_bookmark_start,       f: this.toggle_bookmark_edit},
+          {k: conf.key.popup_open_bookmark_detail, f: this.open_bookmark_detail},
+          {k: conf.key.popup_open,                 f: this.open},
+          {k: conf.key.popup_open_big,             f: this.open, a: [true]},
+          {k: conf.key.popup_reload,               f: this.reload},
+          {k: conf.key.popup_caption_toggle,       f: this.toggle_caption},
+          {k: conf.key.popup_comment_toggle,       f: this.toggle_viewer_comments},
+          {k: conf.key.popup_tag_edit_start,       f: this.toggle_tag_edit},
+          {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
+          {k: conf.key.popup_zoom_in,              f: this.set_zoom, a: [this.zoom_scale + 1]},
+          {k: conf.key.popup_zoom_out,             f: this.set_zoom, a: [this.zoom_scale - 1]},
+          {k: conf.key.popup_help,                 f: show_help}
+        ]
+      });
+    }),
+
+    onclick: new Signal(function(ev) { this.close(); }),
+
+    onclose: new Signal(function() {
+      Popup.unset_event_handler();
+      Popup.instance = null;
+    }),
+
+    run: function(item, manga_page) {
+      if (item) {
+        if (Popup.instance) {
+          Popup.instance.set(item, false, false, false, manga_page);
+        } else {
+          Popup.instance = new Popup(item, manga_page);
+        }
+      }
+      return Popup.instance;
+    },
+
+    run_url: function(url) {
+      var item = new GalleryItem(url, null, null, Popup.instance ? Popup.instance.item : null);
+      if (Popup.instant_prev) Popup.instant_prev.next = item;
+      Popup.instant_prev = item;
+      return Popup.run(item);
+    },
+
+    create_button: function(text, parent, id, cb_click) {
+      var btn = $c('a', parent, {id: id, href: 'javascript:void(0)', text: text});
+      if (cb_click) $ev(btn).click(function() {
+        cb_click();
+        return true;
+      });
+      return btn;
+    },
+
+    create_zoom_image: function(img, width, height, r_width, r_height) {
+      /* security error
+      var canvas = $c('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      var data = ctx.getImageData(0, 0, width, height);
+      for(var y = height - 1; y >= 0; --y) {
+        for(var x = width - 1; x >= 0; --x) {
+          for(var i = 0; i < 4; ++i) {
+            var rx = x * r_width / width, ry = y * r_height / height;
+            data[y * width * 4 + x * 4 + i] = data[ry * width * 4 + rx * 4 + i];
+          }
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+      return canvas;
+      */
+
+      if (browser.opera) {
+        var svg_img = window.document.createElementNS(XMLNS_SVG, 'image');
+        svg_img.setAttribute('width', '100%');
+        svg_img.setAttribute('height', '100%');
+        svg_img.style.imageRendering = 'optimizeSpeed';
+        svg_img.setAttributeNS(XMLNS_XLINK, 'xlink:href', img.src);
+        var svg = window.document.createElementNS(XMLNS_SVG, 'svg');
+        svg.setAttribute('width', width);
+        svg.setAttribute('height', height);
+        svg.appendChild(svg_img);
+        return svg;
+      } else {
+        img = img.cloneNode(false);
+        img.style.cssText = '';
+        img.style.width = width + 'px';
+        img.style.height = height + 'px';
+        if (browser.gecko) {
+          img.style.imageRendering = 'optimizeSpeed';
+        } else if (browser.webkit) {
+          //img.style.imageRendering = '-webkit-crisp-edges';
+        }
+        return img;
+      }
+    },
+
+    is_qrate_button: function(elem) {
+      return !!elem && check_node(elem, 'Input') && /^qr_kw\d+$/.test(elem.id);
+    }
+  });
 
   Popup.Loader = $cls.create(LoaderBase, {
     initialize: function(item, cb_load, cb_error, reload) {
@@ -5480,8 +5489,8 @@
 
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
-    //geturl.cnt = geturl.cnt || 0;
-    //if (++geturl.cnt % 3 === 0) return cb_error();
+    geturl.cnt = geturl.cnt || 0;
+    if (++geturl.cnt % 3 === 0) return cb_error();
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
