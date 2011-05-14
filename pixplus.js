@@ -2672,7 +2672,7 @@
         var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
         if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
       }
-      conf.debug && chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
+      if (conf.debug) chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
     } else if (/^\/search_user\.php/.test(window.location.pathname)) {
       Pager.wait(function() {
         var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
@@ -5353,7 +5353,10 @@
       },
 
       script: function(url, cond) {
-        if (cond) return this;
+        if (cond) {
+          if (conf.debug) chk_ext_src('script', 'src', url);
+          return this;
+        }
         LOG.debug('$js#script: ' + url);
         this.urls.push(url);
         if (this.block) {
@@ -5424,8 +5427,8 @@
       }
     });
 
-    this.script = function(url) {
-      return new ctx().script(url);
+    this.script = function() {
+      return ctx.prototype.script.apply(new ctx(), Array.prototype.slice.call(arguments));
     };
   };
 
