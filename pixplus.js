@@ -5326,7 +5326,7 @@
         if (this.block) {
           ++this.load_cnt;
         } else {
-          this.add_load(url, true, callback);
+          this.add_load(url, true);
         }
         return this;
       },
