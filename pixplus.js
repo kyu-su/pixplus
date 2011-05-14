@@ -2985,6 +2985,7 @@
       init_pixplus_real();
     }
     function pt_onload() {
+      if (!/^\/stacc\//.test(window.location.pathname)) return;
       var _request = window.Ajax.Request.prototype.request;
       window.Ajax.Request.prototype.request = function(url) {
         url = mod_rpc_url(url);
@@ -2998,12 +2999,12 @@
       }
       return $js;
     })($js
-       .script(!window.jQuery && pp.url.js.jquery)
+       .script(pp.url.js.jquery, !!window.jQuery)
        .wait(jq_onload)
-       .script(!window.Prototype && pp.url.js.prototypejs)
-       .wait(/^\/stacc\//.test(window.location.pathname) ? pt_onload : null)
-       .script(pp.url.js.effects)
-       .script(pp.url.js.rpc)
+       .script(pp.url.js.prototypejs, !!window.Prototype)
+       .wait(pt_onload)
+       .script(pp.url.js.effects, !!window.Effect)
+       .script(pp.url.js.rpc, !!window.sendRequest)
        .wait(function() {
          if (conf.disable_effect) {
            window.jQuery.fx.off = true;
@@ -5310,26 +5311,22 @@
 
   var $js = new function() {
     var holder = $t('head')[0];
-    this.script = function(url) {
-      return new ctx().script(url);
-    };
+    var ctx = $cls.create({
+      initialize: function(block) {
+        this.urls     = [];
+        this.scripts  = [];
+        this.load_cnt = 0;
+        this.block    = block;
+      },
 
-    function ctx(block) {
-      this.urls     = [];
-      this.scripts  = [];
-      this.load_cnt = 0;
-      this.block    = block;
-    }
-
-    ctx.prototype = {
-      script: function(url) {
-        if (!url) return this;
+      script: function(url, cond) {
+        if (arguments.length > 1 && cond) return this;
         LOG.debug('$js#script: ' + url);
         this.urls.push(url);
         if (this.block) {
           ++this.load_cnt;
         } else {
-          this.add_load(url, true);
+          this.add_load(url, true, callback);
         }
         return this;
       },
@@ -5353,19 +5350,19 @@
           if (elem.getAttribute('type') === 'script/cache') { // webkit
             LOG.debug('$js#labjs: ' + url);
             var callee = arguments.callee, self = this;
-            setTimeout(function() { callee.apply(self, [url]); }, 0);
+            setTimeout(function() { callee.call(self, url); }, 0);
           } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
             LOG.debug('$js#preexists: ' + url);
-            wait.apply(this, [elem]);
+            wait.call(this, elem);
           } else if (elem.readyState) { // for opera
-            load_cb.apply(this);
+            load_cb.call(this);
           } else {
             setTimeout(bind(load_cb, this), 0);
           }
         } else {
-          LOG.debug('$js#load: ' + url);
+          LOG.info('$js#load: ' + url);
           elem = $c('script', null, {async: false});
-          wait.apply(this, [elem]);
+          wait.call(this, elem);
           elem.src  = url;
           holder.appendChild(elem);
         }
@@ -5392,6 +5389,10 @@
           if (this.wait.ctx)  this.wait.ctx.fire();
         }
       }
+    });
+
+    this.script = function(url) {
+      return new ctx().script(url);
     };
   };
 
