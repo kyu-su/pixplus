@@ -1006,6 +1006,22 @@
              node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
   }
 
+  function set_class(node, cls, state) {
+    var list = node.className.split(/ +/);
+    for(var i = 0; i < list.length; ++i) {
+      if (list[i] === cls) {
+        if (state) {
+          return;
+        } else {
+          list.splice(i, 1);
+          --i;
+        }
+      }
+    }
+    if (state) list.push(cls);
+    node.className = list.join(' ');
+  }
+
   function each(list, func, obj) {
     if (!list) return list;
     for(var i = 0; i < list.length; ++i) {
@@ -3404,7 +3420,8 @@
       this.set_status('Error!');
       this.load_pre();
       if (msg) {
-        this.root_div.className += ' pp-error';
+        set_class(this.root_div, 'pp-error', true);
+        this.img_div.style.display = '';
         this.error_div.textContent = msg;
         this.locate();
         this.update_olc();
@@ -3412,7 +3429,7 @@
     },
     complete: function() {
       this.status.style.display = 'none';
-      this.root_div.className = this.root_div.className.replace(/ *pp-error */, ' ');
+      set_class(this.root_div, 'pp-error', false);
     },
 
     first: function() {
@@ -5489,8 +5506,8 @@
 
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
-    geturl.cnt = geturl.cnt || 0;
-    if (++geturl.cnt % 3 === 0) return cb_error();
+    //geturl.cnt = geturl.cnt || 0;
+    //if (++geturl.cnt % 3) return cb_error();
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
