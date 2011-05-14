@@ -2686,10 +2686,6 @@
   }
 
   function init_pixplus_real() {
-    var ev = window.document.createEvent('Event');
-    ev.initEvent('pixplusInitialize', true, true);
-    window.document.dispatchEvent(ev);
-
     pp.rpc_usable = true;
     if (true || !conf.debug) {
       /* イラストページで誤爆防止のためにタグ編集と評価機能を無効化。 */
@@ -2971,6 +2967,9 @@
 
   function init_pixplus() {
     window.document.body.setAttribute('pixplus', '');
+    var ev = window.document.createEvent('Event');
+    ev.initEvent('pixplusInitialize', true, true);
+    window.document.dispatchEvent(ev);
 
     each($xa('//a[contains(@href, "jump.php")]'), function(anc) {
       var re;
