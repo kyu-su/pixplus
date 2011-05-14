@@ -626,13 +626,15 @@
   }
 
   var $cls = {
-    create: function(parent, proto) {
-      if (arguments.length < 2) {
-        proto = parent;
-        parent = null;
-      }
+    create: function() {
+      var parent = null, args = Array.prototype.slice.call(arguments);
+      if (typeof args === 'function') parent = args.shift();
+      var proto = args[0], props = args[1] || { };
       function cls() {
         this.initialize.apply(this, Array.prototype.slice.call(arguments));
+      }
+      for(var key in props) {
+        cls[key] = props[key];
       }
       cls.__super__ = parent;
       if (parent) cls.prototype = new parent();
@@ -5180,41 +5182,17 @@
     return ary;
   }
 
-  function Floater(wrap, cont) {
-    this.wrap = wrap;
-    this.cont = cont;
-    this.floating = false;
-    this.disable_float = false;
-    this.use_placeholder = true;
-    Floater.instances.push(this);
-    if (Floater.initialized) this.init();
-  }
-  Floater.instances = [];
-  Floater.initialized = false;
-  Floater.init = function() {
-    if (Floater.initialized) return;
-    each(Floater.instances, function(inst) {
-      inst.init();
-    });
-    $ev(window, true).scroll(Floater.update_float);
-    $ev(window, true).resize(Floater.update_height);
-    Floater.initialized = true;
-  };
-  Floater.auto_run = function(func) {
-    if (conf.float_tag_list === 1) {
-      func();
-    } else if (conf.float_tag_list === 2) {
-      Pager.wait(func);
-    }
-  };
-  Floater.update_float = function() {
-    each(Floater.instances, function(inst) { inst.update_float(); });
-  };
-  Floater.update_height = function() {
-    each(Floater.instances, function(inst) { inst.update_height(); });
-  };
+  var Floater = $cls.create({
+    initialize: function(wrap, cont) {
+      this.wrap = wrap;
+      this.cont = cont;
+      this.floating = false;
+      this.disable_float = false;
+      this.use_placeholder = true;
+      Floater.instances.push(this);
+      if (Floater.initialized) this.init();
+    },
 
-  Floater.prototype = {
     init: function() {
       this.wrap.style.boxSizing = 'border-box';
       this.wrap.style.webkitBoxSizing = 'border-box';
@@ -5287,7 +5265,36 @@
     scroll_restore: function () {
       if (this.cont) this.cont.scrollTop = this.scroll_pos;
     }
-  };
+  }, {
+    instances: [],
+    initialized: false,
+
+    init: function() {
+      if (Floater.initialized) return;
+      each(Floater.instances, function(inst) {
+        inst.init();
+      });
+      $ev(window, true).scroll(Floater.update_float);
+      $ev(window, true).resize(Floater.update_height);
+      Floater.initialized = true;
+    },
+
+    auto_run: function(func) {
+      if (conf.float_tag_list === 1) {
+        func();
+      } else if (conf.float_tag_list === 2) {
+        Pager.wait(func);
+      }
+    },
+
+    update_float: function() {
+      each(Floater.instances, function(inst) { inst.update_float(); });
+    },
+
+    update_height: function() {
+      each(Floater.instances, function(inst) { inst.update_height(); });
+    }
+  });
 
   var Pager = new function() {
     var loaded = ((_extension_data && _extension_data.has_pager) ||
