@@ -628,7 +628,7 @@
   var $cls = {
     create: function() {
       var parent = null, args = Array.prototype.slice.call(arguments);
-      if (typeof args === 'function') parent = args.shift();
+      if (typeof args[0] === 'function') parent = args.shift();
       var proto = args[0], props = args[1] || { };
       function cls() {
         this.initialize.apply(this, Array.prototype.slice.call(arguments));
@@ -922,20 +922,20 @@
     return pressed.split('+').sort().join('+') === key.split('+').sort().join('+');
   };
 
-  $ev.Connection = function(ctx) {
-    this.ctx = ctx;
-    this.disconnected = false;
-    this.listeners = [];
-  };
+  $ev.Connection = $cls.create({
+    initialize: function(ctx) {
+      this.ctx = ctx;
+      this.disconnected = false;
+      this.listeners = [];
+    },
 
-  $ev.Connection.prototype = {
     disconnect: function() {
       this.disconnected = true;
       each(this.listeners, function(item) {
         this.ctx.removeEventListener(item[0], item[1], item[2]);
       }, this);
     }
-  };
+  });
 
   function $(id, elem) {
     return window.document.getElementById(id);
