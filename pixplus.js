@@ -629,16 +629,16 @@
     create: function() {
       var parent = null, args = Array.prototype.slice.call(arguments);
       if (typeof args[0] === 'function') parent = args.shift();
-      var proto = args[0], props = args[1] || { };
+      var proto = args[0], props = args[1] || { }, key;
       function cls() {
         this.initialize.apply(this, Array.prototype.slice.call(arguments));
       }
-      for(var key in props) {
+      for(key in props) {
         cls[key] = props[key];
       }
       cls.__super__ = parent;
       if (parent) cls.prototype = new parent();
-      for(var key in proto) {
+      for(key in proto) {
         cls.prototype[key] = proto[key];
       }
       if (!cls.prototype.initialize) {
