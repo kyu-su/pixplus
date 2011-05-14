@@ -2054,7 +2054,7 @@
           if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
         }
 
-        ($('manga_top') || $('pageHeader')).appendChild(root);
+        ($('manga_top') || $('wrapHeader')).appendChild(root);
       }
     }
   }
@@ -2731,7 +2731,7 @@
                  '#pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
                  '#pp-sitenav-menu li input{width:2em;margin-left:2px;padding:1px;}' +
                  // config
-                 '#pp-conf-root{margin-bottom:4px;}' +
+                 '#pp-conf-root{width:970px;margin:0px auto 4px auto;}' +
                  ConfigUI.css +
                  '#pp-conf-pager-content{height:600px;}' +
                  '.pp-conf-page{width:960px;max-height:600px;overflow:auto;}' +
