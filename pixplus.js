@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.6.0
+// @version     0.6.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -308,7 +308,7 @@
       arguments.callee.css.textContent += source;
     },
     open: function() {
-      window.open.apply(window, Array.prototype.slice.apply(arguments));
+      window.open.apply(window, Array.prototype.slice.call(arguments));
     },
     key_enabled: function(ev) {
       return !((check_node(ev.target, 'TextArea') ||
@@ -570,7 +570,7 @@
   }
   wrap_global.wrap = function(func, real) {
     return function() {
-      func.apply(window, [real, this].concat(Array.prototype.slice.apply(arguments)));
+      func.apply(window, [real, this].concat(Array.prototype.slice.call(arguments)));
     };
   };
   wrap_global.check = function() {
@@ -625,21 +625,43 @@
                : 'gecko')] = true;
   }
 
-  function Signal(def) {
-    this.def = def;
-    this.funcs = [];
-    this.id = 1;
-    return this;
-  }
+  var $cls = {
+    create: function(parent, proto) {
+      if (arguments.length < 2) {
+        proto = parent;
+        parent = null;
+      }
+      function cls() {
+        this.initialize.apply(this, Array.prototype.slice.call(arguments));
+      }
+      cls.__super__ = parent;
+      if (parent) cls.prototype = new parent();
+      for(var key in proto) {
+        cls.prototype[key] = proto[key];
+      }
+      if (!cls.prototype.initialize) {
+        cls.prototype.initialize = function() { };
+      }
+      if (parent) cls.prototype.__super__ = parent.prototype.initialize;
+      cls.prototype.constructor = cls;
+      return cls;
+    }
+  };
 
-  Signal.prototype = {
+  var Signal = $cls.create({
+    initialize: function(def) {
+      this.def = def;
+      this.funcs = [];
+      this.id = 1;
+    },
+
     connect: function(func, async) {
       var conn = new Signal.Connection(this, this.id);
       var timer, last_args;
       this.funcs.push({
         id: this.id,
         cb: function() {
-          last_args = [this, Array.prototype.slice.apply(arguments)];
+          last_args = [this, Array.prototype.slice.call(arguments)];
           if (async) {
             if (timer) return null;
             timer = setTimeout(function() {
@@ -669,7 +691,7 @@
     },
 
     emit: function(inst) {
-      var args = Array.prototype.slice.apply(arguments, [1]);
+      var args = Array.prototype.slice.call(arguments, 1);
       var res;
       for(var i = 0; i < this.funcs.length; ++i) {
         res = this.funcs[i].cb.apply(inst, args);
@@ -678,19 +700,19 @@
       if (this.def && (res = this.def.apply(inst, args))) return res;
       return false;
     }
-  };
+  });
 
-  Signal.Connection = function(signal, id) {
-    this.signal = signal;
-    this.id = id;
-    this.disconnected = false;
-  };
+  Signal.Connection = $cls.create({
+    initialize: function(signal, id) {
+      this.signal = signal;
+      this.id = id;
+      this.disconnected = false;
+    },
 
-  Signal.Connection.prototype = {
     disconnect: function() {
       if (!this.disconnected) this.signal.disconnect(this.id);
     }
-  };
+  });
 
   function $ev(ctx, args) {
     var opts = args || {};
@@ -1013,9 +1035,9 @@
   }
 
   function bind(func, obj) {
-    var args = Array.prototype.slice.apply(arguments, [2]);
+    var args = Array.prototype.slice.call(arguments, 2);
     return function() {
-      return func.apply(obj || window, args.concat(Array.prototype.slice.apply(arguments)));
+      return func.apply(obj || window, args.concat(Array.prototype.slice.call(arguments)));
     };
   }
 
@@ -1571,6 +1593,10 @@
   }];
 
   ConfigUI.changelog_data = [{
+    date: '2011/05/xx', version: '0.6.1', changes: [
+      'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+    ]
+  }, {
     date: '2011/05/13', version: '0.6.0', changes: [
       '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
       '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
@@ -2599,7 +2625,7 @@
           } else {
             var _setup = window.pixiv.manga.setup;
             window.pixiv.manga.setup = function() {
-              _setup.apply(this, Array.prototype.slice.apply(arguments));
+              _setup.apply(this, Array.prototype.slice.call(arguments));
               func();
             };
           }
@@ -2858,7 +2884,7 @@
               });
             btn.style.opacity = '0.2';
           } else {
-            _open.apply(this, Array.prototype.slice.apply(arguments));
+            _open.apply(this, Array.prototype.slice.call(arguments));
           }
         };
       })();
@@ -2877,7 +2903,7 @@
       var msg = "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9".replace('%s', String(score));
       if (conf.rate_confirm && !confirm(msg)) return;
       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
-      real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+      real.apply(othis, Array.prototype.slice.call(arguments, 2));
     });
     defineMagicFunction('send_quality_rating', function(real, othis) {
       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
@@ -2888,7 +2914,7 @@
         var success = obj.success;
         obj.success = function() {
           try {
-            success.apply(othis, Array.prototype.slice.apply(arguments));
+            success.apply(othis, Array.prototype.slice.call(arguments));
             if (Popup.instance && Popup.instance.has_qrate) {
               if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
               each(
@@ -2908,7 +2934,7 @@
         };
         return _ajax.apply(this, [obj]);
       };
-      real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+      real.apply(othis, Array.prototype.slice.call(arguments, 2));
       window.jQuery.ajax = _ajax;
     });
     defineMagicFunction('rating_ef', function(real, othis) {
@@ -2920,7 +2946,7 @@
     });
     defineMagicFunction('rating_ef2', function(real, othis) {
       if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
-      real.apply(othis, Array.prototype.slice.apply(arguments, [2]));
+      real.apply(othis, Array.prototype.slice.call(arguments, 2));
     });
   }
 
@@ -2952,7 +2978,7 @@
         var _ajax = window.jQuery.ajax;
         window.jQuery.ajax = function(obj) {
           if (obj) obj.url = mod_rpc_url(obj.url);
-          return _ajax.apply(this, Array.prototype.slice.apply(arguments));
+          return _ajax.apply(this, Array.prototype.slice.call(arguments));
         };
       }
       init_pixplus_real();
@@ -2961,7 +2987,7 @@
       var _request = window.Ajax.Request.prototype.request;
       window.Ajax.Request.prototype.request = function(url) {
         url = mod_rpc_url(url);
-        return _request.apply(this, [url].concat(Array.prototype.slice.apply(arguments, [1])));
+        return _request.apply(this, [url].concat(Array.prototype.slice.call(arguments, 1)));
       };
     }
 
@@ -2993,12 +3019,13 @@
     setTimeout(Floater.init, 100);
   }
 
-  function LoaderBase(cb_load, cb_error) {
-    this.stopped = false;
-    this.cb_load = cb_load;
-    this.cb_error = cb_error;
-  }
-  LoaderBase.prototype = {
+  var LoaderBase = $cls.create({
+    initialize: function(cb_load, cb_error) {
+      this.stopped = false;
+      this.cb_load = cb_load;
+      this.cb_error = cb_error;
+    },
+
     complete: function() {
       if (!this.stopped && this.cb_load) this.cb_load.call(this);
       this.stopped = true;
@@ -3012,7 +3039,7 @@
     cancel: function() {
       this.stopped = true;
     }
-  };
+  });
 
   function GalleryItem(url, thumb, caption, prev, gallery) {
     var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1], 10);
@@ -4447,52 +4474,52 @@
     }
   };
 
-  Popup.Loader = function(item, cb_load, cb_error, reload) {
-    LoaderBase.call(this, cb_load, cb_error);
-    this.item      = item;
-    this.url       = item.medium;
-    this.text      = '';
-    this.image     = null;
-    this.parallel  = false;
-    this.text_cmp  = false;
-    this.img_cmp   = false;
+  Popup.Loader = $cls.create(LoaderBase, {
+    initialize: function(item, cb_load, cb_error, reload) {
+      this.__super__.call(this, cb_load, cb_error);
+      this.item      = item;
+      this.url       = item.medium;
+      this.text      = '';
+      this.image     = null;
+      this.parallel  = false;
+      this.text_cmp  = false;
+      this.img_cmp   = false;
 
-    this.item.loaded = true;
+      this.item.loaded = true;
 
-    if (conf.popup.big_image && this.item.img_big) {
-      this.image = this.item.img_big;
-      this.img_cmp = true;
-    } else if (!conf.popup.big_image && this.item.img_med) {
-      this.image = this.item.img_med;
-      this.img_cmp = true;
-    } else if (this.item.img_url_base && !getcache(this.url)) {
-      // conf.popup.big_image = trueの時、イラストがマンガなら大きな画像は存在しないので、失敗したらHTMLソースをパースする。
-      // キャッシュを持ってる時は同期的にコールバックするのでやらない。推定したURLが404の時に余分なリクエストが発生するため。
-      LOG.debug('trying parallel load - ' + this.item.img_url_base);
-      this.parallel = true;
-      this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
-    }
-
-    geturl(this.url, bind(function(text) {
-      var re;
-      if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
-        this.error(re[1].replace(/<[^>]*>/g, ''));
-      } else {
-        this.text = text;
-        this.text_cmp = true;
-        if (this.img_cmp) {
-          this.complete();
-        } else if (!this.parallel) {
-          this.parse_text();
-        } // else 画像が並列ロード中かキャンセルされた
+      if (conf.popup.big_image && this.item.img_big) {
+        this.image = this.item.img_big;
+        this.img_cmp = true;
+      } else if (!conf.popup.big_image && this.item.img_med) {
+        this.image = this.item.img_med;
+        this.img_cmp = true;
+      } else if (this.item.img_url_base && !getcache(this.url)) {
+        // conf.popup.big_image = trueの時、イラストがマンガなら大きな画像は存在しないので、失敗したらHTMLソースをパースする。
+        // キャッシュを持ってる時は同期的にコールバックするのでやらない。推定したURLが404の時に余分なリクエストが発生するため。
+        LOG.debug('trying parallel load - ' + this.item.img_url_base);
+        this.parallel = true;
+        this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
       }
-    }, this), bind(function() {
-      this.error('Failed to load HTML');
-    }, this), reload);
-    return this;
-  };
 
-  Popup.Loader.prototype = {
+      geturl(this.url, bind(function(text) {
+        var re;
+        if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
+          this.error(re[1].replace(/<[^>]*>/g, ''));
+        } else {
+          this.text = text;
+          this.text_cmp = true;
+          if (this.img_cmp) {
+            this.complete();
+          } else if (!this.parallel) {
+            this.parse_text();
+          } // else 画像が並列ロード中かキャンセルされた
+        }
+      }, this), bind(function() {
+        this.error('Failed to load HTML');
+      }, this), reload);
+      return this;
+    },
+
     load_image: function(url) {
       var self = this;
       getimg(url, function(img) {
@@ -4543,38 +4570,37 @@
       uncache(this.url);
       LoaderBase.prototype.error.call(this, msg);
     }
-  };
-  Popup.Loader.prototype.__proto__ = LoaderBase.prototype;
+  });
 
-  Popup.MangaLoader = function(item, page, cb_load, cb_error) {
-    LoaderBase.call(this, cb_load, cb_error);
-    this.item       = item;
-    this.page       = page;
+  Popup.MangaLoader = $cls.create(LoaderBase, {
+    initialize: function(item, page, cb_load, cb_error) {
+      this.__super__.call(this, cb_load, cb_error);
+      this.item       = item;
+      this.page       = page;
 
-    this.images     = null;
-    this.pages      = [{page: page, image_index: 0}];
-    this.page_inc   = 1;
-    this.page_dec   = 1;
-    this.load_html  = conf.popup.manga_spread;
+      this.images     = null;
+      this.pages      = [{page: page, image_index: 0}];
+      this.page_inc   = 1;
+      this.page_dec   = 1;
+      this.load_html  = conf.popup.manga_spread;
 
-    if (this.load_html) {
-      if (item.manga_pages) {
-        this.load_pages(item.manga_pages);
-        return;
-      } else {
-        geturl(urlmode(item.medium, 'manga'),
-               bind(Popup.MangaLoader.prototype.parse_html, this),
-               bind(function() {
-                 this.error('Failed to load manga page');
-               }, this));
+      if (this.load_html) {
+        if (item.manga_pages) {
+          this.load_pages(item.manga_pages);
+          return;
+        } else {
+          geturl(urlmode(item.medium, 'manga'),
+                 bind(Popup.MangaLoader.prototype.parse_html, this),
+                 bind(function() {
+                   this.error('Failed to load manga page');
+                 }, this));
+        }
       }
-    }
-    this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
-    this.image_url_big = item.img_url_base + '_big_p' + page + item.img_url_ext;
-    this.load_image(this.image_url, this.image_url_big);
-  };
+      this.image_url = item.img_url_base + '_p' + page + item.img_url_ext;
+      this.image_url_big = item.img_url_base + '_big_p' + page + item.img_url_ext;
+      this.load_image(this.image_url, this.image_url_big);
+    },
 
-  Popup.MangaLoader.prototype = {
     check_complete: function(image) {
       if (!this.images) return;
       for(var i = 0; i < this.images.length; ++i) {
@@ -4671,8 +4697,7 @@
       }, this);
       this.check_complete();
     }
-  };
-  Popup.MangaLoader.prototype.__proto__ = LoaderBase.prototype;
+  });
 
   function BookmarkForm(root, opts) {
     this.root          = root;
@@ -5565,7 +5590,7 @@
   }
 
   function alert() {
-    safeWindow.alert.apply(safeWindow, Array.prototype.slice.apply(arguments));
+    safeWindow.alert.apply(safeWindow, Array.prototype.slice.call(arguments));
   }
 
   // 10.63+ loading => interactive => DOMContentLoaded => complete => Load
