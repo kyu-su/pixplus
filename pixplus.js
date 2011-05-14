@@ -5320,7 +5320,7 @@
       },
 
       script: function(url, cond) {
-        if (arguments.length > 1 && cond) return this;
+        if (cond) return this;
         LOG.debug('$js#script: ' + url);
         this.urls.push(url);
         if (this.block) {
