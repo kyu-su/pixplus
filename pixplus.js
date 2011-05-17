@@ -2539,19 +2539,6 @@
       }
     }, {
       name: '',
-      url: '/search_user.php',
-      func: function(args) {
-        Pager.wait(function() {
-          var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
-          if (research) {
-            var parent = research.parentNode;
-            parent.removeChild(research);
-            parent.insertBefore(research, parent.firstChild);
-          }
-        });
-      }
-    }, {
-      name: '',
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       url: ['/mypage.php', '/cate_r18.php'],
