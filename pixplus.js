@@ -2576,17 +2576,43 @@
       name: '',
       // その他ランキング
       // http://www.pixiv.net/ranking.php?mode=day
+      // http://www.pixiv.net/ranking.php?mode=daily
       // http://www.pixiv.net/ranking.php?mode=rookie
       // http://www.pixiv.net/ranking.php?mode=weekly
       // http://www.pixiv.net/ranking.php?mode=monthly
       // http://www.pixiv.net/ranking.php?mode=daily_r18
       // http://www.pixiv.net/ranking.php?mode=weekly_r18
       // http://www.pixiv.net/ranking.php?mode=r18g
-      url: '/ranking.php/',
+      // http://www.pixiv.net/ranking.php?mode=daily&date=20110515
+      url: '/ranking.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
         xpath_cap: './div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
         xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'
+      },
+      func: function(args) {
+        var date, re, li, a_p, a_n;
+        if ((args.mode !== 'day' && args.mode !== 'daily') || !(li = $q('.rankingPager > ul > li'))) return;
+        if ((re = /(\d{4})\u5e74(\d{2})\u6708(\d{2})\u65e5\u4ed8/.exec(li.textContent))) {
+          date = new Date(re[1], re[2], re[3]);
+        } else {
+          return;
+        }
+        li.insertBefore(create_anc(-1, '<'), li.firstChild);
+        li.appendChild(create_anc(2, '>'));
+        function create_anc(offset, text) {
+          date.setDate(date.getDate() + offset);
+          var anc = $c('a', null, {text: text});
+          anc.href = '/ranking.php?mode=daily&date=' +
+            date.getFullYear() + zero_pad(date.getMonth(), 2) + zero_pad(date.getDate(), 2);
+          anc.style.margin = '0px 4px';
+          return anc;
+        }
+        function zero_pad(num, digits) {
+          var str = num.toString();
+          while(str.length < digits) str = '0' + str;
+          return str;
+        }
       }
     }, {
       name: '',
