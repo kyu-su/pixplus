@@ -2076,219 +2076,6 @@
   function unpack_captions_label(col) {
     unpack_captions(col, './ul/li/a[img]/label');
   }
-  function init_galleries() {
-    function area_right() {
-      each($qa('.area_right'), function(root) {
-        add_gallery({
-          root:          root,
-          xpath_col:     '.',
-          xpath_cap:     './/li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
-          xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
-          allow_nothumb: 3
-        });
-      });
-    }
-    function mypage() {
-      each($xa('//div[contains(concat(" ", @class), " baseTop")]'), function(root) {
-        add_gallery({
-          root:      root,
-          xpath_col: './/ul[contains(concat(" ", @class, " "), " top_display_works ")]',
-          xpath_cap: './li/text()[last()]'
-        }, unpack_captions);
-      });
-      area_right();
-    }
-
-    var re;
-    if (/^\/(?:mypage|cate_r18)\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/mypage.php
-      // http://www.pixiv.net/cate_r18.php
-      mypage();
-    } else if (/^\/member\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/member.php?id=11
-      mypage();
-      each($qa('.worksListOthersImg'), function(root) {
-        add_gallery({root: root, xpath_col: '.'}, unpack_captions);
-      });
-    } else if (/^\/member_illust\.php/.test(window.location.pathname)) {
-      if (options.illust_id) {
-        // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
-        // 下部のイメージレスポンス
-        add_gallery({
-          xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
-          xpath_cap: './ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'
-        });
-      } else if (options.id) {
-        // http://www.pixiv.net/member_illust.php?id=11
-        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
-      } else {
-        // 自分のイラスト管理
-        // http://www.pixiv.net/member_illust.php
-        add_gallery({
-          xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-          xpath_cap: './ul/li/a[img]/following-sibling::text()[1]'
-        }, unpack_captions);
-      }
-    } else if ((re = /^\/ranking(_tag|_area)?\.php/.exec(window.location.pathname))) {
-      if ((re[1] === '_tag' || re[1] === '_area') && !options.type) {
-        // 人気タグ別ランキング / 地域ランキング
-        // http://www.pixiv.net/ranking_area.php
-        area_right();
-      } else {
-        // その他ランキング
-        // http://www.pixiv.net/ranking.php?mode=day
-        // http://www.pixiv.net/ranking.php?mode=rookie
-        // http://www.pixiv.net/ranking.php?mode=weekly
-        // http://www.pixiv.net/ranking.php?mode=monthly
-        // http://www.pixiv.net/ranking.php?mode=daily_r18
-        // http://www.pixiv.net/ranking.php?mode=weekly_r18
-        // http://www.pixiv.net/ranking.php?mode=r18g
-        add_gallery({
-          xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
-          xpath_cap: './div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
-          xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'
-        });
-      }
-    } else if (/^\/bookmark\.php/.test(window.location.pathname) && !options.id &&
-               (!options.type || /^illust(?:_all)?$/.test(options.type))) {
-      // ブックマーク管理
-      // http://www.pixiv.net/bookmark.php
-      // http://www.pixiv.net/bookmark.php?type=illust_all
-      function debug_filter(item) {
-        var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
-        if (c) {
-          if (check_node(item.caption.nextSibling, 'BR')) {
-            item.caption.parentNode.removeChild(item.caption.nextSibling);
-          }
-          var d = $c('div', null, {html: 'ID: ' + item.id + '<br />BID: ' + c.value});
-          item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
-        }
-      }
-      add_gallery({
-        xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-        xpath_cap: './ul/li/text()[preceding-sibling::a/img]'
-      }, unpack_captions, conf.debug ? debug_filter : null);
-    } else if (/^\/bookmark_detail\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
-      // 下部の「****の他の作品」
-      add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'});
-    } else if (/^\/stacc/.test(window.location.pathname)) {
-      // http://www.pixiv.net/stacc/
-      add_gallery({
-        xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-        xpath_cap: './div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
-        xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
-        skip_dups: true
-      });
-      add_gallery({
-        xpath_col:  '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-        xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
-        thumb_only: true
-      });
-    } else if (/^\/event_detail\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/event_detail.php?event_id=805
-      add_gallery({
-        xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
-        xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
-        thumb_only: true
-      });
-    } else if (/^\/event_member\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/event_member.php?event_id=805
-      add_gallery({
-        xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
-        xpath_tmb:  './li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
-        thumb_only: true,
-        get_url:    get_url_from_image
-      });
-    } else if (/^\/(?:view|rating|comment)_all\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/view_all.php
-      // http://www.pixiv.net/rating_all.php
-      // http://www.pixiv.net/comment_all.php
-      add_gallery({
-        xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
-        xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
-        allow_nothumb: -1
-      });
-    } else if (/^\/ranking_log\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/ranking_log.php
-      if (conf.popup_ranking_log) {
-        add_gallery({
-          xpath_col:  '//table[contains(concat(" ", @class, " "), " calender_ranking ")]',
-          xpath_tmb:  './/a[contains(@href, "ranking.php")]//img',
-          thumb_only: true,
-          skip_dups:  true,
-          get_url:    get_url_from_image
-        });
-      }
-    } else if (/^\/user_event\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/user_event.php
-      // http://www.pixiv.net/user_event.php?mode=attn
-      add_gallery({
-        xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
-        xpath_cap: './li/text()[preceding-sibling::a/img]'
-      }, unpack_captions);
-      if (options.id) {
-        // http://www.pixiv.net/user_event.php?id=23
-        add_gallery({
-          xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
-          xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
-          xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
-        });
-      }
-    } else if (/^\/user_event_related\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/user_event_related.php?id=23
-      pp.write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
-      add_gallery({
-        xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
-        xpath_cap: './li/p[preceding-sibling::a/img]'
-      }, function(col) {
-        unpack_captions(col, './li/a/p');
-      });
-      add_gallery({
-        xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
-        xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
-        xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
-      });
-    } else if (/^\/(?:search|tags)\.php/.test(window.location.pathname)) {
-      // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
-      // http://www.pixiv.net/tags.php?tag=pixiv
-      add_gallery({
-        xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
-        xpath_cap: './li/h1',
-        xpath_tmb: 'preceding-sibling::a[contains(@href, "mode=medium")]/p/img'
-      }, function(col) {
-        unpack_captions(col, './li/a/h1');
-      });
-    }
-
-    // 汎用
-    if (pp.galleries.length === 0) {
-      if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
-          $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
-        // http://www.pixiv.net/event_christmas2010.php
-        mypage();
-      } else {
-        // http://www.pixiv.net/new_illust.php
-        // http://www.pixiv.net/mypixiv_new_illust.php
-        // http://www.pixiv.net/bookmark_new_illust.php
-        // http://www.pixiv.net/new_illust_r18.php
-        // http://www.pixiv.net/bookmark_new_illust_r18.php
-        // http://www.pixiv.net/bookmark.php?id=11
-        // http://www.pixiv.net/response.php?illust_id=15092961
-        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
-        add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
-      }
-    }
-
-    function get_url_from_image(cap, thumb) {
-      var re;
-      if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
-        return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
-      } else {
-        return null;
-      }
-    }
-  }
 
   function init_recommend() {
     var r_container = $('illust_recommendation');
@@ -2525,165 +2312,453 @@
   }
 
   function init_per_page() {
-    var bm_tag_list = $('bookmark_list');
-    if (/^\/bookmark(?:_tag_setting)?\.php/.test(window.location.pathname)) {
-      if (options.type && /^(?:reg_)?user$/.test(options.type)) {
-        // http://www.pixiv.net/bookmark.php?type=user
-        /* oAutoPagerizeと衝突する。
-         * //div[@class="two_column_body"]/div[@class="two_column_space"]//div[@class="list_box"]/*
-         var msgbox = $x('//div[@class="msgbox_bottom"]');
-         var form = $x('//div[@class="two_column_space"]/form[@action="bookmark_setting.php"]');
-         var list = $x('div[@class="list_box"]', form);
-         if (msgbox && form && list) {
-         var p = form.parentNode, pp = p.parentNode;
-         p.removeChild(form);
-         pp.replaceChild(form, p);
-         form.replaceChild(p, list);
-         p.appendChild(list);
-         write_css('.msgbox_bottom[float]{opacity:0.6;}' +
-         '.msgbox_bottom[float]:hover{opacity:1;}');
-         msgbox.parentNode.removeChild(msgbox);
-         form.insertBefore(msgbox, p);
-         new Floater(msgbox);
-         }
-         */
-      } else if (bm_tag_list && !options.id) {
-        if (conf.bm_tag_order.length) {
-          var head = $xa('ul/li[contains(concat(" ", @class, " "), " level0 ")]', bm_tag_list).reverse()[0];
-          var list = reorder_tags($xa('ul/li[contains(concat(" ", @class, " "), " level") and not(contains(concat(" ", @class, " "), " level0 "))]', bm_tag_list));
-          each(list, function(list) {
-            var ul = $c('ul', bm_tag_list);
-            each(list, function(li) {
-              li.parentNode.removeChild(li);
-              ul.appendChild(li);
-            });
-          });
-          defineMagicFunction('bookmarkToggle', function(real, othis, container_id, type) {
-            var container = $(container_id);
-            container.className = type;
-            each($t('ul', container), function(ul) {
-              if (type === 'cloud') {
-                ul.className = 'tagCloud';
-              } else {
-                ul.removeAttribute('class');
-              }
-            });
-            each($xa('ul/li', container), function(li, idx) {
-              var cn = li.className.replace(/bg_(?:gray|white)/, '');
-              if (type === 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
-              li.className = cn;
-            });
-
-            $('book_outlist').style.display = type === 'flat' ? 'none' : 'block';
-
-            var flat = type === 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
-            toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
-            toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
-
-            window.jQuery.cookie('bookToggle', type, {
-              expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')
-            });
-
-            var ev = window.document.createEvent('Event');
-            ev.initEvent('pixplusBMTagToggled', true, true);
-            window.document.dispatchEvent(ev);
-          }, function() {
-            var flat = $t('ul', bm_tag_list)[0].className !== 'tagCloud';
-            window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
-          });
-        }
-
-        Floater.auto_run(function() {
-          var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
-          var form = $x('//form[@action="bookmark_setting.php"]');
-          if (msgbox && form) {
-            msgbox.parentNode.removeChild(msgbox);
-            form.insertBefore(msgbox, form.firstChild);
-            pp.write_css('.msgbox_bottom{border:0px !important;}' +
-                         // ポップアップより下(z-index:90)に表示する
-                         '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
-                         '.msgbox_bottom[float]:hover{opacity:1;}');
-
-            new Floater(msgbox, null, true);
-          }
+    function area_right() {
+      each($qa('.area_right'), function(root) {
+        add_gallery({
+          root:          root,
+          xpath_col:     '.',
+          xpath_cap:     './/li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
+          xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
+          allow_nothumb: 3
         });
-      }
-    } else if (/^\/member_illust\.php/.test(window.location.pathname)) {
-      switch(options.mode) {
-      case 'medium':
-        init_illust_page_bookmark();
-        each($xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
-             function(anc) {
-               anc.setAttribute('nopopup', '');
-             });
-
-        var elem, pos, de = window.document.documentElement;
-        if (conf.scroll === 1) {
-          elem = $x('//div[contains(concat(" ", @class, " "), " works_area ")]');
-          pos = 0;
-        } else if (conf.scroll === 2) {
-          elem = $x('//div[contains(concat(" ", @class, " "), " works_display ")]');
-          pos = 1;
-        }
-        if (elem) window.scroll(0, getpos(elem).top - (de.clientHeight - elem.offsetHeight) * pos);
-
-        var works_caption = $x('//p[contains(concat(" ", @class, " "), " works_caption ")]');
-        if (works_caption) {
-          works_caption.innerHTML = edit_comment(works_caption.innerHTML);
-        }
-
-        var re, img = $x('//div[contains(concat(" ", @class, " "), " works_display ")]/a[starts-with(@href, "member_illust.php?mode=big")]/img');
-        // 冒頭メモ参照
-        if (img && (re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
-          img.parentNode.href = re[1] + re[2];
-        }
-        break;
-      case 'manga':
-        (function(func) {
-          if (window.pixiv.manga.imageContainer) {
-            func();
-          } else {
-            var _setup = window.pixiv.manga.setup;
-            window.pixiv.manga.setup = function() {
-              _setup.apply(this, Array.prototype.slice.call(arguments));
-              func();
-            };
-          }
-        })(function() {
-          var re;
-          if ((re = /^#pp_page=(\d+)$/.exec(window.location.hash))) {
-            var page = parseInt(re[1], 10);
-            each(window.pixiv.context.images, function(ary, idx) {
-              if ((page + 1) <= ary.length) {
-                window.pixiv.manga.updatePosition(window.pixiv.manga.findPosition(idx));
-                window.pixiv.manga.move(idx);
-                return true;
-              }
-              page -= ary.length;
-              return false;
-            });
-          } else if (window.location.hash === '#pp_manga_tb') {
-            window.pixiv.manga.toggleView();
-          }
-        });
-        break;
-      }
-    } else if (/^\/bookmark_add\.php/.test(window.location.pathname)) {
-      if (conf.mod_bookmark_add_page && options.type === 'illust') {
-        var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
-        if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
-      }
-      if (conf.debug) chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
-    } else if (/^\/search_user\.php/.test(window.location.pathname)) {
-      Pager.wait(function() {
-        var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
-        if (research) {
-          var parent = research.parentNode;
-          parent.removeChild(research);
-          parent.insertBefore(research, parent.firstChild);
-        }
       });
     }
+    function mypage() {
+      each($xa('//div[contains(concat(" ", @class), " baseTop")]'), function(root) {
+        add_gallery({
+          root:      root,
+          xpath_col: './/ul[contains(concat(" ", @class, " "), " top_display_works ")]',
+          xpath_cap: './li/text()[last()]'
+        }, unpack_captions);
+      });
+      area_right();
+    }
+    function get_url_from_image(cap, thumb) {
+      var re;
+      if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
+        return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
+      } else {
+        return null;
+      }
+    }
+
+    each([{
+      name: 'bookmark',
+      url: /^\/bookmark(?:_tag_setting)?\.php/,
+      func: function(args) {
+        if (!args.id && (!args.type || /^illust(?:_all)?$/.test(args.type))) {
+          // ブックマーク管理
+          // http://www.pixiv.net/bookmark.php
+          // http://www.pixiv.net/bookmark.php?type=illust_all
+          function debug_filter(item) {
+            var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
+            if (c) {
+              if (check_node(item.caption.nextSibling, 'BR')) {
+                item.caption.parentNode.removeChild(item.caption.nextSibling);
+              }
+              var d = $c('div', null, {html: 'ID: ' + item.id + '<br />BID: ' + c.value});
+              item.caption.parentNode.insertBefore(d, item.caption.nextSibling);
+            }
+          }
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+            xpath_cap: './ul/li/text()[preceding-sibling::a/img]'
+          }, unpack_captions, conf.debug ? debug_filter : null);
+
+          var bm_tag_list = $('bookmark_list');
+          if (conf.bm_tag_order.length) {
+            var head = $xa('ul/li[contains(concat(" ", @class, " "), " level0 ")]', bm_tag_list).reverse()[0];
+            var list = reorder_tags($xa('ul/li[contains(concat(" ", @class, " "), " level") and not(contains(concat(" ", @class, " "), " level0 "))]', bm_tag_list));
+            each(list, function(list) {
+              var ul = $c('ul', bm_tag_list);
+              each(list, function(li) {
+                li.parentNode.removeChild(li);
+                ul.appendChild(li);
+              });
+            });
+            defineMagicFunction('bookmarkToggle', function(real, othis, container_id, type) {
+              var container = $(container_id);
+              container.className = type;
+              each($t('ul', container), function(ul) {
+                if (type === 'cloud') {
+                  ul.className = 'tagCloud';
+                } else {
+                  ul.removeAttribute('class');
+                }
+              });
+              each($xa('ul/li', container), function(li, idx) {
+                var cn = li.className.replace(/bg_(?:gray|white)/, '');
+                if (type === 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                li.className = cn;
+              });
+
+              $('book_outlist').style.display = type === 'flat' ? 'none' : 'block';
+
+              var flat = type === 'flat', toggle_btns = $xa('.//a/span', $('bookmark_toggle_btn'));
+              toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
+              toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
+
+              window.jQuery.cookie('bookToggle', type, {
+                expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')
+              });
+
+              var ev = window.document.createEvent('Event');
+              ev.initEvent('pixplusBMTagToggled', true, true);
+              window.document.dispatchEvent(ev);
+            }, function() {
+              var flat = $t('ul', bm_tag_list)[0].className !== 'tagCloud';
+              window.bookmarkToggle('bookmark_list', flat ? 'flat' : 'cloud');
+            });
+          }
+
+          Floater.auto_run(function() {
+            var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
+            var form = $x('//form[@action="bookmark_setting.php"]');
+            if (msgbox && form) {
+              msgbox.parentNode.removeChild(msgbox);
+              form.insertBefore(msgbox, form.firstChild);
+              pp.write_css('.msgbox_bottom{border:0px !important;}' +
+                           // ポップアップより下(z-index:90)に表示する
+                           '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
+                           '.msgbox_bottom[float]:hover{opacity:1;}');
+
+              new Floater(msgbox, null, true);
+            }
+          });
+        } else if (args.type && /^(?:reg_)?user$/.test(args.type)) {
+          // http://www.pixiv.net/bookmark.php?type=user
+          /* oAutoPagerizeと衝突する。
+           * //div[@class="two_column_body"]/div[@class="two_column_space"]//div[@class="list_box"]/*
+           var msgbox = $x('//div[@class="msgbox_bottom"]');
+           var form = $x('//div[@class="two_column_space"]/form[@action="bookmark_setting.php"]');
+           var list = $x('div[@class="list_box"]', form);
+           if (msgbox && form && list) {
+           var p = form.parentNode, pp = p.parentNode;
+           p.removeChild(form);
+           pp.replaceChild(form, p);
+           form.replaceChild(p, list);
+           p.appendChild(list);
+           write_css('.msgbox_bottom[float]{opacity:0.6;}' +
+           '.msgbox_bottom[float]:hover{opacity:1;}');
+           msgbox.parentNode.removeChild(msgbox);
+           form.insertBefore(msgbox, p);
+           new Floater(msgbox);
+           }
+           */
+        }
+      }
+    }, {
+      name: '',
+      url: '/member_illust.php',
+      func: function(args) {
+        if (args.illust_id) {
+          // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
+          // 下部のイメージレスポンス
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
+            xpath_cap: './ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'
+          });
+
+          if (args.mode === 'medium') {
+            init_illust_page_bookmark();
+            each($xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
+                 function(anc) {
+                   anc.setAttribute('nopopup', '');
+                 });
+
+            var elem, pos, de = window.document.documentElement;
+            if (conf.scroll === 1) {
+              elem = $x('//div[contains(concat(" ", @class, " "), " works_area ")]');
+              pos = 0;
+            } else if (conf.scroll === 2) {
+              elem = $x('//div[contains(concat(" ", @class, " "), " works_display ")]');
+              pos = 1;
+            }
+            if (elem) window.scroll(0, getpos(elem).top - (de.clientHeight - elem.offsetHeight) * pos);
+
+            var works_caption = $x('//p[contains(concat(" ", @class, " "), " works_caption ")]');
+            if (works_caption) {
+              works_caption.innerHTML = edit_comment(works_caption.innerHTML);
+            }
+
+            var re, img = $x('//div[contains(concat(" ", @class, " "), " works_display ")]/a[starts-with(@href, "member_illust.php?mode=big")]/img');
+            // 冒頭メモ参照
+            if (img && (re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
+              img.parentNode.href = re[1] + re[2];
+            }
+          } else if (args.mode === 'manga') {
+            (function(func) {
+              if (window.pixiv.manga.imageContainer) {
+                func();
+              } else {
+                var _setup = window.pixiv.manga.setup;
+                window.pixiv.manga.setup = function() {
+                  _setup.apply(this, Array.prototype.slice.call(arguments));
+                  func();
+                };
+              }
+            })(function() {
+              var re;
+              if ((re = /^#pp_page=(\d+)$/.exec(window.location.hash))) {
+                var page = parseInt(re[1], 10);
+                each(window.pixiv.context.images, function(ary, idx) {
+                  if ((page + 1) <= ary.length) {
+                    window.pixiv.manga.updatePosition(window.pixiv.manga.findPosition(idx));
+                    window.pixiv.manga.move(idx);
+                    return true;
+                  }
+                  page -= ary.length;
+                  return false;
+                });
+              } else if (window.location.hash === '#pp_manga_tb') {
+                window.pixiv.manga.toggleView();
+              }
+            });
+          }
+        } else if (args.id) {
+          // http://www.pixiv.net/member_illust.php?id=11
+          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
+        } else {
+          // 自分のイラスト管理
+          // http://www.pixiv.net/member_illust.php
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+            xpath_cap: './ul/li/a[img]/following-sibling::text()[1]'
+          }, unpack_captions);
+        }
+      }
+    }, {
+      name: '',
+      url: '/bookmark_add.php',
+      func: function(args) {
+        if (conf.mod_bookmark_add_page && args.type === 'illust') {
+          var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
+          if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
+        }
+        if (conf.debug) chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
+      }
+    }, {
+      name: '',
+      url: '/search_user.php/',
+      func: function(args) {
+        Pager.wait(function() {
+          var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
+          if (research) {
+            var parent = research.parentNode;
+            parent.removeChild(research);
+            parent.insertBefore(research, parent.firstChild);
+          }
+        });
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/mypage.php
+      // http://www.pixiv.net/cate_r18.php
+      url: ['/mypage.php', '/cate_r18.php'],
+      func: mypage
+    }, {
+      name: '',
+      // http://www.pixiv.net/member.php?id=11
+      url: '/member.php',
+      func: function(args) {
+        mypage();
+        each($qa('.worksListOthersImg'), function(root) {
+          add_gallery({root: root, xpath_col: '.'}, unpack_captions);
+        });
+      }
+    }, {
+      name: '',
+      // 人気タグ別ランキング / 地域ランキング
+      // http://www.pixiv.net/ranking_area.php
+      url: /^\/ranking(?:_tag|_area)\.php/,
+      func: area_right
+    }, {
+      name: '',
+      // その他ランキング
+      // http://www.pixiv.net/ranking.php?mode=day
+      // http://www.pixiv.net/ranking.php?mode=rookie
+      // http://www.pixiv.net/ranking.php?mode=weekly
+      // http://www.pixiv.net/ranking.php?mode=monthly
+      // http://www.pixiv.net/ranking.php?mode=daily_r18
+      // http://www.pixiv.net/ranking.php?mode=weekly_r18
+      // http://www.pixiv.net/ranking.php?mode=r18g
+      url: '/ranking.php/',
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
+        xpath_cap: './div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
+        xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
+      url: '/bookmark_detail.php',
+      // 下部の「****の他の作品」
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/stacc/
+      url: /^\/stacc/,
+      gallery: [{
+        xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
+        xpath_cap: './div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
+        xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
+        skip_dups: true
+      }, {
+        xpath_col:  '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
+        xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
+        thumb_only: true
+      }]
+    }, {
+      name: '',
+      // http://www.pixiv.net/event_detail.php?event_id=805
+      url: '/event_detail.php',
+      gallery: {
+        xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
+        xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
+        thumb_only: true
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/event_member.php?event_id=805
+      url: '/event_member.php',
+      gallery: {
+        xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
+        xpath_tmb:  './li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
+        thumb_only: true,
+        get_url:    get_url_from_image
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/view_all.php
+      // http://www.pixiv.net/rating_all.php
+      // http://www.pixiv.net/comment_all.php
+      url: /^\/(?:view|rating|comment)_all\.php/,
+      gallery: {
+        xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
+        xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
+        allow_nothumb: -1
+      }
+    }, {
+      name: '',
+      url: '/ranking_log.php',
+      gallery: {
+        xpath_col:  '//table[contains(concat(" ", @class, " "), " calender_ranking ")]',
+        xpath_tmb:  './/a[contains(@href, "ranking.php")]//img',
+        thumb_only: true,
+        skip_dups:  true,
+        get_url:    get_url_from_image
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/user_event.php
+      // http://www.pixiv.net/user_event.php?mode=attn
+      url: '/user_event.php',
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
+        xpath_cap: './li/text()[preceding-sibling::a/img]',
+        filter_col: unpack_captions
+      },
+      func: function(args) {
+        if (args.id) {
+          // http://www.pixiv.net/user_event.php?id=23
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
+            xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+            xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
+          });
+        }
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/user_event_related.php?id=23
+      url: '/user_event_related.php',
+      gallery: [{
+        xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
+        xpath_cap: './li/p[preceding-sibling::a/img]',
+        filter_col: function(col) {
+          unpack_captions(col, './li/a/p');
+        }
+      }, {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
+        xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+        xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
+      }],
+      func: function(args) {
+        pp.write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
+      }
+    }, {
+      name: '',
+      // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
+      // http://www.pixiv.net/tags.php?tag=pixiv
+      url: ['/search.php', '/tags.php'],
+      gallery: {
+        xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
+        xpath_cap: './li/h1',
+        xpath_tmb: 'preceding-sibling::a[contains(@href, "mode=medium")]/p/img',
+        filter_col: function(col) {
+          unpack_captions(col, './li/a/h1');
+        }
+      }
+    }, {
+      // 汎用
+      name: '',
+      func: function(args) {
+        if (pp.galleries.length === 0) {
+          if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
+              $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
+            // http://www.pixiv.net/event_christmas2010.php
+            mypage();
+          } else {
+            // http://www.pixiv.net/new_illust.php
+            // http://www.pixiv.net/mypixiv_new_illust.php
+            // http://www.pixiv.net/bookmark_new_illust.php
+            // http://www.pixiv.net/new_illust_r18.php
+            // http://www.pixiv.net/bookmark_new_illust_r18.php
+            // http://www.pixiv.net/bookmark.php?id=11
+            // http://www.pixiv.net/response.php?illust_id=15092961
+            add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
+            add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
+          }
+        }
+      }
+    }], function(page) {
+      var match = false;
+      if (page.url) {
+        match = (function(func) {
+          if (page.url instanceof Array) {
+            for(var i = 0; i < page.url.length; ++i) {
+              if (func(page.url[i])) return true;
+            }
+            return false;
+          } else {
+            return func(page.url);
+          }
+        })(function(url) {
+          if (url instanceof RegExp) {
+            return url.test(window.location.pathname);
+          } else if (typeof url === 'string' || url instanceof String) {
+            return url === window.location.pathname;
+          } else {
+            alert('unexpected url');
+          }
+          return false;
+        });
+      } else {
+        match = true;
+      }
+      if (match) {
+        if (page.func) page.func(options);
+        if (page.gallery) {
+          if (page.gallery instanceof Array) {
+            each(page.gallery, add_gallery);
+          } else {
+            add_gallery(page.gallery);
+          }
+        }
+      }
+    });
   }
 
   function init_pixplus_real() {
@@ -2821,7 +2896,6 @@
                 );
 
     init_config_ui();
-    init_galleries();
     init_recommend();
     init_taglist();
     init_per_page();
@@ -3125,7 +3199,7 @@
     this.args = args;
     this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
     this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[contains(@href, "mode=medium")]/img';
-    this.filter_col = filter_col;
+    this.filter_col = args.filter_col || filter_col;
     this.filter = filter;
 
     this.items          = [];
