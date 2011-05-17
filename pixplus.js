@@ -2539,7 +2539,7 @@
       }
     }, {
       name: '',
-      url: '/search_user.php/',
+      url: '/search_user.php',
       func: function(args) {
         Pager.wait(function() {
           var research = $x('//div[contains(concat(" ", @class, " "), " re_research ")]');
