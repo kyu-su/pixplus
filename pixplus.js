@@ -188,7 +188,6 @@
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
                 {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]},
-      {"key": "popup_ranking_log", "value": true, "desc": "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u4f7f\u7528\u3059\u308b"}
     ]},
     {"name": "popup", "label": "Popup", "items": [
       {"key": "preload", "value": true, "desc": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"},
@@ -1614,7 +1613,8 @@
     date: '2011/05/xx', version: '0.6.1', changes: [
       'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       '\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+      '\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+      'conf.popup_ranking_log\u3092\u524a\u9664\u3002'
     ]
   }, {
     date: '2011/05/13', version: '0.6.0', changes: [
@@ -2640,6 +2640,7 @@
         xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
         allow_nothumb: -1
       }
+      /*
     }, {
       name: '',
       url: '/ranking_log.php',
@@ -2650,6 +2651,7 @@
         skip_dups:  true,
         get_url:    get_url_from_image
       }
+       */
     }, {
       name: '',
       // http://www.pixiv.net/user_event.php
