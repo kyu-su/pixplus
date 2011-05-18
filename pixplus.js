@@ -1943,375 +1943,25 @@
     }
   }
 
-  function init_config_ui() {
-    if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
-
-    var root, click_handler;
-    var sitenav = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
-    if (sitenav) {
-      var config_anc;
-
-      function fire_event() {
-        var ev = window.document.createEvent('Event');
-        ev.initEvent('pixplusConfigToggled', true, true);
-        window.document.dispatchEvent(ev);
-      }
-      function show() {
-        create();
-        root.style.display = '';
-        fire_event();
-        if (click_handler) click_handler.disconnect();
-        click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
-          if (!is_ancestor(root, ev.target) &&
-              !is_ancestor(config_anc, ev.target)) {
-            hide();
-          }
-          return false;
-        });
-      }
-      function hide() {
-        root.style.display = 'none';
-        fire_event();
-        if (click_handler) {
-          click_handler.disconnect();
-          click_handler = null;
-        }
-      }
-      function toggle() {
-        if (!root || root.style.display === 'none') {
-          show();
-        } else {
-          hide();
-        }
-      }
-
-      function create_menu_item(text, func) {
-        var item = $c('li');
-        $ev($c('a', item, {href: '#', text: text})).click(function() {
-          func();
-          return true;
-        });
-        return item;
-      }
-
-      var menu_items = [];
-      if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
-        var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
-        menu_items.push(create_menu_item('Save layout', function() {
-          var value = window.jQuery.cookie('pixiv_mypage');
-          window.localStorage[key] = value;
-          mi_restore_input.value = value;
-          //mi_restore.style.display = 'block';
-        }));
-        menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-          window.jQuery.cookie('pixiv_mypage', mi_restore_input.value,
-                               {expires: 30, domain: 'pixiv.net', path: '/'});
-          window.location.reload();
-        }));
-        mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
-        $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
-          this.select(); /* WARN */
-        });
-        //if (!window.localStorage[key]) mi_restore.style.display = 'none';
-      })();
-
-      var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
-      sitenav.insertBefore(li, sitenav.firstChild);
-      config_anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
-      if (menu_items.length) {
-        li.appendChild(config_anc.cloneNode(true));
-        var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
-        each(menu_items, function(item) {
-          menu.appendChild(item);
-        });
-      }
-      $ev(config_anc).click(function() {
-        if (_extension_data) {
-          if (_extension_data.open_options) {
-            _extension_data.open_options();
-          } else {
-            pp.open(_extension_data.base_uri + 'options.html');
-          }
-        } else {
-          toggle();
-        }
-        return true;
-      });
-
-      function create() {
-        if (root) return;
-        root = $c('div', null, {id: 'pp-conf-root'});
-        var ui = new ConfigUI(root);
-        var li = $c('li', null, {id: 'pp-conf-close'});
-        ui.page_list.insertBefore(li, ui.page_list.firstChild);
-        $ev($c('a', li, {href: '#', text: '\u00d7'})).click(function() {
-          hide();
-          return true;
-        });
-
-        if (!LS.u) {
-          var note = $c('div', root, {text: "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002"});
-          if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
-        }
-
-        ($('manga_top') || $('wrapHeader')).appendChild(root);
-      }
-    }
-  }
-
-  function unpack_captions(col, xpath_cap) {
-    each($xa(xpath_cap || './/a[img]/text()', col), function(node) {
-      if (check_node(node.previousSibling, 'BR')) {
-        node.parentNode.removeChild(node.previousSibling);
-      }
-      var p = node.parentNode;
-      p.removeChild(node);
-      if (p.nextSibling) {
-        p.parentNode.insertBefore(node, p.nextSibling);
-      } else {
-        p.parentNode.appendChild(node);
-      }
-    });
-  }
-  function unpack_captions_label(col) {
-    unpack_captions(col, './ul/li/a[img]/label');
-  }
-
-  function init_recommend() {
-    var r_container = $('illust_recommendation');
-    var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., \"\u304a\u3059\u3059\u3081\")]]', r_container);
-    var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
-    var float_wrap = null;
-    if (!r_container) return;
-
-    if (conf.debug) (function() {
-      // trap
-      var ir = window.IllustRecommender;
-      var _show = ir.prototype.show;
-      var _error = ir.error;
-      ir.prototype.show = function(res) {
-        try {
-          _show.apply(this, arguments);
-        } catch(ex) {
-          this.error(ex);
-        }
-      };
-      ir.prototype.error = function(msg) {
-        alert(msg);
-        if (_error) _error.apply(this, arguments);
-      };
-    })();
-
-    var de = window.document.documentElement;
-    var gallery;
-
-    function init_gallery(illusts) {
-      gallery = add_gallery({
-        root:      illusts,
-        xpath_col: './li',
-        xpath_cap: './a[img]/following-sibling::text()[1]',
-        xpath_tmb: 'preceding-sibling::a/img'
-      }, unpack_captions);
-      if (float_wrap) init_right_gallery(illusts);
-    }
-    function init_right_gallery(illusts) {
-      var floater = new Floater(float_wrap, illusts), conn;
-      init_pager();
-      gallery.onadditem.connect(init_pager, true);
-      function init_pager() {
-        var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
-        if (more) {
-          if (conn) conn.disconnect();
-          conn = $ev(illusts, {async: true}).scroll(function(ev, conn) {
-            if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
-              send_click(more);
-              conn.disconnect();
-            }
-          });
-        }
-        floater.update_height();
-      }
-    }
-
-    var switch_wrap;
-    function locate_right() {
-      var _show = r_container.show, _hide = r_container.hide;
-      r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
-      r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
-      function sv(show) {
-        r_switch.parentNode.removeChild(r_switch);
-        if (show) {
-          $('wrapper').style.width = '1160px';
-          $('pp-recom-wrap').style.display = '';
-          switch_wrap.appendChild(r_switch);
-        } else {
-          $('wrapper').style.width = '970px';
-          $('pp-recom-wrap').style.display = 'none';
-          r_switch_p.appendChild(r_switch);
-        }
-      }
-      locate_right_real();
-    }
-    function locate_right_real() {
-      var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
-      var wrap = $c('div', null, {id: 'pp-recom-wrap'});
-      var div = $c('div', wrap);
-      if (anc) {
-        div.appendChild(anc.cloneNode(true));
-        if (r_switch) {
-          var r_switch_p_new = $c('span');
-          switch_wrap = $c('span', div, {id: 'pp-recom-switch-wrap'});
-          r_switch_p.replaceChild(r_switch_p_new, r_switch);
-          r_switch_p = r_switch_p_new;
-          switch_wrap.appendChild(r_switch);
-        }
-      }
-      r_container.parentNode.removeChild(r_container);
-      div.appendChild(r_container);
-
-      var contents = $('contents');
-      contents.parentNode.insertBefore(wrap, contents);
-      float_wrap = div;
-
-      pp.write_css('#wrapper{width:1160px;}' +
-                   '#contents{width:970px;float:left;}' +
-                   '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
-                   '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
-                   '#pp-recom-switch-wrap:after{content:"]";}' +
-                   '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
-                   '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
-                   '#pp-recom-wrap li{float:none !important;}' +
-                   // 縦方向の隙間を詰める小細工
-                   '#illust_recommendation div.image_container{height:inherit;}' +
-                   '#illust_recommendation div.image_container a{display:block;}' +
-                   '#illust_recommendation div.image_container>br{display:none;}' +
-                   '#illust_recommendation div.caption{height:inherit;overflow:inherit;}' +
-                   // オートビューモード/もっと見る
-                   '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
-                   '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
-    }
-
-    function wait_xpath(xpath, root, func) {
-      var node = $x(xpath, root);
-      if (node) {
-        func(node);
-      } else {
-        $ev(root, {async: true}).listen(['DOMNodeInserted', 'DOMAttrModified'], function(ev, conn) {
-          node = $x(xpath, root);
-          if (node) {
-            func(node);
-            conn.disconnect();
-          }
-        });
-      }
-    }
-    wait_xpath(
-      './/ul[contains(concat(" ", @class, " "), " illusts ") and li]',
-      r_container,
-      function(illusts) {
-        if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
-          if (conf.locate_recommend_right === 1) {
-            locate_right();
-          } else if (conf.locate_recommend_right === 2 &&
-                     $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
-            Pager.wait(function() {
-              locate_right();
-              if (gallery) init_right_gallery(r_container);
-            });
-          }
-        }
-        init_gallery(illusts);
-      });
-  }
-
-  function init_taglist() {
-    var bm_tag_list = $('bookmark_list');
-    if (bm_tag_list) {
-      pp.write_css('.area_bookmark, #bookmark_list{padding:0px !important;}' +
-                   '#bookmark_list > ul{display:block;}' +
-                   '#bookmark_list > ul > li{padding:0px;}' +
-                   '#bookmark_list.flat > ul + ul{' + conf.tag_separator_style + '}' +
-                   '#bookmark_list.flat > ul > li{display:block !important;padding:0px 4px;}' +
-                   '#bookmark_list.cloud > ul{padding:0px 4px;}' +
-                   '#bookmark_list.cloud > ul + ul + ul{' + conf.tag_separator_style + '}' +
-                   '#bookmark_list.cloud > ul{padding:0px 4px;}' +
-                   '#bookmark_list.cloud > ul:first-child{display:none;}');
-
-      if (options.tag) {
-        var a = $x('//li/a[contains(@href, "bookmark.php?tag=' + options.tag + '&")]', bm_tag_list);
-        if (a) {
-          a.style.color          = 'gray';
-          a.style.fontWeight     = 'bold';
-          a.style.textDecoration = 'none';
-        }
-      }
-    }
-
-    Floater.auto_run(function() {
-      var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
-      if (cont) {
-        var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
-        if (wrap) {
-          pp.write_css('.ui-layout-east{float:right;}' +
-                       '.ui-layout-west .area_new{margin:0px;}');
-          var floater = new Floater(wrap, cont);
-          window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
-        }
-      }
-    });
-    return bm_tag_list;
-  }
-
-  function init_illust_page_bookmark() {
-    var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_illusticonsBlock ")]//a[contains(@href, "bookmark_add.php")]');
-    var display = $x('//div[contains(concat(" ", @class, " "), "works_display")]');
-    if (!bm_add_anc || !display) return;
-    var bm_form_div, loader;
-    $ev(bm_add_anc).click(function() {
-      if (bm_form_div) {
-        hide();
-      } else {
-        show();
-      }
-      return true;
-    });
-
-    function Loader(url, wrap) {
-      var cancelled = false;
-      this.cancel = function() { cancelled = true; };
-      geturl(url, function(text) {
-        var re;
-        if (cancelled) return;
-        if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi.exec(text))) {
-          wrap.innerHTML = re[0];
-          var form = new BookmarkForm(wrap, {
-            autotag: !$x('preceding-sibling::a[contains(@href, "bookmark_detail.php")]', bm_add_anc),
-            closable: true
-          });
-          form.onclose.connect(hide);
-        } else {
-          wrap.textContent = 'Error!';
-        }
-      }, function() {
-        if (cancelled) return;
-        wrap.textContent = 'Error!';
-      }, true);
-    }
-    function show() {
-      if (bm_form_div) return;
-      bm_form_div = $c('div', null, {text: 'Loading', css: 'margin:1em'});
-      loader = new Loader(bm_add_anc.href, bm_form_div);
-      display.parentNode.insertBefore(bm_form_div, display);
-    }
-    function hide() {
-      if (!bm_form_div) return;
-      if (loader) loader.cancel();
-      bm_form_div.parentNode.removeChild(bm_form_div);
-      bm_form_div = null;
-    }
-  }
-
   function init_per_page() {
+    function unpack_captions(col, xpath_cap) {
+      each($xa(xpath_cap || './/a[img]/text()', col), function(node) {
+        if (check_node(node.previousSibling, 'BR')) {
+          node.parentNode.removeChild(node.previousSibling);
+        }
+        var p = node.parentNode;
+        p.removeChild(node);
+        if (p.nextSibling) {
+          p.parentNode.insertBefore(node, p.nextSibling);
+        } else {
+          p.parentNode.appendChild(node);
+        }
+      });
+    }
+    function unpack_captions_label(col) {
+      unpack_captions(col, './ul/li/a[img]/label');
+    }
+
     function area_right() {
       each($qa('.area_right'), function(root) {
         add_gallery({
@@ -2447,6 +2097,7 @@
            */
         }
       }
+
     }, {
       name: '',
       url: '/member_illust.php',
@@ -2460,7 +2111,55 @@
           });
 
           if (args.mode === 'medium') {
-            init_illust_page_bookmark();
+            (function() {
+              var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_illusticonsBlock ")]//a[contains(@href, "bookmark_add.php")]');
+              var display = $x('//div[contains(concat(" ", @class, " "), "works_display")]');
+              if (!bm_add_anc || !display) return;
+              var bm_form_div, loader;
+              $ev(bm_add_anc).click(function() {
+                if (bm_form_div) {
+                  hide();
+                } else {
+                  show();
+                }
+                return true;
+              });
+
+              function Loader(url, wrap) {
+                var cancelled = false;
+                this.cancel = function() { cancelled = true; };
+                geturl(url, function(text) {
+                  var re;
+                  if (cancelled) return;
+                  if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi.exec(text))) {
+                    wrap.innerHTML = re[0];
+                    var form = new BookmarkForm(wrap, {
+                      autotag: !$x('preceding-sibling::a[contains(@href, "bookmark_detail.php")]', bm_add_anc),
+                      closable: true
+                    });
+                    form.onclose.connect(hide);
+                  } else {
+                    wrap.textContent = 'Error!';
+                  }
+                }, function() {
+                  if (cancelled) return;
+                  wrap.textContent = 'Error!';
+                }, true);
+              }
+              function show() {
+                if (bm_form_div) return;
+                bm_form_div = $c('div', null, {text: 'Loading', css: 'margin:1em'});
+                loader = new Loader(bm_add_anc.href, bm_form_div);
+                display.parentNode.insertBefore(bm_form_div, display);
+              }
+              function hide() {
+                if (!bm_form_div) return;
+                if (loader) loader.cancel();
+                bm_form_div.parentNode.removeChild(bm_form_div);
+                bm_form_div = null;
+              }
+            })();
+
             each($xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
                  function(anc) {
                    anc.setAttribute('nopopup', '');
@@ -2527,6 +2226,7 @@
           }, unpack_captions);
         }
       }
+
     }, {
       name: '',
       url: '/bookmark_add.php',
@@ -2537,12 +2237,14 @@
         }
         if (conf.debug) chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       url: ['/mypage.php', '/cate_r18.php'],
       func: mypage
+
     }, {
       name: '',
       // http://www.pixiv.net/member.php?id=11
@@ -2553,12 +2255,14 @@
           add_gallery({root: root, xpath_col: '.'}, unpack_captions);
         });
       }
+
     }, {
       name: '',
       // 人気タグ別ランキング / 地域ランキング
       // http://www.pixiv.net/ranking_area.php
       url: /^\/ranking(?:_tag|_area)\.php/,
       func: area_right
+
     }, {
       name: '',
       // その他ランキング
@@ -2601,6 +2305,7 @@
           return str;
         }
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
@@ -2609,6 +2314,7 @@
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/stacc/
@@ -2623,6 +2329,7 @@
         xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
         thumb_only: true
       }]
+
     }, {
       name: '',
       // http://www.pixiv.net/event_detail.php?event_id=805
@@ -2632,6 +2339,7 @@
         xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
         thumb_only: true
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/event_member.php?event_id=805
@@ -2642,6 +2350,7 @@
         thumb_only: true,
         get_url:    get_url_from_image
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/view_all.php
@@ -2653,18 +2362,7 @@
         xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
         allow_nothumb: -1
       }
-      /*
-    }, {
-      name: '',
-      url: '/ranking_log.php',
-      gallery: {
-        xpath_col:  '//table[contains(concat(" ", @class, " "), " calender_ranking ")]',
-        xpath_tmb:  './/a[contains(@href, "ranking.php")]//img',
-        thumb_only: true,
-        skip_dups:  true,
-        get_url:    get_url_from_image
-      }
-       */
+
     }, {
       name: '',
       // http://www.pixiv.net/user_event.php
@@ -2685,6 +2383,7 @@
           });
         }
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/user_event_related.php?id=23
@@ -2703,6 +2402,7 @@
       func: function(args) {
         pp.write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
       }
+
     }, {
       name: '',
       // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
@@ -2716,10 +2416,11 @@
           unpack_captions(col, './li/a/h1');
         }
       }
+
     }, {
       // 汎用
       name: '',
-      func: function(args) {
+      func: [function(args) {
         if (pp.galleries.length === 0) {
           if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
               $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
@@ -2737,7 +2438,302 @@
             add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
           }
         }
-      }
+
+      }, function(args) {
+        var bm_tag_list = $('bookmark_list');
+        if (bm_tag_list) {
+          pp.write_css('.area_bookmark, #bookmark_list{padding:0px !important;}' +
+                       '#bookmark_list > ul{display:block;}' +
+                       '#bookmark_list > ul > li{padding:0px;}' +
+                       '#bookmark_list.flat > ul + ul{' + conf.tag_separator_style + '}' +
+                       '#bookmark_list.flat > ul > li{display:block !important;padding:0px 4px;}' +
+                       '#bookmark_list.cloud > ul{padding:0px 4px;}' +
+                       '#bookmark_list.cloud > ul + ul + ul{' + conf.tag_separator_style + '}' +
+                       '#bookmark_list.cloud > ul{padding:0px 4px;}' +
+                       '#bookmark_list.cloud > ul:first-child{display:none;}');
+
+          if (options.tag) {
+            var a = $x('//li/a[contains(@href, "bookmark.php?tag=' + options.tag + '&")]', bm_tag_list);
+            if (a) {
+              a.style.color          = 'gray';
+              a.style.fontWeight     = 'bold';
+              a.style.textDecoration = 'none';
+            }
+          }
+        }
+
+        Floater.auto_run(function() {
+          var cont = bm_tag_list ? bm_tag_list : $x('//ul[contains(concat(" ", @class, " "), " tagCloud ")]');
+          if (cont) {
+            var wrap = $x('ancestor::div[contains(concat(" ", @class, " "), " ui-layout-west ")]', cont);
+            if (wrap) {
+              pp.write_css('.ui-layout-east{float:right;}' +
+                           '.ui-layout-west .area_new{margin:0px;}');
+              var floater = new Floater(wrap, cont);
+              window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
+            }
+          }
+        });
+
+      }, function(args) {
+        if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
+
+        var root, click_handler;
+        var sitenav = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
+        if (sitenav) {
+          var config_anc;
+
+          function fire_event() {
+            var ev = window.document.createEvent('Event');
+            ev.initEvent('pixplusConfigToggled', true, true);
+            window.document.dispatchEvent(ev);
+          }
+          function show() {
+            create();
+            root.style.display = '';
+            fire_event();
+            if (click_handler) click_handler.disconnect();
+            click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
+              if (!is_ancestor(root, ev.target) &&
+                  !is_ancestor(config_anc, ev.target)) {
+                hide();
+              }
+              return false;
+            });
+          }
+          function hide() {
+            root.style.display = 'none';
+            fire_event();
+            if (click_handler) {
+              click_handler.disconnect();
+              click_handler = null;
+            }
+          }
+          function toggle() {
+            if (!root || root.style.display === 'none') {
+              show();
+            } else {
+              hide();
+            }
+          }
+
+          function create_menu_item(text, func) {
+            var item = $c('li');
+            $ev($c('a', item, {href: '#', text: text})).click(function() {
+              func();
+              return true;
+            });
+            return item;
+          }
+
+          var menu_items = [];
+          if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
+            var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
+            menu_items.push(create_menu_item('Save layout', function() {
+              var value = window.jQuery.cookie('pixiv_mypage');
+              window.localStorage[key] = value;
+              mi_restore_input.value = value;
+              //mi_restore.style.display = 'block';
+            }));
+            menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
+              window.jQuery.cookie('pixiv_mypage', mi_restore_input.value,
+                                   {expires: 30, domain: 'pixiv.net', path: '/'});
+              window.location.reload();
+            }));
+            mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
+            $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
+              this.select(); /* WARN */
+            });
+            //if (!window.localStorage[key]) mi_restore.style.display = 'none';
+          })();
+
+          var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
+          sitenav.insertBefore(li, sitenav.firstChild);
+          config_anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
+          if (menu_items.length) {
+            li.appendChild(config_anc.cloneNode(true));
+            var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
+            each(menu_items, function(item) {
+              menu.appendChild(item);
+            });
+          }
+          $ev(config_anc).click(function() {
+            if (_extension_data) {
+              if (_extension_data.open_options) {
+                _extension_data.open_options();
+              } else {
+                pp.open(_extension_data.base_uri + 'options.html');
+              }
+            } else {
+              toggle();
+            }
+            return true;
+          });
+
+          function create() {
+            if (root) return;
+            root = $c('div', null, {id: 'pp-conf-root'});
+            var ui = new ConfigUI(root);
+            var li = $c('li', null, {id: 'pp-conf-close'});
+            ui.page_list.insertBefore(li, ui.page_list.firstChild);
+            $ev($c('a', li, {href: '#', text: '\u00d7'})).click(function() {
+              hide();
+              return true;
+            });
+
+            if (!LS.u) {
+              var note = $c('div', root, {text: "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002"});
+              if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
+            }
+
+            ($('manga_top') || $('wrapHeader')).appendChild(root);
+          }
+        }
+
+      }, function(args) {
+        var r_container = $('illust_recommendation');
+        var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., \"\u304a\u3059\u3059\u3081\")]]', r_container);
+        var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
+        var float_wrap = null;
+        if (!r_container) return;
+
+        if (conf.debug) (function() {
+          // trap
+          var ir = window.IllustRecommender;
+          var _show = ir.prototype.show;
+          var _error = ir.error;
+          ir.prototype.show = function(res) {
+            try {
+              _show.apply(this, arguments);
+            } catch(ex) {
+              this.error(ex);
+            }
+          };
+          ir.prototype.error = function(msg) {
+            alert(msg);
+            if (_error) _error.apply(this, arguments);
+          };
+        })();
+
+        var de = window.document.documentElement;
+        var gallery;
+
+        function init_gallery(illusts) {
+          gallery = add_gallery({
+            root:      illusts,
+            xpath_col: './li',
+            xpath_cap: './a[img]/following-sibling::text()[1]',
+            xpath_tmb: 'preceding-sibling::a/img'
+          }, unpack_captions);
+          if (float_wrap) init_right_gallery(illusts);
+        }
+        function init_right_gallery(illusts) {
+          var floater = new Floater(float_wrap, illusts), conn;
+          init_pager();
+          gallery.onadditem.connect(init_pager, true);
+          function init_pager() {
+            var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
+            if (more) {
+              if (conn) conn.disconnect();
+              conn = $ev(illusts, {async: true}).scroll(function(ev, conn) {
+                if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
+                  send_click(more);
+                  conn.disconnect();
+                }
+              });
+            }
+            floater.update_height();
+          }
+        }
+
+        var switch_wrap;
+        function locate_right() {
+          var _show = r_container.show, _hide = r_container.hide;
+          r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
+          r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
+          function sv(show) {
+            r_switch.parentNode.removeChild(r_switch);
+            if (show) {
+              $('wrapper').style.width = '1160px';
+              $('pp-recom-wrap').style.display = '';
+              switch_wrap.appendChild(r_switch);
+            } else {
+              $('wrapper').style.width = '970px';
+              $('pp-recom-wrap').style.display = 'none';
+              r_switch_p.appendChild(r_switch);
+            }
+          }
+          locate_right_real();
+        }
+        function locate_right_real() {
+          var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
+          var wrap = $c('div', null, {id: 'pp-recom-wrap'});
+          var div = $c('div', wrap);
+          if (anc) {
+            div.appendChild(anc.cloneNode(true));
+            if (r_switch) {
+              var r_switch_p_new = $c('span');
+              switch_wrap = $c('span', div, {id: 'pp-recom-switch-wrap'});
+              r_switch_p.replaceChild(r_switch_p_new, r_switch);
+              r_switch_p = r_switch_p_new;
+              switch_wrap.appendChild(r_switch);
+            }
+          }
+          r_container.parentNode.removeChild(r_container);
+          div.appendChild(r_container);
+
+          var contents = $('contents');
+          contents.parentNode.insertBefore(wrap, contents);
+          float_wrap = div;
+
+          pp.write_css('#wrapper{width:1160px;}' +
+                       '#contents{width:970px;float:left;}' +
+                       '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
+                       '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
+                       '#pp-recom-switch-wrap:after{content:"]";}' +
+                       '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
+                       '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
+                       '#pp-recom-wrap li{float:none !important;}' +
+                       // 縦方向の隙間を詰める小細工
+                       '#illust_recommendation div.image_container{height:inherit;}' +
+                       '#illust_recommendation div.image_container a{display:block;}' +
+                       '#illust_recommendation div.image_container>br{display:none;}' +
+                       '#illust_recommendation div.caption{height:inherit;overflow:inherit;}' +
+                       // オートビューモード/もっと見る
+                       '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
+                       '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
+        }
+
+        function wait_xpath(xpath, root, func) {
+          var node = $x(xpath, root);
+          if (node) {
+            func(node);
+          } else {
+            $ev(root, {async: true}).listen(['DOMNodeInserted', 'DOMAttrModified'], function(ev, conn) {
+              node = $x(xpath, root);
+              if (node) {
+                func(node);
+                conn.disconnect();
+              }
+            });
+          }
+        }
+        wait_xpath('.//ul[contains(concat(" ", @class, " "), " illusts ") and li]', r_container, function(illusts) {
+          if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
+            if (conf.locate_recommend_right === 1) {
+              locate_right();
+            } else if (conf.locate_recommend_right === 2 &&
+                       $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
+              Pager.wait(function() {
+                locate_right();
+                if (gallery) init_right_gallery(r_container);
+              });
+            }
+          }
+          init_gallery(illusts);
+        });
+      }]
+
     }], function(page) {
       var match = false;
       if (page.url) {
@@ -2764,13 +2760,13 @@
         match = true;
       }
       if (match) {
-        if (page.func) page.func(options);
+        if (page.func) {
+          each(page.func instanceof Array ? page.func : [page.func], function(func) {
+            func(options);
+          });
+        }
         if (page.gallery) {
-          if (page.gallery instanceof Array) {
-            each(page.gallery, add_gallery);
-          } else {
-            add_gallery(page.gallery);
-          }
+          each(page.gallery instanceof Array ? page.gallery : [page.gallery], add_gallery);
         }
       }
     });
@@ -2910,9 +2906,6 @@
                  '#pp-popup #tag_edit > div{margin:0px !important;}'
                 );
 
-    init_config_ui();
-    init_recommend();
-    init_taglist();
     init_per_page();
 
     $ev(window.document.body).click(function(ev) {
