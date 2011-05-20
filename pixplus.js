@@ -2405,9 +2405,14 @@
 
     }, {
       name: '',
+      // http://www.pixiv.net/new_illust.php
+      // http://www.pixiv.net/bookmark_new_illust.php
+      // http://www.pixiv.net/mypixiv_new_illust.php
+      // http://www.pixiv.net/new_illust_r18.php
+      // http://www.pixiv.net/bookmark_new_illust_r18.php
       // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
       // http://www.pixiv.net/tags.php?tag=pixiv
-      url: ['/search.php', '/tags.php'],
+      url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
         xpath_cap: './li/h1',
@@ -2427,11 +2432,7 @@
             // http://www.pixiv.net/event_christmas2010.php
             mypage();
           } else {
-            // http://www.pixiv.net/new_illust.php
-            // http://www.pixiv.net/mypixiv_new_illust.php
-            // http://www.pixiv.net/bookmark_new_illust.php
-            // http://www.pixiv.net/new_illust_r18.php
-            // http://www.pixiv.net/bookmark_new_illust_r18.php
+            // for old html support
             // http://www.pixiv.net/bookmark.php?id=11
             // http://www.pixiv.net/response.php?illust_id=15092961
             add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
@@ -2610,7 +2611,7 @@
             }
           };
           ir.prototype.error = function(msg) {
-            alert(msg);
+            alert('Illust recommender\n' + msg);
             if (_error) _error.apply(this, arguments);
           };
         })();
