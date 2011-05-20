@@ -3259,7 +3259,6 @@
       var self = this;
       var prev = this.last;
       var prev_limited = this.last_limited;
-      var prev_parent = null;
       this.page_item = 0;
       ++this.page_col;
       each(elements, function(elem, cnt) {
@@ -3276,12 +3275,17 @@
         if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
 
         if (cap) {
-          if (cap.nodeType === 3) {
-            if (prev_parent && cap.parentNode === prev_parent) {
+          if (thumb && prev && thumb === prev.thumb) {
+            if (cap.nodeType === 3) {
               cap.parentNode.removeChild(cap);
               prev.caption.appendChild(cap);
               return;
+            } else if (conf.debug) {
+              alert('[bug]title detected redundantly');
+              return;
             }
+          }
+          if (cap.nodeType === 3) {
             var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue), 'a:nopopup': ''});
             cap.parentNode.replaceChild(new_caption, cap);
             cap = new_caption;
@@ -3292,7 +3296,6 @@
               cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
             }
           }
-          prev_parent = cap.parentNode;
         }
 
         var item = new GalleryItem(url, thumb, cap, prev, self);
