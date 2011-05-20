@@ -187,7 +187,7 @@
       {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
-                {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]},
+                {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]}
     ]},
     {"name": "popup", "label": "Popup", "items": [
       {"key": "preload", "value": true, "desc": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"},
@@ -3259,6 +3259,7 @@
       var self = this;
       var prev = this.last;
       var prev_limited = this.last_limited;
+      var prev_parent = null;
       this.page_item = 0;
       ++this.page_col;
       each(elements, function(elem, cnt) {
@@ -3276,6 +3277,11 @@
 
         if (cap) {
           if (cap.nodeType === 3) {
+            if (prev_parent && cap.parentNode === prev_parent) {
+              cap.parentNode.removeChild(cap);
+              prev.caption.appendChild(cap);
+              return;
+            }
             var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue), 'a:nopopup': ''});
             cap.parentNode.replaceChild(new_caption, cap);
             cap = new_caption;
@@ -3286,6 +3292,7 @@
               cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
             }
           }
+          prev_parent = cap.parentNode;
         }
 
         var item = new GalleryItem(url, thumb, cap, prev, self);
