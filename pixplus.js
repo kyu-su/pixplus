@@ -1614,7 +1614,9 @@
       'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       '\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
       '\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'conf.popup_ranking_log\u3092\u524a\u9664\u3002'
+      'conf.popup_ranking_log\u3092\u524a\u9664\u3002',
+      '\u65b0\u7740\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+      'conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/05/13', version: '0.6.0', changes: [
@@ -2689,7 +2691,7 @@
 
           pp.write_css('#wrapper{width:1160px;}' +
                        '#contents{width:970px;float:left;}' +
-                       '#footer,.adver_footer,.adver_footerBottom{clear:both;}' +
+                       '#page-footer,.adver_footer{clear:both;}' +
                        '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
                        '#pp-recom-switch-wrap:after{content:"]";}' +
                        '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
@@ -2723,8 +2725,7 @@
           if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
             if (conf.locate_recommend_right === 1) {
               locate_right();
-            } else if (conf.locate_recommend_right === 2 &&
-                       $x('//li[contains(concat(" ", @class, " "), " pager_ul_next ")]')) {
+            } else if (conf.locate_recommend_right === 2 && $q('.pages>ol>li>a[rel="next"]')) {
               Pager.wait(function() {
                 locate_right();
                 if (gallery) init_right_gallery(r_container);
