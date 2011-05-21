@@ -980,6 +980,7 @@
   }
   function $xa(xpath, root) {
     var doc = root ? root.ownerDocument : (root = window.document);
+    // XPathResult.ORDERED_NODE_ITERATOR_TYPE = 5
     // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7
     var nodes = doc.evaluate(xpath, root, null, 7, null);
     var res = new Array();
@@ -2231,17 +2232,6 @@
 
     }, {
       name: '',
-      url: '/bookmark_add.php',
-      func: function(args) {
-        if (conf.mod_bookmark_add_page && args.type === 'illust') {
-          var wrap = $x('//div[contains(concat(" ", @class, " "), " one_column_body ")]');
-          if (wrap) new BookmarkForm(wrap, {autotag: !!$x('//h2[contains(text(), \"\u8ffd\u52a0\")]')});
-        }
-        if (conf.debug) chk_ext_src('script', 'src', pp.url.js.bookmark_add_v4);
-      }
-
-    }, {
-      name: '',
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       url: ['/mypage.php', '/cate_r18.php'],
@@ -2372,7 +2362,7 @@
       url: '/user_event.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
-        xpath_cap: './li/text()[preceding-sibling::a/img]',
+        xpath_cap: './li/a[img]/following-sibling::text()',
         filter_col: unpack_captions
       },
       func: function(args) {
@@ -2432,11 +2422,15 @@
           if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
               $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
             // http://www.pixiv.net/event_christmas2010.php
+            // TODO: it's not works
             mypage();
           } else {
             // for old html support
             // http://www.pixiv.net/bookmark.php?id=11
             // http://www.pixiv.net/response.php?illust_id=15092961
+            // http://www.pixiv.net/event_loveplus.php
+            // http://www.pixiv.net/bookmark_add.php
+            //   ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
             add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
             add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
           }
@@ -3251,7 +3245,8 @@
     },
     add_collection: function(col) {
       if (this.filter_col) this.filter_col(col);
-      var elements = $xa(this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap, col);
+      var xpath = this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap;
+      var elements = $xa(xpath, col);
       if (!elements.length) return;
       LOG.debug('collection detected - ' + elements.length);
       col.setAttribute('pixplus_loaded', 'true');
@@ -3281,7 +3276,9 @@
               prev.caption.appendChild(cap);
               return;
             } else if (conf.debug) {
-              alert('[bug]title detected redundantly');
+              alert(['[bug]title detected redundantly',
+                     xpath,
+                     cap.nodeType + ':' + (cap.textContent || cap.value)].join('\n'));
               return;
             }
           }
