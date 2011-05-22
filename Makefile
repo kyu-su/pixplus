@@ -14,7 +14,7 @@ XPI_TMP_DIR             = .xpi
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null 2>&1 && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
-BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null 2>&1 && which "$(JS)" >/dev/null && echo yes || echo no)
+BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null 2>&1 && which "$(JS)" >/dev/null 2>&1 && echo yes || echo no)
 
 LICENSE                 = LICENSE.TXT
 CONFIG_JSON             = config.json
