@@ -1954,11 +1954,20 @@
         }
         var p = node.parentNode;
         p.removeChild(node);
-        if (p.nextSibling) {
-          p.parentNode.insertBefore(node, p.nextSibling);
-        } else {
-          p.parentNode.appendChild(node);
-        }
+        p.parentNode.insertBefore(node, p.nextSibling);
+        if (window.opera && conf.debug && node.nodeType === 3) (function() {
+          // prevent bug in opera xpath processor
+          var prev, next;
+          while((prev = node.previousSibling) && prev.nodeType === 3) {
+            prev.nodeValue += node.nodeValue;
+            node.parentNode.removeChild(node);
+            node = prev;
+          }
+          while((next = node.nextSibling) && next.nodeType === 3) {
+            node.nodeValue += next.nodeValue;
+            next.parentNode.removeChild(next);
+          }
+        })();
       });
     }
     function unpack_captions_label(col) {
