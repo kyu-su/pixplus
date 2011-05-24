@@ -285,7 +285,6 @@
     conf:          conf,
 
     galleries:     [],
-    Popup:         Popup,
     Gallery:       Gallery,
     GalleryItem:   GalleryItem,
 
@@ -3352,7 +3351,7 @@
     }
   };
 
-  var Popup = $cls.create({
+  var Popup = pp.Popup = $cls.create({
     initialize: function(item, manga_page) {
       this.root_div              = $c('div', null, {id: 'pp-popup'});
       this.header                = $c('div', this.root_div, {id: 'pp-header'});
@@ -4521,8 +4520,6 @@
 
     onclick: new Signal(function() { this.close(); }),
 
-    onbookmark: new Signal(),
-
     onclose: new Signal(function() {
       Popup.unset_event_handler();
       Popup.instance = null;
@@ -4831,7 +4828,7 @@
     }
   });
 
-  var BookmarkForm = $cls.create({
+  var BookmarkForm = pp.BookmarkForm = $cls.create({
     initialize: function(root, opts) {
       this.root          = root;
       this.key_type      = conf.bookmark_form;
