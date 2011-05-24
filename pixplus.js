@@ -4519,7 +4519,9 @@
       });
     }),
 
-    onclick: new Signal(function(ev) { this.close(); }),
+    onclick: new Signal(function() { this.close(); }),
+
+    onbookmark: new Signal(),
 
     onclose: new Signal(function() {
       Popup.unset_event_handler();
@@ -4829,257 +4831,208 @@
     }
   });
 
-  function BookmarkForm(root, opts) {
-    this.root          = root;
-    this.key_type      = conf.bookmark_form;
+  var BookmarkForm = $cls.create({
+    initialize: function(root, opts) {
+      this.root          = root;
+      this.key_type      = conf.bookmark_form;
 
-    this.title         = opts.title || $x('//div[contains(concat(" ", @class, " "), " works_data ")]/h3');
-    this.comment       = opts.comment || $x('//div[contains(concat(" ", @class, " "), " works_tag ")]/preceding-sibling::p');
-    this.form          = $x('.//form[@action="bookmark_add.php"]', this.root);
-    this.input_tag     = $x('.//input[@id="input_tag"]', this.root);
-    this.tagcloud      = $x('.//ul[contains(concat(" ", @class, " "), " tagCloud ")]', this.root);
+      this.title         = opts.title || $x('//div[contains(concat(" ", @class, " "), " works_data ")]/h3');
+      this.comment       = opts.comment || $x('//div[contains(concat(" ", @class, " "), " works_tag ")]/preceding-sibling::p');
+      this.form          = $x('.//form[@action="bookmark_add.php"]', this.root);
+      this.input_tag     = $x('.//input[@id="input_tag"]', this.root);
+      this.tagcloud      = $x('.//ul[contains(concat(" ", @class, " "), " tagCloud ")]', this.root);
 
-    this.tag_wraps     = $xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]', this.root);
-    this.tag_wrap_it   = this.tag_wraps.length >= 2 ? this.tag_wraps[0] : null;
-    this.tag_wrap_bm   = this.tag_wraps[this.tag_wraps.length >= 2 ? 1 : 0];
-    this.tags_illust   = this.tag_wrap_it ? $xa('ul/li/a', this.tag_wrap_it) : [];
-    this.tags_bookmark = $xa('ul/li/a', this.tag_wrap_bm);
+      this.tag_wraps     = $xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]', this.root);
+      this.tag_wrap_it   = this.tag_wraps.length >= 2 ? this.tag_wraps[0] : null;
+      this.tag_wrap_bm   = this.tag_wraps[this.tag_wraps.length >= 2 ? 1 : 0];
+      this.tags_illust   = this.tag_wrap_it ? $xa('ul/li/a', this.tag_wrap_it) : [];
+      this.tags_bookmark = $xa('ul/li/a', this.tag_wrap_bm);
 
-    this.connections   = [];
+      this.connections   = [];
 
-    BookmarkForm.write_css();
-    BookmarkForm.trap_jquery_ready();
+      BookmarkForm.write_css();
+      BookmarkForm.trap_jquery_ready();
 
-    this.root.className = this.root.className.replace(/ *pp-bm-form */, ' ') + ' pp-bm-wrap';
+      this.root.className = this.root.className.replace(/ *pp-bm-form */, ' ') + ' pp-bm-wrap';
 
-    this.btn_submit = find($xa('.//input[@type="submit"]', root), function(submit, idx) {
-      if (idx + 1 < this.length) {
-        submit.parentNode.parentNode.removeChild(submit.parentNode);
-        return false;
+      this.btn_submit = find($xa('.//input[@type="submit"]', root), function(submit, idx) {
+        if (idx + 1 < this.length) {
+          submit.parentNode.parentNode.removeChild(submit.parentNode);
+          return false;
+        }
+        return true;
+      });
+      if (opts.closable) {
+        this.onclose = new Signal(BookmarkForm.prototype.destroy);
+        this.btn_close = $c('input', this.btn_submit.parentNode,
+                            {type: 'button', value: "\u9589\u3058\u308b", cls: 'btn_type01 bookmark_submit_btn'});
+        this.connections.push($ev(this.btn_close).click(bind(function(ev, conn) {
+          conn.disconnect();
+          this.close();
+          return true;
+        }, this)));
       }
-      return true;
-    });
-    if (opts.closable) {
-      this.onclose = new Signal(BookmarkForm.prototype.destroy);
-      this.btn_close = $c('input', this.btn_submit.parentNode,
-                          {type: 'button', value: "\u9589\u3058\u308b", cls: 'btn_type01 bookmark_submit_btn'});
-      this.connections.push($ev(this.btn_close).click(bind(function(ev, conn) {
-        conn.disconnect();
-        this.close();
+
+      if (conf.bookmark_hide) (function() {
+        var hide = $x('.//input[@type="radio" and @name="restrict" and @value="1"]', this.root);
+        if (hide) hide.checked = true;
+      }).call(this);
+
+      this.connections.push($ev(this.form).submit(bind(function() {
+        this.submit();
         return true;
       }, this)));
-    }
 
-    if (conf.bookmark_hide) (function() {
-      var hide = $x('.//input[@type="radio" and @name="restrict" and @value="1"]', this.root);
-      if (hide) hide.checked = true;
-    }).call(this);
-
-    this.connections.push($ev(this.form).submit(bind(function() {
-      this.submit();
-      return true;
-    }, this)));
-
-    this.connections.push($ev(this.root).key(function(ev, conn, key) {
-      if (key === $ev.KEY_ESCAPE && $x('ancestor-or-self::input', ev.target)) {
-        ev.target.blur();
-        return true;
-      }
-      return false;
-    }));
-
-    each([this.tags_illust, this.tags_bookmark], function(group, idx) {
-      each(group, function(it) {
-        var tag = it.firstChild.nodeValue;
-        it.setAttribute('onclick', '');
-        it.onclick = '';
-        $ev(it).click(function() {
-          window.add_form(tag);
+      this.connections.push($ev(this.root).key(function(ev, conn, key) {
+        if (key === $ev.KEY_ESCAPE && $x('ancestor-or-self::input', ev.target)) {
+          ev.target.blur();
           return true;
-        });
-        if (idx === 0) {
-          it.href = '/tags.php?tag=' + tag;
-        } else {
-          it.href = '/bookmark.php?tag=' + tag + (conf.bookmark_hide ? '&rest=hide' : '');
         }
-      });
-    });
+        return false;
+      }));
 
-    $js.script(pp.url.js.bookmark_add_v4).wait(bind(function() {
-      // 二回目以降bookmark_add_v4.jsの初期化関数が呼ばれない
-      window.alltags = window.getAllTags();
-      // magic 11.00.1029
-      window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
-
-      if (conf.bm_tag_order.length) {
-        each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]' +
-                 '/a[starts-with(@id, "myBookmarkTagsSortBy")]', this.root),
-             function(anc) {
-               if (anc.previousSibling.nodeType === 3) {
-                 // &nbsp;
-                 anc.parentNode.removeChild(anc.previousSibling);
-               }
-               anc.parentNode.removeChild(anc);
-             });
-        each(reorder_tags($xa('ul/li', this.tag_wrap_bm)), function(list) {
-          var ul = $c('ul', this.tag_wrap_bm, {cls: 'tagCloud'});
-          each(list, function(li) {
-            li.parentNode.removeChild(li);
-            ul.appendChild(li);
+      each([this.tags_illust, this.tags_bookmark], function(group, idx) {
+        each(group, function(it) {
+          var tag = it.firstChild.nodeValue;
+          it.setAttribute('onclick', '');
+          it.onclick = '';
+          $ev(it).click(function() {
+            window.add_form(tag);
+            return true;
           });
-        }, this);
-        this.tag_wrap_bm.removeChild($t('ul', this.tag_wrap_bm)[0]);
-      } else {
-        window.bookmarkTagSort.sortedTag = {
-          name: { asc: [], desc: [] },
-          num:  { asc: [], desc: [] }
-        };
-        window.bookmarkTagSort.tag = [];
-        window.bookmarkTagSort.init();
-      }
+          if (idx === 0) {
+            it.href = '/tags.php?tag=' + tag;
+          } else {
+            it.href = '/bookmark.php?tag=' + tag + (conf.bookmark_hide ? '&rest=hide' : '');
+          }
+        });
+      });
 
-      var first = true;
-      var p = 'pixplus-bm-tag-' + Math.floor(Math.random() * 100);
-      each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
-           function(ul, idx) {
-             var q = p + '-' + idx;
-             var tags = $xa('li/a', ul);
-             each(tags, function(tag, idx) {
-               tag.id = q + '-' + idx;
-               tag.style.navLeft = '#' + q + '-' + (idx ? idx - 1 : tags.length - 1);
-               tag.style.navRight = '#' + q + '-' + (tags[idx + 1] ? idx + 1 : 0);
-             });
-             if (first && tags.length) {
-               this.input_tag.style.navDown = '#' + tags[0].id;
-               first = false;
-             }
-           },
-           this);
+      $js.script(pp.url.js.bookmark_add_v4).wait(bind(function() {
+        // 二回目以降bookmark_add_v4.jsの初期化関数が呼ばれない
+        window.alltags = window.getAllTags();
+        // magic 11.00.1029
+        window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
 
-      if (opts.autotag) this.autoinput_from_tag();
-
-      var keyhandler = BookmarkForm.prototype.onkey_common;
-      if (this.key_type === 1) {
-        this.tag_items = [];
-        this.tag_preselected_index = {x: 0, y: 0};
-        this.input_tag.setAttribute('autocomplete', 'off');
-        this.input_tag.focus();
-        each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
-             function(ul) {
-               var l = $t('li', ul);
-               if (l.length) this.tag_items.push(l);
-             }, this);
-        if (this.tag_items.length) {
-          $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey, this));
+        if (conf.bm_tag_order.length) {
+          each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]' +
+                   '/a[starts-with(@id, "myBookmarkTagsSortBy")]', this.root),
+               function(anc) {
+                 if (anc.previousSibling.nodeType === 3) {
+                   // &nbsp;
+                   anc.parentNode.removeChild(anc.previousSibling);
+                 }
+                 anc.parentNode.removeChild(anc);
+               });
+          each(reorder_tags($xa('ul/li', this.tag_wrap_bm)), function(list) {
+            var ul = $c('ul', this.tag_wrap_bm, {cls: 'tagCloud'});
+            each(list, function(li) {
+              li.parentNode.removeChild(li);
+              ul.appendChild(li);
+            });
+          }, this);
+          this.tag_wrap_bm.removeChild($t('ul', this.tag_wrap_bm)[0]);
+        } else {
+          window.bookmarkTagSort.sortedTag = {
+            name: { asc: [], desc: [] },
+            num:  { asc: [], desc: [] }
+          };
+          window.bookmarkTagSort.tag = [];
+          window.bookmarkTagSort.init();
         }
-      } else if (this.key_type === 2) {
-        this.set_root_key_enabled(true);
-        this.key_map_root = {};
-        each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
-          if (idx >= BookmarkForm.keys_root.length) return true;
-          var div = $c('div', null, {css: 'display:inline-block', 'a:ppaccesskey': BookmarkForm.keys_root[idx]});
-          input.parentNode.insertBefore(div, input);
-          input.parentNode.removeChild(input);
-          div.appendChild(input);
-          this.key_map_root[BookmarkForm.keys_root[idx]] = input;
-          return false;
-        }, this);
 
-        this.key_map_tag_list = {};
+        var first = true;
+        var p = 'pixplus-bm-tag-' + Math.floor(Math.random() * 100);
         each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
              function(ul, idx) {
-               if (idx >= BookmarkForm.keys_tag.length) return;
-               this.key_map_tag_list[BookmarkForm.keys_tag[idx]] = ul;
-               ul.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
+               var q = p + '-' + idx;
+               var tags = $xa('li/a', ul);
+               each(tags, function(tag, idx) {
+                 tag.id = q + '-' + idx;
+                 tag.style.navLeft = '#' + q + '-' + (idx ? idx - 1 : tags.length - 1);
+                 tag.style.navRight = '#' + q + '-' + (tags[idx + 1] ? idx + 1 : 0);
+               });
+               if (first && tags.length) {
+                 this.input_tag.style.navDown = '#' + tags[0].id;
+                 first = false;
+               }
              },
              this);
 
-        keyhandler = BookmarkForm.prototype.onkey2;
-        //this.connections.push($ev(this.root).listen(['focus', 'blur'], bind(function() {
-        //  alert();
-        //  this.set_root_key_enabled(lc(window.document.activeElement) !== 'input');
-        //}, this)));
-      } else {
-        this.input_tag.focus();
-      }
-      if (keyhandler) {
-        if (opts.signal_key) {
-          this.connections.push(opts.signal_key.connect(bind(keyhandler, this)));
+        if (opts.autotag) this.autoinput_from_tag();
+
+        var keyhandler = BookmarkForm.prototype.onkey_common;
+        if (this.key_type === 1) {
+          this.tag_items = [];
+          this.tag_preselected_index = {x: 0, y: 0};
+          this.input_tag.setAttribute('autocomplete', 'off');
+          this.input_tag.focus();
+          each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
+               function(ul) {
+                 var l = $t('li', ul);
+                 if (l.length) this.tag_items.push(l);
+               }, this);
+          if (this.tag_items.length) {
+            $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey, this));
+          }
+        } else if (this.key_type === 2) {
+          this.set_root_key_enabled(true);
+          this.key_map_root = {};
+          each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
+            if (idx >= BookmarkForm.keys_root.length) return true;
+            var div = $c('div', null, {css: 'display:inline-block', 'a:ppaccesskey': BookmarkForm.keys_root[idx]});
+            input.parentNode.insertBefore(div, input);
+            input.parentNode.removeChild(input);
+            div.appendChild(input);
+            this.key_map_root[BookmarkForm.keys_root[idx]] = input;
+            return false;
+          }, this);
+
+          this.key_map_tag_list = {};
+          each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
+               function(ul, idx) {
+                 if (idx >= BookmarkForm.keys_tag.length) return;
+                 this.key_map_tag_list[BookmarkForm.keys_tag[idx]] = ul;
+                 ul.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
+               },
+               this);
+
+          keyhandler = BookmarkForm.prototype.onkey2;
+          //this.connections.push($ev(this.root).listen(['focus', 'blur'], bind(function() {
+          //  alert();
+          //  this.set_root_key_enabled(lc(window.document.activeElement) !== 'input');
+          //}, this)));
         } else {
-          $ev(window).key(bind(keyhandler, this));
+          this.input_tag.focus();
         }
-      }
-    }, this));
-
-    (function() {
-      var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
-      try {
-        if (bottom.firstChild.nodeType === 3 &&
-            check_node(bottom.firstChild.nextSibling, 'BR')) {
-          bottom.removeChild(bottom.firstChild);
-          bottom.removeChild(bottom.firstChild);
+        if (keyhandler) {
+          if (opts.signal_key) {
+            this.connections.push(opts.signal_key.connect(bind(keyhandler, this)));
+          } else {
+            $ev(window).key(bind(keyhandler, this));
+          }
         }
-      } catch (x) { }
-      var note = $x('.//dd/text()[contains(., \"10\u500b\")]', this.root);
-      if (note) {
-        if (check_node(note.previousSibling, 'BR')) {
-          note.parentNode.removeChild(note.previousSibling);
+      }, this));
+
+      (function() {
+        var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
+        try {
+          if (bottom.firstChild.nodeType === 3 &&
+              check_node(bottom.firstChild.nextSibling, 'BR')) {
+            bottom.removeChild(bottom.firstChild);
+            bottom.removeChild(bottom.firstChild);
+          }
+        } catch (x) { }
+        var note = $x('.//dd/text()[contains(., \"10\u500b\")]', this.root);
+        if (note) {
+          if (check_node(note.previousSibling, 'BR')) {
+            note.parentNode.removeChild(note.previousSibling);
+          }
+          note.parentNode.removeChild(note);
         }
-        note.parentNode.removeChild(note);
-      }
-    }).call(this);
-  }
+      }).call(this);
+    },
 
-  BookmarkForm.keys_root = ['q', 'w', 'e', 'r'];
-  BookmarkForm.keys_tag = ['a', 's', 'd', 'f', 'z', 'x', 'c', 'v'];
-  BookmarkForm.write_css = function() {
-    pp.write_css('.pp-bm-wrap .bookmain_title{padding:4px;}' +
-                 '.pp-bm-wrap .bookmain_title_img{text-align:left;}' +
-                 '.pp-bm-wrap .box_main_sender{padding-right:0px;padding-bottom:0px;}' +
-                 '.pp-bm-wrap .box_one_body{padding:0px;}' +
-                 '.pp-bm-wrap .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}' +
-                 '.pp-bm-wrap .box_one_body > dl:last-child{padding:4px;}' +
-                 '.pp-bm-wrap .box_one_body > dl > dd{margin-top:-24px;}' +
-                 '.pp-bm-wrap #pp-autoinput-wrap{text-align:right;line-height:normal;margin-top:4px;}' +
-                 '.pp-bm-wrap #pp-autoinput-wrap > a + a{margin-left:0.6em;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag{margin:4px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > span:first-child{display:none;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > br{display:none;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;}' +
-                 '.pp-bm-wrap .bookmark_recommend_tag > ul > li[pppreselected]{border:2px solid #56E655;padding:0px;}' +
-                 '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
-                 '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
-                 '.pp-bm-wrap *[ppaccesskey]:before{' +
-                 '  display:none;content:attr(ppaccesskey);font-size:10px;font-weight:bold;padding:1px;' +
-                 //'  position:absolute;margin-top:-0.4em;margin-left:-0.8em;' +
-                 '  color:white;background-color:gray;line-height:1em;height:1em;}' +
-                 '.pp-bm-wrap.pp-access-key-on div[ppaccesskey]:before{display:inline-block;}' +
-                 '.pp-bm-wrap.pp-access-key-on ul[ppaccesskey]:before{display:inline-block;}' +
-                 '.pp-bm-wrap ul.pp-access-key-on li[ppaccesskey]:before{display:inline-block;}' +
-                 ''
-                );
-    BookmarkForm.write_css = function() { };
-  };
-  BookmarkForm.trap_jquery_ready = function() {
-    /* window.jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
-     * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
-     */
-    window.jQuery.fn.ready = function(func) {
-      setTimeout(func, 10);
-    };
-    BookmarkForm.trap_jquery_ready = function() { };
-  };
-
-  BookmarkForm.set_key_label_enabled = function(node, enabled) {
-    var classes = node.className.replace(/ *pp-access-key-on */, ' ');
-    if (enabled) classes += ' pp-access-key-on';
-    node.className = classes;
-  };
-
-  BookmarkForm.prototype = {
     autoinput: function(func) {
       var tags = this.input_tag.value.split(/\s+|\u3000+/);
       each(this.tags_bookmark, function(bt) {
@@ -5257,7 +5210,58 @@
       });
       this.connections = [];
     }
-  };
+  }, {
+    keys_root: ['q', 'w', 'e', 'r'],
+    keys_tag: ['a', 's', 'd', 'f', 'z', 'x', 'c', 'v'],
+
+    write_css: function() {
+      pp.write_css('.pp-bm-wrap .bookmain_title{padding:4px;}' +
+                   '.pp-bm-wrap .bookmain_title_img{text-align:left;}' +
+                   '.pp-bm-wrap .box_main_sender{padding-right:0px;padding-bottom:0px;}' +
+                   '.pp-bm-wrap .box_one_body{padding:0px;}' +
+                   '.pp-bm-wrap .box_one_body > dl{padding:4px 4px 0px 4px;margin:0px;line-height:24px;}' +
+                   '.pp-bm-wrap .box_one_body > dl:last-child{padding:4px;}' +
+                   '.pp-bm-wrap .box_one_body > dl > dd{margin-top:-24px;}' +
+                   '.pp-bm-wrap #pp-autoinput-wrap{text-align:right;line-height:normal;margin-top:4px;}' +
+                   '.pp-bm-wrap #pp-autoinput-wrap > a + a{margin-left:0.6em;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag{margin:4px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag + .bookmark_recommend_tag{margin-top:16px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > span:first-child{display:none;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > br{display:none;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > ul > li[pppreselected]{border:2px solid #56E655;padding:0px;}' +
+                   '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
+                   '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
+                   '.pp-bm-wrap *[ppaccesskey]:before{' +
+                   '  display:none;content:attr(ppaccesskey);font-size:10px;font-weight:bold;padding:1px;' +
+                   //'  position:absolute;margin-top:-0.4em;margin-left:-0.8em;' +
+                   '  color:white;background-color:gray;line-height:1em;height:1em;}' +
+                   '.pp-bm-wrap.pp-access-key-on div[ppaccesskey]:before{display:inline-block;}' +
+                   '.pp-bm-wrap.pp-access-key-on ul[ppaccesskey]:before{display:inline-block;}' +
+                   '.pp-bm-wrap ul.pp-access-key-on li[ppaccesskey]:before{display:inline-block;}' +
+                   ''
+                  );
+      BookmarkForm.write_css = function() { };
+    },
+
+    trap_jquery_ready: function() {
+      /* window.jQuery(function)=>jQuery.fn.ready()がjQuery.isReady === trueの時
+       * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
+       */
+      window.jQuery.fn.ready = function(func) {
+        setTimeout(func, 10);
+      };
+      BookmarkForm.trap_jquery_ready = function() { };
+    },
+
+    set_key_label_enabled: function(node, enabled) {
+      var classes = node.className.replace(/ *pp-access-key-on */, ' ');
+      if (enabled) classes += ' pp-access-key-on';
+      node.className = classes;
+    }
+  });
 
   function add_gallery(args, filter_col, filter) {
     try {
