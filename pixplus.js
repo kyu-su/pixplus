@@ -285,8 +285,6 @@
     conf:          conf,
 
     galleries:     [],
-    Gallery:       Gallery,
-    GalleryItem:   GalleryItem,
 
     rpc_ids:       {rpc_i_id: 1, rpc_u_id: 2, rpc_e_id: 4, rpc_qr: 8, rpc_t_id: 16},
     rpc_usable:    false,
@@ -3148,39 +3146,38 @@
     }
   });
 
-  function GalleryItem(url, thumb, caption, prev, gallery) {
-    var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1], 10);
-    if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
+  var GalleryItem = pp.GalleryItem = $cls.create({
+    initialize: function(url, thumb, caption, prev, gallery) {
+      var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1], 10);
+      if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
 
-    this.loaded  = false;
-    this.gallery = gallery;
-    this.thumb   = thumb;
-    this.caption = caption;
-    this.id      = id;
-    this.medium  = urlmode(url, 'medium');
-    this.big     = urlmode(url, 'big');
-    this.prev    = prev || null;
-    this.next    = null;
-    this.manga   = { viewed: false };
-    this.img_med = null;
-    this.img_big = null;
-    this.limited = thumb && pp.url.limit_thumb.indexOf(thumb.src) >= 0 ? true : false;
+      this.loaded  = false;
+      this.gallery = gallery;
+      this.thumb   = thumb;
+      this.caption = caption;
+      this.id      = id;
+      this.medium  = urlmode(url, 'medium');
+      this.big     = urlmode(url, 'big');
+      this.prev    = prev || null;
+      this.next    = null;
+      this.manga   = { viewed: false };
+      this.img_med = null;
+      this.img_big = null;
+      this.limited = thumb && pp.url.limit_thumb.indexOf(thumb.src) >= 0 ? true : false;
 
-    if (gallery) {
-      this.page_item = ++gallery.page_item;
-      this.page_col  = gallery.page_col;
-    } else {
-      this.page_item = 0;
-      this.page_col  = 0;
-    }
+      if (gallery) {
+        this.page_item = ++gallery.page_item;
+        this.page_col  = gallery.page_col;
+      } else {
+        this.page_item = 0;
+        this.page_col  = 0;
+      }
 
-    this.img_url_base = null;
-    this.img_url_ext  = null;
-    if (this.thumb) this.parse_img_url(this.thumb.src);
-    return this;
-  }
+      this.img_url_base = null;
+      this.img_url_ext  = null;
+      if (this.thumb) this.parse_img_url(this.thumb.src);
+    },
 
-  GalleryItem.prototype = {
     parse_img_url: function(url) {
       // 冒頭メモ参照
       var re;
@@ -3189,9 +3186,11 @@
         this.img_url_ext  = re[2];
       }
     },
+
     popup: function() {
       Popup.run(this);
     },
+
     preload: function() {
       if (conf.popup.preload) {
         if (!this.loaded) {
@@ -3206,44 +3205,39 @@
         }
       }
     }
-  };
+  });
 
-  function Gallery(args, filter_col, filter) {
-    this.args = args;
-    this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
-    this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[contains(@href, "mode=medium")]/img';
-    this.filter_col = args.filter_col || filter_col;
-    this.filter = filter;
+  var Gallery = pp.Gallery = $cls.create({
+    initialize: function(args, filter_col, filter) {
+      this.args = args;
+      this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
+      this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[contains(@href, "mode=medium")]/img';
+      this.filter_col = args.filter_col || filter_col;
+      this.filter = filter;
 
-    this.items          = [];
-    this.idmap          = {};
-    this.first          = null;
-    this.first_limited  = null;
-    this.last           = null;
-    this.last_limited   = null;
-    this.prev_dups      = [];
-    this.page_item      = 0;
-    this.page_col       = 0;
+      this.items          = [];
+      this.idmap          = {};
+      this.first          = null;
+      this.first_limited  = null;
+      this.last           = null;
+      this.last_limited   = null;
+      this.prev_dups      = [];
+      this.page_item      = 0;
+      this.page_col       = 0;
 
-    this.onadditem = new Signal();
+      this.onadditem = new Signal();
 
-    if (this.args.xpath_col) {
-      this.detect_new_collection();
-      //if (this.page_col === 0) throw 1;
-      $ev(window.document.body, {async: true}).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
-      Gallery.oncreate.emit(this);
-    } else {
-      throw 1;
-    }
-    return this;
-  }
-  Gallery.get_url = function(cap, thumb) {
-    var thumb_anc = thumb && $x('ancestor-or-self::a', thumb);
-    return (cap && cap.href) || (thumb_anc && thumb_anc.href);
-  };
-  Gallery.oncreate = new Signal();
+      if (this.args.xpath_col) {
+        this.detect_new_collection();
+        //if (this.page_col === 0) throw 1;
+        $ev(window.document.body, {async: true}).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
+        Gallery.oncreate.emit(this);
+      } else {
+        throw 1;
+      }
+      return this;
+    },
 
-  Gallery.prototype = {
     detect_new_collection: function() {
       var self = this;
       each($xa(this.args.xpath_col, this.args.root), function(col) {
@@ -3252,6 +3246,7 @@
         }
       });
     },
+
     add_collection: function(col) {
       if (this.filter_col) this.filter_col(col);
       var xpath = this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap;
@@ -3349,7 +3344,14 @@
         }
       });
     }
-  };
+  }, {
+    get_url: function(cap, thumb) {
+      var thumb_anc = thumb && $x('ancestor-or-self::a', thumb);
+      return (cap && cap.href) || (thumb_anc && thumb_anc.href);
+    },
+
+    oncreate: new Signal()
+  });
 
   var Popup = pp.Popup = $cls.create({
     initialize: function(item, manga_page) {
