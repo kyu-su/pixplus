@@ -872,6 +872,7 @@
     if (ev.metaKey)  keys.push('Meta');
     if (ev.type === 'keydown') {
       // webkit
+      console.log(ev);
       if (!ev.keyIdentifier) return null;
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
@@ -4162,12 +4163,12 @@
       return !!window.document.querySelector('#pp-caption[show],#pp-caption:hover');
     },
 
-    keypress: function(ev, key) {
+    onkey: function(ev, key) {
       if (Popup.is_qrate_button(ev.target)) {
         ev.qrate = ev.target;
-        return Popup.onkeypress.emit(this, ev, key);
+        return Popup.onkey.emit(this, ev, key);
       } else if (pp.key_enabled(ev)) {
-        return Popup.onkeypress.emit(this, ev, key);
+        return Popup.onkey.emit(this, ev, key);
       } else {
         return false;
       }
@@ -4295,7 +4296,7 @@
             this.bookmark_form = new BookmarkForm(this.bm_edit, {
               title: this.title, comment: this.comment,
               autotag: !this.bm_btn.hasAttribute('enable'),
-              closable: true, signal_key: Popup.onkeypress
+              closable: true, signal_key: Popup.onkey
             });
             this.bookmark_form.onclose.connect(bind(function() {
               this.toggle_bookmark_edit();
@@ -4388,17 +4389,15 @@
       this.comment_wrap.scrollTop += pos;
     }
   }, {
-    _keypress: function(ev, conn, key) {
-      if (!Popup.stop_key) return Popup.instance.keypress(ev, key);
-      return false;
-    },
-
     _locate: function() {
       Popup.instance.locate();
     },
 
     set_event_handler: function() {
-      Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(Popup._keypress);
+      Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(function(ev, conn, key) {
+        if (!Popup.stop_key) return Popup.instance.onkey(ev, key);
+        return false;
+      });
       window.addEventListener('resize', Popup._locate, false);
     },
 
@@ -4417,7 +4416,7 @@
 
     onsetitem: new Signal(),
     onload: new Signal(),
-    onkeypress: new Signal(function(ev, key) {
+    onkey: new Signal(function(ev, key) {
       function sel_qr(prev) {
         var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
         if (Popup.is_qrate_button(node)) node.focus();
@@ -4603,6 +4602,7 @@
       return !!elem && check_node(elem, 'Input') && /^qr_kw\d+$/.test(elem.id);
     }
   });
+  Popup.onkeypress = Popup.onkey; // for compatibility
 
   Popup.Loader = $cls.create(LoaderBase, {
     initialize: function(item, cb_load, cb_error, reload) {
@@ -4958,7 +4958,7 @@
 
       if (opts.autotag) this.autoinput_from_tag();
 
-      var keyhandler = BookmarkForm.prototype.keypress_common;
+      var keyhandler = BookmarkForm.prototype.onkey_common;
       if (this.key_type === 1) {
         this.tag_items = [];
         this.tag_preselected_index = {x: 0, y: 0};
@@ -4970,7 +4970,7 @@
                if (l.length) this.tag_items.push(l);
              }, this);
         if (this.tag_items.length) {
-          $ev(this.input_tag).key(bind(BookmarkForm.prototype.keypress1, this));
+          $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey, this));
         }
       } else if (this.key_type === 2) {
         this.set_root_key_enabled(true);
@@ -4994,7 +4994,7 @@
              },
              this);
 
-        keyhandler = BookmarkForm.prototype.keypress2;
+        keyhandler = BookmarkForm.prototype.onkey2;
         //this.connections.push($ev(this.root).listen(['focus', 'blur'], bind(function() {
         //  alert();
         //  this.set_root_key_enabled(lc(window.document.activeElement) !== 'input');
@@ -5107,7 +5107,7 @@
       });
     },
 
-    keypress_common: function(ev, conn, key) {
+    onkey_common: function(ev, conn, key) {
       return false;
       /*
       if (!pp.key_enabled(ev)) return false;
@@ -5153,7 +5153,7 @@
       this.tag_preselected.setAttribute('pppreselected', 'yes');
     },
 
-    keypress1: function(ev, conn, key) {
+    onkey1: function(ev, conn, key) {
       if (this.tag_preselected) {
         var x = 0, y = 0;
         switch(key) {
@@ -5201,7 +5201,7 @@
       }
     },
 
-    keypress2: function(ev, conn, key) {
+    onkey2: function(ev, conn, key) {
       if (!pp.key_enabled(ev)) return false;
       if (this.root_key_enabled) {
         if (this.key_map_root[key]) {
@@ -5228,7 +5228,7 @@
           return true;
         }
       }
-      return this.keypress_common(ev, conn, key);
+      return this.onkey_common(ev, conn, key);
     },
 
     submit: function() {
