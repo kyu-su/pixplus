@@ -316,7 +316,7 @@
 
     url: {
       js: {
-        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.min.js', /* WARN */
+        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.1.min.js', /* WARN */
         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
         effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
@@ -4395,7 +4395,7 @@
     },
 
     set_event_handler: function() {
-      Popup.ev_conn_key = $ev(window, {capture: conf.debug}).key(function(ev, conn, key) {
+      Popup.ev_conn_key = $ev(window).key(function(ev, conn, key) {
         if (!Popup.stop_key) return Popup.instance.onkey(ev, key);
         return false;
       });
@@ -4833,6 +4833,7 @@
   var BookmarkForm = pp.BookmarkForm = $cls.create({
     initialize: function(root, opts) {
       this.root          = root;
+      this.opts          = opts;
       this.key_type      = conf.bookmark_form;
 
       this.title         = opts.title || $x('//div[contains(concat(" ", @class, " "), " works_data ")]/h3');
@@ -5197,6 +5198,7 @@
         }, this)).error(function() {
           alert('Error!');
         });
+      BookmarkForm.onsubmit.emit(this, {add: this.opts.autotag});
     },
 
     close: function() {
@@ -5212,6 +5214,8 @@
   }, {
     keys_root: ['q', 'w', 'e', 'r'],
     keys_tag: ['a', 's', 'd', 'f', 'z', 'x', 'c', 'v'],
+
+    onsubmit: new Signal(),
 
     write_css: function() {
       pp.write_css('.pp-bm-wrap .bookmain_title{padding:4px;}' +
