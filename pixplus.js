@@ -4973,7 +4973,7 @@
                  if (l.length) this.tag_items.push(l);
                }, this);
           if (this.tag_items.length) {
-            $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey, this));
+            $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey1, this));
           }
         } else if (this.key_type === 2) {
           this.set_root_key_enabled(true);
