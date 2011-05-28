@@ -316,9 +316,9 @@
 
     url: {
       js: {
-        jquery:             'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.1.min.js', /* WARN */
-        prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js',
-        effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
+        jquery:             'https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js', /* WARN */
+        prototypejs:        'https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js',
+        effects:            'https://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
         rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
         tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
