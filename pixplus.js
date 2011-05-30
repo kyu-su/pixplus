@@ -316,9 +316,9 @@
 
     url: {
       js: {
-        jquery:             'https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js', /* WARN */
-        prototypejs:        'https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js',
-        effects:            'https://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
+        jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js', /* WARN */
+        prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js',
+        effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
         rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
         tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
@@ -5703,7 +5703,7 @@
     var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
     if (conf.debug && ret) {
       var attr_f = ret.getAttribute(attr);
-      if (attr_f !== url) alert('New one?\n' + attr_f);
+      if (attr_f.replace(/^\w+:/, '') !== url.replace(/^\w+:/, '')) alert('New one?\n' + attr_f);
     }
     return ret;
   }
