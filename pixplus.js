@@ -3314,8 +3314,12 @@
         }
         if (pbtn) {
           $ev($x('ancestor-or-self::a', pbtn)).click(function() {
-            // for HaH bookmarklet
-            if (window.opera && window.document.activeElement === this) this.blur();
+            // spatial navigation
+            if (window.opera &&
+                (window.document.activeElement === this ||
+                 window.document.activeElement === thumb)) {
+              window.document.activeElement.blur();
+            }
             Popup.run(item);
             return true;
           });
