@@ -1008,7 +1008,11 @@
     var list = node.className.split(/ +/);
     for(var i = 0; i < list.length; ++i) {
       if (list[i] === cls) {
-        if (state) {
+        if (arguments.length < 3) {
+          list.splice(i, 1);
+          node.className = list.join(' ');
+          return;
+        } else if (state) {
           return;
         } else {
           list.splice(i, 1);
@@ -1016,7 +1020,7 @@
         }
       }
     }
-    if (state) list.push(cls);
+    if (state || arguments.length < 3) list.push(cls);
     node.className = list.join(' ');
   }
 
@@ -2079,8 +2083,8 @@
               form.insertBefore(msgbox, form.firstChild);
               pp.write_css('.msgbox_bottom{border:0px !important;}' +
                            // ポップアップより下(z-index:90)に表示する
-                           '.msgbox_bottom[float]{z-index:90;opacity:0.6;}' +
-                           '.msgbox_bottom[float]:hover{opacity:1;}');
+                           '.msgbox_bottom.pp-float{z-index:90;opacity:0.6;}' +
+                           '.msgbox_bottom.pp-float:hover{opacity:1;}');
 
               new Floater(msgbox, null, true);
             }
@@ -2098,8 +2102,8 @@
            pp.replaceChild(form, p);
            form.replaceChild(p, list);
            p.appendChild(list);
-           write_css('.msgbox_bottom[float]{opacity:0.6;}' +
-           '.msgbox_bottom[float]:hover{opacity:1;}');
+           write_css('.msgbox_bottom.pp-float{opacity:0.6;}' +
+           '.msgbox_bottom.pp-float:hover{opacity:1;}');
            msgbox.parentNode.removeChild(msgbox);
            form.insertBefore(msgbox, p);
            new Floater(msgbox);
@@ -2793,7 +2797,7 @@
 
     pp.write_css('#header .header_otehrs_ul li{margin-left:0px;}' +
                  '#header .header_otehrs_ul li + li{margin-left:16px;}' +
-                 '*[float]{position:fixed;top:0px;}' +
+                 '*.pp-float{position:fixed;top:0px;}' +
                  // workaround
                  '.book_flat_on,.book_flat_off,.book_cloud_on,.book_cloud_off{padding-bottom:15px;}' +
                  // icon
@@ -2842,7 +2846,7 @@
                  '#pp-popup #pp-header #pp-caption{padding-top:2px;position:absolute;' +
                  '  background-color:white;z-index:2010;opacity:0;padding-bottom:1px;}' +
                  '#pp-popup #pp-header:hover #pp-caption{opacity:' + conf.popup.caption_opacity + ';}' +
-                 '#pp-popup #pp-header #pp-caption[show]{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
+                 '#pp-popup #pp-header #pp-caption.show{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                  '#pp-popup #pp-caption .pp-separator{border-top:1px solid gray;margin-top:1px;padding-top:1px;}' +
                  '#pp-popup #pp-caption .pp-separator-b{border-bottom:1px solid gray;margin-bottom:1px;padding-bottom:1px;}' +
                  '#pp-popup #pp-comment-wrap{overflow:auto;line-height:normal;}' +
@@ -4154,18 +4158,14 @@
     },
 
     toggle_caption: function() {
-      if (this.caption.hasAttribute('show')) {
-        this.caption.removeAttribute('show');
-      } else {
-        this.caption.setAttribute('show', '');
-      }
+      set_class(this.caption, 'show');
       if (!this.is_caption_visible() && Popup.is_qrate_button(window.document.activeElement)) {
         window.document.activeElement.blur();
       }
     },
 
     is_caption_visible: function() {
-      return !!window.document.querySelector('#pp-caption[show],#pp-caption:hover');
+      return !!window.document.querySelector('#pp-caption.show,#pp-caption:hover');
     },
 
     onkey: function(ev, key) {
@@ -5349,7 +5349,7 @@
         this.placeholder = null;
       }
       this.scroll_save();
-      this.wrap.removeAttribute('float');
+      set_class(this.wrap, 'pp-float', false);
       this.scroll_restore();
       this.floating = false;
     },
@@ -5383,7 +5383,7 @@
           this.placeholder.style.height = '0px';
           this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
         }
-        this.wrap.setAttribute('float', '');
+        set_class(this.wrap, 'pp-float', true);
         if (this.use_placeholder) {
           this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
         }
