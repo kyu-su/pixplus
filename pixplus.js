@@ -1019,7 +1019,7 @@
       }
     }
     if (state == -1 || state > 0) list.push(cls);
-    node.className = list.join(' ');
+    node.className = trim(list.join(' '));
   }
 
   function each(list, func, obj) {
@@ -2839,7 +2839,7 @@
                  '#pp-popup #pp-right{float:right;font-size:smaller;}' +
                  '#pp-popup #pp-right > * + *{margin-left:0.4em;}' +
                  '#pp-popup #pp-right a{color:#258fb8;font-weight:bold;}' +
-                 '#pp-popup #pp-right a[enable]{color:gray;font-weight:normal;}' +
+                 '#pp-popup #pp-right a.enable{color:gray;font-weight:normal;}' +
                  '#pp-popup #pp-header{background-color:white;}' +
                  '#pp-popup #pp-header #pp-caption{padding-top:2px;position:absolute;' +
                  '  background-color:white;z-index:2010;opacity:0;padding-bottom:1px;}' +
@@ -3513,7 +3513,7 @@
       this.viewer_comments_a.innerHTML = '';
       if (pp.rpc_usable) {
         this.comments_btn.style.display = '';
-        this.comments_btn.removeAttribute('enable');
+        set_class(this.comments_btn, 'enable', 0);
         if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
       } else {
         this.comments_btn.style.display = 'none';
@@ -3708,7 +3708,7 @@
 
       this.set_manga_button_text();
       this.manga_btn.style.display = this.manga.usable ? 'inline' : 'none';
-      this.manga_btn.removeAttribute('enable');
+      set_class(this.manga_btn, 'enable', 0);
       this.manga_btn.href = urlmode(this.item.medium, 'manga') + '#pp_manga_tb';
 
       if ((re = /<a\s+href=\"(\/member\.php\?id=(\d+))[^\"]*\"[^>]*><img\s+src=\"([^\"]+\.pixiv\.net\/[^\"]+)\"\s+alt=\"([^\"]+)\"[^>]*><\/a>/i.exec(loader.text))) {
@@ -3752,17 +3752,17 @@
         this.has_image_response = true;
         this.res_btn.href = '/' + re[1];
         if (re[2] === this.item.id) {
-          this.res_btn.removeAttribute('enable');
+          set_class(this.res_btn, 'enable', 0);
         } else {
-          this.res_btn.setAttribute('enable', '');
+          set_class(this.res_btn, 'enable', 1);
         }
         this.res_btn.style.display = '';
       }
 
       if (/<a[^>]+href=\"[^\"]*bookmark_detail\.php\?/i.test(loader.text)) {
-        this.bm_btn.setAttribute('enable', '');
+        set_class(this.bm_btn, 'enable', 1);
       } else {
-        this.bm_btn.removeAttribute('enable');
+        set_class(this.bm_btn, 'enable', 0);
       }
       this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
       this.bm_btn.style.display = '';
@@ -4224,7 +4224,7 @@
       } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
         show.call(this);
       }else{
-        this.comments_btn.removeAttribute('enable');
+        set_class(this.comments_btn, 'enable', 0);
         window.jQuery(this.viewer_comments).slideUp(200, bind(function() {
           this.expand_header = false;
           this.locate();
@@ -4251,7 +4251,7 @@
       function show() {
         this.expand_header = true;
         this.locate();
-        this.comments_btn.setAttribute('enable', '');
+        set_class(this.comments_btn, 'enable', 1);
         window.jQuery(this.viewer_comments).slideDown(200);
         window.jQuery(this.comment_wrap).animate({scrollTop: this.comment.offsetHeight}, 200);
       }
@@ -4376,7 +4376,7 @@
       if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) return;
       if ((this.manga.enabled = manga_mode)) {
         this.manga.enabled = true;
-        this.manga_btn.setAttribute('enable', '');
+        set_class(this.manga_btn, 'enable', 1);
         this.update_olc();
         this.set_manga_page(page || 0);
       } else {
