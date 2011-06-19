@@ -4181,7 +4181,7 @@
       if (this.has_qrate) {
         var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
         if (anc) {
-          this.caption.setAttribute('show', '');
+          set_class(this.caption, 'show', 1);
           send_click(anc);
         }
       }
@@ -4208,7 +4208,7 @@
     toggle_viewer_comments: function() {
       if (!this.viewer_comments_enabled) return;
       if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
-        this.caption.setAttribute('show', '');
+        set_class(this.caption, 'show', 1);
       }
       if (!this.viewer_comments_a.innerHTML) {
         window.jQuery.post(
