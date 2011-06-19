@@ -1006,21 +1006,19 @@
 
   function set_class(node, cls, state) {
     var list = node.className.split(/ +/);
+    if (state < 0) state = -1;
     for(var i = 0; i < list.length; ++i) {
       if (list[i] === cls) {
-        if (arguments.length < 3) {
-          list.splice(i, 1);
-          node.className = list.join(' ');
-          return;
-        } else if (state) {
-          return;
-        } else {
+        if (state <= 0) {
           list.splice(i, 1);
           --i;
+          if (state < 0) state = -2;
+        } else {
+          return;
         }
       }
     }
-    if (state || arguments.length < 3) list.push(cls);
+    if (state == -1 || state > 0) list.push(cls);
     node.className = list.join(' ');
   }
 
@@ -3530,7 +3528,7 @@
       this.set_status('Error!');
       this.load_pre();
       if (msg) {
-        set_class(this.root_div, 'pp-error', true);
+        set_class(this.root_div, 'pp-error', 1);
         this.img_div.style.display = '';
         this.error_div.textContent = msg;
         this.locate();
@@ -3539,7 +3537,7 @@
     },
     complete: function() {
       this.status.style.display = 'none';
-      set_class(this.root_div, 'pp-error', false);
+      set_class(this.root_div, 'pp-error', 0);
     },
 
     first: function() {
@@ -4158,7 +4156,7 @@
     },
 
     toggle_caption: function() {
-      set_class(this.caption, 'show');
+      set_class(this.caption, 'show', -1);
       if (!this.is_caption_visible() && Popup.is_qrate_button(window.document.activeElement)) {
         window.document.activeElement.blur();
       }
@@ -5349,7 +5347,7 @@
         this.placeholder = null;
       }
       this.scroll_save();
-      set_class(this.wrap, 'pp-float', false);
+      set_class(this.wrap, 'pp-float', 0);
       this.scroll_restore();
       this.floating = false;
     },
@@ -5383,7 +5381,7 @@
           this.placeholder.style.height = '0px';
           this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
         }
-        set_class(this.wrap, 'pp-float', true);
+        set_class(this.wrap, 'pp-float', 1);
         if (this.use_placeholder) {
           this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
         }
