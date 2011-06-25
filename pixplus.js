@@ -1874,9 +1874,9 @@
             var label = $c('label', null, {text: rep});
             node.parentNode.insertBefore(label, node);
             $ev(label).hover(function() {
-              captions[idx_h].setAttribute('highlight', '');
+              set_class(captions[idx_h], 'highlight', 1);
             }, function() {
-              captions[idx_h].removeAttribute('highlight');
+              set_class(captions[idx_h], 'highlight', 0);
             });
           }
           node.parentNode.insertBefore(window.document.createTextNode(term), node);
@@ -1913,7 +1913,7 @@
     '.pp-help-table{line-height:1.2em;}' +
     '.pp-help-table td{padding:0px 4px;}' +
     '.pp-help-table td.pp-help-mode{padding:0px;font-weight:bold;}' +
-    '.pp-help-table td.pp-help-mode[highlight]{background-color:#ffdfdf;}' +
+    '.pp-help-table td.pp-help-mode.highlight{background-color:#ffdfdf;}' +
     '.pp-help-table td label{color:navy;}' +
     '#pp-conf-about dt{font-weight:bold;}' +
     '#pp-conf-about *+dt{margin-top:0.6em;}' +
@@ -5089,7 +5089,7 @@
 
     unpreselect_tag: function() {
       if (this.tag_preselected) {
-        this.tag_preselected.removeAttribute('pppreselected');
+        set_class(this.tag_preselected, 'pppreselected', 0);
         this.tag_preselected = null;
       }
     },
@@ -5110,7 +5110,7 @@
       this.tag_preselected_index.x = x;
       this.tag_preselected_index.y = y;
       this.tag_preselected = this.tag_items[y][x];
-      this.tag_preselected.setAttribute('pppreselected', 'yes');
+      set_class(this.tag_preselected, 'pppreselected', 1);
     },
 
     onkey1: function(ev, conn, key) {
@@ -5241,7 +5241,7 @@
                    '.pp-bm-wrap .bookmark_recommend_tag > ul{padding:0px;margin:0px;}' +
                    '.pp-bm-wrap .bookmark_recommend_tag > ul + ul{margin-top:4px;}' +
                    '.pp-bm-wrap .bookmark_recommend_tag > ul > li{padding:2px;}' +
-                   '.pp-bm-wrap .bookmark_recommend_tag > ul > li[pppreselected]{border:2px solid #56E655;padding:0px;}' +
+                   '.pp-bm-wrap .bookmark_recommend_tag > ul > li.pppreselected{border:2px solid #56E655;padding:0px;}' +
                    '.pp-bm-wrap .bookmark_bottom{padding-bottom:4px;}' +
                    '.pp-bm-wrap .bookmark_bottom input{margin:0px;}' +
                    '.pp-bm-wrap *[ppaccesskey]:before{' +
