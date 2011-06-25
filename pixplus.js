@@ -1612,7 +1612,8 @@
 
   ConfigUI.changelog_data = [{
     date: '2011/06/26', version: '0.6.2', changes: [
-      '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+      '\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
     date: '2011/05/21', version: '0.6.1', changes: [
@@ -1990,11 +1991,11 @@
       });
     }
     function mypage() {
-      each($xa('//div[contains(concat(" ", @class), " baseTop")]'), function(root) {
+      each($qa('ul.top_display_works'), function(root) {
         add_gallery({
           root:      root,
-          xpath_col: './/ul[contains(concat(" ", @class, " "), " top_display_works ")]',
-          xpath_cap: './li/text()[last()]'
+          xpath_col: 'self::ul',
+          xpath_cap: 'self::ul/li/text()[last()]'
         }, unpack_captions);
       });
       area_right();
@@ -2432,10 +2433,8 @@
       name: '',
       func: [function(args) {
         if (pp.galleries.length === 0) {
-          if ($x('//div[contains(concat(" ", @class, " "), " profile_area ")]/a[@href="/profile.php"]') &&
-              $x('//div[contains(concat(" ", @class, " "), " area_right ")]')) {
+          if ($q('div.profile_area ul.person_menu2') && $q('div.area_right')) {
             // http://www.pixiv.net/event_christmas2010.php
-            // TODO: it's not works
             mypage();
           } else {
             // for old html support
