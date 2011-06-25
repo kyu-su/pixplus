@@ -1611,6 +1611,10 @@
   }];
 
   ConfigUI.changelog_data = [{
+    date: '2011/06/26', version: '0.6.2', changes: [
+      '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+    ]
+  }, {
     date: '2011/05/21', version: '0.6.1', changes: [
       'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       '\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
@@ -2485,8 +2489,8 @@
         if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
         var root, click_handler;
-        var sitenav = $x('//div[@id="nav"]/ul[contains(concat(" ", @class, " "), " sitenav ")]');
-        if (sitenav) {
+        var sitemenu = $q('nav.site-menu ul');
+        if (sitemenu) {
           var config_anc;
 
           function fire_event() {
@@ -2554,7 +2558,7 @@
           })();
 
           var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
-          sitenav.insertBefore(li, sitenav.firstChild);
+          sitemenu.insertBefore(li, sitemenu.firstChild);
           config_anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
           if (menu_items.length) {
             li.appendChild(config_anc.cloneNode(true));
@@ -2592,7 +2596,7 @@
               if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
             }
 
-            ($('manga_top') || $('wrapHeader')).appendChild(root);
+            $('global-header').appendChild(root);
           }
         }
 
@@ -2811,6 +2815,7 @@
                  'hr + br, hr ~ br{display:none;}' +
                  // menu
                  // 検索欄が z-index:1000 なので
+                 'header#global-header div.wrapper nav.site-menu > ul > li{display:inline-block;}' +
                  '#pp-sitenav-menu-caption > a{display:block;}' +
                  '#pp-sitenav-menu-caption div{padding:3px;margin-top:-3px;margin-left:-3px;background-color:white;' +
                  '  z-index:3001;position:absolute;display:none;}' +
@@ -2819,7 +2824,7 @@
                  '#pp-sitenav-menu{display:none;position:absolute;z-index:3000;background-color:white;' +
                  '  border:1px solid silver;padding:2px;margin-top:1px;margin-left:-3px;}' +
                  '#pp-sitenav-menu-caption:hover #pp-sitenav-menu{display:block;}' +
-                 '#pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
+                 'header#global-header div.wrapper #pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
                  '#pp-sitenav-menu li input{width:2em;margin-left:2px;padding:1px;}' +
                  // config
                  '#pp-conf-root{width:970px;margin:0px auto 4px auto;}' +
