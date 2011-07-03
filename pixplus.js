@@ -2283,9 +2283,9 @@
       // http://www.pixiv.net/ranking.php?mode=daily&date=20110515
       url: '/ranking.php',
       gallery: {
-        xpath_col: '//div[contains(concat(" ", @class, " "), " rankingZone ")]',
-        xpath_cap: './div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
-        xpath_tmb: '../../../../div[contains(concat(" ", @class, " "), " r_left ")]/ul/li[contains(concat(" ", @class, " "), " r_left_img ")]/a/img'
+        xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
+        xpath_cap: './article/div/h2/a[contains(@href, "mode=medium")]',
+        xpath_tmb: '../../preceding-sibling::a[contains(concat(" ", @class, " "), " image-thumbnail ")]/img'
       },
       func: function(args) {
         var date, re, li, a_p, a_n;
@@ -4599,7 +4599,7 @@
         if (browser.gecko) {
           img.style.imageRendering = 'optimizeSpeed';
         } else if (browser.webkit) {
-          //img.style.imageRendering = '-webkit-crisp-edges';
+          img.style.imageRendering = '-webkit-optimize-contrast';
         }
         return img;
       }
