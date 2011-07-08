@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.6.2
+// @version     0.6.3
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -316,7 +316,7 @@
 
     url: {
       js: {
-        jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js', /* WARN */
+        jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js', /* WARN */
         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js',
         effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
@@ -1611,6 +1611,10 @@
   }];
 
   ConfigUI.changelog_data = [{
+    date: '2011/07/xx', version: '0.6.3', changes: [
+      '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+    ]
+  }, {
     date: '2011/06/26', version: '0.6.2', changes: [
       '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
       '\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
@@ -4859,7 +4863,8 @@
       BookmarkForm.write_css();
       BookmarkForm.trap_jquery_ready();
 
-      this.root.className = this.root.className.replace(/ *pp-bm-form */, ' ') + ' pp-bm-wrap';
+      this.form.setAttribute('action', this.form.getAttribute('action').replace(/^\/?/, '/'));
+      set_class(this.root, 'pp-bm-wrap', 1);
 
       this.btn_submit = find($xa('.//input[@type="submit"]', root), function(submit, idx) {
         if (idx + 1 < this.length) {
