@@ -4777,6 +4777,46 @@
     },
 
     parse_html: function(html) {
+      var re;
+      if ((re = /<section[^>]+id="image"[^>]*>(.*?)<\/section>/i.exec(html))) {
+        var terms = re[1].split(/pixiv\.context\.images\[(\d+)\]\.(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/);
+        var manga_pages = [], pages = [], i, j = 0, total_page = 0;
+
+        function add_pages() {
+          for(var i = 0; i < pages.length; ++i) {
+            manga_pages.push({list: pages, page_inc: pages.length - i, page_dec: i + 1});
+          }
+        }
+
+        for(i = 0; i + 3 < terms.length; i += 4) {
+          var idx = parseInt(terms[i + 1]);
+          if (idx == j + 1) {
+            add_pages();
+            pages = [];
+            ++j;
+          }
+          if (idx == j) {
+            Array.prototype[terms[i + 2]].call(pages, {
+              url:         terms[i + 3],
+              url_big:     terms[i + 3].replace(/(_p\d+\.\w+)$/, '_big$1'),
+              page:        total_page++,
+              image_index: pages.length
+            });
+          } else {
+            this.error('Invalid html');
+            return;
+          }
+        }
+
+        add_pages();
+        if (manga_pages.length > 0) {
+          this.load_pages(manga_pages);
+          return;
+        }
+      }
+      this.error('Invalid html');
+
+      /*
       var manga_pages = [];
       var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
       var page = 0;
@@ -4801,6 +4841,7 @@
         }
       }
       this.load_pages(manga_pages);
+       */
     },
 
     load_pages: function(pages) {
