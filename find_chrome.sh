@@ -6,6 +6,6 @@ done
 IFS=:
 for f in $CHROME; do
   path=`which "$f" 2>/dev/null`
-  test $? -eq 0 && "$path" --version | grep 'Chromium\|Chrome' >/dev/null && echo "$path" && exit 0
+  test $? -eq 0 && "$path" --version 2>/dev/null | grep 'Chromium\|Chrome' >/dev/null && echo "$path" && exit 0
 done
 echo not found
