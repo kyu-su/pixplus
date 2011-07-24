@@ -1,0 +1,5 @@
+password
+sign.crt
+sign.key
+cacert.crt
+template.xml
