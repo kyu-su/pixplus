@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.6.3
+// @version     0.7.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -165,10 +165,6 @@
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9"},
                 {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]},
-      {"key": "locate_recommend_right", "value": 2, "desc": "\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u7e261\u5217\u306b\u4e26\u3079\u308b",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u6709\u52b9"},
-                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]},
       {"key": "bookmark_form", "value": 1, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c",
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u30a2\u30ed\u30fc\u30ad\u30fc"},
@@ -183,7 +179,7 @@
                 {"value": "self",     "title": "\u3042\u306a\u305f"}]},
       {"key": "rate_confirm", "value": true, "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"},
       {"key": "disable_effect", "value": false, "desc": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"},
-      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"},
+      {"key": "workaround", "value": true, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
       {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
@@ -1611,7 +1607,12 @@
   }];
 
   ConfigUI.changelog_data = [{
-    date: '2011/07/xx', version: '0.6.3', changes: [
+    date: '2011/08/xx', version: '0.7.0', changes: [
+      '\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+      '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002'
+    ]
+  }, {
+    date: '2011/07/24', version: '0.6.3', changes: [
       '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
       '"\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9"\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
       '\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
@@ -1965,6 +1966,7 @@
         }
         var p = node.parentNode;
         p.removeChild(node);
+        p = $x('ancestor-or-self::a', p);
         p.parentNode.insertBefore(node, p.nextSibling);
         if (window.opera && conf.debug && node.nodeType === 3) (function() {
           // prevent bug in opera xpath processor
@@ -2316,6 +2318,13 @@
           while(str.length < digits) str = '0' + str;
           return str;
         }
+
+        var ranking = $('page-ranking');
+        if (ranking) {
+         $ev(ranking, {async: true}).listen('DOMNodeInserted', function() {
+           window.pixiv.scrollView.add();
+         });
+        }
       }
 
     }, {
@@ -2606,118 +2615,8 @@
         }
 
       }, function(args) {
-        var r_container = $('illust_recommendation');
-        var r_caption = $x('../../../preceding-sibling::div/h3/span[text()[contains(., \"\u304a\u3059\u3059\u3081\")]]', r_container);
-        var r_switch = $('switchButton'), r_switch_p = r_switch ? r_switch.parentNode : null;
-        var float_wrap = null;
+        var r_container = $('illust-recommend');
         if (!r_container) return;
-
-        if (conf.debug) (function() {
-          // trap
-          var ir = window.IllustRecommender;
-          var _show = ir.prototype.show;
-          var _error = ir.error;
-          ir.prototype.show = function(res) {
-            try {
-              _show.apply(this, arguments);
-            } catch(ex) {
-              this.error(ex);
-            }
-          };
-          ir.prototype.error = function(msg) {
-            alert('Illust recommender\n' + msg);
-            if (_error) _error.apply(this, arguments);
-          };
-        })();
-
-        var de = window.document.documentElement;
-        var gallery;
-
-        function init_gallery(illusts) {
-          gallery = add_gallery({
-            root:      illusts,
-            xpath_col: './li',
-            xpath_cap: './a[img]/following-sibling::text()[1]',
-            xpath_tmb: 'preceding-sibling::a/img'
-          }, unpack_captions);
-          if (float_wrap) init_right_gallery(illusts);
-        }
-        function init_right_gallery(illusts) {
-          var floater = new Floater(float_wrap, illusts), conn;
-          init_pager();
-          gallery.onadditem.connect(init_pager, true);
-          function init_pager() {
-            var more = $x('.//div[contains(concat(" ", @class, " "), " commands ")]/a[contains(@title, \"\u3082\u3063\u3068\u898b\")]', r_container);
-            if (more) {
-              if (conn) conn.disconnect();
-              conn = $ev(illusts, {async: true}).scroll(function(ev, conn) {
-                if (illusts.scrollHeight - illusts.scrollTop < illusts.clientHeight * 2) {
-                  send_click(more);
-                  conn.disconnect();
-                }
-              });
-            }
-            floater.update_height();
-          }
-        }
-
-        var switch_wrap;
-        function locate_right() {
-          var _show = r_container.show, _hide = r_container.hide;
-          r_container.show = function() { _show.apply(r_container, arguments); sv(true); };
-          r_container.hide = function() { _hide.apply(r_container, arguments); sv(false); };
-          function sv(show) {
-            r_switch.parentNode.removeChild(r_switch);
-            if (show) {
-              $('wrapper').style.width = '1160px';
-              $('pp-recom-wrap').style.display = '';
-              switch_wrap.appendChild(r_switch);
-            } else {
-              $('wrapper').style.width = '970px';
-              $('pp-recom-wrap').style.display = 'none';
-              r_switch_p.appendChild(r_switch);
-            }
-          }
-          locate_right_real();
-        }
-        function locate_right_real() {
-          var anc = $x('./a[contains(@href, "bookmark.php?tag=")]', r_caption);
-          var wrap = $c('div', null, {id: 'pp-recom-wrap'});
-          var div = $c('div', wrap);
-          if (anc) {
-            div.appendChild(anc.cloneNode(true));
-            if (r_switch) {
-              var r_switch_p_new = $c('span');
-              switch_wrap = $c('span', div, {id: 'pp-recom-switch-wrap'});
-              r_switch_p.replaceChild(r_switch_p_new, r_switch);
-              r_switch_p = r_switch_p_new;
-              switch_wrap.appendChild(r_switch);
-            }
-          }
-          r_container.parentNode.removeChild(r_container);
-          div.appendChild(r_container);
-
-          var contents = $('contents');
-          contents.parentNode.insertBefore(wrap, contents);
-          float_wrap = div;
-
-          pp.write_css('#wrapper{width:1160px;}' +
-                       '#contents{width:970px;float:left;}' +
-                       '#page-footer,.adver_footer{clear:both;}' +
-                       '#pp-recom-switch-wrap:before{content:"[";margin-left:4px;}' +
-                       '#pp-recom-switch-wrap:after{content:"]";}' +
-                       '#pp-recom-wrap{float:right;width:190px;text-align:center;}' +
-                       '#pp-recom-wrap ul.illusts{margin:0 !important;padding:0 !important;}' +
-                       '#pp-recom-wrap li{float:none !important;}' +
-                       // 縦方向の隙間を詰める小細工
-                       '#illust_recommendation div.image_container{height:inherit;}' +
-                       '#illust_recommendation div.image_container a{display:block;}' +
-                       '#illust_recommendation div.image_container>br{display:none;}' +
-                       '#illust_recommendation div.caption{height:inherit;overflow:inherit;}' +
-                       // オートビューモード/もっと見る
-                       '#illust_recommendation div.commands{line-height:1.2em;text-align:left;padding:2px 4px;}' +
-                       '#illust_recommendation div.commands>a{display:block;margin:0 !important;padding:0 !important;}');
-        }
 
         function wait_xpath(xpath, root, func) {
           var node = $x(xpath, root);
@@ -2733,19 +2632,17 @@
             });
           }
         }
-        wait_xpath('.//ul[contains(concat(" ", @class, " "), " illusts ") and li]', r_container, function(illusts) {
-          if (!/^\/bookmark_add\.php/.test(window.location.pathname) && de.clientWidth >= 1175) {
-            if (conf.locate_recommend_right === 1) {
-              locate_right();
-            } else if (conf.locate_recommend_right === 2 && $q('.pages>ol>li>a[rel="next"]')) {
-              Pager.wait(function() {
-                locate_right();
-                if (gallery) init_right_gallery(r_container);
-              });
-            }
-          }
-          init_gallery(illusts);
-        });
+
+        wait_xpath('.//ul[contains(concat(" ", @class, " "), " images ") and li]', r_container, function(images) {
+          add_gallery({
+            root:      images,
+            xpath_col: './li',
+            xpath_cap: './a[img]/following-sibling::text()[1]',
+            xpath_tmb: 'preceding-sibling::a/img'
+          }, function(col) {
+            unpack_captions(col, './a[img]/h1/text()');
+          });
+         });
       }]
 
     }], function(page) {
@@ -2920,6 +2817,10 @@
                  // tag edit
                  '#pp-popup #tag_edit > div{margin:0px !important;}'
                 );
+
+    if (conf.workaround) {
+      pp.write_css('footer#global-footer{clear:both;}');
+    }
 
     init_per_page();
 
