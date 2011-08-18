@@ -179,7 +179,7 @@
                 {"value": "self",     "title": "\u3042\u306a\u305f"}]},
       {"key": "rate_confirm", "value": true, "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"},
       {"key": "disable_effect", "value": false, "desc": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"},
-      {"key": "workaround", "value": true, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
+      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
       {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
@@ -2817,10 +2817,6 @@
                  // tag edit
                  '#pp-popup #tag_edit > div{margin:0px !important;}'
                 );
-
-    if (conf.workaround) {
-      pp.write_css('footer#global-footer{clear:both;}');
-    }
 
     init_per_page();
 
