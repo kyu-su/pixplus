@@ -179,7 +179,7 @@
                 {"value": "self",     "title": "\u3042\u306a\u305f"}]},
       {"key": "rate_confirm", "value": true, "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"},
       {"key": "disable_effect", "value": false, "desc": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"},
-      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
+      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"},
       {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
        "hint": [{"value": 0, "title": "\u7121\u52b9"},
                 {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
@@ -542,8 +542,6 @@
     }
     LS.init();
   })();
-
-  var options = parseopts(window.location.href);
 
   function wrap_global(name, func, cb_init) {
     if (!name || !func) return;
@@ -2450,7 +2448,7 @@
             // http://www.pixiv.net/bookmark.php?id=11
             // http://www.pixiv.net/response.php?illust_id=15092961
             // http://www.pixiv.net/bookmark_add.php
-            //   ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
+            // ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
             add_gallery({
               xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
               xpath_cap: 'ul/li/a[img]',
@@ -2476,15 +2474,6 @@
                        '#bookmark_list.cloud > ul + ul + ul{' + conf.tag_separator_style + '}' +
                        '#bookmark_list.cloud > ul{padding:0px 4px;}' +
                        '#bookmark_list.cloud > ul:first-child{display:none;}');
-
-          if (options.tag) {
-            var a = $x('//li/a[contains(@href, "bookmark.php?tag=' + options.tag + '&")]', bm_tag_list);
-            if (a) {
-              a.style.color          = 'gray';
-              a.style.fontWeight     = 'bold';
-              a.style.textDecoration = 'none';
-            }
-          }
         }
 
         Floater.auto_run(function() {
@@ -2646,6 +2635,7 @@
 
     }], function(page) {
       var match = false;
+      if (!arguments.callee.args) arguments.callee.args = parseopts(window.location.href);
       if (page.url) {
         match = (function(func) {
           if (page.url instanceof Array) {
@@ -2672,7 +2662,7 @@
       if (match) {
         if (page.func) {
           each(page.func instanceof Array ? page.func : [page.func], function(func) {
-            func(options);
+            func(arguments.callee.args);
           });
         }
         if (page.gallery) {
