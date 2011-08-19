@@ -2011,8 +2011,9 @@
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
             xpath_cap: 'ul/li/a[img]',
-            xpath_tmb: 'img'
-          }, null, conf.debug ? debug_filter : null);
+            xpath_tmb: 'img',
+            filter:    conf.debug ? debug_filter : null
+          });
 
           var bm_tag_list = $('bookmark_list');
           if (conf.bm_tag_order.length) {
@@ -3117,11 +3118,8 @@
   });
 
   var Gallery = pp.Gallery = $cls.create({
-    initialize: function(args, filter_col, filter) {
-      this.args = args;
-      this.filter_col = args.filter_col || filter_col;
-      this.filter = filter;
-
+    initialize: function(args) {
+      this.args           = args;
       this.items          = [];
       this.idmap          = {};
       this.first          = null;
@@ -3155,7 +3153,6 @@
     },
 
     add_collection: function(col) {
-      if (this.filter_col) this.filter_col(col);
       var xpath = this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap;
       var elements = $xa(xpath, col);
       if (!elements.length) return;
@@ -3221,7 +3218,7 @@
 
         if (!self.first_limited) self.first_limited = item;
         if (!self.first && !item.limited) self.first = item;
-        if (self.filter) self.filter(item);
+        if (self.args.filter) self.args.filter(item);
 
         if (self.args.skip_dups && self.idmap[item.id]) {
           self.prev_dups.push(item);
@@ -5202,9 +5199,9 @@
     }
   });
 
-  function add_gallery(args, filter_col, filter) {
+  function add_gallery(args) {
     try {
-      var g = new Gallery(args, filter_col, filter);
+      var g = new Gallery(args);
       pp.galleries.push(g);
       return g;
     } catch(ex) {
