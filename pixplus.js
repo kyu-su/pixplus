@@ -1959,34 +1959,6 @@
   }
 
   function init_per_page() {
-    function unpack_captions(col, xpath_cap) {
-      each($xa(xpath_cap || './/a[img]/text()', col), function(node) {
-        if (check_node(node.previousSibling, 'BR')) {
-          node.parentNode.removeChild(node.previousSibling);
-        }
-        var p = node.parentNode;
-        p.removeChild(node);
-        p = $x('ancestor-or-self::a', p);
-        p.parentNode.insertBefore(node, p.nextSibling);
-        if (window.opera && conf.debug && node.nodeType === 3) (function() {
-          // prevent bug in opera xpath processor
-          var prev, next;
-          while((prev = node.previousSibling) && prev.nodeType === 3) {
-            prev.nodeValue += node.nodeValue;
-            node.parentNode.removeChild(node);
-            node = prev;
-          }
-          while((next = node.nextSibling) && next.nodeType === 3) {
-            node.nodeValue += next.nodeValue;
-            next.parentNode.removeChild(next);
-          }
-        })();
-      });
-    }
-    function unpack_captions_label(col) {
-      unpack_captions(col, './ul/li/a[img]/label');
-    }
-
     function area_right() {
       each($qa('.area_right'), function(root) {
         add_gallery({
@@ -2002,9 +1974,10 @@
       each($qa('ul.top_display_works'), function(root) {
         add_gallery({
           root:      root,
-          xpath_col: 'self::ul',
-          xpath_cap: 'self::ul/li/text()[last()]'
-        }, unpack_captions);
+          xpath_col: '.',
+          xpath_cap: 'li/a[img]',
+          xpath_tmb: 'img'
+        });
       });
       area_right();
     }
@@ -2026,7 +1999,7 @@
           // http://www.pixiv.net/bookmark.php
           // http://www.pixiv.net/bookmark.php?type=illust_all
           function debug_filter(item) {
-            var c = $x('./input[@name="book_id[]"]', item.caption.parentNode);
+            var c = $x('input[@name="book_id[]"]', item.caption.parentNode);
             if (c) {
               if (check_node(item.caption.nextSibling, 'BR')) {
                 item.caption.parentNode.removeChild(item.caption.nextSibling);
@@ -2037,8 +2010,9 @@
           }
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-            xpath_cap: './ul/li/text()[preceding-sibling::a/img]'
-          }, unpack_captions, conf.debug ? debug_filter : null);
+            xpath_cap: 'ul/li/a[img]',
+            xpath_tmb: 'img'
+          }, null, conf.debug ? debug_filter : null);
 
           var bm_tag_list = $('bookmark_list');
           if (conf.bm_tag_order.length) {
@@ -2132,7 +2106,8 @@
           // 下部のイメージレスポンス
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
-            xpath_cap: './ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]'
+            xpath_cap: 'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]',
+            xpath_tmb: 'preceding-sibling::a/img'
           });
 
           if (args.mode === 'medium') {
@@ -2241,14 +2216,19 @@
           }
         } else if (args.id) {
           // http://www.pixiv.net/member_illust.php?id=11
-          add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+            xpath_cap: 'ul/li/a[img]',
+            xpath_tmb: 'img'
+          });
         } else {
           // 自分のイラスト管理
           // http://www.pixiv.net/member_illust.php
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-            xpath_cap: './ul/li/a[img]/following-sibling::text()[1]'
-          }, unpack_captions);
+            xpath_cap: 'ul/li/a[img]',
+            xpath_tmb: 'img'
+          });
         }
       }
 
@@ -2266,7 +2246,12 @@
       func: function(args) {
         mypage();
         each($qa('.worksListOthersImg'), function(root) {
-          add_gallery({root: root, xpath_col: '.'}, unpack_captions);
+          add_gallery({
+            root:      root,
+            xpath_col: 'ul',
+            xpath_cap: 'li/a[img and contains(@href, "mode=medium")]',
+            xpath_tmb: 'img'
+          });
         });
       }
 
@@ -2292,7 +2277,7 @@
       url: '/ranking.php',
       gallery: {
         xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
-        xpath_cap: './article/div/h2/a[contains(@href, "mode=medium")]',
+        xpath_cap: 'article/div/h2/a[contains(@href, "mode=medium")]',
         xpath_tmb: '../../preceding-sibling::a[contains(concat(" ", @class, " "), " image-thumbnail ")]/img'
       },
       func: function(args) {
@@ -2331,10 +2316,15 @@
       name: '',
       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
       url: '/bookmark_detail.php',
-      // 下部の「****の他の作品」
-      gallery: {
-        xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]'
-      }
+      gallery: [{ // 下部の「****の他の作品」
+        xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]',
+        xpath_cap: 'ul/li/a[img]/following-sibling::text()[last()]',
+        xpath_tmb: 'preceding-sibling::a/img'
+      }, { // 下部の「この作品をブックマークした人はこんな作品もブックマークしています」
+        xpath_col: '//div[@id="illust_recommendation"]/ul/li',
+        xpath_cap: 'a[img]',
+        xpath_tmb: 'img'
+      }]
 
     }, {
       name: '',
@@ -2342,7 +2332,7 @@
       url: /^\/stacc/,
       gallery: [{
         xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-        xpath_cap: './div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
+        xpath_cap: 'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
         xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
         skip_dups: true
       }, {
@@ -2357,7 +2347,7 @@
       url: '/event_detail.php',
       gallery: {
         xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
-        xpath_tmb:  './li/a[contains(@href, "mode=medium")]/img',
+        xpath_tmb:  'li/a[contains(@href, "mode=medium")]/img',
         thumb_only: true
       }
 
@@ -2367,7 +2357,7 @@
       url: '/event_member.php',
       gallery: {
         xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
-        xpath_tmb:  './li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
+        xpath_tmb:  'li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
         thumb_only: true,
         get_url:    get_url_from_image
       }
@@ -2380,7 +2370,7 @@
       url: /^\/(?:view|rating|comment)_all\.php/,
       gallery: {
         xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
-        xpath_cap:     './dd/a[contains(@href, "mode=medium")]',
+        xpath_cap:     'dd/a[contains(@href, "mode=medium")]',
         allow_nothumb: -1
       }
 
@@ -2391,15 +2381,15 @@
       url: '/user_event.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
-        xpath_cap: './li/a[img]/following-sibling::text()',
-        filter_col: unpack_captions
+        xpath_cap: 'li/a[img]',
+        xpath_tmb: 'img'
       },
       func: function(args) {
         if (args.id) {
           // http://www.pixiv.net/user_event.php?id=23
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
-            xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+            xpath_cap: 'h3[contains(concat(" ", @class, " "), " status-title ")]/a',
             xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
           });
         }
@@ -2411,18 +2401,13 @@
       url: '/user_event_related.php',
       gallery: [{
         xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
-        xpath_cap: './li/p[preceding-sibling::a/img]',
-        filter_col: function(col) {
-          unpack_captions(col, './li/a/p');
-        }
+        xpath_cap: 'li/a[img]',
+        xpath_tmb: 'img'
       }, {
         xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
-        xpath_cap: './h3[contains(concat(" ", @class, " "), " status-title ")]/a',
+        xpath_cap: 'h3[contains(concat(" ", @class, " "), " status-title ")]/a',
         xpath_tmb: '../preceding-sibling::div[contains(concat(" ", @class, " "), " status-thumbnail ")]/a/img'
-      }],
-      func: function(args) {
-        pp.write_css('ol.linkStyleWorks p{font-size:inherit;padding:0px;}');
-      }
+      }]
 
     }, {
       name: '',
@@ -2436,11 +2421,19 @@
       url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
-        xpath_cap: './li/h1',
-        xpath_tmb: 'preceding-sibling::a[contains(@href, "mode=medium")]/p/img',
-        filter_col: function(col) {
-          unpack_captions(col, './li/a/h1');
-        }
+        xpath_cap: 'li/a[p/img]',
+        xpath_tmb: 'p/img'
+      }
+
+    }, {
+      name: '',
+      // http://www.pixiv.net/event_fujimi.php
+      // http://www.pixiv.net/event_loveplus.php
+      url: /^\/event_\w+\.php/,
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
+        xpath_cap: 'ul/li/a[p/img]',
+        xpath_tmb: 'p/img'
       }
 
     }, {
@@ -2455,11 +2448,18 @@
             // for old html support
             // http://www.pixiv.net/bookmark.php?id=11
             // http://www.pixiv.net/response.php?illust_id=15092961
-            // http://www.pixiv.net/event_loveplus.php
             // http://www.pixiv.net/bookmark_add.php
             //   ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
-            add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]'}, unpack_captions);
-            add_gallery({xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]'}, unpack_captions);
+            add_gallery({
+              xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
+              xpath_cap: 'ul/li/a[img]',
+              xpath_tmb: 'img'
+            });
+            add_gallery({
+              xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
+              xpath_cap: 'ul/li/a[img]',
+              xpath_tmb: 'img'
+            });
           }
         }
 
@@ -2636,11 +2636,9 @@
         wait_xpath('.//ul[contains(concat(" ", @class, " "), " images ") and li]', r_container, function(images) {
           add_gallery({
             root:      images,
-            xpath_col: './li',
-            xpath_cap: './a[img]/following-sibling::text()[1]',
-            xpath_tmb: 'preceding-sibling::a/img'
-          }, function(col) {
-            unpack_captions(col, './a[img]/h1/text()');
+            xpath_col: 'li',
+            xpath_cap: 'a[img]',
+            xpath_tmb: 'img'
           });
          });
       }]
@@ -2677,7 +2675,9 @@
           });
         }
         if (page.gallery) {
-          each(page.gallery instanceof Array ? page.gallery : [page.gallery], add_gallery);
+          each(page.gallery instanceof Array ? page.gallery : [page.gallery], function(g) {
+            add_gallery(g);
+          });
         }
       }
     });
@@ -3119,8 +3119,6 @@
   var Gallery = pp.Gallery = $cls.create({
     initialize: function(args, filter_col, filter) {
       this.args = args;
-      this.args.xpath_cap = this.args.xpath_cap || './ul/li/a[img and contains(@href, "mode=medium")]/following-sibling::text()[1]';
-      this.args.xpath_tmb = this.args.xpath_tmb || 'preceding-sibling::a[contains(@href, "mode=medium")]/img';
       this.filter_col = args.filter_col || filter_col;
       this.filter = filter;
 
@@ -3210,29 +3208,16 @@
 
         var item = new GalleryItem(url, thumb, cap, prev, self);
 
-        var pbtn = thumb;
-        if (!thumb && cap) {
-          /*
-          pbtn = $c('a');
-          pbtn.href = url;
-          pbtn.textContent = '\u25a0';
-          pbtn.style.marginRight = '4px';
-          cap.parentNode.insertBefore(pbtn, cap);
-          item.added_popup_button = pbtn;
-           */
-        }
-        if (pbtn) {
-          $ev($x('ancestor-or-self::a', pbtn)).click(function() {
-            // spatial navigation
-            if (window.opera &&
-                (window.document.activeElement === this ||
-                 window.document.activeElement === thumb)) {
-              window.document.activeElement.blur();
-            }
-            Popup.run(item);
-            return true;
-          });
-        }
+        $ev(thumb || cap).click(function() {
+          // spatial navigation
+          if (window.opera &&
+              (window.document.activeElement === this ||
+               window.document.activeElement === thumb)) {
+            window.document.activeElement.blur();
+          }
+          Popup.run(item);
+          return true;
+        });
 
         if (!self.first_limited) self.first_limited = item;
         if (!self.first && !item.limited) self.first = item;
