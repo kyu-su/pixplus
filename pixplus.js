@@ -2443,10 +2443,10 @@
       name: '',
       // http://www.pixiv.net/event_fujimi.php
       // http://www.pixiv.net/event_loveplus.php
-      url: /^\/event_\w+\.php/,
+      url: /^\/event_(?!detail|member)\w+\.php/,
       gallery: {
-        xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
-        xpath_cap: 'ul/li/a/p[img]/following-sibling::h1',
+        xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]/ul',
+        xpath_cap: 'li/a/p[img]/following-sibling::h1',
         xpath_tmb: 'preceding-sibling::p/img'
       }
 
