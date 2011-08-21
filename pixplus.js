@@ -1973,8 +1973,8 @@
         add_gallery({
           root:      root,
           xpath_col: '.',
-          xpath_cap: 'li/a[img]',
-          xpath_tmb: 'img'
+          xpath_cap: 'li/a/img/following-sibling::text()',
+          xpath_tmb: 'preceding-sibling::img'
         });
       });
       area_right();
@@ -2008,8 +2008,8 @@
           }
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-            xpath_cap: 'ul/li/a[img]',
-            xpath_tmb: 'img',
+            xpath_cap: 'ul/li/a/img/following-sibling::text()',
+            xpath_tmb: 'preceding-sibling::img',
             filter:    conf.debug ? debug_filter : null
           });
 
@@ -2217,16 +2217,16 @@
           // http://www.pixiv.net/member_illust.php?id=11
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-            xpath_cap: 'ul/li/a[img]',
-            xpath_tmb: 'img'
+            xpath_cap: 'ul/li/a/img/following-sibling::text()',
+            xpath_tmb: 'preceding-sibling::img'
           });
         } else {
           // 自分のイラスト管理
           // http://www.pixiv.net/member_illust.php
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-            xpath_cap: 'ul/li/a[img]',
-            xpath_tmb: 'img'
+            xpath_cap: 'ul/li/a/img/following-sibling::text()',
+            xpath_tmb: 'preceding-sibling::img'
           });
         }
       }
@@ -2248,8 +2248,8 @@
           add_gallery({
             root:      root,
             xpath_col: 'ul',
-            xpath_cap: 'li/a[img and contains(@href, "mode=medium")]',
-            xpath_tmb: 'img'
+            xpath_cap: 'li/a[contains(@href, "mode=medium")]/img/following-sibling::text()',
+            xpath_tmb: 'preceding-sibling::img'
           });
         });
       }
@@ -2321,8 +2321,8 @@
         xpath_tmb: 'preceding-sibling::a/img'
       }, { // 下部の「この作品をブックマークした人はこんな作品もブックマークしています」
         xpath_col: '//div[@id="illust_recommendation"]/ul/li',
-        xpath_cap: 'a[img]',
-        xpath_tmb: 'img'
+        xpath_cap: 'a/img/following-sibling::text()',
+        xpath_tmb: 'preceding-sibling::img'
       }]
 
     }, {
@@ -2380,8 +2380,8 @@
       url: '/user_event.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
-        xpath_cap: 'li/a[img]',
-        xpath_tmb: 'img'
+        xpath_cap: 'li/a/img/following-sibling::text()',
+        xpath_tmb: 'preceding-sibling::img'
       },
       func: function(args) {
         if (args.id) {
@@ -2400,8 +2400,8 @@
       url: '/user_event_related.php',
       gallery: [{
         xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
-        xpath_cap: 'li/a[img]',
-        xpath_tmb: 'img'
+        xpath_cap: 'li/a/img/following-sibling::p',
+        xpath_tmb: 'preceding-sibling::img'
       }, {
         xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
         xpath_cap: 'h3[contains(concat(" ", @class, " "), " status-title ")]/a',
@@ -2420,8 +2420,8 @@
       url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
-        xpath_cap: 'li/a[p/img]',
-        xpath_tmb: 'p/img'
+        xpath_cap: 'li/a/p[img]/following-sibling::h1',
+        xpath_tmb: 'preceding-sibling::p/img'
       }
 
     }, {
@@ -2431,8 +2431,8 @@
       url: /^\/event_\w+\.php/,
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
-        xpath_cap: 'ul/li/a[p/img]',
-        xpath_tmb: 'p/img'
+        xpath_cap: 'ul/li/a/p[img]/following-sibling::h1',
+        xpath_tmb: 'preceding-sibling::p/img'
       }
 
     }, {
@@ -2451,13 +2451,13 @@
             // ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
             add_gallery({
               xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-              xpath_cap: 'ul/li/a[img]',
-              xpath_tmb: 'img'
+              xpath_cap: 'ul/li/a/img/following-sibling::text()',
+              xpath_tmb: 'preceding-sibling::img'
             });
             add_gallery({
               xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
-              xpath_cap: 'ul/li/a[img]',
-              xpath_tmb: 'img'
+              xpath_cap: 'ul/li/a/img/following-sibling::text()',
+              xpath_tmb: 'preceding-sibling::img'
             });
           }
         }
@@ -2627,15 +2627,15 @@
           add_gallery({
             root:      images,
             xpath_col: 'li',
-            xpath_cap: 'a[img]',
-            xpath_tmb: 'img'
+            xpath_cap: 'a/img/following-sibling::h1',
+            xpath_tmb: 'preceding-sibling::img'
           });
          });
       }]
 
     }], function(page) {
-      var match = false;
-      if (!arguments.callee.args) arguments.callee.args = parseopts(window.location.href);
+      var match = false, args = arguments.callee.args;
+      if (!args) arguments.callee.args = args = parseopts(window.location.href);
       if (page.url) {
         match = (function(func) {
           if (page.url instanceof Array) {
@@ -2662,7 +2662,7 @@
       if (match) {
         if (page.func) {
           each(page.func instanceof Array ? page.func : [page.func], function(func) {
-            func(arguments.callee.args);
+            func(args);
           });
         }
         if (page.gallery) {
@@ -3180,22 +3180,27 @@
               return;
             }
           }
-          if (cap.nodeType === 3) {
-            var new_caption = $c('a', null, {href: url, text: trim(cap.nodeValue), 'a:nopopup': ''});
-            cap.parentNode.replaceChild(new_caption, cap);
-            cap = new_caption;
-          } else if (check_node(cap, 'Anchor')) {
+          if (check_node(cap, 'Anchor')) {
             cap.setAttribute('nopopup', '');
-          } else if (!$x('ancestor::a', cap)) {
-            if (cap.childNodes.length === 1 && cap.firstChild.nodeType === 3) {
-              cap.innerHTML = '<a href="' + url + '" nopopup>' + cap.innerHTML + '</a>';
-            }
+          } else {
+            var new_caption = $c('a', null, {href: url, 'a:nopopup': ''});
+            cap.parentNode.replaceChild(new_caption, cap);
+            new_caption.appendChild(cap);
+            cap = new_caption;
           }
         }
 
-        var item = new GalleryItem(url, thumb, cap, prev, self);
-
-        $ev(thumb || cap).click(function() {
+        var pbtn;
+        if (thumb) {
+          pbtn = $x('ancestor-or-self::a', thumb);
+          if (cap && is_ancestor(pbtn, cap)) {
+            cap.parentNode.removeChild(cap);
+            pbtn.parentNode.insertBefore(cap, pbtn.nextSibling);
+          }
+        } else {
+          pbtn = $x('ancestor-or-self::a', cap);
+        }
+        $ev(pbtn).click(function() {
           // spatial navigation
           if (window.opera &&
               (window.document.activeElement === this ||
@@ -3205,6 +3210,8 @@
           Popup.run(item);
           return true;
         });
+
+        var item = new GalleryItem(url, thumb, cap, prev, self);
 
         if (!self.first_limited) self.first_limited = item;
         if (!self.first && !item.limited) self.first = item;
