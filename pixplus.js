@@ -2500,7 +2500,7 @@
               var floater = new Floater(wrap, cont);
               window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
 
-              var keywords = $x('div[contains(div/span/text(), "\u304a\u3059\u3059\u3081\u30ad\u30fc\u30ef\u30fc\u30c9")]', wrap);
+              var keywords = $x('div[div/div[contains(concat(" ", @class, " "), " adingo_keywords ")]]', wrap);
               if (keywords) floater.add_ignore_element(keywords);
             }
           }
