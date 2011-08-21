@@ -2499,6 +2499,9 @@
                            '.ui-layout-west .area_new{margin:0px;}');
               var floater = new Floater(wrap, cont);
               window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
+
+              var keywords = $x('div[contains(div/span/text(), "\u304a\u3059\u3059\u3081\u30ad\u30fc\u30ef\u30fc\u30c9")]', wrap);
+              if (keywords) floater.add_ignore_element(keywords);
             }
           }
         });
@@ -5266,6 +5269,7 @@
       this.floating = false;
       this.disable_float = false;
       this.use_placeholder = true;
+      this.ignore_elements = [];
       Floater.instances.push(this);
       if (Floater.initialized) this.init();
     },
@@ -5299,6 +5303,9 @@
         var de = window.document.documentElement;
         var sc = browser.webkit ? window.document.body : de;
         var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
+        each(this.ignore_elements, function(elem) {
+          mh += elem.offsetHeight;
+        });
         if (mh < 60) {
           this.disable_float = true;
           this.unfloat();
@@ -5341,6 +5348,10 @@
 
     scroll_restore: function () {
       if (this.cont) this.cont.scrollTop = this.scroll_pos;
+    },
+
+    add_ignore_element: function(elem) {
+      this.ignore_elements.push(elem);
     }
   }, {
     instances: [],
@@ -5351,8 +5362,8 @@
       each(Floater.instances, function(inst) {
         inst.init();
       });
-      $ev(window, true).scroll(Floater.update_float);
-      $ev(window, true).resize(Floater.update_height);
+      $ev(window, {async: true}).scroll(Floater.update_float);
+      $ev(window, {async: true}).resize(Floater.update_height);
       Floater.initialized = true;
     },
 
