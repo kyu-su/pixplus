@@ -2328,7 +2328,8 @@
     }, {
       name: '',
       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
-      url: '/bookmark_detail.php',
+      // http://www.pixiv.net/bookmark_add.php
+      url: ['/bookmark_detail.php', '/bookmark_add.php'],
       gallery: [{ // 下部の「****の他の作品」
         xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]',
         xpath_cap: 'ul/li/a[img]/following-sibling::text()[last()]',
@@ -2461,8 +2462,6 @@
             // for old html support
             // http://www.pixiv.net/bookmark.php?id=11
             // http://www.pixiv.net/response.php?illust_id=15092961
-            // http://www.pixiv.net/bookmark_add.php
-            // ブックマーク追加後の「この作品をブックマークした人はこんな作品もブックマークしています」
             add_gallery({
               xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
               xpath_cap: 'ul/li/a/img/following-sibling::text()',
