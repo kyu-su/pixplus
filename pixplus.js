@@ -2255,14 +2255,27 @@
       }
 
     }, {
-      name: '',
-      // 人気タグ別ランキング / 地域ランキング
+      name: 'ranking-area',
+      // 地域ランキング
       // http://www.pixiv.net/ranking_area.php
-      url: /^\/ranking(?:_tag|_area)\.php/,
-      func: area_right
+      url: '/ranking_area.php',
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " rankingArea ")]//section[contains(concat(" ", @class, " "), " area ")]',
+        xpath_tmb: 'section/ul/li/a/img',
+        thumb_only: true
+      },
+      func: function(args) {
+        if (args.type === 'detail') {
+          add_gallery({
+            xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
+            xpath_cap: 'div/div[contains(concat(" ", @class, " "), " r_right ")]/p/span/a[contains(@href, "mode=medium")]',
+            xpath_tmb: '../../../preceding-sibling::div[contains(concat(" ", @class, " "), " r_left ")]/ul/li/a/img'
+          });
+        }
+      }
 
     }, {
-      name: '',
+      name: 'ranking-other',
       // その他ランキング
       // http://www.pixiv.net/ranking.php?mode=day
       // http://www.pixiv.net/ranking.php?mode=daily
