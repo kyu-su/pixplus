@@ -2500,7 +2500,8 @@
               var floater = new Floater(wrap, cont);
               window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
 
-              var keywords = $x('div[div/div[contains(concat(" ", @class, " "), " adingo_keywords ")]]', wrap);
+              var url = 'http://product.adingo.jp.eimg.jp/c/hybridplus/keyword.php';
+              var keywords = $x('div[div/script[contains(@src, "' + url + '")]]', wrap);
               if (keywords) floater.add_ignore_element(keywords);
             }
           }
