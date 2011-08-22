@@ -215,7 +215,7 @@
       {"key": "manga_spread", "value": true, "desc": "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"}
     ]},
     {"name": "key", "label": "Key", "items": [
-      {"key": "popup_prev", "value": "Backspace,a", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "mode": "default"},
+      {"key": "popup_prev", "value": "Backspace,a", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
       {"key": "popup_prev_direction", "value": "Left", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
       {"key": "popup_next", "value": "Space", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
       {"key": "popup_next_direction", "value": "Right", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
@@ -234,12 +234,7 @@
       {"key": "popup_open_staccfeed", "value": "y", "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
       {"key": "popup_open_response", "value": "Shift+r", "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
       {"key": "popup_reload", "value": "g", "desc": "\u30ea\u30ed\u30fc\u30c9"},
-      {"key": "popup_bookmark_start", "value": "b", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
-      {"key": "popup_bookmark_end", "value": "Escape", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86"},
-      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9: \u9001\u4fe1"},
       {"key": "popup_open_bookmark_detail", "value": "Shift+b", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-      {"key": "popup_manga_start", "value": "v", "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"},
-      {"key": "popup_manga_end", "value": "v,Escape", "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u7d42\u4e86"},
       {"key": "popup_open_manga_thumbnail", "value": "Shift+v", "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
       {"key": "popup_rate01", "value": "Shift+0,Shift+~", "desc": "\u8a55\u4fa1\u3059\u308b(1\u70b9)"},
       {"key": "popup_rate02", "value": "Shift+9,Shift+)", "desc": "\u8a55\u4fa1\u3059\u308b(2\u70b9)"},
@@ -251,16 +246,20 @@
       {"key": "popup_rate08", "value": "Shift+3,Shift+#", "desc": "\u8a55\u4fa1\u3059\u308b(8\u70b9)"},
       {"key": "popup_rate09", "value": "Shift+2,Shift+\"", "desc": "\u8a55\u4fa1\u3059\u308b(9\u70b9)"},
       {"key": "popup_rate10", "value": "Shift+1,Shift+!", "desc": "\u8a55\u4fa1\u3059\u308b(10\u70b9)"},
-      {"key": "popup_qrate_start", "value": "d", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u7d42\u4e86"},
-      {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9: \u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e"},
-      {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9: \u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e"},
-      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9: \u9001\u4fe1"},
       {"key": "popup_tag_edit_start", "value": "", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
       {"key": "popup_tag_edit_end", "value": "Escape", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86"},
       {"key": "popup_zoom_in", "value": "plus,Shift+plus", "desc": "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)"},
       {"key": "popup_zoom_out", "value": "-,Shift+-", "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)"},
-      {"key": "popup_help", "value": "?,Shift+?", "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"}
+      {"key": "popup_bookmark_start", "value": "b", "desc": "%s\u958b\u59cb", "start_mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_manga_start", "value": "v", "desc": "%s\u958b\u59cb", "start_mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_start", "value": "d", "desc": "%s\u958b\u59cb", "start_mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_bookmark_end", "value": "Escape", "desc": "%s\u7d42\u4e86", "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1", "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_manga_end", "value": "v,Escape", "desc": "%s\u7d42\u4e86", "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "%s\u7d42\u4e86", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"}
     ]},
     {"name": "bookmark", "label": "Bookmark", "items": [
       {"key": "tag_order", "value": "", "desc": ""},
@@ -998,6 +997,10 @@
              node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
   }
 
+  /*  1: set
+   *  0: unset
+   * -1: toggle
+   */
   function set_class(node, cls, state) {
     var list = node.className.split(/ +/);
     if (state < 0) state = -1;
@@ -1076,12 +1079,12 @@
 
     this.input_table = (function(self) {
       var input_table = { };
-      var idx, page;
+      var idx = 0, page;
       LS.each(function(item, sec) {
         var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
         var type = typeof item.value;
         var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
-        row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'odd' : 'even');
+        row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'even' : 'odd');
         if (item.hint) {
           input = $c('select');
           each(item.hint, function(hint) {
@@ -1092,6 +1095,7 @@
         }
         input.id = 'pp-conf-' + sec.name + '-' + item.key;
         if (type === 'boolean') {
+          cell.className = 'pp-conf-cell-check';
           cell.setAttribute('colspan', '2');
           input.setAttribute('type', 'checkbox');
           input.checked = value;
@@ -1099,6 +1103,7 @@
           label.appendChild(input);
           label.appendChild(window.document.createTextNode(item.key));
         } else {
+          cell.className = 'pp-conf-cell-label';
           cell.textContent = item.key;
           input.value = value;
           cell = row.insertCell(-1);
@@ -1107,7 +1112,9 @@
         }
         input_table[sec.name + '_' + item.key] = input;
 
-        var def = $c('button', row.insertCell(-1), {text: 'Default'});
+        cell = row.insertCell(-1);
+        cell.className = 'pp-conf-cell-default';
+        var def = $c('button', cell, {text: 'Default'});
         $ev(def).click(function() {
           if (type === 'boolean') {
             input.checked = item.value;
@@ -1118,7 +1125,10 @@
           self.update_export();
           return true;
         });
-        row.insertCell(-1).textContent = self.msg_filter(item.desc);
+
+        cell = row.insertCell(-1);
+        cell.className = 'pp-conf-cell-description';
+        cell.textContent = self.msg_filter(item.desc);
 
         $ev(input).change(function(ev) {
           var value;
@@ -1137,6 +1147,7 @@
         if (sec.name === 'bookmark') return true;
         page = self.make_page(sec.label, sec.name);
         page.table = $c('table', page.content);
+        page.section = sec;
         return false;
       });
       return input_table;
@@ -1397,6 +1408,53 @@
           open_editor(row, input);
         });
       });
+
+      var mode, offset = 0, mode_map = {};
+      function add_mode_line(idx, mode) {
+        var row = page.table.insertRow(idx + (offset++));
+        var cell = row.insertCell(-1);
+        row.className = 'pp-conf-key-mode-line';
+        cell.setAttribute('colspan', '4');
+        cell.textContent = mode;
+        if (!mode_map[mode]) mode_map[mode] = [];
+        mode_map[mode].push(row);
+      }
+      add_mode_line(0, "\u901a\u5e38");
+      each(page.section.items, function(item, idx) {
+        var row = page.table.rows[idx + offset];
+        var cell = row.cells[row.cells.length - 1];
+        if (item.mode || item.start_mode) {
+          var mode_name = item.mode || item.start_mode;
+          cell.innerHTML = '';
+          each(item.desc.split(/(%s)/), function(term) {
+            if (term === '%s') {
+              var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
+              if (!mode_map[mode_name]) mode_map[mode_name] = [];
+              mode_map[mode_name].push(span);
+            } else {
+              cell.appendChild(window.document.createTextNode(term));
+            }
+          });
+        }
+        if (item.mode && item.mode !== mode) {
+          add_mode_line(idx, item.mode);
+          mode = item.mode;
+        }
+      });
+      function highlight_mode(mode, on) {
+        each(mode_map[mode], function(elem) {
+          set_class(elem, 'pp-conf-key-mode-highlight', on ? 1 : 0);
+        });
+      }
+      for(var key in mode_map) (function(mode) {
+        each(mode_map[mode], function(elem) {
+          $ev(elem).hover(function() {
+            highlight_mode(mode, true);
+          }, function() {
+            highlight_mode(mode, false);
+          });
+        });
+      })(key);
     }
   }, {
     label: 'Tags', id: 'tags',
@@ -1488,11 +1546,6 @@
           (this.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
         });
       }
-    }
-  }, {
-    label: 'Help', id: 'help',
-    content: function(page) {
-      page.content.appendChild(ConfigUI.create_help_table(this.msg_filter));
     }
   }, {
     label: 'About', id: 'about',
@@ -1737,163 +1790,6 @@
     ]
   }];
 
-  ConfigUI.help_data = [{
-    "mode": "\u901a\u5e38",
-    "keys": [{
-      "key":  "a/BackSapace/Left",
-      "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Space/Right",
-      "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Up/Down",
-      "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"
-    }, {
-      "key":  "Home/End",
-      "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Escape",
-      "desc": "\u9589\u3058\u308b"
-    }, {
-      "key":  "e",
-      "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"
-    }, {
-      "key":  "r",
-      "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"
-    }, {
-      "key":  "Shift+r",
-      "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"
-    }, {
-      "key":  "t",
-      "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"
-    }, {
-      "key":  "y",
-      "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"
-    }, {
-      "key":  "b",
-      "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"
-    }, {
-      "key":  "Shift+b",
-      "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"
-    }, {
-      "key":  "f",
-      "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"
-    }, {
-      "key":  "g",
-      "desc": "\u30ea\u30ed\u30fc\u30c9"
-    }, {
-      "key":  "Shift+f",
-      "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"
-    }, {
-      "key":  "c",
-      "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"
-    }, {
-      "key":  "Shift+c",
-      "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"
-    }, {
-      "key":  "d",
-      "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb"
-    }, {
-      "key":  "v",
-      "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb"
-    }, {
-      "key":  "Shift+v",
-      "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"
-    }, {
-      "key":  "Shift+Number",
-      "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3067\u306f\u7121\u52b9(1=10\u70b9/0=1\u70b9)"
-    }, {
-      "key":  "+/-",
-      "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f/\u62e1\u5927\u3059\u308b"
-    }, {
-      "key":  "?",
-      "desc": "\u30d8\u30eb\u30d7\u3092\u8868\u793a"
-    }]
-  }, {
-    "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9",
-    "keys": [{
-      "key":  "Escape",
-      "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
-    }, {
-      "key":  "Enter",
-      "desc": "\u9001\u4fe1"
-    }]
-  }, {
-    "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9",
-    "keys": [{
-      "key":  "v/Escape",
-      "desc": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
-    }, {
-      "key":  "a/BackSapace/Left",
-      "desc": "\u524d\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Space/Right",
-      "desc": "\u6b21\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "Home/End",
-      "desc": "\u6700\u521d/\u6700\u5f8c\u306e\u30da\u30fc\u30b8\u306b\u79fb\u52d5"
-    }, {
-      "key":  "f",
-      "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u306e\u753b\u50cf\u3092\u958b\u304f"
-    }, {
-      "key":  "Shift+f",
-      "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f"
-    }]
-  }, {
-    "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9",
-    "keys": [{
-      "key":  "d/Escape",
-      "desc": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u3092\u7d42\u4e86"
-    }, {
-      "key":  "Up",
-      "desc": "\u4e00\u3064\u4e0a\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"
-    }, {
-      "key":  "Down",
-      "desc": "\u4e00\u3064\u4e0b\u306e\u9078\u629e\u80a2\u306b\u30d5\u30a9\u30fc\u30ab\u30b9\u3092\u79fb\u3059"
-    }]
-  }];
-
-  ConfigUI.create_help_table = function(msg_filter) {
-    if (!msg_filter) msg_filter = function(s) { return s; };
-    var table = $c('table', null, {cls: 'pp-help-table'});
-    var captions = [];
-    each(ConfigUI.help_data, function(help) {
-      var cell = table.insertRow(-1).insertCell(-1);
-      cell.setAttribute('colspan', '2');
-      cell.className = 'pp-help-mode';
-      cell.textContent = msg_filter(help.mode);
-      each(help.keys, function(key) {
-        var row = table.insertRow(-1);
-        row.insertCell(-1).textContent = key.key;
-        row.insertCell(-1).textContent = msg_filter(key.desc);
-      });
-      captions.push(cell);
-    });
-    each(ConfigUI.help_data, function(help, idx_h) {
-      var rep = msg_filter(help.mode);
-      each(table.rows, function(row) {
-        if (row.cells.length < 2) return;
-        var node = row.cells[1].firstChild;
-        var terms = node.nodeValue.split(rep);
-        if (terms.length < 2) return;
-        each(terms, function(term, idx_t) {
-          if (idx_t > 0) {
-            var label = $c('label', null, {text: rep});
-            node.parentNode.insertBefore(label, node);
-            $ev(label).hover(function() {
-              set_class(captions[idx_h], 'highlight', 1);
-            }, function() {
-              set_class(captions[idx_h], 'highlight', 0);
-            });
-          }
-          node.parentNode.insertBefore(window.document.createTextNode(term), node);
-        });
-        node.parentNode.removeChild(node);
-      });
-    });
-    return table;
-  };
-
   ConfigUI.css =
     '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
     '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
@@ -1907,6 +1803,10 @@
     '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
     '.pp-conf-page textarea{width:100%;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
+    '#pp-conf-key .pp-conf-key-mode-line{font-weight:bold;}' +
+    '#pp-conf-key .pp-conf-key-mode-label{color:navy;}' +
+    '#pp-conf-key .pp-conf-key-mode-highlight{background-color:#dfdfff;}' +
+    //'#pp-conf-key table tr.pp-conf-entry td:first-child{padding-left:1em;}' +
     '.pp-conf-key-editor{padding-left:1em;}' +
     //'.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
     '.pp-conf-key-editor ul label{margin-left:4px;}' +
@@ -1917,11 +1817,6 @@
     '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
     '#pp-conf-export form{display:block;}' +
     '#pp-conf-export input{margin-left:0.2em;}' +
-    '.pp-help-table{line-height:1.2em;}' +
-    '.pp-help-table td{padding:0px 4px;}' +
-    '.pp-help-table td.pp-help-mode{padding:0px;font-weight:bold;}' +
-    '.pp-help-table td.pp-help-mode.highlight{background-color:#ffdfdf;}' +
-    '.pp-help-table td label{color:navy;}' +
     '#pp-conf-about dt{font-weight:bold;}' +
     '#pp-conf-about *+dt{margin-top:0.6em;}' +
     '#pp-conf-about dd{margin-left:1.6em;}' +
@@ -1930,32 +1825,6 @@
     '#pp-conf-changelog ul{padding-left:2em;}' +
     '#pp-conf-changelog ul li{list-style-type:disc;}';
   /* __CONFIG_UI_END__ */
-
-  function show_help() {
-    var de = window.document.documentElement;
-    var background = $c('div', window.document.body, {id: 'pp-help-background'});
-    var root = $c('div', window.document.body, {id: 'pp-help'});
-    root.appendChild(ConfigUI.create_help_table());
-    root.style.position = 'fixed';
-    root.style.left = Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
-    root.style.top  = Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
-
-    Popup.stop_key = true;
-    var conn_click = $ev(background).click(close);
-    var conn_key   = $ev(window).key(function(ev, conn, key) {
-      if (key === $ev.KEY_ESCAPE || key === '?') return close();
-      return false;
-    });
-
-    function close() {
-      conn_click.disconnect();
-      conn_key.disconnect();
-      background.parentNode.removeChild(background);
-      root.parentNode.removeChild(root);
-      Popup.stop_key = false;
-      return true;
-    }
-  }
 
   function init_per_page() {
     function area_right() {
@@ -2741,10 +2610,6 @@
                  ConfigUI.css +
                  '#pp-conf-pager-content{height:600px;}' +
                  '.pp-conf-page{width:960px;max-height:600px;overflow:auto;}' +
-                 // help
-                 '#pp-help-background{position:fixed;background:white;opacity:0.9;z-index:4000;' +
-                 '  left:0px;top:0px;width:100%;height:100%;}' +
-                 '#pp-help{background-color:white;border:2px solid gray;z-index:4001;padding:2px;}' +
                  // popup
                  '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                  '  border:2px solid gray;z-index:2000;}' +
@@ -3277,7 +3142,6 @@
                                                        bind(this.toggle_viewer_comments, this));
       this.bm_btn                = Popup.create_button('[B]', this.header_right, 'pp-bm-btn',
                                                        bind(this.toggle_bookmark_edit, this));
-      //this.help_btn              = Popup.create_button('[?]', this.header_right, 'pp-help-btn', show_help);
       this.caption               = $c('div', this.header, {id: 'pp-caption'});
       this.comment_wrap          = $c('div', this.caption, {id: 'pp-comment-wrap'});
       this.comment               = $c('div', this.comment_wrap, {id: 'pp-comment'});
@@ -4419,8 +4283,7 @@
           {k: conf.key.popup_tag_edit_start,       f: this.toggle_tag_edit},
           {k: conf.key.popup_open_manga_thumbnail, f: this.open_manga_tb},
           {k: conf.key.popup_zoom_in,              f: this.set_zoom, a: [this.zoom_scale + 1]},
-          {k: conf.key.popup_zoom_out,             f: this.set_zoom, a: [this.zoom_scale - 1]},
-          {k: conf.key.popup_help,                 f: show_help}
+          {k: conf.key.popup_zoom_out,             f: this.set_zoom, a: [this.zoom_scale - 1]}
         ]
       });
     }),
