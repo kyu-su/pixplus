@@ -620,12 +620,14 @@
       if (typeof args[0] === 'function') parent = args.shift();
       var proto = args[0], props = args[1] || { }, key;
       function cls() {
+        cls.__inst__.push(this);
         this.initialize.apply(this, Array.prototype.slice.call(arguments));
       }
       for(key in props) {
         cls[key] = props[key];
       }
       cls.__super__ = parent;
+      cls.__inst__ = [];
       if (parent) cls.prototype = new parent();
       for(key in proto) {
         cls.prototype[key] = proto[key];
@@ -635,6 +637,7 @@
       }
       if (parent) cls.prototype.__super__ = parent.prototype.initialize;
       cls.prototype.constructor = cls;
+      if (cls.initialize) cls.initialize();
       return cls;
     }
   };
@@ -655,7 +658,7 @@
           last_args = [this, Array.prototype.slice.call(arguments)];
           if (async) {
             if (timer) return null;
-            timer = setTimeout(function() {
+            timer = window.setTimeout(function() {
               timer = null;
               func.apply(last_args[0], last_args[1]);
             }, typeof async === 'number' ? async : 40);
@@ -797,7 +800,7 @@
             ev_last = ev;
           } else {
             ev_last = ev;
-            timer = setTimeout(function() {
+            timer = window.setTimeout(function() {
               if (conn.disconnected) return;
               timer = null;
               func.call(opts.ctx || ctx, ev_last, conn);
@@ -2839,6 +2842,8 @@
     ev.initEvent('pixplusInitialize', true, true);
     window.document.dispatchEvent(ev);
 
+    Gallery.setup();
+
     each($xa('//a[contains(@href, "jump.php")]'), function(anc) {
       var re;
       if ((re = /^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/.exec(anc.href))) {
@@ -2903,7 +2908,7 @@
       .script(pp.url.js.tag_edit)
       .wait(init_js);
 
-    setTimeout(Floater.init, 100);
+    window.setTimeout(Floater.init, 100);
   }
 
   var LoaderBase = $cls.create({
@@ -3006,8 +3011,6 @@
 
       if (this.args.xpath_col) {
         this.detect_new_collection();
-        //if (this.page_col === 0) throw 1;
-        $ev(window.document.body, {async: true}).listen('DOMNodeInserted', bind(Gallery.prototype.detect_new_collection, this));
         Gallery.oncreate.emit(this);
       } else {
         throw 1;
@@ -3119,12 +3122,20 @@
       });
     }
   }, {
+    oncreate: new Signal(),
+
+    setup: function() {
+      $ev(window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
+        each(Gallery.__inst__, function(gallery) {
+          gallery.detect_new_collection();
+        });
+      });
+    },
+
     get_url: function(cap, thumb) {
       var thumb_anc = thumb && $x('ancestor-or-self::a', thumb);
       return (cap && cap.href) || (thumb_anc && thumb_anc.href);
-    },
-
-    oncreate: new Signal()
+    }
   });
 
   var Popup = pp.Popup = $cls.create({
@@ -5064,7 +5075,7 @@
        * 同期的にコールバックするためwindow.getAllTagsなどが未定義となる。
        */
       window.jQuery.fn.ready = function(func) {
-        setTimeout(func, 10);
+        window.setTimeout(func, 10);
       };
       BookmarkForm.trap_jquery_ready = function() { };
     },
@@ -5227,6 +5238,7 @@
       });
       $ev(window, {async: true}).scroll(Floater.update_float);
       $ev(window, {async: true}).resize(Floater.update_height);
+      $ev(window).listen('pixplusConfigToggled', Floater.update_height);
       Floater.initialized = true;
     },
 
@@ -5311,14 +5323,14 @@
           if (elem.getAttribute('type') === 'script/cache') { // webkit
             LOG.debug('$js#labjs: ' + url);
             var callee = arguments.callee, self = this;
-            setTimeout(function() { callee.call(self, url); }, 0);
+            window.setTimeout(function() { callee.call(self, url); }, 0);
           } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
             LOG.debug('$js#preexists: ' + url);
             wait.call(this, elem);
           } else if (elem.readyState) { // for opera
             load_cb.call(this);
           } else {
-            setTimeout(bind(load_cb, this), 0);
+            window.setTimeout(bind(load_cb, this), 0);
           }
         } else {
           LOG.info('$js#load: ' + url);
