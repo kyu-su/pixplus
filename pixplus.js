@@ -1798,8 +1798,9 @@
     '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
     '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
     '#pp-conf-pagelist li.select a{padding:1px 5px 2px 5px;}' +
-    '#pp-conf-pager-content{border:1px solid silver;padding:4px;margin-top:-1px;z-index:98;}' +
-    '.pp-conf-page{display:none;width:100%;overflow:auto;}' +
+    '#pp-conf-pager-content{border:1px solid silver;margin-top:-1px;z-index:98;overflow:auto;}' +
+    '.pp-conf-page{display:none;width:100%;padding:4px;' +
+    '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
     '.pp-conf-page.select{display:inline-block;}' +
     '.pp-conf-page input, .pp-conf-page textarea{' +
     '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
@@ -2611,8 +2612,7 @@
                  // config
                  '#pp-conf-root{width:970px;margin:0px auto 4px auto;}' +
                  ConfigUI.css +
-                 '#pp-conf-pager-content{height:600px;}' +
-                 '.pp-conf-page{width:960px;max-height:600px;overflow:auto;}' +
+                 '#pp-conf-pager-content{width:960px;height:600px;}' +
                  // popup
                  '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                  '  border:2px solid gray;z-index:2000;}' +
