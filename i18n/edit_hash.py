@@ -27,13 +27,14 @@ if len(sys.argv) > 3 and os.path.exists(sys.argv[3]):
 for line in sys.stdin:
   p = LIST_MESSAGES_REGEX.split(line)
   if len(p) > 1:
-      msgid = '__MSG_%s__' % hashlib.sha1(p[1]).hexdigest()
-      msgstr = p[1]
+    for i in range(1, len(p), 2):
+      msgid = '__MSG_%s__' % hashlib.sha1(p[i]).hexdigest()
+      msgstr = p[i]
       if messages.has_key(msgstr): msgstr = messages[msgstr]['msgstr']
       messages_json[msgid] = {'message': json.loads(msgstr)}
-      p[1] = '"%s"' % msgid
-      sys.stdout.write(''.join(p))
+      p[i] = '"%s"' % msgid
       pass
+    sys.stdout.write(''.join(p))
   else:
     sys.stdout.write(line)
     pass

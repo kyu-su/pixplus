@@ -246,20 +246,32 @@
       {"key": "popup_rate08", "value": "Shift+3,Shift+#", "desc": "\u8a55\u4fa1\u3059\u308b(8\u70b9)"},
       {"key": "popup_rate09", "value": "Shift+2,Shift+\"", "desc": "\u8a55\u4fa1\u3059\u308b(9\u70b9)"},
       {"key": "popup_rate10", "value": "Shift+1,Shift+!", "desc": "\u8a55\u4fa1\u3059\u308b(10\u70b9)"},
-      {"key": "popup_tag_edit_start", "value": "", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb"},
-      {"key": "popup_tag_edit_end", "value": "Escape", "desc": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86"},
       {"key": "popup_zoom_in", "value": "plus,Shift+plus", "desc": "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)"},
       {"key": "popup_zoom_out", "value": "-,Shift+-", "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)"},
-      {"key": "popup_bookmark_start", "value": "b", "desc": "%s\u958b\u59cb", "start_mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_start", "value": "v", "desc": "%s\u958b\u59cb", "start_mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_start", "value": "d", "desc": "%s\u958b\u59cb", "start_mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_bookmark_end", "value": "Escape", "desc": "%s\u7d42\u4e86", "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1", "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_end", "value": "v,Escape", "desc": "%s\u7d42\u4e86", "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "%s\u7d42\u4e86", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1", "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"}
+      {"key": "popup_bookmark_start", "value": "b", "desc": "%s\u958b\u59cb",
+       "start_mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_manga_start", "value": "v", "desc": "%s\u958b\u59cb",
+       "start_mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_start", "value": "d", "desc": "%s\u958b\u59cb",
+       "start_mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_tag_edit_start", "value": "", "desc": "%s\u958b\u59cb",
+       "start_mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_bookmark_end", "value": "Escape", "desc": "%s\u7d42\u4e86",
+       "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
+       "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_manga_end", "value": "v,Escape", "desc": "%s\u7d42\u4e86",
+       "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "%s\u7d42\u4e86",
+       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e",
+       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e",
+       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
+       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
+      {"key": "popup_tag_edit_end", "value": "Escape", "desc": "%s\u7d42\u4e86",
+       "mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"}
     ]},
     {"name": "bookmark", "label": "Bookmark", "items": [
       {"key": "tag_order", "value": "", "desc": ""},
@@ -1412,13 +1424,13 @@
         });
       });
 
-      var mode, offset = 0, mode_map = {};
+      var mode, offset = 0, mode_map = {}, self = this;
       function add_mode_line(idx, mode) {
         var row = page.table.insertRow(idx + (offset++));
         var cell = row.insertCell(-1);
         row.className = 'pp-conf-key-mode-line';
         cell.setAttribute('colspan', '4');
-        cell.textContent = mode;
+        cell.textContent = self.msg_filter(mode);
         if (!mode_map[mode]) mode_map[mode] = [];
         mode_map[mode].push(row);
       }
@@ -1427,9 +1439,9 @@
         var row = page.table.rows[idx + offset];
         var cell = row.cells[row.cells.length - 1];
         if (item.mode || item.start_mode) {
-          var mode_name = item.mode || item.start_mode;
+          var mode_name = self.msg_filter(item.mode || item.start_mode);
           cell.innerHTML = '';
-          each(item.desc.split(/(%s)/), function(term) {
+          each(self.msg_filter(item.desc).split(/(%s)/), function(term) {
             if (term === '%s') {
               var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
               if (!mode_map[mode_name]) mode_map[mode_name] = [];
@@ -1669,7 +1681,7 @@
   }, {
     date: '2011/07/24', version: '0.6.3', changes: [
       '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '"\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9"\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+      '「\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9」\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
       '\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
     ]
   }, {
