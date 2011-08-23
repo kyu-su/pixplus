@@ -1,4 +1,7 @@
 pixplus.js
-config.js
-options.xul
 icons
+config.js
+common.js
+lib.js
+options.css
+options.html

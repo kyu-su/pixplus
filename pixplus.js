@@ -74,7 +74,7 @@
         }
       };
       function open_options() {
-        window.openDialog('chrome://pixplus/content/options.xul');
+        window.open('chrome://pixplus/content/options.html');
       }
       function load(content_window, url) {
         var sandbox = new window.Components.utils.Sandbox(content_window);
@@ -1008,8 +1008,8 @@
   function check_node(node, name) {
     // for Firefox3.6
     return (node instanceof (typeof safeWindow === 'undefined' ? window : safeWindow)['HTML' + name + 'Element'] ||
-            (typeof Components !== 'undefined' &&
-             node instanceof Components.interfaces['nsIDOMHTML' + name + 'Element']));
+            (typeof window.Components !== 'undefined' &&
+             node instanceof window.Components.interfaces['nsIDOMHTML' + name + 'Element']));
   }
 
   /*  1: set

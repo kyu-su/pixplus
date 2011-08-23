@@ -20,10 +20,12 @@ LICENSE                 = LICENSE.TXT
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
 LIB_JS                  = lib.js
+COMMON_JS               = common.js
 ICON_SVG                = pixplus.svg
 ICON_SIZE               = 16 32 48 64
 SRC_USERJS              = pixplus.js
-DIST_FILES              = common.js index.html index.js options.html options.css options.js $(LIB_JS)
+OPTION_PAGE_FILES       = options.js options.css options.html
+DIST_FILES              = $(COMMON_JS) index.html index.js $(OPTION_PAGE_FILES) $(LIB_JS)
 
 I18N_DIR                = i18n
 I18N_LANGUAGES_FULL     = en-US ja-JP
@@ -71,8 +73,8 @@ FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
 FIREFOX_CHROME_MANIFEST = $(FIREFOX_ROOT)/chrome.manifest
 FIREFOX_OVERLAY_XUL     = $(FIREFOX_ROOT)/content/pixplus.xul
 FIREFOX_DEFAULTS_PREFS  = $(FIREFOX_ROOT)/defaults/preferences/pixplus.js
-FIREFOX_OPTIONS_XUL     = $(FIREFOX_ROOT)/content/options.xul
-FIREFOX_CONTENTS        = $(SRC_USERJS) $(CONFIG_JS) options.xul options.js tag_alias.xul tag_alias.js
+FIREFOX_CONTENTS_COPY   = $(SRC_USERJS) $(LIB_JS) $(CONFIG_JS) $(COMMON_JS) $(OPTION_PAGE_FILES)
+FIREFOX_CONTENTS        = $(FIREFOX_CONTENTS_COPY)
 FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
@@ -279,10 +281,7 @@ clean-safari:
 
 # ================ Firefox ================
 
-$(FIREFOX_ROOT)/content/$(SRC_USERJS): $(SRC_USERJS) warn
-	cp $< $@
-
-$(FIREFOX_ROOT)/content/$(CONFIG_JS): $(CONFIG_JS)
+$(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%): $(FIREFOX_ROOT)/content/%: % warn
 	cp $< $@
 
 $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
@@ -303,11 +302,6 @@ $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
 	mkdir -p $(dir $@)
 	python conf-parser.py firefox < $(CONFIG_JSON) >> $@
 
-$(FIREFOX_OPTIONS_XUL): $(FIREFOX_OPTIONS_XUL).in $(CONFIG_JS)
-	sed -e '/__PREFERENCES__/,$$d' < $< > $@
-	$(I18N_EDIT_HASH) < $(CONFIG_JS) | $(JS) -f $(LIB_JS) -f $(FIREFOX_GEN_OPTIONS) >> $@
-	sed -e '1,/__PREFERENCES__/d' < $< >> $@
-
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
@@ -327,7 +321,7 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-firefox:
-	rm -f $(XPI) $(FIREFOX_ROOT)/content/$(SRC_USERJS) $(FIREFOX_ROOT)/content/$(CONFIG_JS) \
-          $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) $(FIREFOX_OPTIONS_XUL) \
+	rm -f $(XPI) $(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%) \
+          $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) \
           $(FIREFOX_DEBUG_LOADER) $(FIREFOX_I18N_FILES)
 	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
