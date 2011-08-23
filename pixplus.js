@@ -32,18 +32,18 @@
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
     if (window.top !== window) return;
-    if (window.opera && opera.extension) {
+    if (window.opera && window.opera.extension) {
       (function() {
         function open_options() {
-          opera.extension.postMessage(JSON.stringify({'command': 'open-options'}));
+          window.opera.extension.postMessage(window.JSON.stringify({'command': 'open-options'}));
         }
-        opera.extension.onmessage = function(ev){
-          var data = JSON.parse(ev.data);
+        window.opera.extension.onmessage = function(ev){
+          var data = window.JSON.parse(ev.data);
           if (data.command === 'config') {
             func(window, window, {conf: data.data, open_options: open_options});
           }
         };
-        opera.extension.postMessage(JSON.stringify({'command': 'config'}));
+        window.opera.extension.postMessage(window.JSON.stringify({'command': 'config'}));
       })();
     } else {
       func(unsafeWindow || window, window);
@@ -51,11 +51,11 @@
   } else if (String(window) === '[object ChromeWindow]') {
     // FirefoxAdd-On
     (function() {
-      var pref = Components.classes['@mozilla.org/preferences-service;1']
-        .getService(Components.interfaces.nsIPrefBranch);
+      var pref = window.Components.classes['@mozilla.org/preferences-service;1']
+        .getService(window.Components.interfaces.nsIPrefBranch);
       function check_key(key) {
-        if (!(key && (typeof key === 'string' || key instanceof String) && /^[a-z_]+$/.test(key))) {
-          throw 'invalid argument';
+        if (!(key && (typeof key === 'string' || key instanceof String) && /^[a-z0-9_]+$/.test(key))) {
+          throw 'invalid argument - ' + key;
         }
         return 'extensions.pixplus.' + key;
       }
@@ -77,17 +77,17 @@
         window.openDialog('chrome://pixplus/content/options.xul');
       }
       function load(content_window, url) {
-        var sandbox = new Components.utils.Sandbox(content_window);
+        var sandbox = new window.Components.utils.Sandbox(content_window);
         sandbox.window = content_window.wrappedJSObject;
         sandbox.safeWindow = content_window;
         sandbox.document = sandbox.window.document;
         sandbox.storage = storage;
         sandbox.open_options = open_options;
-        sandbox.__proto__ = new XPCNativeWrapper(sandbox.window);
+        sandbox.__proto__ = new window.XPCNativeWrapper(sandbox.window);
         try {
           var data = '{storage: this.storage, open_options: this.open_options}';
           var src = '(' + func.toString() + ')(this.window, this.safeWindow, ' + data + ')';
-          Components.utils.evalInSandbox(src, sandbox);
+          window.Components.utils.evalInSandbox(src, sandbox);
         } catch(ex) {
           alert(String(ex));
           throw ex;
@@ -115,26 +115,26 @@
       if (userjs) {
         func();
       } else if (window.chrome) {
-        chrome.extension.sendRequest( /* WARN */
+        window.chrome.extension.sendRequest( /* WARN */
           {command: 'config'},
           function(data) {
             if (data.command === 'config') {
-              func(JSON.stringify({
-                base_uri: chrome.extension.getURL('/'),
+              func(window.JSON.stringify({
+                base_uri: window.chrome.extension.getURL('/'),
                 conf:     data.data
               }));
             }
           });
       } else if (window.safari) {
-        safari.self.addEventListener('message', function(ev) {
+        window.safari.self.addEventListener('message', function(ev) {
           if (ev.name === 'config') {
-            func(JSON.stringify({
-              base_uri: safari.extension.baseURI,
+            func(window.JSON.stringify({
+              base_uri: window.safari.extension.baseURI,
               conf:     ev.message
             }));
           }
         }, false);
-        safari.self.tab.dispatchMessage('config', null);
+        window.safari.self.tab.dispatchMessage('config', null);
       } else {
         func();
       }
@@ -248,21 +248,21 @@
       {"key": "popup_rate10", "value": "Shift+1,Shift+!", "desc": "\u8a55\u4fa1\u3059\u308b(10\u70b9)"},
       {"key": "popup_zoom_in", "value": "plus,Shift+plus", "desc": "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)"},
       {"key": "popup_zoom_out", "value": "-,Shift+-", "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)"},
-      {"key": "popup_bookmark_start", "value": "b", "desc": "%s\u958b\u59cb",
+      {"key": "popup_bookmark_start", "value": "b", "desc": "$mode\u958b\u59cb",
        "start_mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_start", "value": "v", "desc": "%s\u958b\u59cb",
+      {"key": "popup_manga_start", "value": "v", "desc": "$mode\u958b\u59cb",
        "start_mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_start", "value": "d", "desc": "%s\u958b\u59cb",
+      {"key": "popup_qrate_start", "value": "d", "desc": "$mode\u958b\u59cb",
        "start_mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_tag_edit_start", "value": "", "desc": "%s\u958b\u59cb",
+      {"key": "popup_tag_edit_start", "value": "", "desc": "$mode\u958b\u59cb",
        "start_mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_bookmark_end", "value": "Escape", "desc": "%s\u7d42\u4e86",
+      {"key": "popup_bookmark_end", "value": "Escape", "desc": "$mode\u7d42\u4e86",
        "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
        "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_end", "value": "v,Escape", "desc": "%s\u7d42\u4e86",
+      {"key": "popup_manga_end", "value": "v,Escape", "desc": "$mode\u7d42\u4e86",
        "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "%s\u7d42\u4e86",
+      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "$mode\u7d42\u4e86",
        "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
       {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e",
        "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
@@ -270,7 +270,7 @@
        "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
       {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
        "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_tag_edit_end", "value": "Escape", "desc": "%s\u7d42\u4e86",
+      {"key": "popup_tag_edit_end", "value": "Escape", "desc": "$mode\u7d42\u4e86",
        "mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"}
     ]},
     {"name": "bookmark", "label": "Bookmark", "items": [
@@ -483,27 +483,27 @@
         // firefox
         LS.u = true;
         LS.get = function(s, n) {
-          var key = LS.map[s].path.join('_') + '_' + n, val;
-          var def = LS.map[s].schema[n][0];
+          var key = 'conf_' + (s === 'general' ? '' : s + '_') + n, val;
+          var def = LS.map[s].map[n].value;
           if (typeof def === 'boolean') {
             val = _extension_data.storage.getBoolPref(key);
           } else {
             val = LS.get_conv(s, n)[0](_extension_data.storage.getCharPref(key));
           }
           return (typeof val === 'undefined' || val === null || val.constructor !== def.constructor
-                  ? (LS.map[s] ? LS.map[s].schema[n][0] : '')
+                  ? (LS.map[s] ? LS.map[s].map[n].value : '')
                   : val);
         };
         LS.set = function(s, n, v) {
-          var key = LS.map[s].path.join('_') + '_' + n;
-          if (typeof LS.map[s].schema[n][0] === 'boolean') {
+          var key = 'conf_' + (s === 'general' ? '' : s + '_') + n;
+          if (typeof LS.map[s].map[n].value === 'boolean') {
             _extension_data.storage.setBoolPref(key, v);
           } else {
             _extension_data.storage.setCharPref(key, v);
           }
         };
         LS.remove = function(s, n) {
-          LS.set(s, n, LS.map[s].schema[n][0]);
+          LS.set(s, n, LS.map[s].map[n].value);
         };
       } else {
         // opera/chrome/safari
@@ -514,7 +514,7 @@
         LS.set = function(s, n, v) {
           var data = { section: s, key: n, value: v };
           if (window.opera) {
-            opera.extension.postMessage(JSON.stringify({'command': 'config-set', 'data': data}));
+            window.opera.extension.postMessage(window.JSON.stringify({'command': 'config-set', 'data': data}));
           } else {
             /*
             var ev = window.document.createEvent('Event');
@@ -527,7 +527,7 @@
         LS.remove = function(s, n) {
           var data = { section: s, key: n };
           if (window.opera) {
-            opera.extension.postMessage(JSON.stringify({'command': 'config-remove', 'data': data}));
+            window.opera.extension.postMessage(window.JSON.stringify({'command': 'config-remove', 'data': data}));
           } else {
           }
         };
@@ -877,7 +877,7 @@
     if (ev.metaKey)  keys.push('Meta');
     if (ev.type === 'keydown') {
       // webkit
-      console.log(ev);
+      //window.console.log(ev);
       if (!ev.keyIdentifier) return null;
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
@@ -1441,8 +1441,8 @@
         if (item.mode || item.start_mode) {
           var mode_name = self.msg_filter(item.mode || item.start_mode);
           cell.innerHTML = '';
-          each(self.msg_filter(item.desc).split(/(%s)/), function(term) {
-            if (term === '%s') {
+          each(self.msg_filter(item.desc).split(/(\$mode)/), function(term) {
+            if (term === '$mode') {
               var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
               if (!mode_map[mode_name]) mode_map[mode_name] = [];
               mode_map[mode_name].push(span);

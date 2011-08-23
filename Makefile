@@ -88,16 +88,16 @@ WARN_KEYWORDS_P         = $(shell cat prototypejs_funcs.txt)
 ALL_TARGETS             = $(GREASEMONKEY_JS)
 
 ifeq ($(BUILD_OEX),yes)
-ALL_TARGETS         += $(OEX)
+ALL_TARGETS            += $(OEX)
 endif
 ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS         += $(CRX)
+ALL_TARGETS            += $(CRX)
 endif
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-ALL_TARGETS         += $(SAFARIEXTZ)
+ALL_TARGETS            += $(SAFARIEXTZ)
 endif
 ifeq ($(BUILD_XPI),yes)
-ALL_TARGETS         += $(XPI)
+ALL_TARGETS            += $(XPI)
 endif
 
 all: $(ALL_TARGETS)
@@ -114,9 +114,9 @@ $(CONFIG_JS): $(SRC_USERJS)
 	echo '];' >> $@
 	echo 'var LS = {' >> $@
 	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
-            -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
-            -e '/__REMOVE__/d' \
-          < $(SRC_USERJS) | tr -d '\r' >> $@;
+        -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
+        -e '/__REMOVE__/d' \
+      < $(SRC_USERJS) | tr -d '\r' >> $@;
 	echo '};' >> $@
 	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
 
@@ -133,11 +133,11 @@ $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE)
 
 warn:
 	@for kw in $(WARN_KEYWORDS_W); do \
-           grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
-         done
+       grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
+     done
 	@for kw in $(WARN_KEYWORDS_P); do \
-           grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
-         done
+       grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
+     done
 
 po: $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 
@@ -148,10 +148,10 @@ clean: clean-opera clean-chrome clean-safari clean-firefox
 
 $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	sed -e '/@LICENSE@/,$$d' \
-            -e 's/@VERSION@/$(VERSION)/' \
-            -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-            -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-          < $< > $@
+        -e 's/@VERSION@/$(VERSION)/' \
+        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+      < $< > $@
 	@grep '://' $(LICENSE) | sed -e '2,$$d' -e 's/^ */  <license href="/' -e 's/ *$$/">/' >> $@
 	@cat $(LICENSE) >> $@
 	@echo '  </license>' >> $@
@@ -178,14 +178,14 @@ $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
 $(OPERA_I18N_FILES): $(OPERA_I18N_SOURCES)
 	mkdir -p $(dir $@)
 	$(I18N_EDIT) $(I18N_DIR)/$(shell echo $@ | sed -e 's/.*locales\/\([^\/]*\)\/.*/\1/').po opera \
-          < $(shell basename $@) > $@
+      < $(shell basename $@) > $@
 
 $(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
 	@for file in $(^:$(OPERA_ROOT)/%=%); do \
-           mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
-           cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file || cp $$file $(OEX_TMP_DIR)/$$file; \
-         done
+       mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
+       cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file || cp $$file $(OEX_TMP_DIR)/$$file; \
+     done
 #	cd $(OEX_TMP_DIR) && ../$(OPERA_ROOT)/sign/create_signature.sh $(^:$(OPERA_ROOT)/%=%) > signature1.xml
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
 
@@ -198,15 +198,15 @@ clean-opera:
 $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
 	sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
-           test $$first -eq 1 && first=0 || echo ',' >> $@; \
-           /bin/echo -n "    \"$$size\": \"$(CHROME_ICON_DIR)/$$size.png\"" >> $@; \
-         done
+       test $$first -eq 1 && first=0 || echo ',' >> $@; \
+       /bin/echo -n "    \"$$size\": \"$(CHROME_ICON_DIR)/$$size.png\"" >> $@; \
+     done
 	echo >> $@;
 	sed -e '1,/@ICONS@/d' \
-            -e 's/@VERSION@/$(VERSION)/' \
-            -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-            -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-          < $< | tr -d '\r' >> $@
+        -e 's/@VERSION@/$(VERSION)/' \
+        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+      < $< | tr -d '\r' >> $@
 
 $(CHROME_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
 	$(I18N_EDIT_HASH) < $< >> $@
@@ -225,12 +225,12 @@ $(CHROME_I18N_FILES): $(CONFIG_JS)
 $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
 	@for file in $(^:$(CHROME_ROOT)/%=%); do \
-           mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
-           cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file || cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
-         done
+       mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
+       cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file || cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
+     done
 	@test -f $(CHROME_SIGN_KEY) && \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) || \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
+       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) || \
+       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
 	mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) $(CHROME_SIGN_KEY) || :
 
@@ -243,8 +243,8 @@ clean-chrome:
 
 $(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
 	sed -e 's/@VERSION@/$(VERSION)/' \
-            -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-          < $< > $@
+        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+      < $< > $@
 
 $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	sed -e '/__SETTINGS__/,$$d' < $< > $@
@@ -260,17 +260,17 @@ $(SAFARI_ICON_FILES): $(ICON_SVG)
 $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
 	rm -rf $(SAFARIEXTZ_TMP_DIR)
 	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
-           d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
-           mkdir -p $$d/`dirname $$file`; \
-           cp $(SAFARI_ROOT)/$$file $$d/$$file || cp $$file $$d/$$file; \
-         done
+       d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
+       mkdir -p $$d/`dirname $$file`; \
+       cp $(SAFARI_ROOT)/$$file $$d/$$file || cp $$file $$d/$$file; \
+     done
 	cd $(SAFARIEXTZ_TMP_DIR) && \
-          $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
-          : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
-          $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) && \
-          (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
-            openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
-          $(XAR) --inject-sig signature.dat -f ../$@
+      $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
+      : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
+      $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) && \
+      (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
+        openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
+      $(XAR) --inject-sig signature.dat -f ../$@
 
 clean-safari:
 	rm -f $(SAFARIEXTZ) $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) \
@@ -287,9 +287,9 @@ $(FIREFOX_ROOT)/content/$(CONFIG_JS): $(CONFIG_JS)
 
 $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
 	sed -e 's/@VERSION@/$(VERSION)/' \
-            -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-            -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-          < $< > $@
+        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+      < $< > $@
 
 $(FIREFOX_CHROME_MANIFEST): $(FIREFOX_CHROME_MANIFEST).in
 	cp $< $@
@@ -314,16 +314,16 @@ $(FIREFOX_DEBUG_LOADER):
 $(FIREFOX_I18N_FILES): %: %.in $(CONFIG_JS)
 	rm -f $@
 	$(I18N_EDIT_HASH) firefox \
-          $(I18N_DIR)/$(firstword $(subst -, ,$(@:$(FIREFOX_ROOT)/locale/%/entities.dtd=%))).po \
-          $@ < $(CONFIG_JS) > /dev/null
+      $(I18N_DIR)/$(firstword $(subst -, ,$(@:$(FIREFOX_ROOT)/locale/%/entities.dtd=%))).po \
+      $@ < $(CONFIG_JS) > /dev/null
 	cat $< >> $@
 
 $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
 	@for file in $(FIREFOX_DIST_FILES:$(FIREFOX_ROOT)/%=%); do \
-           mkdir -p $(XPI_TMP_DIR)/`dirname $$file`; \
-           cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file || cp $$file $(XPI_TMP_DIR)/$$file; \
-         done
+       mkdir -p $(XPI_TMP_DIR)/`dirname $$file`; \
+       cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file || cp $$file $(XPI_TMP_DIR)/$$file; \
+     done
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-firefox:

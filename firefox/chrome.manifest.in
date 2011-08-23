@@ -1,2 +1,4 @@
 content pixplus content/
+locale pixplus en-US locale/en-US/
+locale pixplus ja-JP locale/ja-JP/
 overlay chrome://browser/content/browser.xul chrome://pixplus/content/pixplus.xul

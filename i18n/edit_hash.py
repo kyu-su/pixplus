@@ -48,7 +48,7 @@ if len(sys.argv) > 3:
     for key in messages_json.keys():
       msg = re.sub(r'&lt;br&gt;', "&#13;&#10;", cgi.escape(messages_json[key]['message']))
       #msg = re.sub(r'(\(.{16,}\))$', r'&#13;&#10;\1', msg)
-      json_fp.write(('<!ENTITY %s "%s">\n' % (key, msg)).encode('utf-8'))
+      json_fp.write(('<!ENTITY %s "%s">\n' % (key, msg.replace('%', '&#38;'))).encode('utf-8'))
       pass
     pass
   json_fp.close()
