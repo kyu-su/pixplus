@@ -3,5 +3,6 @@ icons
 config.js
 common.js
 lib.js
+options.js
 options.css
 options.html
