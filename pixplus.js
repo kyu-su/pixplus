@@ -1953,26 +1953,6 @@
               new Floater(msgbox, null, true);
             }
           });
-        } else if (args.type && /^(?:reg_)?user$/.test(args.type)) {
-          // http://www.pixiv.net/bookmark.php?type=user
-          /* oAutoPagerizeと衝突する。
-           * //div[@class="two_column_body"]/div[@class="two_column_space"]//div[@class="list_box"]/*
-           var msgbox = $x('//div[@class="msgbox_bottom"]');
-           var form = $x('//div[@class="two_column_space"]/form[@action="bookmark_setting.php"]');
-           var list = $x('div[@class="list_box"]', form);
-           if (msgbox && form && list) {
-           var p = form.parentNode, pp = p.parentNode;
-           p.removeChild(form);
-           pp.replaceChild(form, p);
-           form.replaceChild(p, list);
-           p.appendChild(list);
-           write_css('.msgbox_bottom.pp-float{opacity:0.6;}' +
-           '.msgbox_bottom.pp-float:hover{opacity:1;}');
-           msgbox.parentNode.removeChild(msgbox);
-           form.insertBefore(msgbox, p);
-           new Floater(msgbox);
-           }
-           */
         }
       }
 
