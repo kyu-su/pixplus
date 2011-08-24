@@ -2290,7 +2290,8 @@
     }, {
       // http://www.pixiv.net/event_fujimi.php
       // http://www.pixiv.net/event_loveplus.php
-      url: /^\/event_(?!detail|member)\w+\.php/,
+      // http://www.pixiv.net/event_sangokushi-taisen-2.php
+      url: /^\/event_(?!detail|member)/,
       gallery: [{
         xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]/ul',
         xpath_cap: 'li/a/p[img]/following-sibling::h1',
