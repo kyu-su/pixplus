@@ -1854,17 +1854,8 @@
       xpath_tmb: 'preceding-sibling::img'
     };
 
-    function get_url_from_image(cap, thumb) {
-      var re;
-      if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
-        return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
-      } else {
-        return null;
-      }
-    }
 
     each([{
-      name: 'bookmark',
       url: /^\/bookmark(?:_tag_setting)?\.php/,
       func: function(args) {
         if (!args.id && (!args.type || /^illust(?:_all)?$/.test(args.type))) {
@@ -1972,7 +1963,6 @@
       }
 
     }, {
-      name: '',
       url: '/member_illust.php',
       func: function(args) {
         if (args.illust_id) {
@@ -2107,14 +2097,12 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       url: ['/mypage.php', '/cate_r18.php'],
       gallery: [g_mypage, g_area_right]
 
     }, {
-      name: '',
       // http://www.pixiv.net/member.php?id=11
       url: '/member.php',
       gallery: [g_mypage, g_area_right],
@@ -2130,7 +2118,6 @@
       }
 
     }, {
-      name: 'ranking-area',
       // 地域ランキング
       // http://www.pixiv.net/ranking_area.php
       url: '/ranking_area.php',
@@ -2150,7 +2137,6 @@
       }
 
     }, {
-      name: 'ranking-other',
       // その他ランキング
       // http://www.pixiv.net/ranking.php?mode=day
       // http://www.pixiv.net/ranking.php?mode=daily
@@ -2200,7 +2186,6 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
       // http://www.pixiv.net/bookmark_add.php
       url: ['/bookmark_detail.php', '/bookmark_add.php'],
@@ -2215,7 +2200,6 @@
       }]
 
     }, {
-      name: '',
       // http://www.pixiv.net/stacc/
       url: /^\/stacc/,
       gallery: [{
@@ -2230,7 +2214,6 @@
       }]
 
     }, {
-      name: '',
       // http://www.pixiv.net/event_detail.php?event_id=805
       url: '/event_detail.php',
       gallery: {
@@ -2240,18 +2223,32 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/event_member.php?event_id=805
       url: '/event_member.php',
       gallery: {
         xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
         xpath_tmb:  'li/a[contains(@href, "member_event.php")]/img[contains(concat(" ", @class, " "), " thui ")]',
         thumb_only: true,
-        get_url:    get_url_from_image
+        get_url:    function(cap, thumb) {
+          var re;
+          if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
+            return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
+          } else {
+            return null;
+          }
+        }
       }
 
     }, {
-      name: '',
+      // http://www.pixiv.net/member_event.php?id=****&event_id=805
+      url:  '/member_event.php',
+      gallery: {
+        xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]/ul',
+        xpath_cap: 'li/a/img/following-sibling::text()',
+        xpath_tmb: 'preceding-sibling::img'
+      }
+
+    }, {
       // http://www.pixiv.net/view_all.php
       // http://www.pixiv.net/rating_all.php
       // http://www.pixiv.net/comment_all.php
@@ -2263,7 +2260,6 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/user_event.php
       // http://www.pixiv.net/user_event.php?mode=attn
       url: '/user_event.php',
@@ -2284,7 +2280,6 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/user_event_related.php?id=23
       url: '/user_event_related.php',
       gallery: [{
@@ -2298,7 +2293,6 @@
       }]
 
     }, {
-      name: '',
       // http://www.pixiv.net/new_illust.php
       // http://www.pixiv.net/bookmark_new_illust.php
       // http://www.pixiv.net/mypixiv_new_illust.php
@@ -2314,7 +2308,6 @@
       }
 
     }, {
-      name: '',
       // http://www.pixiv.net/event_fujimi.php
       // http://www.pixiv.net/event_loveplus.php
       url: /^\/event_(?!detail|member)\w+\.php/,
@@ -2326,7 +2319,6 @@
 
     }, {
       // 汎用
-      name: '',
       func: [function(args) {
         if (pp.galleries.length === 0) {
           // for old html support
