@@ -1843,28 +1843,17 @@
   /* __CONFIG_UI_END__ */
 
   function init_per_page() {
-    function area_right() {
-      each($qa('.area_right'), function(root) {
-        add_gallery({
-          root:          root,
-          xpath_col:     '.',
-          xpath_cap:     './/li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
-          xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
-          allow_nothumb: 3
-        });
-      });
-    }
-    function mypage() {
-      each($qa('ul.top_display_works'), function(root) {
-        add_gallery({
-          root:      root,
-          xpath_col: '.',
-          xpath_cap: 'li/a/img/following-sibling::text()',
-          xpath_tmb: 'preceding-sibling::img'
-        });
-      });
-      area_right();
-    }
+    var g_area_right = {
+      xpath_col:     '//div[contains(concat(" ", @class, " "), " area_right ")]/ul[contains(concat(" ", @class, " "), " ranklist ")]',
+      xpath_cap:     'li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
+      xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
+      allow_nothumb: 3
+    }, g_mypage = {
+      xpath_col: '//ul[contains(concat(" ", @class, " "), " top_display_works ")]',
+      xpath_cap: 'li/a/img/following-sibling::text()',
+      xpath_tmb: 'preceding-sibling::img'
+    };
+
     function get_url_from_image(cap, thumb) {
       var re;
       if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
@@ -2122,14 +2111,14 @@
       // http://www.pixiv.net/mypage.php
       // http://www.pixiv.net/cate_r18.php
       url: ['/mypage.php', '/cate_r18.php'],
-      func: mypage
+      gallery: [g_mypage, g_area_right]
 
     }, {
       name: '',
       // http://www.pixiv.net/member.php?id=11
       url: '/member.php',
+      gallery: [g_mypage, g_area_right],
       func: function(args) {
-        mypage();
         each($qa('.worksListOthersImg'), function(root) {
           add_gallery({
             root:      root,
@@ -2329,35 +2318,25 @@
       // http://www.pixiv.net/event_fujimi.php
       // http://www.pixiv.net/event_loveplus.php
       url: /^\/event_(?!detail|member)\w+\.php/,
-      gallery: {
+      gallery: [{
         xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]/ul',
         xpath_cap: 'li/a/p[img]/following-sibling::h1',
         xpath_tmb: 'preceding-sibling::p/img'
-      }
+      }, g_mypage, g_area_right]
 
     }, {
       // 汎用
       name: '',
       func: [function(args) {
         if (pp.galleries.length === 0) {
-          if ($q('div.profile_area ul.person_menu2') && $q('div.area_right')) {
-            // http://www.pixiv.net/event_christmas2010.php
-            mypage();
-          } else {
-            // for old html support
-            // http://www.pixiv.net/bookmark.php?id=11
-            // http://www.pixiv.net/response.php?illust_id=15092961
-            add_gallery({
-              xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
-              xpath_cap: 'ul/li/a/img/following-sibling::text()',
-              xpath_tmb: 'preceding-sibling::img'
-            });
-            add_gallery({
-              xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]',
-              xpath_cap: 'ul/li/a/img/following-sibling::text()',
-              xpath_tmb: 'preceding-sibling::img'
-            });
-          }
+          // for old html support
+          // http://www.pixiv.net/bookmark.php?id=11
+          // http://www.pixiv.net/response.php?illust_id=15092961
+          add_gallery({
+            xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ") or contains(concat(" ", @class, " "), " search_a2_result ")]',
+            xpath_cap: 'ul/li/a/img/following-sibling::text()',
+            xpath_tmb: 'preceding-sibling::img'
+          });
         }
 
       }, function(args) {
