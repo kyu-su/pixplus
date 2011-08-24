@@ -1070,780 +1070,7 @@
     return str.replace(/(?:^[\x01-\x20\u3000]+|[\x01-\x20\u3000]+$)/g, '');
   }
 
-  /* __LIBRARY_END__ */
-
-  /* __CONFIG_UI_BEGIN__ */
-  function ConfigUI(root, options_page, msg_filter) {
-    this.root = root;
-    this.options_page = options_page;
-    this.msg_filter = msg_filter || function(s) { return s; };
-
-    this.pager = $c('div', this.root, {id: 'pp-conf-pager'});
-    this.page_list = $c('ul', this.pager, {id: 'pp-conf-pagelist'});
-    this.pager_content = $c('div', this.pager, {id: 'pp-conf-pager-content'});
-    this.pages = [];
-
-    this.input_table = (function(self) {
-      var input_table = { };
-      var idx = 0, page;
-      LS.each(function(item, sec) {
-        var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
-        var type = typeof item.value;
-        var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
-        row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'even' : 'odd');
-        if (item.hint) {
-          input = $c('select');
-          each(item.hint, function(hint) {
-            $c('option', input, {value: hint.value, text: self.msg_filter(hint.title)});
-          });
-        } else {
-          input = $c('input');
-        }
-        input.id = 'pp-conf-' + sec.name + '-' + item.key;
-        if (type === 'boolean') {
-          cell.className = 'pp-conf-cell-check';
-          cell.setAttribute('colspan', '2');
-          input.setAttribute('type', 'checkbox');
-          input.checked = value;
-          var label = $c('label', cell);
-          label.appendChild(input);
-          label.appendChild(window.document.createTextNode(item.key));
-        } else {
-          cell.className = 'pp-conf-cell-label';
-          cell.textContent = item.key;
-          input.value = value;
-          cell = row.insertCell(-1);
-          cell.className = 'pp-conf-cell-value';
-          cell.appendChild(input);
-        }
-        input_table[sec.name + '_' + item.key] = input;
-
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-default';
-        var def = $c('button', cell, {text: 'Default'});
-        $ev(def).click(function() {
-          if (type === 'boolean') {
-            input.checked = item.value;
-          } else {
-            input.value = item.value;
-          }
-          if (LS.u) LS.remove(sec.name, item.key);
-          self.update_export();
-          return true;
-        });
-
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-description';
-        cell.textContent = self.msg_filter(item.desc);
-
-        $ev(input).change(function(ev) {
-          var value;
-          if (type === 'boolean') {
-            value = input.checked;
-          } else {
-            value = LS.conv[type][0](input.value);
-          }
-          if (LS.u) LS.set(sec.name, item.key, value);
-          if (!options_page) LS.map[sec.name].conf[item.key] = value;
-          self.update_export();
-        });
-
-        ++idx;
-      }, function(sec) {
-        if (sec.name === 'bookmark') return true;
-        page = self.make_page(sec.label, sec.name);
-        page.table = $c('table', page.content);
-        page.section = sec;
-        return false;
-      });
-      return input_table;
-    })(this);
-
-    for(var i = 0; i < ConfigUI.pages.length; ++i) {
-      var page = this.make_page(ConfigUI.pages[i].label, ConfigUI.pages[i].id);
-      ConfigUI.pages[i].content.call(this, page, {options_page: options_page});
-    }
-
-    this.show_page(this.pages[0]);
-    this.update_export();
-  }
-
-  // for Opera10.1x
-  ConfigUI.stringify = function(val) {
-    if (window.JSON && window.JSON.stringify) {
-      return JSON.stringify(val);
-    } else {
-      var str = '';
-      if (typeof val === 'string' || val instanceof String) {
-        return '"' + val.replace(/[\\\"]/g, '\\$0')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r') + '"';
-      } else if (val instanceof Array) {
-        for(var i = 0; i < val.length; ++i) {
-          if (i) str += ',';
-          str += ConfigUI.stringify(val[i]);
-        }
-        return '[' + str + ']';
-      } else if (typeof val === 'number') {
-        return String(val);
-      } else if (typeof val === 'object') {
-        var first = true;
-        for(var key in val) {
-          if (!val.hasOwnProperty(key)) continue;
-          if (first) {
-            first = false;
-          } else {
-            str += ',';
-          }
-          str += ConfigUI.stringify(key) + ':' + ConfigUI.stringify(val[key]);
-        }
-        return '{' + str + '}';
-      } else {
-        throw 1;
-      }
-    }
-  };
-
-  ConfigUI.prototype = {
-    create_description: function(msg) {
-      return $c('div', null, {html: this.msg_filter(msg)});
-    },
-    make_page: function(text, id) {
-      var page = find(this.pages, function(page) {
-        return page.id === id;
-      });
-      if (page) return page;
-
-      page = {
-        id:      id,
-        tab:     $c('li', this.page_list),
-        content: $c('div', this.pager_content, {id: 'pp-conf-' + id, cls: 'pp-conf-page'})
-      };
-      page.label = $c('a', page.tab, {href: '#pp-conf-' + id, text: text});
-
-      $ev(page.label, {ctx: this}).click(function() {
-        if (this.selected_page === page) return true;
-        this.show_page(page);
-        return true;
-      });
-
-      this.pages.push(page);
-      return page;
-    },
-    show_page: function(page, animate) {
-      if (this.selected_page) {
-        this.selected_page.tab.className = '';
-        if (!animate) this.selected_page.content.className = 'pp-conf-page';
-      }
-      page.tab.className = 'select';
-      page.content.className = 'pp-conf-page select';
-      this.selected_page = page;
-    },
-
-    get_tag_alias_str: function() {
-      var tag_aliases = '';
-      for(var i = 0; i < this.tag_alias_table.rows.length; ++i) {
-        var row = this.tag_alias_table.rows[i];
-        var inputs = row.getElementsByTagName('input');
-        var key = inputs[0].value;
-        var val = inputs[1].value;
-        if (key && val) tag_aliases += key + '\n' + val + '\n';
-      }
-      return tag_aliases;
-    },
-
-    update_export: function() {
-    },
-    export_export: function() {
-      var obj = { }, self = this;
-      LS.each(function(item, sec) {
-        var input = self.input_table[sec.name + '_' + item.key], val;
-        if (!input) return;
-        val = (typeof item.value === 'boolean'
-               ? input.checked
-               : LS.get_conv(sec.name, item.key)[0](input.value));
-        //if (val !== item.value) obj[sec.name + '_' + item.key] = val;
-        obj[sec.name + '_' + item.key] = val;
-      });
-      obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
-      obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
-      this.export_input.value = ConfigUI.stringify(obj);
-    },
-    export_import: function() {
-      var obj = window.JSON.parse(this.export_input.value);
-      LS.each(function(item, sec) {
-        if (sec.name === 'bookmark') return;
-        var val = obj[sec.name + '_' + item.key];
-        if (typeof val !== 'undefined' && val !== null) {
-          LS.set(sec.name, item.key, val);
-        }
-      });
-      if (obj['bookmark_tag_order']) LS.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
-      if (obj['bookmark_tag_aliases']) LS.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
-      window.location.reload();
-    },
-
-    generate_js: function(new_line, indent_level) {
-      var js = [];
-      var order = LS.parse_bm_tag_order(this.tag_order_textarea.value);
-      var alias = LS.parse_bm_tag_aliases(this.get_tag_alias_str());
-      var indent = 0, self = this;
-      if (!indent_level) indent_level = 0;
-
-      function push(str) {
-        var sp = '';
-        for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
-        js.push(sp + str);
-      }
-
-      LS.each(function(item, sec) {
-        if (sec.name === 'bookmark') return;
-        var input = self.input_table[sec.name + '_' + item.key], val;
-        if (typeof item.value === 'boolean') {
-          val = input.checked;
-        } else {
-          val = LS.get_conv(sec.name, item.key)[0](input.value);
-        }
-        if (val !== item.value) {
-          var path = (sec.name === 'general' ? '' : sec.name + '.') + item.key; // for compatibility
-          push('window.pixplus.conf.' + path + '=' + ConfigUI.stringify(val) + ';');
-        }
-      });
-      if (order.length) {
-        push('window.pixplus.conf.bm_tag_order=[');
-        ++indent;
-        for(var i = 0; i < order.length; ++i) {
-          var ary = order[i];
-          push('[');
-          ++indent;
-          for(var j = 0; j < ary.length; ++j) {
-            var tag = ary[j];
-            push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
-          }
-          --indent;
-          push('],');
-        }
-        --indent;
-        push('];');
-      }
-      var alias_f = true;
-      for(var key in alias) {
-        if (alias_f) {
-          push('window.pixplus.conf.bm_tag_aliases={');
-          alias_f = false;
-          ++indent;
-        }
-        push(ConfigUI.stringify(key) + ':[');
-        ++indent;
-        for(var j = 0; j < alias[key].length; ++j) {
-          var tag = alias[key][j];
-          push(ConfigUI.stringify(tag) + ',');
-        }
-        --indent;
-        push('],');
-      }
-      if (!alias_f) {
-        js.push('};');
-        --indent;
-      }
-      return js.join(new_line || '');
-    }
-  };
-
-  ConfigUI.pages = [{
-    id: 'key',
-    content: function(page) {
-      var editor_row;
-      function close_editor(row, input) {
-        if (editor_row) {
-          editor_row.parentNode.removeChild(editor_row);
-          editor_row = null;
-        }
-      }
-      function open_editor(row, input) {
-        close_editor();
-        editor_row = $c('tr');
-        var root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
-        var list = $c('ul', root);
-        function reset() {
-          list.innerHTML = '';
-          each(input.value.split(','), add);
-        }
-        function add(key) {
-          var li = $c('li', list);
-          $ev($c('button', li, {text: '\u00d7'})).click(function() {
-            list.removeChild(li);
-            apply();
-          });
-          $c('label', li, {text: key});
-        }
-        function apply() {
-          var keys = [];
-          each($xa('li/label', list), function(key) {
-            keys.push(key.textContent);
-          });
-          input.value = keys.join(',');
-          var ev = window.document.createEvent('Event');
-          ev.initEvent('input', true, true);
-          input.dispatchEvent(ev);
-        }
-        reset();
-        var add_line = $c('div', root, {cls: 'pp-conf-key-editor-add-line'});
-        var add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
-        $ev(add_input).key(function(ev, conn, key) {
-          this.value = key;
-          // workaround for firefox4
-          if (browser.gecko && key == $ev.KEY_ESCAPE) {
-            window.setTimeout(function() {
-              add_input.value = key;
-            }, 0);
-          }
-          return true;
-        });
-        $ev($c('button', add_line, {'text': 'Add'})).click(function() {
-          add(add_input.value);
-          add_input.value = '';
-          apply();
-        });
-        $ev($c('button', add_line, {'text': 'Close'})).click(close_editor);
-        row.parentNode.insertBefore(editor_row, row.nextSibling);
-      }
-      each(page.table.rows, function(row) {
-        var input = $t('input', row)[0];
-        $ev(input).focus(function() {
-          open_editor(row, input);
-        });
-      });
-
-      var mode, offset = 0, mode_map = {}, self = this;
-      function add_mode_line(idx, mode) {
-        var row = page.table.insertRow(idx + (offset++));
-        var cell = row.insertCell(-1);
-        row.className = 'pp-conf-key-mode-line';
-        cell.setAttribute('colspan', '4');
-        cell.textContent = self.msg_filter(mode);
-        if (!mode_map[mode]) mode_map[mode] = [];
-        mode_map[mode].push(row);
-      }
-      add_mode_line(0, "\u901a\u5e38");
-      each(page.section.items, function(item, idx) {
-        var row = page.table.rows[idx + offset];
-        var cell = row.cells[row.cells.length - 1];
-        if (item.mode || item.start_mode) {
-          var mode_name = self.msg_filter(item.mode || item.start_mode);
-          cell.innerHTML = '';
-          each(self.msg_filter(item.desc).split(/(\$mode)/), function(term) {
-            if (term === '$mode') {
-              var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
-              if (!mode_map[mode_name]) mode_map[mode_name] = [];
-              mode_map[mode_name].push(span);
-            } else {
-              cell.appendChild(window.document.createTextNode(term));
-            }
-          });
-        }
-        if (item.mode && item.mode !== mode) {
-          add_mode_line(idx, item.mode);
-          mode = item.mode;
-        }
-      });
-      function highlight_mode(mode, on) {
-        each(mode_map[mode], function(elem) {
-          set_class(elem, 'pp-conf-key-mode-highlight', on ? 1 : 0);
-        });
-      }
-      for(var key in mode_map) (function(mode) {
-        each(mode_map[mode], function(elem) {
-          $ev(elem).hover(function() {
-            highlight_mode(mode, true);
-          }, function() {
-            highlight_mode(mode, false);
-          });
-        });
-      })(key);
-    }
-  }, {
-    label: 'Tags', id: 'tags',
-    content: function(page) {
-      var self = this;
-      page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
-      this.tag_order_textarea = $c('textarea', page.content);
-      this.tag_order_textarea.value = (this.options_page
-                                       ? LS.get('bookmark', 'tag_order')
-                                       : LS.bm_tag_order_to_str(conf.bm_tag_order));
-      $ev(this.tag_order_textarea).change(function() {
-        if (LS.u) LS.set('bookmark', 'tag_order', self.tag_order_textarea.value);
-        self.update_export();
-      });
-
-      page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
-      this.tag_alias_table = $c('table', page.content, {id: 'pp-conf-bookmark-tag_aliases'});
-
-      $ev($c('button', page.content, {text: 'Add'})).click(function() { add_row(); });
-
-      function save() {
-        if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
-        self.update_export();
-      }
-
-      function add_row(tag, list) {
-        var row = self.tag_alias_table.insertRow(-1), cell;
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-remove';
-        $ev($c('button', cell, {text: '\u00d7'})).click(function() {
-          row.parentNode.removeChild(row);
-          save();
-        });
-
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-tag';
-        $ev($c('input', cell, {value: tag || ''})).change(save);
-
-        cell = row.insertCell(-1);
-        cell.className = 'pp-conf-cell-aliases';
-        $ev($c('input', cell, {value: list ? list.join(' ') : ''})).change(save);
-      }
-
-      var aliases = (this.options_page
-                     ? LS.parse_bm_tag_aliases(LS.get('bookmark', 'tag_aliases'))
-                     : conf.bm_tag_aliases);
-      for(var key in aliases) add_row(key, aliases[key]);
-    }
-  }, {
-    label: 'Export', id: 'export',
-    content: function(page) {
-      this.export_form = $c('form', page.content);
-      this.export_input = $c('input', this.export_form);
-      $ev(this.export_input).listen(['mousedown', 'mouseup'], function() {
-        this.select(); /* WARN */
-      });
-
-      $ev($c('input', this.export_form, {type: 'button', value: 'Export'}), {ctx: this}).click(function() {
-        this.export_export();
-      });
-
-      if (window.JSON && LS.u) {
-        $c('input', this.export_form, {type: 'submit', value: 'Import'});
-        $ev(this.export_form, {ctx: this}).listen('submit', function() {
-          try {
-            this.export_import();
-          } catch(ex) {
-            alert(ex);
-          }
-          return true;
-        });
-      }
-
-      if (window.opera) {
-        $ev($c('input', this.export_form, {type: 'button', value: 'UserJS'}), {ctx: this}).click(function() {
-          var js = [
-            '// ==UserScript==',
-            '// @name    pixplus settings',
-            '// @version ' + (new Date()).toLocaleString(),
-            '// @include http://www.pixiv.net/*',
-            '// ==/UserScript==',
-            '(function() {',
-            '  window.document.addEventListener("pixplusInitialize",init,false);',
-            '  function init() {',
-            '    ' + this.generate_js('\n    ', 2),
-            '  }',
-            '})();'
-          ].join('\n');
-          (this.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
-        });
-      }
-    }
-  }, {
-    label: 'About', id: 'about',
-    content: function(page, args) {
-      var urls = [
-        'http://crckyl.pa.land.to/pixplus/',
-        'http://my.opera.com/crckyl/',
-        'http://crckyl.ath.cx:8088/pixplus/'
-      ];
-      var prefix = args.options_page ? '' : '/jump.php?';
-      var release = ConfigUI.changelog_data[0];
-      var html = '<dl>' +
-        '<dt>Name</dt><dd>pixplus</dd>' +
-        '<dt>Version</dt><dd>' + release.version + ' - ' + release.date + '</dd>' +
-        '<dt>Web</dt><dd><ul>';
-      for(var i = 0; i < urls.length; ++i) {
-        html += '<li><a href="' + urls[i] + '" onclick="this.href=&quot;' + prefix + urls[i] + '&quot;">' + urls[i] + '</a></li>';
-      }
-      html += '</ul></dd>' +
-        '<dt>Contact</dt><dd><ul>' +
-        '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
-        '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
-        '</ul></dd>' +
-        '<dt>License</dt><dd>Apache License 2.0</dd>' +
-        '</dl>';
-      page.content.innerHTML = html;
-    }
-  }, {
-    label: 'ChangeLog', id: 'changelog',
-    content: function(page) {
-      var dl = $c('dl', page.content);
-      each(ConfigUI.changelog_data, function(release) {
-        $c('dt', dl, {text: release.version + ' - ' + release.date});
-        var ul = $c('ul', $c('dd', dl));
-        each(release.changes, function(change) {
-          $c('li', ul, {text: change});
-        });
-      });
-    }
-  }, {
-    label: 'Debug', id: 'debug',
-    content: function(page) {
-      var debug_input = this.input_table['general_debug'];
-      function show() {
-        page.tab.style.display = '';
-        page.content.style.display = '';
-      }
-      function hide() {
-        page.tab.style.display = 'none';
-        page.content.style.display = 'none';
-        if (this.selected_page === page) this.show_page(this.pages[0]);
-      }
-      function update() {
-        if (debug_input.checked) {
-          show();
-        } else {
-          hide();
-        }
-      }
-      update();
-      $ev(debug_input).change(update);
-
-      function group(label, root) {
-        var group = $c('fieldset', root || page.content);
-        $c('legend', group, {text: 'Key'});
-        return group;
-      }
-
-      (function(root) {
-        var input_line = $c('div', root);
-        var input      = $c('input', input_line);
-        var cancel_l   = $c('label', input_line);
-        var cancel     = $c('input', cancel_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
-        var console_l  = $c('label', input_line);
-        var console    = $c('input', console_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
-        var logger     = $c('table', root, {border: 1, css: 'margin-top:4px;'});
-        cancel_l.appendChild(window.document.createTextNode('Cancel'));
-        console_l.appendChild(window.document.createTextNode('Console'));
-
-        var log_attrs  = [
-          'type',
-          'keyCode',
-          'charCode',
-          'keyIdentifier',
-          'which',
-          'eventPhase',
-          'detail',
-          'timeStamp'
-        ];
-
-        function clear() {
-          input.value = '';
-          logger.innerHTML = '';
-          var row = logger.insertRow(0);
-          row.insertCell(-1).textContent = 'Key';
-          each(log_attrs, function(attr) {
-            row.insertCell(-1).textContent = attr;
-          });
-        }
-
-        function log(ev) {
-          var row = logger.insertRow(1);
-          var key = $ev.parse_key_event(ev) || 'None';
-          row.insertCell(-1).textContent = key;
-          each(log_attrs, function(attr) {
-            row.insertCell(-1).textContent = ev[attr];
-          });
-          if (cancel.checked && key) ev.preventDefault();
-          if (console.checked && window.console) window.console.log(ev);
-        }
-
-        clear();
-        $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
-        input.addEventListener('keydown', log, false);
-        input.addEventListener('keypress', log, false);
-      })(group('key'));
-    }
-  }];
-
-  ConfigUI.changelog_data = [{
-    date: '2011/08/21', version: '0.7.0', changes: [
-      '\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-      '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002',
-      '\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0(/ranking_area.php)\u306e\u65b0\u30c7\u30b6\u30a4\u30f3\u306b\u5bfe\u5fdc\u3002'
-    ]
-  }, {
-    date: '2011/07/24', version: '0.6.3', changes: [
-      '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '「\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9」\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/06/26', version: '0.6.2', changes: [
-      '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/05/21', version: '0.6.1', changes: [
-      'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'conf.popup_ranking_log\u3092\u524a\u9664\u3002',
-      '\u65b0\u7740\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      'conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/05/13', version: '0.6.0', changes: [
-      '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-      '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30e9\u30a4\u30bb\u30f3\u30b9\u3092Apache License 2.0\u306b\u5909\u66f4\u3002',
-      'Webkit\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u8868\u793a\u304c\u5909\u3060\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0(\u5fa9\u6d3b)\u3002',
-      'Chrome\u3067\u30bb\u30f3\u30bf\u30fc\u30af\u30ea\u30c3\u30af\u306b\u3082\u53cd\u5fdc\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'Webkit\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002',
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u691c\u7d22\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/03/26', version: '0.5.1', changes: [
-      '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002',
-      'pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4fee\u6b63\u3002',
-      'Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f\u306e\u30a4\u30e9\u30b9\u30c8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/02/15', version: '0.5.0', changes: [
-      'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
-      'Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002',
-      '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002',
-      '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002',
-      'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'conf.expand_novel\u3092\u524a\u9664\u3002',
-      '\u4ed6\u30e6\u30fc\u30b6\u30fc\u306e\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u305f\u306e\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/02/04', version: '0.4.0', changes: [
-      'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
-      '\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002',
-      'OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002',
-      '\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002',
-      '\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-      '\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002',
-      '\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      'Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
-    ]
-  }, {
-    date: '2011/01/15', version: '0.3.2', changes: [
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2011/01/14', version: '0.3.1', changes: [
-      'Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
-      'OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2010/12/26', version: '0.3.0', changes: [
-      'conf.fast_user_bookmark\u8ffd\u52a0\u3002',
-      '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002',
-      '\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-      '\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
-      '\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-      '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b',
-      '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002',
-      'conf.expand_novel\u8ffd\u52a0\u3002',
-      '\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002',
-      '\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
-      'Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002',
-      '\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2010/12/01', version: '0.2.0', changes: [
-      'Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002',
-      'Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
-      '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002',
-      '\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002',
-      'd\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002'
-    ]
-  }, {
-    date: '2010/11/14', version: '0.1.2', changes: [
-      '\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      '\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
-      'conf.popup.overlay_control\u8ffd\u52a0\u3002',
-      '\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-      '\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
-    ]
-  }, {
-    date: '2010/11/02', version: '0.1.1', changes: [
-      '\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002',
-      'conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-      'pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002'
-    ]
-  }, {
-    date: '2010/10/27', version: '0.1.0', changes: [
-      'Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002',
-      '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002',
-      'AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
-    ]
-  }];
-
-  ConfigUI.css =
-    '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
-    '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
-    '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
-    '#pp-conf-pagelist li.select a{padding:1px 5px 2px 5px;}' +
-    '#pp-conf-pager-content{border:1px solid silver;margin-top:-1px;z-index:98;overflow:auto;}' +
-    '.pp-conf-page{display:none;width:100%;padding:4px;' +
-    '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
-    '.pp-conf-page.select{display:inline-block;}' +
-    '.pp-conf-page input, .pp-conf-page textarea{' +
-    '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
-    '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
-    '.pp-conf-page textarea{width:100%;}' +
-    '.pp-conf-page fieldset{border:1px solid silver;padding:4px;}' +
-    '.pp-conf-page legend{display:block;padding:0px 2px;}' +
-    '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
-    '#pp-conf-key .pp-conf-key-mode-line{font-weight:bold;}' +
-    '#pp-conf-key .pp-conf-key-mode-label{color:navy;}' +
-    '#pp-conf-key .pp-conf-key-mode-highlight{background-color:#dfdfff;}' +
-    //'#pp-conf-key table tr.pp-conf-entry td:first-child{padding-left:1em;}' +
-    '.pp-conf-key-editor{padding-left:1em;}' +
-    //'.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
-    '.pp-conf-key-editor ul label{margin-left:4px;}' +
-    '.pp-conf-key-editor ul li{list-style-type:none;margin-bottom:2px;}' +
-    '.pp-conf-key-editor .pp-conf-key-editor-add-line button{margin-left:4px;}' +
-    '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
-    '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
-    '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
-    '#pp-conf-export form{display:block;}' +
-    '#pp-conf-export input{margin-left:0.2em;}' +
-    '#pp-conf-about dt{font-weight:bold;}' +
-    '#pp-conf-about *+dt{margin-top:0.6em;}' +
-    '#pp-conf-about dd{margin-left:1.6em;}' +
-    '#pp-conf-about dd ul li{list-style-type:none;}' +
-    '#pp-conf-changelog dt{font-weight:bold;}' +
-    '#pp-conf-changelog ul{padding-left:2em;}' +
-    '#pp-conf-changelog ul li{list-style-type:disc;}';
-  /* __CONFIG_UI_END__ */
-
-  function init_per_page() {
+  var pp_page_support = (function() {
     var g_area_right = {
       xpath_col:     '//div[contains(concat(" ", @class, " "), " area_right ")]/ul[contains(concat(" ", @class, " "), " ranklist ")]',
       xpath_cap:     'li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
@@ -1858,15 +1085,13 @@
       xpath_cap: 'li/a/img/following-sibling::text()',
       xpath_tmb: 'preceding-sibling::img'
     };
-
-
-    each([{
+    return [{
+      name: 'bookmark',
+      sample_url: ['http://www.pixiv.net/bookmark.php',
+                   'http://www.pixiv.net/bookmark.php?type=illust_all'],
       url: /^\/bookmark(?:_tag_setting)?\.php/,
       func: function(args) {
         if (!args.id && (!args.type || /^illust(?:_all)?$/.test(args.type))) {
-          // ブックマーク管理
-          // http://www.pixiv.net/bookmark.php
-          // http://www.pixiv.net/bookmark.php?type=illust_all
           function debug_filter(item) {
             var c = $x('input[@name="book_id[]"]', item.caption.parentNode);
             if (c) {
@@ -1948,11 +1173,13 @@
       }
 
     }, {
+      name: 'member-illust',
+      sample_url: ['http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505',
+                   'http://www.pixiv.net/member_illust.php?id=11',
+                   'http://www.pixiv.net/member_illust.php'],
       url: '/member_illust.php',
       func: function(args) {
         if (args.illust_id) {
-          // http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505
-          // 下部のイメージレスポンス
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " worksImageresponse ")]',
             xpath_cap: 'ul[contains(concat(" ", @class, " "), " worksResponse ")]/li/text()[last()]',
@@ -2064,15 +1291,12 @@
             });
           }
         } else if (args.id) {
-          // http://www.pixiv.net/member_illust.php?id=11
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
             xpath_cap: 'ul/li/a/img/following-sibling::text()',
             xpath_tmb: 'preceding-sibling::img'
           });
         } else {
-          // 自分のイラスト管理
-          // http://www.pixiv.net/member_illust.php
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ")]',
             xpath_cap: 'ul/li/a/img/following-sibling::text()',
@@ -2082,19 +1306,21 @@
       }
 
     }, {
-      // http://www.pixiv.net/mypage.php
-      // http://www.pixiv.net/cate_r18.php
+      name: 'mypage',
+      sample_url: ['http://www.pixiv.net/mypage.php',
+                   'http://www.pixiv.net/cate_r18.php'],
       url: ['/mypage.php', '/cate_r18.php'],
       gallery: [g_mypage, g_area_right]
 
     }, {
-      // http://www.pixiv.net/member.php?id=11
+      name: 'member',
+      sample_url: ['http://www.pixiv.net/member.php?id=11'],
       url: '/member.php',
       gallery: g_member
 
     }, {
-      // 地域ランキング
-      // http://www.pixiv.net/ranking_area.php
+      name: 'ranking-area',
+      sample_url: ['http://www.pixiv.net/ranking_area.php'],
       url: '/ranking_area.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " rankingArea ")]//section[contains(concat(" ", @class, " "), " area ")]',
@@ -2112,16 +1338,16 @@
       }
 
     }, {
-      // その他ランキング
-      // http://www.pixiv.net/ranking.php?mode=day
-      // http://www.pixiv.net/ranking.php?mode=daily
-      // http://www.pixiv.net/ranking.php?mode=rookie
-      // http://www.pixiv.net/ranking.php?mode=weekly
-      // http://www.pixiv.net/ranking.php?mode=monthly
-      // http://www.pixiv.net/ranking.php?mode=daily_r18
-      // http://www.pixiv.net/ranking.php?mode=weekly_r18
-      // http://www.pixiv.net/ranking.php?mode=r18g
-      // http://www.pixiv.net/ranking.php?mode=daily&date=20110515
+      name: 'ranking-other',
+      sample_url: ['http://www.pixiv.net/ranking.php?mode=day',
+                   'http://www.pixiv.net/ranking.php?mode=daily',
+                   'http://www.pixiv.net/ranking.php?mode=rookie',
+                   'http://www.pixiv.net/ranking.php?mode=weekly',
+                   'http://www.pixiv.net/ranking.php?mode=monthly',
+                   'http://www.pixiv.net/ranking.php?mode=daily_r18',
+                   'http://www.pixiv.net/ranking.php?mode=weekly_r18',
+                   'http://www.pixiv.net/ranking.php?mode=r18g',
+                   'http://www.pixiv.net/ranking.php?mode=daily&date=20110515'],
       url: '/ranking.php',
       gallery: {
         xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
@@ -2161,8 +1387,9 @@
       }
 
     }, {
-      // http://www.pixiv.net/bookmark_detail.php?illust_id=15092961
-      // http://www.pixiv.net/bookmark_add.php
+      name: 'bookmark-detail',
+      sample_url: ['http://www.pixiv.net/bookmark_detail.php?illust_id=15092961',
+                   'http://www.pixiv.net/bookmark_add.php'],
       url: ['/bookmark_detail.php', '/bookmark_add.php'],
       gallery: [{ // 下部の「****の他の作品」
         xpath_col: '//div[contains(concat(" ", @class, " "), " bookmark_works ")]',
@@ -2175,7 +1402,8 @@
       }]
 
     }, {
-      // http://www.pixiv.net/stacc/
+      name: 'stacc',
+      sample_url: ['http://www.pixiv.net/stacc/'],
       url: /^\/stacc/,
       gallery: [{
         xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
@@ -2189,7 +1417,8 @@
       }]
 
     }, {
-      // http://www.pixiv.net/event_detail.php?event_id=805
+      name: 'event-detail',
+      sample_url: ['http://www.pixiv.net/event_detail.php?event_id=805'],
       url: '/event_detail.php',
       gallery: {
         xpath_col:  '//div[contains(concat(" ", @class, " "), " event-cont ")]//ul[contains(concat(" ", @class, " "), " thu ")]',
@@ -2198,7 +1427,8 @@
       }
 
     }, {
-      // http://www.pixiv.net/event_member.php?event_id=805
+      name: 'event-member',
+      sample_url: ['http://www.pixiv.net/event_member.php?event_id=805'],
       url: '/event_member.php',
       gallery: {
         xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
@@ -2215,14 +1445,16 @@
       }
 
     }, {
-      // http://www.pixiv.net/member_event.php?id=****&event_id=805
+      name: 'member-event',
+      sample_url: ['http://www.pixiv.net/member_event.php?id=****&event_id=805'],
       url:  '/member_event.php',
       gallery: g_member
 
     }, {
-      // http://www.pixiv.net/view_all.php
-      // http://www.pixiv.net/rating_all.php
-      // http://www.pixiv.net/comment_all.php
+      name: 'user-history',
+      sample_url: ['http://www.pixiv.net/view_all.php',
+                   'http://www.pixiv.net/rating_all.php',
+                   'http://www.pixiv.net/comment_all.php'],
       url: /^\/(?:view|rating|comment)_all\.php/,
       gallery: {
         xpath_col:     '//div[contains(concat(" ", @class, " "), " archiveListNaviBody ")]/dl',
@@ -2231,8 +1463,10 @@
       }
 
     }, {
-      // http://www.pixiv.net/user_event.php
-      // http://www.pixiv.net/user_event.php?mode=attn
+      name: 'user-event',
+      sample_url: ['http://www.pixiv.net/user_event.php',
+                   'http://www.pixiv.net/user_event.php?mode=attn',
+                   'http://www.pixiv.net/user_event.php?id=23'],
       url: '/user_event.php',
       gallery: {
         xpath_col: '//div[contains(concat(" ", @class, " "), " linkStyleWorks ")]/ol',
@@ -2241,7 +1475,7 @@
       },
       func: function(args) {
         if (args.id) {
-          // http://www.pixiv.net/user_event.php?id=23
+          // 
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " rounded ")]/div[contains(concat(" ", @class, " "), " status-description ")]',
             xpath_cap: 'h3[contains(concat(" ", @class, " "), " status-title ")]/a',
@@ -2251,7 +1485,8 @@
       }
 
     }, {
-      // http://www.pixiv.net/user_event_related.php?id=23
+      name: 'user-event-related',
+      sample_url: ['http://www.pixiv.net/user_event_related.php?id=23'],
       url: '/user_event_related.php',
       gallery: [{
         xpath_col: '//ol[contains(concat(" ", @class, " "), " linkStyleWorks ")]',
@@ -2264,13 +1499,14 @@
       }]
 
     }, {
-      // http://www.pixiv.net/new_illust.php
-      // http://www.pixiv.net/bookmark_new_illust.php
-      // http://www.pixiv.net/mypixiv_new_illust.php
-      // http://www.pixiv.net/new_illust_r18.php
-      // http://www.pixiv.net/bookmark_new_illust_r18.php
-      // http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag
-      // http://www.pixiv.net/tags.php?tag=pixiv
+      name: 'new-illust',
+      sample_url: ['http://www.pixiv.net/new_illust.php',
+                   'http://www.pixiv.net/bookmark_new_illust.php',
+                   'http://www.pixiv.net/mypixiv_new_illust.php',
+                   'http://www.pixiv.net/new_illust_r18.php',
+                   'http://www.pixiv.net/bookmark_new_illust_r18.php',
+                   'http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag',
+                   'http://www.pixiv.net/tags.php?tag=pixiv'],
       url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
@@ -2279,9 +1515,10 @@
       }
 
     }, {
-      // http://www.pixiv.net/event_fujimi.php
-      // http://www.pixiv.net/event_loveplus.php
-      // http://www.pixiv.net/event_sangokushi-taisen-2.php
+      name: 'official-event',
+      sample_url: ['http://www.pixiv.net/event_fujimi.php',
+                   'http://www.pixiv.net/event_loveplus.php',
+                   'http://www.pixiv.net/event_sangokushi-taisen-2.php'],
       url: /^\/event_(?!detail|member)/,
       gallery: [{
         xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]/ul',
@@ -2290,12 +1527,11 @@
       }, g_mypage, g_area_right]
 
     }, {
-      // 汎用
+      name: 'other',
+      sample_url: ['http://www.pixiv.net/bookmark.php?id=11',
+                   'http://www.pixiv.net/response.php?illust_id=15092961'],
       func: [function(args) {
         if (pp.galleries.length === 0) {
-          // for old html support
-          // http://www.pixiv.net/bookmark.php?id=11
-          // http://www.pixiv.net/response.php?illust_id=15092961
           add_gallery({
             xpath_col: '//div[contains(concat(" ", @class, " "), " display_works ") or contains(concat(" ", @class, " "), " search_a2_result ")]',
             xpath_cap: 'ul/li/a/img/following-sibling::text()',
@@ -2478,7 +1714,805 @@
          });
       }]
 
-    }], function(page) {
+    }];
+  })();
+
+  /* __LIBRARY_END__ */
+
+  /* __CONFIG_UI_BEGIN__ */
+  var ConfigUI = $cls.create({
+    initialize: function(root, options_page, msg_filter) {
+      this.root = root;
+      this.options_page = options_page;
+      this.msg_filter = msg_filter || function(s) { return s; };
+
+      this.pager = $c('div', this.root, {id: 'pp-conf-pager'});
+      this.page_list = $c('ul', this.pager, {id: 'pp-conf-pagelist'});
+      this.pager_content = $c('div', this.pager, {id: 'pp-conf-pager-content'});
+      this.pages = [];
+
+      this.input_table = (function(self) {
+        var input_table = { };
+        var idx = 0, page;
+        LS.each(function(item, sec) {
+          var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
+          var type = typeof item.value;
+          var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
+          row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'even' : 'odd');
+          if (item.hint) {
+            input = $c('select');
+            each(item.hint, function(hint) {
+              $c('option', input, {value: hint.value, text: self.msg_filter(hint.title)});
+            });
+          } else {
+            input = $c('input');
+          }
+          input.id = 'pp-conf-' + sec.name + '-' + item.key;
+          if (type === 'boolean') {
+            cell.className = 'pp-conf-cell-check';
+            cell.setAttribute('colspan', '2');
+            input.setAttribute('type', 'checkbox');
+            input.checked = value;
+            var label = $c('label', cell);
+            label.appendChild(input);
+            label.appendChild(window.document.createTextNode(item.key));
+          } else {
+            cell.className = 'pp-conf-cell-label';
+            cell.textContent = item.key;
+            input.value = value;
+            cell = row.insertCell(-1);
+            cell.className = 'pp-conf-cell-value';
+            cell.appendChild(input);
+          }
+          input_table[sec.name + '_' + item.key] = input;
+
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-default';
+          var def = $c('button', cell, {text: 'Default'});
+          $ev(def).click(function() {
+            if (type === 'boolean') {
+              input.checked = item.value;
+            } else {
+              input.value = item.value;
+            }
+            if (LS.u) LS.remove(sec.name, item.key);
+            self.update_export();
+            return true;
+          });
+
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-description';
+          cell.textContent = self.msg_filter(item.desc);
+
+          $ev(input).change(function(ev) {
+            var value;
+            if (type === 'boolean') {
+              value = input.checked;
+            } else {
+              value = LS.conv[type][0](input.value);
+            }
+            if (LS.u) LS.set(sec.name, item.key, value);
+            if (!options_page) LS.map[sec.name].conf[item.key] = value;
+            self.update_export();
+          });
+
+          ++idx;
+        }, function(sec) {
+          if (sec.name === 'bookmark') return true;
+          page = self.make_page(sec.label, sec.name);
+          page.table = $c('table', page.content);
+          page.section = sec;
+          return false;
+        });
+        return input_table;
+      })(this);
+
+      for(var i = 0; i < ConfigUI.pages.length; ++i) {
+        var page = this.make_page(ConfigUI.pages[i].label, ConfigUI.pages[i].id);
+        ConfigUI.pages[i].content.call(this, page, {options_page: options_page});
+      }
+
+      this.show_page(this.pages[0]);
+      this.update_export();
+    },
+
+    create_description: function(msg) {
+      return $c('div', null, {html: this.msg_filter(msg)});
+    },
+
+    make_page: function(text, id) {
+      var page = find(this.pages, function(page) {
+        return page.id === id;
+      });
+      if (page) return page;
+
+      page = {
+        id:      id,
+        tab:     $c('li', this.page_list),
+        content: $c('div', this.pager_content, {id: 'pp-conf-' + id, cls: 'pp-conf-page'})
+      };
+      page.label = $c('a', page.tab, {href: '#pp-conf-' + id, text: text});
+
+      $ev(page.label, {ctx: this}).click(function() {
+        if (this.selected_page === page) return true;
+        this.show_page(page);
+        return true;
+      });
+
+      this.pages.push(page);
+      return page;
+    },
+
+    show_page: function(page, animate) {
+      if (this.selected_page) {
+        this.selected_page.tab.className = '';
+        if (!animate) this.selected_page.content.className = 'pp-conf-page';
+      }
+      page.tab.className = 'select';
+      page.content.className = 'pp-conf-page select';
+      this.selected_page = page;
+    },
+
+    get_tag_alias_str: function() {
+      var tag_aliases = '';
+      for(var i = 0; i < this.tag_alias_table.rows.length; ++i) {
+        var row = this.tag_alias_table.rows[i];
+        var inputs = row.getElementsByTagName('input');
+        var key = inputs[0].value;
+        var val = inputs[1].value;
+        if (key && val) tag_aliases += key + '\n' + val + '\n';
+      }
+      return tag_aliases;
+    },
+
+    update_export: function() {
+    },
+
+    export_export: function() {
+      var obj = { }, self = this;
+      LS.each(function(item, sec) {
+        var input = self.input_table[sec.name + '_' + item.key], val;
+        if (!input) return;
+        val = (typeof item.value === 'boolean'
+               ? input.checked
+               : LS.get_conv(sec.name, item.key)[0](input.value));
+        //if (val !== item.value) obj[sec.name + '_' + item.key] = val;
+        obj[sec.name + '_' + item.key] = val;
+      });
+      obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
+      obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
+      this.export_input.value = ConfigUI.stringify(obj);
+    },
+
+    export_import: function() {
+      var obj = window.JSON.parse(this.export_input.value);
+      LS.each(function(item, sec) {
+        if (sec.name === 'bookmark') return;
+        var val = obj[sec.name + '_' + item.key];
+        if (typeof val !== 'undefined' && val !== null) {
+          LS.set(sec.name, item.key, val);
+        }
+      });
+      if (obj['bookmark_tag_order']) LS.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+      if (obj['bookmark_tag_aliases']) LS.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+      window.location.reload();
+    },
+
+    generate_js: function(new_line, indent_level) {
+      var js = [];
+      var order = LS.parse_bm_tag_order(this.tag_order_textarea.value);
+      var alias = LS.parse_bm_tag_aliases(this.get_tag_alias_str());
+      var indent = 0, self = this;
+      if (!indent_level) indent_level = 0;
+
+      function push(str) {
+        var sp = '';
+        for(var i = 0; i < indent_level * indent; ++i) sp += ' ';
+        js.push(sp + str);
+      }
+
+      LS.each(function(item, sec) {
+        if (sec.name === 'bookmark') return;
+        var input = self.input_table[sec.name + '_' + item.key], val;
+        if (typeof item.value === 'boolean') {
+          val = input.checked;
+        } else {
+          val = LS.get_conv(sec.name, item.key)[0](input.value);
+        }
+        if (val !== item.value) {
+          var path = (sec.name === 'general' ? '' : sec.name + '.') + item.key; // for compatibility
+          push('window.pixplus.conf.' + path + '=' + ConfigUI.stringify(val) + ';');
+        }
+      });
+      if (order.length) {
+        push('window.pixplus.conf.bm_tag_order=[');
+        ++indent;
+        for(var i = 0; i < order.length; ++i) {
+          var ary = order[i];
+          push('[');
+          ++indent;
+          for(var j = 0; j < ary.length; ++j) {
+            var tag = ary[j];
+            push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
+          }
+          --indent;
+          push('],');
+        }
+        --indent;
+        push('];');
+      }
+      var alias_f = true;
+      for(var key in alias) {
+        if (alias_f) {
+          push('window.pixplus.conf.bm_tag_aliases={');
+          alias_f = false;
+          ++indent;
+        }
+        push(ConfigUI.stringify(key) + ':[');
+        ++indent;
+        for(var j = 0; j < alias[key].length; ++j) {
+          var tag = alias[key][j];
+          push(ConfigUI.stringify(tag) + ',');
+        }
+        --indent;
+        push('],');
+      }
+      if (!alias_f) {
+        js.push('};');
+        --indent;
+      }
+      return js.join(new_line || '');
+    }
+
+  }, {
+    // for Opera10.1x
+    stringify: function(val) {
+      if (window.JSON && window.JSON.stringify) {
+        return JSON.stringify(val);
+      } else {
+        var str = '';
+        if (typeof val === 'string' || val instanceof String) {
+          return '"' + val.replace(/[\\\"]/g, '\\$0')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r') + '"';
+        } else if (val instanceof Array) {
+          for(var i = 0; i < val.length; ++i) {
+            if (i) str += ',';
+            str += ConfigUI.stringify(val[i]);
+          }
+          return '[' + str + ']';
+        } else if (typeof val === 'number') {
+          return String(val);
+        } else if (typeof val === 'object') {
+          var first = true;
+          for(var key in val) {
+            if (!val.hasOwnProperty(key)) continue;
+            if (first) {
+              first = false;
+            } else {
+              str += ',';
+            }
+            str += ConfigUI.stringify(key) + ':' + ConfigUI.stringify(val[key]);
+          }
+          return '{' + str + '}';
+        } else {
+          throw 1;
+        }
+      }
+    },
+
+    pages: [{
+      id: 'key',
+      content: function(page) {
+        var editor_row;
+        function close_editor(row, input) {
+          if (editor_row) {
+            editor_row.parentNode.removeChild(editor_row);
+            editor_row = null;
+          }
+        }
+        function open_editor(row, input) {
+          close_editor();
+          editor_row = $c('tr');
+          var root = $c('div', $c('td', editor_row, {cls: 'pp-conf-key-editor', 'a:colspan': '4'}));
+          var list = $c('ul', root);
+          function reset() {
+            list.innerHTML = '';
+            each(input.value.split(','), add);
+          }
+          function add(key) {
+            var li = $c('li', list);
+            $ev($c('button', li, {text: '\u00d7'})).click(function() {
+              list.removeChild(li);
+              apply();
+            });
+            $c('label', li, {text: key});
+          }
+          function apply() {
+            var keys = [];
+            each($xa('li/label', list), function(key) {
+              keys.push(key.textContent);
+            });
+            input.value = keys.join(',');
+            var ev = window.document.createEvent('Event');
+            ev.initEvent('input', true, true);
+            input.dispatchEvent(ev);
+          }
+          reset();
+          var add_line = $c('div', root, {cls: 'pp-conf-key-editor-add-line'});
+          var add_input = $c('input', add_line, {'a:placeholder': 'Grab key'});
+          $ev(add_input).key(function(ev, conn, key) {
+            this.value = key;
+            // workaround for firefox4
+            if (browser.gecko && key == $ev.KEY_ESCAPE) {
+              window.setTimeout(function() {
+                add_input.value = key;
+              }, 0);
+            }
+            return true;
+          });
+          $ev($c('button', add_line, {'text': 'Add'})).click(function() {
+            add(add_input.value);
+            add_input.value = '';
+            apply();
+          });
+          $ev($c('button', add_line, {'text': 'Close'})).click(close_editor);
+          row.parentNode.insertBefore(editor_row, row.nextSibling);
+        }
+        each(page.table.rows, function(row) {
+          var input = $t('input', row)[0];
+          $ev(input).focus(function() {
+            open_editor(row, input);
+          });
+        });
+
+        var mode, offset = 0, mode_map = {}, self = this;
+        function add_mode_line(idx, mode) {
+          var row = page.table.insertRow(idx + (offset++));
+          var cell = row.insertCell(-1);
+          row.className = 'pp-conf-key-mode-line';
+          cell.setAttribute('colspan', '4');
+          cell.textContent = self.msg_filter(mode);
+          if (!mode_map[mode]) mode_map[mode] = [];
+          mode_map[mode].push(row);
+        }
+        add_mode_line(0, "\u901a\u5e38");
+        each(page.section.items, function(item, idx) {
+          var row = page.table.rows[idx + offset];
+          var cell = row.cells[row.cells.length - 1];
+          if (item.mode || item.start_mode) {
+            var mode_name = self.msg_filter(item.mode || item.start_mode);
+            cell.innerHTML = '';
+            each(self.msg_filter(item.desc).split(/(\$mode)/), function(term) {
+              if (term === '$mode') {
+                var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
+                if (!mode_map[mode_name]) mode_map[mode_name] = [];
+                mode_map[mode_name].push(span);
+              } else {
+                cell.appendChild(window.document.createTextNode(term));
+              }
+            });
+          }
+          if (item.mode && item.mode !== mode) {
+            add_mode_line(idx, item.mode);
+            mode = item.mode;
+          }
+        });
+        function highlight_mode(mode, on) {
+          each(mode_map[mode], function(elem) {
+            set_class(elem, 'pp-conf-key-mode-highlight', on ? 1 : 0);
+          });
+        }
+        for(var key in mode_map) (function(mode) {
+          each(mode_map[mode], function(elem) {
+            $ev(elem).hover(function() {
+              highlight_mode(mode, true);
+            }, function() {
+              highlight_mode(mode, false);
+            });
+          });
+        })(key);
+      }
+
+    }, {
+      label: 'Tags', id: 'tags',
+      content: function(page) {
+        var self = this;
+        page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
+        this.tag_order_textarea = $c('textarea', page.content);
+        this.tag_order_textarea.value = (this.options_page
+                                         ? LS.get('bookmark', 'tag_order')
+                                         : LS.bm_tag_order_to_str(conf.bm_tag_order));
+        $ev(this.tag_order_textarea).change(function() {
+          if (LS.u) LS.set('bookmark', 'tag_order', self.tag_order_textarea.value);
+          self.update_export();
+        });
+
+        page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
+        this.tag_alias_table = $c('table', page.content, {id: 'pp-conf-bookmark-tag_aliases'});
+
+        $ev($c('button', page.content, {text: 'Add'})).click(function() { add_row(); });
+
+        function save() {
+          if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
+          self.update_export();
+        }
+
+        function add_row(tag, list) {
+          var row = self.tag_alias_table.insertRow(-1), cell;
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-remove';
+          $ev($c('button', cell, {text: '\u00d7'})).click(function() {
+            row.parentNode.removeChild(row);
+            save();
+          });
+
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-tag';
+          $ev($c('input', cell, {value: tag || ''})).change(save);
+
+          cell = row.insertCell(-1);
+          cell.className = 'pp-conf-cell-aliases';
+          $ev($c('input', cell, {value: list ? list.join(' ') : ''})).change(save);
+        }
+
+        var aliases = (this.options_page
+                       ? LS.parse_bm_tag_aliases(LS.get('bookmark', 'tag_aliases'))
+                       : conf.bm_tag_aliases);
+        for(var key in aliases) add_row(key, aliases[key]);
+      }
+
+    }, {
+      label: 'Export', id: 'export',
+      content: function(page) {
+        this.export_form = $c('form', page.content);
+        this.export_input = $c('input', this.export_form);
+        $ev(this.export_input).listen(['mousedown', 'mouseup'], function() {
+          this.select(); /* WARN */
+        });
+
+        $ev($c('input', this.export_form, {type: 'button', value: 'Export'}), {ctx: this}).click(function() {
+          this.export_export();
+        });
+
+        if (window.JSON && LS.u) {
+          $c('input', this.export_form, {type: 'submit', value: 'Import'});
+          $ev(this.export_form, {ctx: this}).listen('submit', function() {
+            try {
+              this.export_import();
+            } catch(ex) {
+              alert(ex);
+            }
+            return true;
+          });
+        }
+
+        if (window.opera) {
+          $ev($c('input', this.export_form, {type: 'button', value: 'UserJS'}), {ctx: this}).click(function() {
+            var js = [
+              '// ==UserScript==',
+              '// @name    pixplus settings',
+              '// @version ' + (new Date()).toLocaleString(),
+              '// @include http://www.pixiv.net/*',
+              '// ==/UserScript==',
+              '(function() {',
+              '  window.document.addEventListener("pixplusInitialize",init,false);',
+              '  function init() {',
+              '    ' + this.generate_js('\n    ', 2),
+              '  }',
+              '})();'
+            ].join('\n');
+            (this.options_page ? window : pp).open('data:text/javascript;charset=utf-8,' + encodeURI(js));
+          });
+        }
+      }
+
+    }, {
+      label: 'About', id: 'about',
+      content: function(page, args) {
+        var urls = [
+          'http://crckyl.pa.land.to/pixplus/',
+          'http://my.opera.com/crckyl/',
+          'http://crckyl.ath.cx:8088/pixplus/'
+        ];
+        var prefix = args.options_page ? '' : '/jump.php?';
+        var release = ConfigUI.changelog_data[0];
+        var html = '<dl>' +
+              '<dt>Name</dt><dd>pixplus</dd>' +
+              '<dt>Version</dt><dd>' + release.version + ' - ' + release.date + '</dd>' +
+              '<dt>Web</dt><dd><ul>';
+        for(var i = 0; i < urls.length; ++i) {
+          html += '<li><a href="' + urls[i] + '" onclick="this.href=&quot;' + prefix + urls[i] + '&quot;">' + urls[i] + '</a></li>';
+        }
+        html += '</ul></dd>' +
+          '<dt>Contact</dt><dd><ul>' +
+          '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
+          '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
+          '</ul></dd>' +
+          '<dt>License</dt><dd>Apache License 2.0</dd>' +
+          '</dl>';
+        page.content.innerHTML = html;
+      }
+
+    }, {
+      label: 'ChangeLog', id: 'changelog',
+      content: function(page) {
+        var dl = $c('dl', page.content);
+        each(ConfigUI.changelog_data, function(release) {
+          $c('dt', dl, {text: release.version + ' - ' + release.date});
+          var ul = $c('ul', $c('dd', dl));
+          each(release.changes, function(change) {
+            $c('li', ul, {text: change});
+          });
+        });
+      }
+
+    }, {
+      label: 'Debug', id: 'debug',
+      content: function(page) {
+        var debug_input = this.input_table['general_debug'];
+        function show() {
+          page.tab.style.display = '';
+          page.content.style.display = '';
+        }
+        function hide() {
+          page.tab.style.display = 'none';
+          page.content.style.display = 'none';
+          if (this.selected_page === page) this.show_page(this.pages[0]);
+        }
+        function update() {
+          if (debug_input.checked) {
+            show();
+          } else {
+            hide();
+          }
+        }
+        update();
+        $ev(debug_input).change(update);
+
+        function group(label, root) {
+          var group = $c('fieldset', root || page.content);
+          $c('legend', group, {text: label});
+          return group;
+        }
+
+        (function(root) {
+          var input_line = $c('div', root);
+          var input      = $c('input', input_line);
+          var cancel_l   = $c('label', input_line);
+          var cancel     = $c('input', cancel_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+          var console_l  = $c('label', input_line);
+          var console    = $c('input', console_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+          var logger     = $c('table', root, {border: 1, css: 'margin-top:4px;'});
+          cancel_l.appendChild(window.document.createTextNode('Cancel'));
+          console_l.appendChild(window.document.createTextNode('Console'));
+
+          var log_attrs  = [
+            'type',
+            'keyCode',
+            'charCode',
+            'keyIdentifier',
+            'which',
+            'eventPhase',
+            'detail',
+            'timeStamp'
+          ];
+
+          function clear() {
+            input.value = '';
+            logger.innerHTML = '';
+            var row = logger.insertRow(0);
+            row.insertCell(-1).textContent = 'Key';
+            each(log_attrs, function(attr) {
+              row.insertCell(-1).textContent = attr;
+            });
+          }
+
+          function log(ev) {
+            var row = logger.insertRow(1);
+            var key = $ev.parse_key_event(ev) || 'None';
+            row.insertCell(-1).textContent = key;
+            each(log_attrs, function(attr) {
+              row.insertCell(-1).textContent = ev[attr];
+            });
+            if (cancel.checked && key) ev.preventDefault();
+            if (console.checked && window.console) window.console.log(ev);
+          }
+
+          clear();
+          $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
+          input.addEventListener('keydown', log, false);
+          input.addEventListener('keypress', log, false);
+        })(group('key'));
+
+        (function(root) {
+          var dl = $c('dl', root);
+          each(pp_page_support, function(page) {
+            $c('dt', dl, {text: page.name});
+            var ul = $c('ul', $c('dd', dl));
+            each(page.sample_url, function(url) {
+              $c('a', $c('li', ul), {text: url, 'a:href': url});
+            });
+          });
+        })(group('Pages'));
+      }
+    }],
+
+    changelog_data: [{
+      date: '2011/08/21', version: '0.7.0', changes: [
+        '\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002',
+        '\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0(/ranking_area.php)\u306e\u65b0\u30c7\u30b6\u30a4\u30f3\u306b\u5bfe\u5fdc\u3002'
+      ]
+    }, {
+      date: '2011/07/24', version: '0.6.3', changes: [
+        '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '「\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9」\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/06/26', version: '0.6.2', changes: [
+        '\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/05/21', version: '0.6.1', changes: [
+        'Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.popup_ranking_log\u3092\u524a\u9664\u3002',
+        '\u65b0\u7740\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        'conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/05/13', version: '0.6.0', changes: [
+        '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30e9\u30a4\u30bb\u30f3\u30b9\u3092Apache License 2.0\u306b\u5909\u66f4\u3002',
+        'Webkit\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u8868\u793a\u304c\u5909\u3060\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0(\u5fa9\u6d3b)\u3002',
+        'Chrome\u3067\u30bb\u30f3\u30bf\u30fc\u30af\u30ea\u30c3\u30af\u306b\u3082\u53cd\u5fdc\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'Webkit\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002',
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u691c\u7d22\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/03/26', version: '0.5.1', changes: [
+        '\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002',
+        'pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4fee\u6b63\u3002',
+        'Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f\u306e\u30a4\u30e9\u30b9\u30c8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/02/15', version: '0.5.0', changes: [
+        'conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002',
+        'Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002',
+        '\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002',
+        'Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.expand_novel\u3092\u524a\u9664\u3002',
+        '\u4ed6\u30e6\u30fc\u30b6\u30fc\u306e\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u305f\u306e\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/02/04', version: '0.4.0', changes: [
+        'pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002',
+        '\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002',
+        'OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002',
+        '\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002',
+        '\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        '\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002',
+        '\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        'Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
+      ]
+    }, {
+      date: '2011/01/15', version: '0.3.2', changes: [
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2011/01/14', version: '0.3.1', changes: [
+        'Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
+        'OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2010/12/26', version: '0.3.0', changes: [
+        'conf.fast_user_bookmark\u8ffd\u52a0\u3002',
+        '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002',
+        '\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
+        '\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        '\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b',
+        '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002',
+        'conf.expand_novel\u8ffd\u52a0\u3002',
+        '\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002',
+        '\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002',
+        'Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002',
+        '\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2010/12/01', version: '0.2.0', changes: [
+        'Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002',
+        'Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002',
+        '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002',
+        '\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002',
+        'd\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002'
+      ]
+    }, {
+      date: '2010/11/14', version: '0.1.2', changes: [
+        '\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002',
+        'conf.popup.overlay_control\u8ffd\u52a0\u3002',
+        '\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
+      date: '2010/11/02', version: '0.1.1', changes: [
+        '\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002',
+        'conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        'pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002'
+      ]
+    }, {
+      date: '2010/10/27', version: '0.1.0', changes: [
+        'Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002',
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002',
+        'AutoPatchWork\u306b\u5bfe\u5fdc\u3002'
+      ]
+    }],
+
+    css: '' +
+      '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
+      '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
+      '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
+      '#pp-conf-pagelist li.select a{padding:1px 5px 2px 5px;}' +
+      '#pp-conf-pager-content{border:1px solid silver;margin-top:-1px;z-index:98;overflow:auto;}' +
+      '.pp-conf-page{display:none;width:100%;padding:4px;' +
+      '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
+      '.pp-conf-page.select{display:inline-block;}' +
+      '.pp-conf-page input, .pp-conf-page textarea{' +
+      '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
+      '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
+      '.pp-conf-page textarea{width:100%;}' +
+      '.pp-conf-page fieldset{border:1px solid silver;padding:4px;}' +
+      '.pp-conf-page legend{display:block;padding:0px 2px;}' +
+      '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
+      '#pp-conf-key .pp-conf-key-mode-line{font-weight:bold;}' +
+      '#pp-conf-key .pp-conf-key-mode-label{color:navy;}' +
+      '#pp-conf-key .pp-conf-key-mode-highlight{background-color:#dfdfff;}' +
+      //'#pp-conf-key table tr.pp-conf-entry td:first-child{padding-left:1em;}' +
+      '.pp-conf-key-editor{padding-left:1em;}' +
+      //'.pp-conf-page .pp-conf-key-editor button{display:inline-block;}' +
+      '.pp-conf-key-editor ul label{margin-left:4px;}' +
+      '.pp-conf-key-editor ul li{list-style-type:none;margin-bottom:2px;}' +
+      '.pp-conf-key-editor .pp-conf-key-editor-add-line button{margin-left:4px;}' +
+      '#pp-conf-tags textarea{height:200px;margin-bottom:1em;}' +
+      '#pp-conf-tags .pp-conf-cell-aliases{width:100%;}' +
+      '#pp-conf-tags .pp-conf-cell-aliases input{width:100%;}' +
+      '#pp-conf-export form{display:block;}' +
+      '#pp-conf-export input{margin-left:0.2em;}' +
+      '#pp-conf-about dt{font-weight:bold;}' +
+      '#pp-conf-about *+dt{margin-top:0.6em;}' +
+      '#pp-conf-about dd{margin-left:1.6em;}' +
+      '#pp-conf-about dd ul li{list-style-type:none;}' +
+      '#pp-conf-changelog dt{font-weight:bold;}' +
+      '#pp-conf-changelog ul{padding-left:2em;}' +
+      '#pp-conf-changelog ul li{list-style-type:disc;}'
+  });
+  /* __CONFIG_UI_END__ */
+
+  function init_per_page() {
+    each(pp_page_support, function(page) {
       var match = false, args = arguments.callee.args;
       if (!args) arguments.callee.args = args = parseopts(window.location.href);
       if (page.url) {
