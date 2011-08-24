@@ -1862,6 +1862,10 @@
       xpath_col: '//ul[contains(concat(" ", @class, " "), " top_display_works ")]',
       xpath_cap: 'li/a/img/following-sibling::text()',
       xpath_tmb: 'preceding-sibling::img'
+    }, g_member = {
+      xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]/ul',
+      xpath_cap: 'li/a/img/following-sibling::text()',
+      xpath_tmb: 'preceding-sibling::img'
     };
 
 
@@ -2115,17 +2119,7 @@
     }, {
       // http://www.pixiv.net/member.php?id=11
       url: '/member.php',
-      gallery: [g_mypage, g_area_right],
-      func: function(args) {
-        each($qa('.worksListOthersImg'), function(root) {
-          add_gallery({
-            root:      root,
-            xpath_col: 'ul',
-            xpath_cap: 'li/a[contains(@href, "mode=medium")]/img/following-sibling::text()',
-            xpath_tmb: 'preceding-sibling::img'
-          });
-        });
-      }
+      gallery: g_member
 
     }, {
       // 地域ランキング
@@ -2252,11 +2246,7 @@
     }, {
       // http://www.pixiv.net/member_event.php?id=****&event_id=805
       url:  '/member_event.php',
-      gallery: {
-        xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]/ul',
-        xpath_cap: 'li/a/img/following-sibling::text()',
-        xpath_tmb: 'preceding-sibling::img'
-      }
+      gallery: g_member
 
     }, {
       // http://www.pixiv.net/view_all.php
