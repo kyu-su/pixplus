@@ -2270,8 +2270,8 @@
         update();
         $ev(debug_input).change(update);
 
-        function group(label, root) {
-          var group = $c('fieldset', root || page.content);
+        function group(label, id, root) {
+          var group = $c('fieldset', root || page.content, {id: 'pp-conf-debug-group-' + id});
           $c('legend', group, {text: label});
           return group;
         }
@@ -2323,7 +2323,7 @@
           $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
           input.addEventListener('keydown', log, false);
           input.addEventListener('keypress', log, false);
-        })(group('key'));
+        })(group('Key', 'key'));
 
         (function(root) {
           var dl = $c('dl', root);
@@ -2334,7 +2334,7 @@
               $c('a', $c('li', ul), {text: url, 'a:href': url});
             });
           });
-        })(group('Pages'));
+        })(group('Pages', 'pages'));
       }
     }],
 
@@ -2507,7 +2507,8 @@
       '#pp-conf-about dd ul li{list-style-type:none;}' +
       '#pp-conf-changelog dt{font-weight:bold;}' +
       '#pp-conf-changelog ul{padding-left:2em;}' +
-      '#pp-conf-changelog ul li{list-style-type:disc;}'
+      '#pp-conf-changelog ul li{list-style-type:disc;}' +
+      '#pp-conf-debug-group-pages ul li{list-style-type:none;}'
   });
   /* __CONFIG_UI_END__ */
 
