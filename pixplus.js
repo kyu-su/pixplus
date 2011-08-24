@@ -464,15 +464,6 @@
         var aliases = LS.get('bookmark', 'tag_aliases');
         if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
       }
-      each(['auto_manga', 'reverse'], function(key) {
-        try {
-          if (!conf.popup[key + '_regexp']) throw 1;
-          var v = conf.popup[key] & 0xf, r = new RegExp(conf.popup[key + '_regexp']);
-          conf.popup[key + '_p'] = v === 2 ? r.test(window.location.href) : v === 1;
-        } catch(ex) {
-          conf.popup[key + '_p'] = false;
-        }
-      });
     }
   };
   LS.init_map();
@@ -2805,6 +2796,16 @@
     var ev = window.document.createEvent('Event');
     ev.initEvent('pixplusInitialize', true, true);
     window.document.dispatchEvent(ev);
+
+    each(['auto_manga', 'reverse'], function(key) {
+      try {
+        if (!conf.popup[key + '_regexp']) throw 1;
+        var v = conf.popup[key] & 0xf, r = new RegExp(conf.popup[key + '_regexp']);
+        conf.popup[key + '_p'] = v === 2 ? r.test(window.location.href) : v === 1;
+      } catch(ex) {
+        conf.popup[key + '_p'] = false;
+      }
+    });
 
     Gallery.setup();
 
