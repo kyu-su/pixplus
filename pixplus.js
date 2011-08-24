@@ -1623,52 +1623,60 @@
       update();
       $ev(debug_input).change(update);
 
-      var input_line = $c('div', page.content);
-      var input      = $c('input', input_line);
-      var cancel_l   = $c('label', input_line);
-      var cancel     = $c('input', cancel_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
-      var console_l  = $c('label', input_line);
-      var console    = $c('input', console_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
-      var logger     = $c('table', page.content, {border: 1, css: 'margin-top:4px;'});
-      cancel_l.appendChild(window.document.createTextNode('Cancel'));
-      console_l.appendChild(window.document.createTextNode('Console'));
-
-      var log_attrs  = [
-        'type',
-        'keyCode',
-        'charCode',
-        'keyIdentifier',
-        'which',
-        'eventPhase',
-        'detail',
-        'timeStamp'
-      ];
-
-      function clear() {
-        input.value = '';
-        logger.innerHTML = '';
-        var row = logger.insertRow(0);
-        row.insertCell(-1).textContent = 'Key';
-        each(log_attrs, function(attr) {
-          row.insertCell(-1).textContent = attr;
-        });
+      function group(label, root) {
+        var group = $c('fieldset', root || page.content);
+        $c('legend', group, {text: 'Key'});
+        return group;
       }
 
-      function log(ev) {
-        var row = logger.insertRow(1);
-        var key = $ev.parse_key_event(ev) || 'None';
-        row.insertCell(-1).textContent = key;
-        each(log_attrs, function(attr) {
-          row.insertCell(-1).textContent = ev[attr];
-        });
-        if (cancel.checked && key) ev.preventDefault();
-        if (console.checked && window.console) window.console.log(ev);
-      }
+      (function(root) {
+        var input_line = $c('div', root);
+        var input      = $c('input', input_line);
+        var cancel_l   = $c('label', input_line);
+        var cancel     = $c('input', cancel_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+        var console_l  = $c('label', input_line);
+        var console    = $c('input', console_l, {type: 'checkbox', css: 'margin-left:4px;', checked: true});
+        var logger     = $c('table', root, {border: 1, css: 'margin-top:4px;'});
+        cancel_l.appendChild(window.document.createTextNode('Cancel'));
+        console_l.appendChild(window.document.createTextNode('Console'));
 
-      clear();
-      $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
-      input.addEventListener('keydown', log, false);
-      input.addEventListener('keypress', log, false);
+        var log_attrs  = [
+          'type',
+          'keyCode',
+          'charCode',
+          'keyIdentifier',
+          'which',
+          'eventPhase',
+          'detail',
+          'timeStamp'
+        ];
+
+        function clear() {
+          input.value = '';
+          logger.innerHTML = '';
+          var row = logger.insertRow(0);
+          row.insertCell(-1).textContent = 'Key';
+          each(log_attrs, function(attr) {
+            row.insertCell(-1).textContent = attr;
+          });
+        }
+
+        function log(ev) {
+          var row = logger.insertRow(1);
+          var key = $ev.parse_key_event(ev) || 'None';
+          row.insertCell(-1).textContent = key;
+          each(log_attrs, function(attr) {
+            row.insertCell(-1).textContent = ev[attr];
+          });
+          if (cancel.checked && key) ev.preventDefault();
+          if (console.checked && window.console) window.console.log(ev);
+        }
+
+        clear();
+        $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
+        input.addEventListener('keydown', log, false);
+        input.addEventListener('keypress', log, false);
+      })(group('key'));
     }
   }];
 
@@ -1818,6 +1826,8 @@
     '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
     '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
     '.pp-conf-page textarea{width:100%;}' +
+    '.pp-conf-page fieldset{border:1px solid silver;padding:4px;}' +
+    '.pp-conf-page legend{display:block;padding:0px 2px;}' +
     '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
     '#pp-conf-key .pp-conf-key-mode-line{font-weight:bold;}' +
     '#pp-conf-key .pp-conf-key-mode-label{color:navy;}' +
