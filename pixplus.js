@@ -2504,7 +2504,7 @@
       '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
       '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
       '.pp-conf-page textarea{width:100%;}' +
-      '.pp-conf-page fieldset{border:1px solid silver;padding:4px;}' +
+      '.pp-conf-page fieldset{border:1px solid silver;padding:0px 4px 4px 4px;}' +
       '.pp-conf-page legend{display:block;padding:0px 2px;}' +
       '.pp-conf-cell-value select, .pp-conf-cell-value input{margin:0px;padding:0px;width:100%;}' +
       '#pp-conf-key .pp-conf-key-mode-line{font-weight:bold;}' +
