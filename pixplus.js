@@ -1589,7 +1589,7 @@
       }, function(args) {
         if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
 
-        var root, click_handler;
+        var root;
         var sitemenu = $q('nav.site-menu ul');
         if (sitemenu) {
           var config_anc;
@@ -1599,32 +1599,12 @@
             ev.initEvent('pixplusConfigToggled', true, true);
             window.document.dispatchEvent(ev);
           }
-          function show() {
-            create();
-            root.style.display = '';
-            fire_event();
-            if (click_handler) click_handler.disconnect();
-            click_handler = $ev(window.document.body, {capture: true}).click(function(ev) {
-              if (!is_ancestor(root, ev.target) &&
-                  !is_ancestor(config_anc, ev.target)) {
-                hide();
-              }
-              return false;
-            });
-          }
-          function hide() {
-            root.style.display = 'none';
-            fire_event();
-            if (click_handler) {
-              click_handler.disconnect();
-              click_handler = null;
-            }
-          }
+
           function toggle() {
-            if (!root || root.style.display === 'none') {
-              show();
+            if (!root) {
+              create();
             } else {
-              hide();
+              set_class(root, 'pp-hidden', -1);
             }
           }
 
@@ -1683,12 +1663,12 @@
 
           function create() {
             if (root) return;
-            root = $c('div', null, {id: 'pp-conf-root'});
-            var ui = new ConfigUI(root);
+            root = $c('div', null, {id: 'pp-conf-root', cls: 'pp-hidden'});
+            var ui = new ConfigUI(root), wrapper = $q('header#global-header');
             var li = $c('li', null, {id: 'pp-conf-close'});
             ui.page_list.insertBefore(li, ui.page_list.firstChild);
             $ev($c('a', li, {href: '#', text: '\u00d7'})).click(function() {
-              hide();
+              set_class(root, 'pp-hidden', 1);
               return true;
             });
 
@@ -1697,7 +1677,18 @@
               if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
             }
 
-            $('global-header').appendChild(root);
+            $ev(root).listen(['oTransitionEnd', 'webkitTransitionEnd'], fire_event);
+            wrapper.appendChild(root);
+            window.setTimeout(function() {
+              set_class(root, 'pp-hidden', 0);
+            }, 0);
+
+            $ev(window.document.body, {capture: true}).click(function(ev) {
+              if (!is_ancestor(root, ev.target) && !is_ancestor(config_anc, ev.target)) {
+                set_class(root, 'pp-hidden', 1);
+              }
+              return false;
+            });
           }
         }
 
@@ -2502,7 +2493,7 @@
       '.pp-conf-page.select{display:inline-block;}' +
       '.pp-conf-page input, .pp-conf-page textarea{' +
       '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
-      '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px;}' +
+      '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px 4px;}' +
       '.pp-conf-page textarea{width:100%;}' +
       '.pp-conf-page fieldset{border:1px solid silver;padding:0px 4px 4px 4px;}' +
       '.pp-conf-page legend{display:block;padding:0px 2px;}' +
@@ -2620,9 +2611,18 @@
                  'header#global-header div.wrapper #pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
                  '#pp-sitenav-menu li input{width:2em;margin-left:2px;padding:1px;}' +
                  // config
-                 '#pp-conf-root{width:970px;margin:0px auto 4px auto;}' +
+                 '#pp-conf-root{width:970px;margin:0px auto 4px auto;overflow:hidden;' +
+                 //'  background-color:white;position:absolute;top:118px;z-index:1000;' +
+                 '}' +
+                 '#pp-conf-root #pp-conf-pager{margin-top:0px;' +
+                 '  transition-property:margin-top;transition-duration:0.3s;' +
+                 '  -o-transition-property:margin-top;-o-transition-duration:0.3s;' +
+                 '  -webkit-transition-property:margin-top;-webkit-transition-duration:0.3s;' +
+                 '}' +
+                 '#pp-conf-root.pp-hidden #pp-conf-pager{margin-top:-640px;}' +
+                 '#pp-conf-pagelist{max-height:40px;overflow:hidden;}' +
+                 '#pp-conf-pager-content{height:600px;}' +
                  ConfigUI.css +
-                 '#pp-conf-pager-content{width:960px;height:600px;}' +
                  // popup
                  '#pp-popup{background-color:white;position:fixed;padding:3px;' +
                  '  border:2px solid gray;z-index:2000;}' +
