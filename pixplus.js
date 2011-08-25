@@ -2483,6 +2483,7 @@
     }],
 
     css: '' +
+      '#pp-conf-pager{line-height:1.2em;}' +
       '#pp-conf-pagelist li{display:inline-block;z-index:99;list-style-type:none;}' +
       '#pp-conf-pagelist li.select{background-color:white;border:1px solid silver;border-bottom:0px;}' +
       '#pp-conf-pagelist li a{color:inherit;display:block;padding:2px 6px;text-decoration:none;}' +
@@ -2493,7 +2494,7 @@
       '.pp-conf-page.select{display:inline-block;}' +
       '.pp-conf-page input, .pp-conf-page textarea{' +
       '  box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;}' +
-      '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px 4px;}' +
+      '.pp-conf-page button{display:inline-block;white-space:nowrap;padding:0px 2px;border-width:2px;}' +
       '.pp-conf-page textarea{width:100%;}' +
       '.pp-conf-page fieldset{border:1px solid silver;padding:0px 4px 4px 4px;}' +
       '.pp-conf-page legend{display:block;padding:0px 2px;}' +
