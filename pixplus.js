@@ -1164,7 +1164,7 @@
                 var sel_unviewable = $c('a', null, {text: "\u95b2\u89a7\u4e0d\u53ef", 'a:href': '#', 'css': 'margin-left:1em'});
                 $ev(sel_unviewable).click(function() {
                   each($xa('//div[contains(concat(" ", @class, " "), " display_works ")]' +
-                           '//input[following-sibling::node()/descendant-or-self::img[' +
+                           '//input[@type="checkbox" and following-sibling::node()/descendant-or-self::img[' +
                            'contains(@src, "' + pp.url.limit_thumb.join('") or contains(@src, "') + '")]]'),
                        function(input) {
                          input.checked = true;
