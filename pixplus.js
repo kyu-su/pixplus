@@ -1462,7 +1462,7 @@
 
     }, {
       name: 'member-event',
-      sample_url: ['http://www.pixiv.net/member_event.php?id=****&event_id=805'],
+      sample_url: ['http://www.pixiv.net/member_event.php?id=3881&event_id=1149'],
       url:  '/member_event.php',
       gallery: g_member
 
@@ -1544,7 +1544,7 @@
 
     }, {
       name: 'other',
-      sample_url: ['http://www.pixiv.net/bookmark.php?id=11',
+      sample_url: ['http://www.pixiv.net/bookmark.php?id=32777',
                    'http://www.pixiv.net/response.php?illust_id=15092961'],
       func: [function(args) {
         if (pp.galleries.length === 0) {
