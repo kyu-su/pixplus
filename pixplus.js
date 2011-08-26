@@ -2313,7 +2313,8 @@
 
     changelog_data: [{
       date: '2011/xx/xx', version: '0.8.0', changes: [
-        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002'
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]
     }, {
       date: '2011/08/21', version: '0.7.0', changes: [
@@ -3310,7 +3311,7 @@
     init_comments: function(keep_form) {
       this.comment_wrap.scrollTop = 0;
       this.viewer_comments.style.display = 'none';
-      this.viewer_comments_c.innerHTML = '';
+      if (!keep_form) this.viewer_comments_c.innerHTML = '';
       this.viewer_comments_a.innerHTML = '';
       if (pp.rpc_usable) {
         this.comments_btn.style.display = '';
