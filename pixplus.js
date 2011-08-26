@@ -2891,6 +2891,8 @@
                 str += JSON.stringify(key) + ':' + JSON.stringify(val[key]);
               }
               return '{' + str + '}';
+            } else if (typeof val === 'boolean') {
+              return val ? 'true' : 'false';
             } else {
               throw 'JSON: invalid data type';
             }
