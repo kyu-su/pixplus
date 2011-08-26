@@ -586,6 +586,8 @@
 
   /* __LIBRARY_BEGIN__ */
 
+  var JSON = window.JSON;
+
   var LOG = new function() {
     this.info = function(msg) {
       log(1, msg);
@@ -1888,11 +1890,11 @@
       });
       obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
       obj['bookmark_tag_aliases'] = this.get_tag_alias_str();
-      this.export_input.value = ConfigUI.stringify(obj);
+      this.export_input.value = JSON.stringify(obj);
     },
 
     export_import: function() {
-      var obj = window.JSON.parse(this.export_input.value);
+      var obj = JSON.parse(this.export_input.value);
       LS.each(function(item, sec) {
         if (sec.name === 'bookmark') return;
         var val = obj[sec.name + '_' + item.key];
@@ -1928,7 +1930,7 @@
         }
         if (val !== item.value) {
           var path = (sec.name === 'general' ? '' : sec.name + '.') + item.key; // for compatibility
-          push('window.pixplus.conf.' + path + '=' + ConfigUI.stringify(val) + ';');
+          push('window.pixplus.conf.' + path + '=' + JSON.stringify(val) + ';');
         }
       });
       if (order.length) {
@@ -1940,7 +1942,7 @@
           ++indent;
           for(var j = 0; j < ary.length; ++j) {
             var tag = ary[j];
-            push((tag ? ConfigUI.stringify(tag) : 'null') + ',');
+            push((tag ? JSON.stringify(tag) : 'null') + ',');
           }
           --indent;
           push('],');
@@ -1955,11 +1957,11 @@
           alias_f = false;
           ++indent;
         }
-        push(ConfigUI.stringify(key) + ':[');
+        push(JSON.stringify(key) + ':[');
         ++indent;
         for(var j = 0; j < alias[key].length; ++j) {
           var tag = alias[key][j];
-          push(ConfigUI.stringify(tag) + ',');
+          push(JSON.stringify(tag) + ',');
         }
         --indent;
         push('],');
@@ -1972,42 +1974,6 @@
     }
 
   }, {
-    // for Opera10.1x
-    stringify: function(val) {
-      if (window.JSON && window.JSON.stringify) {
-        return JSON.stringify(val);
-      } else {
-        var str = '';
-        if (typeof val === 'string' || val instanceof String) {
-          return '"' + val.replace(/[\\\"]/g, '\\$0')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r') + '"';
-        } else if (val instanceof Array) {
-          for(var i = 0; i < val.length; ++i) {
-            if (i) str += ',';
-            str += ConfigUI.stringify(val[i]);
-          }
-          return '[' + str + ']';
-        } else if (typeof val === 'number') {
-          return String(val);
-        } else if (typeof val === 'object') {
-          var first = true;
-          for(var key in val) {
-            if (!val.hasOwnProperty(key)) continue;
-            if (first) {
-              first = false;
-            } else {
-              str += ',';
-            }
-            str += ConfigUI.stringify(key) + ':' + ConfigUI.stringify(val[key]);
-          }
-          return '{' + str + '}';
-        } else {
-          throw 1;
-        }
-      }
-    },
-
     pages: [{
       id: 'key',
       content: function(page) {
@@ -2182,7 +2148,7 @@
           this.export_export();
         });
 
-        if (window.JSON && LS.u) {
+        if (JSON && LS.u) {
           $c('input', this.export_form, {type: 'submit', value: 'Import'});
           $ev(this.export_form, {ctx: this}).listen('submit', function() {
             try {
@@ -2757,28 +2723,28 @@
           var restrict = $xa('.//input[@name="restrict"]', form);
           if (btn && form && restrict.length === 2) {
             each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
-            window.jQuery.post(
-              form.getAttribute('action'),
-              window.jQuery(form).serialize(),
-              function(data) {
-                var re;
-                if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
-                  window.jQuery('#favorite-button')
-                    .addClass('added')
-                    .attr('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
-                  window.jQuery('form', this.preference)
-                    .attr('action', '/bookmark_setting.php')
-                    .find('div.action').append('<input type="button" value=\"\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664\" class="button remove"/>')
-                    .find('input[name="mode"]').remove();
-                  btn.style.opacity = '1';
-                } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
-                  alert(re[1]);
-                } else {
-                  alert('Error!');
-                }
-              }).error(function() {
+            post(form, function(data) {
+              var re;
+              if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
+                var button = $('favorite-button');
+                set_class(button, 'added', 1);
+                button.setAttribute('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+                form.setAttribute('action', '/bookmark_setting.php');
+
+                var action = $x('.//div[contains(concat(" ", @class, " "), " action ")]', form);
+                $c('input', action, {'a:type': 'button', value: '\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664', cls: 'button remove'});
+
+                var mode = $x('.//input[@name="mode"]', form);
+                if (mode) mode.parentNode.removeChild(mode);
+                btn.style.opacity = '1';
+              } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
+                alert(re[1]);
+              } else {
                 alert('Error!');
-              });
+              }
+            }, function() {
+              alert('Error!');
+            });
             btn.style.opacity = '0.2';
           } else {
             _open.apply(this, Array.prototype.slice.call(arguments));
@@ -2894,6 +2860,42 @@
         };
       }
       init_pixplus_real();
+
+      if (!JSON) { // Opera10.1x support
+        JSON = {
+          parse: window.jQuery.parseJSON,
+          stringify: function(val) {
+            var str = '';
+            if (typeof val === 'string' || val instanceof String) {
+              return '"' + val.replace(/[\\\"]/g, '\\$0')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r') + '"';
+            } else if (val instanceof Array) {
+              for(var i = 0; i < val.length; ++i) {
+                if (i) str += ',';
+                str += JSON.stringify(val[i]);
+              }
+              return '[' + str + ']';
+            } else if (typeof val === 'number') {
+              return String(val);
+            } else if (typeof val === 'object') {
+              var first = true;
+              for(var key in val) {
+                if (!val.hasOwnProperty(key)) continue;
+                if (first) {
+                  first = false;
+                } else {
+                  str += ',';
+                }
+                str += JSON.stringify(key) + ':' + JSON.stringify(val[key]);
+              }
+              return '{' + str + '}';
+            } else {
+              throw 'JSON: invalid data type';
+            }
+          }
+        };
+      }
     }
     function pt_onload() {
       if (!/^\/stacc\//.test(window.location.pathname)) return;
@@ -3646,7 +3648,7 @@
           anc.onclick = '';
           $ev(anc).click(function() {
             var qr = $x('./div[@id="quality_rating"]', self.rating);
-            window[qr && window.jQuery(qr).is(':visible') ? 'rating_ef2' : 'rating_ef']();
+            window[qr && qr.style.display === 'none' ? 'rating_ef' : 'rating_ef2']();
             return true;
           });
         }
@@ -3663,16 +3665,12 @@
             var submit = $c('input', form, {cls: 'btn_type04', value: 'Send', 'a:type': 'submit', 'a:name': 'submit'});
             $ev(submit).click(function() {
               if (trim(comment.value)) {
-                window.jQuery.post(
-                  form.getAttribute('action'),
-                  window.jQuery(form).serialize(),
-                  function() {
-                    self.reload_viewer_comments();
-                    comment.removeAttribute('disabled');
-                    comment.value = '';
-                    submit.removeAttribute('disabled');
-                  }
-                ).error(function() {
+                post(form, function() {
+                  self.reload_viewer_comments();
+                  comment.removeAttribute('disabled');
+                  comment.value = '';
+                  submit.removeAttribute('disabled');
+                }, function() {
                   alert('Error!');
                 });
                 comment.setAttribute('disabled', '');
@@ -4005,23 +4003,21 @@
     },
 
     toggle_viewer_comments: function() {
+      var self = this;
       if (!this.viewer_comments_enabled) return;
-      if (!this.viewer_comments_a.innerHTML || !window.jQuery(this.viewer_comments).is(':visible')) {
+      if (!this.viewer_comments_a.innerHTML || this.viewer_comments.style.display === 'none') {
         set_class(this.caption, 'show', 1);
       }
       if (!this.viewer_comments_a.innerHTML) {
-        window.jQuery.post(
-          '/rpc_comment_history.php',
-          rpc_create_data(['i_id', 'u_id']),
-          bind(function(data) {
-            this.viewer_comments_a.innerHTML = data;
-            each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', this.viewer_comments_a),
-                 bind(trap_delete, this));
-            show.call(this);
-          }, this)
-        );
-      } else if (!window.jQuery(this.viewer_comments).is(':visible')) {
-        show.call(this);
+        post('/rpc_comment_history.php', rpc_create_data(['i_id', 'u_id']), function(data) {
+          self.viewer_comments_a.innerHTML = data;
+          each($xa('.//a[contains(@href, "member_illust.php?mode=comment_del")]', self.viewer_comments_a), trap_delete);
+          show();
+        }, function() {
+          alert('Error!');
+        });
+      } else if (this.viewer_comments.style.display === 'none') {
+        show();
       }else{
         set_class(this.comments_btn, 'enable', 0);
         window.jQuery(this.viewer_comments).slideUp(200, bind(function() {
@@ -4034,25 +4030,23 @@
         del.setAttribute('onclick', '');
         del.onclick = '';
         if (/^\w/.test(url)) url = '/' + url;
-        $ev(del).click(bind(function() {
+        $ev(del).click(function() {
           if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
-            window.jQuery.ajax({
-              url: url,
-              context: this,
-              success: Popup.prototype.reload_viewer_comments,
-              error: function() {
-                alert('Error!');
-              }});
+            geturl(url, function() {
+              self.reload_viewer_comments();
+            }, function() {
+              alert('Error!');
+            }, true);
           }
           return true;
-        }, this));
+        });
       }
       function show() {
-        this.expand_header = true;
-        this.locate();
-        set_class(this.comments_btn, 'enable', 1);
-        window.jQuery(this.viewer_comments).slideDown(200);
-        window.jQuery(this.comment_wrap).animate({scrollTop: this.comment.offsetHeight}, 200);
+        self.expand_header = true;
+        self.locate();
+        set_class(self.comments_btn, 'enable', 1);
+        window.jQuery(self.viewer_comments).slideDown(200);
+        window.jQuery(self.comment_wrap).animate({scrollTop: self.comment.offsetHeight}, 200);
       }
     },
 
@@ -4120,6 +4114,7 @@
     },
 
     toggle_tag_edit: function() {
+      var self = this;
       if (this.is_tag_editing()) {
         this.tag_edit.style.display = 'none';
         this.caption.style.display = '';
@@ -4129,19 +4124,18 @@
       } else if (!this.tag_loading) {
         this.tag_loading = true;
         this.tag_edit_btn.textContent = '[Loading]';
-        window.jQuery.post(
-          '/rpc_tag_edit.php',
-          rpc_create_data(['i_id', 'u_id', 'e_id'], {mode: 'first'}),
-          bind(function(data) {
-            this.tag_edit.innerHTML = data.html.join('');
-            this.tag_edit.style.display = '';
-            this.caption.style.display = 'none';
-            this.img_div.style.display = 'none';
-            this.locate();
-            this.tag_loading = false;
-            this.tag_edit_btn.textContent = '[E]';
-          }, this),
-          'json').error(function() { alert('Error!'); });
+        post('/rpc_tag_edit.php', rpc_create_data(['i_id', 'u_id', 'e_id'], {mode: 'first'}), function(data) {
+          data = JSON.parse(data);
+          self.tag_edit.innerHTML = data.html.join('');
+          self.tag_edit.style.display = '';
+          self.caption.style.display = 'none';
+          self.img_div.style.display = 'none';
+          self.locate();
+          self.tag_loading = false;
+          self.tag_edit_btn.textContent = '[E]';
+        }, function() {
+          alert('Error!');
+        });
       }
     },
 
@@ -5027,19 +5021,16 @@
     },
 
     submit: function() {
-      var submit_text = this.btn_submit.value;
+      var submit_text = this.btn_submit.value, self = this;
       this.btn_submit.value = "\u9001\u4fe1\u4e2d";
       this.btn_submit.setAttribute('disabled', '');
-      window.jQuery.post(
-        this.form.getAttribute('action'),
-        window.jQuery(this.form).serialize(),
-        bind(function(data) {
-          this.btn_submit.value = submit_text;
-          this.btn_submit.removeAttribute('disabled');
-          this.close();
-        }, this)).error(function() {
-          alert('Error!');
-        });
+      post(this.form, function(data) {
+        self.btn_submit.value = submit_text;
+        self.btn_submit.removeAttribute('disabled');
+        self.close();
+      }, function() {
+        alert('Error!');
+      });
       BookmarkForm.onsubmit.emit(this, {add: this.opts.autotag});
     },
 
@@ -5411,12 +5402,9 @@
       var pos = getpos(elem, root);
       var bt = root.clientHeight * offset, bb = root.clientHeight * (1.0 - offset);
       var top = Math.floor(scroll.scrollTop + bt), bot = Math.floor(scroll.scrollTop + bb);
-      //window.jQuery(scroll).stop();
       if (pos.top < top) {
-        //window.jQuery(scroll).animate({scrollTop: pos.top - bt}, 200);
         scroll.scrollTop = pos.top - bt;
       } else if (pos.top + elem.offsetHeight > bot) {
-        //window.jQuery(scroll).animate({scrollTop: pos.top + elem.offsetHeight - bb}, 200);
         scroll.scrollTop = pos.top + elem.offsetHeight - bb;
       }
       arguments.callee.last = elem;
@@ -5546,9 +5534,57 @@
     }
   }
   getimg.cache = {};
+
+  function post() {
+    var args = Array.prototype.slice.call(arguments), url, data, cb_load, cb_error;
+    if (args[0] instanceof window.HTMLFormElement) {
+      var form = args.shift();
+      url = form.getAttribute('action');
+      data = post.serialize(form);
+    } else {
+      url = args.shift();
+      data = post.serialize(args.shift());
+    }
+    cb_load = args.shift();
+    cb_error = args.shift();
+
+    var xhr = new window.XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    xhr.onload = function() {
+      cb_load(xhr.responseText);
+    };
+    xhr.onerror = function() {
+      cb_error(xhr);
+    };
+    xhr.send(data);
+  }
+
+  post.serialize = function() {
+    var data = '', data_map;
+    if (arguments[0] instanceof window.HTMLFormElement) {
+      data_map = {};
+      each($t('input', arguments[0]), function(input) {
+        switch(lc(input.type)) {
+        case 'reset': case 'submit': break;
+        case 'checkbox': case 'radio': if (!input.checked) break;
+        default: data_map[input.name] = input.value; break;
+        }
+      });
+    } else {
+      data_map = arguments[0];
+    }
+    for(var key in data_map) {
+      if (data) data += '&';
+      data += encodeURIComponent(key) + '=' + encodeURIComponent(data_map[key]);
+    }
+    return data;
+  };
+
   function urlmode(url, mode) {
     return url.replace(/([\?&])mode=[^&]*/, '$1mode=' + mode);
   }
+
   function chk_ext_src(elem, attr, url) {
     var name = url.replace(/\?.*$/, '').replace(/.*\//, '').replace(/^jquery.*/, 'jquery');
     var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
@@ -5566,23 +5602,6 @@
       $c('link', window.document.body, {rel: 'stylesheet', type: 'text/css', href: url});
       return true;
     }
-  }
-
-  function create_post_data(form) {
-    var data = new Object();
-    each($t('input', form), function(input) {
-      switch(lc(input.type)) {
-      case 'reset': case 'submit': break;
-      case 'checkbox': case 'radio': if (!input.checked) break;
-      default: data[input.name] = input.value; break;
-      }
-    });
-    var res = '';
-    for(var name in data) {
-      if (res) res += '&';
-      res += encodeURIComponent(name) + '=' + encodeURIComponent(data[name]);
-    }
-    return res;
   }
 
   function alert() {
