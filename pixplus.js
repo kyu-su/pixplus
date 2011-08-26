@@ -1144,9 +1144,7 @@
               toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
               toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
-              window.jQuery.cookie('bookToggle', type, {
-                expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')
-              });
+              cookie('bookToggle', type, {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
 
               var ev = window.document.createEvent('Event');
               ev.initEvent('pixplusBMTagToggled', true, true);
@@ -1623,14 +1621,13 @@
           if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
             var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
             menu_items.push(create_menu_item('Save layout', function() {
-              var value = window.jQuery.cookie('pixiv_mypage');
+              var value = cookie('pixiv_mypage');
               window.localStorage[key] = value;
               mi_restore_input.value = value;
               //mi_restore.style.display = 'block';
             }));
             menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-              window.jQuery.cookie('pixiv_mypage', mi_restore_input.value,
-                                   {expires: 30, domain: 'pixiv.net', path: '/'});
+              cookie('pixiv_mypage', mi_restore_input.value, {expires: 30, domain: 'pixiv.net', path: '/'});
               window.location.reload();
             }));
             mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
@@ -5605,6 +5602,35 @@
       $c('link', window.document.body, {rel: 'stylesheet', type: 'text/css', href: url});
       return true;
     }
+  }
+
+  function cookie() {
+    var args = Array.prototype.slice.call(arguments),
+        name = args.shift(), value, opts;
+    if (typeof args[0] === 'string' || args[0] instanceof String) {
+      value = args.shift();
+    }
+    opts = args[0] || {};
+    if (value) {
+      var data = [name + '=' + encodeURIComponent(value)];
+      if (opts.expires) {
+        var date = new Date();
+        date.setTime(date.getTime() + (opts.expires * 1000 * 60 * 60 * 24));
+        data.push('expires=' + date.toUTCString());
+      }
+      if (opts.path) data.push('path=' + opts.path);
+      if (opts.domain) data.push('domain=' + opts.domain);
+      window.document.cookie = data.join(';');
+    } else {
+      var items = (window.document.cookie || '').split(';');
+      for(var i = 0; i < items.length; ++i) {
+        var item = trim(items[i]);
+        if (item.lastIndexOf(name + '=', 0) === 0) {
+          return decodeURIComponent(item.substring(name.length + 1));
+        }
+      }
+    }
+    return null;
   }
 
   function alert() {
