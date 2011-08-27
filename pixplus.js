@@ -329,7 +329,6 @@
         rpc:                'http://source.pixiv.net/source/js/rpc.js',
         rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
         tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
-        bookmark_add_v4:    'http://source.pixiv.net/source/js/bookmark_add_v4.js?20101028',
         illust_recommender: 'http://source.pixiv.net/source/js/illust_recommender.js?021216'
       },
       css: {
@@ -4733,7 +4732,7 @@
           it.setAttribute('onclick', '');
           it.onclick = '';
           $ev(it).click(function() {
-            window.add_form(tag);
+            window.pixiv.tag.toggle(tag);
             return true;
           });
           if (idx === 0) {
@@ -4744,11 +4743,8 @@
         });
       });
 
-      $js.script(pp.url.js.bookmark_add_v4).wait(bind(function() {
-        // 二回目以降bookmark_add_v4.jsの初期化関数が呼ばれない
-        window.alltags = window.getAllTags();
-        // magic 11.00.1029
-        window.tag_chk(window.String.prototype.split.apply($('input_tag').value, [/\s+|\u3000+/]));
+      (function() {
+        window.pixiv.tag.setup();
 
         if (conf.bm_tag_order.length) {
           each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]' +
@@ -4848,7 +4844,7 @@
             $ev(window).key(bind(keyhandler, this));
           }
         }
-      }, this));
+      }).call(this);
 
       (function() {
         var bottom = $x('.//div[contains(concat(" ", @class, " "), " bookmark_bottom ")]', this.root);
