@@ -2310,7 +2310,8 @@
     changelog_data: [{
       date: '2011/xx/xx', version: '0.8.0', changes: [
         '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
-        '\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        '\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u3067\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
       ]
     }, {
       date: '2011/08/21', version: '0.7.0', changes: [
@@ -4728,7 +4729,7 @@
 
       each([this.tags_illust, this.tags_bookmark], function(group, idx) {
         each(group, function(it) {
-          var tag = it.firstChild.nodeValue;
+          var tag = it.getAttribute('data-tag');
           it.setAttribute('onclick', '');
           it.onclick = '';
           $ev(it).click(function() {
@@ -4744,6 +4745,11 @@
       });
 
       (function() {
+        window.bookmarkTagSort.sortedTag = {
+          name: { asc: [], desc: [] },
+          num:  { asc: [], desc: [] }
+        };
+        window.bookmarkTagSort.tag = [];
         window.pixiv.tag.setup();
 
         if (conf.bm_tag_order.length) {
@@ -4764,13 +4770,6 @@
             });
           }, this);
           this.tag_wrap_bm.removeChild($t('ul', this.tag_wrap_bm)[0]);
-        } else {
-          window.bookmarkTagSort.sortedTag = {
-            name: { asc: [], desc: [] },
-            num:  { asc: [], desc: [] }
-          };
-          window.bookmarkTagSort.tag = [];
-          window.bookmarkTagSort.init();
         }
 
         var first = true;
@@ -4868,7 +4867,7 @@
     autoinput: function(func) {
       var tags = this.input_tag.value.split(/\s+|\u3000+/);
       each(this.tags_bookmark, function(bt) {
-        var tag = bt.parentNode.getAttribute('jsatagname');
+        var tag = bt.getAttribute('data-tag');
         if (tags.indexOf(tag) >= 0) return;
         var aliases = conf.bm_tag_aliases[tag];
         each([tag].concat(conf.bm_tag_aliases[tag] || []), function(tag) {
@@ -4885,7 +4884,7 @@
     autoinput_from_tag: function() {
       this.autoinput(function(anc, tag) {
         for(var i = 0; i < this.tags_illust.length; ++i) {
-          var itag = this.tags_illust[i].firstChild.nodeValue;
+          var itag = this.tags_illust[i].getAttribute('data-tag');
           if (lc(itag).indexOf(lc(tag)) >= 0) return true;
         }
         return false;
