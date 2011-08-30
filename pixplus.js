@@ -1156,24 +1156,25 @@
             });
           }
 
-          Floater.auto_run(function() {
-            var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
-            var form = $x('//form[@action="bookmark_setting.php"]');
-            if (msgbox) {
-              var sel_last = $x('a[starts-with(@href, "javascript:") and following-sibling::br][last()]', msgbox);
-              if (sel_last) {
-                var sel_unviewable = $c('a', null, {text: "\u95b2\u89a7\u4e0d\u53ef", 'a:href': '#', 'css': 'margin-left:1em'});
-                $ev(sel_unviewable).click(function() {
-                  each($xa('//div[contains(concat(" ", @class, " "), " display_works ")]' +
-                           '//input[@type="checkbox" and following-sibling::node()/descendant-or-self::img[' +
-                           'contains(@src, "' + pp.url.limit_thumb.join('") or contains(@src, "') + '")]]'),
-                       function(input) {
-                         input.checked = true;
-                       });
-                  return true;
-                });
-                msgbox.insertBefore(sel_unviewable, sel_last.nextSibling);
-              }
+          var msgbox = $x('//div[contains(concat(" ", @class, " "), " msgbox_bottom ")]');
+          if (msgbox) {
+            var sel_last = $x('a[starts-with(@href, "javascript:") and following-sibling::br][last()]', msgbox);
+            if (sel_last) {
+              var sel_unviewable = $c('a', null, {text: "\u95b2\u89a7\u4e0d\u53ef", 'a:href': '#', 'css': 'margin-left:1em'});
+              $ev(sel_unviewable).click(function() {
+                each($xa('//div[contains(concat(" ", @class, " "), " display_works ")]' +
+                         '//input[@type="checkbox" and following-sibling::node()/descendant-or-self::img[' +
+                         'contains(@src, "' + pp.url.limit_thumb.join('") or contains(@src, "') + '")]]'),
+                     function(input) {
+                       input.checked = true;
+                     });
+                return true;
+              });
+              msgbox.insertBefore(sel_unviewable, sel_last.nextSibling);
+            }
+
+            Floater.auto_run(function() {
+              var form = $x('//form[@action="bookmark_setting.php"]');
               if (form) {
                 msgbox.parentNode.removeChild(msgbox);
                 form.insertBefore(msgbox, form.firstChild);
@@ -1184,8 +1185,8 @@
 
                 new Floater(msgbox, null, true);
               }
-            }
-          });
+            });
+          }
         }
       }
 
