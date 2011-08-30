@@ -1143,7 +1143,7 @@
               toggle_btns[0].className = flat ? 'book_flat_on' : 'book_flat_off';
               toggle_btns[1].className = flat ? 'book_cloud_off' : 'book_cloud_on';
 
-              cookie('bookToggle', type, {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
+              cookie.set('bookToggle', type, {expires: 30, domain: window.location.hostname.replace(/^(\w+)\./, '.')});
 
               var ev = window.document.createEvent('Event');
               ev.initEvent('pixplusBMTagToggled', true, true);
@@ -1620,13 +1620,13 @@
           if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
             var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
             menu_items.push(create_menu_item('Save layout', function() {
-              var value = cookie('pixiv_mypage');
+              var value = cookie.get('pixiv_mypage');
               window.localStorage[key] = value;
               mi_restore_input.value = value;
               //mi_restore.style.display = 'block';
             }));
             menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-              cookie('pixiv_mypage', mi_restore_input.value, {expires: 30, domain: 'pixiv.net', path: '/'});
+              cookie.set('pixiv_mypage', mi_restore_input.value, {expires: 30, domain: 'pixiv.net', path: '/'});
               window.location.reload();
             }));
             mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
@@ -1661,7 +1661,7 @@
 
           function create() {
             if (root) return;
-            root = $c('div', null, {id: 'pp-conf-root', cls: 'pp-hidden'});
+            root = $c('div', null, {id: 'pp-conf-root', cls: (conf.disable_effect ? '' : 'pp-animation pp-hidden')});
             var ui = new ConfigUI(root), wrapper = $q('header#global-header');
             var li = $c('li', null, {id: 'pp-conf-close'});
             ui.page_list.insertBefore(li, ui.page_list.firstChild);
@@ -1677,9 +1677,11 @@
 
             $ev(root).listen(['oTransitionEnd', 'webkitTransitionEnd'], fire_event);
             wrapper.appendChild(root);
-            window.setTimeout(function() {
-              set_class(root, 'pp-hidden', 0);
-            }, 0);
+            if (!conf.disable_effect) {
+              window.setTimeout(function() {
+                set_class(root, 'pp-hidden', 0);
+              }, 0);
+            }
 
             $ev(window.document.body, {capture: true}).click(function(ev) {
               if (!is_ancestor(root, ev.target) && !is_ancestor(config_anc, ev.target)) {
@@ -2576,10 +2578,9 @@
                  'header#global-header div.wrapper #pp-sitenav-menu li{margin:0px;padding:0px;display:block;float:none;}' +
                  '#pp-sitenav-menu li input{width:2em;margin-left:2px;padding:1px;}' +
                  // config
-                 '#pp-conf-root{width:970px;margin:0px auto 4px auto;overflow:hidden;' +
-                 //'  background-color:white;position:absolute;top:118px;z-index:1000;' +
-                 '}' +
-                 '#pp-conf-root #pp-conf-pager{margin-top:0px;' +
+                 '#pp-conf-root{width:970px;margin:0px auto 4px auto;overflow:hidden;}' +
+                 '#pp-conf-root #pp-conf-pager{margin-top:0px;}' +
+                 '#pp-conf-root.pp-animation #pp-conf-pager{' +
                  '  transition-property:margin-top;transition-duration:0.3s;' +
                  '  -o-transition-property:margin-top;-o-transition-duration:0.3s;' +
                  '  -webkit-transition-property:margin-top;-webkit-transition-duration:0.3s;' +
@@ -5599,14 +5600,19 @@
     }
   }
 
-  function cookie() {
-    var args = Array.prototype.slice.call(arguments),
-        name = args.shift(), value, opts;
-    if (typeof args[0] === 'string' || args[0] instanceof String) {
-      value = args.shift();
-    }
-    opts = args[0] || {};
-    if (value) {
+  var cookie = {
+    get: function(name) {
+      var items = (window.document.cookie || '').split(';');
+      for(var i = 0; i < items.length; ++i) {
+        var item = trim(items[i]);
+        if (item.lastIndexOf(name + '=', 0) === 0) {
+          return decodeURIComponent(item.substring(name.length + 1));
+        }
+      }
+      return null;
+    },
+
+    set: function(name, value, opts) {
       var data = [name + '=' + encodeURIComponent(value)];
       if (opts.expires) {
         var date = new Date();
@@ -5616,17 +5622,8 @@
       if (opts.path) data.push('path=' + opts.path);
       if (opts.domain) data.push('domain=' + opts.domain);
       window.document.cookie = data.join(';');
-    } else {
-      var items = (window.document.cookie || '').split(';');
-      for(var i = 0; i < items.length; ++i) {
-        var item = trim(items[i]);
-        if (item.lastIndexOf(name + '=', 0) === 0) {
-          return decodeURIComponent(item.substring(name.length + 1));
-        }
-      }
     }
-    return null;
-  }
+  };
 
   function alert() {
     safeWindow.alert.apply(safeWindow, Array.prototype.slice.call(arguments));
