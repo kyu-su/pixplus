@@ -260,6 +260,8 @@
        "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
        "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
+      {"key": "popup_manga_open_page", "value": "Shift+s", "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002",
+       "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
       {"key": "popup_manga_end", "value": "v,Escape", "desc": "$mode\u7d42\u4e86",
        "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
       {"key": "popup_qrate_end", "value": "Escape,d", "desc": "$mode\u7d42\u4e86",
@@ -3928,13 +3930,13 @@
       }
     },
 
-    open: function(big) {
+    open: function(big, prefer_manga) {
       if (this.manga.usable && this.manga.page < 0) {
         pp.open(big ? urlmode(this.item.medium, 'manga') : this.item.medium);
       } else if (big) {
         var idx = this.images.order[(this.images.curidx++) % this.images.order.length];
         pp.open(this.images.list[idx].anchor.href);
-      } else if (this.manga.usable) {
+      } else if (this.manga.usable && prefer_manga) {
         pp.open(urlmode(this.item.medium, 'manga') + '#pp_page=' + this.manga.page);
       } else {
         pp.open(this.item.medium);
@@ -4276,7 +4278,8 @@
       }, {
         run: this.manga.enabled,
         map: [
-          {k: conf.key.popup_manga_end, f: this.toggle_manga_mode}
+          {k: conf.key.popup_manga_open_page, f: this.open, a: [false, true]},
+          {k: conf.key.popup_manga_end,       f: this.toggle_manga_mode}
         ]
       }, {
         run: !this.manga.enabled,
