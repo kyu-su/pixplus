@@ -3039,12 +3039,14 @@
     },
 
     detect_new_collection: function() {
-      var self = this;
+      var self = this, cnt = 0;
       each($xa(this.args.xpath_col, this.args.root), function(col) {
         if (!col.hasAttribute('pixplus_loaded')) {
           self.add_collection(col);
+          ++cnt;
         }
       });
+      return cnt;
     },
 
     add_collection: function(col) {
@@ -3146,10 +3148,13 @@
 
     setup: function() {
       $ev(window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
-        window.pixiv.scrollView.add();
+        var added = false;
         each(Gallery.__inst__, function(gallery) {
-          gallery.detect_new_collection();
+          if (gallery.detect_new_collection()) {
+            added = true;
+          }
         });
+        if (added) window.pixiv.scrollView.add();
       });
     },
 
