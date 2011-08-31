@@ -1395,13 +1395,6 @@
           while(str.length < digits) str = '0' + str;
           return str;
         }
-
-        var ranking = $('page-ranking');
-        if (ranking) {
-         $ev(ranking, {async: true}).listen('DOMNodeInserted', function() {
-           window.pixiv.scrollView.add();
-         });
-        }
       }
 
     }, {
@@ -3153,6 +3146,7 @@
 
     setup: function() {
       $ev(window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
+        window.pixiv.scrollView.add();
         each(Gallery.__inst__, function(gallery) {
           gallery.detect_new_collection();
         });
