@@ -1369,7 +1369,7 @@
       url: '/ranking.php',
       gallery: {
         xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
-        xpath_cap: 'article/div/h2/a[contains(@href, "mode=medium")]',
+        xpath_cap: './/article/div/h2/a[contains(@href, "mode=medium")]',
         xpath_tmb: '../../preceding-sibling::a[contains(concat(" ", @class, " "), " image-thumbnail ")]/img'
       },
       func: function(args) {
@@ -2239,8 +2239,8 @@
 
         function group(label, id, root) {
           var group = $c('fieldset', root || page.content, {id: 'pp-conf-debug-group-' + id});
-          $c('legend', group, {text: label});
-          return group;
+          var label = $c('legend', group, {text: label});
+          return [group, label];
         }
 
         (function(root) {
@@ -2290,18 +2290,35 @@
           $ev($c('button', input_line, {text: 'Clear', css: 'margin-left:4px;'})).click(clear);
           input.addEventListener('keydown', log, false);
           input.addEventListener('keypress', log, false);
-        })(group('Key', 'key'));
+        }).apply(this, group('Key', 'key'));
 
-        (function(root) {
-          var dl = $c('dl', root);
+        (function(root, label) {
+          var dl = $c('dl', root), links = [];
           each(pp_page_support, function(page) {
             $c('dt', dl, {text: page.name});
             var ul = $c('ul', $c('dd', dl));
             each(page.sample_url, function(url) {
-              $c('a', $c('li', ul), {text: url, 'a:href': url, 'a:target': '_blank'});
+              links.push($c('a', $c('li', ul), {text: url, 'a:href': url, 'a:target': '_blank'}));
             });
           });
-        })(group('Pages', 'pages'));
+
+          var open = $c('span', label, {css: 'margin-left:0.6em'});
+          var open_link = $c('a', open, {text: 'Open', href: '#'});
+          open.insertBefore(window.document.createTextNode('('), open_link);
+          open.appendChild(window.document.createTextNode(')'));
+          $ev(open_link).click(function() {
+            each(links, function(anc) {
+              var ev = document.createEvent('MouseEvent');
+              if (window.opera && window.opera.version() >= 10.5) {
+                ev.initMouseEvent('click', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, null);
+              } else {
+                ev.initMouseEvent('mousedown', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, null);
+              }
+              anc.dispatchEvent(ev);
+            });
+            return true;
+          });
+        }).apply(this, group('Pages', 'pages'));
       }
     }],
 
@@ -3147,7 +3164,8 @@
     oncreate: new Signal(),
 
     setup: function() {
-      $ev(window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
+      var root = $x('//body/div[@id="wrapper"]/div[@id="contents"]');
+      $ev(root || window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
         var added = false;
         each(Gallery.__inst__, function(gallery) {
           if (gallery.detect_new_collection()) {
