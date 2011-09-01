@@ -3165,6 +3165,7 @@
 
     setup: function() {
       var root = $x('//body/div[@id="wrapper"]/div[@id="contents"]');
+      if (!root) root = $x('//body/div[@id="wrapper"]');
       $ev(root || window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
         var added = false;
         each(Gallery.__inst__, function(gallery) {
