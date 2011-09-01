@@ -1090,8 +1090,8 @@
     };
     return [{
       name: 'bookmark',
-      sample_url: ['http://www.pixiv.net/bookmark.php?rest=hide',
-                   'http://www.pixiv.net/bookmark.php?type=illust_all&rest=hide'],
+      sample_url: [{url: 'http://www.pixiv.net/bookmark.php?rest=hide', page: true},
+                   {url: 'http://www.pixiv.net/bookmark.php?type=illust_all&rest=hide', page: true}],
       url: /^\/bookmark(?:_tag_setting)?\.php/,
       func: function(args) {
         if (!args.id && (!args.type || /^illust(?:_all)?$/.test(args.type))) {
@@ -1193,8 +1193,8 @@
     }, {
       name: 'member-illust',
       sample_url: ['http://www.pixiv.net/member_illust.php?mode=medium&illust_id=14602505',
-                   'http://www.pixiv.net/member_illust.php?id=11',
-                   'http://www.pixiv.net/member_illust.php'],
+                   {url: 'http://www.pixiv.net/member_illust.php?id=11', page: true},
+                   {url: 'http://www.pixiv.net/member_illust.php', page: true}],
       url: '/member_illust.php',
       func: function(args) {
         if (args.illust_id) {
@@ -1357,15 +1357,15 @@
 
     }, {
       name: 'ranking-other',
-      sample_url: ['http://www.pixiv.net/ranking.php?mode=day',
-                   'http://www.pixiv.net/ranking.php?mode=daily',
-                   'http://www.pixiv.net/ranking.php?mode=rookie',
-                   'http://www.pixiv.net/ranking.php?mode=weekly',
-                   'http://www.pixiv.net/ranking.php?mode=monthly',
-                   'http://www.pixiv.net/ranking.php?mode=daily_r18',
-                   'http://www.pixiv.net/ranking.php?mode=weekly_r18',
+      sample_url: [{url: 'http://www.pixiv.net/ranking.php?mode=day', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=daily', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=rookie', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=weekly', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=monthly', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=daily_r18', page: true},
+                   {url: 'http://www.pixiv.net/ranking.php?mode=weekly_r18', page: true},
                    'http://www.pixiv.net/ranking.php?mode=r18g',
-                   'http://www.pixiv.net/ranking.php?mode=daily&date=20110515'],
+                   {url: 'http://www.pixiv.net/ranking.php?mode=daily&date=20110515', page: true}],
       url: '/ranking.php',
       gallery: {
         xpath_col: '//section[contains(concat(" ", @class, " "), " articles ")]',
@@ -1414,7 +1414,7 @@
 
     }, {
       name: 'stacc',
-      sample_url: ['http://www.pixiv.net/stacc/'],
+      sample_url: [{url: 'http://www.pixiv.net/stacc/', page: true}],
       url: /^\/stacc/,
       gallery: [{
         xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
@@ -1439,7 +1439,7 @@
 
     }, {
       name: 'event-member',
-      sample_url: ['http://www.pixiv.net/event_member.php?event_id=805'],
+      sample_url: [{url: 'http://www.pixiv.net/event_member.php?event_id=805', page: true}],
       url: '/event_member.php',
       gallery: {
         xpath_col:  '//div[@id="contents"]//div[contains(concat(" ", @class, " "), " thumbFull ")]/ul',
@@ -1475,7 +1475,7 @@
 
     }, {
       name: 'user-event',
-      sample_url: ['http://www.pixiv.net/user_event.php',
+      sample_url: [{url: 'http://www.pixiv.net/user_event.php', page: true},
                    'http://www.pixiv.net/user_event.php?mode=attn',
                    'http://www.pixiv.net/user_event.php?id=23'],
       url: '/user_event.php',
@@ -1511,13 +1511,13 @@
 
     }, {
       name: 'new-illust',
-      sample_url: ['http://www.pixiv.net/new_illust.php',
-                   'http://www.pixiv.net/bookmark_new_illust.php',
-                   'http://www.pixiv.net/mypixiv_new_illust.php',
-                   'http://www.pixiv.net/new_illust_r18.php',
-                   'http://www.pixiv.net/bookmark_new_illust_r18.php',
-                   'http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag',
-                   'http://www.pixiv.net/tags.php?tag=pixiv'],
+      sample_url: [{url: 'http://www.pixiv.net/new_illust.php', page: true},
+                   {url: 'http://www.pixiv.net/bookmark_new_illust.php', page: true},
+                   {url: 'http://www.pixiv.net/mypixiv_new_illust.php', page: true},
+                   {url: 'http://www.pixiv.net/new_illust_r18.php', page: true},
+                   {url: 'http://www.pixiv.net/bookmark_new_illust_r18.php', page: true},
+                   {url: 'http://www.pixiv.net/search.php?word=pixiv&s_mode=s_tag', page: true},
+                   {url: 'http://www.pixiv.net/tags.php?tag=pixiv', page: true}],
       url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
@@ -1527,9 +1527,9 @@
 
     }, {
       name: 'official-event',
-      sample_url: ['http://www.pixiv.net/event_fujimi.php',
-                   'http://www.pixiv.net/event_loveplus.php',
-                   'http://www.pixiv.net/event_sangokushi-taisen-2.php'],
+      sample_url: [{url: 'http://www.pixiv.net/event_fujimi.php', page: true},
+                   {url: 'http://www.pixiv.net/event_loveplus.php', page: true},
+                   {url: 'http://www.pixiv.net/event_sangokushi-taisen-2.php', page: true}],
       url: /^\/event_(?!detail|member)/,
       gallery: [{
         xpath_col: '//div[contains(concat(" ", @class, " "), " search_a2_result ")]/ul',
@@ -1539,8 +1539,8 @@
 
     }, {
       name: 'other',
-      sample_url: ['http://www.pixiv.net/bookmark.php?id=32777',
-                   'http://www.pixiv.net/response.php?illust_id=15092961'],
+      sample_url: [{url: 'http://www.pixiv.net/bookmark.php?id=32777', page: true},
+                   {url: 'http://www.pixiv.net/response.php?illust_id=15092961', page: true}],
       func: [function(args) {
         if (pp.galleries.length === 0) {
           add_gallery({
@@ -2293,31 +2293,46 @@
         }).apply(this, group('Key', 'key'));
 
         (function(root, label) {
-          var dl = $c('dl', root), links = [];
+          var table = $c('table', root), links = {all: []};
           each(pp_page_support, function(page) {
-            $c('dt', dl, {text: page.name});
-            var ul = $c('ul', $c('dd', dl));
-            each(page.sample_url, function(url) {
-              links.push($c('a', $c('li', ul), {text: url, 'a:href': url, 'a:target': '_blank'}));
+            var cell = table.insertRow(-1).insertCell(-1);
+            cell.setAttribute('colspan', '2');
+            cell.textContent = page.name;
+            each(page.sample_url, function(obj) {
+              var url = typeof obj === 'string' ? obj : obj.url;
+              var flags = [];
+              if (obj.page) flags.push('p');
+
+              var row = table.insertRow(-1);
+              row.insertCell(-1).textContent = flags.join('');
+
+              var anc = $c('a', row.insertCell(-1), {text: url, 'a:href': url, 'a:target': '_blank'});
+              links.all.push(anc);
+              each(flags, function(flag) {
+                if (!links[flag]) links[flag] = [];
+                links[flag].push(anc);
+              });
             });
           });
 
           var open = $c('span', label, {css: 'margin-left:0.6em'});
-          var open_link = $c('a', open, {text: 'Open', href: '#'});
-          open.insertBefore(window.document.createTextNode('('), open_link);
-          open.appendChild(window.document.createTextNode(')'));
-          $ev(open_link).click(function() {
-            each(links, function(anc) {
-              var ev = document.createEvent('MouseEvent');
-              if (window.opera && window.opera.version() >= 10.5) {
-                ev.initMouseEvent('click', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, null);
-              } else {
-                ev.initMouseEvent('mousedown', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, null);
-              }
-              anc.dispatchEvent(ev);
+          open.appendChild(window.document.createTextNode('(Open: '));
+          each(['all', 'p'], function(key, idx) {
+            if (idx) open.appendChild(window.document.createTextNode('/'));
+            $ev($c('a', open, {text: key, href: '#'})).click(function() {
+              each(links[key], function(anc) {
+                var ev = document.createEvent('MouseEvent');
+                if (window.opera && window.opera.version() >= 10.5) {
+                  ev.initMouseEvent('click', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, null);
+                } else {
+                  ev.initMouseEvent('mousedown', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, null);
+                }
+                anc.dispatchEvent(ev);
+              });
+              return true;
             });
-            return true;
           });
+          open.appendChild(window.document.createTextNode(')'));
         }).apply(this, group('Pages', 'pages'));
       }
     }],
