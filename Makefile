@@ -71,7 +71,7 @@ FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
 FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
 FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) \
-                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(LICENSE)
+                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_ROOT)/$(LICENSE)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender \
                           Effect sendRequest getPageUrl
@@ -204,9 +204,11 @@ $(CRX): $(CHROME_DIST_FILES)
        mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
        cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
      done
-	@test -f $(CHROME_SIGN_KEY) && \
-       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) || \
-       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=)
+	@if test -f $(CHROME_SIGN_KEY); then \
+       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY); \
+	 else \
+       "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=); \
+     fi
 	mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) $(CHROME_SIGN_KEY) || :
 
@@ -253,6 +255,9 @@ clean-safari:
 	rm -rf $(SAFARIEXTZ_TMP_DIR)
 
 # ================ Firefox ================
+
+$(FIREFOX_ROOT)/$(LICENSE): $(FIREFOX_ROOT)/%: %
+	cp $< $@
 
 $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%): $(FIREFOX_ROOT)/content/%: % warn
 	cp $< $@
