@@ -1,3 +1,4 @@
+lang.js
 config.js
 lib.js
 options.css
@@ -10,3 +11,4 @@ options.js
 index.html
 icons
 options.html
+LICENSE.TXT

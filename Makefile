@@ -17,47 +17,39 @@ BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null 2>&1 && $(XAR) --hel
 BUILD_XPI               = $(shell which "$(ZIP)" >/dev/null 2>&1 && which "$(JS)" >/dev/null 2>&1 && echo yes || echo no)
 
 LICENSE                 = LICENSE.TXT
+LANG_JS                 = lang.js
 CONFIG_JSON             = config.json
 CONFIG_JS               = config.js
 LIB_JS                  = lib.js
-COMMON_JS               = common.js
 ICON_SVG                = pixplus.svg
 ICON_SIZE               = 16 32 48 64
 SRC_USERJS              = pixplus.js
+COMMON_FILES            = $(LANG_JS) $(CONFIG_JS) $(LIB_JS) common.js
+BGPAGE_FILES            = index.js index.html
 OPTION_PAGE_FILES       = options.js options.css options.html
-DIST_FILES              = $(COMMON_JS) index.html index.js $(OPTION_PAGE_FILES) $(LIB_JS)
+DIST_FILES              = $(LICENSE) $(COMMON_FILES) $(BGPAGE_FILES) $(OPTION_PAGE_FILES)
 
-I18N_DIR                = i18n
-I18N_LANGUAGES_FULL     = en-US ja-JP
-I18N_LANGUAGES          = $(foreach l,$(I18N_LANGUAGES_FULL),$(firstword $(subst -, ,$(l))))
-I18N_UPDATE             = $(I18N_DIR)/update.py
-I18N_EDIT               = $(I18N_DIR)/edit.py
-I18N_EDIT_HASH          = $(I18N_DIR)/edit_hash.py
+GREASEMONKEY_JS         = pixplus.user.js
 
 VERSION                 = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 WEBSITE                 = http://crckyl.pa.land.to/pixplus/
 WEBSITE_SED             = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
-GREASEMONKEY_JS         = pixplus.user.js
-
 OPERA_ROOT              = opera
 OPERA_CONFIG_XML        = $(OPERA_ROOT)/config.xml
 OPERA_ICON_DIR          = icons
 OPERA_ICON_FILES        = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
-OPERA_I18N_SOURCES      = $(OPERA_ROOT)/includes/$(SRC_USERJS) $(OPERA_ROOT)/$(CONFIG_JS)
-OPERA_I18N_FILES        = $(foreach l,$(I18N_LANGUAGES),$(OPERA_I18N_SOURCES:$(OPERA_ROOT)/%=$(OPERA_ROOT)/locales/$(l)/%))
-OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_I18N_SOURCES) $(OPERA_ICON_FILES) \
-                          $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_I18N_FILES) $(LICENSE)
+OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_ICON_FILES) \
+                          $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_ROOT)/includes/$(SRC_USERJS)
 
 CHROME_ROOT             = chrome
 CHROME_SIGN_KEY         = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
 CHROME_MANIFEST_JSON    = $(CHROME_ROOT)/manifest.json
 CHROME_ICON_DIR         = icons
 CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
-CHROME_I18N_FILES       = $(I18N_LANGUAGES:%=$(CHROME_ROOT)/_locales/%/messages.json)
-CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) \
-                          $(CHROME_ICON_FILES) $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_I18N_FILES) $(LICENSE)
+CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ICON_FILES) \
+                          $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_ROOT)/$(SRC_USERJS)
 
 SAFARI_ROOT             = safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
@@ -65,23 +57,21 @@ SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
 SAFARI_CERTS            = $(patsubst %,$(SAFARI_ROOT)/sign/%,safari_cert.der safari_ca1.der safari_ca2.der)
 SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
-SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ROOT)/$(CONFIG_JS) \
-                          $(SAFARI_ROOT)/$(SRC_USERJS) $(SAFARI_ICON_FILES) $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(LICENSE)
+SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ICON_FILES) \
+                          $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ROOT)/$(SRC_USERJS)
 
 FIREFOX_ROOT            = firefox
 FIREFOX_INSTALL_RDF     = $(FIREFOX_ROOT)/install.rdf
 FIREFOX_CHROME_MANIFEST = $(FIREFOX_ROOT)/chrome.manifest
 FIREFOX_OVERLAY_XUL     = $(FIREFOX_ROOT)/content/pixplus.xul
 FIREFOX_DEFAULTS_PREFS  = $(FIREFOX_ROOT)/defaults/preferences/pixplus.js
-FIREFOX_CONTENTS_COPY   = $(SRC_USERJS) $(LIB_JS) $(CONFIG_JS) $(COMMON_JS) $(OPTION_PAGE_FILES)
-FIREFOX_CONTENTS        = $(FIREFOX_CONTENTS_COPY)
+FIREFOX_CONTENTS        = $(SRC_USERJS) $(LANG_JS) $(LIB_JS) $(CONFIG_JS) $(COMMON_JS) $(OPTION_PAGE_FILES)
 FIREFOX_DEBUG_LOADER    = $(FIREFOX_ROOT)/pixplus@crckyl.ath.cx
 FIREFOX_ICON_DIR        = content/icons
 FIREFOX_ICON_FILES      = $(ICON_SIZE:%=$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png)
 FIREFOX_GEN_OPTIONS     = $(FIREFOX_ROOT)/gen_options.js
-FIREFOX_I18N_FILES      = $(I18N_LANGUAGES_FULL:%=$(FIREFOX_ROOT)/locale/%/entities.dtd)
 FIREFOX_DIST_FILES      = $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_OVERLAY_XUL) $(FIREFOX_DEFAULTS_PREFS) \
-                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(FIREFOX_I18N_FILES) $(LICENSE)
+                          $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%) $(FIREFOX_ICON_FILES) $(LICENSE)
 
 WARN_KEYWORDS_W         = location document jQuery rating_ef countup_rating send_quality_rating IllustRecommender \
                           Effect sendRequest getPageUrl
@@ -96,7 +86,7 @@ ifeq ($(BUILD_CRX),yes)
 ALL_TARGETS            += $(CRX)
 endif
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-ALL_TARGETS            += $(SAFARIEXTZ)
+#ALL_TARGETS            += $(SAFARIEXTZ)
 endif
 ifeq ($(BUILD_XPI),yes)
 ALL_TARGETS            += $(XPI)
@@ -108,6 +98,10 @@ $(CONFIG_JSON): $(SRC_USERJS)
 	echo '[' > $@
 	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
 	echo ']' >> $@
+
+$(LANG_JS): $(SRC_USERJS)
+	echo '// auto generated code' > $@
+	sed -e '1,/__LANG_BEGIN__/d' -e '/__LANG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
 	echo '// auto generated code' > $@
@@ -130,9 +124,6 @@ $(LIB_JS): $(SRC_USERJS)
 $(GREASEMONKEY_JS): $(SRC_USERJS)
 	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
 
-$(I18N_LANGUAGES:%=$(I18N_DIR)/%.po): $(SRC_USERJS) $(I18N_UPDATE)
-	$(I18N_UPDATE) $@ $<
-
 warn:
 	@for kw in $(WARN_KEYWORDS_W); do \
        grep -Hn $$kw $(SRC_USERJS) | grep -v window.$$kw | grep -v "'$$kw" | grep -v '/\* WARN \*/' || : ; \
@@ -140,8 +131,6 @@ warn:
 	@for kw in $(WARN_KEYWORDS_P); do \
        grep -Hn "\\.$$kw(" $(SRC_USERJS) | grep -v '/\* WARN \*/' || : ; \
      done
-
-po: $(I18N_LANGUAGES:%=$(I18N_DIR)/%.po)
 
 clean: clean-opera clean-chrome clean-safari clean-firefox
 	rm -f $(CONFIG_JSON) $(CONFIG_JS) $(GREASEMONKEY_JS)
@@ -165,35 +154,27 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS) warn
 	mkdir -p $(dir $@)
-	$(I18N_EDIT) $< opera < $(SRC_USERJS) > $@
+	cp $< $@
 
 $(OPERA_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
 
-$(OPERA_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
-	$(I18N_EDIT) $< opera < $(CONFIG_JS) > $@
-
 $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
 	cp $< $@
-
-$(OPERA_I18N_FILES): $(OPERA_I18N_SOURCES)
-	mkdir -p $(dir $@)
-	$(I18N_EDIT) $(I18N_DIR)/$(shell echo $@ | sed -e 's/.*locales\/\([^\/]*\)\/.*/\1/').po opera \
-      < $(shell basename $@) > $@
 
 $(OEX): $(OPERA_DIST_FILES)
 	rm -rf $(OEX_TMP_DIR)
 	@for file in $(^:$(OPERA_ROOT)/%=%); do \
        mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
-       cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file || cp $$file $(OEX_TMP_DIR)/$$file; \
+       cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file; \
      done
 #	cd $(OEX_TMP_DIR) && ../$(OPERA_ROOT)/sign/create_signature.sh $(^:$(OPERA_ROOT)/%=%) > signature1.xml
 	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
 
 clean-opera:
-	rm -f $(OEX) $(OPERA_CONFIG_XML) $(OPERA_ROOT)/$(CONFIG_JS) $(DIST_FILES:%=$(OPERA_ROOT)/%)
-	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR) $(OPERA_ROOT)/locales
+	rm -f $(OEX) $(OPERA_CONFIG_XML) $(DIST_FILES:%=$(OPERA_ROOT)/%)
+	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
 
 # ================ Chrome ================
 
@@ -210,19 +191,12 @@ $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
       < $< | tr -d '\r' >> $@
 
-$(CHROME_ROOT)/$(CONFIG_JS): $(CONFIG_JS)
-	$(I18N_EDIT_HASH) < $< >> $@
-
 $(CHROME_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
 	$(RSVG_CONVERT) $< -w $(@:$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png=%) -o $@
 
 $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%): $(CHROME_ROOT)/%: %
 	cp $< $@
-
-$(CHROME_I18N_FILES): $(CONFIG_JS)
-	mkdir -p $(dir $@)
-	$(I18N_EDIT_HASH) chrome $(I18N_DIR)/$(@:$(CHROME_ROOT)/_locales/%/messages.json=%).po $@ < $(CONFIG_JS) > /dev/null
 
 $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
@@ -237,9 +211,8 @@ $(CRX): $(CHROME_DIST_FILES)
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) $(CHROME_SIGN_KEY) || :
 
 clean-chrome:
-	rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(CONFIG_JS) $(CHROME_ROOT)/$(SRC_USERJS) \
-          $(DIST_FILES:%=$(CHROME_ROOT)/%)
-	rm -rf $(CRX_TMP_DIR) $(CHROME_ROOT)/$(CHROME_ICON_DIR) $(CHROME_ROOT)/_locales
+	rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
+	rm -rf $(CRX_TMP_DIR) $(CHROME_ROOT)/$(CHROME_ICON_DIR)
 
 # ================ Safari ================
 
@@ -253,7 +226,7 @@ $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	python conf-parser.py safari < $(CONFIG_JSON) >> $@
 	sed -e '1,/__SETTINGS__/d' < $< >> $@
 
-$(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
+$(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
 	cp $< $@
 
 $(SAFARI_ICON_FILES): $(ICON_SVG)
@@ -281,7 +254,7 @@ clean-safari:
 
 # ================ Firefox ================
 
-$(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%): $(FIREFOX_ROOT)/content/%: % warn
+$(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%): $(FIREFOX_ROOT)/content/%: % warn
 	cp $< $@
 
 $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
@@ -292,7 +265,6 @@ $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
 
 $(FIREFOX_CHROME_MANIFEST): $(FIREFOX_CHROME_MANIFEST).in
 	cp $< $@
-	@for l in $(I18N_LANGUAGES_FULL); do echo "locale pixplus $$l locale/$$l/" >> $@; done
 
 $(FIREFOX_ICON_FILES): $(ICON_SVG)
 	mkdir -p $(dir $@)
@@ -305,13 +277,6 @@ $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
 $(FIREFOX_DEBUG_LOADER):
 	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
-$(FIREFOX_I18N_FILES): %: %.in $(CONFIG_JS)
-	rm -f $@
-	$(I18N_EDIT_HASH) firefox \
-      $(I18N_DIR)/$(firstword $(subst -, ,$(@:$(FIREFOX_ROOT)/locale/%/entities.dtd=%))).po \
-      $@ < $(CONFIG_JS) > /dev/null
-	cat $< >> $@
-
 $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
 	@for file in $(FIREFOX_DIST_FILES:$(FIREFOX_ROOT)/%=%); do \
@@ -323,5 +288,5 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 clean-firefox:
 	rm -f $(XPI) $(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%) \
           $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) \
-          $(FIREFOX_DEBUG_LOADER) $(FIREFOX_I18N_FILES)
+          $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)

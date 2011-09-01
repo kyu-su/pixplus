@@ -1,3 +1,4 @@
+lang.js
 pixplus.js
 config.js
 _locales
@@ -11,3 +12,4 @@ options.js
 index.html
 icons
 manifest.json
+LICENSE.TXT

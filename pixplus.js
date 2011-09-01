@@ -32,18 +32,18 @@
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
     if (window.top !== window) return;
-    if (window.opera && window.opera.extension) {
+    if (window.opera && opera.extension) {
       (function() {
         function open_options() {
-          window.opera.extension.postMessage(window.JSON.stringify({'command': 'open-options'}));
+          opera.extension.postMessage(window.JSON.stringify({'command': 'open-options'}));
         }
-        window.opera.extension.onmessage = function(ev){
+        opera.extension.onmessage = function(ev){
           var data = window.JSON.parse(ev.data);
           if (data.command === 'config') {
             func(window, window, {conf: data.data, open_options: open_options});
           }
         };
-        window.opera.extension.postMessage(window.JSON.stringify({'command': 'config'}));
+        opera.extension.postMessage(window.JSON.stringify({'command': 'config'}));
       })();
     } else {
       func(unsafeWindow || window, window);
@@ -148,132 +148,363 @@
     });
    }
 })(function(window, safeWindow, _extension_data) {
+  /* __LANG_BEGIN__ */
+  var lang = {
+    en: {
+      conf: {
+        general: {
+          debug: 'Debug mode',
+          log_level: {
+            desc: 'Log level',
+            hint: ['None', 'Information', 'Debug']
+          },
+          scroll: {
+            desc: 'Scroll page when illust page loaded',
+            hint: ['Do not scroll', 'Caption', 'Illust']
+          },
+          bookmark_hide: 'Make private bookmark by default',
+          float_tag_list: {
+            desc: 'Enable float view for tag list',
+            hint: ['Disable', 'Enable', 'Pager']
+          },
+          bookmark_form: {
+            desc: 'Bookmark form type',
+            hint: ['Disable', 'Arrow keys', 'Alphabet keys']
+          },
+          mod_bookmark_add_page: 'Change bookmark edit page',
+          tag_separator_style: 'Separator style for tag list',
+          stacc_link: {
+            desc: 'Change \'Stacc feed\' link',
+            hint: [{value: '', desc: 'Do not change'},
+                   {value: 'all', desc: 'All'},
+                   {value: 'favorite', desc: 'Favorite'},
+                   {value: 'mypixiv', desc: 'MyPixiv'},
+                   {value: 'self', desc: 'Self'}]
+          },
+          rate_confirm: 'Show confirmation dialog when rating',
+          disable_effect: 'Disable UI animation',
+          workaround: 'Enable workarounds (Temporary, this has no effect)',
+          fast_user_bookmark: {
+            desc: 'Add favorite user by one-click',
+            hint: ['Disable', 'Enable(public)', 'Enable(private)']
+          }
+        },
+
+        popup: {
+          preload: 'Enable preloading',
+          big_image: 'Use original size image',
+          caption_height: 'Caption height',
+          caption_opacity: 'Caption opacity',
+          remove_pixpedia: 'Remove pixpedia icon',
+          rate: 'Enable rating',
+          rate_key: 'Enable rate keys',
+          font_size: 'Font size(e.g. 10px)',
+          auto_manga: {
+            desc: 'Switch manga-mode automatically',
+            hint: ['Disable', 'Enable', 'Specify pages by regexp']
+          },
+          auto_manga_regexp: 'Regular expression for auto_manga=2',
+          reverse: {
+            desc: 'Reverse move direction',
+            hint: ['Disable', 'Enable', 'Specify pages by regexp']
+          },
+          reverse_regexp: 'Regular expression for reverse=2',
+          auto_zoom: 'Auto zoom threshold(0:Disable)',
+          auto_zoom_size: 'Max size for auto-zoom',
+          auto_zoom_scale: 'Max scale for auto-zoom',
+          overlay_control: 'Click area width(0:Disable/<1:Ratio/>1:Pixel)',
+          scroll_height: 'Scroll step for caption',
+          author_status_icon: 'Show icon on profile image',
+          show_comment_form: 'Show comment posting form',
+          manga_spread: 'Enable manga spreads'
+        },
+
+        key: {
+          popup_prev: 'Move to previous illust',
+          popup_prev_direction: 'Move to previous illust(ignore conf.popup.reverse)',
+          popup_next: 'Move to next illust',
+          popup_next_direction: 'Move to next illust(ignore conf.popup.reverse)',
+          popup_first: 'Move to first illust',
+          popup_last: 'Move to last illust',
+          popup_close: 'Close',
+          popup_caption_scroll_up: 'Scroll caption up',
+          popup_caption_scroll_down: 'Scroll caption down',
+          popup_caption_toggle: 'Toggle caption display',
+          popup_comment_toggle: 'Toggle comment',
+          popup_open: 'Open illust page',
+          popup_open_big: 'Open image',
+          popup_open_profile: 'Open profile',
+          popup_open_illust: 'Open works',
+          popup_open_bookmark: 'Open bookmark',
+          popup_open_staccfeed: 'Open staccfeed',
+          popup_open_response: 'Open image response',
+          popup_reload: 'Reload',
+          popup_open_bookmark_detail: 'Open bookmark information page',
+          popup_open_manga_thumbnail: 'Open manga thumbnail page',
+          popup_rate01: 'Rate(1pt)',
+          popup_rate02: 'Rate(2pt)',
+          popup_rate03: 'Rate(3pt)',
+          popup_rate04: 'Rate(4pt)',
+          popup_rate05: 'Rate(5pt)',
+          popup_rate06: 'Rate(6pt)',
+          popup_rate07: 'Rate(7pt)',
+          popup_rate08: 'Rate(8pt)',
+          popup_rate09: 'Rate(9pt)',
+          popup_rate10: 'Rate(10pt)',
+          popup_zoom_in: 'Zoom in(Opera/Firefox only)',
+          popup_zoom_out: 'Zoom out(Opera/Firefox only)',
+          popup_bookmark_start: 'Start $mode',
+          popup_manga_start: 'Start $mode',
+          popup_qrate_start: 'Start $mode',
+          popup_tag_edit_start: 'Start $mode',
+          popup_bookmark_end: 'End $mode',
+          popup_bookmark_submit: 'Send',
+          popup_manga_open_page: 'Open manga page',
+          popup_manga_end: 'End $mode',
+          popup_qrate_end: 'End $mode',
+          popup_qrate_select_prev: 'Select previous item',
+          popup_qrate_select_next: 'Select next item',
+          popup_qrate_submit: 'Send',
+          popup_tag_edit_end: 'End $mode'
+        },
+
+        bookmark: {
+          tag_order: 'Reorder tags. 1 tag per line.<br>-: Separator<br>*: Others',
+          tag_aliases: 'Tag aliases. Used for auto input. Separated by space.'
+        }
+      },
+
+      mode: {
+        normal: 'Normal',
+        bookmark: 'Bookmark mode',
+        manga: 'Manga mode',
+        survey: 'Survey mode',
+        tagedit: 'Tag edit mode'
+      }
+    },
+
+    ja: {
+      conf: {
+        general: {
+          debug: '\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9',
+          log_level: {
+            desc: '\u30ed\u30b0\u30ec\u30d9\u30eb',
+            hint: ['\u306a\u3057', '\u60c5\u5831', '\u30c7\u30d0\u30c3\u30b0']
+          },
+          scroll: {
+            desc: '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
+            hint: ['\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044', '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3', '\u30a4\u30e9\u30b9\u30c8']
+          },
+          bookmark_hide: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b',
+          float_tag_list: {
+            desc: '\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b',
+            hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u30e3']
+          },
+          bookmark_form: {
+            desc: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c',
+            hint: ['\u7121\u52b9', '\u30a2\u30ed\u30fc\u30ad\u30fc', '\u30a2\u30eb\u30d5\u30a1\u30d9\u30c3\u30c8']
+          },
+          mod_bookmark_add_page: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b',
+          tag_separator_style: '\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb',
+          stacc_link: {
+            desc: '\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148',
+            hint: [{value: '', desc: '\u5909\u66f4\u3057\u306a\u3044'},
+                   {value: 'all', desc: '\u3059\u3079\u3066'},
+                   {value: 'favorite', desc: '\u304a\u6c17\u306b\u5165\u308a'},
+                   {value: 'mypixiv', desc: '\u30de\u30a4\u30d4\u30af'},
+                   {value: 'self', desc: '\u3042\u306a\u305f'}]
+          },
+          rate_confirm: '\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b',
+          disable_effect: '\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b',
+          workaround: 'Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)',
+          fast_user_bookmark: {
+            desc: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046',
+            hint: ['\u7121\u52b9', '\u6709\u52b9(\u516c\u958b)', '\u6709\u52b9(\u975e\u516c\u958b)']
+          }
+        },
+
+        popup: {
+          preload: '\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b',
+          big_image: '\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b',
+          caption_height: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055',
+          caption_opacity: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6',
+          remove_pixpedia: '\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
+          rate: '\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b',
+          rate_key: '\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b',
+          font_size: '\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(e.g. 10px)',
+          auto_manga: {
+            desc: '\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b',
+            hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a']
+          },
+          auto_manga_regexp: 'auto_manga\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
+          reverse: {
+            desc: '\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b',
+            hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a']
+          },
+          reverse_regexp: 'reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
+          auto_zoom: '\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)',
+          auto_zoom_size: '\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u30b5\u30a4\u30ba\u4e0a\u9650',
+          auto_zoom_scale: '\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650',
+          overlay_control: '\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)',
+          scroll_height: '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055',
+          author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)',
+          show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b',
+          manga_spread: '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b'
+        },
+
+        key: {
+          popup_prev: '\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
+          popup_prev_direction: '\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)',
+          popup_next: '\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
+          popup_next_direction: '\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)',
+          popup_first: '\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
+          popup_last: '\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
+          popup_close: '\u9589\u3058\u308b',
+          popup_caption_scroll_up: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
+          popup_caption_scroll_down: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
+          popup_caption_toggle: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b',
+          popup_comment_toggle: '\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048',
+          popup_open: '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f',
+          popup_open_big: '\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f',
+          popup_open_profile: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f',
+          popup_open_illust: '\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f',
+          popup_open_bookmark: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f',
+          popup_open_staccfeed: '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f',
+          popup_open_response: '\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f',
+          popup_reload: '\u30ea\u30ed\u30fc\u30c9',
+          popup_open_bookmark_detail: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f',
+          popup_open_manga_thumbnail: '\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f',
+          popup_rate01: '\u8a55\u4fa1\u3059\u308b(1\u70b9)',
+          popup_rate02: '\u8a55\u4fa1\u3059\u308b(2\u70b9)',
+          popup_rate03: '\u8a55\u4fa1\u3059\u308b(3\u70b9)',
+          popup_rate04: '\u8a55\u4fa1\u3059\u308b(4\u70b9)',
+          popup_rate05: '\u8a55\u4fa1\u3059\u308b(5\u70b9)',
+          popup_rate06: '\u8a55\u4fa1\u3059\u308b(6\u70b9)',
+          popup_rate07: '\u8a55\u4fa1\u3059\u308b(7\u70b9)',
+          popup_rate08: '\u8a55\u4fa1\u3059\u308b(8\u70b9)',
+          popup_rate09: '\u8a55\u4fa1\u3059\u308b(9\u70b9)',
+          popup_rate10: '\u8a55\u4fa1\u3059\u308b(10\u70b9)',
+          popup_zoom_in: '\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)',
+          popup_zoom_out: '\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)',
+          popup_bookmark_start: '$mode\u958b\u59cb',
+          popup_manga_start: '$mode\u958b\u59cb',
+          popup_qrate_start: '$mode\u958b\u59cb',
+          popup_tag_edit_start: '$mode\u958b\u59cb',
+          popup_bookmark_end: '$mode\u7d42\u4e86',
+          popup_bookmark_submit: '\u9001\u4fe1',
+          popup_manga_open_page: '\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002',
+          popup_manga_end: '$mode\u7d42\u4e86',
+          popup_qrate_end: '$mode\u7d42\u4e86',
+          popup_qrate_select_prev: '\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
+          popup_qrate_select_next: '\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
+          popup_qrate_submit: '\u9001\u4fe1',
+          popup_tag_edit_end: '$mode\u7d42\u4e86'
+        },
+
+        bookmark: {
+          tag_order: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8',
+          tag_aliases: '\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002'
+        }
+      },
+
+      mode: {
+        normal: '\u901a\u5e38',
+        bookmark: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9',
+        manga: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9',
+        survey: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9',
+        tagedit: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9'
+      }
+    }
+  };
+  lang.c = lang[window.navigator.language] || lang.en;
+  /* __LANG_END__ */
+
   var conf_schema = [
     /* __CONFIG_BEGIN__ */
     {"name": "general", "label": "General", "items": [
-      {"key": "debug", "value": false, "desc": "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9"},
-      {"key": "log_level", "value": 0, "desc": "\u30ed\u30b0\u30ec\u30d9\u30eb",
-       "hint": [{"value": 0, "title": "\u306a\u3057"},
-                {"value": 1, "title": "\u60c5\u5831"},
-                {"value": 2, "title": "\u30c7\u30d0\u30c3\u30b0"}]},
-      {"key": "scroll", "value": 1, "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u3044\u305f\u6642\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b",
-       "hint": [{"value": 0, "title": "\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u306a\u3044"},
-                {"value": 1, "title": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3"},
-                {"value": 2, "title": "\u30a4\u30e9\u30b9\u30c8"}]},
-      {"key": "bookmark_hide", "value": false, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b"},
-      {"key": "float_tag_list", "value": 2, "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u6709\u52b9"},
-                {"value": 2, "title": "\u30da\u30fc\u30b8\u30e3"}]},
-      {"key": "bookmark_form", "value": 1, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u30ad\u30fc\u64cd\u4f5c",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u30a2\u30ed\u30fc\u30ad\u30fc"},
-                {"value": 2, "title": "\u30a2\u30eb\u30d5\u30a1\u30d9\u30c3\u30c8"}]},
-      {"key": "mod_bookmark_add_page", "value": false, "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30da\u30fc\u30b8\u306b\u3082\u5909\u66f4\u3092\u52a0\u3048\u308b"},
-      {"key": "tag_separator_style", "value": "border-top:2px solid #dae1e7;", "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb"},
-      {"key": "stacc_link", "value": "", "desc": "\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148",
-       "hint": [{"value": "",         "title": "\u5909\u66f4\u3057\u306a\u3044"},
-                {"value": "all",      "title": "\u3059\u3079\u3066"},
-                {"value": "favorite", "title": "\u304a\u6c17\u306b\u5165\u308a"},
-                {"value": "mypixiv",  "title": "\u30de\u30a4\u30d4\u30af"},
-                {"value": "self",     "title": "\u3042\u306a\u305f"}]},
-      {"key": "rate_confirm", "value": true, "desc": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b"},
-      {"key": "disable_effect", "value": false, "desc": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"},
-      {"key": "workaround", "value": false, "desc": "Opera\u3084pixiv\u306e\u30d0\u30b0\u56de\u907f\u306e\u305f\u3081\u306e\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b(\u4e00\u6642\u7684\u306b\u6a5f\u80fd\u3057\u306a\u3044)"},
-      {"key": "fast_user_bookmark", "value": 0, "desc": "\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u6709\u52b9(\u516c\u958b)"},
-                {"value": 2, "title": "\u6709\u52b9(\u975e\u516c\u958b)"}]}
+      {"key": "debug", "value": false},
+      {"key": "log_level", "value": 0},
+      {"key": "scroll", "value": 1},
+      {"key": "bookmark_hide", "value": false},
+      {"key": "float_tag_list", "value": 2},
+      {"key": "bookmark_form", "value": 1},
+      {"key": "mod_bookmark_add_page", "value": false},
+      {"key": "tag_separator_style", "value": "border-top:2px solid #dae1e7;"},
+      {"key": "stacc_link", "value": ""},
+      {"key": "rate_confirm", "value": true},
+      {"key": "disable_effect", "value": false},
+      {"key": "workaround", "value": false},
+      {"key": "fast_user_bookmark", "value": 0}
     ]},
     {"name": "popup", "label": "Popup", "items": [
-      {"key": "preload", "value": true, "desc": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b"},
-      {"key": "big_image", "value": false, "desc": "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"},
-      {"key": "caption_height", "value": 0.4, "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055"},
-      {"key": "caption_opacity", "value": 0.9, "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6"},
-      {"key": "remove_pixpedia", "value": false, "desc": "\u30bf\u30b0\u306epixpedia\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b"},
-      {"key": "rate", "value": true, "desc": "\u8a55\u4fa1\u6a5f\u80fd\u3092\u4f7f\u7528\u3059\u308b"},
-      {"key": "rate_key", "value": false, "desc": "\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b"},
-      {"key": "font_size", "value": "", "desc": "\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(e.g. 10px)"},
-      {"key": "auto_manga", "value": 0, "desc": "\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u6709\u52b9"},
-                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]},
-      {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php",
-       "desc": "auto_manga\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"},
-      {"key": "reverse", "value": 0, "desc": "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b",
-       "hint": [{"value": 0, "title": "\u7121\u52b9"},
-                {"value": 1, "title": "\u6709\u52b9"},
-                {"value": 2, "title": "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"}]},
-      {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php", "desc": "reverse\u306b2\u3092\u6307\u5b9a\u3057\u305f\u5834\u5408\u306b\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe"},
-      {"key": "auto_zoom", "value": 0, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u3059\u308b\u6700\u5927\u30b5\u30a4\u30ba(0:\u7121\u52b9)"},
-      {"key": "auto_zoom_size", "value": 800, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u30b5\u30a4\u30ba\u4e0a\u9650"},
-      {"key": "auto_zoom_scale", "value": 4, "desc": "\u81ea\u52d5\u30ba\u30fc\u30e0\u5f8c\u306e\u62e1\u5927\u7387\u4e0a\u9650"},
-      {"key": "overlay_control", "value": 0.3, "desc": "\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)"},
-      {"key": "scroll_height", "value": 32, "desc": "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055"},
-      {"key": "author_status_icon", "value": true, "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)"},
-      {"key": "show_comment_form", "value": true, "desc": "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b"},
-      {"key": "manga_spread", "value": true, "desc": "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b"}
+      {"key": "preload", "value": true},
+      {"key": "big_image", "value": false},
+      {"key": "caption_height", "value": 0.4},
+      {"key": "caption_opacity", "value": 0.9},
+      {"key": "remove_pixpedia", "value": false},
+      {"key": "rate", "value": true},
+      {"key": "rate_key", "value": false},
+      {"key": "font_size", "value": ""},
+      {"key": "auto_manga", "value": 0},
+      {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php"},
+      {"key": "reverse", "value": 0},
+      {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php"},
+      {"key": "auto_zoom", "value": 0},
+      {"key": "auto_zoom_size", "value": 800},
+      {"key": "auto_zoom_scale", "value": 4},
+      {"key": "overlay_control", "value": 0.3},
+      {"key": "scroll_height", "value": 32},
+      {"key": "author_status_icon", "value": true},
+      {"key": "show_comment_form", "value": true},
+      {"key": "manga_spread", "value": true}
     ]},
     {"name": "key", "label": "Key", "items": [
-      {"key": "popup_prev", "value": "Backspace,a", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-      {"key": "popup_prev_direction", "value": "Left", "desc": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
-      {"key": "popup_next", "value": "Space", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-      {"key": "popup_next_direction", "value": "Right", "desc": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)"},
-      {"key": "popup_first", "value": "Home", "desc": "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-      {"key": "popup_last", "value": "End", "desc": "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5"},
-      {"key": "popup_close", "value": "Escape", "desc": "\u9589\u3058\u308b"},
-      {"key": "popup_caption_scroll_up", "value": "Up", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
-      {"key": "popup_caption_scroll_down", "value": "Down", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b"},
-      {"key": "popup_caption_toggle", "value": "c", "desc": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b"},
-      {"key": "popup_comment_toggle", "value": "Shift+c", "desc": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048"},
-      {"key": "popup_open", "value": "Shift+f", "desc": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-      {"key": "popup_open_big", "value": "f", "desc": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f"},
-      {"key": "popup_open_profile", "value": "e", "desc": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f"},
-      {"key": "popup_open_illust", "value": "r", "desc": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f"},
-      {"key": "popup_open_bookmark", "value": "t", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f"},
-      {"key": "popup_open_staccfeed", "value": "y", "desc": "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f"},
-      {"key": "popup_open_response", "value": "Shift+r", "desc": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"},
-      {"key": "popup_reload", "value": "g", "desc": "\u30ea\u30ed\u30fc\u30c9"},
-      {"key": "popup_open_bookmark_detail", "value": "Shift+b", "desc": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-      {"key": "popup_open_manga_thumbnail", "value": "Shift+v", "desc": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f"},
-      {"key": "popup_rate01", "value": "Shift+0,Shift+~", "desc": "\u8a55\u4fa1\u3059\u308b(1\u70b9)"},
-      {"key": "popup_rate02", "value": "Shift+9,Shift+)", "desc": "\u8a55\u4fa1\u3059\u308b(2\u70b9)"},
-      {"key": "popup_rate03", "value": "Shift+8,Shift+(", "desc": "\u8a55\u4fa1\u3059\u308b(3\u70b9)"},
-      {"key": "popup_rate04", "value": "Shift+7,Shift+'", "desc": "\u8a55\u4fa1\u3059\u308b(4\u70b9)"},
-      {"key": "popup_rate05", "value": "Shift+6,Shift+&", "desc": "\u8a55\u4fa1\u3059\u308b(5\u70b9)"},
-      {"key": "popup_rate06", "value": "Shift+5,Shift+%", "desc": "\u8a55\u4fa1\u3059\u308b(6\u70b9)"},
-      {"key": "popup_rate07", "value": "Shift+4,Shift+$", "desc": "\u8a55\u4fa1\u3059\u308b(7\u70b9)"},
-      {"key": "popup_rate08", "value": "Shift+3,Shift+#", "desc": "\u8a55\u4fa1\u3059\u308b(8\u70b9)"},
-      {"key": "popup_rate09", "value": "Shift+2,Shift+\"", "desc": "\u8a55\u4fa1\u3059\u308b(9\u70b9)"},
-      {"key": "popup_rate10", "value": "Shift+1,Shift+!", "desc": "\u8a55\u4fa1\u3059\u308b(10\u70b9)"},
-      {"key": "popup_zoom_in", "value": "plus,Shift+plus", "desc": "\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)"},
-      {"key": "popup_zoom_out", "value": "-,Shift+-", "desc": "\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)"},
-      {"key": "popup_bookmark_start", "value": "b", "desc": "$mode\u958b\u59cb",
-       "start_mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_start", "value": "v", "desc": "$mode\u958b\u59cb",
-       "start_mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_start", "value": "d", "desc": "$mode\u958b\u59cb",
-       "start_mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_tag_edit_start", "value": "", "desc": "$mode\u958b\u59cb",
-       "start_mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_bookmark_end", "value": "Escape", "desc": "$mode\u7d42\u4e86",
-       "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_bookmark_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
-       "mode": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_open_page", "value": "Shift+s", "desc": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002",
-       "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_manga_end", "value": "v,Escape", "desc": "$mode\u7d42\u4e86",
-       "mode": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "desc": "$mode\u7d42\u4e86",
-       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_select_prev", "value": "Up", "desc": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e",
-       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_select_next", "value": "Down", "desc": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e",
-       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_qrate_submit", "value": "Enter,Space", "desc": "\u9001\u4fe1",
-       "mode": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9"},
-      {"key": "popup_tag_edit_end", "value": "Escape", "desc": "$mode\u7d42\u4e86",
-       "mode": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9"}
+      {"key": "popup_prev", "value": "Backspace,a"},
+      {"key": "popup_prev_direction", "value": "Left"},
+      {"key": "popup_next", "value": "Space"},
+      {"key": "popup_next_direction", "value": "Right"},
+      {"key": "popup_first", "value": "Home"},
+      {"key": "popup_last", "value": "End"},
+      {"key": "popup_close", "value": "Escape"},
+      {"key": "popup_caption_scroll_up", "value": "Up"},
+      {"key": "popup_caption_scroll_down", "value": "Down"},
+      {"key": "popup_caption_toggle", "value": "c"},
+      {"key": "popup_comment_toggle", "value": "Shift+c"},
+      {"key": "popup_open", "value": "Shift+f"},
+      {"key": "popup_open_big", "value": "f"},
+      {"key": "popup_open_profile", "value": "e"},
+      {"key": "popup_open_illust", "value": "r"},
+      {"key": "popup_open_bookmark", "value": "t"},
+      {"key": "popup_open_staccfeed", "value": "y"},
+      {"key": "popup_open_response", "value": "Shift+r"},
+      {"key": "popup_reload", "value": "g"},
+      {"key": "popup_open_bookmark_detail", "value": "Shift+b"},
+      {"key": "popup_open_manga_thumbnail", "value": "Shift+v"},
+      {"key": "popup_rate01", "value": "Shift+0,Shift+~"},
+      {"key": "popup_rate02", "value": "Shift+9,Shift+)"},
+      {"key": "popup_rate03", "value": "Shift+8,Shift+("},
+      {"key": "popup_rate04", "value": "Shift+7,Shift+'"},
+      {"key": "popup_rate05", "value": "Shift+6,Shift+&"},
+      {"key": "popup_rate06", "value": "Shift+5,Shift+%"},
+      {"key": "popup_rate07", "value": "Shift+4,Shift+$"},
+      {"key": "popup_rate08", "value": "Shift+3,Shift+#"},
+      {"key": "popup_rate09", "value": "Shift+2,Shift+\""},
+      {"key": "popup_rate10", "value": "Shift+1,Shift+!"},
+      {"key": "popup_zoom_in", "value": "plus,Shift+plus"},
+      {"key": "popup_zoom_out", "value": "-,Shift+-"},
+      {"key": "popup_bookmark_start", "value": "b", "start_mode": "bookmark"},
+      {"key": "popup_manga_start", "value": "v", "start_mode": "manga"},
+      {"key": "popup_qrate_start", "value": "d", "start_mode": "survey"},
+      {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
+      {"key": "popup_bookmark_end", "value": "Escape", "mode": "bookmark"},
+      {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
+      {"key": "popup_manga_open_page", "value": "Shift+s", "mode": "manga"},
+      {"key": "popup_manga_end", "value": "v,Escape", "mode": "manga"},
+      {"key": "popup_qrate_end", "value": "Escape,d", "mode": "survey"},
+      {"key": "popup_qrate_select_prev", "value": "Up", "mode": "survey"},
+      {"key": "popup_qrate_select_next", "value": "Down", "mode": "survey"},
+      {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "survey"},
+      {"key": "popup_tag_edit_end", "value": "Escape", "mode": "tagedit"}
     ]},
     {"name": "bookmark", "label": "Bookmark", "items": [
       {"key": "tag_order", "value": "", "desc": ""},
@@ -506,7 +737,7 @@
         LS.set = function(s, n, v) {
           var data = { section: s, key: n, value: v };
           if (window.opera) {
-            window.opera.extension.postMessage(window.JSON.stringify({'command': 'config-set', 'data': data}));
+            opera.extension.postMessage(window.JSON.stringify({'command': 'config-set', 'data': data}));
           } else {
             /*
             var ev = window.document.createEvent('Event');
@@ -519,7 +750,7 @@
         LS.remove = function(s, n) {
           var data = { section: s, key: n };
           if (window.opera) {
-            window.opera.extension.postMessage(window.JSON.stringify({'command': 'config-remove', 'data': data}));
+            opera.extension.postMessage(window.JSON.stringify({'command': 'config-remove', 'data': data}));
           } else {
           }
         };
@@ -1724,10 +1955,9 @@
 
   /* __CONFIG_UI_BEGIN__ */
   var ConfigUI = $cls.create({
-    initialize: function(root, options_page, msg_filter) {
+    initialize: function(root, options_page) {
       this.root = root;
       this.options_page = options_page;
-      this.msg_filter = msg_filter || function(s) { return s; };
 
       this.pager = $c('div', this.root, {id: 'pp-conf-pager'});
       this.page_list = $c('ul', this.pager, {id: 'pp-conf-pagelist'});
@@ -1741,11 +1971,14 @@
           var value = options_page ? LS.get(sec.name, item.key) : LS.map[sec.name].conf[item.key];
           var type = typeof item.value;
           var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
+          var langitem = lang.c.conf[sec.name][item.key];
           row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'even' : 'odd');
-          if (item.hint) {
+          if (langitem.hint) {
             input = $c('select');
-            each(item.hint, function(hint) {
-              $c('option', input, {value: hint.value, text: self.msg_filter(hint.title)});
+            each(langitem.hint, function(hint, idx) {
+              var value = typeof hint === 'string' ? idx : hint.value;
+              var desc = typeof hint === 'string' ? hint : hint.desc;
+              $c('option', input, {value: value, text: desc});
             });
           } else {
             input = $c('input');
@@ -1785,7 +2018,7 @@
 
           cell = row.insertCell(-1);
           cell.className = 'pp-conf-cell-description';
-          cell.textContent = self.msg_filter(item.desc);
+          cell.textContent = typeof langitem === 'string' ? langitem : langitem.desc;
 
           $ev(input).change(function(ev) {
             var value;
@@ -1817,10 +2050,6 @@
 
       this.show_page(this.pages[0]);
       this.update_export();
-    },
-
-    create_description: function(msg) {
-      return $c('div', null, {html: this.msg_filter(msg)});
     },
 
     make_page: function(text, id) {
@@ -2039,18 +2268,19 @@
           var cell = row.insertCell(-1);
           row.className = 'pp-conf-key-mode-line';
           cell.setAttribute('colspan', '4');
-          cell.textContent = self.msg_filter(mode);
+          cell.textContent = lang.c.mode[mode];
           if (!mode_map[mode]) mode_map[mode] = [];
           mode_map[mode].push(row);
         }
-        add_mode_line(0, "\u901a\u5e38");
+        add_mode_line(0, 'normal');
         each(page.section.items, function(item, idx) {
+          var langitem = lang.c.conf.key[item.key];
           var row = page.table.rows[idx + offset];
           var cell = row.cells[row.cells.length - 1];
           if (item.mode || item.start_mode) {
-            var mode_name = self.msg_filter(item.mode || item.start_mode);
+            var mode_name = lang.c.mode[item.mode || item.start_mode];
             cell.innerHTML = '';
-            each(self.msg_filter(item.desc).split(/(\$mode)/), function(term) {
+            each((langitem.desc || langitem).split(/(\$mode)/), function(term) {
               if (term === '$mode') {
                 var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
                 if (!mode_map[mode_name]) mode_map[mode_name] = [];
@@ -2085,7 +2315,7 @@
       label: 'Tags', id: 'tags',
       content: function(page) {
         var self = this;
-        page.content.appendChild(this.create_description("\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002<br>-: \u30bb\u30d1\u30ec\u30fc\u30bf<br>*: \u6b8b\u308a\u5168\u90e8"));
+        $c('div', page.content, {html: lang.c.conf.bookmark.tag_order});
         this.tag_order_textarea = $c('textarea', page.content);
         this.tag_order_textarea.value = (this.options_page
                                          ? LS.get('bookmark', 'tag_order')
@@ -2095,7 +2325,7 @@
           self.update_export();
         });
 
-        page.content.appendChild(this.create_description("\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"));
+        $c('div', page.content, {html: lang.c.conf.bookmark.tag_aliases});
         this.tag_alias_table = $c('table', page.content, {id: 'pp-conf-bookmark-tag_aliases'});
 
         $ev($c('button', page.content, {text: 'Add'})).click(function() { add_row(); });
@@ -2321,7 +2551,7 @@
             if (idx) open.appendChild(window.document.createTextNode('/'));
             $ev($c('a', open, {text: key, href: '#'})).click(function() {
               each(links[key], function(anc) {
-                var ev = document.createEvent('MouseEvent');
+                var ev = window.document.createEvent('MouseEvent');
                 if (window.opera && window.opera.version() >= 10.5) {
                   ev.initMouseEvent('click', false, false, window.document.defaultView, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, null);
                 } else {
@@ -2728,7 +2958,7 @@
       });
     }
 
-    if (conf.stacc_link) {
+    if (conf.stacc_link && conf.stacc_link !== 'nochange') {
       var stacc_anc;
       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(conf.stacc_link) < 0) {
         alert('conf.stacc_link: invalid value - ' + conf.stacc_link);

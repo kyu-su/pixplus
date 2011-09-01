@@ -15,6 +15,5 @@
   "version": "@VERSION@",
   "description": "@DESCRIPTION@",
   "permissions": [ "http://www.pixiv.net/*" ],
-  "default_locale": "en",
   "update_url": "http://crckyl.ath.cx:8088/pixplus/update.php?browser=chrome&version=@VERSION@"
 }
