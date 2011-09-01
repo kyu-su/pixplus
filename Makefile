@@ -86,7 +86,7 @@ ifeq ($(BUILD_CRX),yes)
 ALL_TARGETS            += $(CRX)
 endif
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-#ALL_TARGETS            += $(SAFARIEXTZ)
+ALL_TARGETS            += $(SAFARIEXTZ)
 endif
 ifeq ($(BUILD_XPI),yes)
 ALL_TARGETS            += $(XPI)
@@ -202,7 +202,7 @@ $(CRX): $(CHROME_DIST_FILES)
 	rm -rf $(CRX_TMP_DIR)
 	@for file in $(^:$(CHROME_ROOT)/%=%); do \
        mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
-       cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file || cp $$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
+       cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
      done
 	@test -f $(CHROME_SIGN_KEY) && \
        "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) || \
@@ -226,7 +226,7 @@ $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	python conf-parser.py safari < $(CONFIG_JSON) >> $@
 	sed -e '1,/__SETTINGS__/d' < $< >> $@
 
-$(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
+$(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
 	cp $< $@
 
 $(SAFARI_ICON_FILES): $(ICON_SVG)
@@ -237,7 +237,7 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
 	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
        d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
        mkdir -p $$d/`dirname $$file`; \
-       cp $(SAFARI_ROOT)/$$file $$d/$$file || cp $$file $$d/$$file; \
+       cp $(SAFARI_ROOT)/$$file $$d/$$file; \
      done
 	cd $(SAFARIEXTZ_TMP_DIR) && \
       $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
@@ -281,7 +281,7 @@ $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
 	rm -rf $(XPI_TMP_DIR)
 	@for file in $(FIREFOX_DIST_FILES:$(FIREFOX_ROOT)/%=%); do \
        mkdir -p $(XPI_TMP_DIR)/`dirname $$file`; \
-       cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file || cp $$file $(XPI_TMP_DIR)/$$file; \
+       cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file; \
      done
 	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
 
