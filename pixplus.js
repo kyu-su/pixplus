@@ -280,7 +280,22 @@
         manga: 'Manga mode',
         survey: 'Survey mode',
         tagedit: 'Tag edit mode'
-      }
+      },
+
+      unviewable: 'Blocked',
+      no_storage: 'Preferences will not saved.',
+      export_userjs: 'You can export UserJS to change setting in "Export" tab.',
+      repost: '(Re: ',
+      favorite_user: 'Your favorite user',
+      unfavorite_user: 'Remove Favorite',
+      rate_confirm: 'Rate it?\n$pointpt',
+      author_works: 'Works',
+      author_bookmarks: 'Bookmarks',
+      author_staccfeed: 'Staccfeed',
+      empty_comment: 'Please enter a comment.',
+      delete_comment: 'Are you sure to delete comment?',
+      close: 'Close',
+      sending: 'Sending'
     },
 
     ja: {
@@ -413,7 +428,22 @@
         manga: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9',
         survey: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9',
         tagedit: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9'
-      }
+      },
+
+      unviewable: '\u95b2\u89a7\u4e0d\u53ef',
+      no_storage: '\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002',
+      export_userjs: 'Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002',
+      repost: '(\u518d: ',
+      favorite_user: '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059',
+      unfavorite_user: '\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664',
+      rate_confirm: '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n$point\u70b9',
+      author_works: '\u4f5c\u54c1',
+      author_bookmarks: '\u30d6\u30c3\u30af\u30de\u30fc\u30af',
+      author_staccfeed: '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9',
+      empty_comment: '\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002',
+      delete_comment: '\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f',
+      close: '\u9589\u3058\u308b',
+      sending: '\u9001\u4fe1\u4e2d'
     }
   };
   lang.c = lang[window.navigator.language] || lang.en;
@@ -1391,7 +1421,7 @@
           if (msgbox) {
             var sel_last = $x('a[starts-with(@href, "javascript:") and following-sibling::br][last()]', msgbox);
             if (sel_last) {
-              var sel_unviewable = $c('a', null, {text: "\u95b2\u89a7\u4e0d\u53ef", 'a:href': '#', 'css': 'margin-left:1em'});
+              var sel_unviewable = $c('a', null, {text: lang.c.unviewable, 'a:href': '#', 'css': 'margin-left:1em'});
               $ev(sel_unviewable).click(function() {
                 each($xa('//div[contains(concat(" ", @class, " "), " display_works ")]' +
                          '//input[@type="checkbox" and following-sibling::node()/descendant-or-self::img[' +
@@ -1606,6 +1636,7 @@
       func: function(args) {
         var date, re, li, a_p, a_n;
         if ((args.mode !== 'day' && args.mode !== 'daily') || !(li = $q('.rankingPager > ul > li'))) return;
+        // it's not translated
         if ((re = /(\d{4})\u5e74(\d{2})\u6708(\d{2})\u65e5\u4ed8/.exec(li.textContent))) {
           date = new Date(re[1], re[2], re[3]);
         } else {
@@ -1898,8 +1929,8 @@
             });
 
             if (!LS.u) {
-              var note = $c('div', root, {text: "\u8a2d\u5b9a\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002"});
-              if (window.opera) note.textContent += "Export\u30bf\u30d6\u3067\u8a2d\u5b9a\u3092\u5909\u66f4\u3059\u308bUserJS\u3092\u51fa\u529b\u3067\u304d\u307e\u3059\u3002";
+              $c('div', root, {text: lang.c.no_storage});
+              if (window.opera) $c('div', root, {text: lang.c.export_userjs});
             }
 
             $ev(root).listen(['oTransitionEnd', 'webkitTransitionEnd'], fire_event);
@@ -2910,7 +2941,7 @@
                  '#pp-popup #pp-info #pp-date-wrap > span + span{margin-left:0.6em;}' +
                  '#pp-popup #pp-info #pp-date-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
                  '#pp-popup #pp-info #pp-date-repost{font-size:smaller;line-height:1.1em;}' +
-                 '#pp-popup #pp-info #pp-date-repost:before{content:\"(\u518d \";}' +
+                 '#pp-popup #pp-info #pp-date-repost:before{content:"' + lang.c.repost + '";}' +
                  '#pp-popup #pp-info #pp-date-repost:after{content:")";}' +
                  '#pp-popup #pp-info #pp-info-wrap > span + span{margin-left:0.6em;}' +
                  '#pp-popup #pp-info #pp-info-wrap:after{content:"\\a";white-space:pre-wrap;line-height:1em;}' +
@@ -2985,11 +3016,11 @@
               if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
                 var button = $('favorite-button');
                 set_class(button, 'added', 1);
-                button.setAttribute('title', '\u304a\u6c17\u306b\u5165\u308a\u3067\u3059');
+                button.setAttribute('title', lang.c.favorite_user);
                 form.setAttribute('action', '/bookmark_setting.php');
 
                 var action = $x('.//div[contains(concat(" ", @class, " "), " action ")]', form);
-                $c('input', action, {'a:type': 'button', value: '\u304a\u6c17\u306b\u5165\u308a\u89e3\u9664', cls: 'button remove'});
+                $c('input', action, {'a:type': 'button', value: lang.c.unfavorite_user, cls: 'button remove'});
 
                 var mode = $x('.//input[@name="mode"]', form);
                 if (mode) mode.parentNode.removeChild(mode);
@@ -3020,7 +3051,7 @@
   function init_js() {
     // rate
     defineMagicFunction('countup_rating', function(real, othis, score) {
-      var msg = "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n%s\u70b9".replace('%s', String(score));
+      var msg = lang.c.rate_confirm.replace('$point', String(score));
       if (conf.rate_confirm && !confirm(msg)) return;
       if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
       real.apply(othis, Array.prototype.slice.call(arguments, 2));
@@ -3071,6 +3102,9 @@
   }
 
   function init_pixplus() {
+    var page_lang = window.document.documentElement.getAttribute('lang');
+    if (lang[page_lang]) lang.c = lang[page_lang];
+
     window.document.body.setAttribute('pixplus', '');
     var ev = window.document.createEvent('Event');
     ev.initEvent('pixplusInitialize', true, true);
@@ -3463,9 +3497,9 @@
       this.info_tools            = $c('span', this.info, {id: 'pp-info-tools'});
       this.author                = $c('span', this.post_cap, {id: 'pp-author'});
       this.a_profile             = $c('a', this.author);
-      this.a_illust              = $c('a', this.author, {text: "\u4f5c\u54c1"});
-      this.a_bookmark            = $c('a', this.author, {text: "\u30d6\u30c3\u30af\u30de\u30fc\u30af"});
-      this.a_stacc               = $c('a', this.author, {text: "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9"});
+      this.a_illust              = $c('a', this.author, {text: lang.c.author_works});
+      this.a_bookmark            = $c('a', this.author, {text: lang.c.author_bookmarks});
+      this.a_stacc               = $c('a', this.author, {text: lang.c.author_staccfeed});
       this.bm_edit               = $c('div', this.root_div, {id: 'pp-bm-edit'});
       this.tag_edit              = $c('div', this.root_div, {id: 'tag_edit'});
       this.img_div               = $c('div', this.root_div, {id: 'pp-img-div'});
@@ -3739,16 +3773,18 @@
        * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
        */
       if ((re = /<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i.exec(loader.text))) {
+        // U+FF5C: FULLWIDTH VERTICAL LINE
         var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
         _title = trim(re[2]);
         this.date.textContent = tmp[0];
+        // repost / it's not translated
         if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
           this.date_repost.textContent = (re[1] === _date ? '' : re[1] + '\u65e5 ') + re[2];
           this.date_repost.style.display = '';
         } else {
           this.date_repost.style.display = 'none';
         }
-        if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b) (\d+)P/.exec(tmp[1]))) {
+        if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b|\u0e21\u0e31\u0e07\u0e07\u0e30|\u041c\u0430\u043d\u0433\u0430|\ub9cc\ud654) (\d+)P/.exec(tmp[1]))) {
           if (re[3]) {
             this.manga.page_count = parseInt(re[3], 10);
             this.manga.usable = this.manga.page_count > 0;
@@ -3889,6 +3925,7 @@
          }
          html += '</h4>';
          */
+        // U+FF1A: FULLWIDTH COLON
         var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
         if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) html += re[1];
         html += '</div>';
@@ -3943,7 +3980,7 @@
                 comment.setAttribute('disabled', '');
                 submit.setAttribute('disabled', '');
               } else {
-                alert("\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+                alert(lang.c.empty_comment);
               }
               return true;
             });
@@ -4298,7 +4335,7 @@
         del.onclick = '';
         if (/^\w/.test(url)) url = '/' + url;
         $ev(del).click(function() {
-          if (confirm("\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
+          if (confirm(lang.c.delete_comment)) {
             geturl(url, function() {
               self.reload_viewer_comments();
             }, function() {
@@ -4969,7 +5006,7 @@
       if (opts.closable) {
         this.onclose = new Signal(BookmarkForm.prototype.destroy);
         this.btn_close = $c('input', this.btn_submit.parentNode,
-                            {type: 'button', value: "\u9589\u3058\u308b", cls: 'btn_type01 bookmark_submit_btn'});
+                            {type: 'button', value: lang.c.close, cls: 'btn_type01 bookmark_submit_btn'});
         this.connections.push($ev(this.btn_close).click(bind(function(ev, conn) {
           conn.disconnect();
           this.close();
@@ -5122,7 +5159,7 @@
             bottom.removeChild(bottom.firstChild);
           }
         } catch (x) { }
-        var note = $x('.//dd/text()[contains(., \"10\u500b\")]', this.root);
+        var note = $x('.//div[@id="bookmark_add_alert"]/following-sibling::text()[last()]', this.root);
         if (note) {
           if (check_node(note.previousSibling, 'BR')) {
             note.parentNode.removeChild(note.previousSibling);
@@ -5285,7 +5322,7 @@
 
     submit: function() {
       var submit_text = this.btn_submit.value, self = this;
-      this.btn_submit.value = "\u9001\u4fe1\u4e2d";
+      this.btn_submit.value = lang.c.sending;
       this.btn_submit.setAttribute('disabled', '');
       post(this.form, function(data) {
         self.btn_submit.value = submit_text;
