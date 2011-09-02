@@ -95,34 +95,39 @@ endif
 all: $(ALL_TARGETS)
 
 $(CONFIG_JSON): $(SRC_USERJS)
-	echo '[' > $@
-	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	echo ']' >> $@
+	@echo Create: $@
+	@echo '[' > $@
+	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
+	@echo ']' >> $@
 
 $(LANG_JS): $(SRC_USERJS)
-	echo '// auto generated code' > $@
-	sed -e '1,/__LANG_BEGIN__/d' -e '/__LANG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
+	@echo Create: $@
+	@echo '// auto generated code' > $@
+	@sed -e '1,/__LANG_BEGIN__/d' -e '/__LANG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(CONFIG_JS): $(SRC_USERJS)
-	echo '// auto generated code' > $@
-	echo 'var conf_schema = [' >> $@
-	sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
-	echo '];' >> $@
-	echo 'var LS = {' >> $@
-	sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
-        -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
-        -e '/__REMOVE__/d' \
-      < $(SRC_USERJS) | tr -d '\r' >> $@;
-	echo '};' >> $@
-	sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@;
+	@echo Create: $@
+	@echo '// auto generated code' > $@
+	@echo 'var conf_schema = [' >> $@
+	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
+	@echo '];' >> $@
+	@echo 'var LS = {' >> $@
+	@sed -e '1,/__STORAGE_COMMON_ENTRIES_BEGIN__/d' \
+         -e '/__STORAGE_COMMON_ENTRIES_END__/,$$d' \
+         -e '/__REMOVE__/d' \
+       < $(SRC_USERJS) | tr -d '\r' >> $@
+	@echo '};' >> $@
+	@sed -e '1,/__CONFIG_UI_BEGIN__/d' -e '/__CONFIG_UI_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(LIB_JS): $(SRC_USERJS)
-	echo '// auto generated code' > $@
-	echo 'var conf={log_level:2};' >> $@
-	sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
+	@echo Create: $@
+	@echo '// auto generated code' > $@
+	@echo 'var conf={log_level:2};' >> $@
+	@sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)
-	sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
+	@echo Create: $@
+	@sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
 
 warn:
 	@for kw in $(WARN_KEYWORDS_W); do \
@@ -133,73 +138,83 @@ warn:
      done
 
 clean: clean-opera clean-chrome clean-safari clean-firefox
-	rm -f $(CONFIG_JSON) $(CONFIG_JS) $(GREASEMONKEY_JS)
+	@echo Cleaning
+	@rm -f $(CONFIG_JSON) $(CONFIG_JS) $(GREASEMONKEY_JS)
 
 # ================ Opera ================
 
 $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
-	sed -e '/@LICENSE@/,$$d' \
-        -e 's/@VERSION@/$(VERSION)/' \
-        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-      < $< > $@
+	@echo Create: $@
+	@sed -e '/@LICENSE@/,$$d' \
+         -e 's/@VERSION@/$(VERSION)/' \
+         -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+       < $< > $@
 	@grep '://' $(LICENSE) | sed -e '2,$$d' -e 's/^ */  <license href="/' -e 's/ *$$/">/' >> $@
 	@cat $(LICENSE) >> $@
 	@echo '  </license>' >> $@
-	sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
+	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)/$$size.png\" />" >> $@; done
-	sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	python conf-parser.py opera < $(CONFIG_JSON) >> $@
-	sed -e '1,/@CONFIG@/d' < $< >> $@
+	@sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
+	@python conf-parser.py opera < $(CONFIG_JSON) >> $@
+	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS) warn
-	mkdir -p $(dir $@)
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@mkdir -p $(dir $@)
+	@cp $< $@
 
 $(OPERA_ICON_FILES): $(ICON_SVG)
-	mkdir -p $(dir $@)
-	$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
+	@echo Build: $@
+	@mkdir -p $(dir $@)
+	@$(RSVG_CONVERT) $< -w $(@:$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png=%) -o $@
 
 $(DIST_FILES:%=$(OPERA_ROOT)/%): $(OPERA_ROOT)/%: %
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(OEX): $(OPERA_DIST_FILES)
-	rm -rf $(OEX_TMP_DIR)
+	@echo Build: $@
+	@rm -rf $(OEX_TMP_DIR)
 	@for file in $(^:$(OPERA_ROOT)/%=%); do \
        mkdir -p $(OEX_TMP_DIR)/`dirname $$file`; \
        cp $(OPERA_ROOT)/$$file $(OEX_TMP_DIR)/$$file; \
      done
 #	cd $(OEX_TMP_DIR) && ../$(OPERA_ROOT)/sign/create_signature.sh $(^:$(OPERA_ROOT)/%=%) > signature1.xml
-	cd $(OEX_TMP_DIR) && $(ZIP) -r ../$@ *
+	@cd $(OEX_TMP_DIR) && $(ZIP) -qr ../$@ *
 
 clean-opera:
-	rm -f $(OEX) $(OPERA_CONFIG_XML) $(DIST_FILES:%=$(OPERA_ROOT)/%)
-	rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
+	@rm -f $(OEX) $(OPERA_CONFIG_XML) $(DIST_FILES:%=$(OPERA_ROOT)/%)
+	@rm -rf $(OEX_TMP_DIR) $(OPERA_ROOT)/includes $(OPERA_ROOT)/$(OPERA_ICON_DIR)
 
 # ================ Chrome ================
 
 $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
-	sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@
+	@echo Create: $@
+	@sed -e '/@ICONS@/,$$d' < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
        test $$first -eq 1 && first=0 || echo ',' >> $@; \
        /bin/echo -n "    \"$$size\": \"$(CHROME_ICON_DIR)/$$size.png\"" >> $@; \
      done
-	echo >> $@;
-	sed -e '1,/@ICONS@/d' \
-        -e 's/@VERSION@/$(VERSION)/' \
-        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-      < $< | tr -d '\r' >> $@
+	@echo >> $@;
+	@sed -e '1,/@ICONS@/d' \
+         -e 's/@VERSION@/$(VERSION)/' \
+         -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+       < $< | tr -d '\r' >> $@
 
 $(CHROME_ICON_FILES): $(ICON_SVG)
-	mkdir -p $(dir $@)
-	$(RSVG_CONVERT) $< -w $(@:$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png=%) -o $@
+	@echo Build: $@
+	@mkdir -p $(dir $@)
+	@$(RSVG_CONVERT) $< -w $(@:$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png=%) -o $@
 
 $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%): $(CHROME_ROOT)/%: %
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(CRX): $(CHROME_DIST_FILES)
-	rm -rf $(CRX_TMP_DIR)
+	@echo Build: $@
+	@rm -rf $(CRX_TMP_DIR)
 	@for file in $(^:$(CHROME_ROOT)/%=%); do \
        mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
        cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
@@ -209,89 +224,102 @@ $(CRX): $(CHROME_DIST_FILES)
 	 else \
        "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=); \
      fi
-	mv $(CRX_TMP_DIR)/$(CRX) ./
+	@mv $(CRX_TMP_DIR)/$(CRX) ./
 	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) $(CHROME_SIGN_KEY) || :
 
 clean-chrome:
-	rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
-	rm -rf $(CRX_TMP_DIR) $(CHROME_ROOT)/$(CHROME_ICON_DIR)
+	@rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
+	@rm -rf $(CRX_TMP_DIR) $(CHROME_ROOT)/$(CHROME_ICON_DIR)
 
 # ================ Safari ================
 
 $(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
-	sed -e 's/@VERSION@/$(VERSION)/' \
-        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-      < $< > $@
+	@echo Create: $@
+	@sed -e 's/@VERSION@/$(VERSION)/' \
+         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+       < $< > $@
 
 $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
-	sed -e '/__SETTINGS__/,$$d' < $< > $@
-	python conf-parser.py safari < $(CONFIG_JSON) >> $@
-	sed -e '1,/__SETTINGS__/d' < $< >> $@
+	@echo Create: $@
+	@sed -e '/__SETTINGS__/,$$d' < $< > $@
+	@python conf-parser.py safari < $(CONFIG_JSON) >> $@
+	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(SAFARI_ICON_FILES): $(ICON_SVG)
-	$(RSVG_CONVERT) $< -w $(@:$(SAFARI_ROOT)/Icon-%.png=%) -o $@
+	@echo Build: $@
+	@$(RSVG_CONVERT) $< -w $(@:$(SAFARI_ROOT)/Icon-%.png=%) -o $@
 
 $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
-	rm -rf $(SAFARIEXTZ_TMP_DIR)
+	@echo Build: $@
+	@rm -rf $(SAFARIEXTZ_TMP_DIR)
 	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
        d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
        mkdir -p $$d/`dirname $$file`; \
        cp $(SAFARI_ROOT)/$$file $$d/$$file; \
      done
-	cd $(SAFARIEXTZ_TMP_DIR) && \
-      $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) && \
-      : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
-      $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) && \
-      (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
-        openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
-      $(XAR) --inject-sig signature.dat -f ../$@
+	@cd $(SAFARIEXTZ_TMP_DIR) && \
+       $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) >/dev/null && \
+       : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
+       $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) >/dev/null && \
+       (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
+         openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
+       $(XAR) --inject-sig signature.dat -f ../$@ >/dev/null
 
 clean-safari:
-	rm -f $(SAFARIEXTZ) $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) \
-          $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ICON_FILES)
-	rm -rf $(SAFARIEXTZ_TMP_DIR)
+	@rm -f $(SAFARIEXTZ) $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) \
+           $(SAFARI_ROOT)/$(CONFIG_JS) $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ICON_FILES)
+	@rm -rf $(SAFARIEXTZ_TMP_DIR)
 
 # ================ Firefox ================
 
 $(FIREFOX_ROOT)/$(LICENSE): $(FIREFOX_ROOT)/%: %
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(FIREFOX_CONTENTS:%=$(FIREFOX_ROOT)/content/%): $(FIREFOX_ROOT)/content/%: % warn
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(FIREFOX_INSTALL_RDF): $(FIREFOX_INSTALL_RDF).in
-	sed -e 's/@VERSION@/$(VERSION)/' \
-        -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
-        -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-      < $< > $@
+	@echo Create: $@
+	@sed -e 's/@VERSION@/$(VERSION)/' \
+         -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+       < $< > $@
 
 $(FIREFOX_CHROME_MANIFEST): $(FIREFOX_CHROME_MANIFEST).in
-	cp $< $@
+	@echo "Copy: $< => $@"
+	@cp $< $@
 
 $(FIREFOX_ICON_FILES): $(ICON_SVG)
-	mkdir -p $(dir $@)
-	$(RSVG_CONVERT) $< -w $(@:$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png=%) -o $@
+	@echo Build: $@
+	@mkdir -p $(dir $@)
+	@$(RSVG_CONVERT) $< -w $(@:$(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)/%.png=%) -o $@
 
 $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
-	mkdir -p $(dir $@)
-	python conf-parser.py firefox < $(CONFIG_JSON) >> $@
+	@echo Build: $@
+	@mkdir -p $(dir $@)
+	@python conf-parser.py firefox < $(CONFIG_JSON) >> $@
 
 $(FIREFOX_DEBUG_LOADER):
-	(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
+	@echo Build: $@
+	@(pwd | tr -d '\r\n'; echo "/$(dir $@)") > $@
 
 $(XPI): $(FIREFOX_DIST_FILES) $(FIREFOX_DEBUG_LOADER)
-	rm -rf $(XPI_TMP_DIR)
+	@echo Build: $@
+	@rm -rf $(XPI_TMP_DIR)
 	@for file in $(FIREFOX_DIST_FILES:$(FIREFOX_ROOT)/%=%); do \
        mkdir -p $(XPI_TMP_DIR)/`dirname $$file`; \
        cp $(FIREFOX_ROOT)/$$file $(XPI_TMP_DIR)/$$file; \
      done
-	cd $(XPI_TMP_DIR) && $(ZIP) -r ../$@ *
+	@cd $(XPI_TMP_DIR) && $(ZIP) -qr ../$@ *
 
 clean-firefox:
-	rm -f $(XPI) $(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%) \
-          $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) \
-          $(FIREFOX_DEBUG_LOADER)
-	rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
+	@rm -f $(XPI) $(FIREFOX_CONTENTS_COPY:%=$(FIREFOX_ROOT)/content/%) \
+           $(FIREFOX_INSTALL_RDF) $(FIREFOX_CHROME_MANIFEST) $(FIREFOX_DEFAULTS_PREFS) \
+           $(FIREFOX_DEBUG_LOADER)
+	@rm -rf $(XPI_TMP_DIR) $(FIREFOX_ROOT)/defaults $(FIREFOX_ROOT)/$(FIREFOX_ICON_DIR)
