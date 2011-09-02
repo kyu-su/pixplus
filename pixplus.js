@@ -253,19 +253,13 @@
           popup_rate10: 'Rate(10pt)',
           popup_zoom_in: 'Zoom in(Opera/Firefox only)',
           popup_zoom_out: 'Zoom out(Opera/Firefox only)',
-          popup_bookmark_start: 'Start $mode',
-          popup_manga_start: 'Start $mode',
-          popup_qrate_start: 'Start $mode',
-          popup_tag_edit_start: 'Start $mode',
-          popup_bookmark_end: 'End $mode',
           popup_bookmark_submit: 'Send',
           popup_manga_open_page: 'Open manga page',
-          popup_manga_end: 'End $mode',
-          popup_qrate_end: 'End $mode',
           popup_qrate_select_prev: 'Select previous item',
           popup_qrate_select_next: 'Select next item',
           popup_qrate_submit: 'Send',
-          popup_tag_edit_end: 'End $mode'
+          mode_start: 'Start $mode',
+          mode_end: 'End $mode'
         },
 
         bookmark: {
@@ -401,19 +395,13 @@
           popup_rate10: '\u8a55\u4fa1\u3059\u308b(10\u70b9)',
           popup_zoom_in: '\u753b\u50cf\u3092\u62e1\u5927\u3059\u308b(Opera/Firefox\u306e\u307f)',
           popup_zoom_out: '\u753b\u50cf\u3092\u7e2e\u5c0f\u3059\u308b(Opera/Firefox\u306e\u307f)',
-          popup_bookmark_start: '$mode\u958b\u59cb',
-          popup_manga_start: '$mode\u958b\u59cb',
-          popup_qrate_start: '$mode\u958b\u59cb',
-          popup_tag_edit_start: '$mode\u958b\u59cb',
-          popup_bookmark_end: '$mode\u7d42\u4e86',
           popup_bookmark_submit: '\u9001\u4fe1',
           popup_manga_open_page: '\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002',
-          popup_manga_end: '$mode\u7d42\u4e86',
-          popup_qrate_end: '$mode\u7d42\u4e86',
           popup_qrate_select_prev: '\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
           popup_qrate_select_next: '\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
           popup_qrate_submit: '\u9001\u4fe1',
-          popup_tag_edit_end: '$mode\u7d42\u4e86'
+          mode_start: '$mode\u958b\u59cb',
+          mode_end: '$mode\u7d42\u4e86'
         },
 
         bookmark: {
@@ -526,15 +514,15 @@
       {"key": "popup_manga_start", "value": "v", "start_mode": "manga"},
       {"key": "popup_qrate_start", "value": "d", "start_mode": "survey"},
       {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
-      {"key": "popup_bookmark_end", "value": "Escape", "mode": "bookmark"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
+      {"key": "popup_bookmark_end", "value": "Escape", "end_mode": "bookmark"},
       {"key": "popup_manga_open_page", "value": "Shift+s", "mode": "manga"},
-      {"key": "popup_manga_end", "value": "v,Escape", "mode": "manga"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "mode": "survey"},
+      {"key": "popup_manga_end", "value": "v,Escape", "end_mode": "manga"},
       {"key": "popup_qrate_select_prev", "value": "Up", "mode": "survey"},
       {"key": "popup_qrate_select_next", "value": "Down", "mode": "survey"},
       {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "survey"},
-      {"key": "popup_tag_edit_end", "value": "Escape", "mode": "tagedit"}
+      {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "survey"},
+      {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
     ]},
     {"name": "bookmark", "label": "Bookmark", "items": [
       {"key": "tag_order", "value": "", "desc": ""},
@@ -2003,6 +1991,13 @@
           var type = typeof item.value;
           var row = page.table.insertRow(-1), cell = row.insertCell(-1), input;
           var langitem = lang.c.conf[sec.name][item.key];
+          if (sec.name === 'key') {
+            if (item.start_mode) {
+              langitem = lang.c.conf.key.mode_start;
+            } else if (item.end_mode) {
+              langitem = lang.c.conf.key.mode_end;
+            }
+          }
           row.className = 'pp-conf-entry pp-conf-entry-' + (idx & 1 ? 'even' : 'odd');
           if (langitem.hint) {
             input = $c('select');
@@ -2305,25 +2300,29 @@
         }
         add_mode_line(0, 'normal');
         each(page.section.items, function(item, idx) {
-          var langitem = lang.c.conf.key[item.key];
+          var langitem = (item.start_mode
+                          ? lang.c.conf.key.mode_start
+                          : (item.end_mode
+                             ? lang.c.conf.key.mode_end
+                             : lang.c.conf.key[item.key]));
           var row = page.table.rows[idx + offset];
           var cell = row.cells[row.cells.length - 1];
-          if (item.mode || item.start_mode) {
-            var mode_name = lang.c.mode[item.mode || item.start_mode];
+          var mode1 = item.mode || item.end_mode, mode2 = mode1 || item.start_mode;
+          if (mode2) {
             cell.innerHTML = '';
             each((langitem.desc || langitem).split(/(\$mode)/), function(term) {
               if (term === '$mode') {
-                var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: mode_name});
-                if (!mode_map[mode_name]) mode_map[mode_name] = [];
-                mode_map[mode_name].push(span);
+                var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: lang.c.mode[mode2]});
+                if (!mode_map[mode2]) mode_map[mode2] = [];
+                mode_map[mode2].push(span);
               } else {
                 cell.appendChild(window.document.createTextNode(term));
               }
             });
           }
-          if (item.mode && item.mode !== mode) {
-            add_mode_line(idx, item.mode);
-            mode = item.mode;
+          if (mode1 && mode1 !== mode) {
+            add_mode_line(idx, mode1);
+            mode = mode1;
           }
         });
         function highlight_mode(mode, on) {
