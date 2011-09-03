@@ -2593,16 +2593,17 @@
             });
           });
           open.appendChild(window.document.createTextNode(')'));
-        }).apply(this, group('Pages', 'pages'));
+        }).apply(this, group('Supported pages', 'pages'));
       }
     }],
 
     changelog_data: [{
-      date: '2011/xx/xx', version: '0.8.0', changes: [
+      date: '2011/09/03', version: '0.8.0', changes: [
         '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
         '\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u3067\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
-        '\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002'
+        '\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002',
+        'AutoPatchWork\u7b49\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002'
       ]
     }, {
       date: '2011/08/21', version: '0.7.0', changes: [
@@ -2854,7 +2855,6 @@
                  '.works_caption hr, #pp-popup hr{display:block;border:none;height:1px;background-color:silver;}' +
                  'hr + br, hr ~ br{display:none;}' +
                  // menu
-                 // 検索欄が z-index:1000 なので
                  'header#global-header div.wrapper nav.site-menu > ul > li{display:inline-block;}' +
                  '#pp-sitenav-menu-caption > a{display:block;}' +
                  '#pp-sitenav-menu-caption div{padding:3px;margin-top:-3px;margin-left:-3px;background-color:white;' +
@@ -2880,7 +2880,7 @@
                  ConfigUI.css +
                  // popup
                  '#pp-popup{background-color:white;position:fixed;padding:3px;' +
-                 '  border:2px solid gray;z-index:2000;}' +
+                 '  border:2px solid gray;z-index:20000;}' +
                  '#pp-popup #pp-header{line-height:1.1em;}' +
                  '#pp-popup #pp-title{font-size:larger;font-weight:bold;}' +
                  '#pp-popup #pp-title:hover{text-decoration:none;}' +
@@ -2890,7 +2890,7 @@
                  '#pp-popup #pp-right a.enable{color:gray;font-weight:normal;}' +
                  '#pp-popup #pp-header{background-color:white;}' +
                  '#pp-popup #pp-header #pp-caption{padding-top:2px;position:absolute;' +
-                 '  background-color:white;z-index:2010;opacity:0;padding-bottom:1px;}' +
+                 '  background-color:white;z-index:20010;opacity:0;padding-bottom:1px;}' +
                  '#pp-popup #pp-header:hover #pp-caption{opacity:' + conf.popup.caption_opacity + ';}' +
                  '#pp-popup #pp-header #pp-caption.show{opacity:' + conf.popup.caption_opacity + ';visibility:visible;}' +
                  '#pp-popup #pp-caption .pp-separator{border-top:1px solid gray;margin-top:1px;padding-top:1px;}' +
@@ -2906,7 +2906,7 @@
                  '#pp-popup #pp-img-div a img{display:block;}' +
                  '#pp-popup #pp-img-div #pp-error-message{display:none;width:480px;height:360px;' +
                  '  line-height:360px;text-align:center;vertical-align:middle;}' +
-                 '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:2004;opacity:0;background-color:gainsboro;}' +
+                 '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:20004;opacity:0;background-color:gainsboro;}' +
                  '#pp-popup .pp-olc:hover{opacity:0.6;}' +
                  '#pp-popup #pp-olc-prev{left:3px;}' +
                  '#pp-popup #pp-olc-next{right:3px;}' +
