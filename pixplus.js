@@ -2963,24 +2963,6 @@
 
     init_per_page();
 
-    $ev(window.document.body).click(function(ev) {
-      var anc = $x('ancestor-or-self::a[1]', ev.target), re;
-      if (anc && !anc.hasAttribute('nopopup') && (anc.getAttribute('href') || '').charAt(0) != '#' &&
-          (re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/.exec(anc.href))) {
-        if (Popup.instance || $t('img', anc).length ||
-            !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + re[1] + '")]//img')) {
-          var opts = parseopts(anc.href);
-          if (opts.illust_id && opts.mode === 'medium') {
-            ev.preventDefault();
-            Popup.run_url(anc.href);
-            LOG.debug(['Open popup: ', anc]);
-            return true;
-          }
-        }
-      }
-      return false;
-    });
-
     if (conf.bookmark_hide) {
       each($xa('.//a[contains(@href, "bookmark.php")]'), function(anc) {
         if (!/[\?&]rest=/.test(anc.href) &&
@@ -3004,44 +2986,60 @@
       }
     }
 
-    if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) {
-      (function() {
-        var _open = window.pixiv.Favorite.prototype.open;
-        window.pixiv.Favorite.prototype.open = function() {
-          var btn = $('favorite-button');
-          var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
-          var restrict = $xa('.//input[@name="restrict"]', form);
-          if (btn && form && restrict.length === 2) {
-            each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
-            post(form, function(data) {
-              var re;
-              if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
-                var button = $('favorite-button');
-                set_class(button, 'added', 1);
-                button.setAttribute('title', lang.c.favorite_user);
-                form.setAttribute('action', '/bookmark_setting.php');
+    if (conf.fast_user_bookmark && window.pixiv && window.pixiv.Favorite) (function() {
+      var _open = window.pixiv.Favorite.prototype.open;
+      window.pixiv.Favorite.prototype.open = function() {
+        var btn = $('favorite-button');
+        var form = $x('//*[@id="favorite-preference"]//form[contains(@action, "bookmark_add.php")]');
+        var restrict = $xa('.//input[@name="restrict"]', form);
+        if (btn && form && restrict.length === 2) {
+          each(restrict, function(r) { r.checked = r.value === conf.fast_user_bookmark - 1; });
+          post(form, function(data) {
+            var re;
+            if (/<div[^>]+class=\"[^\"]*one_complete_title[^\"]*\"[^>]*>[\r\n]*<a[^>]+href=\"member\.php\?id=[^>]*>/i.test(data)) {
+              var button = $('favorite-button');
+              set_class(button, 'added', 1);
+              button.setAttribute('title', lang.c.favorite_user);
+              form.setAttribute('action', '/bookmark_setting.php');
 
-                var action = $x('.//div[contains(concat(" ", @class, " "), " action ")]', form);
-                $c('input', action, {'a:type': 'button', value: lang.c.unfavorite_user, cls: 'button remove'});
+              var action = $x('.//div[contains(concat(" ", @class, " "), " action ")]', form);
+              $c('input', action, {'a:type': 'button', value: lang.c.unfavorite_user, cls: 'button remove'});
 
-                var mode = $x('.//input[@name="mode"]', form);
-                if (mode) mode.parentNode.removeChild(mode);
-                btn.style.opacity = '1';
-              } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
-                alert(re[1]);
-              } else {
-                alert('Error!');
-              }
-            }, function() {
+              var mode = $x('.//input[@name="mode"]', form);
+              if (mode) mode.parentNode.removeChild(mode);
+              btn.style.opacity = '1';
+            } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
+              alert(re[1]);
+            } else {
               alert('Error!');
-            });
-            btn.style.opacity = '0.2';
-          } else {
-            _open.apply(this, Array.prototype.slice.call(arguments));
+            }
+          }, function() {
+            alert('Error!');
+          });
+          btn.style.opacity = '0.2';
+        } else {
+          _open.apply(this, Array.prototype.slice.call(arguments));
+        }
+      };
+    })();
+
+    $ev(window.document.body).click(function(ev) {
+      var anc = $x('ancestor-or-self::a[1]', ev.target), re;
+      if (anc && !anc.hasAttribute('nopopup') && (anc.getAttribute('href') || '').charAt(0) != '#' &&
+          (re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php.*[\?&](illust_id=\d+)/.exec(anc.href))) {
+        if (Popup.instance || $t('img', anc).length ||
+            !$x('//a[contains(@href, "member_illust.php") and contains(@href, "' + re[1] + '")]//img')) {
+          var opts = parseopts(anc.href);
+          if (opts.illust_id && opts.mode === 'medium') {
+            ev.preventDefault();
+            Popup.run_link(anc.href);
+            LOG.debug(['Open popup: ', anc]);
+            return true;
           }
-        };
-      })();
-    }
+        }
+      }
+      return false;
+    });
 
     (function() {
       var ev = window.document.createEvent('Event');
