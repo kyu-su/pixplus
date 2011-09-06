@@ -3032,7 +3032,7 @@
           var opts = parseopts(anc.href);
           if (opts.illust_id && opts.mode === 'medium') {
             ev.preventDefault();
-            Popup.run_link(anc.href);
+            Popup.run_url(anc.href);
             LOG.debug(['Open popup: ', anc]);
             return true;
           }
