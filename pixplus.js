@@ -1337,6 +1337,17 @@
       xpath_cap: 'li/a/img/following-sibling::text()',
       xpath_tmb: 'preceding-sibling::img'
     };
+
+    var main_menu_items = [];
+    function create_main_menu_item(text, func) {
+      var item = $c('li');
+      $ev($c('a', item, {href: '#', text: text})).click(function() {
+        func();
+        return true;
+      });
+      return item;
+    }
+
     return [{
       name: 'bookmark',
       sample_url: [{url: 'http://www.pixiv.net/bookmark.php?rest=hide', page: true},
@@ -1577,7 +1588,27 @@
       sample_url: ['http://www.pixiv.net/mypage.php',
                    'http://www.pixiv.net/cate_r18.php'],
       url: ['/mypage.php', '/cate_r18.php'],
-      gallery: [g_mypage, g_area_right]
+      gallery: [g_mypage, g_area_right],
+      func: function(args) {
+        var cookie_key = {'/mypage.php': 'pixiv_mypage', '/cate_r18.php': 'pixiv_cate_r18'}[window.location.pathname];
+        if (cookie_key) {
+          var mi_restore, mi_restore_input, key = '__pixplus_cookie_' + cookie_key;
+          main_menu_items.push(create_main_menu_item('Save layout', function() {
+            var value = cookie.get(cookie_key);
+            window.localStorage[key] = value;
+            mi_restore_input.value = value;
+            //mi_restore.style.display = 'block';
+          }));
+          main_menu_items.push(mi_restore = create_main_menu_item('Restore layout', function() {
+            cookie.set(cookie_key, mi_restore_input.value, {expires: 30, domain: 'pixiv.net', path: '/'});
+            window.location.reload();
+          }));
+          mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
+          $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
+            this.select(); /* WARN */
+          });
+        }
+      }
 
     }, {
       name: 'member',
@@ -1853,42 +1884,13 @@
             }
           }
 
-          function create_menu_item(text, func) {
-            var item = $c('li');
-            $ev($c('a', item, {href: '#', text: text})).click(function() {
-              func();
-              return true;
-            });
-            return item;
-          }
-
-          var menu_items = [];
-          if (/\/mypage\.php/.test(window.location.pathname) && window.localStorage) (function() {
-            var mi_restore, mi_restore_input, key = '__pixplus_cookie_pixiv_mypage';
-            menu_items.push(create_menu_item('Save layout', function() {
-              var value = cookie.get('pixiv_mypage');
-              window.localStorage[key] = value;
-              mi_restore_input.value = value;
-              //mi_restore.style.display = 'block';
-            }));
-            menu_items.push(mi_restore = create_menu_item('Restore layout', function() {
-              cookie.set('pixiv_mypage', mi_restore_input.value, {expires: 30, domain: 'pixiv.net', path: '/'});
-              window.location.reload();
-            }));
-            mi_restore_input = $c('input', mi_restore, {value: window.localStorage[key] || ''});
-            $ev(mi_restore_input).listen(['mousedown', 'mouseup'], function() {
-              this.select(); /* WARN */
-            });
-            //if (!window.localStorage[key]) mi_restore.style.display = 'none';
-          })();
-
           var li  = $c('li', null, {id: 'pp-sitenav-menu-caption'});
           sitemenu.insertBefore(li, sitemenu.firstChild);
-          config_anc = $c('a', menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
-          if (menu_items.length) {
+          config_anc = $c('a', main_menu_items.length ? $c('div', li) : li, {href: '#', text: 'pixplus'});
+          if (main_menu_items.length) {
             li.appendChild(config_anc.cloneNode(true));
             var menu = $c('ul', li, {id: 'pp-sitenav-menu'});
-            each(menu_items, function(item) {
+            each(main_menu_items, function(item) {
               menu.appendChild(item);
             });
           }
