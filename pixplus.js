@@ -1821,7 +1821,8 @@
     }, {
       name: 'other',
       sample_url: [{url: 'http://www.pixiv.net/bookmark.php?id=32777', page: true},
-                   {url: 'http://www.pixiv.net/response.php?illust_id=15092961', page: true}],
+                   {url: 'http://www.pixiv.net/response.php?illust_id=15092961', page: true},
+                   {url: 'http://www.pixiv.net/personal_tags.php?tag=%E4%BC%81%E7%94%BB', page: true}],
       func: [function(args) {
         if (pp.galleries.length === 0) {
           add_gallery({
