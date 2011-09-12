@@ -516,7 +516,7 @@
       {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
       {"key": "popup_bookmark_end", "value": "Escape", "end_mode": "bookmark"},
-      {"key": "popup_manga_open_page", "value": "Shift+s", "mode": "manga"},
+      {"key": "popup_manga_open_page", "value": "Shift+f", "mode": "manga"},
       {"key": "popup_manga_end", "value": "v,Escape", "end_mode": "manga"},
       {"key": "popup_qrate_select_prev", "value": "Up", "mode": "survey"},
       {"key": "popup_qrate_select_next", "value": "Down", "mode": "survey"},
