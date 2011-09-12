@@ -576,10 +576,6 @@
       js: {
         jquery:             'http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js', /* WARN */
         prototypejs:        'http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js',
-        effects:            'http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/effects.js',
-        rpc:                'http://source.pixiv.net/source/js/rpc.js',
-        rating:             'http://source.pixiv.net/source/js/modules/rating.js?20101107',
-        tag_edit:           'http://source.pixiv.net/source/js/tag_edit.js',
         illust_recommender: 'http://source.pixiv.net/source/js/illust_recommender.js?021216'
       },
       css: {
@@ -2500,9 +2496,9 @@
         update();
         $ev(debug_input).change(update);
 
-        function group(label, id, root) {
+        function group(text, id, root) {
           var group = $c('fieldset', root || page.content, {id: 'pp-conf-debug-group-' + id});
-          var label = $c('legend', group, {text: label});
+          var label = $c('legend', group, {text: text});
           return [group, label];
         }
 
@@ -2601,6 +2597,10 @@
     }],
 
     changelog_data: [{
+      date: '2011/09/xx', version: '0.8.1', changes: [
+        'pixiv \u306e\u5909\u66f4\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306a\u3069\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
       date: '2011/09/03', version: '0.8.0', changes: [
         '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
         '\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
@@ -3142,8 +3142,10 @@
       }
       return url;
     }
+
     function jq_onload() {
-      window.jQuery.noConflict();
+      //window.jQuery.noConflict();
+      if (conf.disable_effect) window.jQuery.fx.off = true;
       if (/^\/stacc\//.test(window.location.pathname)) {
         var _ajax = window.jQuery.ajax;
         window.jQuery.ajax = function(obj) {
@@ -3191,6 +3193,7 @@
         };
       }
     }
+
     function pt_onload() {
       if (!/^\/stacc\//.test(window.location.pathname)) return;
       var _request = window.Ajax.Request.prototype.request;
@@ -3200,30 +3203,9 @@
       };
     }
 
-    (function($js) {
-      if (!$x('//script[contains(@src, "/rating_manga")]')) {
-        $js = $js.script(pp.url.js.rating);
-      }
-      return $js;
-    })($js
-       .script(pp.url.js.jquery, !!window.jQuery)
-       .wait(jq_onload)
-       .script(pp.url.js.prototypejs, !!window.Prototype)
-       .wait(pt_onload)
-       .script(pp.url.js.effects, !!window.Effect)
-       .script(pp.url.js.rpc, !!window.sendRequest)
-       .wait(function() {
-         if (conf.disable_effect) {
-           window.jQuery.fx.off = true;
-           window.Effect.ScopedQueue.prototype.add = function(effect) {
-             effect.loop(effect.startOn);
-             effect.loop(effect.finishOn);
-           };
-         }
-       })
-      )
-      .script(pp.url.js.tag_edit)
-      .wait(init_js);
+    jq_onload();
+    pt_onload();
+    init_js();
 
     window.setTimeout(Floater.init, 100);
   }
@@ -5590,96 +5572,6 @@
       each(funcs, function(func) { func(); });
       conn.disconnect();
     });
-  };
-
-  var $js = new function() {
-    var holder = $t('head')[0];
-    var ctx = $cls.create({
-      initialize: function(block) {
-        this.urls     = [];
-        this.scripts  = [];
-        this.load_cnt = 0;
-        this.block    = block;
-      },
-
-      script: function(url, cond) {
-        if (cond) {
-          if (conf.debug) chk_ext_src('script', 'src', url);
-          return this;
-        }
-        LOG.debug('$js#script: ' + url);
-        this.urls.push(url);
-        if (this.block) {
-          ++this.load_cnt;
-        } else {
-          this.add_load(url, true);
-        }
-        return this;
-      },
-
-      wait: function(func) {
-        LOG.debug('$js#wait');
-        if (this.load_cnt > 0) {
-          var new_obj = new ctx(true);
-          this.wait = {ctx: new_obj, func: func};
-          return new_obj;
-        } else {
-          if (func) func();
-          return this;
-        }
-      },
-
-      add_load: function(url, raise) {
-        var elem = chk_ext_src('script', 'src', url);
-        if (raise) ++this.load_cnt;
-        if (elem) {
-          if (elem.getAttribute('type') === 'script/cache') { // webkit
-            LOG.debug('$js#labjs: ' + url);
-            var callee = arguments.callee, self = this;
-            window.setTimeout(function() { callee.call(self, url); }, 0);
-          } else if (elem.readyState === 'loading' || elem.readyState === 'interactive') {
-            LOG.debug('$js#preexists: ' + url);
-            wait.call(this, elem);
-          } else if (elem.readyState) { // for opera
-            load_cb.call(this);
-          } else {
-            window.setTimeout(bind(load_cb, this), 0);
-          }
-        } else {
-          LOG.info('$js#load: ' + url);
-          elem = $c('script', null, {async: false});
-          wait.call(this, elem);
-          elem.src  = url;
-          holder.appendChild(elem);
-        }
-        function wait(elem) {
-          elem.addEventListener('load', bind(load_cb, this), false);
-        }
-        function load_cb() {
-          if (--this.load_cnt < 1) this.unblock();
-        }
-      },
-
-      fire: function() {
-        LOG.debug('$js#fire');
-        this.block = false;
-        each(this.urls, function(url) {
-          this.add_load(url);
-        }, this);
-      },
-
-      unblock: function() {
-        LOG.debug('$js#unblock');
-        if (this.wait) {
-          if (this.wait.func) this.wait.func();
-          if (this.wait.ctx)  this.wait.ctx.fire();
-        }
-      }
-    });
-
-    this.script = function() {
-      return ctx.prototype.script.apply(new ctx(), Array.prototype.slice.call(arguments));
-    };
   };
 
   function getpos(elem, root) {
