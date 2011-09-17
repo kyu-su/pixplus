@@ -268,6 +268,7 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
        (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
          openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
        $(XAR) --inject-sig signature.dat -f ../$@ >/dev/null
+	@chmod 644 $@
 
 clean-safari:
 	@rm -f $(SAFARIEXTZ) $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) \
