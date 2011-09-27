@@ -3062,18 +3062,17 @@
         var success = obj.success;
         obj.success = function() {
           try {
-            success.apply(othis, Array.prototype.slice.call(arguments));
+            if (success) success.apply(othis, Array.prototype.slice.call(arguments));
             if (Popup.instance && Popup.instance.has_qrate) {
               if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
-              each(
-                $xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                function(item) {
-                  var re;
-                  if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1], 10) & 1)) {
-                    var value = $x('following-sibling::div', item);
-                    if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
-                  }
-                });
+              each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
+                   function(item) {
+                     var re;
+                     if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1], 10) & 1)) {
+                       var value = $x('following-sibling::div', item);
+                       if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                     }
+                   });
             }
           } catch(ex) {
             alert('Error!\nCheck referer setting.');
