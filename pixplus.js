@@ -1315,13 +1315,13 @@
 
   var pp_page_support = (function() {
     var g_area_right = {
-      xpath_col:     '//div[contains(concat(" ", @class, " "), " area_right ")]/ul[contains(concat(" ", @class, " "), " ranklist ")]',
-      xpath_cap:     'li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
-      xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
+      xpath_col: '//ol[contains(concat(" ", @class, " "), " ranking ")]',
+      xpath_cap: 'li//a[parent::li[contains(concat(" ", @class, " "), " rank ")] or parent::h2/parent::li[contains(concat(" ", @class, " "), " rank-detail ")]]',
+      xpath_tmb: 'parent::h2/preceding-sibling::a/img',
       allow_nothumb: 3
     }, g_mypage = {
-      xpath_col: '//ul[contains(concat(" ", @class, " "), " top_display_works ")]',
-      xpath_cap: 'li/a/img/following-sibling::text()',
+      xpath_col: '//div[@id="item-container"]//ul[contains(concat(" ", @class, " "), " images ")]',
+      xpath_cap: 'li/a/img/following-sibling::h1',
       xpath_tmb: 'preceding-sibling::img'
     }, g_member = {
       xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]/ul',
