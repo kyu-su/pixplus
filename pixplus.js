@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.8.1
+// @version     0.8.2
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -1319,9 +1319,18 @@
       xpath_cap: 'li//a[parent::li[contains(concat(" ", @class, " "), " rank ")] or parent::h2/parent::li[contains(concat(" ", @class, " "), " rank-detail ")]]',
       xpath_tmb: 'parent::h2/preceding-sibling::a/img',
       allow_nothumb: 3
+    }, g_area_right_old = {
+      xpath_col:     '//div[contains(concat(" ", @class, " "), " area_right ")]/ul[contains(concat(" ", @class, " "), " ranklist ")]',
+      xpath_cap:     'li//a[contains(@href, "mode=medium")][preceding-sibling::*[contains(concat(" ", @class, " "), " ranknumsmall ")] or ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]]',
+      xpath_tmb:     'ancestor::*[contains(concat(" ", @class, " "), " ran_text ")]/preceding-sibling::*[contains(concat(" ", @class, " "), " ran_img ")]//img',
+      allow_nothumb: 3
     }, g_mypage = {
       xpath_col: '//div[@id="item-container"]//ul[contains(concat(" ", @class, " "), " images ")]',
       xpath_cap: 'li/a/img/following-sibling::h1',
+      xpath_tmb: 'preceding-sibling::img'
+    }, g_mypage_old = {
+      xpath_col: '//ul[contains(concat(" ", @class, " "), " top_display_works ")]',
+      xpath_cap: 'li/a/img/following-sibling::text()',
       xpath_tmb: 'preceding-sibling::img'
     }, g_member = {
       xpath_col: '//div[contains(concat(" ", @class, " "), " worksListOthersImg ")]/ul',
@@ -1576,9 +1585,8 @@
 
     }, {
       name: 'mypage',
-      sample_url: ['http://www.pixiv.net/mypage.php',
-                   'http://www.pixiv.net/cate_r18.php'],
-      url: ['/mypage.php', '/cate_r18.php'],
+      sample_url: ['http://www.pixiv.net/mypage.php'],
+      url: '/mypage.php',
       gallery: [g_mypage, g_area_right],
       func: function(args) {
         var cookie_key = {'/mypage.php': 'pixiv_mypage', '/cate_r18.php': 'pixiv_cate_r18'}[window.location.pathname];
@@ -1600,6 +1608,12 @@
           });
         }
       }
+
+    }, {
+      name: 'mypage-r18',
+      sample_url: ['http://www.pixiv.net/cate_r18.php'],
+      url: '/cate_r18.php',
+      gallery: [g_mypage_old, g_area_right_old]
 
     }, {
       name: 'member',
@@ -2592,6 +2606,11 @@
     }],
 
     changelog_data: [{
+      date: '2011/10/27', version: '0.8.2', changes: [
+        '\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u56de\u7b54\u3059\u308b\u3068\u30a8\u30e9\u30fc\u30c0\u30a4\u30a2\u30ed\u30b0\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8(mypage.php)\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
+      ]
+    }, {
       date: '2011/09/17', version: '0.8.1', changes: [
         'pixiv\u306e\u5909\u66f4\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306a\u3069\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
         'conf.key.popup_manga_open_page\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'

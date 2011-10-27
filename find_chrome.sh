@@ -1,5 +1,5 @@
 #!/bin/sh
-CHROME=chromium:chromium-browser
+CHROME=chromium:chromium-browser:google-chrome
 for n in Chromium "Google Chrome"; do
   CHROME="$CHROME:/Applications/$n.app/Contents/MacOS/$n"
 done
