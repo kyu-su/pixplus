@@ -1861,7 +1861,7 @@
               var floater = new Floater(wrap, cont);
               window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
 
-              var touch = $x('div[div/a[@href="http://touch.pixiv.net"]]', wrap);
+              var touch = $q('#touch_introduction', wrap);
               if (touch) floater.add_ignore_element(touch);
 
               var url = 'http://product.adingo.jp.eimg.jp/c/hybridplus/keyword.php';
