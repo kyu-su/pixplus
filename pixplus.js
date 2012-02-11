@@ -1703,14 +1703,14 @@
       sample_url: [{url: 'http://www.pixiv.net/stacc/', page: true}],
       url: /^\/stacc/,
       gallery: [{
-        xpath_col: '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-        xpath_cap: 'div/div[contains(concat(" ", @class, " "), " post-side ")]/p[contains(concat(" ", @class, " "), " post-imgtitle ")]/a[contains(@href, "mode=medium")]',
-        xpath_tmb: '../../preceding-sibling::div[contains(concat(" ", @class, " "), " post-content-ref ")]/div[contains(concat(" ", @class, " "), " post-img ")]/a/img',
+        xpath_col: '//div[contains(concat(" ", @class, " "), " stacc_page ")]/div[contains(concat(" ", @class, " "), " stacc_status ")]',
+        xpath_cap: './/div[contains(concat(" ", @class, " "), " stacc_ref_illust_title ")]/a',
+        xpath_tmb: '../../preceding-sibling::div/div[contains(concat(" ", @class, " "), " stacc_ref_illust_img ")]/a/img',
         skip_dups: true
       }, {
-        xpath_col:  '//span[@id="insert_status"]/div[contains(concat(" ", @class, " "), " post ")]',
-        xpath_tmb:  './/*[contains(concat(" ", @class, " "), " add_fav_content_area ")]/a[contains(@href, "mode=medium")]/img',
-        thumb_only: true
+        xpath_col: '//div[contains(concat(" ", @class, " "), " stacc_page ")]/div[contains(concat(" ", @class, " "), " stacc_status ")]',
+        xpath_cap: './/div[contains(concat(" ", @class, " "), " stacc_ref_user_illust_title ")]',
+        xpath_tmb: 'preceding-sibling::img'
       }]
 
     }, {
@@ -1743,7 +1743,7 @@
 
     }, {
       name: 'member-event',
-      sample_url: ['http://www.pixiv.net/member_event.php?id=3881&event_id=1149'],
+      sample_url: [],
       url:  '/member_event.php',
       gallery: g_member
 
@@ -1807,7 +1807,7 @@
       url: [/^\/(?:bookmark_|mypixiv_)?new_illust(?:_r18)?\.php/, '/search.php', '/tags.php'],
       gallery: {
         xpath_col: '//ul[contains(concat(" ", @class, " "), " images ")]',
-        xpath_cap: 'li/a/p[img]/following-sibling::h1',
+        xpath_cap: 'li/a/p[img]/following-sibling::h2',
         xpath_tmb: 'preceding-sibling::p/img'
       }
 
