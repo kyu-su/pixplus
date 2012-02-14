@@ -223,7 +223,7 @@
             desc: 'Mouse wheel operation',
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
           },
-          mouse_wheel_delta: 'Threshold for "mouse_wheel" setting'
+          mouse_wheel_delta: 'Threshold for "mouse_wheel" setting(if set negative value, invert direction)'
         },
 
         key: {
@@ -372,7 +372,7 @@
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("reverse"\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
           },
-          mouse_wheel_delta: '"mouse_wheel"\u8a2d\u5b9a\u306e\u95be\u5024'
+          mouse_wheel_delta: '"mouse_wheel"\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)'
         },
 
         key: {
@@ -490,7 +490,7 @@
       {"key": "show_comment_form", "value": true},
       {"key": "manga_spread", "value": true},
       {"key": "mouse_wheel", "value": 0},
-      {"key": "mouse_wheel_delta", "value": 0}
+      {"key": "mouse_wheel_delta", "value": 1}
     ]},
     {"name": "key", "label": "Key", "items": [
       {"key": "popup_prev", "value": "Backspace,a"},
@@ -4343,10 +4343,18 @@
 
       var func;
       this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || -ev.detail || 0);
-      if (this.wheel_delta > conf.popup.mouse_wheel_delta) {
-        func = this.prev;
-      } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
-        func = this.next;
+      if (conf.popup.mouse_wheel_delta < 0) {
+        if (this.wheel_delta <= conf.popup.mouse_wheel_delta) {
+          func = this.prev;
+        } else if (this.wheel_delta >= -conf.popup.mouse_wheel_delta) {
+          func = this.next;
+        }
+      } else {
+        if (this.wheel_delta >= conf.popup.mouse_wheel_delta) {
+          func = this.prev;
+        } else if (this.wheel_delta <= -conf.popup.mouse_wheel_delta) {
+          func = this.next;
+        }
       }
       if (func) {
         func.call(this, true, conf.popup.mouse_wheel === 1);
