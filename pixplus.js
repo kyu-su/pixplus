@@ -2971,9 +2971,9 @@
                  '#pp-popup #tag_area > #pp-tag-edit-btn{font-size:smaller;color:gray;line-height:1.1em;}' +
                  '#pp-popup #pp-bm-edit{margin-top:2px;}' +
                  '#pp-popup #pp-img-div{margin-top:2px;text-align:center;' +
-                 '  min-width:480px;min-height:360px;line-height:0px;border:1px solid silver;}' +
+                 '  min-width:480px;min-height:360px;border:1px solid silver;}' +
                  '#pp-popup #pp-img-div a{display:inline-block;}' +
-                 '#pp-popup #pp-img-div a img{display:block;}' +
+                 '#pp-popup #pp-img-div a img{display:inline-block;}' +
                  '#pp-popup #pp-img-div #pp-error-message{display:none;width:480px;height:360px;' +
                  '  line-height:360px;text-align:center;vertical-align:middle;}' +
                  '#pp-popup .pp-olc{position:absolute;cursor:pointer;z-index:20004;opacity:0;background-color:gainsboro;}' +
