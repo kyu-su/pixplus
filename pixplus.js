@@ -2634,10 +2634,12 @@
     changelog_data: [{
       date: '2012/02/xx', version: '0.9.0', changes_i18n: {
         en: [
-          'Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)'
+          '[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)',
+          '[Fix] External links in author comment were broken.'
         ],
         ja: [
-          '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c\u3092\u5909\u66f4\u3059\u308b\u8a2d\u5b9a(conf.popup.mouse_wheel)\u3092\u8ffd\u52a0\u3002'
+          '[New] \u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c\u3092\u5909\u66f4\u3059\u308b\u8a2d\u5b9a(conf.popup.mouse_wheel)\u3092\u8ffd\u52a0\u3002',
+          '[Fix] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u5916\u90e8\u30ea\u30f3\u30af\u304c\u58ca\u308c\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002'
         ]
       }
     }, {
@@ -4317,15 +4319,23 @@
     },
 
     onwheel: function(ev) {
-      this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || 0);
-      console.log(this.wheel_delta);
-      if (this.wheel_delta > conf.popup.mouse_wheel_delta) {
-        this.next(false, conf.popup.mouse_wheel === 1);
-        this.wheel_delta = 0;
-      } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
-        this.prev(false, conf.popup.mouse_wheel === 1);
-        this.wheel_delta = 0;
+      var node = ev.target;
+      while(node && node.nodeType === 1) {
+        if (node.scrollHeight > node.offsetHeight) {
+          return false;
+        }
+        node = node.parentNode;
       }
+
+      var func;
+      this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || 0);
+      if (this.wheel_delta > conf.popup.mouse_wheel_delta) {
+        func = browser.opera ? this.prev : this.next;
+      } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
+        func = browser.opera ? this.next : this.prev;
+      }
+      func.call(this, false, conf.popup.mouse_wheel === 1);
+      this.wheel_delta = 0;
       return true;
     },
 
@@ -5719,7 +5729,9 @@
         .replace(/^[\s\u3000]+|[\s\u3000]+$/g, '')
         .replace(/[\s\u3000]{4,}/g, '<br />');
     }
-    return str.replace(/(<a\s+href=\")\/?jump\.php\?/ig, '$1');
+    return str.replace(/(<a\s+href=)\"\/?jump\.php\?([^\"]+)"/ig, function(all, left, url) {
+      return left + '"' + decodeURIComponent(url) + '"';
+    });
   }
 
   var urlcache = new Object();
