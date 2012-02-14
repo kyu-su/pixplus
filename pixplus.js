@@ -372,7 +372,7 @@
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("reverse"\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
           },
-          mouse_wheel_delta: ''
+          mouse_wheel_delta: '"mouse_wheel"\u8a2d\u5b9a\u306e\u95be\u5024'
         },
 
         key: {
