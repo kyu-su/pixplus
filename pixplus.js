@@ -490,7 +490,7 @@
       {"key": "show_comment_form", "value": true},
       {"key": "manga_spread", "value": true},
       {"key": "mouse_wheel", "value": 0},
-      {"key": "mouse_wheel_delta", "value": 30}
+      {"key": "mouse_wheel_delta", "value": 0}
     ]},
     {"name": "key", "label": "Key", "items": [
       {"key": "popup_prev", "value": "Backspace,a"},
@@ -983,7 +983,7 @@
       },
 
       wheel: function(func) {
-        return listen('mousewheel', function(ev, conn) {
+        return listen(browser.gecko ? 'DOMMouseScroll' : 'mousewheel', function(ev, conn) {
           if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
           return func.call(this, ev, conn);
         });
@@ -4330,21 +4330,28 @@
     onwheel: function(ev) {
       var node = ev.target;
       while(node && node.nodeType === 1) {
+        if (node === window.document.body ||
+            node === window.document.documentElement) {
+          break;
+        }
         if (node.scrollHeight > node.offsetHeight) {
+          alert(node);
           return false;
         }
         node = node.parentNode;
       }
 
       var func;
-      this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || 0);
+      this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || -ev.detail || 0);
       if (this.wheel_delta > conf.popup.mouse_wheel_delta) {
-        func = browser.opera ? this.prev : this.next;
+        func = this.prev;
       } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
-        func = browser.opera ? this.next : this.prev;
+        func = this.next;
       }
-      func.call(this, true, conf.popup.mouse_wheel === 1);
-      this.wheel_delta = 0;
+      if (func) {
+        func.call(this, true, conf.popup.mouse_wheel === 1);
+        this.wheel_delta = 0;
+      }
       return true;
     },
 
