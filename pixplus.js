@@ -222,7 +222,8 @@
           mouse_wheel: {
             desc: 'Mouse wheel operation',
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
-          }
+          },
+          mouse_wheel_delta: 'Threshold for "mouse_wheel" setting'
         },
 
         key: {
@@ -370,7 +371,8 @@
           mouse_wheel: {
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("reverse"\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
-          }
+          },
+          mouse_wheel_delta: ''
         },
 
         key: {
@@ -487,7 +489,8 @@
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
       {"key": "manga_spread", "value": true},
-      {"key": "mouse_wheel", "value": 0}
+      {"key": "mouse_wheel", "value": 0},
+      {"key": "mouse_wheel_delta", "value": 30}
     ]},
     {"name": "key", "label": "Key", "items": [
       {"key": "popup_prev", "value": "Backspace,a"},
@@ -4314,12 +4317,16 @@
     },
 
     onwheel: function(ev) {
-      if (ev.wheelDelta < 0) {
+      this.wheel_delta = (this.wheel_delta || 0) + (ev.wheelDelta || 0);
+      console.log(this.wheel_delta);
+      if (this.wheel_delta > conf.popup.mouse_wheel_delta) {
         this.next(false, conf.popup.mouse_wheel === 1);
-      } else if (ev.wheelDelta > 0) {
+        this.wheel_delta = 0;
+      } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
         this.prev(false, conf.popup.mouse_wheel === 1);
+        this.wheel_delta = 0;
       }
-      return false;
+      return true;
     },
 
     toggle_qrate: function() {
