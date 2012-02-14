@@ -4343,7 +4343,7 @@
       } else if (this.wheel_delta < -conf.popup.mouse_wheel_delta) {
         func = browser.opera ? this.next : this.prev;
       }
-      func.call(this, false, conf.popup.mouse_wheel === 1);
+      func.call(this, true, conf.popup.mouse_wheel === 1);
       this.wheel_delta = 0;
       return true;
     },
@@ -4670,8 +4670,8 @@
         map: [
           {k: conf.key.popup_prev,                 f: this.prev, a: [true]},
           {k: conf.key.popup_next,                 f: this.next, a: [true]},
-          {k: conf.key.popup_prev_direction,       f: this.prev, a: [false, true]},
-          {k: conf.key.popup_next_direction,       f: this.next, a: [false, true]},
+          {k: conf.key.popup_prev_direction,       f: this.prev, a: [true, true]},
+          {k: conf.key.popup_next_direction,       f: this.next, a: [true, true]},
           {k: conf.key.popup_caption_scroll_up,    f: this.scroll_caption, a: [-conf.popup.scroll_height]},
           {k: conf.key.popup_caption_scroll_down,  f: this.scroll_caption, a: [conf.popup.scroll_height]},
           {k: conf.key.popup_first,                f: this.first},
