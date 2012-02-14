@@ -4335,7 +4335,6 @@
           break;
         }
         if (node.scrollHeight > node.offsetHeight) {
-          alert(node);
           return false;
         }
         node = node.parentNode;
