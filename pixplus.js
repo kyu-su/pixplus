@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     0.8.3
+// @version     0.9.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -151,6 +151,8 @@
   /* __LANG_BEGIN__ */
   var lang = {
     en: {
+      __name__: 'en',
+
       conf: {
         general: {
           debug: 'Debug mode',
@@ -216,7 +218,11 @@
           scroll_height: 'Scroll step for caption',
           author_status_icon: 'Show icon on profile image',
           show_comment_form: 'Show comment posting form',
-          manga_spread: 'Enable manga spreads'
+          manga_spread: 'Enable manga spreads',
+          mouse_wheel: {
+            desc: 'Mouse wheel operation',
+            hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
+          }
         },
 
         key: {
@@ -293,6 +299,8 @@
     },
 
     ja: {
+      __name__: 'ja',
+
       conf: {
         general: {
           debug: '\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9',
@@ -358,7 +366,11 @@
           scroll_height: '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)',
           show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b',
-          manga_spread: '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b'
+          manga_spread: '\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4f7f\u7528\u3059\u308b',
+          mouse_wheel: {
+            desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
+            hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("reverse"\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
+          }
         },
 
         key: {
@@ -474,7 +486,8 @@
       {"key": "scroll_height", "value": 32},
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
-      {"key": "manga_spread", "value": true}
+      {"key": "manga_spread", "value": true},
+      {"key": "mouse_wheel", "value": 0}
     ]},
     {"name": "key", "label": "Key", "items": [
       {"key": "popup_prev", "value": "Backspace,a"},
@@ -962,6 +975,13 @@
       click: function(func) {
         return listen('click', function(ev, conn) {
           if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
+          return func.call(this, ev, conn);
+        });
+      },
+
+      wheel: function(func) {
+        return listen('mousewheel', function(ev, conn) {
+          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
           return func.call(this, ev, conn);
         });
       },
@@ -2479,7 +2499,7 @@
         each(ConfigUI.changelog_data, function(release) {
           $c('dt', dl, {text: release.version + ' - ' + release.date});
           var ul = $c('ul', $c('dd', dl));
-          each(release.changes, function(change) {
+          each(release.changes_i18n ? release.changes_i18n[lang.c.__name__] : release.changes, function(change) {
             $c('li', ul, {text: change});
           });
         });
@@ -2609,6 +2629,15 @@
     }],
 
     changelog_data: [{
+      date: '2012/02/xx', version: '0.9.0', changes_i18n: {
+        en: [
+          'Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)'
+        ],
+        ja: [
+          '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c\u3092\u5909\u66f4\u3059\u308b\u8a2d\u5b9a(conf.popup.mouse_wheel)\u3092\u8ffd\u52a0\u3002'
+        ]
+      }
+    }, {
       date: '2012/02/11', version: '0.8.3', changes: [
         '\u65b0\u7740\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
         '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
@@ -4284,6 +4313,15 @@
       }
     },
 
+    onwheel: function(ev) {
+      if (ev.wheelDelta < 0) {
+        this.next(false, conf.popup.mouse_wheel === 1);
+      } else if (ev.wheelDelta > 0) {
+        this.prev(false, conf.popup.mouse_wheel === 1);
+      }
+      return false;
+    },
+
     toggle_qrate: function() {
       if (this.has_qrate) {
         var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
@@ -4504,12 +4542,20 @@
         if (!Popup.stop_key) return Popup.instance.onkey(ev, key);
         return false;
       });
-      window.addEventListener('resize', Popup._locate, false);
+      Popup.ev_conn_resize = $ev(window, {async: true}).resize(Popup._locate);
+      if (conf.popup.mouse_wheel) {
+        Popup.ev_conn_wheel = $ev(window).wheel(function(ev, conn) {
+          return Popup.instance.onwheel(ev);
+        });
+      }
     },
 
     unset_event_handler: function() {
-      Popup.ev_conn_key.disconnect();
-      window.removeEventListener('resize', Popup._locate, false);
+      each([Popup.ev_conn_key, Popup.ev_conn_resize, Popup.ev_conn_wheel], function(conn) {
+        if (conn) {
+          conn.disconnect();
+        }
+      });
     },
 
     oncreate: new Signal(function(item, manga_page) {
