@@ -4248,9 +4248,9 @@
             width = Math.floor(conf.popup.overlay_control);
           }
           this.olc_prev.style.width  = width + 'px';
-          this.olc_prev.style.height = this.img_div.offsetHeight + 'px';
+          this.olc_prev.style.height = this.img_div.clientHeight + 'px';
           this.olc_next.style.width  = width + 'px';
-          this.olc_next.style.height = this.img_div.offsetHeight + 'px';
+          this.olc_next.style.height = this.img_div.clientHeight + 'px';
         }
       }
       this.root_div.style.left = Math.floor((de.clientWidth  - this.root_div.offsetWidth)  / 2) + 'px';
