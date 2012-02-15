@@ -92,7 +92,14 @@ ifeq ($(BUILD_XPI),yes)
 ALL_TARGETS            += $(XPI)
 endif
 
-all: $(ALL_TARGETS)
+all: $(ALL_TARGETS) status
+
+status:
+	@echo
+	@echo "$(OEX):        $(BUILD_OEX)"
+	@echo "$(CRX):        $(BUILD_CRX)"
+	@echo "$(SAFARIEXTZ): $(BUILD_SAFARIEXTZ)"
+	@echo "$(XPI):        $(BUILD_XPI)"
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	@echo Create: $@
