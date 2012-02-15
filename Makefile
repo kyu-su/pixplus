@@ -96,6 +96,7 @@ all: $(ALL_TARGETS) status
 
 status:
 	@echo
+	@echo "$(GREASEMONKEY_JS):    yes"
 	@echo "$(OEX):        $(BUILD_OEX)"
 	@echo "$(CRX):        $(BUILD_CRX)"
 	@echo "$(SAFARIEXTZ): $(BUILD_SAFARIEXTZ)"
