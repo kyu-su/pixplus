@@ -1089,9 +1089,6 @@
     return obj;
   };
 
-  $ev.BIT_OFFSET_CHAR = 0;
-  $ev.BIT_OFFSET_SPEC = 8;
-  $ev.BIT_OFFSET_MODS = 24;
   $ev.key_map_code = { };
   $ev.key_map_name = { };
   $ev.key_map_encode = { };
@@ -1887,6 +1884,9 @@
               var touch = $q('#touch_introduction', wrap);
               if (touch) floater.add_ignore_element(touch);
 
+              var amazon = $q('.area_new .area_inside .ads_amazon_outer', wrap);
+              if (amazon) floater.add_ignore_element(amazon.parentNode.parentNode);
+
               var url = 'http://product.adingo.jp.eimg.jp/c/hybridplus/keyword.php';
               var keywords = $x('div[div/script[contains(@src, "' + url + '")]]', wrap);
               if (keywords) floater.add_ignore_element(keywords);
@@ -2632,7 +2632,7 @@
     }],
 
     changelog_data: [{
-      date: '2012/02/xx', version: '0.9.0', changes_i18n: {
+      date: '2012/02/17', version: '0.9.0', changes_i18n: {
         en: [
           '[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)',
           '[Fix] External links in author comment were broken.'
