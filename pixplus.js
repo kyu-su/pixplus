@@ -3337,7 +3337,7 @@
 
       this.img_url_base  = null;
       this.img_url_ext   = null;
-      this.img_url_query = null;
+      this.img_url_query = '?';
       if (this.thumb) this.parse_img_url(this.thumb.src);
     },
 
@@ -3347,7 +3347,7 @@
       if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(\?.*)?$/.exec(url))) {
         this.img_url_base  = re[1];
         this.img_url_ext   = re[2];
-        this.img_url_query = re[3] || '';
+        this.img_url_query = re[3] || '?';
       }
     },
 
