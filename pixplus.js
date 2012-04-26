@@ -3325,17 +3325,19 @@
         this.page_col  = 0;
       }
 
-      this.img_url_base = null;
-      this.img_url_ext  = null;
+      this.img_url_base  = null;
+      this.img_url_ext   = null;
+      this.img_url_query = null;
       if (this.thumb) this.parse_img_url(this.thumb.src);
     },
 
     parse_img_url: function(url) {
       // 冒頭メモ参照
       var re;
-      if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(?:\?.*)?$/.exec(url))) {
-        this.img_url_base = re[1];
-        this.img_url_ext  = re[2];
+      if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(\?.*)?$/.exec(url))) {
+        this.img_url_base  = re[1];
+        this.img_url_ext   = re[2];
+        this.img_url_query = re[3] || '';
       }
     },
 
@@ -4820,7 +4822,7 @@
         // キャッシュを持ってる時は同期的にコールバックするのでやらない。推定したURLが404の時に余分なリクエストが発生するため。
         LOG.debug('trying parallel load - ' + this.item.img_url_base);
         this.parallel = true;
-        this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext);
+        this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext + this.item.img_url_query);
       }
 
       geturl(this.url, bind(function(text) {
