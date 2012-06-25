@@ -1555,8 +1555,7 @@
             }
 
             var re, img = $x('//div[contains(concat(" ", @class, " "), " works_display ")]/a[starts-with(@href, "member_illust.php?mode=big")]/img');
-            // 冒頭メモ参照
-            if (img && (re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
+            if (img && (re = /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
               img.parentNode.href = re[1] + re[2];
             }
           } else if (args.mode === 'manga') {
@@ -1753,7 +1752,7 @@
         thumb_only: true,
         get_url:    function(cap, thumb) {
           var re;
-          if (thumb && (re = /http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
+          if (thumb && (re = /http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+(?:\/mobile)?\/(\d+)_(?:128x128|s)/i.exec(thumb.src))) {
             return 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + re[1];
           } else {
             return null;
@@ -2632,11 +2631,13 @@
     }],
 
     changelog_data: [{
-      date: '2012/xx/xx', version: '0.9.1', changes_i18n: {
+      date: '2012/06/26', version: '0.9.1', changes_i18n: {
         en: [
+          '[Fix] Corresponds to pixiv\'s spec changes.',
           '[Fix] In reposted illust, pixplus shows first version.'
         ],
         ja: [
+          '[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002',
           '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u304c\u518d\u6295\u7a3f\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u306b\u53e4\u3044\u753b\u50cf\u3092\u8868\u793a\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
         ]
       }
@@ -3342,9 +3343,8 @@
     },
 
     parse_img_url: function(url) {
-      // 冒頭メモ参照
       var re;
-      if ((re = /^(http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(\?.*)?$/.exec(url))) {
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)(?:_[sm]|_100|_p\d+)?(\.\w+)(\?.*)?$/.exec(url))) {
         this.img_url_base  = re[1];
         this.img_url_ext   = re[2];
         this.img_url_query = re[3] || '?';
@@ -4880,7 +4880,7 @@
 
     parse_text: function() {
       var url, re;
-      if ((re = /<img src=\"(http:\/\/img\d+\.pixiv\.net\/img\/[^\"]+)\"/i.exec(this.text))) {
+      if ((re = /<img src=\"(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\"]+)\"/i.exec(this.text))) {
         url = re[1];
         if (conf.popup.big_image &&
             !/<div[^>]+class=\"[^\"]*works_display[^\"]*\"[^>]*><a[^>]+href=\"member_illust\.php\?mode=manga/i.test(this.text) &&
@@ -4972,7 +4972,7 @@
     parse_html: function(html) {
       var re;
       if ((re = /<section[^>]+id="image"[^>]*>(.*?)<\/section>/i.exec(html))) {
-        var terms = re[1].split(/pixiv\.context\.images\[(\d+)\]\.(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/);
+        var terms = re[1].split(/pixiv\.context\.images\[(\d+)\]\.(push|unshift)\([\"\'](http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/);
         var manga_pages = [], pages = [], i, j = 0, total_page = 0;
 
         function add_pages() {
@@ -5008,33 +5008,6 @@
         }
       }
       this.error('Invalid html');
-
-      /*
-      var manga_pages = [];
-      var containers = html.split(/<div[^>]+class=\"[^\"]*image-container[^\"]*\"[^>]*>(.*?)<\/(?:div|section)>/i);
-      var page = 0;
-      for(var i = 0; i + 1 < containers.length; i += 2) {
-        var images = containers[i + 1].split(/<script[^>]*>[^<]*(push|unshift)\([\"\'](http:\/\/img\d+\.pixiv\.net\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?_p\d+\.\w+)/i);
-        var pages = [], j;
-        for(j = 0; j + 2 < images.length; j += 3) {
-          pages.push({
-            url: images[j + 2],
-            url_big: images[j + 2].replace(/(_p\d+\.\w+)$/, '_big$1'),
-            page: page++,
-            image_index: pages.length
-          });
-        }
-        if (pages.length < 1) {
-          this.error('Invalid html');
-          return;
-        }
-        if (images[1] === 'unshift') pages.reverse();
-        for(j = 0; j < pages.length; ++j) {
-          manga_pages.push({list: pages, page_inc: pages.length - j, page_dec: j + 1});
-        }
-      }
-      this.load_pages(manga_pages);
-       */
     },
 
     load_pages: function(pages) {

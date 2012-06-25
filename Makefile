@@ -164,7 +164,7 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)/$$size.png\" />" >> $@; done
 	@sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@python conf-parser.py opera < $(CONFIG_JSON) >> $@
+	@python2 conf-parser.py opera < $(CONFIG_JSON) >> $@
 	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS) warn
@@ -250,7 +250,7 @@ $(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
 $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	@echo Create: $@
 	@sed -e '/__SETTINGS__/,$$d' < $< > $@
-	@python conf-parser.py safari < $(CONFIG_JSON) >> $@
+	@python2 conf-parser.py safari < $(CONFIG_JSON) >> $@
 	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
@@ -312,7 +312,7 @@ $(FIREFOX_ICON_FILES): $(ICON_SVG)
 $(FIREFOX_DEFAULTS_PREFS): $(CONFIG_JSON)
 	@echo Build: $@
 	@mkdir -p $(dir $@)
-	@python conf-parser.py firefox < $(CONFIG_JSON) >> $@
+	@python2 conf-parser.py firefox < $(CONFIG_JSON) >> $@
 
 $(FIREFOX_DEBUG_LOADER):
 	@echo Build: $@
