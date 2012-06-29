@@ -4117,7 +4117,7 @@
       each(images, function(entry, idx) {
         var image = entry.image || entry;
         image.style.cssText = '';
-        var anc = $c('a', this.img_div, {href: entry.url || image.src.replace(/_[sm](\.\w+)$/, '$1')});
+        var anc = $c('a', this.img_div, {href: entry.url || image.src.replace(/_[sm](\.\w+)(\?.*)?$/, '$1$2')});
         anc.appendChild(image);
 
         var size = {width: image.width, height: image.height};
