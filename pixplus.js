@@ -1203,7 +1203,7 @@
     return (elem || window.document).getElementsByTagName(tag);
   }
   function $q(selector, elem) {
-    return window.document.querySelector(selector);
+    return (elem || window.document).querySelector(selector);
   }
   function $qa(selector, elem) {
     return window.document.querySelectorAll(selector);
@@ -1485,55 +1485,6 @@
           });
 
           if (args.mode === 'medium') {
-            (function() {
-              var bm_add_anc = $x('//div[contains(concat(" ", @class, " "), " works_illusticonsBlock ")]//a[contains(@href, "bookmark_add.php")]');
-              var display = $x('//div[contains(concat(" ", @class, " "), "works_display")]');
-              if (!bm_add_anc || !display) return;
-              var bm_form_div, loader;
-              $ev(bm_add_anc).click(function() {
-                if (bm_form_div) {
-                  hide();
-                } else {
-                  show();
-                }
-                return true;
-              });
-
-              function Loader(url, wrap) {
-                var cancelled = false;
-                this.cancel = function() { cancelled = true; };
-                geturl(url, function(text) {
-                  var re;
-                  if (cancelled) return;
-                  if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/mi.exec(text))) {
-                    wrap.innerHTML = re[0];
-                    var form = new BookmarkForm(wrap, {
-                      autotag: !$x('preceding-sibling::a[contains(@href, "bookmark_detail.php")]', bm_add_anc),
-                      closable: true
-                    });
-                    form.onclose.connect(hide);
-                  } else {
-                    wrap.textContent = 'Error!';
-                  }
-                }, function() {
-                  if (cancelled) return;
-                  wrap.textContent = 'Error!';
-                }, true);
-              }
-              function show() {
-                if (bm_form_div) return;
-                bm_form_div = $c('div', null, {text: 'Loading', css: 'margin:1em'});
-                loader = new Loader(bm_add_anc.href, bm_form_div);
-                display.parentNode.insertBefore(bm_form_div, display);
-              }
-              function hide() {
-                if (!bm_form_div) return;
-                if (loader) loader.cancel();
-                bm_form_div.parentNode.removeChild(bm_form_div);
-                bm_form_div = null;
-              }
-            })();
-
             each($xa('//div[contains(concat(" ", @class, " "), " centeredNavi ")]//a[contains(@href, "mode=medium")]'),
                  function(anc) {
                    anc.setAttribute('nopopup', '');
@@ -1557,6 +1508,16 @@
             var re, img = $x('//div[contains(concat(" ", @class, " "), " works_display ")]/a[starts-with(@href, "member_illust.php?mode=big")]/img');
             if (img && (re = /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/\d+(?:_[0-9a-f]{10})?)_m(\.\w+)(?:\?.*)?$/i.exec(img.src))) {
               img.parentNode.href = re[1] + re[2];
+            }
+
+            var manga = $q('.works_display a[href*="member_illust.php?mode=manga&illust_id="]');
+            if (manga) {
+              var gitem = new GalleryItem(manga.href, $q('img[src*=".pixiv.net/img"]', manga));
+              gitem.preload(true);
+              $ev(manga).click(function() {
+                Popup.run(gitem, 0);
+                return true;
+              });
             }
           } else if (args.mode === 'manga') {
             (function(func) {
@@ -3349,7 +3310,9 @@
       this.img_url_base  = null;
       this.img_url_ext   = null;
       this.img_url_query = '?';
-      if (this.thumb) this.parse_img_url(this.thumb.src);
+      if (this.thumb) {
+        this.parse_img_url(this.thumb.src);
+      }
     },
 
     parse_img_url: function(url) {
@@ -3365,13 +3328,13 @@
       Popup.run(this);
     },
 
-    preload: function() {
+    preload: function(force_preload_manga) {
       if (conf.popup.preload) {
         if (!this.loaded) {
           this.loaded = true;
           new Popup.Loader(
             this,
-            (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16)
+            (force_preload_manga || (conf.popup.auto_manga_p && (conf.popup.auto_manga & 16))
              ? bind(function() {
                new Popup.MangaLoader(this, 0);
              }, this)
@@ -4751,11 +4714,11 @@
       return Popup.instance;
     },
 
-    run_url: function(url) {
+    run_url: function(url, manga_page) {
       var item = new GalleryItem(url, null, null, Popup.instance ? Popup.instance.item : null);
       if (Popup.instant_prev) Popup.instant_prev.next = item;
       Popup.instant_prev = item;
-      return Popup.run(item);
+      return Popup.run(item, manga_page);
     },
 
     create_button: function(text, parent, id, cb_click) {
@@ -4845,23 +4808,25 @@
         this.load_image(this.item.img_url_base + (conf.popup.big_image ? '' : '_m') + this.item.img_url_ext + this.item.img_url_query);
       }
 
-      geturl(this.url, bind(function(text) {
-        var re;
-        if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
-          this.error(re[1].replace(/<[^>]*>/g, ''));
-        } else {
-          this.text = text;
-          this.text_cmp = true;
-          if (this.img_cmp) {
-            this.complete();
-          } else if (!this.parallel) {
-            this.parse_text();
-          } // else 画像が並列ロード中かキャンセルされた
-        }
-      }, this), bind(function() {
+      geturl(this.url, bind(this.onload, this), bind(function() {
         this.error('Failed to load HTML');
       }, this), reload);
       return this;
+    },
+
+    onload: function(text) {
+      var re;
+      if ((re = /<span[^>]+class=\"error\"[^>]*>(.+)<\/span>/i.exec(text))) {
+        this.error(re[1].replace(/<[^>]*>/g, ''));
+      } else {
+        this.text = text;
+        this.text_cmp = true;
+        if (this.img_cmp) {
+          this.complete();
+        } else if (!this.parallel) {
+          this.parse_text();
+        } // else 画像が並列ロード中かキャンセルされた
+      }
     },
 
     load_image: function(url) {
@@ -4900,14 +4865,18 @@
       }
       if (url) {
         this.load_image(url);
-        if (!this.item.img_url_base) this.item.parse_img_url(url);
+        if (!this.item.img_url_base) {
+          this.item.parse_img_url(url);
+        }
       } else {
         this.error('Failed to parse image URL');
       }
     },
 
     complete: function() {
-      if (this.text_cmp && this.img_cmp) LoaderBase.prototype.complete.call(this);
+      if (this.text_cmp && this.img_cmp) {
+        LoaderBase.prototype.complete.call(this);
+      }
     },
 
     error: function(msg) {
