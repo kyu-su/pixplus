@@ -31,7 +31,9 @@
 (function(func, unsafeWindow, userjs) {
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
-    if (window.top !== window) return;
+    if (window.top !== window) {
+      return;
+    }
     if (window.opera && opera.extension) {
       (function() {
         function open_options() {
@@ -110,7 +112,9 @@
     })();
   } else {
     // Chrome/Safari
-    if (window.top !== window || window.location.href.indexOf('pixivreader') >= 0) return;
+    if (window.top !== window || window.location.href.indexOf('pixivreader') >= 0) {
+      return;
+    }
     (function(func) {
       if (userjs) {
         func();
@@ -607,12 +611,16 @@
     return;
   }
   window.pixplus = pp;
-  if (window.opera) window.opera.pixplus = pp; // for compatibility
+  if (window.opera) {
+    window.opera.pixplus = pp; // for compatibility
+  }
   function rpc_chk(f) {
     return (pp.rpc_state & f) === f;
   }
   function rpc_create_data(ids, data) {
-    if (!data) data = {};
+    if (!data) {
+      data = {};
+    }
     each(ids, function(id) {
       data[id] = $('rpc_' + id).getAttribute('title');
     });
@@ -647,11 +655,15 @@
     each: function(cb_item, cb_sec, cb_sec_after) {
       for(var i = 0; i < conf_schema.length; ++i) {
         var sec = conf_schema[i];
-        if (cb_sec && cb_sec(sec)) return;
+        if (cb_sec && cb_sec(sec)) {
+          return;
+        }
         for(var j = 0; j < sec.items.length; ++j) {
           cb_item(sec.items[j], sec);
         }
-        if (cb_sec_after) cb_sec_after(sec);
+        if (cb_sec_after) {
+          cb_sec_after(sec);
+        }
       }
     },
     parse_bm_tag_order: function(str) {
@@ -659,7 +671,9 @@
       for(var i = 0; i < lines.length; ++i) {
         var tag = lines[i];
         if (tag === '-') {
-          if (ary_ary.length) ary.push(ary_ary);
+          if (ary_ary.length) {
+            ary.push(ary_ary);
+          }
           ary_ary = [];
         } else if (tag === '*') {
           ary_ary.push(null);
@@ -667,7 +681,9 @@
           ary_ary.push(tag);
         }
       }
-      if (ary_ary.length) ary.push(ary_ary);
+      if (ary_ary.length) {
+        ary.push(ary_ary);
+      }
       return ary;
     },
     parse_bm_tag_aliases: function(str) {
@@ -683,13 +699,19 @@
     },
     bm_tag_order_to_str: function(bm_tag_order) {
       var str = '';
-      if (!bm_tag_order) return str;
+      if (!bm_tag_order) {
+        return str;
+      }
       for(var i = 0; i < bm_tag_order.length; ++i) {
         var ary = bm_tag_order[i];
         for(var j = 0; j < ary.length; ++j) {
-          if (ary[j] === null) ary[j] = '*';
+          if (ary[j] === null) {
+            ary[j] = '*';
+          }
         }
-        if (i) str += '-\n';
+        if (i) {
+          str += '-\n';
+        }
         str += ary.join('\n') + '\n';
       }
       return str;
@@ -704,22 +726,30 @@
     /* __STORAGE_COMMON_ENTRIES_END__ */,
     init: function() {
       each(conf_schema, function(sec) {
-        if (sec.name === 'bookmark') return;
+        if (sec.name === 'bookmark') {
+          return;
+        }
         var obj = sec.name === 'general' ? conf : conf[sec.name] = { }; // for compatibility
         LS.map[sec.name].conf = obj;
         each(sec.items, function(item) {
           obj[item.key] = item.value;
           if (LS.u) {
             var v = LS.get(sec.name, item.key);
-            if (typeof v !== 'undefined' && v !== null) obj[item.key] = v;
+            if (typeof v !== 'undefined' && v !== null) {
+              obj[item.key] = v;
+            }
           }
         });
       });
       if (LS.u) {
         var order = LS.get('bookmark', 'tag_order');
-        if (order) conf.bm_tag_order = LS.parse_bm_tag_order(order);
+        if (order) {
+          conf.bm_tag_order = LS.parse_bm_tag_order(order);
+        }
         var aliases = LS.get('bookmark', 'tag_aliases');
-        if (aliases) conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+        if (aliases) {
+          conf.bm_tag_aliases = LS.parse_bm_tag_aliases(aliases);
+        }
       }
     }
   };
@@ -803,12 +833,18 @@
   })();
 
   function wrap_global(name, func, cb_init) {
-    if (!name || !func) return;
+    if (!name || !func) {
+      return;
+    }
     if (window[name]) {
       window[name] = wrap_global.wrap(func, window[name]);
-      if (cb_init) cb_init();
+      if (cb_init) {
+        cb_init();
+      }
     } else {
-      if (!wrap_global.items) wrap_global.items = [];
+      if (!wrap_global.items) {
+        wrap_global.items = [];
+      }
       wrap_global.items.push({name: name, func: func, cb_init: cb_init});
       if (!wrap_global.timer) {
         wrap_global.check_count = 0;
@@ -823,12 +859,16 @@
     };
   };
   wrap_global.check = function() {
-    if (!wrap_global.items) return;
+    if (!wrap_global.items) {
+      return;
+    }
     for(var i = 0; i < wrap_global.items.length; ++i) {
       var item = wrap_global.items[i];
       if (window[item.name]) {
         window[item.name] = wrap_global.wrap(item.func, window[item.name]);
-        if (item.cb_init) item.cb_init();
+        if (item.cb_init) {
+          item.cb_init();
+        }
         wrap_global.items.splice(i, 1);
         --i;
       }
@@ -854,7 +894,9 @@
     };
 
     function log(level, msg) {
-      if (level > conf.log_level) return;
+      if (level > conf.log_level) {
+        return;
+      }
       if (window.console && window.console.log) {
         window.console && window.console.log && window.console.log(msg);
       } else if (window.opera) {
@@ -879,7 +921,9 @@
   var $cls = {
     create: function() {
       var parent = null, args = Array.prototype.slice.call(arguments);
-      if (typeof args[0] === 'function') parent = args.shift();
+      if (typeof args[0] === 'function') {
+        parent = args.shift();
+      }
       var proto = args[0], props = args[1] || { }, key;
       function cls() {
         cls.__inst__.push(this);
@@ -890,16 +934,22 @@
       }
       cls.__super__ = parent;
       cls.__inst__ = [];
-      if (parent) cls.prototype = new parent();
+      if (parent) {
+        cls.prototype = new parent();
+      }
       for(key in proto) {
         cls.prototype[key] = proto[key];
       }
       if (!cls.prototype.initialize) {
         cls.prototype.initialize = function() { };
       }
-      if (parent) cls.prototype.__super__ = parent.prototype.initialize;
+      if (parent) {
+        cls.prototype.__super__ = parent.prototype.initialize;
+      }
       cls.prototype.constructor = cls;
-      if (cls.initialize) cls.initialize();
+      if (cls.initialize) {
+        cls.initialize();
+      }
       return cls;
     }
   };
@@ -919,7 +969,9 @@
         cb: function() {
           last_args = [this, Array.prototype.slice.call(arguments)];
           if (async) {
-            if (timer) return null;
+            if (timer) {
+              return null;
+            }
             timer = window.setTimeout(function() {
               timer = null;
               func.apply(last_args[0], last_args[1]);
@@ -951,9 +1003,13 @@
       var res;
       for(var i = 0; i < this.funcs.length; ++i) {
         res = this.funcs[i].cb.apply(inst, args);
-        if (res) return res;
+        if (res) {
+          return res;
+        }
       }
-      if (this.def && (res = this.def.apply(inst, args))) return res;
+      if (this.def && (res = this.def.apply(inst, args))) {
+        return res;
+      }
       return false;
     }
   });
@@ -966,7 +1022,9 @@
     },
 
     disconnect: function() {
-      if (!this.disconnected) this.signal.disconnect(this.id);
+      if (!this.disconnected) {
+        this.signal.disconnect(this.id);
+      }
     }
   });
 
@@ -977,14 +1035,18 @@
 
       click: function(func) {
         return listen('click', function(ev, conn) {
-          if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
+          if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) {
+            return false;
+          }
           return func.call(this, ev, conn);
         });
       },
 
       wheel: function(func) {
         return listen(browser.gecko ? 'DOMMouseScroll' : 'mousewheel', function(ev, conn) {
-          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) return false;
+          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) {
+            return false;
+          }
           return func.call(this, ev, conn);
         });
       },
@@ -992,13 +1054,17 @@
       key: function(func) {
         var conn = listen('keypress', function(ev, conn) {
           var key = $ev.parse_key_event(ev);
-          if (key) return func.call(this, ev, conn, key);
+          if (key) {
+            return func.call(this, ev, conn, key);
+          }
           return false;
         });
         if (browser.webkit) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
-            if (key) return func.call(this, ev, conn, key);
+            if (key) {
+              return func.call(this, ev, conn, key);
+            }
             return false;
           }, conn);
         }
@@ -1042,7 +1108,9 @@
 
       focus: function(focus, blur) {
         var conn = listen('focus', focus);
-        if (blur) conn = listen('blur', blur, conn);
+        if (blur) {
+          conn = listen('blur', blur, conn);
+        }
         return conn;
       },
 
@@ -1060,17 +1128,23 @@
     };
 
     function listen(name, func, conn) {
-      if (!conn) conn = new $ev.Connection(ctx);
+      if (!conn) {
+        conn = new $ev.Connection(ctx);
+      }
       var timer, ev_last;
       var listener = function(ev) {
-        if (conn.disconnected) return;
+        if (conn.disconnected) {
+          return;
+        }
         if (opts.async) {
           if (timer) {
             ev_last = ev;
           } else {
             ev_last = ev;
             timer = window.setTimeout(function() {
-              if (conn.disconnected) return;
+              if (conn.disconnected) {
+                return;
+              }
               timer = null;
               func.call(opts.ctx || ctx, ev_last, conn);
             }, typeof opts.async === 'number' ? opts.async : 40);
@@ -1125,17 +1199,25 @@
   $ev.parse_key_event = function(ev) {
     var c = ev.keyCode || ev.charCode;
     var keys = [], key;
-    if (ev.ctrlKey)  keys.push('Control');
-    if (ev.shiftKey) keys.push('Shift');
-    if (ev.altKey)   keys.push('Alt');
-    if (ev.metaKey)  keys.push('Meta');
-    if (ev.type === 'keydown') {
-      // webkit
-      //window.console.log(ev);
-      if (!ev.keyIdentifier) return null;
+    if (ev.ctrlKey) {
+      keys.push('Control');
+    }
+    if (ev.shiftKey) {
+      keys.push('Shift');
+    }
+    if (ev.altKey) {
+      keys.push('Alt');
+    }
+    if (ev.metaKey) {
+      keys.push('Meta');
+    }
+
+    if (ev.keyIdentifier) {
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
-        if (c <= 0) return null;
+        if (c <= 0) {
+          return null;
+        }
         if (c < 0x20) {
           key = $ev.key_map_code[c] || ('_c' + String(c));
         } else if (c < 0x7f) {
@@ -1152,29 +1234,33 @@
       }
       keys = unique(keys); // for chrome10
       return keys.join('+');
-    } else if (ev.type === 'keypress') {
-      if (c === ev.which && c > 0x20 && c < 0x7f) {
-        key = lc(String.fromCharCode(c));
-        keys.push($ev.key_map_encode[key] || key);
-      } else if ($ev.key_map_code[c]) {
-        keys.push($ev.key_map_code[c]);
-      } else if (c > 0) {
-        keys.push('_c' + String(c));
-      }
-      return keys.join('+');
-    } else {
-      return null;
     }
+
+    if (c === ev.which && c > 0x20 && c < 0x7f) {
+      key = lc(String.fromCharCode(c));
+      keys.push($ev.key_map_encode[key] || key);
+    } else if ($ev.key_map_code[c]) {
+      keys.push($ev.key_map_code[c]);
+    } else if (c > 0) {
+      keys.push('_c' + String(c));
+    }
+    return keys.join('+');
   };
 
   $ev.key_check = function(ev, key) {
-    if (!ev || !key) return false;
+    if (!ev || !key) {
+      return false;
+    }
     var pressed = $ev.parse_key_event(ev);
-    if (!pressed) return false;
+    if (!pressed) {
+      return false;
+    }
     if (key.indexOf(',') >= 0) {
       var keys = key.split(',');
       for(var i = 0; i < keys.length; ++i) {
-        if ($ev.key_check(ev, keys[i])) return true;
+        if ($ev.key_check(ev, keys[i])) {
+          return true;
+        }
       }
       return false;
     }
@@ -1210,7 +1296,9 @@
   }
   function $c(tag, parent, opts) {
     var elem = window.document.createElement(tag);
-    if (parent) parent.appendChild(elem);
+    if (parent) {
+      parent.appendChild(elem);
+    }
     if (opts) {
       for(var key in opts) {
         if (key.lastIndexOf('a:', 0) === 0) {
@@ -1233,7 +1321,9 @@
     css:  'style.cssText'
   };
   function $x(xpath, root) {
-    if (arguments.length > 1 && !root) return null;
+    if (arguments.length > 1 && !root) {
+      return null;
+    }
     var doc = root ? root.ownerDocument : (root = window.document);
     // XPathResult.FIRST_ORDERED_NODE_TYPE = 9
     return doc.evaluate(xpath, root, null, 9, null).singleNodeValue;
@@ -1253,7 +1343,9 @@
   function is_ancestor(ancestor, elem) {
     while(elem) {
       // Firefox3.6: elem === ancestor is always false
-      if (elem == ancestor) return true;
+      if (elem == ancestor) {
+        return true;
+      }
       elem = elem.parentNode;
     }
     return false;
@@ -1272,26 +1364,36 @@
    */
   function set_class(node, cls, state) {
     var list = node.className.split(/ +/);
-    if (state < 0) state = -1;
+    if (state < 0) {
+      state = -1;
+    }
     for(var i = 0; i < list.length; ++i) {
       if (list[i] === cls) {
         if (state <= 0) {
           list.splice(i, 1);
           --i;
-          if (state < 0) state = -2;
+          if (state < 0) {
+            state = -2;
+          }
         } else {
           return;
         }
       }
     }
-    if (state == -1 || state > 0) list.push(cls);
+    if (state == -1 || state > 0) {
+      list.push(cls);
+    }
     node.className = trim(list.join(' '));
   }
 
   function each(list, func, obj) {
-    if (!list) return list;
+    if (!list) {
+      return list;
+    }
     for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) break;
+      if (func.call(obj || list, list[i], i)) {
+        break;
+      }
     }
     return list;
   }
@@ -1306,14 +1408,18 @@
           break;
         }
       }
-      if (!match) ret.push(list[i]);
+      if (!match) {
+        ret.push(list[i]);
+      }
     }
     return ret;
   }
 
   function find(list, func, obj) {
     for(var i = 0; i < list.length; ++i) {
-      if (func.call(obj || list, list[i], i)) return list[i];
+      if (func.call(obj || list, list[i], i)) {
+        return list[i];
+      }
     }
     return null;
   }
@@ -1415,7 +1521,9 @@
               });
               each($xa('ul/li', container), function(li, idx) {
                 var cn = li.className.replace(/bg_(?:gray|white)/, '');
-                if (type === 'flat') cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                if (type === 'flat') {
+                  cn += idx & 1 ? ' bg_gray' : ' bg_white';
+                }
                 li.className = cn;
               });
 
@@ -1498,7 +1606,9 @@
               elem = $x('//div[contains(concat(" ", @class, " "), " works_display ")]');
               pos = 1;
             }
-            if (elem) window.scroll(0, getpos(elem).top - (de.clientHeight - elem.offsetHeight) * pos);
+            if (elem) {
+              window.scroll(0, getpos(elem).top - (de.clientHeight - elem.offsetHeight) * pos);
+            }
 
             var works_caption = $x('//p[contains(concat(" ", @class, " "), " works_caption ")]');
             if (works_caption) {
@@ -1639,7 +1749,9 @@
       },
       func: function(args) {
         var date, re, li, a_p, a_n;
-        if ((args.mode !== 'day' && args.mode !== 'daily') || !(li = $q('.rankingPager > ul > li'))) return;
+        if ((args.mode !== 'day' && args.mode !== 'daily') || !(li = $q('.rankingPager > ul > li'))) {
+          return;
+        }
         // it's not translated
         if ((re = /(\d{4})\u5e74(\d{2})\u6708(\d{2})\u65e5\u4ed8/.exec(li.textContent))) {
           date = new Date(re[1], re[2], re[3]);
@@ -1842,20 +1954,28 @@
               window.document.addEventListener('pixplusBMTagToggled', bind(floater.update_height, floater), false);
 
               var touch = $q('#touch_introduction', wrap);
-              if (touch) floater.add_ignore_element(touch);
+              if (touch) {
+                floater.add_ignore_element(touch);
+              }
 
               var amazon = $q('.area_new .area_inside .ads_amazon_outer', wrap);
-              if (amazon) floater.add_ignore_element(amazon.parentNode.parentNode);
+              if (amazon) {
+                floater.add_ignore_element(amazon.parentNode.parentNode);
+              }
 
               var url = 'http://product.adingo.jp.eimg.jp/c/hybridplus/keyword.php';
               var keywords = $x('div[div/script[contains(@src, "' + url + '")]]', wrap);
-              if (keywords) floater.add_ignore_element(keywords);
+              if (keywords) {
+                floater.add_ignore_element(keywords);
+              }
             }
           }
         });
 
       }, function(args) {
-        if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) return;
+        if (_extension_data && !(_extension_data.base_uri || _extension_data.open_options)) {
+          return;
+        }
 
         var root;
         var sitemenu = $q('nav.site-menu ul');
@@ -1900,7 +2020,9 @@
           });
 
           function create() {
-            if (root) return;
+            if (root) {
+              return;
+            }
             root = $c('div', null, {id: 'pp-conf-root', cls: (conf.disable_effect ? '' : 'pp-animation pp-hidden')});
             var ui = new ConfigUI(root), wrapper = $q('header#global-header');
             var li = $c('li', null, {id: 'pp-conf-close'});
@@ -1912,7 +2034,9 @@
 
             if (!LS.u) {
               $c('div', root, {text: lang.c.no_storage});
-              if (window.opera) $c('div', root, {text: lang.c.export_userjs});
+              if (window.opera) {
+                $c('div', root, {text: lang.c.export_userjs});
+              }
             }
 
             $ev(root).listen(['oTransitionEnd', 'webkitTransitionEnd'], fire_event);
@@ -1934,7 +2058,9 @@
 
       }, function(args) {
         var r_container = $('illust-recommend');
-        if (!r_container) return;
+        if (!r_container) {
+          return;
+        }
 
         function wait_xpath(xpath, root, func) {
           var node = $x(xpath, root);
@@ -2031,7 +2157,9 @@
             } else {
               input.value = item.value;
             }
-            if (LS.u) LS.remove(sec.name, item.key);
+            if (LS.u) {
+              LS.remove(sec.name, item.key);
+            }
             self.update_export();
             return true;
           });
@@ -2047,14 +2175,20 @@
             } else {
               value = LS.conv[type][0](input.value);
             }
-            if (LS.u) LS.set(sec.name, item.key, value);
-            if (!options_page) LS.map[sec.name].conf[item.key] = value;
+            if (LS.u) {
+              LS.set(sec.name, item.key, value);
+            }
+            if (!options_page) {
+              LS.map[sec.name].conf[item.key] = value;
+            }
             self.update_export();
           });
 
           ++idx;
         }, function(sec) {
-          if (sec.name === 'bookmark') return true;
+          if (sec.name === 'bookmark') {
+            return true;
+          }
           page = self.make_page(sec.label, sec.name);
           page.table = $c('table', page.content);
           page.section = sec;
@@ -2076,7 +2210,9 @@
       var page = find(this.pages, function(page) {
         return page.id === id;
       });
-      if (page) return page;
+      if (page) {
+        return page;
+      }
 
       page = {
         id:      id,
@@ -2086,7 +2222,9 @@
       page.label = $c('a', page.tab, {href: '#pp-conf-' + id, text: text});
 
       $ev(page.label, {ctx: this}).click(function() {
-        if (this.selected_page === page) return true;
+        if (this.selected_page === page) {
+          return true;
+        }
         this.show_page(page);
         return true;
       });
@@ -2098,7 +2236,9 @@
     show_page: function(page, animate) {
       if (this.selected_page) {
         this.selected_page.tab.className = '';
-        if (!animate) this.selected_page.content.className = 'pp-conf-page';
+        if (!animate) {
+          this.selected_page.content.className = 'pp-conf-page';
+        }
       }
       page.tab.className = 'select';
       page.content.className = 'pp-conf-page select';
@@ -2112,7 +2252,9 @@
         var inputs = row.getElementsByTagName('input');
         var key = inputs[0].value;
         var val = inputs[1].value;
-        if (key && val) tag_aliases += key + '\n' + val + '\n';
+        if (key && val) {
+          tag_aliases += key + '\n' + val + '\n';
+        }
       }
       return tag_aliases;
     },
@@ -2124,11 +2266,15 @@
       var obj = { }, self = this;
       LS.each(function(item, sec) {
         var input = self.input_table[sec.name + '_' + item.key], val;
-        if (!input) return;
+        if (!input) {
+          return;
+        }
         val = (typeof item.value === 'boolean'
                ? input.checked
                : LS.get_conv(sec.name, item.key)[0](input.value));
-        //if (val !== item.value) obj[sec.name + '_' + item.key] = val;
+        // if (val !== item.value) {
+        //   obj[sec.name + '_' + item.key] = val;
+        // }
         obj[sec.name + '_' + item.key] = val;
       });
       obj['bookmark_tag_order'] = this.tag_order_textarea.value.replace(/\r/g, '');
@@ -2139,14 +2285,20 @@
     export_import: function() {
       var obj = JSON.parse(this.export_input.value);
       LS.each(function(item, sec) {
-        if (sec.name === 'bookmark') return;
+        if (sec.name === 'bookmark') {
+          return;
+        }
         var val = obj[sec.name + '_' + item.key];
         if (typeof val !== 'undefined' && val !== null) {
           LS.set(sec.name, item.key, val);
         }
       });
-      if (obj['bookmark_tag_order']) LS.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
-      if (obj['bookmark_tag_aliases']) LS.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+      if (obj['bookmark_tag_order']) {
+        LS.set('bookmark', 'tag_order', obj['bookmark_tag_order']);
+      }
+      if (obj['bookmark_tag_aliases']) {
+        LS.set('bookmark', 'tag_aliases', obj['bookmark_tag_aliases']);
+      }
       window.location.reload();
     },
 
@@ -2155,7 +2307,9 @@
       var order = LS.parse_bm_tag_order(this.tag_order_textarea.value);
       var alias = LS.parse_bm_tag_aliases(this.get_tag_alias_str());
       var indent = 0, self = this;
-      if (!indent_level) indent_level = 0;
+      if (!indent_level) {
+        indent_level = 0;
+      }
 
       function push(str) {
         var sp = '';
@@ -2164,7 +2318,9 @@
       }
 
       LS.each(function(item, sec) {
-        if (sec.name === 'bookmark') return;
+        if (sec.name === 'bookmark') {
+          return;
+        }
         var input = self.input_table[sec.name + '_' + item.key], val;
         if (typeof item.value === 'boolean') {
           val = input.checked;
@@ -2289,7 +2445,9 @@
           row.className = 'pp-conf-key-mode-line';
           cell.setAttribute('colspan', '4');
           cell.textContent = lang.c.mode[mode];
-          if (!mode_map[mode]) mode_map[mode] = [];
+          if (!mode_map[mode]) {
+            mode_map[mode] = [];
+          }
           mode_map[mode].push(row);
         }
         add_mode_line(0, 'normal');
@@ -2307,7 +2465,9 @@
             each((langitem.desc || langitem).split(/(\$mode)/), function(term) {
               if (term === '$mode') {
                 var span = $c('span', cell, {cls: 'pp-conf-key-mode-label', text: lang.c.mode[mode2]});
-                if (!mode_map[mode2]) mode_map[mode2] = [];
+                if (!mode_map[mode2]) {
+                  mode_map[mode2] = [];
+                }
                 mode_map[mode2].push(span);
               } else {
                 cell.appendChild(window.document.createTextNode(term));
@@ -2345,7 +2505,9 @@
                                          ? LS.get('bookmark', 'tag_order')
                                          : LS.bm_tag_order_to_str(conf.bm_tag_order));
         $ev(this.tag_order_textarea).change(function() {
-          if (LS.u) LS.set('bookmark', 'tag_order', self.tag_order_textarea.value);
+          if (LS.u) {
+            LS.set('bookmark', 'tag_order', self.tag_order_textarea.value);
+          }
           self.update_export();
         });
 
@@ -2355,7 +2517,9 @@
         $ev($c('button', page.content, {text: 'Add'})).click(function() { add_row(); });
 
         function save() {
-          if (LS.u) LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
+          if (LS.u) {
+            LS.set('bookmark', 'tag_aliases', self.get_tag_alias_str());
+          }
           self.update_export();
         }
 
@@ -2479,7 +2643,9 @@
         function hide() {
           page.tab.style.display = 'none';
           page.content.style.display = 'none';
-          if (this.selected_page === page) this.show_page(this.pages[0]);
+          if (this.selected_page === page) {
+            this.show_page(this.pages[0]);
+          }
         }
         function update() {
           if (debug_input.checked) {
@@ -2536,8 +2702,12 @@
             each(log_attrs, function(attr) {
               row.insertCell(-1).textContent = ev[attr];
             });
-            if (cancel.checked && key) ev.preventDefault();
-            if (console.checked && window.console) window.console.log(ev);
+            if (cancel.checked && key) {
+              ev.preventDefault();
+            }
+            if (console.checked && window.console) {
+              window.console.log(ev);
+            }
           }
 
           clear();
@@ -2555,7 +2725,9 @@
             each(page.sample_url, function(obj) {
               var url = typeof obj === 'string' ? obj : obj.url;
               var flags = [];
-              if (obj.page) flags.push('p');
+              if (obj.page) {
+                flags.push('p');
+              }
 
               var row = table.insertRow(-1);
               row.insertCell(-1).textContent = flags.join('');
@@ -2563,7 +2735,9 @@
               var anc = $c('a', row.insertCell(-1), {text: url, 'a:href': url, 'a:target': '_blank'});
               links.all.push(anc);
               each(flags, function(flag) {
-                if (!links[flag]) links[flag] = [];
+                if (!links[flag]) {
+                  links[flag] = [];
+                }
                 links[flag].push(anc);
               });
             });
@@ -2572,7 +2746,9 @@
           var open = $c('span', label, {css: 'margin-left:0.6em'});
           open.appendChild(window.document.createTextNode('(Open: '));
           each(['all', 'p'], function(key, idx) {
-            if (idx) open.appendChild(window.document.createTextNode('/'));
+            if (idx) {
+              open.appendChild(window.document.createTextNode('/'));
+            }
             $ev($c('a', open, {text: key, href: '#'})).click(function() {
               each(links[key], function(anc) {
                 var ev = window.document.createEvent('MouseEvent');
@@ -2835,12 +3011,16 @@
   function init_per_page() {
     each(pp_page_support, function(page) {
       var match = false, args = arguments.callee.args;
-      if (!args) arguments.callee.args = args = parseopts(window.location.href);
+      if (!args) {
+        arguments.callee.args = args = parseopts(window.location.href);
+      }
       if (page.url) {
         match = (function(func) {
           if (page.url instanceof Array) {
             for(var i = 0; i < page.url.length; ++i) {
-              if (func(page.url[i])) return true;
+              if (func(page.url[i])) {
+                return true;
+              }
             }
             return false;
           } else {
@@ -3056,7 +3236,9 @@
               $c('input', action, {'a:type': 'button', value: lang.c.unfavorite_user, cls: 'button remove'});
 
               var mode = $x('.//input[@name="mode"]', form);
-              if (mode) mode.parentNode.removeChild(mode);
+              if (mode) {
+                mode.parentNode.removeChild(mode);
+              }
               btn.style.opacity = '1';
             } else if ((re = /<span[^>]+class=\"[^\"]*error[^\"]*\"[^>]*>(.+)<\/span>/i.exec(data))) {
               alert(re[1]);
@@ -3102,12 +3284,18 @@
     // rate
     defineMagicFunction('countup_rating', function(real, othis, score) {
       var msg = lang.c.rate_confirm.replace('$point', String(score));
-      if (conf.rate_confirm && !confirm(msg)) return;
-      if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+      if (conf.rate_confirm && !confirm(msg)) {
+        return;
+      }
+      if (Popup.instance && Popup.instance.item) {
+        uncache(Popup.instance.item.medium);
+      }
       real.apply(othis, Array.prototype.slice.call(arguments, 2));
     });
     defineMagicFunction('send_quality_rating', function(real, othis) {
-      if (Popup.instance && Popup.instance.item) uncache(Popup.instance.item.medium);
+      if (Popup.instance && Popup.instance.item) {
+        uncache(Popup.instance.item.medium);
+      }
 
       var _ajax = window.jQuery.ajax;
       window.jQuery.ajax = function(obj) {
@@ -3115,15 +3303,21 @@
         var success = obj.success;
         obj.success = function() {
           try {
-            if (success) success.apply(othis, Array.prototype.slice.call(arguments));
+            if (success) {
+              success.apply(othis, Array.prototype.slice.call(arguments));
+            }
             if (Popup.instance && Popup.instance.has_qrate) {
-              if (window.jQuery('#rating').is(':visible')) window.rating_ef2();
+              if (window.jQuery('#rating').is(':visible')) {
+                window.rating_ef2();
+              }
               each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
                    function(item) {
                      var re;
                      if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1], 10) & 1)) {
                        var value = $x('following-sibling::div', item);
-                       if (value && !value.hasAttribute('id')) value.setAttribute('highlight', '');
+                       if (value && !value.hasAttribute('id')) {
+                         value.setAttribute('highlight', '');
+                       }
                      }
                    });
             }
@@ -3141,18 +3335,24 @@
       window.jQuery('#quality_rating').slideDown(200, after_show);
       function after_show() {
         var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
-        if (f) f.focus();
+        if (f) {
+          f.focus();
+        }
       }
     });
     defineMagicFunction('rating_ef2', function(real, othis) {
-      if (Popup.is_qrate_button(window.document.activeElement)) window.document.activeElement.blur();
+      if (Popup.is_qrate_button(window.document.activeElement)) {
+        window.document.activeElement.blur();
+      }
       real.apply(othis, Array.prototype.slice.call(arguments, 2));
     });
   }
 
   function init_pixplus() {
     var page_lang = window.document.documentElement.getAttribute('lang');
-    if (lang[page_lang]) lang.c = lang[page_lang];
+    if (lang[page_lang]) {
+      lang.c = lang[page_lang];
+    }
 
     window.document.body.setAttribute('pixplus', '');
     var ev = window.document.createEvent('Event');
@@ -3161,7 +3361,9 @@
 
     each(['auto_manga', 'reverse'], function(key) {
       try {
-        if (!conf.popup[key + '_regexp']) throw 1;
+        if (!conf.popup[key + '_regexp']) {
+          throw 1;
+        }
         var v = conf.popup[key] & 0xf, r = new RegExp(conf.popup[key + '_regexp']);
         conf.popup[key + '_p'] = v === 2 ? r.test(window.location.href) : v === 1;
       } catch(ex) {
@@ -3175,7 +3377,9 @@
       var re;
       if ((re = /^(?:http:\/\/www\.pixiv\.net)?\/?jump\.php\?(.*)$/.exec(anc.href))) {
         var url = re[1];
-        if (/^\w+%3a%2f%2f/i.test(url)) url = decodeURIComponent(url);
+        if (/^\w+%3a%2f%2f/i.test(url)) {
+          url = decodeURIComponent(url);
+        }
         anc.href = url;
       }
     });
@@ -3193,11 +3397,15 @@
 
     function jq_onload() {
       //window.jQuery.noConflict();
-      if (conf.disable_effect) window.jQuery.fx.off = true;
+      if (conf.disable_effect) {
+        window.jQuery.fx.off = true;
+      }
       if (/^\/stacc\//.test(window.location.pathname)) {
         var _ajax = window.jQuery.ajax;
         window.jQuery.ajax = function(obj) {
-          if (obj) obj.url = mod_rpc_url(obj.url);
+          if (obj) {
+            obj.url = mod_rpc_url(obj.url);
+          }
           return _ajax.apply(this, Array.prototype.slice.call(arguments));
         };
       }
@@ -3214,7 +3422,9 @@
                 .replace(/\r/g, '\\r') + '"';
             } else if (val instanceof Array) {
               for(var i = 0; i < val.length; ++i) {
-                if (i) str += ',';
+                if (i) {
+                  str += ',';
+                }
                 str += JSON.stringify(val[i]);
               }
               return '[' + str + ']';
@@ -3223,7 +3433,9 @@
             } else if (typeof val === 'object') {
               var first = true;
               for(var key in val) {
-                if (!val.hasOwnProperty(key)) continue;
+                if (!val.hasOwnProperty(key)) {
+                  continue;
+                }
                 if (first) {
                   first = false;
                 } else {
@@ -3243,7 +3455,9 @@
     }
 
     function pt_onload() {
-      if (!/^\/stacc\//.test(window.location.pathname)) return;
+      if (!/^\/stacc\//.test(window.location.pathname)) {
+        return;
+      }
       var _request = window.Ajax.Request.prototype.request;
       window.Ajax.Request.prototype.request = function(url) {
         url = mod_rpc_url(url);
@@ -3266,12 +3480,16 @@
     },
 
     complete: function() {
-      if (!this.stopped && this.cb_load) this.cb_load.call(this);
+      if (!this.stopped && this.cb_load) {
+        this.cb_load.call(this);
+      }
       this.stopped = true;
     },
 
     error: function(msg) {
-      if (!this.stopped && this.cb_error) this.cb_error.call(this, msg);
+      if (!this.stopped && this.cb_error) {
+        this.cb_error.call(this, msg);
+      }
       this.stopped = true;
     },
 
@@ -3283,7 +3501,9 @@
   var GalleryItem = pp.GalleryItem = $cls.create({
     initialize: function(url, thumb, caption, prev, gallery) {
       var id = parseInt(/[\?&]illust_id=(\d+)/.exec(url)[1], 10);
-      if (gallery && gallery.args.skip_dups && prev && id === prev.id) prev = prev.prev;
+      if (gallery && gallery.args.skip_dups && prev && id === prev.id) {
+        prev = prev.prev;
+      }
 
       this.loaded  = false;
       this.gallery = gallery;
@@ -3382,7 +3602,9 @@
     add_collection: function(col) {
       var xpath = this.args.thumb_only ? this.args.xpath_tmb : this.args.xpath_cap;
       var elements = $xa(xpath, col);
-      if (!elements.length) return;
+      if (!elements.length) {
+        return;
+      }
       LOG.debug('collection detected - ' + elements.length);
       col.setAttribute('pixplus_loaded', 'true');
 
@@ -3399,10 +3621,14 @@
           thumb = $x(self.args.xpath_tmb, elem);
           cap = elem;
         }
-        if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) return;
+        if ((!self.args.allow_nothumb || cnt < self.args.allow_nothumb) && !thumb) {
+          return;
+        }
 
         var url = (self.args.get_url || Gallery.get_url)(cap, thumb);
-        if (!url || !/[\?&]illust_id=(\d+)/.test(url)) return;
+        if (!url || !/[\?&]illust_id=(\d+)/.test(url)) {
+          return;
+        }
 
         if (cap) {
           if (thumb && prev && thumb === prev.thumb) {
@@ -3450,16 +3676,26 @@
 
         var item = new GalleryItem(url, thumb, cap, prev, self);
 
-        if (!self.first_limited) self.first_limited = item;
-        if (!self.first && !item.limited) self.first = item;
-        if (self.args.filter) self.args.filter(item);
+        if (!self.first_limited) {
+          self.first_limited = item;
+        }
+        if (!self.first && !item.limited) {
+          self.first = item;
+        }
+        if (self.args.filter) {
+          self.args.filter(item);
+        }
 
         if (self.args.skip_dups && self.idmap[item.id]) {
           self.prev_dups.push(item);
         } else {
           if (!item.limited) {
-            if (prev) prev.next = item;
-            if (prev_limited) prev_limited.next = item;
+            if (prev) {
+              prev.next = item;
+            }
+            if (prev_limited) {
+              prev_limited.next = item;
+            }
             if (self.prev_dups.length) {
               each(self.prev_dups, function(p) { p.next = item; });
               self.prev_dups = [];
@@ -3478,7 +3714,9 @@
 
     setup: function() {
       var root = $x('//body/div[@id="wrapper"]/div[@id="contents"]');
-      if (!root) root = $x('//body/div[@id="wrapper"]');
+      if (!root) {
+        root = $x('//body/div[@id="wrapper"]');
+      }
       $ev(root || window.document.body, {async: true}).listen('DOMNodeInserted', function(ev) {
         var added = false;
         each(Gallery.__inst__, function(gallery) {
@@ -3486,7 +3724,9 @@
             added = true;
           }
         });
-        if (added) window.pixiv.scrollView.add();
+        if (added) {
+          window.pixiv.scrollView.add();
+        }
       });
     },
 
@@ -3645,12 +3885,16 @@
     init_comments: function(keep_form) {
       this.comment_wrap.scrollTop = 0;
       this.viewer_comments.style.display = 'none';
-      if (!keep_form) this.viewer_comments_c.innerHTML = '';
+      if (!keep_form) {
+        this.viewer_comments_c.innerHTML = '';
+      }
       this.viewer_comments_a.innerHTML = '';
       if (pp.rpc_usable) {
         this.comments_btn.style.display = '';
         set_class(this.comments_btn, 'enable', 0);
-        if (!keep_form) this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
+        if (!keep_form) {
+          this.viewer_comments_c.style.display = conf.popup.show_comment_form ? 'block' : 'none';
+        }
       } else {
         this.comments_btn.style.display = 'none';
       }
@@ -3731,10 +3975,14 @@
 
     set: function(item, scroll, close, reload, manga_page) {
       if (!item) {
-        if (close) this.close();
+        if (close) {
+          this.close();
+        }
         return;
       }
-      if (this.loader) this.loader.cancel();
+      if (this.loader) {
+        this.loader.cancel();
+      }
       if (!this.item && item.caption) {
         this.title.textContent = trim(item.caption.textContent);
         this.title.href = item.medium;
@@ -3747,7 +3995,9 @@
         this.conn_g_add_item.disconnect();
         this.conn_g_add_item = null;
       }
-      if (this.item.gallery) this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
+      if (this.item.gallery) {
+        this.conn_g_add_item = this.item.gallery.onadditem.connect(function() { self.update_olc(); });
+      }
 
       if (item.limited && item.thumb) {
         this.load_pre(scroll);
@@ -3756,8 +4006,12 @@
         this.set_images([{image: item.thumb.cloneNode(false), url: item.thumb.src}], false);
         this.update_olc();
         Popup.onload.emit(this);
-        if (this.item.prev) this.item.prev.preload();
-        if (this.item.next) this.item.next.preload();
+        if (this.item.prev) {
+          this.item.prev.preload();
+        }
+        if (this.item.next) {
+          this.item.next.preload();
+        }
       } else {
         var self = this;
         this.set_status('Loading');
@@ -3772,7 +4026,9 @@
     },
 
     load_pre: function(scroll) {
-      if (scroll) pp.lazy_scroll(this.item.thumb || this.item.caption);
+      if (scroll) {
+        pp.lazy_scroll(this.item.thumb || this.item.caption);
+      }
       this.init_comments();
       this.manga.init();
       this.manga_btn.style.display = 'none';
@@ -3907,7 +4163,9 @@
 
       this.comment.style.display = 'none';
       if ((re = /<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i.exec(loader.text))) {
-        if ((this.comment.innerHTML = edit_comment(re[1]))) this.comment.style.display = '';
+        if ((this.comment.innerHTML = edit_comment(re[1]))) {
+          this.comment.style.display = '';
+        }
       }
 
       this.tag_edit_enabled = false;
@@ -3917,9 +4175,13 @@
         var html = '';
         each(re[1].replace(/\s*\n\s*/g, '').split('\u3000'), function(t) {
           t = trim(t);
-          if (t) html += '<span>' + t.replace(/> </g, '><') + '</span>';
+          if (t) {
+            html += '<span>' + t.replace(/> </g, '><') + '</span>';
+          }
         });
-        if (!/<a /i.test(html)) html = '';
+        if (!/<a /i.test(html)) {
+          html = '';
+        }
         // タグ編集はrpc_i_id/rpc_u_id/rpc_e_idを要求
         if (pp.rpc_usable && rpc_chk(pp.rpc_req_tag) &&
             /<a[^>]+onclick="startTagEdit\(\)"/i.exec(loader.text)) {
@@ -3961,7 +4223,9 @@
          */
         // U+FF1A: FULLWIDTH COLON
         var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
-        if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) html += re[1];
+        if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) {
+          html += re[1];
+        }
         html += '</div>';
         if (rpc_chk(pp.rpc_req_qrate)) {
           var re1 = /<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i.exec(loader.text);
@@ -3975,7 +4239,9 @@
             }
           }
         }
-        if (!this.has_qrate) html += '</div>';
+        if (!this.has_qrate) {
+          html += '</div>';
+        }
         this.rating.innerHTML = html;
         this.rating.style.display = '';
         this.rating_enabled = true;
@@ -4033,10 +4299,16 @@
         this.set_images([{image: loader.image, size: img_size, url: url}], this.manga.usable);
         this.update_olc();
         Popup.onload.emit(this);
-        if (this.manga.usable) this.manga.preload();
+        if (this.manga.usable) {
+          this.manga.preload();
+        }
       }
-      if (this.item.prev) this.item.prev.preload();
-      if (this.item.next) this.item.next.preload();
+      if (this.item.prev) {
+        this.item.prev.preload();
+      }
+      if (this.item.next) {
+        this.item.next.preload();
+      }
     },
 
     set_manga_page: function(page) {
@@ -4048,7 +4320,9 @@
           this.set_status('Loading');
           // エラーの時に次のページに移動する
           this.manga.page = page;
-          if (this.loader) this.loader.cancel();
+          if (this.loader) {
+            this.loader.cancel();
+          }
           this.loader = new Popup.MangaLoader(
             this.item, page,
             function() { self.manga_onload(this, page); },
@@ -4074,7 +4348,9 @@
     set_manga_button_text: function() {
       var pages = [];
       each(this.manga.pages, function(p) { pages.push(p.page + 1); });
-      if (!pages.length) pages.push(0);
+      if (!pages.length) {
+        pages.push(0);
+      }
       this.manga_btn.textContent = '[M:' + pages.join('+') + '/' + this.manga.page_count + ']';
     },
 
@@ -4109,8 +4385,12 @@
         var len = width > height ? width : height;
         if (len <= conf.popup.auto_zoom) {
           zoom = Math.floor(conf.popup.auto_zoom_size / len);
-          if (zoom > conf.popup.auto_zoom_scale) zoom = Math.floor(conf.popup.auto_zoom_scale);
-          if (zoom < 1) zoom = 1;
+          if (zoom > conf.popup.auto_zoom_scale) {
+            zoom = Math.floor(conf.popup.auto_zoom_scale);
+          }
+          if (zoom < 1) {
+            zoom = 1;
+          }
         }
       }
       if (zoom > 1) {
@@ -4122,12 +4402,16 @@
     },
 
     adjust_image_size: function() {
-      if (!this.images.list) return;
+      if (!this.images.list) {
+        return;
+      }
 
       var width = 0, height = 0;
       each(this.images.list, function(image) {
         width += image.size.width;
-        if (image.size.height > height) height = image.size.height;
+        if (image.size.height > height) {
+          height = image.size.height;
+        }
       });
 
       var de = window.document.documentElement;
@@ -4178,7 +4462,9 @@
         var w = img.size.width * this.zoom_scale, h = img.size.height * this.zoom_scale;
         var scaled = Popup.create_zoom_image(img.image_unscaled || img.image, w, h, img.size.width, img.size.height);
         img.image.parentNode.replaceChild(scaled, img.image);
-        if (!img.image_unscaled) img.image_unscaled = img.image;
+        if (!img.image_unscaled) {
+          img.image_unscaled = img.image;
+        }
         img.image = scaled;
       }
       this.locate();
@@ -4190,8 +4476,12 @@
       each(this.images.list, function(img) {
         var sup = [], re;
         var scale = Math.floor(img.image.offsetWidth / img.display_size.width * 100) / 100;
-        if (scale !== 1) sup.push(scale + 'x');
-        if ((re = /\.([^\/\.\?]+)(?:\?.*)?$/.exec(img.image.src))) sup.push(re[1]);
+        if (scale !== 1) {
+          sup.push(scale + 'x');
+        }
+        if ((re = /\.([^\/\.\?]+)(?:\?.*)?$/.exec(img.image.src))) {
+          sup.push(re[1]);
+        }
         info_size.push(img.display_size.width + 'x' + img.display_size.height + (sup.length ? '(' + sup.join('/') + ')' : ''));
       });
       this.info_size.textContent = info_size.join('/');
@@ -4255,9 +4545,15 @@
     },
 
     close: function() {
-      if (Popup.onclose.emit(this)) return;
-      if (this.loader) this.loader.cancel();
-      if (this.conn_g_add_item) this.conn_g_add_item.disconnect();
+      if (Popup.onclose.emit(this)) {
+        return;
+      }
+      if (this.loader) {
+        this.loader.cancel();
+      }
+      if (this.conn_g_add_item) {
+        this.conn_g_add_item.disconnect();
+      }
       window.document.body.removeChild(this.root_div);
       if (pp.rpc_usable) {
         pp.rpc_div.innerHTML = '';
@@ -4362,22 +4658,32 @@
       if (Popup.is_qrate_button(btn)) {
         for(; move !== 0; move += move < 0 ? 1 : -1) {
           var next = move < 0 ? btn.previousSibling : btn.nextSibling;
-          if (Popup.is_qrate_button(next)) btn = next;
+          if (Popup.is_qrate_button(next)) {
+            btn = next;
+          }
         }
-        if (btn) btn.focus();
+        if (btn) {
+          btn.focus();
+        }
       }
     },
 
     qrate_submit: function(force) {
       var btn = window.document.activeElement;
-      if (!Popup.is_qrate_button(btn)) return;
-      if (!force && !this.is_caption_visible()) return;
+      if (!Popup.is_qrate_button(btn)) {
+        return;
+      }
+      if (!force && !this.is_caption_visible()) {
+        return;
+      }
       send_click(btn);
     },
 
     toggle_viewer_comments: function() {
       var self = this;
-      if (!this.viewer_comments_enabled) return;
+      if (!this.viewer_comments_enabled) {
+        return;
+      }
       if (!this.viewer_comments_a.innerHTML || this.viewer_comments.style.display === 'none') {
         set_class(this.caption, 'show', 1);
       }
@@ -4402,7 +4708,9 @@
         var url = del.getAttribute('href');
         del.setAttribute('onclick', '');
         del.onclick = '';
-        if (/^\w/.test(url)) url = '/' + url;
+        if (/^\w/.test(url)) {
+          url = '/' + url;
+        }
         $ev(del).click(function() {
           if (confirm(lang.c.delete_comment)) {
             geturl(url, function() {
@@ -4426,9 +4734,13 @@
     toggle_viewer_comment_form: function() {
       var hidden = this.viewer_comments_c.style.display === 'none', comment;
       this.viewer_comments_c.style.display = hidden ? 'block' : 'none';
-      if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) comment.focus();
+      if (hidden && (comment = $x('./form/input[@name="comment"]', this.viewer_comments_c))) {
+        comment.focus();
+      }
       conf.popup.show_comment_form = !!hidden;
-      if (LS.u) LS.set('popup', 'show_comment_form', !!hidden);
+      if (LS.u) {
+        LS.set('popup', 'show_comment_form', !!hidden);
+      }
     },
 
     reload_viewer_comments: function() {
@@ -4457,7 +4769,9 @@
           if ((re = /<form[^>]+action="bookmark_add.php"[\s\S]*?<\/form>/i.exec(text))) {
             this.complete();
             // エラー回避
-            if (!window.update_input_tag) window.update_input_tag = function() { };
+            if (!window.update_input_tag) {
+              window.update_input_tag = function() { };
+            }
             this.bm_edit.innerHTML = re[0];
             this.bm_edit.style.display = '';
             this.caption.style.display = 'none';
@@ -4517,15 +4831,21 @@
     },
 
     open_author_profile: function() {
-      if (this.author.style.display !== 'none') pp.open(this.a_profile.href);
+      if (this.author.style.display !== 'none') {
+        pp.open(this.a_profile.href);
+      }
     },
 
     open_author_illust: function() {
-      if (this.author.style.display !== 'none') pp.open(this.a_illust.href);
+      if (this.author.style.display !== 'none') {
+        pp.open(this.a_illust.href);
+      }
     },
 
     open_author_bookmark: function() {
-      if (this.author.style.display !== 'none') pp.open(this.a_bookmark.href);
+      if (this.author.style.display !== 'none') {
+        pp.open(this.a_bookmark.href);
+      }
     },
 
     open_author_staccfeed: function() {
@@ -4539,7 +4859,9 @@
     },
 
     set_manga_mode: function(manga_mode, page) {
-      if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) return;
+      if (!this.manga.usable || !!this.manga.enabled === !!manga_mode) {
+        return;
+      }
       if ((this.manga.enabled = manga_mode)) {
         this.manga.enabled = true;
         set_class(this.manga_btn, 'enable', 1);
@@ -4551,7 +4873,9 @@
     },
 
     toggle_manga_mode: function(page) {
-      if (this.manga.usable) this.set_manga_mode(!this.manga.enabled, page);
+      if (this.manga.usable) {
+        this.set_manga_mode(!this.manga.enabled, page);
+      }
     },
 
     scroll_caption: function(pos) {
@@ -4564,7 +4888,9 @@
 
     set_event_handler: function() {
       Popup.ev_conn_key = $ev(window).key(function(ev, conn, key) {
-        if (!Popup.stop_key) return Popup.instance.onkey(ev, key);
+        if (!Popup.stop_key) {
+          return Popup.instance.onkey(ev, key);
+        }
         return false;
       });
       Popup.ev_conn_resize = $ev(window, {async: true}).resize(Popup._locate);
@@ -4596,12 +4922,16 @@
     onkey: new Signal(function(ev, key) {
       function sel_qr(prev) {
         var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
-        if (Popup.is_qrate_button(node)) node.focus();
+        if (Popup.is_qrate_button(node)) {
+          node.focus();
+        }
       }
       return (function() {
         for(var i = 0; i < arguments.length; ++i) {
           var map = arguments[i];
-          if (!map.run) continue;
+          if (!map.run) {
+            continue;
+          }
           for(var j = 0; j < map.map.length; ++j) {
             var entry = map.map[j];
             if ($ev.key_check(ev, map.map[j].k)) {
@@ -4609,7 +4939,9 @@
               return true;
             }
           }
-          if (map.stop) break;
+          if (map.stop) {
+            break;
+          }
         }
         return false;
       }).call(this, {
@@ -4716,17 +5048,21 @@
 
     run_url: function(url, manga_page) {
       var item = new GalleryItem(url, null, null, Popup.instance ? Popup.instance.item : null);
-      if (Popup.instant_prev) Popup.instant_prev.next = item;
+      if (Popup.instant_prev) {
+        Popup.instant_prev.next = item;
+      }
       Popup.instant_prev = item;
       return Popup.run(item, manga_page);
     },
 
     create_button: function(text, parent, id, cb_click) {
       var btn = $c('a', parent, {id: id, href: 'javascript:void(0)', text: text});
-      if (cb_click) $ev(btn).click(function() {
-        cb_click();
-        return true;
-      });
+      if (cb_click) {
+        $ev(btn).click(function() {
+          cb_click();
+          return true;
+        });
+      }
       return btn;
     },
 
@@ -4844,7 +5180,9 @@
         if (self.parallel && conf.popup.big_image) {
           LOG.debug('parallel load failed - ' + self.item.img_url_base);
           self.parallel = false;
-          if (self.text_cmp) self.parse_text();
+          if (self.text_cmp) {
+            self.parse_text();
+          }
         } else {
           self.error('Failed to load image');
         }
@@ -4915,9 +5253,13 @@
     },
 
     check_complete: function(image) {
-      if (!this.images) return;
+      if (!this.images) {
+        return;
+      }
       for(var i = 0; i < this.images.length; ++i) {
-        if (this.images[i] instanceof Array) return;
+        if (this.images[i] instanceof Array) {
+          return;
+        }
       }
       this.complete();
     },
@@ -5072,7 +5414,9 @@
 
       if (conf.bookmark_hide) (function() {
         var hide = $x('.//input[@type="radio" and @name="restrict" and @value="1"]', this.root);
-        if (hide) hide.checked = true;
+        if (hide) {
+          hide.checked = true;
+        }
       }).call(this);
 
       this.connections.push($ev(this.form).submit(bind(function() {
@@ -5151,7 +5495,9 @@
              },
              this);
 
-        if (opts.autotag) this.autoinput_from_tag();
+        if (opts.autotag) {
+          this.autoinput_from_tag();
+        }
 
         var keyhandler = BookmarkForm.prototype.onkey_common;
         if (this.key_type === 1) {
@@ -5162,7 +5508,9 @@
           each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
                function(ul) {
                  var l = $t('li', ul);
-                 if (l.length) this.tag_items.push(l);
+                 if (l.length) {
+                   this.tag_items.push(l);
+                 }
                }, this);
           if (this.tag_items.length) {
             $ev(this.input_tag).key(bind(BookmarkForm.prototype.onkey1, this));
@@ -5171,7 +5519,9 @@
           this.set_root_key_enabled(true);
           this.key_map_root = {};
           each($xa('.//input[@type!="hidden"]', this.root), function(input, idx) {
-            if (idx >= BookmarkForm.keys_root.length) return true;
+            if (idx >= BookmarkForm.keys_root.length) {
+              return true;
+            }
             var div = $c('div', null, {css: 'display:inline-block', 'a:ppaccesskey': BookmarkForm.keys_root[idx]});
             input.parentNode.insertBefore(div, input);
             input.parentNode.removeChild(input);
@@ -5183,7 +5533,9 @@
           this.key_map_tag_list = {};
           each($xa('.//div[contains(concat(" ", @class, " "), " bookmark_recommend_tag ")]/ul', this.root),
                function(ul, idx) {
-                 if (idx >= BookmarkForm.keys_tag.length) return;
+                 if (idx >= BookmarkForm.keys_tag.length) {
+                   return;
+                 }
                  this.key_map_tag_list[BookmarkForm.keys_tag[idx]] = ul;
                  ul.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
                },
@@ -5229,7 +5581,9 @@
       var tags = this.input_tag.value.split(/\s+|\u3000+/);
       each(this.tags_bookmark, function(bt) {
         var tag = bt.getAttribute('data-tag');
-        if (tags.indexOf(tag) >= 0) return;
+        if (tags.indexOf(tag) >= 0) {
+          return;
+        }
         var aliases = conf.bm_tag_aliases[tag];
         each([tag].concat(conf.bm_tag_aliases[tag] || []), function(tag) {
           if (func.call(this, bt, tag)) {
@@ -5246,7 +5600,9 @@
       this.autoinput(function(anc, tag) {
         for(var i = 0; i < this.tags_illust.length; ++i) {
           var itag = this.tags_illust[i].getAttribute('data-tag');
-          if (lc(itag).indexOf(lc(tag)) >= 0) return true;
+          if (lc(itag).indexOf(lc(tag)) >= 0) {
+            return true;
+          }
         }
         return false;
       });
@@ -5254,17 +5610,17 @@
 
     onkey_common: function(ev, conn, key) {
       return false;
-      /*
-      if (!pp.key_enabled(ev)) return false;
-      if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
-        this.submit();
-        return true;
-      } else if (key === $ev.KEY_ESCAPE) {
-        this.close();
-        return true;
-      }
-      return false;
-       */
+      // if (!pp.key_enabled(ev)) {
+      //   return false;
+      // }
+      // if (key === $ev.KEY_ENTER || key === $ev.KEY_SPACE) {
+      //   this.submit();
+      //   return true;
+      // } else if (key === $ev.KEY_ESCAPE) {
+      //   this.close();
+      //   return true;
+      // }
+      // return false;
     },
 
     // conf.bookmark_form === 1
@@ -5286,7 +5642,9 @@
       } else if (y >= this.tag_items.length) {
         y = 0;
       }
-      if (y !== this.tag_preselected_index.y) x = 0;
+      if (y !== this.tag_preselected_index.y) {
+        x = 0;
+      }
       if (x < 0) {
         x = this.tag_items[y].length - 1;
       } else if (x >= this.tag_items[y].length) {
@@ -5332,14 +5690,18 @@
         BookmarkForm.set_key_label_enabled(ul, false);
         this.key_map_tags = {};
         each($t('li', ul), function(li, idx) {
-          if (idx >= BookmarkForm.keys_tag.length) return;
+          if (idx >= BookmarkForm.keys_tag.length) {
+            return;
+          }
           this.key_map_tags[BookmarkForm.keys_tag[idx]] = li;
           li.setAttribute('ppaccesskey', BookmarkForm.keys_tag[idx]);
         }, this);
         BookmarkForm.set_key_label_enabled(ul, true);
         this.selected_list = ul;
       } else {
-        if (this.selected_list) BookmarkForm.set_key_label_enabled(this.selected_list, false);
+        if (this.selected_list) {
+          BookmarkForm.set_key_label_enabled(this.selected_list, false);
+        }
         this.set_root_key_enabled(true);
         this.key_map_tags = null;
         this.selected_list = null;
@@ -5347,7 +5709,9 @@
     },
 
     onkey2: function(ev, conn, key) {
-      if (!pp.key_enabled(ev)) return false;
+      if (!pp.key_enabled(ev)) {
+        return false;
+      }
       if (this.root_key_enabled) {
         if (this.key_map_root[key]) {
           if (this.key_map_root[key].type === 'radio') {
@@ -5391,7 +5755,9 @@
     },
 
     close: function() {
-      if (this.onclose) this.onclose.emit(this);
+      if (this.onclose) {
+        this.onclose.emit(this);
+      }
     },
 
     destroy: function() {
@@ -5450,7 +5816,9 @@
 
     set_key_label_enabled: function(node, enabled) {
       var classes = node.className.replace(/ *pp-access-key-on */, ' ');
-      if (enabled) classes += ' pp-access-key-on';
+      if (enabled) {
+        classes += ' pp-access-key-on';
+      }
       node.className = classes;
     }
   });
@@ -5482,7 +5850,9 @@
           }
         }
       });
-      if (ary_ary.length > 0) ary.push(ary_ary);
+      if (ary_ary.length > 0) {
+        ary.push(ary_ary);
+      }
     });
     list.sort(function(a, b) {
       a = t(a); b = t(b);
@@ -5497,7 +5867,9 @@
       }
       return false;
     });
-    if (list.length) ary.push(list);
+    if (list.length) {
+      ary.push(list);
+    }
     function t(elem) {
       return $x('.//text()', elem).nodeValue;
     }
@@ -5513,7 +5885,9 @@
       this.use_placeholder = true;
       this.ignore_elements = [];
       Floater.instances.push(this);
-      if (Floater.initialized) this.init();
+      if (Floater.initialized) {
+        this.init();
+      }
     },
 
     init: function() {
@@ -5554,13 +5928,17 @@
           this.cont.style.maxHeight = '';
           return;
         }
-        if (!this.floating) mh -= getpos(this.wrap).top - sc.scrollTop;
+        if (!this.floating) {
+          mh -= getpos(this.wrap).top - sc.scrollTop;
+        }
         this.cont.style.maxHeight = mh + 'px';
       }
     },
 
     update_float: function () {
-      if (this.disable_float) return;
+      if (this.disable_float) {
+        return;
+      }
       var de = window.document.documentElement;
       var sc = browser.webkit ? window.document.body : window.document.documentElement;
       var pos = getpos(this.placeholder || this.wrap);
@@ -5585,11 +5963,15 @@
     },
 
     scroll_save: function () {
-      if (this.cont) this.scroll_pos = this.cont.scrollTop;
+      if (this.cont) {
+        this.scroll_pos = this.cont.scrollTop;
+      }
     },
 
     scroll_restore: function () {
-      if (this.cont) this.cont.scrollTop = this.scroll_pos;
+      if (this.cont) {
+        this.cont.scrollTop = this.scroll_pos;
+      }
     },
 
     add_ignore_element: function(elem) {
@@ -5600,7 +5982,9 @@
     initialized: false,
 
     init: function() {
-      if (Floater.initialized) return;
+      if (Floater.initialized) {
+        return;
+      }
       each(Floater.instances, function(inst) {
         inst.init();
       });
@@ -5639,7 +6023,9 @@
         funcs.push(func);
       }
     };
-    if (loaded) return;
+    if (loaded) {
+      return;
+    }
     $ev(window.document).listen(['GM_AutoPagerizeLoaded', 'AutoPatchWork.initialized'], function(ev, conn) {
       loaded = true;
       each(funcs, function(func) { func(); });
@@ -5662,7 +6048,9 @@
   }
 
   function lazy_scroll(elem, offset, root, scroll) {
-    if (!elem || elem === arguments.callee.last) return;
+    if (!elem || elem === arguments.callee.last) {
+      return;
+    }
     offset = parseFloat(typeof offset === 'undefined' ? 0.2 : offset);
     if (root && scroll) {
       var pos = getpos(elem, root);
@@ -5727,8 +6115,10 @@
 
   var urlcache = new Object();
   function geturl(url, cb_load, cb_error, reload) {
-    //geturl.cnt = geturl.cnt || 0;
-    //if (++geturl.cnt % 3) return cb_error();
+    // geturl.cnt = geturl.cnt || 0;
+    // if (++geturl.cnt % 3) {
+    //   return cb_error();
+    // }
     if (!reload && urlcache[url]) {
       cb_load(urlcache[url]);
     } else {
@@ -5757,7 +6147,9 @@
     if (url instanceof Array) {
       var stop = false, urls = [].concat(url);
       function check() {
-        if (stop) return;
+        if (stop) {
+          return;
+        }
         for(var i = 0; i < urls.length; ++i) {
           if (urls[i]) {
             if (typeof urls[i] === 'string' || urls[i] instanceof String) {
@@ -5773,7 +6165,9 @@
         cb_error();
       }
       each(urls, function(url, idx) {
-        if (stop) return;
+        if (stop) {
+          return;
+        }
         getimg(url, function(image) {
           urls[idx] = image;
           check();
@@ -5784,7 +6178,9 @@
       });
     } else {
       if (getimg.cache[url]) {
-        if (cb_load) cb_load(getimg.cache[url]);
+        if (cb_load) {
+          cb_load(getimg.cache[url]);
+        }
       } else {
         function error() {
           getimg.cache[url] = false;
@@ -5794,11 +6190,19 @@
         img.addEventListener('load', function() {
           img.parentNode.removeChild(img);
           getimg.cache[url] = img;
-          if (cb_load) cb_load(img);
+          if (cb_load) {
+            cb_load(img);
+          }
         }, false);
-        if (cb_error && !cb_abort) cb_abort = cb_error;
-        if (cb_error) img.addEventListener('error', error, false);
-        if (cb_abort) img.addEventListener('abort', cb_abort, false);
+        if (cb_error && !cb_abort) {
+          cb_abort = cb_error;
+        }
+        if (cb_error) {
+          img.addEventListener('error', error, false);
+        }
+        if (cb_abort) {
+          img.addEventListener('abort', cb_abort, false);
+        }
         img.src = url;
         img.style.display = 'none';
         window.document.body.appendChild(img);
@@ -5838,16 +6242,23 @@
       data_map = {};
       each($t('input', arguments[0]), function(input) {
         switch(lc(input.type)) {
-        case 'reset': case 'submit': break;
-        case 'checkbox': case 'radio': if (!input.checked) break;
-        default: data_map[input.name] = input.value; break;
+        case 'reset': case 'submit':
+          break;
+        case 'checkbox': case 'radio':
+          if (!input.checked) {
+            break;
+          }
+        default:
+          data_map[input.name] = input.value; break;
         }
       });
     } else {
       data_map = arguments[0];
     }
     for(var key in data_map) {
-      if (data) data += '&';
+      if (data) {
+        data += '&';
+      }
       data += encodeURIComponent(key) + '=' + encodeURIComponent(data_map[key]);
     }
     return data;
@@ -5862,7 +6273,9 @@
     var ret = $x('//' + elem + '[contains(@' + attr + ', "' + name + '")]');
     if (conf.debug && ret) {
       var attr_f = ret.getAttribute(attr);
-      if (attr_f.replace(/^\w+:/, '') !== url.replace(/^\w+:/, '')) alert('New one?\n' + attr_f);
+      if (attr_f.replace(/^\w+:/, '') !== url.replace(/^\w+:/, '')) {
+        alert('New one?\n' + attr_f);
+      }
     }
     return ret;
   }
@@ -5895,8 +6308,12 @@
         date.setTime(date.getTime() + (opts.expires * 1000 * 60 * 60 * 24));
         data.push('expires=' + date.toUTCString());
       }
-      if (opts.path) data.push('path=' + opts.path);
-      if (opts.domain) data.push('domain=' + opts.domain);
+      if (opts.path) {
+        data.push('path=' + opts.path);
+      }
+      if (opts.domain) {
+        data.push('domain=' + opts.domain);
+      }
       window.document.cookie = data.join(';');
     }
   };
