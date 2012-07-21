@@ -1214,6 +1214,17 @@
       keys.push('Meta');
     }
 
+    if (ev.key) {
+      if (ev.char.length === 1 && ev.char === ev.key) {
+        key = ev.char.toLowerCase();
+      } else {
+        key = ev.key;
+      }
+      keys.push($ev.key_map_encode[key] || key);
+      keys = unique(keys);
+      return keys.join('+');
+    }
+
     if (ev.keyIdentifier) {
       if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
         c = parseInt(ev.keyIdentifier.substring(2), 16);
@@ -1235,17 +1246,6 @@
         keys.push(ev.keyIdentifier);
       }
       keys = unique(keys); // for chrome10
-      return keys.join('+');
-    }
-
-    if (ev.key) {
-      if (ev.char.length === 1 && ev.char === ev.key) {
-        key = ev.char.toLowerCase();
-      } else {
-        key = ev.key;
-      }
-      keys.push($ev.key_map_encode[key] || key);
-      keys = unique(keys);
       return keys.join('+');
     }
 
