@@ -1059,7 +1059,7 @@
           }
           return false;
         });
-        if (browser.webkit) {
+        if (browser.webkit || (window.opera && window.opera.version() >= 12.5)) {
           conn = listen('keydown', function(ev, conn) {
             var key = $ev.parse_key_event(ev);
             if (key) {
@@ -1195,6 +1195,8 @@
     $ev.key_map_encode[entry[0]] = entry[1];
     $ev.key_map_decode[entry[1]] = entry[0];
   });
+  $ev.key_map_encode['Spacebar'] = 'Space';
+  $ev.key_map_encode['Esc'] = 'Escape';
 
   $ev.parse_key_event = function(ev) {
     var c = ev.keyCode || ev.charCode;
@@ -1233,6 +1235,17 @@
         keys.push(ev.keyIdentifier);
       }
       keys = unique(keys); // for chrome10
+      return keys.join('+');
+    }
+
+    if (ev.key) {
+      if (ev.char.length === 1 && ev.char === ev.key) {
+        key = ev.char.toLowerCase();
+      } else {
+        key = ev.key;
+      }
+      keys.push($ev.key_map_encode[key] || key);
+      keys = unique(keys);
       return keys.join('+');
     }
 
@@ -2678,6 +2691,8 @@
             'type',
             'keyCode',
             'charCode',
+            'key',
+            'char',
             'keyIdentifier',
             'which',
             'eventPhase',
