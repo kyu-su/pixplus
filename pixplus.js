@@ -28,24 +28,24 @@
  * 2010/07/20 http://twitter.com/pixiv/status/18992660402
  */
 
-(function(func, unsafeWindow, userjs) {
+(function(global, func, unsafeWindow, userjs) {
   if (window.opera || unsafeWindow) {
     // OperaUserJS/OperaExtension/Greasemonkey
     if (window.top !== window) {
       return;
     }
-    if (window.opera && opera.extension) {
+    if (window.opera && global.opera.extension) {
       (function() {
         function open_options() {
-          opera.extension.postMessage(window.JSON.stringify({'command': 'open-options'}));
+          global.opera.extension.postMessage(window.JSON.stringify({'command': 'open-options'}));
         }
-        opera.extension.onmessage = function(ev){
+        global.opera.extension.onmessage = function(ev){
           var data = window.JSON.parse(ev.data);
           if (data.command === 'config') {
             func(window, window, {conf: data.data, open_options: open_options});
           }
         };
-        opera.extension.postMessage(window.JSON.stringify({'command': 'config'}));
+        global.opera.extension.postMessage(window.JSON.stringify({'command': 'config'}));
       })();
     } else {
       func(unsafeWindow || window, window);
@@ -151,7 +151,7 @@
       window.document.body.appendChild(s);
     });
    }
-})(function(window, safeWindow, _extension_data) {
+})(this, function(window, safeWindow, _extension_data) {
   /* __LANG_BEGIN__ */
   var lang = {
     en: {
