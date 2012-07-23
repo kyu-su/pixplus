@@ -2625,7 +2625,7 @@
         html += '</ul></dd>' +
           '<dt>Contact</dt><dd><ul>' +
           '<li><a href="http://twitter.com/crckyl">@crckyl</a></li>' +
-          '<li><a href="mailto:crckyl@gmail.com">crckyl@gmail.com</a></li>' +
+          '<li><a href="mailto:crckyl@myopera.com">crckyl@myopera.com</a></li>' +
           '</ul></dd>' +
           '<dt>License</dt><dd>Apache License 2.0</dd>' +
           '</dl>';
