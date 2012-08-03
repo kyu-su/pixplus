@@ -4054,6 +4054,7 @@
       this.tag_edit.style.display = 'none';
       this.expand_header = false;
     },
+
     load: function(loader, scroll) {
       var self = this, re;
       this.load_pre(scroll);
@@ -4074,36 +4075,38 @@
       var img_size, _title = 'Error!';
       this.info.style.display = '';
       this.info_tools.style.display = 'none';
-      /* ツールは「&nbsp;」区切り
-       * R-18やマイピク限定の場合は全角スペースを挟んでその旨表示
-       */
-      if ((re = /<div[^>]+class="works_data"[^>]*>[\r\n]*<p>([^\u3000]*).*?<\/p>[\r\n]*?<h3>(.*)<\/h3>/i.exec(loader.text))) {
+      this.comment.style.display = 'none';
+      if ((re = /<ul[^>]+class=\"[^\"]*meta[^\"]*\"[^>]*><li>(\d{4}\u5e74\d\d\u6708\d\d\u65e5 \d+:\d+)<\/li><li>([^<]*)<\/li>(.*)<\/ul><h1[^>]+class=\"[^\"]*title[^\"]*\"[^>]*>([^<]*)<\/h1>(<p[^>]+class=\"[^\"]*caption[^\"]*\"[^>]*>(.*)<\/p>)?/i.exec(loader.text))) {
         // U+FF5C: FULLWIDTH VERTICAL LINE
-        var tmp = re[1].split('\uff5c'), _date = tmp[0].split(' ')[0];
-        _title = trim(re[2]);
-        this.date.textContent = tmp[0];
+        var _date = re[1], size_or_manga = re[2], more_info = re[3];
+        _title = trim(re[4]);
+        if ((this.comment.innerHTML = edit_comment(re[5] || ''))) {
+          this.comment.style.display = '';
+        }
+        this.date.textContent = _date;
+
         // repost / it's not translated
-        if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5? (\d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
-          this.date_repost.textContent = (re[1] === _date ? '' : re[1] + '\u65e5 ') + re[2];
+        if ((re = /(\d{4}\u5e74\d{2}\u6708\d{2})\u65e5?( \d{2}:\d{2}) \u306b\u518d\u6295\u7a3f/.exec(loader.text))) {
+          var repost = re[1] + '\u65e5';
+          this.date_repost.textContent = (repost === _date ? '' : repost) + re[2];
           this.date_repost.style.display = '';
         } else {
           this.date_repost.style.display = 'none';
         }
-        if (tmp.length > 1 && (re = /(\d+)\u00d7(\d+)|(?:\u6f2b\u753b|Manga|\u6f2b\u756b|\u0e21\u0e31\u0e07\u0e07\u0e30|\u041c\u0430\u043d\u0433\u0430|\ub9cc\ud654) (\d+)P/.exec(tmp[1]))) {
-          if (re[3]) {
-            this.manga.page_count = parseInt(re[3], 10);
-            this.manga.usable = this.manga.page_count > 0;
-          } else {
-            img_size = {width: parseInt(re[1], 10), height: parseInt(re[2], 10)};
-          }
+
+        if ((re = /(\d+)\u00d7(\d+)/.exec(size_or_manga))) {
+          img_size = {width: parseInt(re[1], 10), height: parseInt(re[2], 10)};
+        } else if ((re = /(?:\u6f2b\u753b|Manga|\u6f2b\u756b|\u0e21\u0e31\u0e07\u0e07\u0e30|\u041c\u0430\u043d\u0433\u0430|\ub9cc\ud654) (\d+)P/.exec(size_or_manga))) {
+          this.manga.page_count = parseInt(re[1], 10);
+          this.manga.usable = this.manga.page_count > 0;
         }
-        if (tmp.length > 2) {
+
+        if ((re = /<ul[^>]+class=\"[^\"]*tools[^\"]*\"[^>]*><li>((?:[^<]+<\/li><li>)*[^<]+)<\/li><\/ul>/i.exec(more_info))) {
           // tools.php?tool=hoge
-          var html = '';
-          each(trim(tmp[2]).split('&nbsp;'), function(tool) {
-            html += '<span><a href="/search.php?word=' + encodeURIComponent(tool) + '&s_mode=s_tag">' + tool + '</a></span>';
-          });
-          this.info_tools.innerHTML = html;
+          this.info_tools.innerHTML = '';
+          each(re[1].split('</li><li>'), function(tool) {
+            $c('a', $c('span', this.info_tools), {'href': '/search.php?word=' + encodeURIComponent(tool) + '&s_mode=s_tag', text: tool});
+          }, this);
           this.info_tools.style.display = '';
         }
       }
@@ -4175,13 +4178,6 @@
       }
       this.bm_btn.href = '/bookmark_add.php?type=illust&illust_id=' + this.item.id;
       this.bm_btn.style.display = '';
-
-      this.comment.style.display = 'none';
-      if ((re = /<p[^>]+class=\"works_caption\"[^>]*>(.*)<\/p>/i.exec(loader.text))) {
-        if ((this.comment.innerHTML = edit_comment(re[1]))) {
-          this.comment.style.display = '';
-        }
-      }
 
       this.tag_edit_enabled = false;
       this.tag_edit_btn = null;
