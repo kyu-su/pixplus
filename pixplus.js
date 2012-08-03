@@ -2800,7 +2800,7 @@
         ja: [
           '[\u4fee\u6b63] conf.popup.big_image=0\u306e\u6642\u3001"S"\u30ad\u30fc(conf.key.popup_open_big)\u3067medium\u306e\u753b\u50cf\u3092\u958b\u3044\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
         ]
-       }
+      }
 
     }, {
       date: '2012/06/26', version: '0.9.1', changes_i18n: {
