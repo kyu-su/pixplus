@@ -2815,18 +2815,6 @@
       }
 
     }, {
-      date: '2012/06/26', version: '0.9.1', changes_i18n: {
-        en: [
-          '[Fix] Corresponds to pixiv\'s spec changes.',
-          '[Fix] In reposted illust, pixplus shows first version.'
-        ],
-        ja: [
-          '[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002',
-          '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u304c\u518d\u6295\u7a3f\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u306b\u53e4\u3044\u753b\u50cf\u3092\u8868\u793a\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
-        ]
-      }
-
-    }, {
       date: '2012/02/17', version: '0.9.0', changes_i18n: {
         en: [
           '[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)',
