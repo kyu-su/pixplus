@@ -2793,6 +2793,16 @@
       }
 
     }, {
+      date: '2012/06/29', version: '0.9.2', changes_i18n: {
+        en: [
+          '[Fix] If conf.popup.big_image=0, "S" key (conf.key.popup_open_big) opens medium image.'
+        ],
+        ja: [
+          '[\u4fee\u6b63] conf.popup.big_image=0\u306e\u6642\u3001"S"\u30ad\u30fc(conf.key.popup_open_big)\u3067medium\u306e\u753b\u50cf\u3092\u958b\u3044\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        ]
+       }
+
+    }, {
       date: '2012/06/26', version: '0.9.1', changes_i18n: {
         en: [
           '[Fix] Corresponds to pixiv\'s spec changes.',
@@ -2803,6 +2813,7 @@
           '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u304c\u518d\u6295\u7a3f\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u306b\u53e4\u3044\u753b\u50cf\u3092\u8868\u793a\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
         ]
       }
+
     }, {
       date: '2012/06/26', version: '0.9.1', changes_i18n: {
         en: [
