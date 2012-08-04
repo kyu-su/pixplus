@@ -568,8 +568,8 @@
     rpc_usable:    false,
     rpc_state:     0,  // flags; e.g. 5=rpc_e_id|rpc_i_id
     rpc_req_tag:   7,  // i|u|e
-    rpc_req_rate:  13, // i|e|qr
-    rpc_req_qrate: 13,
+    // rpc_req_rate:  13, // i|e|qr
+    // rpc_req_qrate: 13,
 
     lazy_scroll: lazy_scroll,
     load_css: load_css,
@@ -1397,6 +1397,13 @@
       list.push(cls);
     }
     node.className = trim(list.join(' '));
+  }
+
+  function has_class(node, cls) {
+    if (!node) {
+      return false;
+    }
+    return (node.className || '').split(/\s+/).indexOf(cls) >= 0;
   }
 
   function each(list, func, obj) {
@@ -3173,22 +3180,30 @@
                  '#pp-popup.pp-error #pp-img-div #pp-error-message{display:block;}' +
                  // rating
                  '#pp-popup #pp-rating{line-height:1.1em;padding:0px !important;}' +
-                 '#pp-popup #pp-rating input{display:block;line-height:1em;}' +
-                 '#pp-popup #pp-rating input:focus{background-color:#feffdf;}' +
-                 '#pp-popup #pp-rating #unit span > div:before{content:":";margin-right:0.4em;}' +
-                 '#pp-popup #pp-rating #unit span + span{margin-left:0.8em;}' +
-                 '#pp-popup #pp-rating #after_q_rating{font-size:inherit;}' +
-                 '#pp-popup #pp-rating ul.unit-rating{margin:0px;float:none;}' +
-                 '#pp-popup #pp-rating #quality_rating{float:none !important;}' +
-                 '#pp-popup #pp-rating h4{margin:0px;}' +
-                 '#pp-popup #pp-rating #result{font-size:inherit !important;width:100% !important;}' +
-                 '#pp-popup #pp-rating #result > div{width:auto !important;}' +
-                 '#pp-popup #pp-rating dl.ra_a dt{width:100%;}' +
-                 '#pp-popup #pp-rating dl.ra_a dd{margin-top:-1.1em;}' +
-                 '#pp-popup #pp-rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
-                 '#pp-popup #pp-rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
-                 '#pp-popup #pp-rating #result div[highlight]{background-color:#efefef;}' +
-                 '#pp-popup #pp-rating #quality_rating{width:100% !important;}' +
+                 '#pp-popup #pp-rating > span + span{margin-left:0.8em;}' +
+                 '#pp-popup #pp-rating .rating{margin:0px !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire{margin:0px !important;text-align:inherit !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire .stats{margin:0px !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire .stats td{padding-top:0px !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire .stats th{padding-top:0px !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire .list{margin:0px !important;}' +
+                 '#pp-popup #pp-qrate .questionnaire .list li{margin-top:0.2em !important;}' +
+                 // '#pp-popup #pp-rating input{display:block;line-height:1em;}' +
+                 // '#pp-popup #pp-rating input:focus{background-color:#feffdf;}' +
+                 // '#pp-popup #pp-rating #unit span > div:before{content:":";margin-right:0.4em;}' +
+                 // '#pp-popup #pp-rating #unit span + span{margin-left:0.8em;}' +
+                 // '#pp-popup #pp-rating #after_q_rating{font-size:inherit;}' +
+                 // '#pp-popup #pp-rating ul.unit-rating{margin:0px;float:none;}' +
+                 // '#pp-popup #pp-rating #quality_rating{float:none !important;}' +
+                 // '#pp-popup #pp-rating h4{margin:0px;}' +
+                 // '#pp-popup #pp-rating #result{font-size:inherit !important;width:100% !important;}' +
+                 // '#pp-popup #pp-rating #result > div{width:auto !important;}' +
+                 // '#pp-popup #pp-rating dl.ra_a dt{width:100%;}' +
+                 // '#pp-popup #pp-rating dl.ra_a dd{margin-top:-1.1em;}' +
+                 // '#pp-popup #pp-rating dl.ra_a:after{content:"";clear:both;height:0;display:block;visibility:hidden;}' +
+                 // '#pp-popup #pp-rating dl.ra_a dt:nth-child(4n+1){background-color:#efefef;}' +
+                 // '#pp-popup #pp-rating #result div[highlight]{background-color:#efefef;}' +
+                 // '#pp-popup #pp-rating #quality_rating{width:100% !important;}' +
                  // info
                  '#pp-popup #pp-info{line-height:1.1em;position:relative;}' +
                  '#pp-popup #pp-info #pp-author-img{' +
@@ -3305,74 +3320,6 @@
     })();
   }
 
-  function init_js() {
-    // rate
-    defineMagicFunction('countup_rating', function(real, othis, score) {
-      var msg = lang.c.rate_confirm.replace('$point', String(score));
-      if (conf.rate_confirm && !confirm(msg)) {
-        return;
-      }
-      if (Popup.instance && Popup.instance.item) {
-        uncache(Popup.instance.item.medium);
-      }
-      real.apply(othis, Array.prototype.slice.call(arguments, 2));
-    });
-    defineMagicFunction('send_quality_rating', function(real, othis) {
-      if (Popup.instance && Popup.instance.item) {
-        uncache(Popup.instance.item.medium);
-      }
-
-      var _ajax = window.jQuery.ajax;
-      window.jQuery.ajax = function(obj) {
-        var othis = this;
-        var success = obj.success;
-        obj.success = function() {
-          try {
-            if (success) {
-              success.apply(othis, Array.prototype.slice.call(arguments));
-            }
-            if (Popup.instance && Popup.instance.has_qrate) {
-              if (window.jQuery('#rating').is(':visible')) {
-                window.rating_ef2();
-              }
-              each($xa('.//div[@id="result"]/div[starts-with(@id, "qr_item")]', Popup.instance.rating),
-                   function(item) {
-                     var re;
-                     if ((re = /^qr_item(\d+)$/.exec(item.id)) && (parseInt(re[1], 10) & 1)) {
-                       var value = $x('following-sibling::div', item);
-                       if (value && !value.hasAttribute('id')) {
-                         value.setAttribute('highlight', '');
-                       }
-                     }
-                   });
-            }
-          } catch(ex) {
-            alert('Error!\nCheck referer setting.');
-            throw ex;
-          }
-        };
-        return _ajax.apply(this, [obj]);
-      };
-      real.apply(othis, Array.prototype.slice.call(arguments, 2));
-      window.jQuery.ajax = _ajax;
-    });
-    defineMagicFunction('rating_ef', function(real, othis) {
-      window.jQuery('#quality_rating').slideDown(200, after_show);
-      function after_show() {
-        var f = $x('.//input[@id="qr_kw1"]', Popup.instance ? Popup.instance.rating : window.document.body);
-        if (f) {
-          f.focus();
-        }
-      }
-    });
-    defineMagicFunction('rating_ef2', function(real, othis) {
-      if (Popup.is_qrate_button(window.document.activeElement)) {
-        window.document.activeElement.blur();
-      }
-      real.apply(othis, Array.prototype.slice.call(arguments, 2));
-    });
-  }
-
   function init_pixplus() {
     var page_lang = window.document.documentElement.getAttribute('lang');
     if (lang[page_lang]) {
@@ -3436,8 +3383,8 @@
       }
       init_pixplus_real();
 
-      if (!JSON) { // Opera10.1x support
-        JSON = {
+      if (!window.JSON) { // Opera10.1x support
+        window.JSON = {
           parse: window.jQuery.parseJSON,
           stringify: function(val) {
             var str = '';
@@ -3492,7 +3439,20 @@
 
     jq_onload();
     pt_onload();
-    init_js();
+
+    try {
+      var rate_apply = window.pixiv.rating.apply;
+      window.pixiv.rating.apply = function() {
+        var msg = lang.c.rate_confirm.replace('$point', String(window.pixiv.rating.rate));
+        if (conf.rate_confirm && !window.confirm(msg)) {
+          return;
+        }
+        if (Popup.instance && Popup.instance.item) {
+          uncache(Popup.instance.item.medium);
+        }
+        rate_apply.apply(this, Array.prototype.slice.call(arguments));
+      };
+    } catch(ex) { }
 
     window.setTimeout(Floater.init, 100);
   }
@@ -3784,7 +3744,7 @@
       this.viewer_comments_c     = $c('div', this.viewer_comments_w);
       this.viewer_comments_a     = $c('div', this.viewer_comments_w, {id: 'one_comment_area'});
       this.tags                  = $c('div', this.caption, {id: 'tag_area'});
-      this.rating                = $c('div', this.caption, {id: 'pp-rating', cls: 'pp-separator works_area'});
+      this.rating                = $c('div', this.caption, {id: 'pp-rating', cls: 'pp-separator'});
       this.post_cap              = $c('div', this.caption, {id: 'pp-info', cls: 'pp-separator'});
       this.a_img                 = $c('img', this.post_cap, {id: 'pp-author-img'});
       this.a_status              = $c('span', this.post_cap, {id: 'pp-author-status'});
@@ -4067,6 +4027,10 @@
 
     load: function(loader, scroll) {
       var self = this, re;
+
+      window.pixiv.context.illustId = this.item.id;
+      window.pixiv.context.hasQuestionnaire = false;
+
       this.load_pre(scroll);
       this.complete();
 
@@ -4225,57 +4189,29 @@
       this.rating_enabled = false;
       this.rating.style.display = 'none';
       var re_rtv, re_rtc, re_rtt;
-      //<h4>Views：<div style="display:inline;" id="jd_rtv">3495</div>　Rating Count：<div style="display:inline;" id="jd_rtc">211</div>　Ratings：<div style="display:inline;" id="jd_rtt">2091</div></h4>
-      if (conf.popup.rate && pp.rpc_usable && rpc_chk(pp.rpc_req_rate) &&
-          //(re_rtv = /<div[^>]+id=\"jd_rtv\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
-          //(re_rtc = /<div[^>]+id=\"jd_rtc\"[^>]*>(\d+)<\/div>/i.exec(loader.text)) &&
-          //(re_rtt = /<div[^>]+id=\"jd_rtt\"[^>]*>(\d+)<\/div>/i.exec(loader.text))) {
-          (re = /(<div[^>]+id=\"unit\"[^>]*>)[\r\n]*<h\d>(.*)<\/h\d>/i.exec(loader.text))) {
-        /*
-         var html = '<div id="rating"><div id="unit"><h4>' +
-         '<span>' + "\u95b2\u89a7\u6570: " + re_rtv[0] + '</span>' +
-         '<span>' + "\u8a55\u4fa1\u56de\u6570: " + re_rtc[0] + '</span>' +
-         '<span>' + "\u7dcf\u5408\u70b9: " + re_rtt[0] + '</span>';
-         if ((re = /(<a[^>]+href=\")\/?(questionnaire_illust\.php[^>]+><img[^>]+><\/a>)/i.exec(loader.text))) {
-         // add '/' for staccfeed
-         html += '<span>' + re[1] + '/' + re[2] + '</span>';
-         }
-         html += '</h4>';
-         */
-        // U+FF1A: FULLWIDTH COLON
-        var html = '<div id="rating">' + re[1] + '<span>' + re[2].replace(/\uff1a/g, '').replace(/\u3000/g, '</span><span>') + '</span>';
-        if ((re = /(<ul[^>]+class=\"unit-rating\"[^>]*>[\s\S]*?<\/ul>)/i.exec(loader.text))) {
-          html += re[1];
+      // <section class="score"><dl><dt>閲覧数</dt><dd class="view-count">...</dd><dt>評価回数</dt><dd class="rated-count">...</dd><dt>総合点</dt><dd class="score-count">...</dd>
+      if (conf.popup.rate && pp.rpc_usable &&
+          (re = /<section[^>]+class=\"[^\"]*score[^\"]*\"[^>]*><dl><dt>([^<]+)<\/dt><dd[^>]+class=\"[^\"]*view-count[^\"]*\"[^>]*>(\d+)<\/dd><dt>([^<]+)<\/dt><dd[^>]+class=\"[^\"]*rated-count[^\"]*\"[^>]*>(\d+)<\/dd><dt>([^<]+)<\/dt><dd[^>]+class=\"[^\"]*score-count[^\"]*\"[^>]*>(\d+)<\/dd>/i.exec(loader.text))) {
+        this.rating.innerHTML = '';
+        $c('span', this.rating, {text: re[1] + ': ' + re[2]});
+        $c('span', this.rating, {text: re[3] + ': ' + re[4]});
+        $c('span', this.rating, {text: re[5] + ': ' + re[6]});
+        if ((re = /<div[^>]+class=\"[^\"]*rating[^\"]*"[^>]*><div[^>]+class=\"[^\"]*rate[^\"]*\"[^>]*><\/div><div[^>]+class=\"[^\"]*star[^\"]*\"[^>]*><\/div>(?:<div[^>]+class=\"[^\"]*status[^\"]*\"[^>]*><\/div>)?<\/div>/i.exec(loader.text))) {
+          $c('div', this.rating, {cls: 'score'}).innerHTML = re[0];
         }
-        html += '</div>';
-        if (rpc_chk(pp.rpc_req_qrate)) {
-          var re1 = /<h4[^>]+id=\"after_q_rating\"[^>]*>.*<\/h4>/i.exec(loader.text);
-          if (re1 && (re = /(<div[^>]+id=\"quality_rating\"[^>]*>[\s\S]*?<\/div>)/i.exec(loader.text))) {
-            html += re1[0] + '</div>' + re[1];
-            this.has_qrate = true;
-          } else if ((re1 = /<h4[^>]*><a[^>]+onClick=\"onOff\('result'\).*<\/h4>/i.exec(loader.text))) {
-            if ((re = /(<div[^>+]id=\"result\"[\s\S]*?\n<\/div>)/i.exec(loader.text))) {
-              html += re1[0] + '</div>' + re[1];
-              this.has_qrate = true;
-            }
-          }
+        if ((re = /<section[^>]+class=\"[^\"]*questionnaire[^\"]*\"[^>]*><span[^>]*>[^<]+<\/span>(?:<script[^>]*>[\s\S]*?<\/script>)?(?:<div[^>]+class=\"[^\"]*list[^\"]*\"[^>]*><h1[^>]*>[^<]+<\/h1><ol[^>]*>.*<\/ol><\/div>)?<div[^>]+class=\"[^\"]*stats[^\"]*\"[^>]*><h1[^>]*>[^<]+<\/h1><table[^>]*>.*<\/table><\/div><\/section>/.exec(loader.text))) {
+          $c('div', this.rating, {id: 'pp-qrate'}).innerHTML = re[0];
+          this.has_qrate = true;
         }
-        if (!this.has_qrate) {
-          html += '</div>';
-        }
-        this.rating.innerHTML = html;
         this.rating.style.display = '';
         this.rating_enabled = true;
-
-        var anc = $x('./div[@id="rating"]/h4/a', self.rating);
-        if (anc && anc.getAttribute('onclick') === 'rating_ef4()') {
-          anc.setAttribute('onclick', '');
-          anc.onclick = '';
-          $ev(anc).click(function() {
-            var qr = $x('./div[@id="quality_rating"]', self.rating);
-            window[qr && qr.style.display === 'none' ? 'rating_ef' : 'rating_ef2']();
-            return true;
-          });
+        if (/pixiv\.context\.rated\s*=\s*false/i.exec(loader.text)) {
+          window.pixiv.rating.setup();
+        }
+        if (this.has_qrate) {
+          window.pixiv.context.hasQuestionnaire = true;
+          window.pixiv.context.answered = !!/pixiv\.context\.answered\s*=\s*true/.exec(loader.text);
+          window.pixiv.questionnaire.setup();
         }
       }
 
@@ -4609,9 +4545,7 @@
 
     toggle_caption: function() {
       set_class(this.caption, 'show', -1);
-      if (!this.is_caption_visible() && Popup.is_qrate_button(window.document.activeElement)) {
-        window.document.activeElement.blur();
-      }
+      this.blur_qrate();
     },
 
     is_caption_visible: function() {
@@ -4619,10 +4553,7 @@
     },
 
     onkey: function(ev, key) {
-      if (Popup.is_qrate_button(ev.target)) {
-        ev.qrate = ev.target;
-        return Popup.onkey.emit(this, ev, key);
-      } else if (pp.key_enabled(ev)) {
+      if (pp.key_enabled(ev)) {
         return Popup.onkey.emit(this, ev, key);
       } else {
         return false;
@@ -4664,29 +4595,52 @@
       return true;
     },
 
+    send_rate: function(rate) {
+      if (this.rating_enabled) {
+        window.pixiv.rating.rate = rate;
+        window.pixiv.rating.apply();
+      }
+    },
+
+    is_in_qrate_mode: function() {
+      return this.has_qrate && has_class($q('#pp-qrate .list', this.rating), 'visible');
+    },
+
+    blur_qrate: function() {
+      if (Popup.is_qrate_button(window.document.activeElement)) {
+        window.document.activeElement.blur();
+      }
+    },
+
     toggle_qrate: function() {
       if (this.has_qrate) {
-        var anc = $x('./div[@id="rating"]/h4/a', this.rating), qr;
-        if (anc) {
+        var toggle = $q('#pp-qrate .toggle-list, #pp-qrate .toggle-stats', this.rating);
+        if (toggle) {
+          this.blur_qrate();
           set_class(this.caption, 'show', 1);
-          send_click(anc);
+          send_click(toggle);
         }
       }
     },
 
     qrate_move_selection: function(move) {
-      var btn = window.document.activeElement;
-      if (Popup.is_qrate_button(btn)) {
-        for(; move !== 0; move += move < 0 ? 1 : -1) {
-          var next = move < 0 ? btn.previousSibling : btn.nextSibling;
-          if (Popup.is_qrate_button(next)) {
-            btn = next;
-          }
-        }
-        if (btn) {
-          btn.focus();
+      var buttons = $qa('#pp-qrate .list ol li input', this.rating);
+      if (buttons.length < 1) {
+        return;
+      }
+      move = move % buttons.length - 1;
+      for(var i = 0; i < buttons.length; ++i) {
+        if (window.document.activeElement == buttons[i]) {
+          move += i + 1;
+          break;
         }
       }
+      if (move < 0) {
+        move += buttons.length;
+      } else if (move >= buttons.length) {
+        move -= buttons.length;
+      }
+      buttons[move].focus();
     },
 
     qrate_submit: function(force) {
@@ -4941,12 +4895,7 @@
     onsetitem: new Signal(),
     onload: new Signal(),
     onkey: new Signal(function(ev, key) {
-      function sel_qr(prev) {
-        var node = prev ? ev.qrate.previousSibling : ev.qrate.nextSibling;
-        if (Popup.is_qrate_button(node)) {
-          node.focus();
-        }
-      }
+      var qrate = this.is_in_qrate_mode();
       return (function() {
         for(var i = 0; i < arguments.length; ++i) {
           var map = arguments[i];
@@ -4980,7 +4929,7 @@
           {k: conf.key.popup_tag_edit_end, f: this.toggle_tag_edit}
         ]
       }, {
-        run: !!ev.qrate,
+        run: qrate,
         map: [
           {k: conf.key.popup_qrate_select_prev, f: this.qrate_move_selection, a: [-1]},
           {k: conf.key.popup_qrate_select_next, f: this.qrate_move_selection, a: [1]},
@@ -4988,23 +4937,23 @@
           {k: conf.key.popup_qrate_end,         f: this.toggle_qrate}
         ]
       }, {
-        run: !ev.qrate,
+        run: !qrate,
         map: [
           {k: conf.key.popup_qrate_start, f: this.toggle_qrate}
         ]
       }, {
         run: conf.popup.rate && conf.popup.rate_key,
         map: [
-          {k: conf.key.popup_rate01, f: window.countup_rating, a: [1], ctx: window},
-          {k: conf.key.popup_rate02, f: window.countup_rating, a: [2], ctx: window},
-          {k: conf.key.popup_rate03, f: window.countup_rating, a: [3], ctx: window},
-          {k: conf.key.popup_rate04, f: window.countup_rating, a: [4], ctx: window},
-          {k: conf.key.popup_rate05, f: window.countup_rating, a: [5], ctx: window},
-          {k: conf.key.popup_rate06, f: window.countup_rating, a: [6], ctx: window},
-          {k: conf.key.popup_rate07, f: window.countup_rating, a: [7], ctx: window},
-          {k: conf.key.popup_rate08, f: window.countup_rating, a: [8], ctx: window},
-          {k: conf.key.popup_rate09, f: window.countup_rating, a: [9], ctx: window},
-          {k: conf.key.popup_rate10, f: window.countup_rating, a: [10], ctx: window}
+          {k: conf.key.popup_rate01, f: this.send_rate, a: [1]},
+          {k: conf.key.popup_rate02, f: this.send_rate, a: [2]},
+          {k: conf.key.popup_rate03, f: this.send_rate, a: [3]},
+          {k: conf.key.popup_rate04, f: this.send_rate, a: [4]},
+          {k: conf.key.popup_rate05, f: this.send_rate, a: [5]},
+          {k: conf.key.popup_rate06, f: this.send_rate, a: [6]},
+          {k: conf.key.popup_rate07, f: this.send_rate, a: [7]},
+          {k: conf.key.popup_rate08, f: this.send_rate, a: [8]},
+          {k: conf.key.popup_rate09, f: this.send_rate, a: [9]},
+          {k: conf.key.popup_rate10, f: this.send_rate, a: [10]}
         ]
       }, {
         run: this.manga.enabled,
@@ -5132,8 +5081,8 @@
       }
     },
 
-    is_qrate_button: function(elem) {
-      return !!elem && check_node(elem, 'Input') && /^qr_kw\d+$/.test(elem.id);
+    is_qrate_button: function(btn) {
+      return Array.prototype.indexOf.call($qa('#pp-qrate .list ol li input', this.rating), btn) >= 0;
     }
   });
   Popup.onkeypress = Popup.onkey; // for compatibility
