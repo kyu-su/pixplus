@@ -354,7 +354,7 @@
 
       serialize: function(form) {
         var data = '', data_map = { };
-        if (form instanceof window.HTMLFormElement) {
+        if (form instanceof w.HTMLFormElement) {
           _.tag('input', form).forEach(function(input) {
             switch((input.type || '').toLowerCase()) {
             case 'reset':
@@ -404,6 +404,7 @@
 
         if (listener(ev, connection)) {
           ev.preventDefault();
+          ev.stopPropagation();
         }
       };
 
@@ -445,8 +446,29 @@
     },
 
     send_click: function(elem) {
-      var ev = elem.ownerDocument.createEvent('MouseEvents');
-      ev.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      if (_.conf.general.debug) {
+        _.log('send click event');
+      }
+      var doc  = elem.ownerDocument || d,
+          ev   = doc.createEvent('MouseEvent'),
+          view = doc.defaultView;
+      ev.initMouseEvent(
+        'click', // type
+        true,    // canBubble
+        true,    // cancelable
+        view,    // view
+        1,       // detail
+        0,       // screenX
+        0,       // screenY
+        0,       // clientX
+        0,       // clientY
+        false,   // ctrlKey
+        false,   // altKey
+        false,   // shiftKey
+        false,   // metaKey
+        0,       // button
+        elem     // relatedTarget
+      );
       elem.dispatchEvent(ev);
     },
 
@@ -574,18 +596,22 @@
           key = ev.key;
         }
         keys.push(_.key.encode_map[key] || key);
-      } else if (ev.keyIdentifier && ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
-        c = g.parseInt(ev.keyIdentifier.substring(2), 16);
-        if (c <= 0) {
-          // error
-        } else if (c < 0x20) {
-          key = _.key.code_map[c] || ('_c' + String(c));
-        } else if (c < 0x7f) {
-          key = g.String.fromCharCode(c).toLowerCase();
-        } else if (c === 0x7f) {
-          key = _.key.DELETE;
+      } else if (ev.keyIdentifier) {
+        if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
+          c = g.parseInt(ev.keyIdentifier.substring(2), 16);
+          if (c <= 0) {
+            // error
+          } else if (c <= 0x20) {
+            key = _.key.code_map[c] || ('_c' + String(c));
+          } else if (c < 0x7f) {
+            key = g.String.fromCharCode(c).toLowerCase();
+          } else if (c === 0x7f) {
+            key = _.key.DELETE;
+          } else {
+            // not in ascii
+          }
         } else {
-          // not in ascii
+          key = ev.keyIdentifier;
         }
         if (key) {
           keys.push(_.key.encode_map[key] || key);
@@ -626,7 +652,14 @@
       _.listen(context, ['keypress', 'keydown'], function(ev, connection) {
         var key = _.key.parse_event(ev);
         if (key) {
-          return listener(key, ev, connection);
+          if (_.conf.general.debug) {
+            _.log('keyevent type=%s key=%s', ev.type, key);
+          }
+          var res = listener(key, ev, connection);
+          if (res && _.conf.general.debug) {
+            _.log('  canceled');
+          }
+          return res;
         }
         return false;
       });
@@ -948,7 +981,63 @@
         });
       });
     },
-    
+
+    create_tab_content_debug: function(root) {
+      var input_line = _.e('div', null, root);
+      var input      = _.e('input', null, input_line);
+      var cancel_l   = _.e('label', null, input_line);
+      var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
+      var console_l  = _.e('label', null, input_line);
+      var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
+      var logger     = _.e('table', {border: 1, css: 'margin-top:4px;'}, root);
+
+      cancel_l.appendChild(d.createTextNode('Cancel'));
+      console_l.appendChild(d.createTextNode('Console'));
+
+      var log_attrs  = [
+        'type',
+        'keyCode',
+        'charCode',
+        'key',
+        'char',
+        'keyIdentifier',
+        'which',
+        'eventPhase',
+        'detail',
+        'timeStamp'
+      ];
+
+      function clear() {
+        input.value = '';
+        logger.innerHTML = '';
+        var row = logger.insertRow(0);
+        row.insertCell(-1).textContent = 'Key';
+        log_attrs.forEach(function(attr) {
+          row.insertCell(-1).textContent = attr;
+        });
+      }
+
+      function log(ev) {
+        var row = logger.insertRow(1);
+        var key = _.key.parse_event(ev) || 'None';
+        row.insertCell(-1).textContent = key;
+        log_attrs.forEach(function(attr) {
+          row.insertCell(-1).textContent = ev[attr];
+        });
+        if (cancel.checked && key) {
+          ev.preventDefault();
+        }
+        if (console.checked && g.console) {
+          g.console.log(ev);
+        }
+      }
+
+      clear();
+      _.onclick(_.e('button', {text: 'Clear', css: 'margin-left:4px;'}, input_line), clear);
+      input.addEventListener('keydown', log, false);
+      input.addEventListener('keypress', log, false);
+    },
+
     create_tab: function(name, create_args) {
       var dom = _.configui.dom;
       var label = _.e('label', {text: _.lang.current.pref[name]}, dom.tabbar);
@@ -976,6 +1065,9 @@
         _.configui.create_tab(section.name, section);
       });
       ['export', 'about', 'changelog'].forEach(_.configui.create_tab);
+      if (_.conf.general.debug) {
+        _.configui.create_tab('debug');
+      }
 
       dom.root.appendChild(dom.tabbar);
       dom.root.appendChild(dom.content);
@@ -2502,9 +2594,6 @@
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
         }
-        if (_.conf.general.debug) {
-          _.log('keyevent type=%s key=%s', ev.type, key);
-        }
 
         for(var i = 0; i < maps.length; ++i) {
           if (!maps[i].cond()) {
@@ -2647,7 +2736,7 @@
       }
 
       input_tag.focus();
-      _.key.listen(input_tag, function(key) {
+      _.key.listen(input_tag, function(key, ev) {
         if (!selected_tag) {
           if (key === _.key.DOWN) {
             selected_tag = _.bookmarkform.select_tag(tags[0], selected_tag);
@@ -2659,6 +2748,9 @@
         var idx = tags.indexOf(selected_tag);
         if (key === _.key.SPACE) {
           _.send_click(selected_tag);
+          return true;
+        } else if (key === _.key.ESCAPE) {
+          idx = -1;
         } if (key === _.key.LEFT) {
           idx = idx <= 0 ? tags.length - 1 : idx - 1;
         } else if (key === _.key.RIGHT) {
@@ -2688,8 +2780,6 @@
             return a[0] - b[0];
           })[0][1], selected_tag);
           return true;
-        } else if (key === _.key.ESCAPE) {
-          idx = -1;
         } else {
           return false;
         }
@@ -3300,6 +3390,7 @@
         'import': 'Import',
         about: 'About',
         changelog: 'Changelog',
+        debug: 'Debug',
         'default': 'Default',
         add: 'Add',
         close: 'Close'
@@ -3434,6 +3525,7 @@
         'import': '\u30a4\u30f3\u30dd\u30fc\u30c8',
         about: '\u60c5\u5831',
         changelog: '\u66f4\u65b0\u5c65\u6b74',
+        debug: '\u30c7\u30d0\u30c3\u30b0',
         'default': '\u30c7\u30d5\u30a9\u30eb\u30c8',
         add: '\u8ffd\u52a0',
         close: '\u9589\u3058\u308b'
