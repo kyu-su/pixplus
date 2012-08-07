@@ -478,24 +478,23 @@
       }
       offset = g.parseFloat(typeof offset === 'undefined' ? 0.2 : offset);
 
-      if (!root || !scroll) {
-        var p = elem.parentNode;
-        while(p && p !== d.body && p !== d.documentElement) {
-          if (p.scrollHeight > p.offsetHeight) {
-            // for webkit
-            // var style = p.ownerDocument.defaultView.getComputedStyle(p, '');
-            // if (/auto|scroll/i.test(style.overflowY)) {
-            root = scroll = p;
-            break;
-            // }
-          }
-          p = p.parentNode;
-        }
-      }
+      // if (!root || !scroll) {
+      //   var p = elem.parentNode;
+      //   while(p && p !== d.body && p !== d.documentElement) {
+      //     if (p.scrollHeight > p.offsetHeight) {
+      //       root = scroll = p;
+      //       break;
+      //     }
+      //     p = p.parentNode;
+      //   }
+      // }
 
-      if (!root || !scroll) {
-        root = d.documentElement;
-        scroll = d.compatMode === 'BackCompat' ? d.body : d.documentElement;
+      if (!root) {
+        root = d.compatMode === 'BackCompat' ? d.body : d.documentElement;
+      }
+      if (!scroll) {
+        _.lazy_scroll(elem, offset, root, d.body);
+        scroll = d.documentElement;
       }
 
       var rect = elem.getBoundingClientRect();
@@ -2917,7 +2916,6 @@
     update_height: function () {
       if (this.cont) {
         var de = d.documentElement;
-        var sc = d.compatMode === 'BackCompat' ? d.body : de;
         var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
         this.ignore_elements.forEach(function(elem) {
           mh += elem.offsetHeight;
@@ -2940,7 +2938,6 @@
         return;
       }
       var de = d.documentElement;
-      var sc = d.compatMode === 'BackCompat' ? d.body : de;
       var rect = (this.placeholder || this.wrap).getBoundingClientRect();
       if (!this.floating && rect.top < 0) {
         this.scroll_save();
