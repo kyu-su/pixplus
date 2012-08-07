@@ -15,8 +15,6 @@ if sys.argv[1] == 'safari':
       <key>Type</key>
       <string>%(type_safari)s</string>%(more)s
     </dict>'''
-elif sys.argv[1] == 'firefox':
-  format = 'pref("extensions.pixplus.%(name)s", %(value_firefox)s);'
   pass
 
 def print_conf(conf):
@@ -32,7 +30,6 @@ def print_conf(conf):
       value = item['value']
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % escape(str(value))
-      value_firefox = json.dumps(value)
       more = ''
       if item.has_key('hint'):
         type_safari = 'PopUpButton'
@@ -59,14 +56,24 @@ def print_conf(conf):
           pass
         value_safari = '<%s/>' % value
         pass
-      if isinstance(value, int) or isinstance(value, float):
-        value_firefox = '"%s"' % value
-        pass
       print (format % {'name':          name,
                        'value':         quoteattr(str(value)),
                        'type_safari':   type_safari,
                        'value_safari':  value_safari,
-                       'value_firefox': value_firefox,
                        'more':          more}).encode('utf-8')
+      pass
+    pass
+
+  print (format % {'name':         'conf_prefs',
+                   'value':        '"{}"',
+                   'type_safari':  'TextField',
+                   'value_safari': '<string>{}</string>',
+                   'more':         ''}).encode('utf-8')
+  print (format % {'name':         'conf_version',
+                   'value':        '"1"',
+                   'type_safari':  'TextField',
+                   'value_safari': '<string>1</string>',
+                   'more':         ''}).encode('utf-8')
+  pass
 
 print_conf(json.loads(sys.stdin.read()))
