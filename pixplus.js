@@ -1347,10 +1347,12 @@
     }
   };
 
-  _.extend({
-    illust_id_map: { },
+  _.illust = {
+    root: null,
+    last_link_count: 0,
+    list: [ ],
 
-    create_illust: function(link, allow_types, cb_onshow) {
+    create: function(link, allow_types, cb_onshow) {
       var illust, images = _.tag('img', link);
       if (!allow_types) {
         allow_types = ['_s', '_100'];
@@ -1364,28 +1366,19 @@
           }
 
           var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
-          illust = { };
-          if (_.illust_id_map[id]) {
-            _.extend(_.illust_id_map[id], illust);
-          }
-
-          _.extend({
+          illust = {
             id: id,
             image_thumb: images[i],
             image_url_base: url_base,
             image_url_suffix: url_suffix,
             image_url_medium: url_base + '_m' + url_suffix,
             image_url_big: url_base + url_suffix
-          }, illust);
+          };
         }
       }
 
       if (!illust) {
         return null;
-      }
-
-      if (illust.connection && illust.link === link) {
-        illust.connection.disconnect();
       }
 
       _.extend({
@@ -1408,25 +1401,58 @@
       return illust;
     },
 
-    update_illust_list: function() {
-      var last_illust;
-      _.illust_list = [];
+    update: function() {
+      var links = _.qa('a[href*="member_illust.php?mode=medium"]', _.illust.root);
+      if (links.length === _.illust.last_link_count) {
+        return;
+      }
+      _.illust.last_link_count = links.length;
 
-      _.qa('a[href*="member_illust.php?mode=medium"]').forEach(function(link) {
-        var illust = _.create_illust(link);
+      var extract = function(link) {
+        var list = _.illust.list;
+        for(var i = 0; i < list.length; ++i) {
+          var illust = list[i];
+          if (illust.link === link) {
+            list.splice(i, 1);
+            return illust;
+          }
+        }
+        return null;
+      };
+
+      var new_list = [], last;
+      links.forEach(function(link) {
+        var illust = extract(link);
+        if (!illust) {
+          illust = _.illust.create(link);
+        }
         if (!illust) {
           return;
         }
 
-        illust.prev = last_illust;
-        if (last_illust) {
-          last_illust.next = illust;
+        illust.prev = last;
+        illust.next = null;
+        if (last) {
+          last.next = illust;
         }
-        last_illust = illust;
+        last = illust;
 
-        _.illust_list.push(illust);
-        _.illust_id_map[illust.id] = illust;
+        new_list.push(illust);
       });
+
+      _.illust.list.forEach(function(illust) {
+        illust.connection.disconnect();
+      });
+      _.illust.list = new_list;
+    },
+
+    setup: function(root) {
+      if (!root) {
+        return;
+      }
+      _.illust.root = root;
+      _.illust.update();
+      _.listen(_.illust.root, 'DOMNodeInserted', _.illust.update, true);
     },
 
     parse_medium_html: function(illust, html) {
@@ -1540,7 +1566,7 @@
       return true;
     },
 
-    load_illust: function(illust) {
+    load: function(illust) {
       if (illust.loaded) {
         _.popup.onload(illust);
         return;
@@ -1598,7 +1624,7 @@
       }
 
       _.xhr.get(illust.url_medium, function(text) {
-        if (_.parse_medium_html(illust, text)) {
+        if (_.illust.parse_medium_html(illust, text)) {
           text_status = 1;
           if (image_m_status > 0 || image_b_status > 0) {
             illust.loaded = true;
@@ -1610,7 +1636,7 @@
       }, send_error);
     },
 
-    unload_illust: function(illust) {
+    unload: function(illust) {
       if (!illust) {
         return;
       }
@@ -1656,8 +1682,8 @@
     load_manga_page: function(illust, page) {
       if (!illust.manga.pages) {
         _.xhr.get(illust.url_manga, function(text) {
-          if (_.parse_manga_html(illust, text)) {
-            _.load_manga_page(illust, page);
+          if (_.illust.parse_manga_html(illust, text)) {
+            _.illust.load_manga_page(illust, page);
           } else {
             _.popup.manga.onerror(illust, page);
           }
@@ -1701,7 +1727,7 @@
         img.src = obj;
       });
     }
-  });
+  };
 
   _.popup = {
     dom: { },
@@ -1904,13 +1930,13 @@
       }
       if (_.conf.popup.preload) {
         if (illust.manga.enable) {
-          _.load_manga_page(illust, 0);
+          _.illust.load_manga_page(illust, 0);
         }
         if (illust.prev) {
-          _.load_illust(illust.prev);
+          _.illust.load(illust.prev);
         }
         if (illust.next) {
-          _.load_illust(illust.next);
+          _.illust.load(illust.next);
         }
       }
 
@@ -2042,7 +2068,7 @@
       _.popup.set_status('Loading');
       _.popup.adjust();
       _.lazy_scroll(illust.image_thumb);
-      _.load_illust(illust);
+      _.illust.load(illust);
     },
 
     hide: function() {
@@ -2055,7 +2081,7 @@
     },
 
     reload: function() {
-      _.unload_illust(_.popup.illust);
+      _.illust.unload(_.popup.illust);
       _.popup.show(_.popup.illust);
     },
 
@@ -2180,10 +2206,10 @@
 
       if (_.conf.popup.preload) {
         if (_.popup.manga.page > 0) {
-          _.load_manga_page(illust, _.popup.manga.page - 1);
+          _.illust.load_manga_page(illust, _.popup.manga.page - 1);
         }
         if (_.popup.manga.page + 1 < illust.manga.pages.length) {
-          _.load_manga_page(illust, _.popup.manga.page + 1);
+          _.illust.load_manga_page(illust, _.popup.manga.page + 1);
         }
       }
 
@@ -2236,7 +2262,7 @@
       _.popup.manga.update_button();
       illust.manga.viewed = true;
       _.popup.set_status('Loading');
-      _.load_manga_page(illust, _.popup.manga.page);
+      _.illust.load_manga_page(illust, _.popup.manga.page);
     },
 
     start: function() {
@@ -2526,7 +2552,7 @@
       if (_.popup.manga.enable) {
         _.popup.manga.show(0);
       } else {
-        _.popup.show(_.illust_list[0]);
+        _.popup.show(_.illust.list[0]);
       }
     },
 
@@ -2534,7 +2560,7 @@
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.illust.manga.pages.length - 1);
       } else {
-        _.popup.show(_.illust_list[_.illust_list.length - 1]);
+        _.popup.show(_.illust.list[_.illust.list.length - 1]);
       }
     },
 
@@ -3146,10 +3172,10 @@
           return;
         }
 
-        var illust = _.create_illust(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
+        var illust = _.illust.create(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
           _.popup.manga.start();
         });
-        _.load_illust(illust);
+        _.illust.load(illust);
       }
     ],
 
@@ -3327,13 +3353,12 @@
         if (_.conf.general.rate_confirm && !g.confirm(msg)) {
           return;
         }
-        _.unload_illust(_.popup.illust);
+        _.illust.unload(_.popup.illust);
         rate_apply.apply(this, Array.prototype.slice.call(arguments));
       };
     } catch(ex) { }
 
-    _.update_illust_list();
-    _.listen(d.body, 'DOMNodeInserted', _.update_illust_list, true);
+    _.illust.setup(_.q('#wrapper'));
 
     _.pager.init();
     _.Floater.init();
