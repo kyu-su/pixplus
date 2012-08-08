@@ -1,4 +1,16 @@
 (function(g, w, d, _) {
+  _.conf.__key_prefix_page = _.conf.__key_prefix;
+  _.conf.__key_prefix = 'conf_';
+  _.conf.__is_extension = true;
+  _.conf.__init(
+    (g.opera
+     ? g.widget.preferences
+     : (g.safari
+        ? g.safari.extension.settings
+        : g.localStorage // chrome
+       ))
+  );
+
   if (g.opera) {
     g.opera.extension.onmessage = function(event) {
       var res = create_response(g.JSON.parse(event.data));
@@ -19,18 +31,19 @@
     },false);
   }
 
-  function create_response(data) {
-    if (data.command == 'config') {
-      var storage = { };
-      _.conf.__load();
-      storage[_.conf.__key_prefix_page + 'prefs'] = g.JSON.stringify(_.conf.__prefs_obj);
-      storage[_.conf.__key_prefix_page + 'version'] = _.conf.__prefs_obj;
-      return {command: data.command, data: storage};
-    } else if (data.command == 'open-options') {
+  function create_response(msg) {
+    if (msg.command == 'config') {
+      return {command: msg.command, data: _.conf.__export(_.conf.__key_prefix_page)};
+    } else if (msg.command == 'config-set') {
+      _.conf[msg.data.section][msg.data.item] = msg.data.value;
+    } else if (msg.command == 'config-import') {
+      _.conf.__import(msg.data);
+      return {command: msg.command, data: {status: 'complete'}};
+    } else if (msg.command == 'open-options') {
       if (g.opera) {
         g.opera.extension.tabs.create({url: 'options.html', focused: true});
       }
     }
-    return {command: data.command, data: null};
+    return {command: msg.command, data: null};
   }
 })(this, this.window, this.window.document, this.window.pixplus);

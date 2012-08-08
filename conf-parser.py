@@ -63,17 +63,6 @@ def print_conf(conf):
                        'more':          more}).encode('utf-8')
       pass
     pass
-
-  print (format % {'name':         'conf_prefs',
-                   'value':        '"{}"',
-                   'type_safari':  'TextField',
-                   'value_safari': '<string>{}</string>',
-                   'more':         ''}).encode('utf-8')
-  print (format % {'name':         'conf_version',
-                   'value':        '"1"',
-                   'type_safari':  'TextField',
-                   'value_safari': '<string>1</string>',
-                   'more':         ''}).encode('utf-8')
   pass
 
 print_conf(json.loads(sys.stdin.read()))

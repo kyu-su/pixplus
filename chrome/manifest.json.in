@@ -16,7 +16,8 @@
     {
       "matches": ["http://www.pixiv.net/*"],
       "exclude_globs": ["*pixivreader*"],
-      "js": ["pixplus.js"]
+      "js": ["pixplus.js"],
+      "run_at": "document_end"
     }
   ],
   "permissions": ["http://www.pixiv.net/*"],

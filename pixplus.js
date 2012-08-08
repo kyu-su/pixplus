@@ -30,7 +30,7 @@
   if (g.opera || unsafeWindow) {
     if (g.opera && g.opera.extension) {
       var open_options = function() {
-        g.opera.extension.postMessage(g.JSON.stringify({'command': 'open-options'}));
+        g.opera.extension.postMessage(g.JSON.stringify({command: 'open-options'}));
       };
       g.opera.extension.onmessage = function(ev){
         var data = g.JSON.parse(ev.data);
@@ -38,7 +38,7 @@
           entrypoint(g, w, w.document, {conf: data.data, open_options: open_options});
         }
       };
-      g.opera.extension.postMessage(g.JSON.stringify({'command': 'config'}));
+      g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
     } else {
       entrypoint(g, unsafeWindow || w, (unsafeWindow || w).document);
     }
@@ -46,14 +46,11 @@
     inject(null);
   } else if (g.chrome) {
     var base_uri = g.chrome.extension.getURL('/');
-    g.chrome.extension.sendRequest(
-      {command: 'config'},
-      function(data) {
-        if (data.command === 'config') {
-          inject({base_uri: base_uri, conf: data.data});
-        }
+    g.chrome.extension.sendRequest({command: 'config'}, function(msg) {
+      if (msg.command === 'config') {
+        inject({base_uri: base_uri, conf: msg.data});
       }
-    );
+    });
   } else if (g.safari) {
     g.safari.self.addEventListener('message', function(ev) {
       if (ev.name === 'config') {
@@ -68,6 +65,10 @@
     inject(null);
   }
 })(this, this.window, this.unsafeWindow, function(g, w, d, _extension_data) {
+
+  if (w.pixplus) {
+    return;
+  }
 
   // __LIBRARY_BEGIN__
 
@@ -87,19 +88,15 @@
     __key_prefix: '__pixplus_',
     __is_extension: false,
 
-    __upgrade: {
-      '0': function(storage, version_key) {
-        var prefs = { };
-        var conv = {
-          'string': g.String,
-          'number': g.parseFloat,
-          'boolean': function(value) {
-            var num = g.parseFloat(value);
-            return g.String(value).toLowerCase() === 'true' || num > 0 || num < 0;
-          }
-        };
+    __conv: {
+      'string': g.String,
+      'number': g.parseFloat,
+      'boolean': function(value) {
+        return g.String(value).toLowerCase() === 'true';
+      },
 
-        var parse_bm_tag_order = function(str) {
+      bookmark_tag_order: {
+        parse: function(str) {
           var ary = [], ary_ary = [], lines = str.split(/[\r\n]+/);
           for(var i = 0; i < lines.length; ++i) {
             var tag = lines[i];
@@ -118,69 +115,95 @@
             ary.push(ary_ary);
           }
           return ary;
-        };
+        },
 
-        var parse_bm_tag_aliases = function(str) {
+        dump: function(bm_tag_order) {
+          var str = '';
+          if (!bm_tag_order) {
+            return str;
+          }
+          for(var i = 0; i < bm_tag_order.length; ++i) {
+            var ary = bm_tag_order[i];
+            for(var j = 0; j < ary.length; ++j) {
+              if (ary[j] === null) {
+                ary[j] = '*';
+              }
+            }
+            if (i) {
+              str += '-\n';
+            }
+            str += ary.join('\n') + '\n';
+          }
+          return str;
+        }
+      },
+
+      bookmark_tag_aliases: {
+        parse: function(str) {
           var aliases = {};
           var lines = str.split(/[\r\n]+/);
-          for(var i = 0; i < g.Math.floor(lines.length / 2); ++i) {
+          for(var i = 0; i < Math.floor(lines.length / 2); ++i) {
             var tag = lines[i * 2], alias = lines[i * 2 + 1];
             if (tag && alias) {
               aliases[tag] = alias.split(/\s+/);
             }
           }
           return aliases;
-        };
+        },
 
-        for(var section in _.conf.__defaults) {
-          var prefs_section, section_key;
-          prefs_section = prefs[section] = { };
-          section_key = _.conf.__key_prefix + section + '_';
-          if (section === 'general' && _.conf.__is_extension) {
-            section_key = _.conf.__key_prefix;
+        dump: function(bm_tag_aliases) {
+          var str = '';
+          for(var key in bm_tag_aliases) {
+            str += key + '\n' + bm_tag_aliases[key].join(' ') + '\n';
           }
-
-          if (section === 'bookmark') {
-            prefs_section['tag_order'] = parse_bm_tag_order(storage[section_key + 'tag_order'] || '');
-            prefs_section['tag_aliases'] = parse_bm_tag_aliases(storage[section_key + 'tag_aliases'] || '');
-            if (storage.removeItem) {
-              storage.removeItem(section_key + 'tag_order');
-              storage.removeItem(section_key + 'tag_aliases');
-            }
-            continue;
-          }
-
-          for(var item in _.conf.__defaults[section]) {
-            var value = storage[section_key + item];
-            var defvalue = _.conf.__defaults[section][item];
-            if (typeof(value) !== 'undefined') {
-              value = conv[typeof(defvalue)](value);
-            } else {
-              value = defvalue;
-            }
-            prefs_section[item] = value;
-            if (storage.removeItem) {
-              storage.removeItem(section_key + item);
-            }
-          }
+          return str;
         }
-
-        storage[_.conf.__key_prefix + 'prefs'] = g.JSON.stringify(prefs);
-        storage[version_key] = '1';
       }
     },
 
-    __load: function() {
-      _.conf.__prefs_obj = g.JSON.parse(_.conf.__storage[_.conf.__key_prefs] || '{}');
+    __export: function(key_prefix) {
+      var storage = { };
+      _.conf.__schema.forEach(function(section) {
+        section.items.forEach(function(item) {
+          var value = _.conf[section.name][item.key];
+          var conv = _.conf.__conv[section.name + '_' + item.key];
+          if (conv) {
+            value = conv.dump(value);
+          } else {
+            value = g.String(value);
+          }
+          storage[key_prefix + section.name + '_' + item.key] = value;
+        });
+      });
+      return storage;
     },
 
-    __save: function() {
-      _.conf.__storage[_.conf.__key_prefs] = g.JSON.stringify(_.conf.__prefs_obj);
+    __import: function(data) {
+      _.conf.__schema.forEach(function(section) {
+        section.items.forEach(function(item) {
+          var key = section.name + '_' + item.key;
+          var value = data[key];
+          if (typeof(value) === 'undefined') {
+            return;
+          }
+
+          var conv = _.conf.__conv[key];
+          if (conv) {
+            value = conv.parse(value);
+          } else if ((conv = _.conf.__conv[typeof(item.value)])) {
+            value = conv(value);
+          }
+
+          _.conf[section.name][item.key] = value;
+        });
+      });
+    },
+
+    __set_item: function(storage, key, section, item, value) {
+      storage.setItem(key, value);
     },
 
     __init: function(storage) {
-      _.conf.__storage = storage;
-
       _.conf.__defaults = { };
       _.conf.__schema.forEach(function(section) {
         _.conf.__defaults[section.name] = { };
@@ -189,37 +212,47 @@
         });
       });
 
-      _.conf.__key_version = _.conf.__key_prefix + 'version';
-      while(true) {
-        var version_before = g.String(storage[_.conf.__key_version] || '0');
-        var upgrade = _.conf.__upgrade[version_before];
-        if (upgrade) {
-          upgrade(storage, _.conf.__key_version);
-          _.log('Preferences upgraded: %s => %s', version_before, g.String(storage[_.conf.__key_version]));
-        } else {
-          _.conf.__version = version_before;
-          break;
-        }
-      }
-
-      _.conf.__key_prefs = _.conf.__key_prefix + 'prefs';
-      _.conf.__load();
       _.conf.__schema.forEach(function(section) {
-        var conf_section = _.conf[section.name] = { };
-        if (!_.conf.__prefs_obj[section.name]) {
-          _.conf.__prefs_obj[section.name] = { };
+        var conf_section = _.conf[section.name] = { }, value_cache = { };
+        var section_key = _.conf.__key_prefix;
+        if (!_.conf.__is_extension || section.name !== 'general') { // for compatibility
+          section_key += section.name + '_';
         }
+
         section.items.forEach(function(item) {
-          conf_section.__defineGetter__(item.key, function() {
-            var value = _.conf.__prefs_obj[section.name][item.key];
-            if (typeof(value) === 'undefined') {
-              value = item.value;
+          var key = section_key + item.key;
+          
+          var value = storage.getItem(key), conv;
+          if (value === null) {
+            value = item.value;
+          } else {
+            conv = _.conf.__conv[typeof(item.value)];
+            if (conv) {
+              value = conv(value);
             }
-            return value;
+          }
+
+          conv = _.conf.__conv[section.name + '_' + item.key];
+          if (conv) {
+            value = conv.parse(value);
+          }
+
+          value_cache[item.key] = value;
+
+          conf_section.__defineGetter__(item.key, function() {
+            return value_cache[item.key];
           });
+
           conf_section.__defineSetter__(item.key, function(value) {
-            _.conf.__prefs_obj[section.name][item.key] = value;
-            _.conf.__save();
+            value_cache[item.key] = value;
+
+            var conv = _.conf.__conv[section.name + '_' + item.key];
+            if (conv) {
+              value = conv.dump(value);
+            } else {
+              value = g.String(value);
+            }
+            _.conf.__set_item(storage, key, section.name, item.key, value);
           });
         });
       });
@@ -476,7 +509,7 @@
       if (!elem) {
         return;
       }
-      offset = g.parseFloat(typeof offset === 'undefined' ? 0.2 : offset);
+      offset = g.parseFloat(typeof(offset) === 'undefined' ? 0.2 : offset);
 
       // if (!root || !scroll) {
       //   var p = elem.parentNode;
@@ -914,22 +947,23 @@
       }
     },
 
-    create_tab_content_export: function(root) {
-      var toolbar  = _.e('div', {id: 'pp-config-export-toolbar'}, root);
+    create_tab_content_importexport: function(root) {
+      var toolbar  = _.e('div', {id: 'pp-config-importexport-toolbar'}, root);
       var textarea = _.e('textarea', null, root);
 
       _.onclick(_.e('button', {text: _.lang.current.pref['export']}, toolbar), function() {
-        textarea.value = JSON.stringify(_.conf.__prefs_obj, null, 2);
+        textarea.value = JSON.stringify(_.conf.__export(''), null, 2);
       });
+
       _.onclick(_.e('button', {text: _.lang.current.pref['import']}, toolbar), function() {
+        var data;
         try {
-          _.conf.__prefs_obj = JSON.parse(textarea.value);
+          data = JSON.parse(textarea.value);
         } catch(ex) {
           g.alert(ex);
           return;
         }
-        _.conf.__save();
-        w.location.reload();
+        _.conf.__import(data);
       });
     },
 
@@ -1063,7 +1097,7 @@
       _.conf.__schema.forEach(function(section) {
         _.configui.create_tab(section.name, section);
       });
-      ['export', 'about', 'changelog'].forEach(_.configui.create_tab);
+      ['importexport', 'about', 'changelog'].forEach(_.configui.create_tab);
       if (_.conf.general.debug) {
         _.configui.create_tab('debug');
       }
@@ -1307,11 +1341,11 @@
     },
 
     text: function(node, all) {
+      if (!node || (!all && _.fastxml.ignore_elements.test(node.tag))) {
+        return '';
+      }
       if (node.text) {
         return node.text;
-      }
-      if (!all && _.fastxml.ignore_elements.test(node.tag)) {
-        return '';
       }
       return node.children.reduce(function(a, b) {
         return a + (b.text || '');
@@ -1383,6 +1417,12 @@
 
     parse_medium_html: function(illust, html) {
       var root = _.fastxml.parse(html), re;
+
+      var error = _.fastxml.q(root, '.error strong');
+      if (error) {
+        illust.error = _.fastxml.text(error);
+        return false;
+      }
 
       var work_info = _.fastxml.q(root, '.work-info'),
           score     = _.fastxml.q(work_info, '.score'),
@@ -1477,6 +1517,7 @@
           }
         });
       }
+      return true;
     },
 
     load_illust: function(illust) {
@@ -1537,11 +1578,14 @@
       }
 
       _.xhr.get(illust.url_medium, function(text) {
-        _.parse_medium_html(illust, text);
-        text_status = 1;
-        if (image_m_status > 0 || image_b_status > 0) {
-          illust.loaded = true;
-          _.popup.onload(illust);
+        if (_.parse_medium_html(illust, text)) {
+          text_status = 1;
+          if (image_m_status > 0 || image_b_status > 0) {
+            illust.loaded = true;
+            _.popup.onload(illust);
+          }
+        } else {
+          send_error();
         }
       }, send_error);
     },
@@ -2121,7 +2165,11 @@
       if (illust !== _.popup.illust || !_.popup.manga.enable || page !== _.popup.manga.page) {
         return;
       }
+      if (illust.error) {
+        _.popup.dom.image_layout.textContent = illust.error;
+      }
       _.popup.set_status('Error');
+      _.popup.adjust();
     },
 
     update_button: function() {
@@ -3093,7 +3141,19 @@
   _.run = function() {
     _.run = function() { };
 
-    _.conf.__init(_extension_data ? _extension_data.conf : g.localStorage);
+    if (_extension_data) {
+      _.conf.__init({
+        getItem: function(key) {
+          return _extension_data.conf[key] || null;
+        },
+
+        setItem: function(key, value) {
+          _extension_data.conf[key] = value;
+        }
+      });
+    } else {
+      _.conf.__init(g.localStorage);
+    }
     _.log('version=%s', _.version());
     _.lang.current = _.lang[d.documentElement.getAttribute('lang')] || _.lang[g.navigator.language] || _.lang.en;
     _.key.init();
@@ -3253,10 +3313,11 @@
 
     // config ui
     '#pp-config{display:none;line-height:1.1em}',
+    '#pp-config ul{list-style-type:none}',
     '#global-header #pp-config{margin:0px auto 4px;width:970px}',
     '#pp-config.pp-show{display:block}',
     '#pp-config-tabbar{margin-bottom:-1px}',
-    '#pp-config-tabbar label{display:inline-block;margin:1px 1px 0px 1px;padding:0.2em 0.4em}',
+    '#pp-config-tabbar label{display:inline-block;padding:0.2em 0.4em;margin:1px 1px 0px 1px}',
     '#pp-config-tabbar label.active{margin:0px;border:solid #aaa;border-width:1px 1px 0px 1px;background-color:#fff}',
     '#pp-config-content-wrapper{border:1px solid #aaa;background-color:#fff;padding:0.2em}',
     '#global-header #pp-config-content-wrapper{height:600px;overflow-y:auto}',
@@ -3272,9 +3333,9 @@
     '#pp-config-bookmark-tag-aliases td:last-child{width:100%}',
     '#pp-config-bookmark-tag-aliases td:last-child input{width:100%;',
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
-    '#pp-config-export-toolbar{margin-bottom:0.2em}',
-    '#pp-config-export-toolbar button{margin-right:0.2em}',
-    '#pp-config-export-content textarea{width:100%;height:30em;',
+    '#pp-config-importexport-toolbar{margin-bottom:0.2em}',
+    '#pp-config-importexport-toolbar button{margin-right:0.2em}',
+    '#pp-config-importexport-content textarea{width:100%;height:30em;',
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
 
     // key editor
@@ -3368,8 +3429,8 @@
       {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"}
     ]},
     {"name": "bookmark", "items": [
-      {"key": "tag_order", "value": []},
-      {"key": "tag_aliases", "value": {}}
+      {"key": "tag_order", "value": ""},
+      {"key": "tag_aliases", "value": ""}
     ]}
     // __CONFIG_END__
   ];
@@ -3383,6 +3444,7 @@
         popup: 'Popup',
         key: 'Key',
         bookmark: 'Tags',
+        importexport: 'Import/Export',
         'export': 'Export',
         'import': 'Import',
         about: 'About',
@@ -3507,7 +3569,8 @@
       author_works: 'Works',
       author_bookmarks: 'Bookmarks',
       author_staccfeed: 'Staccfeed',
-      sending: 'Sending'
+      sending: 'Sending',
+      importing: 'Importing'
     },
 
     ja: {
@@ -3518,6 +3581,7 @@
         popup: '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7',
         key: '\u30ad\u30fc',
         bookmark: '\u30bf\u30b0',
+        importexport: '\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
         'export': '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
         'import': '\u30a4\u30f3\u30dd\u30fc\u30c8',
         about: '\u60c5\u5831',
@@ -3642,7 +3706,8 @@
       author_works: '\u4f5c\u54c1',
       author_bookmarks: '\u30d6\u30c3\u30af\u30de\u30fc\u30af',
       author_staccfeed: '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9',
-      sending: '\u9001\u4fe1\u4e2d'
+      sending: '\u9001\u4fe1\u4e2d',
+      importing: '\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d'
     }
   };
 
