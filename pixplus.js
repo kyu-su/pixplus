@@ -970,8 +970,9 @@
     create_tab_content_about: function(root) {
       var urls = [
         'http://crckyl.pa.land.to/pixplus/',
+        'http://crckyl.ath.cx:8088/pixplus/',
         'http://my.opera.com/crckyl/',
-        'http://crckyl.ath.cx:8088/pixplus/'
+        'http://twitter.com/crckyl'
       ];
       var dl = _.e('dl', null, root);
       [['Name', 'pixplus'],
@@ -982,25 +983,18 @@
            _.e('a', {href: url, text: url}, _.e('li', null, ul));
          });
        }],
-       ['Contact', function(dd) {
-         var ul = _.e('ul', null, dd);
-         _.e('a', {text: '@crckyl', href: 'http://twitter.com/crckyl'}, _.e('li', null, ul));
-         _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'}, _.e('li', null, ul));
-       }],
+       ['Mail', _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
        ['License', 'Apache License 2.0']].forEach(function(p) {
-         var label = p[0], contents = p[1];
+         var label = p[0], content = p[1];
          _.e('dt', {text: label}, dl);
          var dd = _.e('dd', null, dl);
-         if (!g.Array.isArray(contents)) {
-           contents = [contents];
+         if (content instanceof w.HTMLElement) {
+           dd.appendChild(content);
+         } else if (content.call) {
+           content(dd);
+         } else {
+           dd.textContent = content;
          }
-         contents.forEach(function(c) {
-           if (c.call) {
-             c(dd);
-           } else {
-             dd.textContent = c;
-           }
-         });
        });
     },
 
@@ -1397,6 +1391,7 @@
           url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + illust.id,
           url_bookmark_detail: '/bookmark_detail.php?illust_id=' + illust.id,
           url_manga:           '/member_illust.php?mode=manga&illust_id=' + illust.id,
+          url_response:        '/response.php?illust_id=' + illust.id,
           prev:                last_illust,
           next:                null
         }, illust);
@@ -1489,7 +1484,6 @@
         illust.repost = {year: re[1], month: re[2], date: re[3], hour: re[4], minute: re[5]};
       }
 
-
       illust.size = null;
       illust.manga = {enable: false};
       if ((re = _.re.meta_size.exec(meta2))) {
@@ -1506,6 +1500,13 @@
       illust.bookmarked = !!_.fastxml.q(root, '.action .bookmark a', function(node) {
         return (node.attrs['href'] || '').indexOf('bookmark_detail.php') >= 0;
       });
+
+      var response_to = _.fastxml.q(root, '.worksImageresponseInfo a');
+      illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
+      illust.image_response_to  = null;
+      if (response_to && (re = /member_illust\.php\?mode=medium&illust_id=(\d+)/.exec(response_to.attrs['href']))) {
+        illust.image_response_to = g.parseInt(re[1]);
+      }
 
       var comment_form_data = _.fastxml.qa(root, '.worksOption form input');
       if (comment_form_data.length > 0) {
@@ -1698,6 +1699,7 @@
       dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
       dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
       dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga'}, dom.rightbox);
+      dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]'}, dom.rightbox);
       dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
       dom.title_link        = _.e('a', null, dom.title);
       dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
@@ -1842,6 +1844,7 @@
       _.clear(dom.title_link);
 
       dom.button_manga.style.display = 'none';
+      dom.button_response.style.display = 'none';
 
       _.clear(dom.caption);
       _.clear(dom.taglist);
@@ -1899,6 +1902,16 @@
 
       dom.button_bookmark.href = illust.url_bookmark;
       dom.button_bookmark.className = illust.bookmarked ? 'pp-active' : '';
+
+      if (illust.has_image_response) {
+        dom.button_response.classList.remove('pp-active');
+        dom.button_response.href = illust.url_response;
+        dom.button_response.style.display = '';
+      } else if (illust.image_response_to) {
+        dom.button_response.classList.add('pp-active');
+        dom.button_response.href = '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
+        dom.button_response.style.display = '';
+      }
 
       if (illust.manga.enable) {
         dom.button_manga.href = illust.url_manga + '#pp-manga-thumbnail';
@@ -2523,6 +2536,9 @@
     },
 
     open_response: function() {
+      if (_.popup.illust.has_image_response || _.popup.illust.image_response_to) {
+        _.open(_.popup.dom.button_response.href);
+      }
     },
 
     open_bookmark_detail: function() {
@@ -3757,7 +3773,7 @@
         '[\u524a\u9664] \u30bf\u30b0\u7de8\u96c6\u6a5f\u80fd\u3092\u524a\u9664\u3002',
         '[\u524a\u9664] \u6a5f\u80fd\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u3092\u524a\u9664\u3002',
         '[\u524a\u9664] \u30ba\u30fc\u30e0\u6a5f\u80fd\u3092\u524a\u9664\u3002',
-        '[\u4fee\u6b63] \u4ed6\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002'
+        '[\u4fee\u6b63] \u591a\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002'
       ]
     }
 
