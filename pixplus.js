@@ -970,6 +970,7 @@
       var urls = [
         'http://crckyl.pa.land.to/pixplus/',
         'http://crckyl.ath.cx:8088/pixplus/',
+        'http://crckyl.ath.cx:8088/svn/repos/pixplus/',
         'http://my.opera.com/crckyl/',
         'http://twitter.com/crckyl'
       ];
@@ -1924,7 +1925,7 @@
 
     onload: function(illust) {
       var dom = _.popup.dom;
-      if (illust !== _.popup.illust) {
+      if (illust !== _.popup.illust || _.popup.bookmark.enable) {
         return;
       }
       if (_.conf.popup.preload) {
@@ -2143,7 +2144,7 @@
           _.popup.dom.root.classList.add('pp-bookmark-mode');
           _.bookmarkform.setup(_.tag('form', _.popup.dom.bookmark_wrapper)[0], !illust.bookmarked, function() {
             if (illust === _.popup.illust && _.popup.bookmark.enable) {
-              _.popup.bookmark.end();
+              _.popup.bookmark.clear();
               _.popup.reload();
             }
           });
@@ -2176,6 +2177,7 @@
         return;
       }
       _.popup.bookmark.clear();
+      _.popup.show(_.popup.illust);
       _.popup.adjust();
     },
 
@@ -2871,6 +2873,9 @@
         if (!selected_tag) {
           if (key === _.key.DOWN) {
             selected_tag = _.bookmarkform.select_tag(tags[0], selected_tag);
+            return true;
+          } else if (key === _.key.ESCAPE) {
+            input_tag.blur();
             return true;
           }
           return false;
