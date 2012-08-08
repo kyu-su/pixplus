@@ -2881,18 +2881,15 @@
           return false;
         }
 
-        var idx = tags.indexOf(selected_tag);
         if (key === _.key.SPACE) {
           _.send_click(selected_tag);
           return true;
         } else if (key === _.key.ESCAPE) {
           selected_tag = _.bookmarkform.select_tag(null, selected_tag);
           return true;
-        } if (key === _.key.LEFT) {
-          idx = idx <= 0 ? tags.length - 1 : idx - 1;
-        } else if (key === _.key.RIGHT) {
-          idx = idx < 0 ? 0 : (idx >= tags.length - 1 ? 0 : idx + 1);
-        } else if (key === _.key.DOWN || key === _.key.UP) {
+        }
+
+        if (key === _.key.DOWN || key === _.key.UP) {
           var rect = _.as_array(selected_tag.getClientRects()).reduce(function(a, b) {
             return a.width > b.width ? a : b;
           });
@@ -2917,6 +2914,13 @@
             return a[0] - b[0];
           })[0][1], selected_tag);
           return true;
+        }
+
+        var idx = tags.indexOf(selected_tag);
+        if (key === _.key.LEFT) {
+          idx = idx <= 0 ? tags.length - 1 : idx - 1;
+        } else if (key === _.key.RIGHT) {
+          idx = idx < 0 ? 0 : (idx >= tags.length - 1 ? 0 : idx + 1);
         } else {
           return false;
         }
@@ -3835,7 +3839,7 @@
   };
 
   _.changelog = [{
-    date: '2012/08/xx', version: '1.0.0', changes_i18n: {
+    date: '2012/08/08', version: '1.0.0', changes_i18n: {
       en: [
         'Rewrite whole of source code.',
         '[Add] Add preference to specify minimum height of caption area.',
