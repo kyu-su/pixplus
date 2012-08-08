@@ -310,10 +310,8 @@
       }
     },
 
-    bind: function(context, func) {
-      return function() {
-        return func.apply(context, arguments);
-      };
+    trim: function(text) {
+      return text ? text.replace(_.re.trim, '') : '';
     },
 
     as_array: function(obj) {
@@ -595,6 +593,7 @@
     },
 
     re: {
+      trim: /(?:^\s+|\s+$)/g,
       image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/(\d+)(?:_[\da-f]{10})?)(_[sm]|_100|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
       xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
       xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
@@ -2744,7 +2743,7 @@
         }
 
         var node = ev.target;
-        while(node && node.nodeType === 1) {
+        while(node && node.nodeType === w.Node.ELEMENT_NODE) {
           if (node === d.body || node === d.documentElement) {
             break;
           }
@@ -2943,6 +2942,19 @@
         var hide_radio = _.q('input#res1', _.popup.dom.bookmark_wrapper);
         hide_radio.checked = true;
       }
+
+      _.qa('.box_main_bookmark br, .bookmark_bottom br', form).forEach(function(br) {
+        var text_found = false;
+        [br.previousSibling, br.nextSibling].forEach(function(sibling) {
+          if (sibling.nodeType === w.Node.TEXT_NODE && _.trim(sibling.nodeValue)) {
+            text_found = true;
+            sibling.parentNode.removeChild(sibling);
+          }
+        });
+        if (text_found) {
+          br.parentNode.removeChild(br);
+        }
+      });
 
       if (autoinput) {
         _.bookmarkform.setup_autoinput(form);
@@ -3196,7 +3208,7 @@
 
         var lists = _.reorder_tag_list(bookmark_list, function(item) {
           var a = _.tag('a', item)[0];
-          if (!a || !a.firstChild || a.firstChild.nodeType !== 3) {
+          if (!a || !a.firstChild || a.firstChild.nodeType !== w.Node.TEXT_NODE) {
             return null;
           }
           return a.firstChild.nodeValue;
@@ -3411,6 +3423,11 @@
     '#pp-popup.pp-bookmark-mode #pp-popup-image-wrapper{display:none}',
     '#pp-popup.pp-bookmark-mode #pp-popup-bookmark-wrapper{display:block}',
     '#pp-popup.pp-bookmark-mode .pp-popup-olc{display:none}',
+    '#pp-popup-bookmark-wrapper .bookmain_title{padding:0.2em}',
+    '#pp-popup-bookmark-wrapper .box_one_body{padding:0px}',
+    '#pp-popup-bookmark-wrapper .box_main_bookmark{margin-top:0px;padding:0.2em}',
+    '#pp-popup-bookmark-wrapper .bookmark_recommend_tag{margin:0px 0.2em 0.2em}',
+    '#pp-popup-bookmark-wrapper .bookmark_bottom{padding-bottom:0.2em}',
 
     // config ui
     '#pp-config{display:none;line-height:1.1em}',
