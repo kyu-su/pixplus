@@ -2084,9 +2084,10 @@
         if (form) {
           _.popup.dom.bookmark_wrapper.innerHTML = _.fastxml.src(form);
           _.popup.dom.root.classList.add('pp-bookmark-mode');
-          _.bookmarkform.setup(_.tag('form', _.popup.dom.bookmark_wrapper)[0], function() {
+          _.bookmarkform.setup(_.tag('form', _.popup.dom.bookmark_wrapper)[0], !illust.bookmarked, function() {
             if (illust === _.popup.illust && _.popup.bookmark.enable) {
               _.popup.bookmark.end();
+              _.popup.reload();
             }
           });
 
@@ -2765,6 +2766,29 @@
       return tag;
     },
 
+    setup_autoinput: function(form) {
+      var illust_tags = _.qa('.bookmark_recommend_tag ul:not(#myBookmarkTags) li a.tag[data-tag]', form).map(function(tag) {
+        return tag.getAttribute('data-tag');
+      });
+
+      var aliases = _.conf.bookmark.tag_aliases;
+      _.qa('#myBookmarkTags li[jsatagname]').map(function(tag) {
+        var tags = [tag.getAttribute('jsatagname')], alist;
+        alist = aliases[tags[0]];
+        if (alist) {
+          tags = tags.concat(alist);
+        }
+        for(var i = 0; i < tags.length; ++i) {
+          for(var j = 0; j < illust_tags.length; ++j) {
+            if (illust_tags[j].indexOf(tags[i]) >= 0) {
+              _.send_click(_.q('a', tag));
+              return;
+            }
+          }
+        }
+      });
+    },
+
     setup_tag_order: function(form) {
       var mytags = _.q('#myBookmarkTags', form);
       if (!mytags || _.conf.bookmark.tag_order.length < 1) {
@@ -2797,7 +2821,8 @@
           _.send_click(selected_tag);
           return true;
         } else if (key === _.key.ESCAPE) {
-          idx = -1;
+          selected_tag = _.bookmarkform.select_tag(null, selected_tag);
+          return true;
         } if (key === _.key.LEFT) {
           idx = idx <= 0 ? tags.length - 1 : idx - 1;
         } else if (key === _.key.RIGHT) {
@@ -2830,12 +2855,13 @@
         } else {
           return false;
         }
+
         selected_tag = _.bookmarkform.select_tag(tags[idx], selected_tag);
         return true;
       });
     },
 
-    setup: function(form, cb_submit) {
+    setup: function(form, autoinput, cb_submit) {
       if (!form) {
         return;
       }
@@ -2855,6 +2881,10 @@
       if (_.conf.general.bookmark_hide) {
         var hide_radio = _.q('input#res1', _.popup.dom.bookmark_wrapper);
         hide_radio.checked = true;
+      }
+
+      if (autoinput) {
+        _.bookmarkform.setup_autoinput(form);
       }
 
       _.bookmarkform.setup_tag_order(form);
