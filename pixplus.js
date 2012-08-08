@@ -1350,63 +1350,82 @@
   _.extend({
     illust_id_map: { },
 
+    create_illust: function(link, allow_types, cb_onshow) {
+      var illust, images = _.tag('img', link);
+      if (!allow_types) {
+        allow_types = ['_s', '_100'];
+      }
+
+      for(var i = 0; i < images.length; ++i) {
+        var re;
+        if ((re = _.re.image.exec(images[i].src)) && allow_types.indexOf(re[3]) >= 0) {
+          if (illust) {
+            return null;
+          }
+
+          var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
+          illust = { };
+          if (_.illust_id_map[id]) {
+            _.extend(_.illust_id_map[id], illust);
+          }
+
+          _.extend({
+            id: id,
+            image_thumb: images[i],
+            image_url_base: url_base,
+            image_url_suffix: url_suffix,
+            image_url_medium: url_base + '_m' + url_suffix,
+            image_url_big: url_base + url_suffix
+          }, illust);
+        }
+      }
+
+      if (!illust) {
+        return null;
+      }
+
+      if (illust.connection && illust.link === link) {
+        illust.connection.disconnect();
+      }
+
+      _.extend({
+        link:                link,
+        url_medium:          '/member_illust.php?mode=medium&illust_id=' + illust.id,
+        url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + illust.id,
+        url_bookmark_detail: '/bookmark_detail.php?illust_id=' + illust.id,
+        url_manga:           '/member_illust.php?mode=manga&illust_id=' + illust.id,
+        url_response:        '/response.php?illust_id=' + illust.id,
+        next:                null
+      }, illust);
+
+      illust.connection = _.onclick(illust.link, function() {
+        _.popup.show(illust);
+        if (cb_onshow) {
+          cb_onshow();
+        }
+        return true;
+      });
+      return illust;
+    },
+
     update_illust_list: function() {
       var last_illust;
       _.illust_list = [];
 
       _.qa('a[href*="member_illust.php?mode=medium"]').forEach(function(link) {
-        var illust, images = _.tag('img', link);
-        for(var i = 0; i < images.length; ++i) {
-          var re;
-          if ((re = _.re.image.exec(images[i].src))
-              && (re[3] === '_s' || re[3] === '_100')) {
-            if (illust) {
-              return;
-            }
-
-            var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
-            illust = _.illust_id_map[id] || { };
-            _.extend({
-              id: id,
-              image_thumb: images[i],
-              image_url_base: url_base,
-              image_url_suffix: url_suffix,
-              image_url_medium: url_base + '_m' + url_suffix,
-              image_url_big: url_base + url_suffix
-            }, illust);
-          }
-        }
-
+        var illust = _.create_illust(link);
         if (!illust) {
           return;
         }
 
-        if (illust.connection && illust.link === link) {
-          illust.connection.disconnect();
-        }
-
-        _.extend({
-          link:                link,
-          url_medium:          link.href,
-          url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + illust.id,
-          url_bookmark_detail: '/bookmark_detail.php?illust_id=' + illust.id,
-          url_manga:           '/member_illust.php?mode=manga&illust_id=' + illust.id,
-          url_response:        '/response.php?illust_id=' + illust.id,
-          prev:                last_illust,
-          next:                null
-        }, illust);
-
-        illust.connection = _.onclick(illust.link, function() {
-          _.popup.show(illust);
-          return true;
-        });
-
+        illust.prev = last_illust;
         if (last_illust) {
           last_illust.next = illust;
         }
+        last_illust = illust;
+
         _.illust_list.push(illust);
         _.illust_id_map[illust.id] = illust;
-        last_illust = illust;
       });
     },
 
@@ -3120,6 +3139,17 @@
             w.pixiv.manga.move(g.parseInt(re[1], 10));
           } catch(ex) { }
         }
+      },
+
+      function(query) {
+        if (query.mode !== 'medium') {
+          return;
+        }
+
+        var illust = _.create_illust(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
+          _.popup.manga.start();
+        });
+        _.load_illust(illust);
       }
     ],
 
