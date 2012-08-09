@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.0.0
+// @version     1.1.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -73,14 +73,13 @@
   // __LIBRARY_BEGIN__
 
   var _ = w.pixplus = {
-    extend: function(obj, dest) {
-      if (!dest) {
-        dest = _;
-      }
-      for(var key in obj) {
-        dest[key] = obj[key];
-      }
-      return dest;
+    extend: function(base) {
+      g.Array.prototype.slice.call(arguments, 1).forEach(function(extract) {
+        for(var key in extract) {
+          base[key] = extract[key];
+        }
+      });;
+      return base;
     }
   };
 
@@ -259,7 +258,7 @@
     }
   };
 
-  _.extend({
+  _.extend(_, {
     version: function() {
       return _.changelog[0].version;
     },
@@ -607,7 +606,8 @@
       hash_manga_page: /^#pp-manga-page-(\d+)$/,
       url_extension: /\.(\w+)(?:\?|$)/,
       repost: /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/,
-      url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/
+      url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/,
+      url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/
     }
   });
 
@@ -1352,6 +1352,40 @@
     last_link_count: 0,
     list: [ ],
 
+    parse_image_url: function(url, allow_types) {
+      if (!allow_types) {
+        allow_types = ['_s', '_100'];
+      }
+
+      var re;
+      if ((re = _.re.image.exec(url)) && allow_types.indexOf(re[3]) >= 0) {
+        var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
+        if (id < 1) {
+          return null;
+        }
+
+        return {
+          id: id,
+          image_url_base: url_base,
+          image_url_suffix: url_suffix,
+          image_url_medium: url_base + '_m' + url_suffix,
+          image_url_big: url_base + url_suffix
+        };
+      }
+      return null;
+    },
+
+    create_from_id: function(id) {
+      return {
+        id:                  id,
+        url_medium:          '/member_illust.php?mode=medium&illust_id=' + id,
+        url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + id,
+        url_bookmark_detail: '/bookmark_detail.php?illust_id=' + id,
+        url_manga:           '/member_illust.php?mode=manga&illust_id=' + id,
+        url_response:        '/response.php?illust_id=' + id
+      };
+    },
+
     create: function(link, allow_types, cb_onshow) {
       var illust, images = _.tag('img', link);
       if (!allow_types) {
@@ -1359,37 +1393,26 @@
       }
 
       for(var i = 0; i < images.length; ++i) {
-        var re;
-        if ((re = _.re.image.exec(images[i].src)) && allow_types.indexOf(re[3]) >= 0) {
-          if (illust) {
-            return null;
-          }
-
-          var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
-          illust = {
-            id: id,
-            image_thumb: images[i],
-            image_url_base: url_base,
-            image_url_suffix: url_suffix,
-            image_url_medium: url_base + '_m' + url_suffix,
-            image_url_big: url_base + url_suffix
-          };
+        var p = _.illust.parse_image_url(images[i].src, allow_types);
+        if (!p) {
+          continue;
         }
+        if (illust) {
+          return null;
+        }
+
+        illust = p;
+        illust.image_thumb = images[i];
       }
 
       if (!illust) {
         return null;
       }
 
-      _.extend({
-        link:                link,
-        url_medium:          '/member_illust.php?mode=medium&illust_id=' + illust.id,
-        url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + illust.id,
-        url_bookmark_detail: '/bookmark_detail.php?illust_id=' + illust.id,
-        url_manga:           '/member_illust.php?mode=manga&illust_id=' + illust.id,
-        url_response:        '/response.php?illust_id=' + illust.id,
-        next:                null
-      }, illust);
+      _.extend(illust, _.illust.create_from_id(illust.id), {
+        link: link,
+        next: null
+      });
 
       illust.connection = _.onclick(illust.link, function() {
         _.popup.show(illust);
@@ -1462,6 +1485,27 @@
       if (error) {
         illust.error = _.fastxml.text(error);
         return false;
+      }
+
+      if (!illust.image_url_base) {
+        var img = _.fastxml.q(root, '.works_display a img');
+        if (!img) {
+          illust.error = 'Medium image not found';
+          return false;
+        }
+
+        var p = _.illust.parse_image_url(img.attrs['src'], '_m');
+        if (!p) {
+          illust.error = 'Failed to parse medium image url';
+          return false;
+        }
+
+        if (p.id !== illust.id) {
+          illust.error = 'Invalid medium image url';
+          return false;
+        }
+
+        _.extend(illust, p);
       }
 
       var work_info = _.fastxml.q(root, '.work-info'),
@@ -1549,8 +1593,11 @@
       var response_to = _.fastxml.q(root, '.worksImageresponseInfo a');
       illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
       illust.image_response_to  = null;
-      if (response_to && (re = /member_illust\.php\?mode=medium&illust_id=(\d+)/.exec(response_to.attrs['href']))) {
-        illust.image_response_to = g.parseInt(re[1]);
+      if (response_to) {
+        var query = _.illust.parse_illust_url(response_to.attrs['href']);
+        if (query && query.mode === 'medium' && query.illust_id) {
+          illust.image_response_to = query.illust_id;
+        }
       }
 
       var comment_form_data = _.fastxml.qa(root, '.worksOption form input');
@@ -1572,68 +1619,83 @@
         return;
       }
 
-      /* -1: error
-       *  0: loading
-       *  1: complete
-       */
-      var text_status = 0, image_m_status = 0, image_b_status = -1;
-
       var error_sent = false;
-      var send_error = function() {
+      var send_error = function(msg) {
         if (!error_sent) {
+          if (msg) {
+            illust.error = msg;
+          }
           _.popup.onerror(illust);
           error_sent = true;
         }
       };
 
-      var image_m = new w.Image();
-      _.listen(image_m, 'load', function() {
-        illust.image_medium = image_m;
-        image_m_status = 1;
-        if (text_status > 0) {
-          illust.loaded = true;
-          _.popup.onload(illust);
-        }
-      });
-      _.listen(image_m, 'error', function() {
-        image_m_status = -1;
-        if (image_b_status < 0) {
-          send_error();
-        }
-      });
-      image_m.src = illust.image_url_medium;
+      /* -1: error
+       *  0: waiting
+       *  1: loading
+       *  2: complete
+       */
+      var statuses = {
+        html:   0,
+        medium: 0,
+        big:    0
+      };
 
-      if (_.conf.popup.big_image) {
-        var image_b = new w.Image();
-        image_b_status = 0;
-        _.listen(image_b, 'load', function() {
-          illust.image_big = image_b;
-          image_b_status = 1;
-          if (text_status > 0) {
+      var load_image = function(name, url, other) {
+        if (statuses[name] !== 0) {
+          return;
+        }
+        statuses[name] = 1;
+
+        var image = new w.Image();
+
+        _.listen(image, 'load', function() {
+          illust['image_' + name] = image;
+          statuses[name] = 2;
+          if (statuses.html > 1) {
             illust.loaded = true;
             _.popup.onload(illust);
           }
         });
-        _.listen(image_b, 'error', function() {
-          image_b_status = -1;
-          if (image_m_status < 0) {
-            send_error();
+
+        _.listen(image, 'error', function() {
+          statuses[name] = -1;
+          if (statuses[other] < 0) {
+            send_error('Failed to load image - ' + url);
           }
         });
-        image_b.src = illust.image_url_big;
+
+        image.src = url;
+      };
+
+      var start_images = function() {
+        load_image('medium', illust.image_url_medium, 'big');
+        if (_.conf.popup.big_image) {
+          load_image('big', illust.image_url_big, 'medium');
+        } else {
+          statuses.big = -1;
+        }
+      };
+
+      if (illust.image_url_base) {
+        start_images();
       }
 
       _.xhr.get(illust.url_medium, function(text) {
         if (_.illust.parse_medium_html(illust, text)) {
-          text_status = 1;
-          if (image_m_status > 0 || image_b_status > 0) {
+          statuses.html = 2;
+          if (statuses.medium === 0) {
+            start_images();
+          } else if (statuses.medium > 1 || statuses.big > 1) {
             illust.loaded = true;
             _.popup.onload(illust);
           }
         } else {
           send_error();
         }
-      }, send_error);
+      }, function() {
+        send_error('Failed to load medium html');
+      });
     },
 
     unload: function(illust) {
@@ -1726,6 +1788,46 @@
         img.onerror = send_error;
         img.src = obj;
       });
+    },
+
+    parse_illust_url: function(url) {
+      var re;
+      if (!(re = _.re.url_member_illust.exec(url))) {
+        return null;
+      }
+      var query = _.url.parse_query(re[1]);
+      if (query.illust_id) {
+        query.illust_id = g.parseInt(query.illust_id, 10);
+      }
+      return query;
+    }
+  };
+
+  _.process_caption = function(caption, base_illust) {
+    if (!caption) {
+      return;
+    }
+
+    var last = base_illust;
+    _.qa('a[href*="mode=medium"]', caption).forEach(function(link) {
+      var query = _.illust.parse_illust_url(link.href);
+      if (query && query.mode === 'medium' && query.illust_id) {
+        var illust = _.illust.create_from_id(query.illust_id);
+        illust.link = link;
+        illust.connection = _.onclick(illust.link, function() {
+          _.popup.show(illust);
+          return true;
+        });
+        illust.prev = last;
+        if (last) {
+          last.next = illust;
+        }
+        last = illust;
+      }
+    });
+
+    if (last && base_illust && last !== base_illust) {
+      last.next = base_illust;
     }
   };
 
@@ -1965,6 +2067,8 @@
       }
 
       dom.caption.innerHTML = illust.caption;
+      _.process_caption(dom.caption, illust);
+
       dom.taglist.innerHTML = illust.taglist.replace(/\u3000/g, '');
       dom.rating.innerHTML = illust.rating + illust.question;
 
@@ -2040,6 +2144,17 @@
       } catch(ex) { }
 
       _.popup.set_status('');
+      _.popup.adjust();
+    },
+
+    onerror: function(illust) {
+      if (illust !== _.popup.illust || _.popup.bookmark.enable) {
+        return;
+      }
+      var msg = illust.error || 'Unknown error';
+      _.log('[Error] %s', msg);
+      _.popup.dom.image_layout.textContent = msg;
+      _.popup.set_status('Error');
       _.popup.adjust();
     },
 
@@ -3136,7 +3251,7 @@
     }
   };
 
-  _.extend({
+  _.extend(_.Floater, {
     instances: [],
     initialized: false,
 
@@ -3172,7 +3287,7 @@
         inst.update_height();
       });
     }
-  }, _.Floater);
+  });
 
   _.page_procs = {
     '/member_illust.php': [
@@ -3189,14 +3304,19 @@
       },
 
       function(query) {
-        if (query.mode !== 'medium') {
+        if (query.mode !== 'medium' || !query.illust_id) {
           return;
         }
 
-        var illust = _.illust.create(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
-          _.popup.manga.start();
-        });
-        _.illust.load(illust);
+        _.process_caption(_.q('.work-info .caption'));
+
+        var manga = _.q('.works_display a[href*="mode=manga"]');
+        if (manga) {
+          var illust = _.illust.create(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
+            _.popup.manga.start();
+          });
+          _.illust.load(illust);
+        }
       }
     ],
 
@@ -3277,6 +3397,7 @@
     } else {
       _.conf.__init(g.localStorage);
     }
+
     _.log('version=%s', _.version());
     _.lang.current = _.lang[d.documentElement.getAttribute('lang')] || _.lang[g.navigator.language] || _.lang.en;
     _.key.init();
@@ -3839,6 +3960,20 @@
   };
 
   _.changelog = [{
+    date: '2012/08/xx', version: '1.1.0', changes_i18n: {
+      en: [
+        '[Add] Open popup from illust link in caption(author comment).',
+        '[Fix] Don\'t open popup from image-response list in illust page.',
+        '[Fix] Improve error handling.'
+      ],
+      ja: [
+        '[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u30ea\u30f3\u30af\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
+        '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u5185\u306e\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002'
+      ]
+    }
+
+  }, {
     date: '2012/08/08', version: '1.0.0', changes_i18n: {
       en: [
         'Rewrite whole of source code.',
