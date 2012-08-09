@@ -834,7 +834,9 @@
 
         function reset() {
           _.clear(list);
-          input.value.split(',').forEach(add);
+          if (input.value) {
+            input.value.split(',').forEach(add);
+          }
         }
 
         function add(key) {
@@ -1877,6 +1879,7 @@
       dom.image_wrapper     = _.e('a', {id: 'pp-popup-image-wrapper'}, dom.root);
       dom.image_layout      = _.e('div', {id: 'pp-popup-image-layout'}, dom.image_wrapper);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
+      dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
       if (!_.conf.popup.show_comment_form) {
         dom.comment_form.style.display = 'none';
@@ -1955,7 +1958,7 @@
       dom.image_layout.style.marginTop =
         g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
 
-      if (!_.popup.bookmark.enable) {
+      if (!_.popup.bookmark.enable && !_.popup.tagedit.enable) {
         var base_width = dom.image_wrapper.offsetWidth;
         dom.header.style.width = base_width + 'px';
 
@@ -2014,6 +2017,7 @@
       _.popup.manga.clear();
       _.popup.question.clear();
       _.popup.comment.clear();
+      _.popup.tagedit.clear();
     },
 
     set_images: function(images) {
@@ -2027,7 +2031,7 @@
 
     onload: function(illust) {
       var dom = _.popup.dom;
-      if (illust !== _.popup.illust || _.popup.bookmark.enable) {
+      if (illust !== _.popup.illust || _.popup.bookmark.enable || _.popup.tagedit.enable) {
         return;
       }
       if (_.conf.popup.preload) {
@@ -2070,6 +2074,11 @@
       _.process_caption(dom.caption, illust);
 
       dom.taglist.innerHTML = illust.taglist.replace(/\u3000/g, '');
+      _.onclick(_.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist), function() {
+        _.popup.tagedit.start();
+        return true;
+      });
+
       dom.rating.innerHTML = illust.rating + illust.question;
 
       if (_.conf.popup.remove_pixpedia) {
@@ -2130,6 +2139,7 @@
 
       try {
         w.pixiv.context.illustId = illust.id;
+        w.pixiv.context.userId = illust.author_id;
         w.pixiv.context.rated = illust.rated;
         if (illust.rating && !illust.rated) {
           w.pixiv.rating.setup();
@@ -2148,7 +2158,7 @@
     },
 
     onerror: function(illust) {
-      if (illust !== _.popup.illust || _.popup.bookmark.enable) {
+      if (illust !== _.popup.illust || _.popup.bookmark.enable || _.popup.tagedit.enable) {
         return;
       }
       var msg = illust.error || 'Unknown error';
@@ -2170,6 +2180,13 @@
       if (!illust) {
         _.popup.hide();
         return;
+      }
+
+      if (_.popup.bookmark.enable) {
+        _.popup.bookmark.end();
+      }
+      if (_.popup.tagedit.enable) {
+        _.popup.tagedit.end();
       }
 
       var dom = _.popup.dom;
@@ -2518,10 +2535,15 @@
 
     reload: function() {
       var illust = _.popup.illust;
+      if (!illust.author_id) {
+        _.popup.comment.onerror('Author id not specified');
+        return;
+      }
+
       try {
         w.pixiv.api.post('/rpc_comment_history.php', {
 	  i_id: illust.id,
-	  u_id: w.pixiv.context.userId
+	  u_id: illust.author_id
 	}, {
 	  ajaxSettings: {dataType: 'text'}
 	}).done(function(data) {
@@ -2531,6 +2553,7 @@
         });
       } catch(ex) {
         _.popup.comment.onerror(illust);
+        return;
       }
       _.popup.dom.comment_history.textContent = 'Loading';
     },
@@ -2595,6 +2618,82 @@
       } else {
         _.popup.comment.start();
       }
+    }
+  };
+
+  _.popup.tagedit = {
+    enable: false,
+
+    clear: function() {
+      _.popup.dom.root.classList.remove('pp-tagedit-mode');
+      _.clear(_.popup.dom.tagedit_wrapper);
+      _.popup.tagedit.enable = false;
+    },
+
+    onload: function(illust, html) {
+      if (illust !== _.popup.illust || !_.popup.tagedit.enable) {
+        return;
+      }
+      _.clear(_.popup.dom.tagedit_wrapper);
+      _.e('div', {id: 'tag_edit'}, _.popup.dom.tagedit_wrapper).innerHTML = html;
+      _.popup.adjust();
+    },
+
+    onerror: function(illust, message) {
+      if (illust !== _.popup.illust || !_.popup.tagedit.enable) {
+        return;
+      }
+      _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
+    },
+
+    reload: function() {
+      var illust = _.popup.illust;
+      if (!illust.author_id) {
+        _.popup.tagedit.onerror('Author id not specified');
+        return;
+      }
+
+      try {
+        w.pixiv.api.post('/rpc_tag_edit.php', {
+          mode: 'first',
+	  i_id: illust.id,
+	  u_id: illust.author_id,
+	  e_id: w.pixiv.user.id
+	}, {
+	  ajaxSettings: {dataType: 'text'}
+	}).done(function(data) {
+          try {
+            _.popup.tagedit.onload(illust, g.JSON.parse(data).html.join(''));
+          } catch(ex) {
+            _.popup.tagedit.onerror(illust, g.String(ex));
+          }  
+	}).fail(function(data) {
+          _.popup.tagedit.onerror(illust, data);
+        });
+      } catch(ex) {
+        _.popup.tagedit.onerror(illust);
+        return;
+      }
+      _.popup.dom.tagedit_wrapper.textContent = 'Loading';
+    },
+
+    start: function() {
+      if (_.popup.tagedit.enable) {
+        return;
+      }
+      _.popup.tagedit.enable = true;
+      _.popup.tagedit.reload();
+      _.popup.dom.root.classList.add('pp-tagedit-mode');
+      _.popup.adjust();
+    },
+
+    end: function() {
+      if (!_.popup.tagedit.enable) {
+        return;
+      }
+      _.popup.dom.root.classList.remove('pp-tagedit-mode');
+      _.popup.tagedit.enable = false;
+      _.popup.adjust();
     }
   };
 
@@ -2771,6 +2870,16 @@
           ['qrate_end', _.popup.question.end]
         ]
       }, {
+        cond: function() { return !_.popup.tagedit.enable; },
+        keys: [
+          ['tag_edit_start', _.popup.tagedit.start]
+        ]
+      }, {
+        cond: function() { return _.popup.tagedit.enable; },
+        keys: [
+          ['tag_edit_end', _.popup.tagedit.end]
+        ]
+      }, {
         cond: function() { return _.conf.popup.rate_key; },
         keys: [
           ['rate01', _.popup.send_rate, 1],
@@ -2928,6 +3037,15 @@
           dom.comment_form.style.display = visible ? '' : 'none';
           _.conf.popup.show_comment_form = visible;
         }
+      });
+
+      _.onclick(dom.tagedit_wrapper, function(ev) {
+        var endbtn = ev.target;
+        if (endbtn instanceof w.HTMLInputElement && (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
+          _.popup.tagedit.end();
+          return true;
+        }
+        return false;
       });
     }
   };
@@ -3544,20 +3662,31 @@
     '#pp-popup-author-links a{margin-right:0.6em;font-weight:bold}',
     '#pp-popup-image-wrapper{display:block;border:1px solid #aaa;line-height:0;min-width:480px;min-height:360px}',
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc}',
-    '.pp-popup-olc.pp-active:hover{opacity:0.6}' +
-    '#pp-popup-olc-prev{left:0}' +
-    '#pp-popup-olc-next{right:0}' +
+    '.pp-popup-olc.pp-active:hover{opacity:0.6}',
+    '#pp-popup-olc-prev{left:0}',
+    '#pp-popup-olc-next{right:0}',
     '#pp-popup-image-layout{display:inline-block;font-size:200%}',
+
+    // bookmark
     '#pp-popup-bookmark-wrapper{display:none}',
     '#pp-popup.pp-bookmark-mode #pp-popup-header{display:none}',
     '#pp-popup.pp-bookmark-mode #pp-popup-image-wrapper{display:none}',
-    '#pp-popup.pp-bookmark-mode #pp-popup-bookmark-wrapper{display:block}',
     '#pp-popup.pp-bookmark-mode .pp-popup-olc{display:none}',
+    '#pp-popup.pp-bookmark-mode #pp-popup-bookmark-wrapper{display:block}',
     '#pp-popup-bookmark-wrapper .bookmain_title{padding:0.2em}',
     '#pp-popup-bookmark-wrapper .box_one_body{padding:0px}',
     '#pp-popup-bookmark-wrapper .box_main_bookmark{margin-top:0px;padding:0.2em}',
     '#pp-popup-bookmark-wrapper .bookmark_recommend_tag{margin:0px 0.2em 0.2em}',
     '#pp-popup-bookmark-wrapper .bookmark_bottom{padding-bottom:0.2em}',
+
+    // tagedit
+    '#pp-popup-tagedit-button{color:#888;font-size:90%;margin-left:0.4em}',
+    '#pp-popup-tagedit-wrapper{display:none;font-size:12px}',
+    '#pp-popup.pp-tagedit-mode #pp-popup-header{display:none}',
+    '#pp-popup.pp-tagedit-mode #pp-popup-image-wrapper{display:none}',
+    '#pp-popup.pp-tagedit-mode .pp-popup-olc{display:none}',
+    '#pp-popup.pp-tagedit-mode #pp-popup-tagedit-wrapper{display:block}',
+    '#pp-popup-tagedit-wrapper #tag_edit>div{margin:0px !important}',
 
     // config ui
     '#pp-config{display:none;line-height:1.1em}',
@@ -3667,6 +3796,7 @@
       {"key": "popup_bookmark_start", "value": "b", "start_mode": "bookmark"},
       {"key": "popup_manga_start", "value": "v", "start_mode": "manga"},
       {"key": "popup_qrate_start", "value": "d", "start_mode": "question"},
+      {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
       {"key": "popup_bookmark_end", "value": "Escape", "end_mode": "bookmark"},
       {"key": "popup_manga_open_page", "value": "Shift+f", "mode": "manga"},
@@ -3674,7 +3804,8 @@
       {"key": "popup_qrate_select_prev", "value": "Up", "mode": "question"},
       {"key": "popup_qrate_select_next", "value": "Down", "mode": "question"},
       {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "question"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"}
+      {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"},
+      {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
     ]},
     {"name": "bookmark", "items": [
       {"key": "tag_order", "value": ""},
@@ -3803,7 +3934,8 @@
           normal: 'Normal',
           bookmark: 'Bookmark mode',
           manga: 'Manga mode',
-          question: 'Questionnaire mode'
+          question: 'Questionnaire mode',
+          tagedit: 'Tag edit mode'
         },
 
         bookmark: {
@@ -3940,7 +4072,8 @@
           normal: '\u901a\u5e38',
           bookmark: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9',
           manga: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9',
-          question: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9'
+          question: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9',
+          tagedit: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9'
         },
 
         bookmark: {
