@@ -284,7 +284,7 @@
             break;
           case '0':
             for(j = ++i; j < fmt.length && /\d/.test(fmt[j]); ++j) ;
-            if (j < fmt.length && fmt[j] == 'd') {
+            if (j < fmt.length && fmt[j] === 'd') {
               arg = g.String(arguments[arg_idx++]);
               while(arg.length < g.parseInt(fmt.substring(i, j), 10)) {
                 arg = '0' + arg;
@@ -1207,7 +1207,7 @@
           if (node) {
             var target = node;
             while(target) {
-              if (target.tag == tag) {
+              if (target.tag === tag) {
                 target.raw_close = raw;
                 node = target.parent;
                 break;
@@ -1547,7 +1547,7 @@
             if (_.conf.general.debug) {
               _.log('pixiv.context.%s = %s', name, re[1]);
             }
-            value = re[1] == 'true';
+            value = re[1] === 'true';
             return true;
           }
           return false;
@@ -4155,7 +4155,7 @@
   };
 
   _.changelog = [{
-    date: '2012/08/xx', version: '1.1.0', changes_i18n: {
+    date: '2012/08/09', version: '1.1.0', changes_i18n: {
       en: [
         '[Add] Open popup from illust link in caption(author comment).',
         '[Add] Add tag edit mode.',
