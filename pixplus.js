@@ -3624,16 +3624,27 @@
     }
 
     try {
-      var rate_apply = w.pixiv.rating.apply;
+      var rate_apply = w.pixiv.rating.apply, waiting_confirmation;
       w.pixiv.rating.apply = function() {
-        var msg = _.lang.current.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
-        var rate = w.pixiv.rating.rate; // workaround for firefox
-        if (_.conf.general.rate_confirm && !w.confirm(msg)) {
-          if (_.conf.general.debug) {
-            _.log('rating cancelled');
-          }
+        if (waiting_confirmation) {
           return;
         }
+
+        var msg = _.lang.current.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
+        var rate = w.pixiv.rating.rate; // workaround for firefox
+
+        if (_.conf.general.rate_confirm) {
+          waiting_confirmation = true;
+          var confirmed = w.confirm(msg);
+          waiting_confirmation = false;
+          if (!confirmed) {
+            if (_.conf.general.debug) {
+              _.log('rating cancelled');
+            }
+            return;
+          }
+        }
+
         if (_.conf.general.debug) {
           _.log('send rating');
         }
