@@ -3626,7 +3626,7 @@
     try {
       var rate_apply = w.pixiv.rating.apply, waiting_confirmation;
       w.pixiv.rating.apply = function() {
-        if (waiting_confirmation) {
+        if (waiting_confirmation) { // workaround for chromium
           return;
         }
 
@@ -3634,9 +3634,9 @@
         var rate = w.pixiv.rating.rate; // workaround for firefox
 
         if (_.conf.general.rate_confirm) {
-          waiting_confirmation = true;
+          waiting_confirmation = true; // workaround for chromium
           var confirmed = w.confirm(msg);
-          waiting_confirmation = false;
+          waiting_confirmation = false; // workaround for chromium
           if (!confirmed) {
             if (_.conf.general.debug) {
               _.log('rating cancelled');
