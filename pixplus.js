@@ -2044,7 +2044,7 @@
 
       _.popup.clear();
 
-      dom.title_link.textContent = illust.title;
+      dom.title_link.innerHTML = illust.title;
       dom.title_link.href = illust.url_medium;
 
       dom.button_bookmark.href = illust.url_bookmark;
@@ -2109,7 +2109,7 @@
       if (illust.author_id) {
         var lng = _.lang.current;
         dom.author_profile.href = '/member.php?id=' + illust.author_id;
-        dom.author_profile.textContent = illust.author_name;
+        dom.author_profile.innerHTML = illust.author_name;
         dom.author_works.href = '/member_illust.php?id=' + illust.author_id;
         dom.author_works.textContent = lng.author_works;
         dom.author_bookmarks.href = '/bookmark.php?id=' + illust.author_id;
@@ -3964,12 +3964,14 @@
       en: [
         '[Add] Open popup from illust link in caption(author comment).',
         '[Fix] Don\'t open popup from image-response list in illust page.',
-        '[Fix] Improve error handling.'
+        '[Fix] Improve error handling.',
+        '[Fix] Displaying html entity in title and author name.'
       ],
       ja: [
         '[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u30ea\u30f3\u30af\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
         '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u5185\u306e\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002'
+        '[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002',
+        '[\u4fee\u6b63] \u30bf\u30a4\u30c8\u30eb\u3068\u30e6\u30fc\u30b6\u30fc\u540d\u306bHTML\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u304c\u8868\u793a\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]
     }
 
