@@ -1,3 +1,5 @@
+// this file loaded in background page
+
 (function(g, w, d, _) {
   _.conf.__key_prefix_page = _.conf.__key_prefix;
   _.conf.__key_prefix = 'conf_';

@@ -79,19 +79,21 @@ status:
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	@echo Create: $@
-	@echo '[' > $@
+	@echo '{"comment": "this is automatically generated file from $<", "data": [' >> $@
 	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	@echo ']' >> $@
+	@echo ']}' >> $@
 
 $(LIB_JS): $(SRC_USERJS)
 	@echo Create: $@
-	@echo '(function(g, w, d) {' > $@
+	@echo '// this is automatically generated file from $<' > $@
+	@echo '(function(g, w, d) {' >> $@
 	@sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	@echo '})(this, this.window, this.window.document);' >> $@
 
 $(DATA_JS): $(SRC_USERJS)
 	@echo Create: $@
-	@echo '(function(g, w, d, _) {' > $@
+	@echo '// this is automatically generated file from $<' > $@
+	@echo '(function(g, w, d, _) {' >> $@
 	@sed -e '1,/__DATA_BEGIN__/d' -e '/__DATA_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	@echo '})(this, this.window, this.window.document, this.window.pixplus);' >> $@
 

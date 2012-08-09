@@ -1,3 +1,5 @@
+// this file loaded in option page
+
 (function(g, w, d, _) {
   var send_message = function(command, data) {
     if (g.opera) {
