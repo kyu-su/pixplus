@@ -1445,7 +1445,7 @@
         return null;
       };
 
-      var new_list = [], last;
+      var new_list = [], last = null;
       links.forEach(function(link) {
         var illust = extract(link);
         if (!illust) {
@@ -1810,7 +1810,7 @@
       return;
     }
 
-    var last = base_illust;
+    var last = null;
     _.qa('a[href*="mode=medium"]', caption).forEach(function(link) {
       var query = _.illust.parse_illust_url(link.href);
       if (query && query.mode === 'medium' && query.illust_id) {
@@ -1820,7 +1820,7 @@
           _.popup.show(illust);
           return true;
         });
-        illust.prev = last;
+        illust.prev = last || base_illust;
         if (last) {
           last.next = illust;
         }
@@ -1828,7 +1828,7 @@
       }
     });
 
-    if (last && base_illust && last !== base_illust) {
+    if (last) {
       last.next = base_illust;
     }
   };
