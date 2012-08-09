@@ -3610,13 +3610,23 @@
       var rate_apply = w.pixiv.rating.apply;
       w.pixiv.rating.apply = function() {
         var msg = _.lang.current.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
-        if (_.conf.general.rate_confirm && !g.confirm(msg)) {
+        var rate = w.pixiv.rating.rate; // workaround for firefox
+        if (_.conf.general.rate_confirm && !w.confirm(msg)) {
+          if (_.conf.general.debug) {
+            _.log('rating cancelled');
+          }
           return;
         }
+        if (_.conf.general.debug) {
+          _.log('send rating');
+        }
+        w.pixiv.rating.rate = rate; // workaround for firefox
+        rate_apply.apply(w.pixiv.rating, arguments);
         _.illust.unload(_.popup.illust);
-        rate_apply.apply(this, Array.prototype.slice.call(arguments));
       };
-    } catch(ex) { }
+    } catch(ex) {
+      _.log('rating error - %s', g.String(ex));
+    }
 
     _.illust.setup(_.q('#wrapper'));
 
