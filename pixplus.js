@@ -1396,6 +1396,10 @@
 
       for(var i = 0; i < images.length; ++i) {
         var p = _.illust.parse_image_url(images[i].src, allow_types);
+        if (!p && images[i].hasAttribute('data-src')) {
+          // lazy load support
+          p = _.illust.parse_image_url(images[i].getAttribute('data-src'), allow_types);
+        }
         if (!p) {
           continue;
         }
@@ -1433,6 +1437,10 @@
       }
       _.illust.last_link_count = links.length;
 
+      if (_.conf.general.debug) {
+        _.log('updating illust list');
+      }
+
       var extract = function(link) {
         var list = _.illust.list;
         for(var i = 0; i < list.length; ++i) {
@@ -1469,10 +1477,19 @@
         illust.connection.disconnect();
       });
       _.illust.list = new_list;
+
+      if (new_list.length < 1) {
+        _.illust.last_link_count = 0;
+      }
+
+      if (_.conf.general.debug) {
+        _.log('illust list updated - %d', new_list.length);
+      }
     },
 
     setup: function(root) {
       if (!root) {
+        _.log('root of illust list not specified');
         return;
       }
       _.illust.root = root;
@@ -4111,7 +4128,9 @@
         '[Fix] Improve error handling.',
         '[Fix] Displaying html entity in title and author name.',
         '[Fix] Can\' t move to another illust when in bookmark mode.',
-        '[Fix] Various minor bug fixes.'
+        '[Fix] Various minor bug fixes.',
+        '[Fix][Firefox] Can\'t send rating if "Show confirmation dialog when rating" option is on.',
+        '[Fix][Firefox] Popup don\'t works on ranking page.'
       ],
       ja: [
         '[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u30ea\u30f3\u30af\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002',
@@ -4120,7 +4139,9 @@
         '[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002',
         '[\u4fee\u6b63] \u30bf\u30a4\u30c8\u30eb\u3068\u30e6\u30fc\u30b6\u30fc\u540d\u306bHTML\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u304c\u8868\u793a\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u6642\u306b\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '[\u4fee\u6b63] \u4ed6\u7d30\u304b\u306a\u30d0\u30b0\u4fee\u6b63\u3002'
+        '[\u4fee\u6b63] \u4ed6\u7d30\u304b\u306a\u30d0\u30b0\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63][Firefox] \u300c\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u6709\u52b9\u306b\u3057\u3066\u3044\u308b\u3068\u8a55\u4fa1\u3067\u304d\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63][Firefox] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]
     }
 
