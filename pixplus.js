@@ -1384,7 +1384,8 @@
         url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + id,
         url_bookmark_detail: '/bookmark_detail.php?illust_id=' + id,
         url_manga:           '/member_illust.php?mode=manga&illust_id=' + id,
-        url_response:        '/response.php?illust_id=' + id
+        url_response:        '/response.php?illust_id=' + id,
+        manga:               { }
       };
     },
 
