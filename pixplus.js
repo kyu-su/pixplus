@@ -1854,6 +1854,7 @@
   _.popup = {
     dom: { },
     images: [],
+    saved_context: null,
 
     create: function() {
       var dom = _.popup.dom;
@@ -1861,7 +1862,7 @@
         return;
       }
 
-      dom.root              = _.e('div', {id: 'pp-popup'}, d.body);
+      dom.root              = _.e('div', {id: 'pp-popup'});
       dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
       dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
       dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
@@ -2195,6 +2196,14 @@
     },
 
     show: function(illust) {
+      if (!_.popup.saved_context) {
+        if (_.conf.general.debug) {
+          _.log('saving pixiv.context');
+        }
+        _.popup.saved_context = w.pixiv.context;
+        w.pixiv.context = _.extend({ }, w.pixiv.context);
+      }
+
       if (!illust) {
         _.popup.hide();
         return;
@@ -2214,7 +2223,9 @@
 
       _.popup.illust = illust;
       _.popup.running = true;
-      dom.root.classList.add('pp-show');
+      if (!dom.root.parentNode) {
+        d.body.insertBefore(dom.root, d.body.firstChild);
+      }
       _.popup.set_status('Loading');
       _.popup.adjust();
       _.lazy_scroll(illust.image_thumb);
@@ -2225,7 +2236,20 @@
       if (!_.popup.running) {
         return;
       }
-      _.popup.dom.root.classList.remove('pp-show');
+
+      if (_.popup.saved_context) {
+        if (_.conf.general.debug) {
+          _.log('restoring pixiv.context');
+        }
+        w.pixiv.context = _.popup.saved_context;
+      } else {
+        _.log('[Error] pixiv.context not saved (bug)');
+      }
+
+      var dom = _.popup.dom;
+      if (dom.root.parentNode) {
+        dom.root.parentNode.removeChild(dom.root);
+      }
       _.popup.clear();
       _.popup.running = false;
     },
@@ -3667,8 +3691,7 @@
 
   _.css = [
     // popup
-    '#pp-popup{display:none;position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}',
-    '#pp-popup.pp-show{display:block}',
+    '#pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}',
     '#pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}',
     '#pp-popup-rightbox{float:right;font-size:80%}',
     '#pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}',
