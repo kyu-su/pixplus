@@ -723,12 +723,15 @@
     dom: { },
     shown: false,
     root: null,
+    menu: null,
 
     init: function(root, menu, extension_data) {
       if (!root) {
         return;
       }
+
       _.configui.root = root;
+      _.configui.menu = menu;
 
       if (menu) {
         var btn = _.e('a', {text: 'pixplus', 'href': '#'}, _.e('li'));
@@ -1069,7 +1072,7 @@
 
     create_tab: function(name, create_args) {
       var dom = _.configui.dom;
-      var label = _.e('label', {text: _.lang.current.pref[name]}, dom.tabbar);
+      var label = _.e('label', {text: _.lang.current.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
       var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
       (_.configui['create_tab_content_' + name] || _.configui.create_tab_content)(content, create_args);
       dom.content.appendChild(content);
@@ -1090,6 +1093,13 @@
       dom.tabbar  = _.e('div', {id: 'pp-config-tabbar'});
       dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
+      if (_.configui.menu) {
+        _.onclick(_.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar), function() {
+          _.configui.hide();
+          return true;
+        });
+      }
+
       _.conf.__schema.forEach(function(section) {
         _.configui.create_tab(section.name, section);
       });
@@ -1109,11 +1119,11 @@
     activate_tab: function(tab) {
       var lasttab = _.configui.dom.lasttab;
       if (lasttab) {
-        lasttab.label.classList.remove('active');
-        lasttab.content.classList.remove('active');
+        lasttab.label.classList.remove('pp-active');
+        lasttab.content.classList.remove('pp-active');
       }
-      tab.label.classList.add('active');
-      tab.content.classList.add('active');
+      tab.label.classList.add('pp-active');
+      tab.content.classList.add('pp-active');
       _.configui.dom.lasttab = tab;
     },
 
@@ -3756,12 +3766,15 @@
     '#global-header #pp-config{margin:0px auto 4px;width:970px}',
     '#pp-config.pp-show{display:block}',
     '#pp-config-tabbar{margin-bottom:-1px}',
-    '#pp-config-tabbar label{display:inline-block;padding:0.2em 0.4em;margin:1px 1px 0px 1px}',
-    '#pp-config-tabbar label.active{margin:0px;border:solid #aaa;border-width:1px 1px 0px 1px;background-color:#fff}',
+    '#pp-config-tabbar label{cursor:pointer}',
+    '#pp-config-close-button{padding:0.2em}',
+    '#pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.2em 0.4em;margin:1px 1px 0px 1px}',
+    '#pp-config-tabbar .pp-config-tab.pp-active{',
+    'margin:0px;border:solid #aaa;border-width:1px 1px 0px 1px;background-color:#fff}',
     '#pp-config-content-wrapper{border:1px solid #aaa;background-color:#fff;padding:0.2em}',
     '#global-header #pp-config-content-wrapper{height:600px;overflow-y:auto}',
     '.pp-config-content{display:none}',
-    '.pp-config-content.active{display:block}',
+    '.pp-config-content.pp-active{display:block}',
     '.pp-config-content dt{font-weight:bold}',
     '.pp-config-content dd{margin-left:1em}',
     '#pp-config-key-content td:not(.pp-config-key-modeline):first-child{padding-left:1em}',
