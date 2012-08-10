@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.1.0
+// @version     1.1.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -3697,7 +3697,7 @@
     '#pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}',
     '#pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}',
     '#pp-popup-status{color:#888}',
-    '#pp-popup-header{clear:both;position:absolute;background-color:#fff;line-height:1.1em}',
+    '#pp-popup-header{clear:both;position:absolute;background-color:#fff;line-height:1.1em;z-index:20001}',
     '#pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}',
     '.pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}',
     '#pp-popup-caption-wrapper{overflow-y:auto}',
@@ -3810,7 +3810,7 @@
       {"key": "caption_minheight", "value": 160},
       {"key": "caption_opacity", "value": 0.9},
       {"key": "remove_pixpedia", "value": false},
-      {"key": "rate_key", "value": false},
+      {"key": "rate_key", "value": true},
       {"key": "font_size", "value": ""},
       {"key": "auto_manga", "value": 0},
       {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php"},
@@ -3820,7 +3820,7 @@
       {"key": "scroll_height", "value": 32},
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
-      {"key": "mouse_wheel", "value": 0},
+      {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1}
     ]},
     {"name": "key", "items": [
@@ -4155,6 +4155,18 @@
   };
 
   _.changelog = [{
+    date: '2012/08/xx', version: '1.1.1', changes_i18n: {
+      en: [
+        '[Fix] Header area hidden by click navigator.',
+        '[Fix] Change default value for some preferences.'
+      ],
+      ja: [
+        '[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '\u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002'
+      ]
+    }
+
+  }, {
     date: '2012/08/09', version: '1.1.0', changes_i18n: {
       en: [
         '[Add] Open popup from illust link in caption(author comment).',
