@@ -1004,14 +1004,32 @@
     },
 
     create_tab_content_changelog: function(root) {
-      var dl = _.e('dl', null, root);
-      _.changelog.forEach(function(release) {
-        _.e('dt', {text: release.version + ' - ' + release.date}, dl);
-        var ul = _.e('ul', null, _.e('dd', null, dl));
-        (release.changes_i18n ? release.changes_i18n[_.lang.current.__name__] : release.changes).forEach(function(change) {
-          _.e('li', {text: change}, ul);
+      var lng = _.lang.current.__name__;
+
+      var create = function() {
+        var dl = _.e('dl', null, root);
+        _.changelog.forEach(function(release) {
+          _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+          var ul = _.e('ul', null, _.e('dd', null, dl));
+          (release.changes_i18n ? release.changes_i18n[lng] : release.changes).forEach(function(change) {
+            _.e('li', {text: change}, ul);
+          });
         });
-      });
+        return dl;
+      };
+
+      var dl;
+      if (_.conf.general.debug) {
+        var langbar = _.e('div', {id: 'pp-config-changelog-langbar'}, root);
+        ['en', 'ja'].forEach(function(name) {
+          _.onclick(_.e('button', {text: name}, langbar), function() {
+            lng = name;
+            dl.parentNode.removeChild(dl);
+            dl = create();
+          });
+        });
+      }
+      dl = create();
     },
 
     create_tab_content_debug: function(root) {
@@ -3789,6 +3807,8 @@
     '#pp-config-importexport-toolbar button{margin-right:0.2em}',
     '#pp-config-importexport-content textarea{width:100%;height:30em;',
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
+    '#pp-config-changelog-langbar{margin-bottom:0.2em}',
+    '#pp-config-changelog-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
 
     // key editor
     '.pp-config-key-editor ul button{padding:0px;margin-right:0.2em}',
@@ -4171,11 +4191,11 @@
     date: '2012/08/xx', version: '1.1.1', changes_i18n: {
       en: [
         '[Fix] Header area hidden by click navigator.',
-        '[Fix] Change default value for some preferences.'
+        '[Change] Change default value for some preferences.'
       ],
       ja: [
         '[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '\u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002'
+        '[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002'
       ]
     }
 
