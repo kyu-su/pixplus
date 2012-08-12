@@ -1768,9 +1768,6 @@
           pages_big.push([]);
         }
 
-        if (_.conf.popup.big_image) {
-          url = url_big;
-        }
         if (pages.length > 0 && page === pages.length - 1) {
           pages[page][terms[i + 1]](url);
           pages_big[page][terms[i + 1]](url_big);
@@ -1803,7 +1800,9 @@
         return;
       }
 
-      if (page >= illust.manga.pages.length) {
+      var prefer_big = _.conf.popup.big_image;
+      var pages = prefer_big ? illust.manga.pages_big : illust.manga.pages;
+      if (page >= pages.length) {
         _.popup.manga.onerror(illust, page);
         return;
       }
@@ -1816,24 +1815,36 @@
         }
       };
 
-      var images = illust.manga.pages[page], load_count = 0;
+      var images = pages[page].slice(), load_count = 0;
       var onload = function() {
         if (!error_sent && ++load_count === images.length) {
-          _.popup.manga.onload(illust, page);
+          _.popup.manga.onload(illust, page, images);
         }
       };
-      illust.manga.pages[page].forEach(function(obj, idx) {
+
+      pages[page].forEach(function(obj, idx) {
         if (obj instanceof w.HTMLImageElement) {
           onload();
           return;
         }
 
-        var img = new g.Image();
+        var img = new g.Image(), big = prefer_big;
         img.onload = function() {
-          illust.manga.pages[page][idx] = img;
+          images[idx] = img;
+          pages[page][idx] = img;
           onload();
         };
-        img.onerror = send_error;
+        img.onerror = function() {
+          if (big) {
+            big = false;
+            img.src = illust.manga.pages[page][idx];
+            if (_.conf.general.debug) {
+              _.log('[Warn] big image for manga loading failed. falling back to default image. (it\'s normal for old work)');
+            }
+          } else {
+            send_error();
+          }
+        };
         img.src = obj;
       });
     },
@@ -2402,7 +2413,7 @@
       _.popup.manga.update_button();
     },
 
-    onload: function(illust, page) {
+    onload: function(illust, page, images) {
       if (illust !== _.popup.illust || !_.popup.manga.enable || page !== _.popup.manga.page) {
         return;
       }
@@ -2417,7 +2428,7 @@
       }
 
       _.popup.dom.image_wrapper.href = illust.url_manga + '#pp-manga-page-' + page;
-      _.popup.set_images(illust.manga.pages[page]);
+      _.popup.set_images(images);
       _.popup.manga.update_button();
       _.popup.set_status('');
       _.popup.adjust();
@@ -2792,7 +2803,7 @@
 
     prev: function() {
       if (_.popup.manga.enable) {
-        _.popup.manga.show(_.popup.manga.page + (_.popup.input.reverse ? 1 : -1));
+        _.popup.manga.show(_.popup.manga.page - 1);
         return;
       }
       _.popup.show(_.popup.illust[_.popup.input.reverse ? 'next' : 'prev']);
@@ -2800,7 +2811,7 @@
 
     next: function() {
       if (_.popup.manga.enable) {
-        _.popup.manga.show(_.popup.manga.page + (_.popup.input.reverse ? -1 : 1));
+        _.popup.manga.show(_.popup.manga.page + 1);
         return;
       } else if (_.popup.input.auto_manga && _.popup.illust.manga.enable && !_.popup.illust.manga.viewed) {
         _.popup.manga.start();
@@ -2882,7 +2893,9 @@
     open_big: function() {
       if (_.popup.illust.manga.enable) {
         if (_.popup.manga.enable) {
-          _.popup.illust.manga.pages_big[_.popup.manga.page].forEach(_.open);
+          _.popup.illust.manga.pages_big[_.popup.manga.page].forEach(function(img) {
+            _.open(img.src || img);
+          });
         } else {
           _.open(_.popup.illust.url_manga);
         }
@@ -4191,10 +4204,14 @@
     date: '2012/08/xx', version: '1.1.1', changes_i18n: {
       en: [
         '[Fix] Header area hidden by click navigator.',
+        '[Fix] "Reverse" setting applied in manga mode.',
+        '[Fix] Can\'t read old manga if "Use original size image" is enabled.',
         '[Change] Change default value for some preferences.'
       ],
       ja: [
         '[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u8a2d\u5b9a\u304c\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306b\u3082\u9069\u7528\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"\u304c\u6709\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u53e4\u3044\u30de\u30f3\u30ac\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002'
       ]
     }
