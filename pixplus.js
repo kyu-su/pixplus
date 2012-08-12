@@ -722,6 +722,7 @@
   _.configui = {
     dom: { },
     shown: false,
+    lng: null,
     root: null,
     menu: null,
 
@@ -730,6 +731,7 @@
         return;
       }
 
+      _.configui.lng = _.lang.current;
       _.configui.root = root;
       _.configui.menu = menu;
 
@@ -753,7 +755,7 @@
 
     create_tab_content: function(root, section) {
       var table = _.e('table', null, root);
-      var lang_conf = _.lang.current.conf, last_mode;
+      var lang_conf = _.configui.lng.conf, last_mode;
 
       section.items.forEach(function(item) {
         var type = typeof(item.value);
@@ -809,7 +811,7 @@
           _.conf[section.name][item.key] = value;
         });
         
-        _.onclick(_.e('button', {'text': _.lang.current.pref['default']}, row.insertCell(-1)), function() {
+        _.onclick(_.e('button', {'text': _.configui.lng.pref['default']}, row.insertCell(-1)), function() {
           _.conf[section.name][item.key] = item.value;
           control[control_propname] = item.value;
         });
@@ -871,12 +873,12 @@
           add_input.value = key;
           return true;
         });
-        _.onclick(_.e('button', {text: _.lang.current.pref.add}, add_line), function() {
+        _.onclick(_.e('button', {text: _.configui.lng.pref.add}, add_line), function() {
           add(add_input.value);
           add_input.value = '';
           apply();
         });
-        _.onclick(_.e('button', {text: _.lang.current.pref.close}, add_line), close_editor);
+        _.onclick(_.e('button', {text: _.configui.lng.pref.close}, add_line), close_editor);
 
         row.parentNode.insertBefore(editor_row, row.nextSibling);
       }
@@ -892,7 +894,7 @@
     },
 
     create_tab_content_bookmark: function(root, section) {
-      _.e('div', {text: _.lang.current.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
+      _.e('div', {text: _.configui.lng.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
 
       var tag_order_textarea = _.e('textarea', null, root);
       tag_order_textarea.value = _.conf.bookmark.tag_order.map(function(a) {
@@ -917,10 +919,10 @@
       });
 
 
-      _.e('div', {text: _.lang.current.conf.bookmark.tag_aliases}, root);
+      _.e('div', {text: _.configui.lng.conf.bookmark.tag_aliases}, root);
 
       var tag_alias_table = _.e('table', {id: 'pp-config-bookmark-tag-aliases'}, root);
-      _.onclick(_.e('button', {text: _.lang.current.pref.add}, root), function() {
+      _.onclick(_.e('button', {text: _.configui.lng.pref.add}, root), function() {
         add_row();
       });
 
@@ -955,11 +957,11 @@
       var toolbar  = _.e('div', {id: 'pp-config-importexport-toolbar'}, root);
       var textarea = _.e('textarea', null, root);
 
-      _.onclick(_.e('button', {text: _.lang.current.pref['export']}, toolbar), function() {
+      _.onclick(_.e('button', {text: _.configui.lng.pref['export']}, toolbar), function() {
         textarea.value = JSON.stringify(_.conf.__export(''), null, 2);
       });
 
-      _.onclick(_.e('button', {text: _.lang.current.pref['import']}, toolbar), function() {
+      _.onclick(_.e('button', {text: _.configui.lng.pref['import']}, toolbar), function() {
         var data;
         try {
           data = JSON.parse(textarea.value);
@@ -1004,35 +1006,28 @@
     },
 
     create_tab_content_changelog: function(root) {
-      var lng = _.lang.current.__name__;
-
-      var create = function() {
-        var dl = _.e('dl', null, root);
-        _.changelog.forEach(function(release) {
-          _.e('dt', {text: release.version + ' - ' + release.date}, dl);
-          var ul = _.e('ul', null, _.e('dd', null, dl));
-          (release.changes_i18n ? release.changes_i18n[lng] : release.changes).forEach(function(change) {
-            _.e('li', {text: change}, ul);
-          });
+      var dl = _.e('dl', null, root);
+      _.changelog.forEach(function(release) {
+        _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+        var ul = _.e('ul', null, _.e('dd', null, dl));
+        (release.changes_i18n ? release.changes_i18n[_.configui.lng.__name__] : release.changes).forEach(function(change) {
+          _.e('li', {text: change}, ul);
         });
-        return dl;
-      };
-
-      var dl;
-      if (_.conf.general.debug) {
-        var langbar = _.e('div', {id: 'pp-config-changelog-langbar'}, root);
-        ['en', 'ja'].forEach(function(name) {
-          _.onclick(_.e('button', {text: name}, langbar), function() {
-            lng = name;
-            dl.parentNode.removeChild(dl);
-            dl = create();
-          });
-        });
-      }
-      dl = create();
+      });
     },
 
     create_tab_content_debug: function(root) {
+      var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
+      ['en', 'ja'].forEach(function(name) {
+        _.onclick(_.e('button', {text: name}, langbar), function() {
+          _.configui.lng = _.lang[name];
+          _.configui.dom.root.parentNode.removeChild(_.configui.dom.root);
+          _.configui.dom = { };
+          _.configui.shown = false;
+          _.configui.show();
+        });
+      });
+
       var input_line = _.e('div', null, root);
       var input      = _.e('input', null, input_line);
       var cancel_l   = _.e('label', null, input_line);
@@ -1090,7 +1085,7 @@
 
     create_tab: function(name, create_args) {
       var dom = _.configui.dom;
-      var label = _.e('label', {text: _.lang.current.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
+      var label = _.e('label', {text: _.configui.lng.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
       var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
       (_.configui['create_tab_content_' + name] || _.configui.create_tab_content)(content, create_args);
       dom.content.appendChild(content);
@@ -3584,6 +3579,9 @@
 
   _.run = function() {
     _.run = function() { };
+    if (_.q('#login-block')) {
+      return;
+    }
 
     if (_extension_data) {
       _.conf.__init({
@@ -3820,8 +3818,8 @@
     '#pp-config-importexport-toolbar button{margin-right:0.2em}',
     '#pp-config-importexport-content textarea{width:100%;height:30em;',
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
-    '#pp-config-changelog-langbar{margin-bottom:0.2em}',
-    '#pp-config-changelog-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
+    '#pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}',
+    '#pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
 
     // key editor
     '.pp-config-key-editor ul button{padding:0px;margin-right:0.2em}',
