@@ -780,14 +780,23 @@
           _.e('span', {text: _.format('0x%04x', value), css: 'float:right;margin-left:1em'}, li);
           li.appendChild(d.createTextNode(key));
           _.e('div', {css: 'clear:both'}, li);
-          _.listen(li, 'mousedown', function() {
-            var val = g.parseInt(input.value, 10) || 0;
-            if ((val & value) === value) {
-              val &= ~value;
+          items.push([key, value, li]);
+        }
+        items.sort(function(a, b) {
+          return a[1] - b[1];
+        });
+
+        items.forEach(function(item) {
+          var flags = item[1];
+
+          _.listen(item[2], 'mousedown', function() {
+            var value = g.parseInt(input.value, 10) || 0;
+            if ((value & flags) === flags) {
+              value &= ~flags;
             } else {
-              val |= value;
+              value |= flags;
             }
-            input.value = val;
+            input.value = value;
 
             var ev = d.createEvent('Event');
             ev.initEvent('input', true, true);
@@ -796,13 +805,7 @@
             update();
             return true;
           });
-          items.push([key, value, li]);
-        }
-        items.sort(function(a, b) {
-          return a[1] - b[1];
-        });
 
-        items.forEach(function(item) {
           list.appendChild(item[2]);
         });
 
