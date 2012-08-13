@@ -788,6 +788,11 @@
               val |= value;
             }
             input.value = val;
+
+            var ev = d.createEvent('Event');
+            ev.initEvent('input', true, true);
+            input.dispatchEvent(ev);
+
             update();
             return true;
           });
@@ -2378,8 +2383,8 @@
       }
       _.popup.set_status('Loading');
       _.popup.adjust();
-      _.lazy_scroll(illust.image_thumb);
       _.illust.load(illust);
+      _.lazy_scroll(illust.image_thumb);
     },
 
     hide: function() {
