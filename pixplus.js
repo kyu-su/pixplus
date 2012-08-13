@@ -2146,9 +2146,9 @@
       root.style.top  = g.Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
 
       if (_.conf.general.workaround & _.workaround.OPERA1250_REDRAWFIX) {
-        root.style.opacity = '0.99';
+        root.style.borderColor = '#aaaaab';
         g.setTimeout(function() {
-          root.style.opacity = '';
+          root.style.borderColor = '';
         }, 0);
       }
     },
