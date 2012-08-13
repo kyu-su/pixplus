@@ -2223,9 +2223,13 @@
 
     set_status: function(text) {
       var dom = _.popup.dom;
-      dom.status.textContent = text;
-      if (text && dom.image_layout.childNodes.length < 1) {
-        dom.image_layout.textContent = text;
+      dom.status.style.display = 'none';
+      if (text) {
+        dom.status.textContent = text;
+        dom.status.style.display = 'inline';
+        if (text && dom.image_layout.childNodes.length < 1) {
+          dom.image_layout.textContent = text;
+        }
       }
     },
 
@@ -4204,13 +4208,15 @@
         '[Fix] Header area hidden by click navigator.',
         '[Fix] "Reverse" setting applied in manga mode.',
         '[Fix] Can\'t read old manga if "Use original size image" is enabled.',
-        '[Change] Change default value for some preferences.'
+        '[Change] Change default value for some preferences.',
+        '[Fix][WebKit] Status field layout is broken while loading.'
       ],
       ja: [
         '[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u8a2d\u5b9a\u304c\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306b\u3082\u9069\u7528\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"\u304c\u6709\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u53e4\u3044\u30de\u30f3\u30ac\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002'
+        '[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002',
+        '[\u4fee\u6b63][WebKit] \u30ed\u30fc\u30c9\u4e2d\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u8868\u793a\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5909\u306b\u306a\u308b\u306e\u3092\u4fee\u6b63\u3002'
       ]
     }
 
