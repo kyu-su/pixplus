@@ -78,7 +78,7 @@
         for(var key in extract) {
           base[key] = extract[key];
         }
-      });;
+      });
       return base;
     }
   };
@@ -88,8 +88,12 @@
     __is_extension: false,
 
     __conv: {
-      'string': g.String,
-      'number': g.parseFloat,
+      'string': function(value) {
+        return g.String(value);
+      },
+      'number': function(value) {
+        return g.parseFloat(value) || 0;
+      },
       'boolean': function(value) {
         return g.String(value).toLowerCase() === 'true';
       },
@@ -268,34 +272,60 @@
     },
 
     format: function(fmt) {
+      if (arguments.length < 1) {
+        return '';
+      } else if (arguments.length === 1) {
+        return g.String(fmt);
+      }
+
       var res = '', i, j, arg, arg_idx = 1, last_arg = arguments[arguments.length - 1];
-      fmt = g.String(fmt);
+      var f_flag = false, f_pad;
+
+      var add_with_pad = function(str) {
+        if (f_pad) {
+          while(f_pad[1] > str.length) {
+            res += f_pad[0];
+            f_pad[1] -= 1;
+          }
+        }
+        res += str;
+      };
+
       for(i = 0; i < fmt.length; ++i) {
-        if (fmt[i] === '%') {
-          switch(fmt[++i]) {
+        if (f_flag) {
+          switch(fmt[i]) {
           case '%':
             res += '%';
+            f_flag = false;
             break;
           case 's':
             res += g.String(arguments[arg_idx++]);
+            f_flag = false;
             break;
           case 'd':
-            res += g.String(arguments[arg_idx++]);
+            add_with_pad(arguments[arg_idx++].toString(10));
+            f_flag = false;
             break;
+          case 'x':
+            add_with_pad(arguments[arg_idx++].toString(16));
+            f_flag = false;
+            break;
+
           case '0':
             for(j = ++i; j < fmt.length && /\d/.test(fmt[j]); ++j) ;
-            if (j < fmt.length && fmt[j] === 'd') {
-              arg = g.String(arguments[arg_idx++]);
-              while(arg.length < g.parseInt(fmt.substring(i, j), 10)) {
-                arg = '0' + arg;
-              }
-              res += arg;
-              i = j;
+            if (j < fmt.length) {
+              f_pad = ['0', g.parseInt(fmt.substring(i, j), 10)];
             } else {
-              return res + ' [[FORMAT ERROR: Invalid format - ' + fmt.substring(i - 2, j + 1) + ']]';
+              return res + ' [[FORMAT ERROR: Invalid format]]';
             }
             break;
+
+          default:
+            return res + ' [[FORMAT ERROR: Invalid format]]';
           }
+        } else if (fmt[i] === '%') {
+          f_flag = true;
+          f_pad = null;
         } else {
           res += fmt[i];
         }
@@ -608,6 +638,10 @@
       repost: /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/,
       url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/,
       url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/
+    },
+
+    workaround: {
+      OPERA1250_REDRAWFIX: 0x80
     }
   });
 
@@ -726,6 +760,67 @@
     root: null,
     menu: null,
 
+    bitfield: {
+      general: {
+        workaround: _.workaround
+      },
+
+      setup: function(input, field_map) {
+        var list = _.e('ul', {cls: 'pp-config-bitfield-list'}), items = [ ];
+
+        var update = function() {
+          var value = g.parseInt(input.value, 10) || 0;
+          items.forEach(function(item) {
+            item[2].classList[(value & item[1]) === item[1] ? 'add' : 'remove']('pp-active');
+          });
+        };
+
+        for(var key in field_map) {
+          var value = field_map[key], li = _.e('li');
+          _.e('span', {text: _.format('0x%04x', value), css: 'float:right;margin-left:1em'}, li);
+          li.appendChild(d.createTextNode(key));
+          _.e('div', {css: 'clear:both'}, li);
+          _.listen(li, 'mousedown', function() {
+            var val = g.parseInt(input.value, 10) || 0;
+            if ((val & value) === value) {
+              val &= ~value;
+            } else {
+              val |= value;
+            }
+            input.value = val;
+            update();
+            return true;
+          });
+          items.push([key, value, li]);
+        }
+        items.sort(function(a, b) {
+          return a[1] - b[1];
+        });
+
+        items.forEach(function(item) {
+          list.appendChild(item[2]);
+        });
+
+        var show = function() {
+          if (list.parentNode) {
+            return;
+          }
+          update();
+          input.parentNode.appendChild(list);
+        };
+
+        var hide = function() {
+          if (!list.parentNode) {
+            return;
+          }
+          list.parentNode.removeChild(list);
+        };
+
+        _.listen(input, 'focus', show);
+        _.listen(input, 'blur', hide);
+      }
+    },
+
     init: function(root, menu, extension_data) {
       if (!root) {
         return;
@@ -758,9 +853,14 @@
       var lang_conf = _.configui.lng.conf, last_mode;
 
       section.items.forEach(function(item) {
+        if (!_.conf.general.debug && item.hidden) {
+          return;
+        }
+
         var type = typeof(item.value);
         var info = lang_conf[section.name][item.key] || '[Error]';
 
+        // key tab
         if (section.name === 'key') {
           var mode = item.mode || item.end_mode;
           if (mode && mode !== last_mode) {
@@ -798,6 +898,11 @@
             });
           } else {
             control = _.e('input', null, value);
+
+            var field_map = (_.configui.bitfield[section.name] || { })[item.key];
+            if (field_map) {
+              _.configui.bitfield.setup(control, field_map);
+            }
           }
           control_propname = 'value';
         }
@@ -2039,6 +2144,13 @@
 
       root.style.left = g.Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
       root.style.top  = g.Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
+
+      if (_.conf.general.workaround & _.workaround.OPERA1250_REDRAWFIX) {
+        root.style.opacity = '0.99';
+        g.setTimeout(function() {
+          root.style.opacity = '';
+        }, 0);
+      }
     },
 
     clear: function() {
@@ -3740,7 +3852,7 @@
     '#pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}',
     '#pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}',
     '#pp-popup-status{color:#888}',
-    '#pp-popup-header{clear:both;position:absolute;background-color:#fff;line-height:1.1em;z-index:20001}',
+    '#pp-popup-header{position:absolute;background-color:#fff;line-height:1.1em;z-index:20001}',
     '#pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}',
     '.pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}',
     '#pp-popup-caption-wrapper{overflow-y:auto}',
@@ -3824,6 +3936,9 @@
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
     '#pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}',
     '#pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
+    '.pp-config-bitfield-list{position:absolute;border:1px solid #888}',
+    '.pp-config-bitfield-list li{padding:0.2em 0.4em;cursor:pointer}',
+    '.pp-config-bitfield-list li.pp-active{background-color:#ddf;font-weight:bold}',
 
     // key editor
     '.pp-config-key-editor ul button{padding:0px;margin-right:0.2em}',
@@ -3849,7 +3964,8 @@
       {"key": "stacc_link", "value": ""},
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
-      {"key": "fast_user_bookmark", "value": 0}
+      {"key": "fast_user_bookmark", "value": 0},
+      {"key": "workaround", "value": 0, "hidden": true}
     ]},
     {"name": "popup", "items": [
       {"key": "preload", "value": true},
@@ -3966,7 +4082,8 @@
           fast_user_bookmark: {
             desc: 'Add favorite user by one-click',
             hint: ['Disable', 'Enable(public)', 'Enable(private)']
-          }
+          },
+          workaround: 'Workaround (debug mode only)'
         },
 
         popup: {
@@ -4104,7 +4221,8 @@
           fast_user_bookmark: {
             desc: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046',
             hint: ['\u7121\u52b9', '\u6709\u52b9(\u516c\u958b)', '\u6709\u52b9(\u975e\u516c\u958b)']
-          }
+          },
+          workaround: '\u30ef\u30fc\u30af\u30a2\u30e9\u30a6\u30f3\u30c9 (\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9\u306e\u307f)'
         },
 
         popup: {
