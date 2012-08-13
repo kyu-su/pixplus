@@ -1,7 +1,6 @@
 RSVG_CONVERT            = rsvg-convert
 ZIP                     = zip
 XAR                     = xar
-JS                      = js
 CHROME                  = $(shell ./find_chrome.sh)
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
@@ -9,6 +8,7 @@ SAFARIEXTZ              = pixplus.safariextz
 OEX_TMP_DIR             = .oex
 CRX_TMP_DIR             = .crx
 SAFARIEXTZ_TMP_DIR      = .safariextz
+
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null 2>&1 && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
