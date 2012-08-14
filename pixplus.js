@@ -407,9 +407,11 @@
         _.xhr.request('GET', url, null, null, cb_success, cb_error);
       },
 
-      post: function(url, data, cb_success, cb_error) {
-        _.xhr.request('POST', url, [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
-                      data, cb_success, cb_error);
+      post: function(form, cb_success, cb_error) {
+        _.xhr.request('POST', form.getAttribute('action'),
+                      [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
+                      _.xhr.serialize(form),
+                      cb_success, cb_error);
       },
 
       serialize: function(form) {
@@ -2462,7 +2464,7 @@
       _.popup.bookmark.enable = true;
       _.popup.set_status('Loading');
 
-      _.xhr.request('GET', illust.url_bookmark, null, null, function(html) {
+      _.xhr.get(illust.url_bookmark, function(html) {
         if (illust !== _.popup.illust || !_.popup.bookmark.enable) {
           return;
         }
@@ -2774,9 +2776,7 @@
         _.e('input', {type: 'hidden', name: name, value: data[name]}, form);
       }
       _.listen(form, 'submit', function() {
-        var url  = form.getAttribute('action'),
-            data = _.xhr.serialize(form);
-        _.xhr.post(url, data, function() {
+        _.xhr.post(form, function() {
           _.popup.comment.setup_form();
           _.popup.comment.reload();
         }, function() {
@@ -3370,6 +3370,8 @@
         return;
       }
 
+      form.setAttribute('action', '/bookmark_add.php');
+
       try {
         w.bookmarkTagSort.sortedTag = {
           name: { asc: [], desc: [] },
@@ -3408,9 +3410,7 @@
       _.bookmarkform.setup_key(form);
 
       _.listen(form, 'submit', function() {
-        var url  = form.getAttribute('action'),
-            data = _.xhr.serialize(form);
-        _.xhr.post(url, data, function() {
+        _.xhr.post(form, function() {
           cb_submit();
         }, function() {
           g.alert('Error!');
@@ -3773,7 +3773,7 @@
             return;
           }
           radio.checked = true;
-          _.xhr.post(form.getAttribute('action'), _.xhr.serialize(form), function() {
+          _.xhr.post(form, function() {
             user_bookmark.classList.remove('open');
             user_bookmark.classList.add('added');
           });
@@ -3944,7 +3944,7 @@
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
     '#pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}',
     '#pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
-    '.pp-config-bitfield-list{position:absolute;border:1px solid #888}',
+    '.pp-config-bitfield-list{position:absolute;border:1px solid #888;background-color:#fff}',
     '.pp-config-bitfield-list li{padding:0.2em 0.4em;cursor:pointer}',
     '.pp-config-bitfield-list li.pp-active{background-color:#ddf;font-weight:bold}',
 
@@ -4329,11 +4329,12 @@
   };
 
   _.changelog = [{
-    date: '2012/08/xx', version: '1.1.1', changes_i18n: {
+    date: '2012/08/14', version: '1.1.1', changes_i18n: {
       en: [
         '[Fix] Header area hidden by click navigator.',
         '[Fix] "Reverse" setting applied in manga mode.',
         '[Fix] Can\'t read old manga if "Use original size image" is enabled.',
+        '[Fix] Can\'t add or modify bookmark in staccfeed page.',
         '[Change] Change default value for some preferences.',
         '[Fix][WebKit] Status field layout is broken while loading.'
       ],
@@ -4341,6 +4342,7 @@
         '[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u8a2d\u5b9a\u304c\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306b\u3082\u9069\u7528\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b"\u304c\u6709\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u53e4\u3044\u30de\u30f3\u30ac\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u8ffd\u52a0\u30fb\u7de8\u96c6\u304c\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002',
         '[\u4fee\u6b63][WebKit] \u30ed\u30fc\u30c9\u4e2d\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u8868\u793a\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5909\u306b\u306a\u308b\u306e\u3092\u4fee\u6b63\u3002'
       ]
