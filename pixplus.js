@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.1.1
+// @version     1.2.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -607,6 +607,18 @@
                    && (!ev.target.type || /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
     },
 
+    redirect_jump_page: function(root) {
+      if (_.conf.general.redirect_jump_page !== 2) {
+        return;
+      }
+      _.qa('a[href*="jump.php"]', root).forEach(function(link) {
+        var re;
+        if ((re = _.re.url_jump.exec(link.href))) {
+          link.href = g.decodeURIComponent(re[1]);
+        }
+      });
+    },
+
     url: {
       sprite: 'http://source.pixiv.net/source/images/sprite.png?20120528',
       bookmark_add_css: 'http://source.pixiv.net/source/css/bookmark_add.css?20100720',
@@ -639,7 +651,8 @@
       url_extension: /\.(\w+)(?:\?|$)/,
       repost: /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/,
       url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/,
-      url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/
+      url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/,
+      url_jump: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/
     },
 
     workaround: {
@@ -2247,6 +2260,7 @@
 
       dom.caption.innerHTML = illust.caption;
       _.process_caption(dom.caption, illust);
+      _.redirect_jump_page(dom.caption);
 
       dom.taglist.innerHTML = illust.taglist.replace(/\u3000/g, '');
       _.onclick(_.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist), function() {
@@ -2464,6 +2478,7 @@
       _.popup.bookmark.enable = true;
       _.popup.set_status('Loading');
 
+      _.xhr.remove_cache(illust.url_bookmark);
       _.xhr.get(illust.url_bookmark, function(html) {
         if (illust !== _.popup.illust || !_.popup.bookmark.enable) {
           return;
@@ -3728,6 +3743,12 @@
     _.e('style', {text: _.css}, d.body);
     _.configui.init(_.q('#global-header'), _.q('#global-header nav.site-menu ul'), _extension_data);
 
+    if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
+      w.location.href = g.decodeURIComponent(w.location.search.substring(1));
+      return;
+    }
+    _.redirect_jump_page();
+
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
         var re;
@@ -3973,6 +3994,7 @@
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
       {"key": "fast_user_bookmark", "value": 0},
+      {"key": "redirect_jump_page", "value": 1},
       {"key": "workaround", "value": 0, "hidden": true}
     ]},
     {"name": "popup", "items": [
@@ -4090,6 +4112,10 @@
           fast_user_bookmark: {
             desc: 'Add favorite user by one-click',
             hint: ['Disable', 'Enable(public)', 'Enable(private)']
+          },
+          redirect_jump_page: {
+            desc: 'Redirect jump.php',
+            hint: ['Disable', 'Open target', 'Modify link']
           },
           workaround: 'Workaround (debug mode only)'
         },
@@ -4230,6 +4256,10 @@
             desc: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046',
             hint: ['\u7121\u52b9', '\u6709\u52b9(\u516c\u958b)', '\u6709\u52b9(\u975e\u516c\u958b)']
           },
+          redirect_jump_page: {
+            desc: 'jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b',
+            hint: ['\u7121\u52b9', '\u30da\u30fc\u30b8\u3092\u958b\u304f', '\u30ea\u30f3\u30af\u3092\u5909\u66f4']
+          },
           workaround: '\u30ef\u30fc\u30af\u30a2\u30e9\u30a6\u30f3\u30c9 (\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9\u306e\u307f)'
         },
 
@@ -4329,6 +4359,16 @@
   };
 
   _.changelog = [{
+    date: '2012/08/xx', version: '1.2.0', changes_i18n: {
+      en: [
+        '[Add] Add "Redirect jump.php" setting.'
+      ],
+      ja: [
+        '[\u8ffd\u52a0] "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002'
+      ]
+    }
+
+  }, {
     date: '2012/08/14', version: '1.1.1', changes_i18n: {
       en: [
         '[Fix] Header area hidden by click navigator.',
