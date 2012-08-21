@@ -671,11 +671,19 @@
 
       if (ev.key) {
         if (ev.char.length === 1 && ev.char === ev.key) {
-          key = ev.char.toLowerCase();
+          if (ev.char.charCodeAt(0) > 0x20) {
+            key = ev.char.toLowerCase();
+          } else if (ev.keyCode > 0x20 && ev.keyCode < 0x7f) {
+            key = g.String.fromCharCode(ev.keyCode).toLowerCase();
+          }
         } else {
           key = ev.key;
         }
-        keys.push(_.key.encode_map[key] || key);
+
+        if (key) {
+          keys.push(_.key.encode_map[key] || key);
+        }
+
       } else if (ev.keyIdentifier) {
         if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
           c = g.parseInt(ev.keyIdentifier.substring(2), 16);
@@ -696,6 +704,7 @@
         if (key) {
           keys.push(_.key.encode_map[key] || key);
         }
+
       } else if (ev.type === 'keypress') {
         var c = ev.keyCode || ev.charCode;
         if (c === ev.which && c > 0x20 && c < 0x7f) {
