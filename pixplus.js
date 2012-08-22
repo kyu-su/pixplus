@@ -4370,10 +4370,14 @@
   _.changelog = [{
     date: '2012/08/xx', version: '1.2.0', changes_i18n: {
       en: [
-        '[Add] Add "Redirect jump.php" setting.'
+        '[Add] Add "Redirect jump.php" setting.',
+        '[Fix] Fix control key support for DOM3Events.',
+        '[Fix] Improve auto-manga-mode feature.'
       ],
       ja: [
-        '[\u8ffd\u52a0] "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002'
+        '[\u8ffd\u52a0] "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002',
+        '[\u4fee\u6b63] DOM3Event\u306eControl\u30ad\u30fc\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u81ea\u52d5\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306e\u6319\u52d5\u3092\u6539\u5584\u3002'
       ]
     }
 
