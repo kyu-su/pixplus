@@ -1754,7 +1754,7 @@
       }
 
       illust.size = null;
-      illust.manga = {enable: false};
+      illust.manga = {enable: false, viewed: illust.manga ? !!illust.manga.viewed : false};
       if ((re = _.re.meta_size.exec(meta2))) {
         illust.size = [g.parseInt(re[1], 10), g.parseInt(re[2], 10)];
       } else if ((re = _.re.meta_manga.exec(meta2))) {
