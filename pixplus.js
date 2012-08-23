@@ -23,7 +23,10 @@
   var inject = function(data) {
     var s = w.document.createElement('script');
     s.setAttribute('type', 'text/javascript');
-    s.textContent = '(' + entrypoint.toString() + ')(this,this.window,this.window.document,' + g.JSON.stringify(data) + ')';
+    s.textContent
+      = ('(' + entrypoint.toString() + ')'
+         + '(this,this.window,this.window.document,'
+         + g.JSON.stringify(data) + ')');
     w.document.body.appendChild(s);
   };
 
@@ -218,7 +221,8 @@
       _.conf.__schema.forEach(function(section) {
         var conf_section = _.conf[section.name] = { }, value_cache = { };
         var section_key = _.conf.__key_prefix;
-        if (!_.conf.__is_extension || section.name !== 'general') { // for compatibility
+        if (!_.conf.__is_extension || section.name !== 'general') {
+          // for compatibility
           section_key += section.name + '_';
         }
 
@@ -278,8 +282,9 @@
         return g.String(fmt);
       }
 
-      var res = '', i, j, arg, arg_idx = 1, last_arg = arguments[arguments.length - 1];
-      var f_flag = false, f_pad;
+      var res = '', i, j, arg, arg_idx = 1,
+          last_arg = arguments[arguments.length - 1],
+          f_flag = false, f_pad;
 
       var add_with_pad = function(str) {
         if (f_pad) {
@@ -408,10 +413,13 @@
       },
 
       post: function(form, cb_success, cb_error) {
-        _.xhr.request('POST', form.getAttribute('action'),
-                      [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
-                      _.xhr.serialize(form),
-                      cb_success, cb_error);
+        _.xhr.request(
+          'POST',
+          form.getAttribute('action'),
+          [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
+          _.xhr.serialize(form),
+          cb_success, cb_error
+        );
       },
 
       serialize: function(form) {
@@ -499,12 +507,16 @@
     },
 
     onwheel: function(context, listener) {
-      return _.listen(context, ['DOMMouseScroll', 'mousewheel'], function(ev, connection) {
-        if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) {
-          return false;
+      return _.listen(
+        context,
+        ['DOMMouseScroll', 'mousewheel'],
+        function(ev, connection) {
+          if (ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) {
+            return false;
+          }
+          return listener(ev, connection);
         }
-        return listener(ev, connection);
-      });
+      );
     },
 
     send_click: function(elem) {
@@ -560,7 +572,8 @@
       }
 
       var rect = elem.getBoundingClientRect();
-      var bt = g.Math.floor(root.clientHeight * offset), bb = g.Math.floor(root.clientHeight * (1.0 - offset));
+      var bt = g.Math.floor(root.clientHeight * offset),
+          bb = g.Math.floor(root.clientHeight * (1.0 - offset));
       if (rect.top < bt) {
         scroll.scrollTop -= bt - rect.top;
       } else if (rect.bottom > bb) {
@@ -604,7 +617,7 @@
     key_enabled: function(ev) {
       return !(ev.target instanceof w.HTMLTextAreaElement
                || (ev.target instanceof w.HTMLInputElement
-                   && (!ev.target.type || /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
+                   && (!ev.target.type || _.re.input_type_text.test(ev.target.type))));
     },
 
     redirect_jump_page: function(root) {
@@ -652,7 +665,8 @@
       repost: /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/,
       url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/,
       url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/,
-      url_jump: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/
+      url_jump: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/,
+      input_type_text: /^(?:text|search|tel|url|email|password|number)$/i
     },
 
     workaround: {
@@ -755,9 +769,12 @@
     },
 
     init: function() {
-      var keys = [[8, 'Backspace'], [9, 'Tab'], [13, 'Enter'], [27, 'Escape'], [32, 'Space'], [33, 'PageUp'],
-                  [34, 'PageDown'], [35, 'End'], [36, 'Home'], [37, 'Left'], [38, 'Up'], [39, 'Right'],
-                  [40, 'Down'], [45, 'Insert'], [46, 'Delete']];
+      var keys = [
+        [8, 'Backspace'], [9, 'Tab'], [13, 'Enter'], [27, 'Escape'],
+        [32, 'Space'], [33, 'PageUp'], [34, 'PageDown'], [35, 'End'],
+        [36, 'Home'], [37, 'Left'], [38, 'Up'], [39, 'Right'],
+        [40, 'Down'], [45, 'Insert'], [46, 'Delete']
+      ];
 
       for(var i = 1; i < 13; ++i) {
         keys.push([111 + i, 'F' + i.toString(10)]);
@@ -770,7 +787,12 @@
         _.key.name_map[name] = code;
       });
 
-      [['+', 'plus'], [',', 'comma'], [' ', 'Space'], ['\t', 'Tab']].forEach(function(p) {
+      [
+        ['+', 'plus'],
+        [',', 'comma'],
+        [' ', 'Space'],
+        ['\t', 'Tab']
+      ].forEach(function(p) {
         _.key.encode_map[p[0]] = p[1];
         _.key.decode_map[p[1]] = p[0];
       });
@@ -903,9 +925,15 @@
             last_mode = mode;
           }
           if (item.start_mode) {
-            info = lang_conf.key.mode_start.replace('$mode', lang_conf.mode[item.start_mode]);
+            info = lang_conf.key.mode_start.replace(
+              '$mode',
+              lang_conf.mode[item.start_mode]
+            );
           } else if (item.end_mode) {
-            info = lang_conf.key.mode_end.replace('$mode', lang_conf.mode[item.end_mode]);
+            info = lang_conf.key.mode_end.replace(
+              '$mode',
+              lang_conf.mode[item.end_mode]
+            );
           }
         }
 
@@ -948,10 +976,13 @@
           _.conf[section.name][item.key] = value;
         });
         
-        _.onclick(_.e('button', {'text': _.configui.lng.pref['default']}, row.insertCell(-1)), function() {
-          _.conf[section.name][item.key] = item.value;
-          control[control_propname] = item.value;
-        });
+        _.onclick(
+          _.e('button', {'text': _.configui.lng.pref['default']}, row.insertCell(-1)),
+          function() {
+            _.conf[section.name][item.key] = item.value;
+            control[control_propname] = item.value;
+          }
+        );
       });
     },
 
@@ -971,7 +1002,8 @@
         close_editor();
         editor_row = _.e('tr');
 
-        var root = _.e('div', null, _.e('td', {cls: 'pp-config-key-editor', 'colspan': '3'}, editor_row));
+        var cell = _.e('td', {cls: 'pp-config-key-editor', 'colspan': '3'}, editor_row);
+        var root = _.e('div', null, cell);
         var list = _.e('ul', null, root);
 
         function reset() {
@@ -1080,8 +1112,11 @@
           row.parentNode.removeChild(row);
           save();
         });
-        _.listen(_.e('input', {value: tag || ''}, row.insertCell(-1)), 'input', save);
-        _.listen(_.e('input', {value: list ? list.join(' ') : ''}, row.insertCell(-1)), 'input', save);
+
+        var i_tag = _.e('input', {value: tag || ''}, row.insertCell(-1)),
+            i_atags = _.e('input', {value: list ? list.join(' ') : ''}, row.insertCell(-1));
+        _.listen(i_tag, 'input', save);
+        _.listen(i_atags, 'input', save);
       }
 
       var aliases = _.conf.bookmark.tag_aliases;
@@ -1147,7 +1182,11 @@
       _.changelog.forEach(function(release) {
         _.e('dt', {text: release.version + ' - ' + release.date}, dl);
         var ul = _.e('ul', null, _.e('dd', null, dl));
-        (release.changes_i18n ? release.changes_i18n[_.configui.lng.__name__] : release.changes).forEach(function(change) {
+        (
+          release.changes_i18n
+            ? release.changes_i18n[_.configui.lng.__name__]
+            : release.changes
+        ).forEach(function(change) {
           _.e('li', {text: change}, ul);
         });
       });
@@ -1244,10 +1283,13 @@
       dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
       if (_.configui.menu) {
-        _.onclick(_.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar), function() {
-          _.configui.hide();
-          return true;
-        });
+        _.onclick(
+          _.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar),
+          function() {
+            _.configui.hide();
+            return true;
+          }
+        );
       }
 
       _.conf.__schema.forEach(function(section) {
@@ -1357,7 +1399,8 @@
     parse: function(xml) {
       var dom, node, tags = xml.replace(_.re.xml_cmment, '').split(_.re.xml_tag);
       for(var i = 0; i + 2 < tags.length; i += 3) {
-        var text = tags[i], tag = tags[i + 1].toLowerCase(), attrs = tags[i + 2] || '', raw = '<' + tag + attrs + '>';
+        var text = tags[i], tag = tags[i + 1].toLowerCase(),
+            attrs = tags[i + 2] || '', raw = '<' + tag + attrs + '>';
         if (text && node) {
           node.children.push({text: text});
         }
@@ -1971,7 +2014,7 @@
             big = false;
             img.src = illust.manga.pages[page][idx];
             if (_.conf.general.debug) {
-              _.log('[Warn] big image for manga loading failed. falling back to default image. (it\'s normal for old work)');
+              _.log('[Warn] big image for manga loading failed. falling back to default image.');
             }
           } else {
             send_error();
@@ -2138,15 +2181,17 @@
       }
 
       var dom = _.popup.dom, root = dom.root, de = d.documentElement;
-      _.popup.layout_images(g.Math.max(480, de.clientWidth  - (root.offsetWidth  - dom.image_wrapper.clientWidth)  - 20),
-                            g.Math.max(320, de.clientHeight - (root.offsetHeight - dom.image_wrapper.clientHeight) - 20));
+      _.popup.layout_images(
+        g.Math.max(480, de.clientWidth  - (root.offsetWidth  - dom.image_wrapper.clientWidth)  - 20),
+        g.Math.max(320, de.clientHeight - (root.offsetHeight - dom.image_wrapper.clientHeight) - 20)
+      );
 
       dom.image_layout.style.marginLeft = '0px';
       dom.image_layout.style.marginTop = '0px';
-      dom.image_layout.style.marginLeft =
-        g.Math.floor((dom.image_wrapper.clientWidth - dom.image_layout.offsetWidth) / 2) + 'px';
-      dom.image_layout.style.marginTop =
-        g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
+      dom.image_layout.style.marginLeft
+        = g.Math.floor((dom.image_wrapper.clientWidth - dom.image_layout.offsetWidth) / 2) + 'px';
+      dom.image_layout.style.marginTop
+        = g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
 
       if (!_.popup.bookmark.enable && !_.popup.tagedit.enable) {
         var base_width = dom.image_wrapper.offsetWidth;
@@ -2257,7 +2302,8 @@
         dom.button_response.style.display = '';
       } else if (illust.image_response_to) {
         dom.button_response.classList.add('pp-active');
-        dom.button_response.href = '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
+        dom.button_response.href
+          = '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
         dom.button_response.style.display = '';
       }
 
@@ -2272,10 +2318,13 @@
       _.redirect_jump_page(dom.caption);
 
       dom.taglist.innerHTML = illust.taglist.replace(/\u3000/g, '');
-      _.onclick(_.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist), function() {
-        _.popup.tagedit.start();
-        return true;
-      });
+      _.onclick(
+        _.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist),
+        function() {
+          _.popup.tagedit.start();
+          return true;
+        }
+      );
 
       dom.rating.innerHTML = illust.rating + illust.question;
 
@@ -2286,7 +2335,11 @@
       }
 
       if (_.conf.popup.author_status_icon) {
-        [['fav', 'pp-fav'], ['fav_m', 'pp-fav-m'], ['mypix', 'pp-mypix']].forEach(function(p) {
+        [
+          ['fav', 'pp-fav'],
+          ['fav_m', 'pp-fav-m'],
+          ['mypix', 'pp-mypix']
+        ].forEach(function(p) {
           if (illust['author_' + p[0]]) {
             dom.author_status.className = p[1];
             dom.author_status.style.display = '';
@@ -2310,7 +2363,11 @@
       dom.datetime.textContent = datetime;
 
       illust.tools.forEach(function(tool) {
-        _.e('a', {href: '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag', text: tool}, dom.tools);
+        _.e(
+          'a',
+          {href: '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag', text: tool},
+          dom.tools
+        );
       });
 
       if (illust.author_id) {
@@ -2333,7 +2390,8 @@
         dom.image_wrapper.href = illust.image_url_big;
       }
       _.popup.set_images([(_.conf.popup.big_image && illust.image_big) || !illust.image_medium
-                          ? illust.image_big : illust.image_medium]);
+                          ? illust.image_big
+                          : illust.image_medium]);
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -2500,12 +2558,16 @@
         if (form) {
           _.popup.dom.bookmark_wrapper.innerHTML = _.fastxml.src(form);
           _.popup.dom.root.classList.add('pp-bookmark-mode');
-          _.bookmarkform.setup(_.tag('form', _.popup.dom.bookmark_wrapper)[0], !illust.bookmarked, function() {
-            if (illust === _.popup.illust && _.popup.bookmark.enable) {
-              _.popup.bookmark.clear();
-              _.popup.reload();
+          _.bookmarkform.setup(
+            _.tag('form', _.popup.dom.bookmark_wrapper)[0],
+            !illust.bookmarked,
+            function() {
+              if (illust === _.popup.illust && _.popup.bookmark.enable) {
+                _.popup.bookmark.clear();
+                _.popup.reload();
+              }
             }
-          });
+          );
 
           _.popup.set_status('');
           _.popup.adjust();
@@ -2559,7 +2621,9 @@
     },
 
     onload: function(illust, page, images) {
-      if (illust !== _.popup.illust || !_.popup.manga.enable || page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust
+          || !_.popup.manga.enable
+          || page !== _.popup.manga.page) {
         return;
       }
 
@@ -2580,7 +2644,9 @@
     },
 
     onerror: function(illust, page) {
-      if (illust !== _.popup.illust || !_.popup.manga.enable || page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust
+          || !_.popup.manga.enable
+          || page !== _.popup.manga.page) {
         return;
       }
       if (illust.error) {
@@ -2650,7 +2716,8 @@
 
   _.popup.question = {
     enabled: function() {
-      return !!_.q('.questionnaire .list.visible, .questionnaire .stats.visible', _.popup.dom.rating);
+      return !!_.q('.questionnaire .list.visible, .questionnaire .stats.visible',
+                   _.popup.dom.rating);
     },
 
     clear: function() {
@@ -2714,7 +2781,8 @@
     },
 
     start: function() {
-      var toggle = _.q('.questionnaire .toggle-list, .questionnaire .toggle-stats', _.popup.dom.rating);
+      var toggle = _.q('.questionnaire .toggle-list, .questionnaire .toggle-stats',
+                       _.popup.dom.rating);
       if (toggle) {
         _.popup.show_caption();
         _.send_click(toggle);
@@ -2723,7 +2791,10 @@
 
     end: function() {
       _.popup.question.blur();
-      _.qa('.questionnaire .list, .questionnaire .stats', _.popup.dom.rating).forEach(function(elem) {
+      _.qa(
+        '.questionnaire .list, .questionnaire .stats',
+        _.popup.dom.rating
+      ).forEach(function(elem) {
         elem.classList.remove('visible');
       });
     }
@@ -2791,7 +2862,9 @@
         return;
       }
 
-      var form  = _.e('form', {action: '/member_illust.php', method: 'POST'}, _.popup.dom.comment_form);
+      var form  = _.e('form',
+                      {action: '/member_illust.php', method: 'POST'},
+                      _.popup.dom.comment_form);
       var input = _.e('input', {name: 'comment'}, form);
       for(var name in data) {
         if (name === 'submit' || name === 'comment') {
@@ -2956,7 +3029,9 @@
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page + 1);
         return;
-      } else if (_.popup.input.auto_manga && _.popup.illust.manga.enable && !_.popup.illust.manga.viewed) {
+      } else if (_.popup.input.auto_manga
+                 && _.popup.illust.manga.enable
+                 && !_.popup.illust.manga.viewed) {
         _.popup.manga.start();
         return;
       }
@@ -3065,25 +3140,33 @@
   _.popup.key = {
     maps: [
       {
-        cond: function() { return _.popup.bookmark.enable; },
+        cond: function() {
+          return _.popup.bookmark.enable;
+        },
         stop: true,
         keys: [
           ['bookmark_submit', _.popup.bookmark.submit],
           ['bookmark_end', _.popup.bookmark.end]
         ]
       }, {
-        cond: function() { return _.popup.manga.enable; },
+        cond: function() {
+          return _.popup.manga.enable;
+        },
         keys: [
           'manga_open_page',
           ['manga_end', _.popup.manga.end]
         ]
       }, {
-        cond: function() { return _.popup.illust.manga.enable && !_.popup.manga.enable; },
+        cond: function() {
+          return _.popup.illust.manga.enable && !_.popup.manga.enable;
+        },
         keys: [
           ['manga_start', _.popup.manga.start]
         ]
       }, {
-        cond: function() { return !_.popup.question.enabled(); },
+        cond: function() {
+          return !_.popup.question.enabled();
+        },
         keys: [
           ['qrate_start', _.popup.question.start]
         ]
@@ -3096,17 +3179,23 @@
           ['qrate_end', _.popup.question.end]
         ]
       }, {
-        cond: function() { return !_.popup.tagedit.enable; },
+        cond: function() {
+          return !_.popup.tagedit.enable;
+        },
         keys: [
           ['tag_edit_start', _.popup.tagedit.start]
         ]
       }, {
-        cond: function() { return _.popup.tagedit.enable; },
+        cond: function() {
+          return _.popup.tagedit.enable;
+        },
         keys: [
           ['tag_edit_end', _.popup.tagedit.end]
         ]
       }, {
-        cond: function() { return _.conf.popup.rate_key; },
+        cond: function() {
+          return _.conf.popup.rate_key;
+        },
         keys: [
           ['rate01', _.popup.send_rate, 1],
           ['rate02', _.popup.send_rate, 2],
@@ -3120,7 +3209,9 @@
           ['rate10', _.popup.send_rate, 10]
         ]
       }, {
-        cond: function() { return true; },
+        cond: function() {
+          return true;
+        },
         keys: [
           'prev',
           'next',
@@ -3267,7 +3358,8 @@
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
         var endbtn = ev.target;
-        if (endbtn instanceof w.HTMLInputElement && (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
+        if (endbtn instanceof w.HTMLInputElement
+            && (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
           _.popup.tagedit.end();
           return true;
         }
@@ -3288,7 +3380,10 @@
     },
 
     setup_autoinput: function(form) {
-      var illust_tags = _.qa('.bookmark_recommend_tag ul:not(#myBookmarkTags) li a.tag[data-tag]', form).map(function(tag) {
+      var illust_tags = _.qa(
+        '.bookmark_recommend_tag ul:not(#myBookmarkTags) li a.tag[data-tag]',
+        form
+      ).map(function(tag) {
         return tag.getAttribute('data-tag');
       });
 
@@ -3360,10 +3455,15 @@
             if (node === selected_tag) {
               return g.Infinity;
             }
-            return g.Math.min.apply(g.Math, _.as_array(node.getClientRects()).map(function(rect) {
-              var y = yscore(rect);
-              return y < 0 ? g.Infinity : g.Math.max(x - rect.right, rect.left - x) + y * 10000;
-            }));
+            return g.Math.min.apply(
+              g.Math,
+              _.as_array(node.getClientRects()).map(function(rect) {
+                var y = yscore(rect);
+                return (y < 0
+                        ? g.Infinity
+                        : g.Math.max(x - rect.right, rect.left - x) + y * 10000);
+              })
+            );
           };
           selected_tag = _.bookmarkform.select_tag(tags.map(function(node) {
             var s = score(node);
@@ -3487,10 +3587,14 @@
         return;
       }
 
-      _.listen(w, ['GM_AutoPagerizeLoaded', 'AutoPatchWork.initialized'], function(ev, connection) {
-        _.pager.load();
-        connection.disconnect();
-      });
+      _.listen(
+        w,
+        ['GM_AutoPagerizeLoaded', 'AutoPatchWork.initialized'],
+        function(ev, connection) {
+          _.pager.load();
+          connection.disconnect();
+        }
+      );
     }
   };
 
@@ -3568,7 +3672,8 @@
         }
         this.wrap.classList.add('pp-float');
         if (this.use_placeholder) {
-          this.placeholder.style.height = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
+          this.placeholder.style.height
+            = Math.min(this.wrap.offsetHeight, de.clientHeight) + 'px';
         }
         this.scroll_restore();
         this.floating = true;
@@ -3656,9 +3761,13 @@
 
         var manga = _.q('.works_display a[href*="mode=manga"]');
         if (manga) {
-          var illust = _.illust.create(_.q('.works_display a[href*="mode=manga"]'), ['_m'], function() {
-            _.popup.manga.start();
-          });
+          var illust = _.illust.create(
+            _.q('.works_display a[href*="mode=manga"]'),
+            ['_m'],
+            function() {
+              _.popup.manga.start();
+            }
+          );
           _.illust.load(illust);
         }
       }
@@ -3667,7 +3776,9 @@
     '/bookmark.php': [
       function(query) {
         var bookmark_list;
-        if (_.conf.bookmark.tag_order.length < 1 || query.id || !(bookmark_list = _.q('#bookmark_list ul'))) {
+        if (_.conf.bookmark.tag_order.length < 1
+            || query.id
+            || !(bookmark_list = _.q('#bookmark_list ul'))) {
           return;
         }
 
@@ -3746,7 +3857,11 @@
     }
 
     _.log('version=%s', _.version());
-    _.lang.current = _.lang[d.documentElement.getAttribute('lang')] || _.lang[g.navigator.language] || _.lang.en;
+    _.lang.current = (
+      _.lang[d.documentElement.getAttribute('lang')]
+        || _.lang[g.navigator.language]
+        || _.lang.en
+    );
     _.key.init();
 
     _.e('style', {text: _.css}, d.body);
@@ -3798,7 +3913,9 @@
           if (!form) {
             return;
           }
-          var radio = _.q('input[name="restrict"][value="' + (_.conf.general.fast_user_bookmark - 1) + '"]', form);
+          var radio = _.q('input[name="restrict"][value="'
+                          + (_.conf.general.fast_user_bookmark - 1) + '"]',
+                          form);
           if (!radio) {
             return;
           }
@@ -3915,7 +4032,8 @@
     '#pp-popup-tools{margin-left:0.6em}',
     '#pp-popup-tools a{margin-right:0.6em}',
     '#pp-popup-author-links a{margin-right:0.6em;font-weight:bold}',
-    '#pp-popup-image-wrapper{display:block;border:1px solid #aaa;line-height:0;min-width:480px;min-height:360px}',
+    '#pp-popup-image-wrapper{display:block;border:1px solid #aaa;line-height:0;',
+    'min-width:480px;min-height:360px}',
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc}',
     '.pp-popup-olc.pp-active:hover{opacity:0.6}',
     '#pp-popup-olc-prev{left:0}',
