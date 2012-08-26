@@ -18,7 +18,7 @@
         /* __GREASEMONKEY_REMOVE__
          true;
          * __GREASEMONKEY_REMOVE__ */
-      false;
+      false; // __GREASEMONKEY_REMOVE__
 
   var inject = function(data) {
     var s = w.document.createElement('script');
