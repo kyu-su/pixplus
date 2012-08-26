@@ -1922,11 +1922,16 @@
               statuses.medium = 1;
               image_medium.src = illust.image_url_medium;
             }
+
             if (_.conf.popup.big_image && statuses.big <= 1
                 && image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
               _.log('reloading big image with new url');
               statuses.big = 1;
               image_big.src = illust.image_url_big;
+            }
+
+            if (statuses.medium < 0 && statuses.big < 0) {
+              send_error('Failed to load image');
             }
           }
         } else {
