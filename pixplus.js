@@ -650,7 +650,7 @@
 
     re: {
       trim: /(?:^\s+|\s+$)/g,
-      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/(\d+)(?:_[\da-f]{10})?)(_[sm]|_100|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
+      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+)(?:_[\da-f]{10})?(_[sm]|_100|_128x128|_240ms|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
       xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
       xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
       xml_comment: /<!--.*?-->/g,
@@ -1474,7 +1474,7 @@
           for(var i = 1; i + 1 < terms.length; i += 2) {
             var v = terms[i + 1];
             if (terms[i] === '#') {
-              if (v && v !== node.attrs['id']) {
+              if (v && v !== node.attrs.id) {
                 return false;
               }
             } else if (terms[i] === '.') {
@@ -1559,12 +1559,16 @@
 
     parse_image_url: function(url, allow_types) {
       if (!allow_types) {
-        allow_types = ['_s', '_100'];
+        allow_types = ['_s', '_100', '_240ms', '_128x128'];
       }
 
       var re;
-      if ((re = _.re.image.exec(url)) && allow_types.indexOf(re[3]) >= 0) {
-        var id = g.parseInt(re[2], 10), url_base = re[1], url_suffix = re[4];
+      if (!(re = _.re.image.exec(url))) {
+        return null;
+      }
+
+      if (allow_types.indexOf(re[3]) >= 0) {
+        var id = g.parseInt(re[2], 10), url_base = re[1] + re[2], url_suffix = re[4];
         if (id < 1) {
           return null;
         }
@@ -1594,9 +1598,6 @@
 
     create: function(link, allow_types, cb_onshow) {
       var illust, images = _.tag('img', link);
-      if (!allow_types) {
-        allow_types = ['_s', '_100'];
-      }
 
       for(var i = 0; i < images.length; ++i) {
         var p = _.illust.parse_image_url(images[i].src, allow_types);
@@ -1710,25 +1711,22 @@
         return false;
       }
 
-      if (!illust.image_url_base) {
-        var img = _.fastxml.q(root, '.works_display a img');
-        if (!img) {
-          illust.error = 'Medium image not found';
-          return false;
-        }
-
-        var p = _.illust.parse_image_url(img.attrs['src'], '_m');
-        if (!p) {
+      var img = _.fastxml.q(root, '.works_display a img');
+      if (img) {
+        var p = _.illust.parse_image_url(img.attrs.src, '_m');
+        if (p) {
+          if (p.id !== illust.id) {
+            illust.error = 'Invalid medium image url';
+            return false;
+          }
+          _.extend(illust, p);
+        } else if (!illust.image_url_base) {
           illust.error = 'Failed to parse medium image url';
           return false;
         }
-
-        if (p.id !== illust.id) {
-          illust.error = 'Invalid medium image url';
-          return false;
-        }
-
-        _.extend(illust, p);
+      } else if (!illust.image_url_base) {
+        illust.error = 'Medium image not found';
+        return false;
       }
 
       var work_info = _.fastxml.q(root, '.work-info'),
@@ -1768,24 +1766,24 @@
           avatar         = _.fastxml.q(profile_area, '.avatar_m img'),
           author_link    = _.fastxml.q(profile_area, 'h2 .avatar_m'),
           staccfeed_link = _.fastxml.q(root, '.extaraNavi p a', function(link) {
-            return (link.attrs['href'] || '').indexOf('/stacc/') >= 0;
+            return (link.attrs.href || '').indexOf('/stacc/') >= 0;
           });
 
       illust.author_fav   = !!_.fastxml.q(profile_area, '#favorite-button.added');
       illust.author_fav_m = !!_.fastxml.q(profile_area, '.list_fav');
       illust.author_mypix = !!_.fastxml.q(profile_area, '#mypixiv-button.added');
-      illust.author_image = avatar ? avatar.attrs['src'] : null;
+      illust.author_image = avatar ? avatar.attrs.src : null;
       illust.author_name  = '[Error]';
       illust.author_url   = '';
       illust.author_id    = 0;
       if (author_link) {
         illust.author_name = _.fastxml.text(author_link);
-        illust.author_url = author_link.attrs['href'];
+        illust.author_url = author_link.attrs.href;
         if ((re = _.re.author_profile.exec(illust.author_url))) {
           illust.author_id = g.parseInt(re[1], 10);
         }
       }
-      illust.author_staccfeed = staccfeed_link ? staccfeed_link.attrs['href'] : null;
+      illust.author_staccfeed = staccfeed_link ? staccfeed_link.attrs.href : null;
 
       var meta = _.fastxml.qa(work_info, '.meta li'),
           meta2 = _.fastxml.text(meta[1]);
@@ -1810,14 +1808,14 @@
       });
 
       illust.bookmarked = !!_.fastxml.q(root, '.action .bookmark a', function(node) {
-        return (node.attrs['href'] || '').indexOf('bookmark_detail.php') >= 0;
+        return (node.attrs.href || '').indexOf('bookmark_detail.php') >= 0;
       });
 
       var response_to = _.fastxml.q(root, '.worksImageresponseInfo a');
       illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
       illust.image_response_to  = null;
       if (response_to) {
-        var query = _.illust.parse_illust_url(response_to.attrs['href']);
+        var query = _.illust.parse_illust_url(response_to.attrs.href);
         if (query && query.mode === 'medium' && query.illust_id) {
           illust.image_response_to = query.illust_id;
         }
@@ -1827,7 +1825,7 @@
       if (comment_form_data.length > 0) {
         illust.comment_form_data = { };
         comment_form_data.forEach(function(input) {
-          var name = input.attrs['name'], value = input.attrs['value'];
+          var name = input.attrs.name, value = input.attrs.value;
           if (name && value) {
             illust.comment_form_data[name] = value;
           }
@@ -1864,9 +1862,11 @@
         big:    0
       };
 
+      var image_medium, image_big;
+
       var load_image = function(name, url, other) {
         if (statuses[name] !== 0) {
-          return;
+          return null;
         }
         statuses[name] = 1;
 
@@ -1883,18 +1883,19 @@
 
         _.listen(image, 'error', function() {
           statuses[name] = -1;
-          if (statuses[other] < 0) {
+          if (statuses[other] < 0 && statuses.html > 1) {
             send_error('Failed to load image - ' + url);
           }
         });
 
         image.src = url;
+        return image;
       };
 
       var start_images = function() {
-        load_image('medium', illust.image_url_medium, 'big');
+        image_medium = load_image('medium', illust.image_url_medium, 'big');
         if (_.conf.popup.big_image) {
-          load_image('big', illust.image_url_big, 'medium');
+          image_big = load_image('big', illust.image_url_big, 'medium');
         } else {
           statuses.big = -1;
         }
@@ -1909,9 +1910,24 @@
           statuses.html = 2;
           if (statuses.medium === 0) {
             start_images();
-          } else if (statuses.medium > 1 || statuses.big > 1) {
-            illust.loaded = true;
-            _.popup.onload(illust);
+          } else {
+            if (statuses.medium > 1 || statuses.big > 1) {
+              illust.loaded = true;
+              _.popup.onload(illust);
+            }
+
+            if (statuses.medium <= 1 && statuses.big <= 1
+                && image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
+              _.log('reloading medium image with new url');
+              statuses.medium = 1;
+              image_medium.src = illust.image_url_medium;
+            }
+            if (_.conf.popup.big_image && statuses.big <= 1
+                && image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
+              _.log('reloading big image with new url');
+              statuses.big = 1;
+              image_big.src = illust.image_url_big;
+            }
           }
         } else {
           send_error();
@@ -2130,6 +2146,10 @@
     },
 
     layout_images: function(max_width, max_height) {
+      if (!_.popup.images || _.popup.images.length < 1) {
+        return;
+      }
+
       var scale = 1, natural_sizes;
 
       natural_sizes = _.popup.images.map(function(img) {
@@ -2553,7 +2573,7 @@
 
         var root = _.fastxml.parse(html);
         var form = _.fastxml.q(root, 'form', function(form) {
-          return form.attrs['action'] === 'bookmark_add.php';
+          return form.attrs.action === 'bookmark_add.php';
         });
         if (form) {
           _.popup.dom.bookmark_wrapper.innerHTML = _.fastxml.src(form);
@@ -3838,9 +3858,6 @@
 
   _.run = function() {
     _.run = function() { };
-    if (_.q('#login-block')) {
-      return;
-    }
 
     if (_extension_data) {
       _.conf.__init({
@@ -3857,6 +3874,11 @@
     }
 
     _.log('version=%s', _.version());
+    if (_.q('#login-block')) {
+      _.log('not logged in');
+      return;
+    }
+
     _.lang.current = (
       _.lang[d.documentElement.getAttribute('lang')]
         || _.lang[g.navigator.language]
