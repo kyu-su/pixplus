@@ -4512,12 +4512,14 @@
       en: [
         '[Add] Add "Redirect jump.php" setting.',
         '[Fix] Fix control key support for DOM3Events.',
-        '[Fix] Improve auto-manga-mode feature.'
+        '[Fix] Improve auto-manga-mode feature.',
+        '[Fix] Support "new Staccfeed" page.'
       ],
       ja: [
         '[\u8ffd\u52a0] "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002',
         '[\u4fee\u6b63] DOM3Event\u306eControl\u30ad\u30fc\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002',
-        '[\u4fee\u6b63] \u81ea\u52d5\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306e\u6319\u52d5\u3092\u6539\u5584\u3002'
+        '[\u4fee\u6b63] \u81ea\u52d5\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306e\u6319\u52d5\u3092\u6539\u5584\u3002',
+        '[\u4fee\u6b63] \u300c\u65b0\u3057\u3044\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u3092\u30b5\u30dd\u30fc\u30c8\u3002'
       ]
     }
 
