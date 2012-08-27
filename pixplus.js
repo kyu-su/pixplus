@@ -4513,7 +4513,7 @@
   };
 
   _.changelog = [{
-    date: '2012/08/xx', version: '1.2.0', changes_i18n: {
+    date: '2012/08/27', version: '1.2.0', changes_i18n: {
       en: [
         '[Add] Add "Redirect jump.php" setting.',
         '[Fix] Fix control key support for DOM3Events.',

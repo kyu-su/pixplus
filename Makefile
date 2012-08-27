@@ -170,6 +170,7 @@ $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
      done
 	@echo >> $@;
 	@sed -e '1,/@ICONS@/d' \
+             -e 's/@VERSION@/$(VERSION)/' \
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
            < $< | tr -d '\r' >> $@
 
