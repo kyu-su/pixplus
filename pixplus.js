@@ -1906,37 +1906,43 @@
       }
 
       _.xhr.get(illust.url_medium, function(text) {
-        if (_.illust.parse_medium_html(illust, text)) {
-          statuses.html = 2;
-          if (statuses.medium === 0) {
-            start_images();
-          } else {
-            if (statuses.medium > 1 || statuses.big > 1) {
-              illust.loaded = true;
-              _.popup.onload(illust);
-            }
-
-            if (statuses.medium <= 1 && statuses.big <= 1
-                && image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
-              _.log('reloading medium image with new url');
-              statuses.medium = 1;
-              image_medium.src = illust.image_url_medium;
-            }
-
-            if (_.conf.popup.big_image && statuses.big <= 1
-                && image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
-              _.log('reloading big image with new url');
-              statuses.big = 1;
-              image_big.src = illust.image_url_big;
-            }
-
-            if (statuses.medium < 0 && statuses.big < 0) {
-              send_error('Failed to load image');
-            }
-          }
-        } else {
+        if (!_.illust.parse_medium_html(illust, text)) {
           send_error();
+          return;
         }
+
+        statuses.html = 2;
+        if (statuses.medium === 0) {
+          start_images();
+        } else {
+          if (statuses.medium > 1 || statuses.big > 1) {
+            illust.loaded = true;
+            _.popup.onload(illust);
+          }
+
+          if (statuses.medium <= 1 && statuses.big <= 1
+              && image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
+            _.log('reloading medium image with new url');
+            statuses.medium = 1;
+            image_medium.src = illust.image_url_medium;
+          }
+
+          if (_.conf.popup.big_image && statuses.big <= 1
+              && image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
+            _.log('reloading big image with new url');
+            statuses.big = 1;
+            image_big.src = illust.image_url_big;
+          }
+
+          if (statuses.medium < 0 && statuses.big < 0) {
+            send_error('Failed to load image');
+          }
+        }
+
+        if (_.conf.popup.preload && illust.manga.enable) {
+          _.illust.load_manga_page(illust, 0);
+        }
+
       }, function() {
         send_error('Failed to load medium html');
       });
@@ -2302,9 +2308,6 @@
         return;
       }
       if (_.conf.popup.preload) {
-        if (illust.manga.enable) {
-          _.illust.load_manga_page(illust, 0);
-        }
         if (illust.prev) {
           _.illust.load(illust.prev);
         }
