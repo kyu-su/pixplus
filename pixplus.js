@@ -3796,7 +3796,10 @@
               _.popup.manga.start();
             }
           );
-          _.illust.load(illust);
+
+          if (_.conf.popup.preload) {
+            _.illust.load(illust);
+          }
         }
       }
     ],
