@@ -3631,6 +3631,7 @@
     this.cont = cont;
     this.floating = false;
     this.disable_float = false;
+    this.disable_float_temp = false;
     this.use_placeholder = true;
     this.ignore_elements = [];
     _.Floater.instances.push(this);
@@ -3665,6 +3666,7 @@
     },
 
     update_height: function () {
+      this.disable_float_temp = false;
       if (this.cont) {
         var de = d.documentElement;
         var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
@@ -3672,7 +3674,7 @@
           mh += elem.offsetHeight;
         });
         if (mh < 60) {
-          this.disable_float = true;
+          this.disable_float_temp = true;
           this.unfloat();
           this.cont.style.maxHeight = '';
           return;
@@ -3685,7 +3687,7 @@
     },
 
     update_float: function () {
-      if (this.disable_float) {
+      if (this.disable_float || this.disable_float_temp) {
         return;
       }
       var de = d.documentElement;
