@@ -1735,7 +1735,7 @@
 
       illust.title    = _.fastxml.text(_.fastxml.q(work_info, '.title'));
       illust.caption  = _.fastxml.src(_.fastxml.q(work_info, '.caption'));
-      illust.taglist  = _.fastxml.src(_.fastxml.q(root, '.works_tag #tags'));
+      illust.taglist  = _.fastxml.src(_.fastxml.q(root, '.work-tags .tags'));
       illust.rating   = _.fastxml.src(score);
       illust.question = _.fastxml.src(question, true);
 
@@ -2345,7 +2345,7 @@
       _.process_caption(dom.caption, illust);
       _.redirect_jump_page(dom.caption);
 
-      dom.taglist.innerHTML = illust.taglist.replace(/\u3000/g, '');
+      dom.taglist.innerHTML = illust.taglist;
       _.onclick(
         _.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist),
         function() {
@@ -4050,7 +4050,7 @@
     '#pp-popup-comment{display:none;border-left:3px solid #ccc;margin-left:0.6em;padding-left:0.3em}',
     '#pp-popup.pp-comment-mode #pp-popup-comment{display:block}',
     '#pp-popup-comment-form input{width:80%}',
-    '#pp-popup-taglist a[href*="dic.pixiv.net"]{margin-left:0.6em;}',
+    '#pp-popup-taglist li{display:inline-block;margin-right:0.6em}',
     '#pp-popup-rating *{margin:0px;padding:0px}',
     '#pp-popup-rating .score dl{display:inline}',
     '#pp-popup-rating .score dt{display:inline;margin-right:0.2em}',
