@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.2.0
+// @version     1.2.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -4050,6 +4050,7 @@
     '#pp-popup-comment{display:none;border-left:3px solid #ccc;margin-left:0.6em;padding-left:0.3em}',
     '#pp-popup.pp-comment-mode #pp-popup-comment{display:block}',
     '#pp-popup-comment-form input{width:80%}',
+    '#pp-popup-taglist ul{display:inline-block}',
     '#pp-popup-taglist li{display:inline-block;margin-right:0.6em}',
     '#pp-popup-rating *{margin:0px;padding:0px}',
     '#pp-popup-rating .score dl{display:inline}',
@@ -4089,7 +4090,7 @@
     '#pp-popup-bookmark-wrapper .bookmark_bottom{padding-bottom:0.2em}',
 
     // tagedit
-    '#pp-popup-tagedit-button{color:#888;font-size:90%;margin-left:0.4em}',
+    '#pp-popup-tagedit-button{color:#888;font-size:90%}',
     '#pp-popup-tagedit-wrapper{display:none;font-size:12px}',
     '#pp-popup.pp-tagedit-mode #pp-popup-header{display:none}',
     '#pp-popup.pp-tagedit-mode #pp-popup-image-wrapper{display:none}',
@@ -4522,6 +4523,16 @@
   };
 
   _.changelog = [{
+    date: '2012/09/29', version: '1.2.1', changes_i18n: {
+      en: [
+        '[Fix] Minor fix for pixiv\'s update.'
+      ],
+      ja: [
+        '[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002'
+      ]
+    }
+
+  }, {
     date: '2012/08/27', version: '1.2.0', changes_i18n: {
       en: [
         '[Add] Add "Redirect jump.php" setting.',
