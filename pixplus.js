@@ -650,7 +650,7 @@
 
     re: {
       trim: /(?:^\s+|\s+$)/g,
-      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+)(?:_[\da-f]{10})?(_[sm]|_100|_128x128|_240ms|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
+      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240ms|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
       xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
       xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
       xml_comment: /<!--.*?-->/g,
@@ -1888,6 +1888,9 @@
           }
         });
 
+        if (_.conf.general.debug) {
+          _.log('trying to load image - ' + name + ':' + url);
+        }
         image.src = url;
         return image;
       };
@@ -4528,11 +4531,13 @@
     date: '2012/11/xx', version: '1.2.2', changes_i18n: {
       en: [
         '[Fix] Fix manga layout is broken.',
-        '[Fix] Fix tag list layout.'
+        '[Fix] Fix tag list layout.',
+        '[Fix] Fix fail to load access-restricted illust.'
       ],
       ja: [
         '[\u4fee\u6b63] \u30de\u30f3\u30ac\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5d29\u308c\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
-        '[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002'
+        '[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u304c\u5236\u9650\u3055\u308c\u305f\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
       ]
     }
 
