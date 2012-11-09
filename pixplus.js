@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.2.1
+// @version     1.2.2
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -2212,6 +2212,8 @@
       }
 
       var dom = _.popup.dom, root = dom.root, de = d.documentElement;
+      root.style.left = '0px';
+      root.style.top  = '0px';
       _.popup.layout_images(
         g.Math.max(480, de.clientWidth  - (root.offsetWidth  - dom.image_wrapper.clientWidth)  - 20),
         g.Math.max(320, de.clientHeight - (root.offsetHeight - dom.image_wrapper.clientHeight) - 20)
@@ -4523,6 +4525,18 @@
   };
 
   _.changelog = [{
+    date: '2012/11/xx', version: '1.2.2', changes_i18n: {
+      en: [
+        '[Fix] Fix manga layout is broken.',
+        '[Fix] Fix tag list layout.'
+      ],
+      ja: [
+        '[\u4fee\u6b63] \u30de\u30f3\u30ac\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5d29\u308c\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002'
+      ]
+    }
+
+  }, {
     date: '2012/09/29', version: '1.2.1', changes_i18n: {
       en: [
         '[Fix] Minor fix for pixiv\'s update.'
