@@ -650,7 +650,7 @@
 
     re: {
       trim: /(?:^\s+|\s+$)/g,
-      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240ms|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
+      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
       xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
       xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
       xml_comment: /<!--.*?-->/g,
@@ -1559,7 +1559,7 @@
 
     parse_image_url: function(url, allow_types) {
       if (!allow_types) {
-        allow_types = ['_s', '_100', '_240ms', '_128x128'];
+        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
       }
 
       var re;
@@ -1735,7 +1735,7 @@
 
       illust.title    = _.fastxml.text(_.fastxml.q(work_info, '.title'));
       illust.caption  = _.fastxml.src(_.fastxml.q(work_info, '.caption'));
-      illust.taglist  = _.fastxml.src(_.fastxml.q(root, '.work-tags .tags'));
+      illust.taglist  = _.fastxml.src(_.fastxml.q(root, '.work-tags .tags-container'));
       illust.rating   = _.fastxml.src(score);
       illust.question = _.fastxml.src(question, true);
 
@@ -4057,6 +4057,7 @@
     '#pp-popup-comment-form input{width:80%}',
     '#pp-popup-taglist ul{display:inline}',
     '#pp-popup-taglist li{display:inline;margin-right:0.6em}',
+    '#pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}',
     '#pp-popup-rating *{margin:0px;padding:0px}',
     '#pp-popup-rating .score dl{display:inline}',
     '#pp-popup-rating .score dt{display:inline;margin-right:0.2em}',
@@ -4528,16 +4529,18 @@
   };
 
   _.changelog = [{
-    date: '2012/11/xx', version: '1.2.2', changes_i18n: {
+    date: '2012/12/06', version: '1.2.2', changes_i18n: {
       en: [
         '[Fix] Fix manga layout is broken.',
         '[Fix] Fix tag list layout.',
-        '[Fix] Fix fail to load access-restricted illust.'
+        '[Fix] Fix fail to load access-restricted illust.',
+        '[Fix] Fix broken tag list with no tags.'
       ],
       ja: [
         '[\u4fee\u6b63] \u30de\u30f3\u30ac\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5d29\u308c\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002',
-        '[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u304c\u5236\u9650\u3055\u308c\u305f\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002'
+        '[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u304c\u5236\u9650\u3055\u308c\u305f\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u306b\u30bf\u30b0\u304c\u767b\u9332\u3055\u308c\u3066\u3044\u306a\u3044\u6642\u306b\u8868\u793a\u304c\u58ca\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
       ]
     }
 

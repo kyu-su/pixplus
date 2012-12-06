@@ -5,9 +5,9 @@ CHROME                  = $(shell ./find_chrome.sh)
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
 SAFARIEXTZ              = pixplus.safariextz
-OEX_TMP_DIR             = .oex
-CRX_TMP_DIR             = .crx
-SAFARIEXTZ_TMP_DIR      = .safariextz
+OEX_TMP_DIR             = $(CURDIR)/.oex
+CRX_TMP_DIR             = $(CURDIR)/.crx
+SAFARIEXTZ_TMP_DIR      = $(CURDIR)/.safariextz
 
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null 2>&1 && echo yes || echo no)
@@ -32,14 +32,14 @@ DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e
 WEBSITE                 = http://crckyl.pa.land.to/pixplus/
 WEBSITE_SED             = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
-OPERA_ROOT              = opera
+OPERA_ROOT              = $(CURDIR)/opera
 OPERA_CONFIG_XML        = $(OPERA_ROOT)/config.xml
 OPERA_ICON_DIR          = icons
 OPERA_ICON_FILES        = $(ICON_SIZE:%=$(OPERA_ROOT)/$(OPERA_ICON_DIR)/%.png)
 OPERA_DIST_FILES        = $(OPERA_CONFIG_XML) $(OPERA_ICON_FILES) \
                           $(DIST_FILES:%=$(OPERA_ROOT)/%) $(OPERA_ROOT)/includes/$(SRC_USERJS)
 
-CHROME_ROOT             = chrome
+CHROME_ROOT             = $(CURDIR)/chrome
 CHROME_SIGN_KEY         = $(CHROME_ROOT)/sign/$(CRX:.crx=.crx.pem)
 CHROME_MANIFEST_JSON    = $(CHROME_ROOT)/manifest.json
 CHROME_ICON_DIR         = icons
@@ -47,7 +47,7 @@ CHROME_ICON_FILES       = $(ICON_SIZE:%=$(CHROME_ROOT)/$(CHROME_ICON_DIR)/%.png)
 CHROME_DIST_FILES       = $(CHROME_MANIFEST_JSON) $(CHROME_ICON_FILES) \
                           $(DIST_FILES:%=$(CHROME_ROOT)/%) $(CHROME_ROOT)/$(SRC_USERJS)
 
-SAFARI_ROOT             = safari/pixplus.safariextension
+SAFARI_ROOT             = $(CURDIR)/safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
 SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
@@ -234,10 +234,10 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
      done
 	@cd $(SAFARIEXTZ_TMP_DIR) && \
        $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) >/dev/null && \
-       : | openssl dgst -sign ../$(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
-       $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc ../%) >/dev/null && \
+       : | openssl dgst -sign $(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
+       $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc %) >/dev/null && \
        (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
-         openssl rsautl -sign -inkey ../$(SAFARI_SIGN_KEY) > signature.dat && \
+         openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) > signature.dat && \
        $(XAR) --inject-sig signature.dat -f ../$@ >/dev/null
 	@chmod 644 $@
 
