@@ -1205,7 +1205,7 @@
       });
 
       var escaper = _.e('div', {id: 'pp-config-escaper'}, root), escaper_e;
-      _.e('input', null, escaper).addEventListener('input', function(ev) {
+      _.listen(_.e('input', null, escaper), 'input', function(ev) {
         escaper_e.value = ev.target.value.split('').map(function(c) {
           var b = c.charCodeAt(0);
 
@@ -1219,7 +1219,7 @@
           }
           return '\\u' + c;
         }).join('');
-      }, false);
+      });
       escaper_e = _.e('input', null, escaper);
 
       var input_line = _.e('div', null, root);
@@ -1715,8 +1715,10 @@
         _.log('root of illust list not specified');
         return;
       }
+
       _.illust.root = root;
       _.illust.update();
+
       _.listen(_.illust.root, 'DOMNodeInserted', _.illust.update, true);
     },
 
