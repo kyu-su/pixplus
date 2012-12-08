@@ -1753,7 +1753,9 @@
 
       illust.title    = _.fastxml.text(_.fastxml.q(work_info, '.title'));
       illust.caption  = _.fastxml.src(_.fastxml.q(work_info, '.caption'));
-      illust.taglist  = _.fastxml.src(_.fastxml.q(root, '.work-tags .tags-container'));
+      illust.taglist  =
+        _.fastxml.src(_.fastxml.q(root, '#template-work-tags'), true) +
+        _.fastxml.src(_.fastxml.q(root, '.work-tags .tags-container'));
       illust.rating   = _.fastxml.src(score);
       illust.question = _.fastxml.src(question, true);
 
@@ -2152,7 +2154,7 @@
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
       dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history'}, dom.comment);
-      dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
+      dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
       dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
@@ -3083,7 +3085,7 @@
       }
       _.clear(_.popup.dom.tagedit_wrapper);
 
-      var c = _.e('div', {id: 'tag_edit'}, _.popup.dom.tagedit_wrapper);
+      var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
       c.innerHTML = html;
 
       var table = c.querySelector('table');
@@ -4186,6 +4188,7 @@
     '#pp-popup-comment{display:none;border-left:3px solid #ccc;margin-left:0.6em;padding-left:0.3em}',
     '#pp-popup.pp-comment-mode #pp-popup-comment{display:block}',
     '#pp-popup-comment-form input{width:80%}',
+    '#pp-popup-taglist{margin:0px;padding:0px}',
     '#pp-popup-taglist ul{display:inline}',
     '#pp-popup-taglist li{display:inline;margin-right:0.6em}',
     '#pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}',
@@ -4233,7 +4236,7 @@
     '#pp-popup.pp-tagedit-mode #pp-popup-image-wrapper{display:none}',
     '#pp-popup.pp-tagedit-mode .pp-popup-olc{display:none}',
     '#pp-popup.pp-tagedit-mode #pp-popup-tagedit-wrapper{display:block}',
-    '#pp-popup-tagedit-wrapper #tag_edit>div{margin:0px !important}',
+    '#pp-popup-tagedit-wrapper #tag-editor>div{margin:0px !important}',
     '#pp-popup-tagedit-table-wrapper{overflow:auto}',
 
     // config ui
