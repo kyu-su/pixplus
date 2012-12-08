@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.2.2
+// @version     1.2.3
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -4544,6 +4544,16 @@
   };
 
   _.changelog = [{
+    date: '2012/12/xx', version: '1.2.3', changes_i18n: {
+      en: [
+        '[Fix] Fix tag edit mode is not working.',
+        '[Change] Improve bookmark mode layout.'
+      ],
+      ja: [
+      ]
+    }
+
+  }, {
     date: '2012/12/06', version: '1.2.2', changes_i18n: {
       en: [
         '[Fix] Fix manga layout is broken.',
