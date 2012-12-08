@@ -1785,6 +1785,18 @@
       }
       illust.author_staccfeed = staccfeed_link ? staccfeed_link.attrs.href : null;
 
+      if (!illust.author_id) {
+        if ((re = /(?:pixiv\.user\.id|pixiv\.context\.userId)\s*=\s*([\'\"])(\d+)\1;/.exec(html))) {
+          illust.author_id = g.parseInt(re[2]);
+        }
+      }
+
+      try {
+        if (illust.author_id == w.pixiv.user.id) {
+          illust.author_name  = '[Me]';
+        }
+      } catch(ex) { }
+
       var meta = _.fastxml.qa(work_info, '.meta li'),
           meta2 = _.fastxml.text(meta[1]);
 
@@ -2866,7 +2878,7 @@
     reload: function() {
       var illust = _.popup.illust;
       if (!illust.author_id) {
-        _.popup.comment.onerror('Author id not specified');
+        _.popup.comment.onerror(illust, 'Author id not specified');
         return;
       }
 
@@ -2979,7 +2991,7 @@
     reload: function() {
       var illust = _.popup.illust;
       if (!illust.author_id) {
-        _.popup.tagedit.onerror('Author id not specified');
+        _.popup.tagedit.onerror(illust, 'Author id not specified');
         return;
       }
 
@@ -2992,8 +3004,11 @@
 	}, {
 	  ajaxSettings: {dataType: 'text'}
 	}).done(function(data) {
+          if (_.conf.general.debug) {
+            _.log(data);
+          }
           try {
-            _.popup.tagedit.onload(illust, g.JSON.parse(data).html.join(''));
+            _.popup.tagedit.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
             _.popup.tagedit.onerror(illust, g.String(ex));
           }  
