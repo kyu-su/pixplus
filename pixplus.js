@@ -1204,13 +1204,31 @@
         });
       });
 
+      var escaper = _.e('div', {id: 'pp-config-escaper'}, root), escaper_e;
+      _.e('input', null, escaper).addEventListener('input', function(ev) {
+        escaper_e.value = ev.target.value.split('').map(function(c) {
+          var b = c.charCodeAt(0);
+
+          if (b >= 0x20 && b <= 0x7e) {
+            return c;
+          }
+
+          c = b.toString(16);
+          while(c.length < 4) {
+            c = '0' + c;
+          }
+          return '\\u' + c;
+        }).join('');
+      }, false);
+      escaper_e = _.e('input', null, escaper);
+
       var input_line = _.e('div', null, root);
       var input      = _.e('input', null, input_line);
       var cancel_l   = _.e('label', null, input_line);
       var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
       var console_l  = _.e('label', null, input_line);
       var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
-      var logger     = _.e('table', {border: 1, css: 'margin-top:4px;'}, root);
+      var logger     = _.e('table', {css: 'margin-top:4px;border:1px solid #aaa'}, root);
 
       cancel_l.appendChild(d.createTextNode('Cancel'));
       console_l.appendChild(d.createTextNode('Console'));
@@ -4249,6 +4267,9 @@
     'box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}',
     '#pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}',
     '#pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}',
+    '#pp-config-escaper{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}',
+    '#pp-config-escaper input{display:block;width:100%;box-sizing:border-box}',
+    '#pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}',
     '.pp-config-bitfield-list{position:absolute;border:1px solid #888;background-color:#fff}',
     '.pp-config-bitfield-list li{padding:0.2em 0.4em;cursor:pointer}',
     '.pp-config-bitfield-list li.pp-active{background-color:#ddf;font-weight:bold}',
