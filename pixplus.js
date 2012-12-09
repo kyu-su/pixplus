@@ -1808,7 +1808,7 @@
       illust.author_staccfeed = staccfeed_link ? staccfeed_link.attrs.href : null;
 
       if (!illust.author_id) {
-        if ((re = /(?:pixiv\.user\.id|pixiv\.context\.userId)\s*=\s*([\'\"])(\d+)\1;/.exec(html))) {
+        if ((re = /pixiv\.context\.userId\s*=\s*([\'\"])(\d+)\1;/.exec(html))) {
           illust.author_id = g.parseInt(re[2]);
         }
       }
@@ -2416,17 +2416,10 @@
 
       dom.rating.innerHTML = illust.rating + illust.question;
 
-      if (_.conf.popup.remove_pixpedia) {
-        _.qa('a[href^="http://dic.pixiv.net/"]', dom.taglist).forEach(function(icon) {
-          icon.parentNode.removeChild(icon);
-        });
-      }
-
-      if (_.conf.popup.remove_pixiv_comic) {
-        _.qa('a[href^="http://comic.pixiv.net/"]', dom.taglist).forEach(function(icon) {
-          icon.parentNode.removeChild(icon);
-        });
-      }
+      ['pixpedia', 'pixiv_comic'].forEach(function(name) {
+        var f = _.conf.popup['remove_' + name];
+        dom.taglist.classList[f ? 'add' : 'remove']('pp-no-' + name.replace('_', '-'));
+      });
 
       if (_.conf.popup.author_status_icon) {
         [
@@ -4194,6 +4187,8 @@
     '#pp-popup-taglist ul{display:inline}',
     '#pp-popup-taglist li{display:inline;margin-right:0.6em}',
     '#pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}',
+    '#pp-popup-taglist.pp-no-pixpedia a[href^="http://dic.pixiv.net/"]{display:none}',
+    '#pp-popup-taglist.pp-no-pixiv-comic a[href^="http://comic.pixiv.net/"]{display:none}',
     '#pp-popup-rating *{margin:0px;padding:0px}',
     '#pp-popup-rating .score dl{display:inline}',
     '#pp-popup-rating .score dt{display:inline;margin-right:0.2em}',
