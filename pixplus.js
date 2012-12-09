@@ -3532,15 +3532,22 @@
   };
 
   _.bookmarkform = {
-    select_tag: function(tag, last_selected) {
-      if (last_selected) {
-        last_selected.classList.remove('pp-tag-select');
+    sel: {
+      tag:  null,
+      rect: null
+    },
+
+    select_tag: function(tag, rect) {
+      var sel = _.bookmarkform.sel;
+      if (sel.tag) {
+        sel.tag.classList.remove('pp-tag-select');
       }
       if (tag) {
         tag.classList.add('pp-tag-select');
         _.lazy_scroll(tag);
       }
-      return tag;
+      sel.tag  = tag;
+      sel.rect = tag ? (rect || tag.getClientRects()[0]) : null;
     },
 
     setup_autoinput: function(form) {
@@ -3579,18 +3586,43 @@
       });
     },
 
+    find_nearest_tag: function(tags, rect, down) {
+      var x = (rect.left + rect.right) / 2,
+          t = rect.top, b = rect.bottom,
+          rects;
+
+      rects = tags.reduce(function(rects, tag) {
+        return rects.concat(g.Array.prototype.map.call(tag.getClientRects(), function(r) {
+          var y = down ? r.top - b : t - r.bottom;
+          return [tag, r, (y < 0
+                           ? g.Infinity
+                           : g.Math.max(x - r.right, r.left - x) + y * 10000)];
+        }));
+      }, []);
+
+      rects.sort(function(a, b) {
+        return a[2] - b[2];
+      });
+
+      return rects[0];
+    },
+
     setup_key: function(form) {
-      var tags = _.qa('a.tag', form), selected_tag;
-      var input_tag = _.q('input#input_tag', form);
+      var tags = _.qa('a.tag', form),
+          initial_select_tag = _.q('#myBookmarkTags a.tag', form) || tags[0],
+          input_tag = _.q('input#input_tag', form);
+
       if (!input_tag) {
         return;
       }
 
       input_tag.focus();
       _.key.listen(input_tag, function(key, ev) {
-        if (!selected_tag) {
+        var sel = _.bookmarkform.sel;
+
+        if (!sel.tag) {
           if (key === _.key.DOWN) {
-            selected_tag = _.bookmarkform.select_tag(tags[0], selected_tag);
+            _.bookmarkform.select_tag(initial_select_tag);
             return true;
           } else if (key === _.key.ESCAPE) {
             input_tag.blur();
@@ -3600,46 +3632,20 @@
         }
 
         if (key === _.key.SPACE) {
-          _.send_click(selected_tag);
+          _.send_click(sel.tag);
           return true;
         } else if (key === _.key.ESCAPE) {
-          selected_tag = _.bookmarkform.select_tag(null, selected_tag);
+          _.bookmarkform.select_tag(null);
           return true;
         }
 
         if (key === _.key.DOWN || key === _.key.UP) {
-          var rect = _.as_array(selected_tag.getClientRects()).reduce(function(a, b) {
-            return a.width > b.width ? a : b;
-          });
-          var x = (rect.left + rect.right) / 2, t = rect.top, b = rect.bottom;
-          var yscore = function(rect) {
-            return key === _.key.DOWN ? rect.top - b : t - rect.bottom;
-          };
-          var score = function(node) {
-            if (node === selected_tag) {
-              return g.Infinity;
-            }
-            return g.Math.min.apply(
-              g.Math,
-              _.as_array(node.getClientRects()).map(function(rect) {
-                var y = yscore(rect);
-                return (y < 0
-                        ? g.Infinity
-                        : g.Math.max(x - rect.right, rect.left - x) + y * 10000);
-              })
-            );
-          };
-          selected_tag = _.bookmarkform.select_tag(tags.map(function(node) {
-            var s = score(node);
-            //_.log('tag=%s score=%s', node.getAttribute('data-tag'), s);
-            return [s, node];
-          }).sort(function(a, b) {
-            return a[0] - b[0];
-          })[0][1], selected_tag);
+          var p = _.bookmarkform.find_nearest_tag(tags, sel.rect, key === _.key.DOWN);
+          _.bookmarkform.select_tag(p[0], p[1]);
           return true;
         }
 
-        var idx = tags.indexOf(selected_tag);
+        var idx = tags.indexOf(sel.tag);
         if (key === _.key.LEFT) {
           idx = idx <= 0 ? tags.length - 1 : idx - 1;
         } else if (key === _.key.RIGHT) {
@@ -3648,7 +3654,7 @@
           return false;
         }
 
-        selected_tag = _.bookmarkform.select_tag(tags[idx], selected_tag);
+        _.bookmarkform.select_tag(tags[idx]);
         return true;
       });
     },
