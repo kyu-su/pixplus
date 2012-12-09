@@ -546,38 +546,40 @@
       elem.dispatchEvent(ev);
     },
 
-    lazy_scroll: function (elem, offset, root, scroll) {
-      if (!elem) {
+    lazy_scroll: function (target, offset, root, scroll) {
+      if (!target) {
         return;
       }
       offset = g.parseFloat(typeof(offset) === 'undefined' ? 0.2 : offset);
 
-      // if (!root || !scroll) {
-      //   var p = elem.parentNode;
-      //   while(p && p !== d.body && p !== d.documentElement) {
-      //     if (p.scrollHeight > p.offsetHeight) {
-      //       root = scroll = p;
-      //       break;
-      //     }
-      //     p = p.parentNode;
-      //   }
-      // }
+      if (!root || !scroll) {
+        var p = target.parentNode;
+        while(p && p !== d.body && p !== d.documentElement) {
+          if (p.scrollHeight > p.offsetHeight) {
+            root = scroll = p;
+            break;
+          }
+          p = p.parentNode;
+        }
+      }
 
       if (!root) {
         root = d.compatMode === 'BackCompat' ? d.body : d.documentElement;
       }
+
       if (!scroll) {
-        _.lazy_scroll(elem, offset, root, d.body);
+        _.lazy_scroll(target, offset, root, d.body);
         scroll = d.documentElement;
       }
 
-      var rect = elem.getBoundingClientRect();
-      var bt = g.Math.floor(root.clientHeight * offset),
-          bb = g.Math.floor(root.clientHeight * (1.0 - offset));
-      if (rect.top < bt) {
-        scroll.scrollTop -= bt - rect.top;
-      } else if (rect.bottom > bb) {
-        scroll.scrollTop += rect.bottom - bb;
+      var r_root   = root.getBoundingClientRect(),
+          r_target = target.getBoundingClientRect(),
+          bt       = g.Math.floor(g.Math.max(0, r_root.top) + root.clientHeight * offset),
+          bb       = g.Math.floor(g.Math.max(0, r_root.top) + root.clientHeight * (1.0 - offset));
+      if (r_target.top < bt) {
+        scroll.scrollTop -= bt - r_target.top;
+      } else if (r_target.bottom > bb) {
+        scroll.scrollTop += r_target.bottom - bb;
       }
     },
 
@@ -3536,6 +3538,7 @@
       }
       if (tag) {
         tag.classList.add('pp-tag-select');
+        _.lazy_scroll(tag);
       }
       return tag;
     },
