@@ -2255,8 +2255,8 @@
         c = dom.image_wrapper;
       }
       return [
-        g.Math.max(480, de.clientWidth  - 20 - (root.offsetWidth  - c.clientWidth)),
-        g.Math.max(320, de.clientHeight - 20 - (root.offsetHeight - c.clientHeight))
+        de.clientWidth  - 20 - (root.offsetWidth  - c.clientWidth),
+        de.clientHeight - 20 - (root.offsetHeight - c.clientHeight)
       ];
     },
 
