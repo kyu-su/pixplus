@@ -3532,11 +3532,6 @@
   };
 
   _.bookmarkform = {
-    sel: {
-      tag:  null,
-      rect: null
-    },
-
     select_tag: function(tag, rect) {
       var sel = _.bookmarkform.sel;
       if (sel.tag) {
@@ -3586,17 +3581,49 @@
       });
     },
 
-    find_nearest_tag: function(tags, rect, down) {
-      var x = (rect.left + rect.right) / 2,
-          t = rect.top, b = rect.bottom,
-          rects;
+    find_nearest_tag: function(key) {
+      var dom = _.bookmarkform.dom,
+          sel = _.bookmarkform.sel,
+          x = (sel.rect.left + sel.rect.right) / 2,
+          t = sel.rect.top, b = sel.rect.bottom,
+          right, down, rects;
 
-      rects = tags.reduce(function(rects, tag) {
+      right = key === _.key.RIGHT;
+      if (right || key === _.key.LEFT) {
+        var idx = dom.tags.indexOf(sel.tag);
+        if (right) {
+          ++idx;
+        } else {
+          --idx;
+        }
+        if (idx < 0) {
+          idx += dom.tags.length;
+        } else if (idx >= dom.tags.length) {
+          idx -= dom.tags.length;
+        }
+        return [dom.tags[idx]];
+      }
+
+      down = key === _.key.DOWN;
+      if (!down && key !== _.key.UP) {
+        return null;
+      }
+
+      rects = dom.tags.reduce(function(rects, tag) {
+        if (tag === sel.tag) {
+          return rects;
+        }
         return rects.concat(g.Array.prototype.map.call(tag.getClientRects(), function(r) {
-          var y = down ? r.top - b : t - r.bottom;
-          return [tag, r, (y < 0
-                           ? g.Infinity
-                           : g.Math.max(x - r.right, r.left - x) + y * 10000)];
+          var sy, sx;
+
+          sx = g.Math.max(r.left - x, x - r.right);
+          sy = down ? r.top - b : t - r.bottom;
+          if (sy < 0) {
+            sy += 100000000;
+          }
+          sy *= 10000;
+
+          return [tag, r, sx + sy];
         }));
       }, []);
 
@@ -3607,62 +3634,57 @@
       return rects[0];
     },
 
-    setup_key: function(form) {
-      var tags = _.qa('a.tag', form),
-          initial_select_tag = _.q('#myBookmarkTags a.tag', form) || tags[0],
-          input_tag = _.q('input#input_tag', form);
+    onkey: function(key, ev) {
+      var dom = _.bookmarkform.dom,
+          sel = _.bookmarkform.sel;
 
-      if (!input_tag) {
-        return;
-      }
-
-      input_tag.focus();
-      _.key.listen(input_tag, function(key, ev) {
-        var sel = _.bookmarkform.sel;
-
-        if (!sel.tag) {
-          if (key === _.key.DOWN) {
-            _.bookmarkform.select_tag(initial_select_tag);
-            return true;
-          } else if (key === _.key.ESCAPE) {
-            input_tag.blur();
-            return true;
-          }
-          return false;
-        }
-
-        if (key === _.key.SPACE) {
-          _.send_click(sel.tag);
+      if (!sel.tag) {
+        if (key === _.key.DOWN) {
+          _.bookmarkform.select_tag(dom.first_tag || dom.tags[0]);
           return true;
         } else if (key === _.key.ESCAPE) {
-          _.bookmarkform.select_tag(null);
+          dom.input_tag.blur();
           return true;
         }
+        return false;
+      }
 
-        if (key === _.key.DOWN || key === _.key.UP) {
-          var p = _.bookmarkform.find_nearest_tag(tags, sel.rect, key === _.key.DOWN);
-          _.bookmarkform.select_tag(p[0], p[1]);
-          return true;
-        }
-
-        var idx = tags.indexOf(sel.tag);
-        if (key === _.key.LEFT) {
-          idx = idx <= 0 ? tags.length - 1 : idx - 1;
-        } else if (key === _.key.RIGHT) {
-          idx = idx < 0 ? 0 : (idx >= tags.length - 1 ? 0 : idx + 1);
-        } else {
-          return false;
-        }
-
-        _.bookmarkform.select_tag(tags[idx]);
+      if (key === _.key.SPACE) {
+        _.send_click(sel.tag);
         return true;
-      });
+      } else if (key === _.key.ESCAPE) {
+        _.bookmarkform.select_tag(null);
+        return true;
+      }
+
+      var p = _.bookmarkform.find_nearest_tag(key);
+      if (!p) {
+        return false;
+      }
+      _.bookmarkform.select_tag(p[0], p[1]);
+      return true;
+    },
+
+    setup_key: function(form) {
+      var dom = _.bookmarkform.dom = {
+        tags: _.qa('a.tag', form),
+        input_tag: _.q('input#input_tag', form),
+        first_tag: _.q('#myBookmarkTags a.tag', form)
+      };
+
+      dom.input_tag.focus();
+      _.key.listen(dom.input_tag, _.bookmarkform.onkey);
     },
 
     setup: function(form, autoinput, cb_submit) {
       if (!form) {
         return;
       }
+
+      _.bookmarkform.sel = {
+        tag:  null,
+        rect: null
+      };
 
       form.setAttribute('action', '/bookmark_add.php');
 
