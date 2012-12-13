@@ -2271,13 +2271,6 @@
       root.style.left = '0px';
       root.style.top  = '0px';
 
-      dom.image_layout.style.marginLeft = '0px';
-      dom.image_layout.style.marginTop = '0px';
-      dom.image_layout.style.marginLeft
-        = g.Math.floor((dom.image_wrapper.clientWidth - dom.image_layout.offsetWidth) / 2) + 'px';
-      dom.image_layout.style.marginTop
-        = g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
-
       if (_.popup.bookmark.enable) {
         _.popup.bookmark.adjust(max_size[0], max_size[1]);
 
@@ -2286,6 +2279,13 @@
 
       } else {
         _.popup.layout_images(max_size[0], max_size[1]);
+
+        dom.image_layout.style.marginLeft = '0px';
+        dom.image_layout.style.marginTop = '0px';
+        dom.image_layout.style.marginLeft
+          = g.Math.floor((dom.image_wrapper.clientWidth - dom.image_layout.offsetWidth) / 2) + 'px';
+        dom.image_layout.style.marginTop
+          = g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
 
         var base_width = dom.image_wrapper.offsetWidth;
         dom.header.style.width = base_width + 'px';
