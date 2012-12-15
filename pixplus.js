@@ -546,7 +546,7 @@
       elem.dispatchEvent(ev);
     },
 
-    lazy_scroll: function (target, offset, root, scroll) {
+    lazy_scroll: function (target, root, scroll, offset) {
       if (!target) {
         return;
       }
@@ -568,7 +568,7 @@
       }
 
       if (!scroll) {
-        _.lazy_scroll(target, offset, root, d.body);
+        _.lazy_scroll(target, root, d.body, offset);
         scroll = d.documentElement;
       }
 
@@ -3549,19 +3549,20 @@
         sel.tag.classList.remove('pp-tag-select');
       }
       if (gidx >= 0) {
+        var group = dom.tag_groups[gidx][0];
+
         sel.gidx = gidx;
         sel.idx = idx;
         sel.tag = dom.tag_groups[gidx][1][idx];
         sel.rect = rect;
 
         if (!rect) {
-          var group = dom.tag_groups[gidx][0];
           sel.rect = _.bookmarkform.calc_tag_rect(group, sel.tag.getClientRects()[0]);
         }
         g.console.log(sel.rect);
 
         sel.tag.classList.add('pp-tag-select');
-        _.lazy_scroll(sel.tag);
+        _.lazy_scroll(sel.tag, group, group);
       } else {
         sel.tag  = null;
         sel.rect = null;
