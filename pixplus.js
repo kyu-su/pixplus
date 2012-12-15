@@ -900,7 +900,7 @@
           }
           return true;
         });
-        menu.insertBefore(btn, menu.firstChild);
+        menu.insertBefore(btn.parentNode, menu.firstChild);
       }
     },
 
@@ -3532,17 +3532,40 @@
   };
 
   _.bookmarkform = {
-    select_tag: function(tag, rect) {
-      var sel = _.bookmarkform.sel;
+    calc_tag_rect: function(group, rect, grect) {
+      if (!grect) {
+        grect = group.getBoundingClientRect();
+      }
+      return {top:    rect.top    - grect.top  + group.scrollTop,
+              bottom: rect.bottom - grect.top  + group.scrollTop,
+              left:   rect.left   - grect.left + group.scrollLeft,
+              right:  rect.right  - grect.left + group.scrollLeft};
+    },
+
+    select_tag: function(gidx, idx, rect) {
+      var dom = _.bookmarkform.dom,
+          sel = _.bookmarkform.sel;
       if (sel.tag) {
         sel.tag.classList.remove('pp-tag-select');
       }
-      if (tag) {
-        tag.classList.add('pp-tag-select');
-        _.lazy_scroll(tag);
+      if (gidx >= 0) {
+        sel.gidx = gidx;
+        sel.idx = idx;
+        sel.tag = dom.tag_groups[gidx][1][idx];
+        sel.rect = rect;
+
+        if (!rect) {
+          var group = dom.tag_groups[gidx][0];
+          sel.rect = _.bookmarkform.calc_tag_rect(group, sel.tag.getClientRects()[0]);
+        }
+        g.console.log(sel.rect);
+
+        sel.tag.classList.add('pp-tag-select');
+        _.lazy_scroll(sel.tag);
+      } else {
+        sel.tag  = null;
+        sel.rect = null;
       }
-      sel.tag  = tag;
-      sel.rect = tag ? (rect || tag.getClientRects()[0]) : null;
     },
 
     setup_autoinput: function(form) {
@@ -3581,57 +3604,108 @@
       });
     },
 
-    find_nearest_tag: function(key) {
+    select_nearest_tag: function(key) {
       var dom = _.bookmarkform.dom,
-          sel = _.bookmarkform.sel,
-          x = (sel.rect.left + sel.rect.right) / 2,
-          t = sel.rect.top, b = sel.rect.bottom,
-          right, down, rects;
+          sel = _.bookmarkform.sel;
 
-      right = key === _.key.RIGHT;
-      if (right || key === _.key.LEFT) {
-        var idx = dom.tags.indexOf(sel.tag);
-        if (right) {
+      var gidx = sel.gidx, idx = sel.idx;
+      if (key === _.key.RIGHT) {
+        if (idx >= dom.tag_groups[sel.gidx][1].length - 1) {
+          if (gidx >= dom.tag_groups.length - 1) {
+            gidx = 0;
+          } else {
+            ++gidx;
+          }
+          idx = 0;
+        } else {
           ++idx;
+        }
+        _.bookmarkform.select_tag(gidx, idx);
+        return;
+      } else if (key === _.key.LEFT) {
+        if (idx <= 0) {
+          if (gidx <= 0) {
+            gidx = dom.tag_groups.length - 1;
+          } else {
+            --gidx;
+          }
+          idx = dom.tag_groups[sel.gidx][1].length - 1;
         } else {
           --idx;
         }
-        if (idx < 0) {
-          idx += dom.tags.length;
-        } else if (idx >= dom.tags.length) {
-          idx -= dom.tags.length;
-        }
-        return [dom.tags[idx]];
+        _.bookmarkform.select_tag(gidx, idx);
+        return;
       }
 
-      down = key === _.key.DOWN;
+      var down = key === _.key.DOWN;
       if (!down && key !== _.key.UP) {
-        return null;
+        return;
       }
 
-      rects = dom.tags.reduce(function(rects, tag) {
-        if (tag === sel.tag) {
-          return rects;
-        }
-        return rects.concat(g.Array.prototype.map.call(tag.getClientRects(), function(r) {
-          var sy, sx;
+      var x = (sel.rect.left + sel.rect.right) / 2,
+          t_top = {}, t_near = {}, t_bottom = {};
 
-          sx = g.Math.max(r.left - x, x - r.right);
-          sy = down ? r.top - b : t - r.bottom;
-          if (sy < 0) {
-            sy += 100000000;
+      var set = function(d, gidx, idx, rect, distance) {
+        d.set      = true;
+        d.gidx     = gidx;
+        d.idx      = idx;
+        d.rect     = rect;
+        d.distance = distance;
+      };
+
+      dom.tag_groups.forEach(function(p, gidx) {
+        var group = p[0], tags = p[1], grect;
+        grect = group.getBoundingClientRect();
+
+        tags.forEach(function(tag, idx) {
+          if (tag === sel.tag) {
+            return;
           }
-          sy *= 10000;
 
-          return [tag, r, sx + sy];
-        }));
-      }, []);
+          g.Array.prototype.map.call(tag.getClientRects(), function(r) {
+            var rect, distance;
+            rect = _.bookmarkform.calc_tag_rect(group, r, grect);
+            distance = g.Math.max(rect.left - x, x - rect.right);
 
-      rects.sort(function(a, b) {
-        return a[2] - b[2];
+            if (!t_top.set || gidx < t_top.gidx
+                || (gidx === t_top.gidx
+                    && (rect.bottom < t_top.rect.top
+                        || (rect.top < t_top.rect.bottom && distance < t_top.distance)))) {
+              set(t_top, gidx, idx, rect, distance);
+            }
+
+            if (!t_bottom.set || gidx > t_bottom.gidx
+                || (gidx === t_bottom.gidx
+                    && (rect.top > t_bottom.rect.bottom
+                        || (rect.bottom > t_bottom.rect.top && distance < t_bottom.distance)))) {
+              set(t_bottom, gidx, idx, rect, distance);
+            }
+
+            if (down) {
+              if ((gidx > sel.gidx || (gidx === sel.gidx && rect.top > sel.rect.bottom))
+                  && (!t_near.set || gidx < t_near.gidx
+                      || (gidx === t_near.gidx
+                          && (rect.bottom < t_near.rect.top
+                              || (rect.top < t_near.rect.bottom && distance < t_near.distance))))) {
+                set(t_near, gidx, idx, rect, distance);
+              }
+            } else {
+              if ((gidx < sel.gidx || (gidx === sel.gidx && rect.bottom < sel.rect.top))
+                  && (!t_near.set || gidx > t_near.gidx
+                      || (gidx === t_near.gidx
+                          && (rect.top > t_near.rect.bottom
+                              || (rect.bottom > t_near.rect.top && distance < t_near.distance))))) {
+                set(t_near, gidx, idx, rect, distance);
+              }
+            }
+          });
+        });
       });
 
-      return rects[0];
+      if (!t_near.set) {
+        t_near = down ? t_top : t_bottom;
+      }
+      _.bookmarkform.select_tag(t_near.gidx, t_near.idx, t_near.rect);
     },
 
     onkey: function(key, ev) {
@@ -3640,7 +3714,7 @@
 
       if (!sel.tag) {
         if (key === _.key.DOWN) {
-          _.bookmarkform.select_tag(dom.first_tag || dom.tags[0]);
+          _.bookmarkform.select_tag(dom.tag_groups.length - 1, 0);
           return true;
         } else if (key === _.key.ESCAPE) {
           dom.input_tag.blur();
@@ -3653,24 +3727,28 @@
         _.send_click(sel.tag);
         return true;
       } else if (key === _.key.ESCAPE) {
-        _.bookmarkform.select_tag(null);
+        _.bookmarkform.select_tag(-1);
         return true;
       }
 
-      var p = _.bookmarkform.find_nearest_tag(key);
-      if (!p) {
-        return false;
-      }
-      _.bookmarkform.select_tag(p[0], p[1]);
+      _.bookmarkform.select_nearest_tag(key);
       return true;
     },
 
     setup_key: function(form) {
       var dom = _.bookmarkform.dom = {
-        tags: _.qa('a.tag', form),
-        input_tag: _.q('input#input_tag', form),
-        first_tag: _.q('#myBookmarkTags a.tag', form)
+        tags: [],
+        tag_groups: [],
+        input_tag: _.q('input#input_tag', form)
       };
+
+      _.qa('.bookmark_recommend_tag', form).forEach(function(g) {
+        var tags = _.qa('a.tag', g);
+        if (tags.length) {
+          dom.tags = dom.tags.concat(tags);
+          dom.tag_groups.push([g, tags]);
+        }
+      });
 
       dom.input_tag.focus();
       _.key.listen(dom.input_tag, _.bookmarkform.onkey);
@@ -4065,7 +4143,7 @@
     _.key.init();
 
     _.e('style', {text: _.css}, d.body);
-    _.configui.init(_.q('#global-header'), _.q('#global-header nav.site-menu ul'), _extension_data);
+    _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
 
     if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
       w.location.href = g.decodeURIComponent(w.location.search.substring(1));
@@ -4271,7 +4349,7 @@
     // config ui
     '#pp-config{display:none;line-height:1.1em}',
     '#pp-config ul{list-style-type:none}',
-    '#global-header #pp-config{margin:0px auto 4px;width:970px}',
+    'header #pp-config{margin:0px auto 4px;width:970px}',
     '#pp-config.pp-show{display:block}',
     '#pp-config-tabbar{margin-bottom:-1px}',
     '#pp-config-tabbar label{cursor:pointer}',
@@ -4280,7 +4358,7 @@
     '#pp-config-tabbar .pp-config-tab.pp-active{',
     'margin:0px;border:solid #aaa;border-width:1px 1px 0px 1px;background-color:#fff}',
     '#pp-config-content-wrapper{border:1px solid #aaa;background-color:#fff;padding:0.2em}',
-    '#global-header #pp-config-content-wrapper{height:600px;overflow-y:auto}',
+    'header #pp-config-content-wrapper{height:600px;overflow-y:auto}',
     '.pp-config-content{display:none}',
     '.pp-config-content.pp-active{display:block}',
     '.pp-config-content dt{font-weight:bold}',
@@ -4702,15 +4780,17 @@
     date: '2012/12/xx', version: '1.3.0', changes_i18n: {
       en: [
         '[Add] Add option to remove pixiv comic icon.',
-        '[Fix] Fix tag edit mode is not working.',
         '[Change] Improve bookmark mode layout.',
-        '[Change] Improve tag edit mode layout.'
+        '[Change] Improve tag edit mode layout.',
+        '[Fix] Fix tag edit mode is not working.',
+        '[Fix] Can not open preferences in UserJS/Greasemonkey version.'
       ],
       ja: [
         '[\u8ffd\u52a0] pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002',
-        '[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
         '[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002',
-        '[\u5909\u66f4] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002'
+        '[\u5909\u66f4] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002',
+        '[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
+        '[\u4fee\u6b63] UserJS/Greasemonkey\u7248\u3067\u8a2d\u5b9a\u753b\u9762\u3092\u958b\u3051\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
       ]
     }
 
