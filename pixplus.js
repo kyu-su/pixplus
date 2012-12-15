@@ -2709,10 +2709,12 @@
           _.popup.set_status('');
           _.popup.adjust();
         } else {
+          _.popup.bookmark.enable = false;
           _.popup.set_status('Error');
         }
       }, function() {
         if (illust === _.popup.illust && _.popup.bookmark.enable) {
+          _.popup.bookmark.enable = false;
           _.popup.set_status('Error');
         }
       });
@@ -3099,6 +3101,9 @@
     onerror: function(illust, message) {
       if (illust !== _.popup.illust || !_.popup.tagedit.enable) {
         return;
+      }
+      if (!_.popup.dom.root.classList.contains('pp-tagedit-mode')) {
+        _.popup.tagedit.enable = false;
       }
       _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
     },
