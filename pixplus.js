@@ -2628,7 +2628,7 @@
     adjust: function(w, h) {
       var dom  = _.popup.dom,
           wrap = dom.bookmark_wrapper,
-          min  = 80;
+          min  = 40;
 
       if (_.conf.general.debug) {
         _.log('Max height: ' + h);
