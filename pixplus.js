@@ -3629,7 +3629,7 @@
           } else {
             --gidx;
           }
-          idx = dom.tag_groups[sel.gidx][1].length - 1;
+          idx = dom.tag_groups[gidx][1].length - 1;
         } else {
           --idx;
         }
