@@ -3627,7 +3627,7 @@
           ++idx;
         }
         _.bookmarkform.select_tag(gidx, idx);
-        return;
+        return true;
       } else if (key === _.key.LEFT) {
         if (idx <= 0) {
           if (gidx <= 0) {
@@ -3640,12 +3640,12 @@
           --idx;
         }
         _.bookmarkform.select_tag(gidx, idx);
-        return;
+        return true;
       }
 
       var down = key === _.key.DOWN;
       if (!down && key !== _.key.UP) {
-        return;
+        return false;
       }
 
       var x = (sel.rect.left + sel.rect.right) / 2,
@@ -3712,6 +3712,7 @@
         t_near = down ? t_top : t_bottom;
       }
       _.bookmarkform.select_tag(t_near.gidx, t_near.idx, t_near.rect);
+      return true;
     },
 
     onkey: function(key, ev) {
@@ -3737,8 +3738,7 @@
         return true;
       }
 
-      _.bookmarkform.select_nearest_tag(key);
-      return true;
+      return _.bookmarkform.select_nearest_tag(key);
     },
 
     setup_key: function(form) {
