@@ -4783,7 +4783,7 @@
   };
 
   _.changelog = [{
-    date: '2012/12/xx', version: '1.3.0', changes_i18n: {
+    date: '2012/12/16', version: '1.3.0', changes_i18n: {
       en: [
         '[Add] Add option to remove pixiv comic icon.',
         '[Change] Improve bookmark mode layout.',
