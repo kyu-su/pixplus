@@ -4787,6 +4787,7 @@
       en: [
         '[Add] Add option to remove pixiv comic icon.',
         '[Change] Improve bookmark mode layout.',
+        '[Change] Improve key navigation feature in bookmark mode.',
         '[Change] Improve tag edit mode layout.',
         '[Fix] Fix tag edit mode is not working.',
         '[Fix] Can not open preferences in UserJS/Greasemonkey version.'
@@ -4794,6 +4795,7 @@
       ja: [
         '[\u8ffd\u52a0] pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002',
         '[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002',
+        '[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002',
         '[\u5909\u66f4] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002',
         '[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002',
         '[\u4fee\u6b63] UserJS/Greasemonkey\u7248\u3067\u8a2d\u5b9a\u753b\u9762\u3092\u958b\u3051\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002'
