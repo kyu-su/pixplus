@@ -1400,14 +1400,14 @@
       });
     });
 
-    if (!all_list) {
-      all_list = add_list();
-    }
-
     for(var tag in tag_map) {
-      if (tag_map[tag]) {
-        all_list.insertBefore(tag_map[tag], all_list_before ? all_list_before.nextSibling : null);
+      if (!tag_map[tag]) {
+        continue;
       }
+      if (!all_list) {
+        all_list = add_list();
+      }
+      all_list.insertBefore(tag_map[tag], all_list_before ? all_list_before.nextSibling : null);
     }
 
     return lists;
@@ -4057,31 +4057,30 @@
 
     '/bookmark.php': [
       function(query) {
-        var bookmark_list;
+        var bookmark_list, bookmark_list_ul;
         if (_.conf.bookmark.tag_order.length < 1
             || query.id
-            || !(bookmark_list = _.q('#bookmark_list ul'))) {
+            || !(bookmark_list = _.q('#bookmark_list'))
+            || !(bookmark_list_ul = _.q('ul', bookmark_list))) {
           return;
         }
 
-        var first_list, items = _.tag('li', bookmark_list);
-        first_list = bookmark_list.cloneNode(false);
+        bookmark_list.classList.add('pp-bookmark-tag-list');
+
+        var first_list, items = _.tag('li', bookmark_list_ul);
+        first_list = bookmark_list_ul.cloneNode(false);
         items[0].parentNode.removeChild(items[0]);
         items[1].parentNode.removeChild(items[1]);
         first_list.appendChild(items[0]);
         first_list.appendChild(items[1]);
-        bookmark_list.parentNode.insertBefore(first_list, bookmark_list);
+        bookmark_list_ul.parentNode.insertBefore(first_list, bookmark_list_ul);
 
-        var lists = _.reorder_tag_list(bookmark_list, function(item) {
+        var lists = _.reorder_tag_list(bookmark_list_ul, function(item) {
           var a = _.tag('a', item)[0];
           if (!a || !a.firstChild || a.firstChild.nodeType !== w.Node.TEXT_NODE) {
             return null;
           }
           return a.firstChild.nodeValue;
-        });
-
-        lists.forEach(function(list, idx) {
-          list.style.cssText += _.conf.general.tag_separator_style;
         });
 
         if (!first_list) {
@@ -4148,7 +4147,15 @@
     );
     _.key.init();
 
-    _.e('style', {text: _.css}, d.body);
+    var css_append = [
+      '.pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:',
+      _.conf.general.tag_separator_style2,
+      '}.pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:',
+      _.conf.general.tag_separator_style2,
+      '}'
+    ].join('');
+
+    _.e('style', {text: _.css + css_append}, d.body);
     _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
 
     if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
@@ -4410,7 +4417,7 @@
       {"key": "debug", "value": false},
       {"key": "bookmark_hide", "value": false},
       {"key": "float_tag_list", "value": 2},
-      {"key": "tag_separator_style", "value": "border-top:2px solid #dae1e7;"},
+      {"key": "tag_separator_style2", "value": "2px solid #dae1e7"},
       {"key": "stacc_link", "value": ""},
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
@@ -4520,7 +4527,7 @@
             desc: 'Enable float view for tag list',
             hint: ['Disable', 'Enable', 'Pager']
           },
-          tag_separator_style: 'Separator style for tag list',
+          tag_separator_style2: 'Separator style for tag list',
           stacc_link: {
             desc: 'Change \'Stacc feed\' link',
             hint: [{value: 'nochange', desc: 'Do not change'},
@@ -4664,7 +4671,7 @@
             desc: '\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b',
             hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u30e3']
           },
-          tag_separator_style: '\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb',
+          tag_separator_style2: '\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb',
           stacc_link: {
             desc: '\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148',
             hint: [{value: 'nochange', desc: '\u5909\u66f4\u3057\u306a\u3044'},
