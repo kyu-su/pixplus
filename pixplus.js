@@ -236,6 +236,15 @@
       return value;
     },
 
+    __dump: function(section, item, value) {
+      var conv = _.conf.__conv[section + '_' + item];
+      if (conv) {
+        return conv.dump(value);
+      } else {
+        return g.String(value);
+      }
+    },
+
     __wrap_storage: function(storage, is_extension) {
       return {
         get: function(section, item) {
@@ -261,7 +270,7 @@
         var conf_section = _.conf[section.name] = { };
 
         section.items.forEach(function(item) {
-          var value = storage.get(section.name, item.key), conv;
+          var value = storage.get(section.name, item.key);
           value = _.conf.__parse(section.name, item.key, value === null ? item.value : value);
 
           conf_section.__defineGetter__(item.key, function() {
@@ -270,13 +279,7 @@
 
           conf_section.__defineSetter__(item.key, function(new_value) {
             value = new_value;
-            var value_s;
-            if (conv) {
-              value_s = conv.dump(value);
-            } else {
-              value_s = g.String(value);
-            }
-            storage.set(section.name, item.key, value_s);
+            storage.set(section.name, item.key, _.conf.__dump(section.name, item.key, value));
           });
         });
       });
@@ -727,7 +730,7 @@
           } else if (c < 0x7f) {
             key = g.String.fromCharCode(c).toLowerCase();
           } else if (c === 0x7f) {
-            key = _.key.DELETE;
+            key = 'Delete';
           } else {
             // not in ascii
           }
@@ -801,7 +804,6 @@
 
       keys.forEach(function(p) {
         var code = p[0], name = p[1];
-        _.key[name.toUpperCase()] = name;
         _.key.code_map[code] = name;
         _.key.name_map[name] = code;
       });
@@ -3632,7 +3634,7 @@
           sel = _.bookmarkform.sel;
 
       var gidx = sel.gidx, idx = sel.idx;
-      if (key === _.key.RIGHT) {
+      if (key === 'Right') {
         if (idx >= dom.tag_groups[sel.gidx][1].length - 1) {
           if (gidx >= dom.tag_groups.length - 1) {
             gidx = 0;
@@ -3645,7 +3647,7 @@
         }
         _.bookmarkform.select_tag(gidx, idx);
         return true;
-      } else if (key === _.key.LEFT) {
+      } else if (key === 'Left') {
         if (idx <= 0) {
           if (gidx <= 0) {
             gidx = dom.tag_groups.length - 1;
@@ -3660,8 +3662,8 @@
         return true;
       }
 
-      var down = key === _.key.DOWN;
-      if (!down && key !== _.key.UP) {
+      var down = key === 'Down';
+      if (!down && key !== 'Up') {
         return false;
       }
 
@@ -3737,21 +3739,52 @@
           sel = _.bookmarkform.sel;
 
       if (!sel.tag) {
-        if (key === _.key.DOWN) {
+        if (key === 'Down') {
           _.bookmarkform.select_tag(dom.tag_groups.length - 1, 0);
           return true;
-        } else if (key === _.key.ESCAPE) {
+        } else if (key === 'Escape') {
           dom.input_tag.blur();
           return true;
         }
         return false;
       }
 
-      if (key === _.key.SPACE) {
+      if (key === 'Space') {
         _.send_click(sel.tag);
         return true;
-      } else if (key === _.key.ESCAPE) {
+
+      } else if (key === 'Escape') {
         _.bookmarkform.select_tag(-1);
+        return true;
+
+      } else if (key === 'Shift+Control') {
+        if (sel.link) {
+          var aliases = _.conf.bookmark.tag_aliases,
+              link1 = sel.link.getAttribute('data-tag'),
+              link2 = sel.tag.getAttribute('data-tag');
+          if (dom.tag_groups[0][1].indexOf(sel.link) < 0) {
+            var tmp = link1;
+            link1 = link2;
+            link2 = tmp;
+          }
+
+          sel.link.classList.remove('pp-tag-link');
+          sel.link = null;
+
+          if (!w.confirm(link1 + ' => ' + link2)) {
+            return false;
+          }
+
+          if (!aliases[link2]) {
+            aliases[link2] = [];
+          }
+          aliases[link2].push(link1);
+          _.conf.bookmark.tag_aliases = aliases;
+          return true;
+        }
+
+        sel.link = sel.tag;
+        sel.link.classList.add('pp-tag-link');
         return true;
       }
 
@@ -4428,6 +4461,7 @@
 
     // bookmark form
     '.pp-tag-select{outline:2px solid #0f0}',
+    '.pp-tag-link{outline:2px solid #f00}',
 
     // floater
     '.pp-float{position:fixed;top:0px}',
