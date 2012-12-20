@@ -42,6 +42,16 @@
         }
       };
       g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
+      w.document.addEventListener('pixplusConfigSet', function(ev) {
+        g.opera.extension.postMessage(g.JSON.stringify({
+          command: 'config-set',
+          data: {
+            section: ev.section,
+            item:    ev.item,
+            value:   ev.value
+          }
+        }));
+      }, false);
     } else {
       entrypoint(g, unsafeWindow || w, (unsafeWindow || w).document);
     }
@@ -205,8 +215,37 @@
       });
     },
 
-    __set_item: function(storage, key, section, item, value) {
-      storage.setItem(key, value);
+    __key: function(section, item, is_extension) {
+      var key = _.conf.__key_prefix;
+      if (!is_extension || section !== 'general') {
+        // for compatibility
+        key += section + '_';
+      }
+      return key + item;
+    },
+
+    __parse: function(section, item, value) {
+      var conv = _.conf.__conv[typeof(_.conf.__defaults[section][item])];
+      if (conv) {
+        value = conv(value);
+      }
+      conv = _.conf.__conv[section + '_' + item];
+      if (conv) {
+        value = conv.parse(value);
+      }
+      return value;
+    },
+
+    __wrap_storage: function(storage, is_extension) {
+      return {
+        get: function(section, item) {
+          return storage.getItem(_.conf.__key(section, item, is_extension));
+        },
+
+        set: function(section, item, value) {
+          storage.setItem(_.conf.__key(section, item, is_extension), value);
+        }
+      };
     },
 
     __init: function(storage) {
@@ -219,47 +258,25 @@
       });
 
       _.conf.__schema.forEach(function(section) {
-        var conf_section = _.conf[section.name] = { }, value_cache = { };
-        var section_key = _.conf.__key_prefix;
-        if (!_.conf.__is_extension || section.name !== 'general') {
-          // for compatibility
-          section_key += section.name + '_';
-        }
+        var conf_section = _.conf[section.name] = { };
 
         section.items.forEach(function(item) {
-          var key = section_key + item.key;
-          
-          var value = storage.getItem(key), conv;
-          if (value === null) {
-            value = item.value;
-          } else {
-            conv = _.conf.__conv[typeof(item.value)];
-            if (conv) {
-              value = conv(value);
-            }
-          }
-
-          conv = _.conf.__conv[section.name + '_' + item.key];
-          if (conv) {
-            value = conv.parse(value);
-          }
-
-          value_cache[item.key] = value;
+          var value = storage.get(section.name, item.key), conv;
+          value = _.conf.__parse(section.name, item.key, value === null ? item.value : value);
 
           conf_section.__defineGetter__(item.key, function() {
-            return value_cache[item.key];
+            return value;
           });
 
-          conf_section.__defineSetter__(item.key, function(value) {
-            value_cache[item.key] = value;
-
-            var conv = _.conf.__conv[section.name + '_' + item.key];
+          conf_section.__defineSetter__(item.key, function(new_value) {
+            value = new_value;
+            var value_s;
             if (conv) {
-              value = conv.dump(value);
+              value_s = conv.dump(value);
             } else {
-              value = g.String(value);
+              value_s = g.String(value);
             }
-            _.conf.__set_item(storage, key, section.name, item.key, value);
+            storage.set(section.name, item.key, value_s);
           });
         });
       });
@@ -4122,16 +4139,23 @@
 
     if (_extension_data) {
       _.conf.__init({
-        getItem: function(key) {
-          return _extension_data.conf[key] || null;
+        get: function(section, item) {
+          return _extension_data.conf[_.conf.__key(section, item, true)] || null;
         },
 
-        setItem: function(key, value) {
-          _extension_data.conf[key] = value;
+        set: function(section, item, value) {
+          _extension_data.conf[_.conf.__key(section, item, true)] = value;
+
+          var ev = d.createEvent('Event');
+          ev.initEvent('pixplusConfigSet', true, true);
+          ev.section = section;
+          ev.item    = item;
+          ev.value   = value;
+          d.dispatchEvent(ev);
         }
       });
     } else {
-      _.conf.__init(g.localStorage);
+      _.conf.__init(_.conf.__wrap_storage(g.localStorage));
     }
 
     _.log('version=%s', _.version());

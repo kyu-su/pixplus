@@ -4,14 +4,13 @@
   _.conf.__key_prefix_page = _.conf.__key_prefix;
   _.conf.__key_prefix = 'conf_';
   _.conf.__is_extension = true;
-  _.conf.__init(
-    (g.opera
-     ? g.widget.preferences
-     : (g.safari
-        ? g.safari.extension.settings
-        : g.localStorage // chrome
-       ))
-  );
+  _.conf.__init(_.conf.__wrap_storage(
+    g.opera
+      ? g.widget.preferences
+      : (g.safari
+         ? g.safari.extension.settings
+         : g.localStorage // chrome
+        )));
 
   if (g.opera) {
     g.opera.extension.onmessage = function(event) {
@@ -37,7 +36,10 @@
     if (msg.command == 'config') {
       return {command: msg.command, data: _.conf.__export(_.conf.__key_prefix_page)};
     } else if (msg.command == 'config-set') {
-      _.conf[msg.data.section][msg.data.item] = msg.data.value;
+      var value = _.conf.__parse(msg.data.section, msg.data.item, msg.data.value);
+      _.log(msg.command + ': ' + msg.data.section + '.' + msg.data.itemkey
+            + '=' + '(' + typeof(value) + ')' + msg.data.value);
+      _.conf[msg.data.section][msg.data.item] = value;
     } else if (msg.command == 'config-import') {
       _.conf.__import(msg.data);
       return {command: msg.command, data: {status: 'complete'}};

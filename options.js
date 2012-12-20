@@ -14,11 +14,6 @@
   };
 
   var init = function(storage) {
-    _.conf.__set_item = function(storage, key, section, item, value) {
-      storage[key] = value;
-      send_message('config-set', {section: section, item: item, value: value});
-    };
-
     _.conf.__import = function(data) {
       send_message('config-import', data);
 
@@ -31,11 +26,13 @@
     };
 
     _.conf.__init({
-      getItem: function(key) {
-        return storage[key] || null;
+      get: function(section, item) {
+        return storage[_.conf.__key(section, item, true)] || null;
       },
 
-      setItem: function(key, value) {
+      set: function(section, item, value) {
+        storage[_.conf.__key(section, item, true)] = value;
+        send_message('config-set', {section: section, item: item, value: value});
       }
     });
 
