@@ -4848,6 +4848,7 @@
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
       "date": "2012/12/16",
       "version": "1.3.0",
@@ -5296,6 +5297,7 @@
         "AutoPatchWork\u306b\u5bfe\u5fdc\u3002"
       ]
     }
+    // __CHANGELOG_END__
   ];
 
   /* __DATA_END__ */
