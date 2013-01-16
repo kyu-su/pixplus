@@ -1,6 +1,7 @@
 RSVG_CONVERT            = rsvg-convert
 ZIP                     = zip
 XAR                     = xar
+PYTHON2                 = python2.7
 CHROME                  = $(shell ./find_chrome.sh)
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
@@ -17,7 +18,6 @@ LICENSE                 = LICENSE.TXT
 LIB_JS                  = lib.js
 DATA_JS                 = data.js
 CONFIG_JSON             = config.json
-CHANGELOG_JSON          = changelog.json
 ICON_SVG                = pixplus.svg
 ICON_SIZE               = 16 32 48 64 128
 SRC_USERJS              = pixplus.js
@@ -25,6 +25,9 @@ COMMON_FILES            = $(LIB_JS) $(DATA_JS) common.js
 BGPAGE_FILES            = index.js index.html
 OPTION_PAGE_FILES       = options.js options.css options.html
 DIST_FILES              = $(LICENSE) $(COMMON_FILES) $(BGPAGE_FILES) $(OPTION_PAGE_FILES)
+
+FEED_ATOM               = feed.atom
+CHANGELOG_JSON          = changelog.json
 
 GREASEMONKEY_JS         = pixplus.user.js
 
@@ -69,7 +72,7 @@ ifeq ($(BUILD_SAFARIEXTZ),yes)
 ALL_TARGETS            += $(SAFARIEXTZ)
 endif
 
-all: $(ALL_TARGETS) $(CHANGELOG_JSON) status
+all: $(ALL_TARGETS) feeds status
 
 status:
 	@echo
@@ -104,9 +107,20 @@ $(DATA_JS): $(SRC_USERJS)
 	@sed -e '1,/__DATA_BEGIN__/d' -e '/__DATA_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	@echo '})(this, this.window, this.window.document, this.window.pixplus);' >> $@
 
-clean: clean-greasemonkey clean-opera clean-chrome clean-safari
+clean: clean-feeds clean-greasemonkey clean-opera clean-chrome clean-safari
 	@echo Cleaning
-	@rm -f $(CONFIG_JSON) $(LIB_JS) $(DATA_JS)
+	@rm -f $(CONFIG_JSON) $(CHANGELOG_JSON) $(LIB_JS) $(DATA_JS)
+
+# ================ Feeds ================
+
+$(FEED_ATOM): $(CHANGELOG_JSON)
+	@echo Create: $@
+	@$(PYTHON2) feed_atom.py < $< > $@
+
+feeds: $(FEED_ATOM)
+
+clean-feeds:
+	@rm -f $(FEED_ATOM)
 
 # ================ GreaseMonkey ================
 
@@ -132,7 +146,7 @@ $(OPERA_CONFIG_XML): $(OPERA_CONFIG_XML).in $(SRC_USERJS) $(CONFIG_JSON)
 	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OPERA_ICON_DIR)/$$size.png\" />" >> $@; done
 	@sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@python2 conf-parser.py opera < $(CONFIG_JSON) >> $@
+	@$(PYTHON2) conf-parser.py opera < $(CONFIG_JSON) >> $@
 	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OPERA_ROOT)/includes/$(SRC_USERJS): $(SRC_USERJS)
@@ -220,7 +234,7 @@ $(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
 $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	@echo Create: $@
 	@sed -e '/__SETTINGS__/,$$d' < $< > $@
-	@python2 conf-parser.py safari < $(CONFIG_JSON) >> $@
+	@$(PYTHON2) conf-parser.py safari < $(CONFIG_JSON) >> $@
 	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARI_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(SAFARI_ROOT)/%): $(SAFARI_ROOT)/%: %
