@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">pixplus</title>
+  <id>http://crckyl.ath.cx/pixplus/feed.atom</id>
+  <updated>2012-12-16T00:00:00Z</updated>
+  <link href="http://crckyl.ath.cx/pixplus" />
+  <link href="http://crckyl.ath.cx/pixplus/feed.atom" rel="self" />
+  <author>
+    <name>wowo</name>
+    <uri>http://crckyl.ath.cx/</uri>
+    <email>crckyl@myopera.com</email>
+  </author>
+  <subtitle type="text">pixplus changelogs</subtitle>
+  <generator>PyAtom</generator>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.3.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.3.0</id>
+    <updated>2012-12-16T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.3.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.3.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[追加] pixivコミックアイコンを除去するオプションを追加。&lt;/li&gt;
+  &lt;li&gt;[変更] ブックマークモードのレイアウトを改善。&lt;/li&gt;
+  &lt;li&gt;[変更] ブックマークモードのキー操作を改善。&lt;/li&gt;
+  &lt;li&gt;[変更] タグ編集モードのレイアウトを改善。&lt;/li&gt;
+  &lt;li&gt;[修正] タグ編集モードが動かなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;[修正] UserJS/Greasemonkey版で設定画面を開けなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Add] Add option to remove pixiv comic icon.&lt;/li&gt;
+  &lt;li&gt;[Change] Improve bookmark mode layout.&lt;/li&gt;
+  &lt;li&gt;[Change] Improve key navigation feature in bookmark mode.&lt;/li&gt;
+  &lt;li&gt;[Change] Improve tag edit mode layout.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix tag edit mode is not working.&lt;/li&gt;
+  &lt;li&gt;[Fix] Can not open preferences in UserJS/Greasemonkey version.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.2.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.2.2</id>
+    <updated>2012-12-06T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.2.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.2.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] マンガのレイアウトが崩れるバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] タグリストのレイアウトを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] アクセスが制限された作品を閲覧出来ないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] イラストにタグが登録されていない時に表示が壊れる不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Fix manga layout is broken.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix tag list layout.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix fail to load access-restricted illust.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix broken tag list with no tags.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.2.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.2.1</id>
+    <updated>2012-09-29T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.2.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.2.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] pixivの変更に対応。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Minor fix for pixiv's update.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.2.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.2.0</id>
+    <updated>2012-08-27T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.2.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.2.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[追加] "jump.phpをリダイレクトする"設定を追加。&lt;/li&gt;
+  &lt;li&gt;[修正] DOM3EventのControlキーサポートを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] 自動マンガモードの挙動を改善。&lt;/li&gt;
+  &lt;li&gt;[修正] 「新しいスタックフィード」をサポート。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Add] Add "Redirect jump.php" setting.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix control key support for DOM3Events.&lt;/li&gt;
+  &lt;li&gt;[Fix] Improve auto-manga-mode feature.&lt;/li&gt;
+  &lt;li&gt;[Fix] Support "new Staccfeed" page.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.1.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.1.1</id>
+    <updated>2012-08-14T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.1.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.1.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] クリックナビゲーションのUIでヘッダ領域が隠れてしまうバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] "移動方向を反対にする"設定がマンガモードにも適用されていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] "原寸の画像を表示する"が有効になっていると古いマンガ作品を閲覧出来ないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] スタックフィードページでブックマークの追加・編集が出来ないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[変更] いくつかの設定項目のデフォルト値を変更。&lt;/li&gt;
+  &lt;li&gt;[修正][WebKit] ロード中のステータス表示のレイアウトが変になるのを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Header area hidden by click navigator.&lt;/li&gt;
+  &lt;li&gt;[Fix] "Reverse" setting applied in manga mode.&lt;/li&gt;
+  &lt;li&gt;[Fix] Can't read old manga if "Use original size image" is enabled.&lt;/li&gt;
+  &lt;li&gt;[Fix] Can't add or modify bookmark in staccfeed page.&lt;/li&gt;
+  &lt;li&gt;[Change] Change default value for some preferences.&lt;/li&gt;
+  &lt;li&gt;[Fix][WebKit] Status field layout is broken while loading.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.1.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.1.0</id>
+    <updated>2012-08-09T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.1.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.1.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[追加] キャプション内のリンクからポップアップを開く機能を追加。&lt;/li&gt;
+  &lt;li&gt;[追加] タグ編集機能を追加。&lt;/li&gt;
+  &lt;li&gt;[修正] イラストページ内のイメージレスポンス一覧からポップアップが開かないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] エラー処理を改善。&lt;/li&gt;
+  &lt;li&gt;[修正] タイトルとユーザー名にHTMLエンティティが表示されていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] ブックマークモードの時に他のイラストに移動出来ないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正] 他細かなバグ修正。&lt;/li&gt;
+  &lt;li&gt;[修正][Firefox] 「イラストを評価する時に確認をとる」オプションを有効にしていると評価できないバグを修正。&lt;/li&gt;
+  &lt;li&gt;[修正][Firefox] ランキングページでポップアップが開かないバグを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Add] Open popup from illust link in caption(author comment).&lt;/li&gt;
+  &lt;li&gt;[Add] Add tag edit mode.&lt;/li&gt;
+  &lt;li&gt;[Fix] Don't open popup from image-response list in illust page.&lt;/li&gt;
+  &lt;li&gt;[Fix] Improve error handling.&lt;/li&gt;
+  &lt;li&gt;[Fix] Displaying html entity in title and author name.&lt;/li&gt;
+  &lt;li&gt;[Fix] Can' t move to another illust when in bookmark mode.&lt;/li&gt;
+  &lt;li&gt;[Fix] Various minor bug fixes.&lt;/li&gt;
+  &lt;li&gt;[Fix][Firefox] Can't send rating if "Show confirmation dialog when rating" option is on.&lt;/li&gt;
+  &lt;li&gt;[Fix][Firefox] Popup don't works on ranking page.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.0.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.0.0</id>
+    <updated>2012-08-08T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.0.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.0.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;全体的に書き直し。&lt;/li&gt;
+  &lt;li&gt;[追加] キャプションの高さの最小値を指定する設定を追加。&lt;/li&gt;
+  &lt;li&gt;[削除] タグ編集機能を削除。&lt;/li&gt;
+  &lt;li&gt;[削除] 機能しなくなっていたいくつかの設定項目を削除。&lt;/li&gt;
+  &lt;li&gt;[削除] ズーム機能を削除。&lt;/li&gt;
+  &lt;li&gt;[修正] 多言語サポートを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;Rewrite whole of source code.&lt;/li&gt;
+  &lt;li&gt;[Add] Add preference to specify minimum height of caption area.&lt;/li&gt;
+  &lt;li&gt;[Remove] Remove tag edit feature.&lt;/li&gt;
+  &lt;li&gt;[Remove] Remove some dead preferences.&lt;/li&gt;
+  &lt;li&gt;[Remove] Remove zoom feature.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix multilingual support.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.9.4</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.9.4</id>
+    <updated>2012-08-05T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.9.4" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.9.4&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] 評価機能が動かなくなっていたのを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Rating feature don't works.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.9.3</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.9.3</id>
+    <updated>2012-08-03T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.9.3" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.9.3&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] pixivの仕様変更に対応。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Support pixiv's update.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.9.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.9.2</id>
+    <updated>2012-06-29T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.9.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.9.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] conf.popup.big_image=0の時、"S"キー(conf.key.popup_open_big)でmediumの画像を開いていたバグを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] If conf.popup.big_image=0, "S" key (conf.key.popup_open_big) opens medium image.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.9.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.9.1</id>
+    <updated>2012-06-26T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.9.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.9.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[修正] pixivの仕様変更に対応。&lt;/li&gt;
+  &lt;li&gt;[修正] イラストが再投稿されている場合に古い画像を表示していたバグを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Fix] Corresponds to pixiv's spec changes.&lt;/li&gt;
+  &lt;li&gt;[Fix] In reposted illust, pixplus shows first version.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.9.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.9.0</id>
+    <updated>2012-02-17T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.9.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.9.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[追加] マウスホイールの動作を変更する設定(conf.popup.mouse_wheel)を追加。&lt;/li&gt;
+  &lt;li&gt;[修正] キャプション内の外部リンクが壊れていたのを修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)&lt;/li&gt;
+  &lt;li&gt;[Fix] External links in author comment were broken.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.8.3</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.8.3</id>
+    <updated>2012-02-11T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.8.3" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.8.3&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;新着イラストページで上手く動作しなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;スタックフィードで上手く動作しなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;タグリストのフロート表示の動作を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.8.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.8.2</id>
+    <updated>2011-10-27T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.8.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.8.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;アンケートに回答するとエラーダイアログが出るようになっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;トップページ(mypage.php)で上手く動作しなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.8.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.8.1</id>
+    <updated>2011-09-17T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.8.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.8.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;pixivの変更でアンケートなどの動作がおかしくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;conf.key.popup_manga_open_pageのデフォルト値が変だったバグを修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.8.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.8.0</id>
+    <updated>2011-09-03T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.8.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.8.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;ブックマーク管理ページで、閲覧出来なくなったイラストに一括でチェックを入れる機能を追加。&lt;/li&gt;
+  &lt;li&gt;コメントを投稿するとコメントフォームが消えてしまうバグを修正。&lt;/li&gt;
+  &lt;li&gt;ブックマークフォームでエラーが出るようになっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;言語サポートを改善。&lt;/li&gt;
+  &lt;li&gt;AutoPatchWork等のサポートを改善。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.7.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.7.0</id>
+    <updated>2011-08-21T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.7.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.7.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;ランキングページにおいてAutoPatchWorkなどで継ぎ足した二ページ目以降の画像が表示されないのを是正する機能を追加。&lt;/li&gt;
+  &lt;li&gt;おすすめイラストをページの右側に表示する機能(conf.locate_recommend_right)を削除。&lt;/li&gt;
+  &lt;li&gt;地域ランキング(/ranking_area.php)の新デザインに対応。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.6.3</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.6.3</id>
+    <updated>2011-07-24T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.6.3" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.6.3&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;スタックフィードでブックマークしようとするとエラーが出るバグを修正。&lt;/li&gt;
+  &lt;li&gt;「スライドモード」設定の時、マンガを閲覧出来ない不具合を修正。&lt;/li&gt;
+  &lt;li&gt;ランキングで上手く動作しなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.6.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.6.2</id>
+    <updated>2011-06-26T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.6.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.6.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;設定画面へのリンクが表示されなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;イベントの特設ページ(e.g. /event_starfestival2011.php)で動作していなかった不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.6.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.6.1</id>
+    <updated>2011-05-21T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.6.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.6.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Opera10.1xで動作しなくなっていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;タグ検索(ex. /tags.php?tag=pixiv)で動作しなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;エラー表示の動作が変だったバグを修正。&lt;/li&gt;
+  &lt;li&gt;conf.popup_ranking_logを削除。&lt;/li&gt;
+  &lt;li&gt;新着ページで動作しなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;conf.locate_recommend_rightが動作しなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.6.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.6.0</id>
+    <updated>2011-05-13T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.6.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.6.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;キーバインドのカスタマイズ機能を追加。&lt;/li&gt;
+  &lt;li&gt;イラストページでブックマークの処理が動作していなかった不具合を修正。&lt;/li&gt;
+  &lt;li&gt;ライセンスをApache License 2.0に変更。&lt;/li&gt;
+  &lt;li&gt;Webkitでブックマークフォームの表示が変だった不具合を修正。&lt;/li&gt;
+  &lt;li&gt;トップページのレイアウトをバックアップする機能を追加(復活)。&lt;/li&gt;
+  &lt;li&gt;Chromeでセンタークリックにも反応していたバグを修正。&lt;/li&gt;
+  &lt;li&gt;Webkitでのキー操作を改善。&lt;/li&gt;
+  &lt;li&gt;ブックマークフォームなどの動作が変になってた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;検索ページで動かなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.5.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.5.1</id>
+    <updated>2011-03-26T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.5.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.5.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;おすすめイラストが非表示の時もconf.locate_recommend_rightが動作してしまうバグを修正。&lt;/li&gt;
+  &lt;li&gt;conf.extageditを廃止してconf.bookmark_formに変更。&lt;/li&gt;
+  &lt;li&gt;pixivの言語設定が日本語以外の時にマンガが閲覧できなかった不具合を修正。&lt;/li&gt;
+  &lt;li&gt;マンガの見開き表示を修正。&lt;/li&gt;
+  &lt;li&gt;Firefox4でブックマーク編集画面でタグを選択できなくなっていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;ブックマーク済みのイラストでブックマークボタンが表示されなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.5.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.5.0</id>
+    <updated>2011-02-15T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.5.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.5.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;conf.extensionを廃止。Opera拡張版のツールバーアイコンを削除。&lt;/li&gt;
+  &lt;li&gt;Firefoxでコメント表示機能が動作していなかったバグを修正。&lt;/li&gt;
+  &lt;li&gt;Firefoxでブックマーク編集フォームでアローキーでタグ選択を行う時に入力履歴が表示される不具合を修正。&lt;/li&gt;
+  &lt;li&gt;ポップアップのタグ編集のUIをブックマーク編集と同じに変更。&lt;/li&gt;
+  &lt;li&gt;ポップアップでブックマーク編集モードのまま他のイラストに移動するとキャプションが表示されなくなるバグを修正。&lt;/li&gt;
+  &lt;li&gt;マンガモードでも可能なら原寸の画像を使用するように変更。&lt;/li&gt;
+  &lt;li&gt;メンバーイラストページなどを開いた時に評価などが出来ない場合があるバグを修正。&lt;/li&gt;
+  &lt;li&gt;設定画面のデザインを変更。&lt;/li&gt;
+  &lt;li&gt;Opera10.1xでポップアップを開いた時に画像が表示されないバグを修正。&lt;/li&gt;
+  &lt;li&gt;小説ページで評価できなかったバグを修正。&lt;/li&gt;
+  &lt;li&gt;conf.expand_novelを削除。&lt;/li&gt;
+  &lt;li&gt;他ユーザーのブックマークページで動かなくなってたのを修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.4.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.4.0</id>
+    <updated>2011-02-04T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.4.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.4.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;pixivreaderと衝突するらしいので、excludeに追加。&lt;/li&gt;
+  &lt;li&gt;設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。&lt;/li&gt;
+  &lt;li&gt;OperaExtension版で動作しない場合があるバグをたぶん修正。&lt;/li&gt;
+  &lt;li&gt;閲覧できないマンガがあったバグを修正。&lt;/li&gt;
+  &lt;li&gt;ズーム機能でFirefoxをサポート。&lt;/li&gt;
+  &lt;li&gt;企画目録関連ページに対応。&lt;/li&gt;
+  &lt;li&gt;マンガページの変更(見開き表示など)に対応。それに伴ってconf.default_manga_typeとconf.popup_manga_tbを削除。&lt;/li&gt;
+  &lt;li&gt;作品管理ページで動作しなくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;Chrome/SafariでAutoPatchWorkに対応。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.3.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.3.2</id>
+    <updated>2011-01-15T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.3.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.3.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;ブックマーク管理ページで上手く動作していなかった不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.3.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.3.1</id>
+    <updated>2011-01-14T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.3.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.3.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Opera以外のブラウザにおいて一部のページで評価やコメント表示などの機能の動作が変だったバグを修正。&lt;/li&gt;
+  &lt;li&gt;conf.popup.rate_key=trueの時、Shiftキーなしで評価できていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;ChromeExtension/SafariExtension版で自動アップデートに対応。&lt;/li&gt;
+  &lt;li&gt;OperaExtension版のオプションページで数値がNaNになる場合があるバグをたぶん修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.3.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.3.0</id>
+    <updated>2010-12-26T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.3.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.3.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;conf.fast_user_bookmark追加。&lt;/li&gt;
+  &lt;li&gt;プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。&lt;/li&gt;
+  &lt;li&gt;コメント表示機能を追加。&lt;/li&gt;
+  &lt;li&gt;アンケート結果の表示を変更。&lt;/li&gt;
+  &lt;li&gt;閲覧・評価・コメント履歴ページに対応。&lt;/li&gt;
+  &lt;li&gt;キーバインドを変更。Shift+c:コメント表示/d:アンケート/a:戻る&lt;/li&gt;
+  &lt;li&gt;ポップアップのイベントAPIをPopup.on*のみに変更。&lt;/li&gt;
+  &lt;li&gt;conf.expand_novel追加。&lt;/li&gt;
+  &lt;li&gt;ランキングカレンダーに対応。conf.popup_ranking_log追加。&lt;/li&gt;
+  &lt;li&gt;イベント詳細/参加者ページに対応。&lt;/li&gt;
+  &lt;li&gt;Extension版にツールバーボタンと設定画面を追加。conf.extension.*追加。&lt;/li&gt;
+  &lt;li&gt;タグの並べ替えを設定していない時、ブックマーク編集の動作がおかしかった不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.2.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.2.0</id>
+    <updated>2010-12-01T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.2.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.2.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Extension版でアンケートに答えられなくなっていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;トップページのレイアウトをバックアップする機能追加。&lt;/li&gt;
+  &lt;li&gt;Extension版の自動アップデートに対応。&lt;/li&gt;
+  &lt;li&gt;上下キーでキャプションをスクロールするように変更。conf.popup.scroll_height追加。&lt;/li&gt;
+  &lt;li&gt;画像を拡大/縮小するキーをo/iから+/-に変更。&lt;/li&gt;
+  &lt;li&gt;dキー(前のイラストに戻る)をキーバインドに追加。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.1.2</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.1.2</id>
+    <updated>2010-11-14T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.1.2" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.1.2&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;一部のページでアンケート結果を表示出来なくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。&lt;/li&gt;
+  &lt;li&gt;スタックフィード上で評価やタグ編集が出来なかったバグを修正。&lt;/li&gt;
+  &lt;li&gt;マウス操作用UIの表示を変更。&lt;/li&gt;
+  &lt;li&gt;conf.popup.overlay_control追加。&lt;/li&gt;
+  &lt;li&gt;マンガページ(mode=manga)で改ページ出来なくなっていた不具合を修正。&lt;/li&gt;
+  &lt;li&gt;評価出来なくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.1.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.1.1</id>
+    <updated>2010-11-02T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.1.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.1.1&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。&lt;/li&gt;
+  &lt;li&gt;conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。&lt;/li&gt;
+  &lt;li&gt;pixivの変更(評価、ランキング、etc)に対応。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 0.1.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/0.1.0</id>
+    <updated>2010-10-27T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/0.1.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 0.1.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Opera11のExtensionに対応。&lt;/li&gt;
+  &lt;li&gt;ブックマーク管理ページでレコメンドを右側に並べる機能が動作しなくなっていたのを修正。&lt;/li&gt;
+  &lt;li&gt;AutoPatchWorkに対応。&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
+</feed>
