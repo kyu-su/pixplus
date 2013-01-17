@@ -107,9 +107,9 @@ $(DATA_JS): $(SRC_USERJS)
 	@sed -e '1,/__DATA_BEGIN__/d' -e '/__DATA_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	@echo '})(this, this.window, this.window.document, this.window.pixplus);' >> $@
 
-clean: clean-feeds clean-greasemonkey clean-opera clean-chrome clean-safari
+clean: clean-greasemonkey clean-opera clean-chrome clean-safari
 	@echo Cleaning
-	@rm -f $(CONFIG_JSON) $(CHANGELOG_JSON) $(LIB_JS) $(DATA_JS)
+	@rm -f $(CONFIG_JSON) $(LIB_JS) $(DATA_JS)
 
 # ================ Feeds ================
 
