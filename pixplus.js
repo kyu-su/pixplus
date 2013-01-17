@@ -1168,9 +1168,8 @@
 
     create_tab_content_about: function(root) {
       var urls = [
-        'http://crckyl.pa.land.to/pixplus/',
-        'http://crckyl.ath.cx:8088/pixplus/',
-        'http://crckyl.ath.cx:8088/svn/repos/pixplus/',
+        'http://crckyl.ath.cx/pixplus/',
+        'http://crckyl.ath.cx/cgit/pixplus.git/',
         'http://my.opera.com/crckyl/',
         'http://twitter.com/crckyl'
       ];
