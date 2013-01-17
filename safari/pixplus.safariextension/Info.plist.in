@@ -50,7 +50,7 @@
       </dict>
     </dict>
     <key>Update Manifest URL</key>
-    <string>http://crckyl.ath.cx:8088/pixplus/update.php?browser=safari&amp;version=@VERSION@</string>
+    <string>http://crckyl.ath.cx/pixplus/update.php?browser=safari&amp;version=@VERSION@</string>
     <key>Website</key>
     <string>@WEBSITE@</string>
   </dict>
