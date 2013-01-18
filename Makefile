@@ -33,7 +33,7 @@ GREASEMONKEY_JS         = pixplus.user.js
 
 VERSION                 = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION             = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
-WEBSITE                 = http://crckyl.pa.land.to/pixplus/
+WEBSITE                 = http://crckyl.ath.cx/pixplus/
 WEBSITE_SED             = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
 OPERA_ROOT              = $(CURDIR)/opera
