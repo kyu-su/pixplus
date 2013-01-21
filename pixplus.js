@@ -3759,9 +3759,8 @@
       } else if (key === 'Shift+Control') {
         if (sel.link) {
           var aliases = _.conf.bookmark.tag_aliases,
-              link1 = sel.link.getAttribute('data-tag'),
-              link2 = sel.tag.getAttribute('data-tag');
-          if (dom.tag_groups[0][1].indexOf(sel.link) < 0) {
+              link1 = sel.link, link2 = sel.tag;
+          if (dom.tag_groups[0][1].indexOf(link1) < 0) {
             var tmp = link1;
             link1 = link2;
             link2 = tmp;
@@ -3770,14 +3769,19 @@
           sel.link.classList.remove('pp-tag-link');
           sel.link = null;
 
-          if (!w.confirm(link1 + ' => ' + link2)) {
+          var link1_t = link1.getAttribute('data-tag'),
+              link2_t = link2.getAttribute('data-tag');
+
+          if (!w.confirm(link1_t + ' => ' + link2_t)) {
             return false;
           }
 
-          if (!aliases[link2]) {
-            aliases[link2] = [];
+          _.send_click(link2);
+
+          if (!aliases[link2_t]) {
+            aliases[link2_t] = [];
           }
-          aliases[link2].push(link1);
+          aliases[link2_t].push(link1_t);
           _.conf.bookmark.tag_aliases = aliases;
           return true;
         }
