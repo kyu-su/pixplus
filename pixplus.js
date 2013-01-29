@@ -2178,7 +2178,7 @@
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
-      dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history'}, dom.comment);
+      dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
