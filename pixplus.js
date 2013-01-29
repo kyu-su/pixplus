@@ -4860,7 +4860,6 @@
   };
 
   _.changelog = [
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/xx",
       "version": "1.3.1",
@@ -4876,6 +4875,7 @@
       }
     },
 
+    // __CHANGELOG_BEGIN__
     {
       "date": "2012/12/16",
       "version": "1.3.0",
