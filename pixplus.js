@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.3.0
+// @version     1.3.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -4861,6 +4861,21 @@
 
   _.changelog = [
     // __CHANGELOG_BEGIN__
+    {
+      "date": "2013/02/xx",
+      "version": "1.3.1",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix author does not shown properly in popup.",
+          "[Fix] Fix comment view in popup."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30b3\u30e1\u30f3\u30c8\u304c\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
     {
       "date": "2012/12/16",
       "version": "1.3.0",
