@@ -83,13 +83,13 @@ status:
 
 $(CONFIG_JSON): $(SRC_USERJS)
 	@echo Create: $@
-	@echo '{"comment": "this file was automatically generated from $<", "data": [' >> $@
+	@echo '{"comment": "this file was automatically generated from $<", "data": [' > $@
 	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
 	@echo ']}' >> $@
 
 $(CHANGELOG_JSON): $(SRC_USERJS)
 	@echo Create: $@
-	@echo '{"comment": "this file was automatically generated from $<", "data": [' >> $@
+	@echo '{"comment": "this file was automatically generated from $<", "data": [' > $@
 	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) >> $@
 	@echo ']}' >> $@
 
