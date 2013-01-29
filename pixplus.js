@@ -3001,7 +3001,13 @@
 	}, {
 	  ajaxSettings: {dataType: 'text'}
 	}).done(function(data) {
-          _.popup.comment.onload(illust, data);
+          try {
+            var obj  = g.JSON.parse(data),
+                html = obj.data.html_array.join('');
+            _.popup.comment.onload(illust, '<ul>' + html + '</ul>');
+          } catch(ex) {
+            _.popup.comment.onerror(illust, g.String(ex));
+          }
 	}).fail(function(data) {
           _.popup.comment.onerror(illust, data);
         });
