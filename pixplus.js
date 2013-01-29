@@ -1804,9 +1804,10 @@
       illust.rated = search_script(score, 'rated');
       illust.answered = search_script(question, 'answered');
 
-      var profile_area   = _.fastxml.q(root, '.profile_area'),
-          avatar         = _.fastxml.q(profile_area, '.avatar_m img'),
-          author_link    = _.fastxml.q(profile_area, 'h2 .avatar_m'),
+      var profile_area   = _.fastxml.q(root, '.user-unit'),
+          avatar         = _.fastxml.q(profile_area, 'img.user-image'),
+          author_link    = _.fastxml.q(profile_area, 'a.user-link'),
+          author_name    = _.fastxml.q(author_link, 'h1.user'),
           staccfeed_link = _.fastxml.q(root, '.extaraNavi p a', function(link) {
             return (link.attrs.href || '').indexOf('/stacc/') >= 0;
           });
@@ -1818,8 +1819,10 @@
       illust.author_name  = '[Error]';
       illust.author_url   = '';
       illust.author_id    = 0;
+      if (author_name) {
+        illust.author_name = _.fastxml.text(author_name);
+      }
       if (author_link) {
-        illust.author_name = _.fastxml.text(author_link);
         illust.author_url = author_link.attrs.href;
         if ((re = _.re.author_profile.exec(illust.author_url))) {
           illust.author_id = g.parseInt(re[1], 10);
