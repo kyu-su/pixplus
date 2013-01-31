@@ -4258,14 +4258,16 @@
       }
     }
 
-    var user_bookmark = _.q('.person_menu #favorite-container #favorite-button');
+    var user_bookmark = _.q('.user-unit .user-relation #favorite-button');
     if (user_bookmark) {
       _.onclick(user_bookmark, function() {
-        if (user_bookmark.classList.contains('added') || _.conf.general.fast_user_bookmark <= 0) {
+        if (user_bookmark.classList.contains('following')
+            || _.conf.general.fast_user_bookmark <= 0) {
           return;
         }
+
         g.setTimeout(function() {
-          var dialog = _.q('.person_menu #favorite-container #favorite-preference');
+          var dialog = _.q('.user-unit .user-relation #favorite-preference');
           if (!dialog) {
             return;
           }
@@ -4273,16 +4275,15 @@
           if (!form) {
             return;
           }
-          var radio = _.q('input[name="restrict"][value="'
-                          + (_.conf.general.fast_user_bookmark - 1) + '"]',
-                          form);
+
+          var restrict = _.conf.general.fast_user_bookmark - 1,
+              radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
           if (!radio) {
             return;
           }
           radio.checked = true;
           _.xhr.post(form, function() {
-            user_bookmark.classList.remove('open');
-            user_bookmark.classList.add('added');
+            user_bookmark.classList.add('following');
           });
           _.send_click(_.q('.close', dialog));
         }, 10);
@@ -4866,11 +4867,13 @@
       "changes_i18n": {
         "en": [
           "[Fix] Fix author does not shown properly in popup.",
-          "[Fix] Fix comment view in popup."
+          "[Fix] Fix comment view in popup.",
+          "[Fix] Fix \"Add favorite user by one-click\" is not working."
         ],
         "ja": [
           "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
-          "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30b3\u30e1\u30f3\u30c8\u304c\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+          "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30b3\u30e1\u30f3\u30c8\u304c\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046\u8a2d\u5b9a\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
