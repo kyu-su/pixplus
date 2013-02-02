@@ -37,7 +37,7 @@
       return {command: msg.command, data: _.conf.__export(_.conf.__key_prefix_page)};
     } else if (msg.command == 'config-set') {
       var value = _.conf.__parse(msg.data.section, msg.data.item, msg.data.value);
-      _.log(msg.command + ': ' + msg.data.section + '.' + msg.data.itemkey
+      _.log(msg.command + ': ' + msg.data.section + '.' + msg.data.item
             + '=' + '(' + typeof(value) + ')' + msg.data.value);
       _.conf[msg.data.section][msg.data.item] = value;
     } else if (msg.command == 'config-import') {

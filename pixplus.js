@@ -30,6 +30,8 @@
     w.document.body.appendChild(s);
   };
 
+  var send_message;
+
   if (g.opera || unsafeWindow) {
     if (g.opera && g.opera.extension) {
       var open_options = function() {
@@ -42,21 +44,17 @@
         }
       };
       g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
-      w.document.addEventListener('pixplusConfigSet', function(ev) {
-        g.opera.extension.postMessage(g.JSON.stringify({
-          command: 'config-set',
-          data: {
-            section: ev.section,
-            item:    ev.item,
-            value:   ev.value
-          }
-        }));
-      }, false);
+      send_message = function(msg) {
+        g.opera.extension.postMessage(g.JSON.stringify(msg));
+      };
+
     } else {
       entrypoint(g, unsafeWindow || w, (unsafeWindow || w).document);
     }
+
   } else if (greasemonkey) {
     inject(null);
+
   } else if (g.chrome) {
     var base_uri = g.chrome.extension.getURL('/');
     g.chrome.extension.sendRequest({command: 'config'}, function(msg) {
@@ -64,6 +62,10 @@
         inject({base_uri: base_uri, conf: msg.data});
       }
     });
+    send_message = function(msg) {
+      g.chrome.extension.sendRequest(msg);
+    };
+
   } else if (g.safari) {
     g.safari.self.addEventListener('message', function(ev) {
       if (ev.name === 'config') {
@@ -74,8 +76,19 @@
       }
     }, false);
     g.safari.self.tab.dispatchMessage('config', null);
+
   } else {
     inject(null);
+  }
+
+  if (send_message) {
+    w.document.addEventListener('pixplusConfigSet', function(ev) {
+      var msg = {command: 'config-set', data: { }};
+      ['section', 'item', 'value'].forEach(function(attr) {
+        msg.data[attr] = ev.target.getAttribute('data-' + attr);
+      });
+      send_message(msg);
+    }, false);
   }
 })(this, this.window, this.unsafeWindow, function(g, w, d, _extension_data) {
 
@@ -4183,6 +4196,8 @@
     _.run = function() { };
 
     if (_extension_data) {
+      var config_set_data = _.e('div', {css: 'display:none'}, d.body);
+
       _.conf.__init({
         get: function(section, item) {
           return _extension_data.conf[_.conf.__key(section, item, true)] || null;
@@ -4193,10 +4208,10 @@
 
           var ev = d.createEvent('Event');
           ev.initEvent('pixplusConfigSet', true, true);
-          ev.section = section;
-          ev.item    = item;
-          ev.value   = value;
-          d.dispatchEvent(ev);
+          config_set_data.setAttribute('data-section', section);
+          config_set_data.setAttribute('data-item',    item);
+          config_set_data.setAttribute('data-value',   value);
+          config_set_data.dispatchEvent(ev);
         }
       });
     } else {
