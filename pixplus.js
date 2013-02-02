@@ -44,8 +44,8 @@
         }
       };
       g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
-      send_message = function(msg) {
-        g.opera.extension.postMessage(g.JSON.stringify(msg));
+      send_message = function(command, data) {
+        g.opera.extension.postMessage(g.JSON.stringify({command: command, data: data}));
       };
 
     } else {
@@ -62,8 +62,8 @@
         inject({base_uri: base_uri, conf: msg.data});
       }
     });
-    send_message = function(msg) {
-      g.chrome.extension.sendRequest(msg);
+    send_message = function(command, data) {
+      g.chrome.extension.sendRequest({command: command, data: data});
     };
 
   } else if (g.safari) {
@@ -76,6 +76,9 @@
       }
     }, false);
     g.safari.self.tab.dispatchMessage('config', null);
+    send_message = function(command, data) {
+      g.safari.self.tab.dispatchMessage(command, data);
+    };
 
   } else {
     inject(null);
@@ -83,11 +86,11 @@
 
   if (send_message) {
     w.document.addEventListener('pixplusConfigSet', function(ev) {
-      var msg = {command: 'config-set', data: { }};
+      var data = {};
       ['section', 'item', 'value'].forEach(function(attr) {
-        msg.data[attr] = ev.target.getAttribute('data-' + attr);
+        data[attr] = ev.target.getAttribute('data-' + attr);
       });
-      send_message(msg);
+      send_message('config-set', data);
     }, false);
   }
 })(this, this.window, this.unsafeWindow, function(g, w, d, _extension_data) {
