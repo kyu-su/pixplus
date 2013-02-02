@@ -88,7 +88,7 @@
     w.document.addEventListener('pixplusConfigSet', function(ev) {
       var data = {};
       ['section', 'item', 'value'].forEach(function(attr) {
-        data[attr] = ev.target.getAttribute('data-' + attr);
+        data[attr] = ev.target.getAttribute('data-pp-' + attr);
       });
       send_message('config-set', data);
     }, false);
@@ -4286,9 +4286,9 @@
 
           var ev = d.createEvent('Event');
           ev.initEvent('pixplusConfigSet', true, true);
-          config_set_data.setAttribute('data-section', section);
-          config_set_data.setAttribute('data-item',    item);
-          config_set_data.setAttribute('data-value',   value);
+          config_set_data.setAttribute('data-pp-section', section);
+          config_set_data.setAttribute('data-pp-item',    item);
+          config_set_data.setAttribute('data-pp-value',   value);
           config_set_data.dispatchEvent(ev);
         }
       });
