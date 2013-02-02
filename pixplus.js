@@ -3848,6 +3848,108 @@
       _.key.listen(dom.input_tag, _.bookmarkform.onkey);
     },
 
+    setup_alias_ui: function(form) {
+      var first_tag_list = _.q('.bookmark_recommend_tag', form);
+
+      if (!first_tag_list) {
+        return;
+      }
+
+      var starter = _.e('button', {text: _.lang.current.associate_tags,
+                                   cls: 'btn_type03', css: 'float:right'});
+      first_tag_list.insertBefore(starter, first_tag_list.firstChild);
+
+      var tag1, tag2;
+
+      var associate = function(tag1, tag2) {
+        _.send_click(tag2);
+
+        tag1 = tag1.getAttribute('data-tag');
+        tag2 = tag2.getAttribute('data-tag');
+
+        _.log('tag alias: ' + tag1 + ' => ' + tag2);
+
+        var aliases = _.conf.bookmark.tag_aliases;
+        if (!aliases[tag2]) {
+          aliases[tag2] = [];
+        }
+        aliases[tag2].push(tag1);
+        _.conf.bookmark.tag_aliases = aliases;
+      };
+
+      var click_handler = function(ev) {
+        var tag   = ev.target,
+            dom   = _.bookmarkform.dom,
+            first = dom.tag_groups[0][1].indexOf(tag);
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        if (first) {
+          if (tag1) {
+            tag1.classList.remove('pp-tag-link');
+          }
+          tag1 = tag;
+          if (tag2) {
+            associate(tag1, tag2);
+            end();
+          } else {
+            tag1.classList.add('pp-tag-link');
+          }
+
+        } else {
+          if (tag2) {
+            tag2.classList.remove('pp-tag-link');
+          }
+          tag2 = tag;
+          if (tag1) {
+            associate(tag1, tag2);
+            end();
+          } else {
+            tag2.classList.add('pp-tag-link');
+          }
+        }
+      };
+
+      var start = function() {
+        starter.classList.add('pp-running');
+        starter.textContent = _.lang.current.cancel;
+
+        _.bookmarkform.dom.tag_groups.forEach(function(grp) {
+          grp[1].forEach(function(tag) {
+            tag.addEventListener('click', click_handler, false);
+          });
+        });
+      };
+
+      var end = function() {
+        starter.classList.remove('pp-running');
+        starter.textContent = _.lang.current.associate_tags;
+        if (tag1) {
+          tag1.classList.remove('pp-tag-link');
+        }
+        if (tag2) {
+          tag2.classList.remove('pp-tag-link');
+        }
+        tag1 = tag2 = null;
+
+        _.bookmarkform.dom.tag_groups.forEach(function(grp) {
+          grp[1].forEach(function(tag) {
+            tag.removeEventListener('click', click_handler, false);
+          });
+        });
+      };
+
+      _.onclick(starter, function() {
+        if (starter.classList.contains('pp-running')) {
+          end();
+        } else {
+          start();
+        }
+        return true;
+      });
+    },
+
     setup: function(form, autoinput, cb_submit) {
       if (!form) {
         return;
@@ -3896,6 +3998,7 @@
 
       _.bookmarkform.setup_tag_order(form);
       _.bookmarkform.setup_key(form);
+      _.bookmarkform.setup_alias_ui(form);
 
       _.listen(form, 'submit', function() {
         _.xhr.post(form, function() {
@@ -4734,13 +4837,15 @@
         }
       },
 
+      cancel: 'Cancel',
       repost: ' (Re: $month/$date/$year $hour:$minute)',
       rate_confirm: 'Rate it?\n$pointpt',
       author_works: 'Works',
       author_bookmarks: 'Bookmarks',
       author_staccfeed: 'Staccfeed',
       sending: 'Sending',
-      importing: 'Importing'
+      importing: 'Importing',
+      associate_tags: 'Associate tags'
     },
 
     ja: {
@@ -4878,13 +4983,15 @@
         }
       },
 
+      cancel: '\u4e2d\u6b62',
       repost: ' (\u518d: $year\u5e74$month\u6708$date\u65e5 $hour:$minute)',
       rate_confirm: '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n$point\u70b9',
       author_works: '\u4f5c\u54c1',
       author_bookmarks: '\u30d6\u30c3\u30af\u30de\u30fc\u30af',
       author_staccfeed: '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9',
       sending: '\u9001\u4fe1\u4e2d',
-      importing: '\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d'
+      importing: '\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d',
+      associate_tags: '\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b'
     }
   };
 
