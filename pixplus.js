@@ -3815,8 +3815,11 @@
     },
 
     setup_alias_ui: function(form) {
-      var first_tag_list = _.q('.bookmark_recommend_tag', form);
+      if (!_.conf.general.debug) {
+        return;
+      }
 
+      var first_tag_list = _.q('.bookmark_recommend_tag', form);
       if (!first_tag_list) {
         return;
       }
@@ -3824,8 +3827,6 @@
       var starter = _.e('button', {text: _.lang.current.associate_tags,
                                    cls: 'btn_type03', css: 'float:right'});
       first_tag_list.insertBefore(starter, first_tag_list.firstChild);
-
-      var tag1, tag2;
 
       var associate = function(tag1, tag2) {
         _.send_click(tag2);
@@ -3843,71 +3844,66 @@
         _.conf.bookmark.tag_aliases = aliases;
       };
 
-      var click_handler = function(ev) {
-        var tag   = ev.target,
-            dom   = _.bookmarkform.dom,
-            first = dom.tag_groups[0][1].indexOf(tag);
+      var tag1, tag2;
 
-        ev.preventDefault();
-        ev.stopPropagation();
+      var select = function(tag, button) {
+        var dom   = _.bookmarkform.dom,
+            first = dom.tag_groups[0][1].indexOf(tag) >= 0;
 
         if (first) {
           if (tag1) {
-            tag1.classList.remove('pp-tag-link');
+            tag1[1].classList.remove('pp-active');
           }
-          tag1 = tag;
+          tag1 = [tag, button];
           if (tag2) {
-            associate(tag1, tag2);
+            associate(tag1[0], tag2[0]);
             end();
           } else {
-            tag1.classList.add('pp-tag-link');
+            tag1[1].classList.add('pp-active');
           }
 
         } else {
           if (tag2) {
-            tag2.classList.remove('pp-tag-link');
+            tag2[1].classList.remove('pp-active');
           }
-          tag2 = tag;
+          tag2 = [tag, button];
           if (tag1) {
-            associate(tag1, tag2);
+            associate(tag1[0], tag2[0]);
             end();
           } else {
-            tag2.classList.add('pp-tag-link');
+            tag2[1].classList.add('pp-active');
           }
         }
       };
 
-      var start = function() {
-        starter.classList.add('pp-running');
-        starter.textContent = _.lang.current.cancel;
-
-        _.bookmarkform.dom.tag_groups.forEach(function(grp) {
-          grp[1].forEach(function(tag) {
-            tag.addEventListener('click', click_handler, false);
+      _.bookmarkform.dom.tag_groups.forEach(function(grp) {
+        grp[1].forEach(function(tag) {
+          var tag_t  = tag.getAttribute('data-tag'),
+              button = _.e('button', {cls: 'pp-tag-associate-button',
+                                      text: tag_t, 'data-tag': tag_t});
+          tag.parentNode.insertBefore(button, tag.nextSibling);
+          _.onclick(button, function() {
+            select(tag, button);
+            return true;
           });
         });
+      });
+
+      var bookmark_wrapper = _.popup.dom.bookmark_wrapper;
+
+      var start = function() {
+        starter.textContent = _.lang.current.cancel;
+        bookmark_wrapper.classList.add('pp-associate-tag');
+        tag1 = tag2 = null;
       };
 
       var end = function() {
-        starter.classList.remove('pp-running');
         starter.textContent = _.lang.current.associate_tags;
-        if (tag1) {
-          tag1.classList.remove('pp-tag-link');
-        }
-        if (tag2) {
-          tag2.classList.remove('pp-tag-link');
-        }
-        tag1 = tag2 = null;
-
-        _.bookmarkform.dom.tag_groups.forEach(function(grp) {
-          grp[1].forEach(function(tag) {
-            tag.removeEventListener('click', click_handler, false);
-          });
-        });
+        _.popup.dom.bookmark_wrapper.classList.remove('pp-associate-tag');
       };
 
       _.onclick(starter, function() {
-        if (starter.classList.contains('pp-running')) {
+        if (bookmark_wrapper.classList.contains('pp-associate-tag')) {
           end();
         } else {
           start();
@@ -4572,6 +4568,11 @@
     // bookmark form
     '.pp-tag-select{outline:2px solid #0f0}',
     '.pp-tag-link{outline:2px solid #f00}',
+    '#pp-popup-bookmark-wrapper .pp-tag-associate-button{display:none;',
+    'background-color:#eee;border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}',
+    '#pp-popup-bookmark-wrapper .pp-tag-associate-button.pp-active{background-color:#ddd}',
+    '#pp-popup-bookmark-wrapper.pp-associate-tag .bookmark_recommend_tag a.tag{display:none}',
+    '#pp-popup-bookmark-wrapper.pp-associate-tag .pp-tag-associate-button{display:inline}',
 
     // floater
     '.pp-float{position:fixed;top:0px}',
