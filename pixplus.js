@@ -4796,7 +4796,7 @@
 
         bookmark: {
           tag_order: 'Reorder tags. 1 tag per line.\n-: Separator\n*: Others',
-          tag_aliases: 'Tag aliases. Used for auto input. Separated by space.'
+          tag_aliases: 'Tag association. Used for auto input. Separate by space.'
         }
       },
 
@@ -4942,7 +4942,7 @@
 
         bookmark: {
           tag_order: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n-: \u30bb\u30d1\u30ec\u30fc\u30bf\n*: \u6b8b\u308a\u5168\u90e8',
-          tag_aliases: '\u30bf\u30b0\u306e\u30a8\u30a4\u30ea\u30a2\u30b9\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002'
+          tag_aliases: '\u30bf\u30b0\u306e\u95a2\u9023\u4ed8\u3051\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002'
         }
       },
 
