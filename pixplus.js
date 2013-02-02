@@ -3815,10 +3815,6 @@
     },
 
     setup_alias_ui: function(form) {
-      if (!_.conf.general.debug) {
-        return;
-      }
-
       var first_tag_list = _.q('.bookmark_recommend_tag', form);
       if (!first_tag_list) {
         return;
