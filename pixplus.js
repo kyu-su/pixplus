@@ -3790,40 +3790,6 @@
       } else if (key === 'Escape') {
         _.bookmarkform.select_tag(-1);
         return true;
-
-      } else if (key === 'Shift+Control') {
-        if (sel.link) {
-          var aliases = _.conf.bookmark.tag_aliases,
-              link1 = sel.link, link2 = sel.tag;
-          if (dom.tag_groups[0][1].indexOf(link1) < 0) {
-            var tmp = link1;
-            link1 = link2;
-            link2 = tmp;
-          }
-
-          sel.link.classList.remove('pp-tag-link');
-          sel.link = null;
-
-          var link1_t = link1.getAttribute('data-tag'),
-              link2_t = link2.getAttribute('data-tag');
-
-          if (!w.confirm(link1_t + ' => ' + link2_t)) {
-            return false;
-          }
-
-          _.send_click(link2);
-
-          if (!aliases[link2_t]) {
-            aliases[link2_t] = [];
-          }
-          aliases[link2_t].push(link1_t);
-          _.conf.bookmark.tag_aliases = aliases;
-          return true;
-        }
-
-        sel.link = sel.tag;
-        sel.link.classList.add('pp-tag-link');
-        return true;
       }
 
       return _.bookmarkform.select_nearest_tag(key);
