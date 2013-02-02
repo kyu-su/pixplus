@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.3.1
+// @version     1.4.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -4961,7 +4961,7 @@
   _.changelog = [
     {
       "date": "2013/02/xx",
-      "version": "1.3.1",
+      "version": "1.4.0",
       "changes_i18n": {
         "en": [
           "[Fix] Fix author does not shown properly in popup.",
