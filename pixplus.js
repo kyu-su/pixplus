@@ -2679,7 +2679,7 @@
         _.log('Max height: ' + h);
       }
 
-      var lists = wrap.querySelectorAll('.bookmark_recommend_tag'), last;
+      var lists = _.qa('.bookmark_recommend_tag', wrap), last;
       lists = g.Array.prototype.filter.call(lists, function(l) {
         if (l.scrollHeight > min) {
           return true;
@@ -3121,7 +3121,7 @@
 
     adjust: function(w, h) {
       var wrap  = _.popup.dom.tagedit_wrapper,
-          twrap = wrap.querySelector('#pp-popup-tagedit-table-wrapper');
+          twrap = _.q('#pp-popup-tagedit-table-wrapper', wrap);
 
       if (!twrap) {
         return;
@@ -3140,7 +3140,7 @@
       var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
       c.innerHTML = html;
 
-      var table = c.querySelector('table');
+      var table = _.q('table', c);
       if (table) {
         var tw = _.e('div', {id: 'pp-popup-tagedit-table-wrapper'});
         table.parentNode.replaceChild(tw, table);
