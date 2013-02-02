@@ -1904,6 +1904,11 @@
           }
         });
       }
+
+      var comment_no_comment = _.fastxml.q(root, '.comment-no-comment');
+      if (comment_no_comment) {
+        _.popup.dom.comment_err_empty.textContent = _.fastxml.text(comment_no_comment);
+      }
       return true;
     },
 
@@ -2195,6 +2200,7 @@
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
       dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
+      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment', css: 'display:none'}, dom.comment);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
@@ -2220,6 +2226,8 @@
       if (!_.conf.popup.show_comment_form) {
         dom.comment_form.style.display = 'none';
       }
+
+      dom.comment_err_empty.textContent = 'Sorry, comments could not be found';
 
       _.popup.input.init();
 
@@ -2994,7 +3002,8 @@
       if (illust !== _.popup.illust || !_.popup.comment.enable) {
         return;
       }
-      _.popup.dom.comment_history.innerHTML = html;
+      _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
+      _.popup.dom.comment_err_empty.style.display = html ? 'none' : '';
       _.popup.adjust();
       _.popup.comment.scroll();
     },
@@ -3023,7 +3032,8 @@
           try {
             var obj  = g.JSON.parse(data),
                 html = obj.data.html_array.join('');
-            _.popup.comment.onload(illust, '<ul>' + html + '</ul>');
+            // _.log(obj);
+            _.popup.comment.onload(illust, html);
           } catch(ex) {
             _.popup.comment.onerror(illust, g.String(ex));
           }
