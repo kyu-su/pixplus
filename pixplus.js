@@ -1023,6 +1023,51 @@
       });
     },
 
+    create_tab_content_mypage: function(root, section) {
+      var history, preview, lng = _.configui.lng.pref;
+
+      _.e('div', {cls: 'pp-config-content-header',
+                  text: lng.mypage_layout_history}, root);
+      history = _.e('ul', {id: 'pp-config-mypage-history'}, root);
+
+      _.e('div', {cls: 'pp-config-content-header',
+                  text: lng.mypage_layout_preview}, root);
+      preview = _.e('ul', {id: 'pp-config-mypage-preview'}, root);
+
+      if (_.conf.mypage.layout_history) {
+        var last_active;
+        _.conf.mypage.layout_history.split(',').forEach(function(layout) {
+          if (!/^[a-zA-Z]+$/.test(layout)) {
+            return;
+          }
+
+          var item = _.e('li', {text: layout}, history);
+
+          _.listen(item, 'mouseover', function() {
+            if (last_active) {
+              last_active.classList.remove('pp-active');
+            }
+            item.classList.add('pp-active');
+
+            _.clear(preview);
+            layout.split('').forEach(function(d) {
+              var item = _.e('li', {text: lng['mypage_layout_' + d.toLowerCase()]}, preview);
+              if (d.toUpperCase() === d) {
+                item.classList.add('pp-open');
+              }
+              _.e('div', null, item);
+            });
+
+            last_active = item;
+          });
+
+          _.listen(item, 'click', function() {
+            _.conf.mypage.layout_restore = layout;
+          });
+        });
+      }
+    },
+
     create_tab_content_key: function(root, section) {
       _.configui.create_tab_content(root, section);
 
@@ -4167,6 +4212,84 @@
   });
 
   _.page_procs = {
+    '/mypage.php': [
+      function() {
+        var layout = _.conf.mypage.layout_restore;
+
+        if (layout) {
+          _.log('Restore layout: ' + layout);
+          _.conf.mypage.layout_restore = '';
+
+          var mp = w.pixiv.mypage;
+          layout.split('').forEach(function(d, i) {
+            var lc = d.toLowerCase();
+            if (!mp.visible.hasOwnProperty(lc)) {
+              return;
+            }
+
+            if (mp.visible[lc] !== (d !== lc)) {
+              mp.toggle(lc);
+            }
+
+            while(true) {
+              var pos = mp.order.indexOf(lc);
+              if (pos <= i) {
+                break;
+              }
+              mp.up(lc);
+            }
+          });
+        }
+      },
+
+      function() {
+        var save = function() {
+          var layout = '';
+          w.pixiv.mypage.order.forEach(function(item) {
+            if (!/^[a-z]$/.test(item)) {
+              throw 'unknown pattern - ' + item;
+            }
+            if (w.pixiv.mypage.visible[item]) {
+              item = item.toUpperCase();
+            }
+            layout += item;
+          });
+
+          if (!layout) {
+            return;
+          }
+
+          var history = [];
+          if (_.conf.mypage.layout_history) {
+            history = _.conf.mypage.layout_history.split(',');
+          }
+
+          if (layout === history[0]) {
+            return;
+          }
+
+          var pos = history.indexOf(layout);
+          if (pos >= 0) {
+            history.splice(pos, 1);
+          }
+          history.unshift(layout);
+          _.conf.mypage.layout_history = history.slice(0, 10).join(',');
+        };
+
+        try {
+          save();
+
+          var pixiv_mypage_update = w.pixiv.mypage.update;
+          w.pixiv.mypage.update = function() {
+            pixiv_mypage_update.apply(this, arguments);
+            save();
+          };
+        } catch(ex) {
+          _.log('mypage error - %s', g.String(ex));
+        }
+      }
+    ],
+
     '/member_illust.php': [
       function() {
         var re;
@@ -4379,9 +4502,10 @@
       });
     }
 
-    if (_.page_procs[w.location.pathname]) {
+    var page_procs = _.page_procs[w.location.pathname];
+    if (page_procs) {
       var query = _.url.parse_query(w.location.search);
-      _.page_procs[w.location.pathname].forEach(function(func) {
+      page_procs.forEach(function(func) {
         func(query);
       });
     }
@@ -4535,6 +4659,14 @@
     '.pp-config-content.pp-active{display:block}',
     '.pp-config-content dt{font-weight:bold}',
     '.pp-config-content dd{margin-left:1em}',
+    '.pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}',
+    '*+.pp-config-content-header{margin-top:0.6em}',
+    '#pp-config-mypage-history li{cursor:pointer}',
+    '#pp-config-mypage-history li.pp-active{background-color:#eee}',
+    '#pp-config-mypage-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}',
+    '#pp-config-mypage-preview li.pp-open{font-weight:bold;color:#444}',
+    '#pp-config-mypage-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}',
+    '#pp-config-mypage-preview li.pp-open div{display:block}',
     '#pp-config-key-content td:not(.pp-config-key-modeline):first-child{padding-left:1em}',
     '.pp-config-key-modeline{font-weight:bold}',
     '#pp-config-bookmark-content textarea{width:100%;height:20em;',
@@ -4611,6 +4743,10 @@
       {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1}
     ]},
+    {"name": "mypage", "items": [
+      {"key": "layout_history", "value": ""},
+      {"key": "layout_restore", "value": ""}
+    ]},
     {"name": "key", "items": [
       {"key": "popup_prev", "value": "Backspace,a", "mode": "normal"},
       {"key": "popup_prev_direction", "value": "Left"},
@@ -4671,6 +4807,14 @@
       pref: {
         general: 'General',
         popup: 'Popup',
+        mypage: 'Top page',
+        mypage_layout_history: 'Layout history',
+        mypage_layout_preview: 'Layout preview',
+        mypage_layout_n: 'New Submissions from Everyone',
+        mypage_layout_t: 'Featured Tags',
+        mypage_layout_e: 'Project Index',
+        mypage_layout_b: 'New Submissions from your Favorite Users',
+        mypage_layout_m: 'New Submissions on My pixiv',
         key: 'Key',
         bookmark: 'Tags',
         importexport: 'Import/Export',
@@ -4817,6 +4961,14 @@
       pref: {
         general: '\u5168\u822c',
         popup: '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7',
+        mypage: '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8',
+        mypage_layout_history: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74',
+        mypage_layout_preview: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u30d7\u30ec\u30d3\u30e5\u30fc',
+        mypage_layout_n: '\u307f\u3093\u306a\u306e\u65b0\u7740\u4f5c\u54c1',
+        mypage_layout_t: '\u6ce8\u76ee\u306e\u30bf\u30b0',
+        mypage_layout_e: '\u4f01\u753b\u76ee\u9332',
+        mypage_layout_b: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u65b0\u7740\u4f5c\u54c1',
+        mypage_layout_m: '\u30de\u30a4\u30d4\u30af\u65b0\u7740\u4f5c\u54c1',
         key: '\u30ad\u30fc',
         bookmark: '\u30bf\u30b0',
         importexport: '\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
