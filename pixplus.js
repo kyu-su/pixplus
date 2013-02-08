@@ -231,13 +231,8 @@
       });
     },
 
-    __key: function(section, item, is_extension_background) {
-      var key = _.conf.__key_prefix;
-      if (!is_extension_background || section !== 'general') {
-        // for compatibility
-        key += section + '_';
-      }
-      return key + item;
+    __key: function(section, item) {
+      return _.conf.__key_prefix + section + '_' + item;
     },
 
     __parse: function(section, item, value) {
@@ -261,14 +256,14 @@
       }
     },
 
-    __wrap_storage: function(storage, is_extension_background) {
+    __wrap_storage: function(storage) {
       return {
         get: function(section, item) {
-          return storage.getItem(_.conf.__key(section, item, is_extension_background));
+          return storage.getItem(_.conf.__key(section, item));
         },
 
         set: function(section, item, value) {
-          storage.setItem(_.conf.__key(section, item, is_extension_background), value);
+          storage.setItem(_.conf.__key(section, item), value);
         }
       };
     },

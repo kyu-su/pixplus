@@ -20,13 +20,7 @@ if sys.argv[1] == 'safari':
 def print_conf(conf):
   for sec in conf:
     for item in sec['items']:
-      # for compatibility
-      if sec['name'] == 'general':
-        name = 'conf_%s' % item['key']
-      else:
-        name = 'conf_%s_%s' % (sec['name'], item['key'])
-        pass
-
+      name = 'conf_%s_%s' % (sec['name'], item['key'])
       value = item['value']
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % escape(str(value))
