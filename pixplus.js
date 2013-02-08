@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.4.0
+// @version     1.5.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -5115,6 +5115,19 @@
   };
 
   _.changelog = [
+    {
+      "date": "2013/02/xx",
+      "version": "1.5.0",
+      "changes_i18n": {
+        "en": [
+          "[Fix][Extension] Fix can't save settings in General section."
+        ],
+        "ja": [
+          "[\u4fee\u6b63][\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3] \u300c\u5168\u822c\u300d\u30bb\u30af\u30b7\u30e7\u30f3\u306e\u8a2d\u5b9a\u304c\u4fdd\u5b58\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/02",
