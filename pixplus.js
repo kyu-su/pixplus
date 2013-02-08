@@ -231,9 +231,9 @@
       });
     },
 
-    __key: function(section, item, is_extension) {
+    __key: function(section, item, is_extension_background) {
       var key = _.conf.__key_prefix;
-      if (!is_extension || section !== 'general') {
+      if (!is_extension_background || section !== 'general') {
         // for compatibility
         key += section + '_';
       }
@@ -261,14 +261,14 @@
       }
     },
 
-    __wrap_storage: function(storage, is_extension) {
+    __wrap_storage: function(storage, is_extension_background) {
       return {
         get: function(section, item) {
-          return storage.getItem(_.conf.__key(section, item, is_extension));
+          return storage.getItem(_.conf.__key(section, item, is_extension_background));
         },
 
         set: function(section, item, value) {
-          storage.setItem(_.conf.__key(section, item, is_extension), value);
+          storage.setItem(_.conf.__key(section, item, is_extension_background), value);
         }
       };
     },
