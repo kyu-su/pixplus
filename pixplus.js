@@ -4197,6 +4197,22 @@
         dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
 
         _.e('p', {text: _.lang.current.mypage_layout_history_help}, dom.root);
+
+        _.listen(w, 'resize', function() {
+          if (!dom.root.parentNode) {
+            return;
+          }
+          _.mypage.history_manager.centerize();
+        }, true);
+
+        _.key.listen(w, function(key, ev, connection) {
+          if (!dom.root.parentNode) {
+            return;
+          }
+          if (key === 'Escape') {
+            _.mypage.history_manager.hide();
+          }
+        });
       },
 
       preview: function(layout) {
@@ -4238,7 +4254,8 @@
           return entry.split(':');
         });
 
-        history.forEach(function(entry) {
+        var last_active;
+        history.forEach(function(entry, idx) {
           var layout = entry[0], text, item;
 
           if (entry[1]) {
@@ -4250,15 +4267,26 @@
           }
 
           item = _.e('li', {text: text}, dom.list);
+
           _.listen(item, 'mouseover', function() {
+            item.classList.add('pp-active');
+            if (last_active) {
+              last_active.classList.remove('pp-active');
+            }
+            last_active = item;
             _.mypage.history_manager.preview(layout);
           });
+
           _.onclick(item, function() {
             _.mypage.restore_layout(layout);
           });
-        });
 
-        _.mypage.history_manager.preview(history[0][0]);
+          if (idx === 0) {
+            item.classList.add('pp-active');
+            _.mypage.history_manager.preview(layout);
+            last_active = item;
+          }
+        });
       },
 
       centerize: function() {
@@ -4792,8 +4820,8 @@
     'text-align:center;background-color:#eee}',
     '#pp-layout-history-manager header span{float:right}',
     '#pp-layout-history{margin:0.2em}',
-    '#pp-layout-history li{cursor:pointer}',
-    '#pp-layout-history li:hover{background-color:#ddd}',
+    '#pp-layout-history li{cursor:pointer;padding:0px 0.3em}',
+    '#pp-layout-history li.pp-active{background-color:#ddd}',
     '#pp-layout-preview{min-width:400px;min-height:300px}',
     '#pp-layout-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}',
     '#pp-layout-preview li.pp-open{font-weight:bold;color:#444}',
