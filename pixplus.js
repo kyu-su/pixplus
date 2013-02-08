@@ -4269,10 +4269,13 @@
           item = _.e('li', {text: text}, dom.list);
 
           _.listen(item, 'mouseover', function() {
-            item.classList.add('pp-active');
+            if (item === last_active) {
+              return;
+            }
             if (last_active) {
               last_active.classList.remove('pp-active');
             }
+            item.classList.add('pp-active');
             last_active = item;
             _.mypage.history_manager.preview(layout);
           });
