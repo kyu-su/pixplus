@@ -1359,6 +1359,10 @@
     },
 
     create_tab: function(name, create_args) {
+      if (!_.conf.general.debug && name === 'mypage') {
+        return;
+      }
+
       var dom = _.configui.dom;
       var label = _.e('label', {text: _.configui.lng.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
       var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
