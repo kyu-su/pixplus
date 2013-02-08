@@ -1023,51 +1023,6 @@
       });
     },
 
-    create_tab_content_mypage: function(root, section) {
-      var history, preview, lng = _.configui.lng.pref;
-
-      _.e('div', {cls: 'pp-config-content-header',
-                  text: lng.mypage_layout_history}, root);
-      history = _.e('ul', {id: 'pp-config-mypage-history'}, root);
-
-      _.e('div', {cls: 'pp-config-content-header',
-                  text: lng.mypage_layout_preview}, root);
-      preview = _.e('ul', {id: 'pp-config-mypage-preview'}, root);
-
-      if (_.conf.mypage.layout_history) {
-        var last_active;
-        _.conf.mypage.layout_history.split(',').forEach(function(layout) {
-          if (!/^[a-zA-Z]+$/.test(layout)) {
-            return;
-          }
-
-          var item = _.e('li', {text: layout}, history);
-
-          _.listen(item, 'mouseover', function() {
-            if (last_active) {
-              last_active.classList.remove('pp-active');
-            }
-            item.classList.add('pp-active');
-
-            _.clear(preview);
-            layout.split('').forEach(function(d) {
-              var item = _.e('li', {text: lng['mypage_layout_' + d.toLowerCase()]}, preview);
-              if (d.toUpperCase() === d) {
-                item.classList.add('pp-open');
-              }
-              _.e('div', null, item);
-            });
-
-            last_active = item;
-          });
-
-          _.listen(item, 'click', function() {
-            _.conf.mypage.layout_restore = layout;
-          });
-        });
-      }
-    },
-
     create_tab_content_key: function(root, section) {
       _.configui.create_tab_content(root, section);
 
@@ -1367,7 +1322,7 @@
     },
 
     create_tab: function(name, create_args) {
-      if (!_.conf.general.debug && name === 'mypage') {
+      if (name === 'mypage') {
         return;
       }
 
@@ -4223,85 +4178,198 @@
     }
   });
 
-  _.page_procs = {
-    '/mypage.php': [
-      function() {
-        var layout = _.conf.mypage.layout_restore;
-
-        if (layout) {
-          _.log('Restore layout: ' + layout);
-          _.conf.mypage.layout_restore = '';
-
-          var mp = w.pixiv.mypage;
-          layout.split('').forEach(function(d, i) {
-            var lc = d.toLowerCase();
-            if (!mp.visible.hasOwnProperty(lc)) {
-              return;
-            }
-
-            if (mp.visible[lc] !== (d !== lc)) {
-              mp.toggle(lc);
-            }
-
-            while(true) {
-              var pos = mp.order.indexOf(lc);
-              if (pos <= i) {
-                break;
-              }
-              mp.up(lc);
-            }
-          });
+  _.mypage = {
+    history_manager: {
+      create: function() {
+        if (_.mypage.history_manager.dom) {
+          return;
         }
+
+        var dom = _.mypage.history_manager.dom = {};
+
+        dom.root = _.e('div', {id: 'pp-layout-history-manager'});
+        dom.header = _.e('header', null, dom.root);
+        dom.error = _.e('p', {cls: 'pp-error-message'}, dom.root);
+        dom.table = _.e('table', null, dom.root);
+
+        _.onclick(_.e('span', {text: '\u00d7', css: 'cursor:pointer'}, dom.header), function() {
+          _.mypage.history_manager.hide();
+        });
+        _.e('h2', {text: _.lang.current.mypage_layout_history}, dom.header);
+
+        var row = dom.table.insertRow(-1);
+        dom.list = _.e('ul', {id: 'pp-layout-history'}, row.insertCell(-1));
+        dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
+
+        _.e('p', {text: _.lang.current.mypage_layout_history_help}, dom.root);
       },
 
-      function() {
-        var save = function() {
-          var layout = '';
-          w.pixiv.mypage.order.forEach(function(item) {
-            if (!/^[a-z]$/.test(item)) {
-              throw 'unknown pattern - ' + item;
-            }
-            if (w.pixiv.mypage.visible[item]) {
-              item = item.toUpperCase();
-            }
-            layout += item;
+      preview: function(layout) {
+        var dom = _.mypage.history_manager.dom;
+        _.clear(dom.preview);
+
+        var name_map = {};
+        _.qa('#item-container header h1').forEach(function(h, i) {
+          var key = w.pixiv.mypage.order[i];
+          name_map[key] = _.trim(h.textContent);
+        });
+
+        layout.split('').forEach(function(d) {
+          var item = _.e('li', {text: name_map[d.toLowerCase()]}, dom.preview);
+          if (d.toUpperCase() === d) {
+            item.classList.add('pp-open');
+          }
+          _.e('div', null, item);
+        });
+      },
+
+      refresh: function() {
+        _.mypage.history_manager.create();
+
+        var dom = _.mypage.history_manager.dom;
+        _.clear(dom.list);
+        _.clear(dom.preview);
+
+        var history = _.conf.mypage.layout_history;
+        if (!history) {
+          dom.error.textContent = _.lang.current.mypage_layout_history_empty;
+          dom.root.classList.add('pp-error');
+          return;
+        } else {
+          dom.root.classList.remove('pp-error');
+        }
+
+        history = history.split(',').map(function(entry) {
+          return entry.split(':');
+        });
+
+        history.forEach(function(entry) {
+          var layout = entry[0], text, item;
+
+          if (entry[1]) {
+            var date = new g.Date();
+            date.setTime(g.parseInt(entry[1]));
+            text = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+          } else {
+            text = layout;
+          }
+
+          item = _.e('li', {text: text}, dom.list);
+          _.listen(item, 'mouseover', function() {
+            _.mypage.history_manager.preview(layout);
           });
+          _.onclick(item, function() {
+            _.mypage.restore_layout(layout);
+          });
+        });
 
-          if (!layout) {
-            return;
-          }
+        _.mypage.history_manager.preview(history[0][0]);
+      },
 
-          var history = [];
-          if (_.conf.mypage.layout_history) {
-            history = _.conf.mypage.layout_history.split(',');
-          }
+      centerize: function() {
+        var dom = _.mypage.history_manager.dom,
+            de  = d.documentElement;
+        dom.root.style.left = g.Math.floor((de.clientWidth  - dom.root.offsetWidth)  / 2) + 'px';
+        dom.root.style.top  = g.Math.floor((de.clientHeight - dom.root.offsetHeight) / 2) + 'px';
+      },
 
-          if (layout === history[0]) {
-            return;
-          }
+      show: function() {
+        _.mypage.history_manager.refresh();
 
-          var pos = history.indexOf(layout);
-          if (pos >= 0) {
-            history.splice(pos, 1);
-          }
-          history.unshift(layout);
-          _.conf.mypage.layout_history = history.slice(0, 10).join(',');
-        };
+        var dom = _.mypage.history_manager.dom;
+        if (!dom.root.parentNode) {
+          d.body.appendChild(dom.root);
+        }
 
-        try {
-          save();
+        _.mypage.history_manager.centerize();
+      },
 
-          var pixiv_mypage_update = w.pixiv.mypage.update;
-          w.pixiv.mypage.update = function() {
-            pixiv_mypage_update.apply(this, arguments);
-            save();
-          };
-        } catch(ex) {
-          _.log('mypage error - %s', g.String(ex));
+      hide: function() {
+        var dom = _.mypage.history_manager.dom;
+        if (dom && dom.root.parentNode) {
+          dom.root.parentNode.removeChild(dom.root);
         }
       }
-    ],
+    },
 
+    setup_item_actions: function() {
+      _.qa('#item-container header .action').forEach(function(actions) {
+        var li = _.e('li', {cls: 'pp-layout-history'});
+        actions.insertBefore(li, actions.firstChild);
+        _.onclick(li, _.mypage.history_manager.show);
+      });
+    },
+
+    save_layout: function() {
+      var layout = '';
+      w.pixiv.mypage.order.forEach(function(item) {
+        if (!/^[a-z]$/.test(item)) {
+          throw 'unknown pattern - ' + item;
+        }
+        if (w.pixiv.mypage.visible[item]) {
+          item = item.toUpperCase();
+        }
+        layout += item;
+      });
+
+      if (!layout) {
+        return;
+      }
+
+      var history = [];
+      if (_.conf.mypage.layout_history) {
+        history = _.conf.mypage.layout_history.split(',').map(function(entry) {
+          return entry.split(':', 2);
+        });
+      }
+
+      if (history.length && layout === history[0][0]) {
+        return;
+      }
+
+      var new_history = [[layout, g.Date.now()]];
+      history.forEach(function(entry) {
+        if (entry[0] !== layout) {
+          new_history.push(entry);
+        }
+      });
+      _.conf.mypage.layout_history = new_history.slice(0, 10).map(function(entry) {
+        return entry.join(':');
+      }).join(',');
+    },
+
+    restore_layout: function(layout) {
+      w.pixiv.mypage.order = layout.split('').map(function(d) {
+        var lc = d.toLowerCase();
+        w.pixiv.mypage.visible[lc] = d !== lc;
+        return lc;
+      });
+      w.pixiv.mypage.update();
+      w.location.reload();
+    },
+
+    init: function() {
+      if (w.location.pathname !== '/mypage.php') {
+        return;
+      }
+
+      _.mypage.setup_item_actions();
+
+      try {
+        _.mypage.save_layout();
+
+        var pixiv_mypage_update = w.pixiv.mypage.update;
+        w.pixiv.mypage.update = function() {
+          pixiv_mypage_update.apply(this, arguments);
+          _.mypage.save_layout();
+        };
+      } catch(ex) {
+        _.log('mypage error - %s', g.String(ex));
+      }
+    }
+  };
+
+  _.page_procs = {
     '/member_illust.php': [
       function() {
         var re;
@@ -4580,6 +4648,7 @@
 
     _.pager.init();
     _.Floater.init();
+    _.mypage.init();
     w.addEventListener('load', _.Floater.update_height, false);
   };
 
@@ -4672,13 +4741,6 @@
     '.pp-config-content dt{font-weight:bold}',
     '.pp-config-content dd{margin-left:1em}',
     '.pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}',
-    '*+.pp-config-content-header{margin-top:0.6em}',
-    '#pp-config-mypage-history li{cursor:pointer}',
-    '#pp-config-mypage-history li.pp-active{background-color:#eee}',
-    '#pp-config-mypage-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}',
-    '#pp-config-mypage-preview li.pp-open{font-weight:bold;color:#444}',
-    '#pp-config-mypage-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}',
-    '#pp-config-mypage-preview li.pp-open div{display:block}',
     '#pp-config-key-content td:not(.pp-config-key-modeline):first-child{padding-left:1em}',
     '.pp-config-key-modeline{font-weight:bold}',
     '#pp-config-bookmark-content textarea{width:100%;height:20em;',
@@ -4717,7 +4779,31 @@
     // floater
     '.pp-float{position:fixed;top:0px}',
     '.msgbox_bottom.pp-float{z-index:90;opacity:0.6}',
-    '.msgbox_bottom.pp-float:hover{opacity:1;}'
+    '.msgbox_bottom.pp-float:hover{opacity:1;}',
+
+    // mypage layout
+    '#page-mypage #item-container header .action .pp-layout-history{background-image:url(',
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6Q',
+    'AAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB90CCBALOuTefdcAAABiSU',
+    'RBVCjPlZDBDcAgDAMPduiLEdkgA7ABI2aO9FNV0EJE/PY5dpKZARhnSjlgBrBMUD9AVRGRM0BV6b37I+xZ7Z',
+    'lba/tKK40VX6CUQq11Sh2Tlxe+kLvBqzJecoHdW6+AP90XkitbPvSbXwAAAABJRU5ErkJggg==) !important}',
+    '#pp-layout-history-manager{position:fixed;border:1px solid #aaa;',
+    'background-color:#fff;box-shadow:0px 0px 0.6em 0.4em rgba(0,0,0,0.4)}',
+    '#pp-layout-history-manager .pp-error-message{display:none}',
+    '#pp-layout-history-manager.pp-error .pp-error-message{display:block}',
+    '#pp-layout-history-manager.pp-error table{display:none}',
+    '#pp-layout-history-manager table td{vertical-align:top}',
+    '#pp-layout-history-manager header{border-bottom:1px solid #aaa;padding:0.1em 0.2em;',
+    'text-align:center;background-color:#eee}',
+    '#pp-layout-history-manager header span{float:right}',
+    '#pp-layout-history{margin:0.2em}',
+    '#pp-layout-history li{cursor:pointer}',
+    '#pp-layout-history li:hover{background-color:#ddd}',
+    '#pp-layout-preview{min-width:400px;min-height:300px}',
+    '#pp-layout-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}',
+    '#pp-layout-preview li.pp-open{font-weight:bold;color:#444}',
+    '#pp-layout-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}',
+    '#pp-layout-preview li.pp-open div{display:block}'
   ].join('');
 
   _.conf.__schema = [
@@ -4756,8 +4842,7 @@
       {"key": "mouse_wheel_delta", "value": 1}
     ]},
     {"name": "mypage", "items": [
-      {"key": "layout_history", "value": ""},
-      {"key": "layout_restore", "value": ""}
+      {"key": "layout_history", "value": ""}
     ]},
     {"name": "key", "items": [
       {"key": "popup_prev", "value": "Backspace,a", "mode": "normal"},
@@ -4819,14 +4904,6 @@
       pref: {
         general: 'General',
         popup: 'Popup',
-        mypage: 'Top page',
-        mypage_layout_history: 'Layout history',
-        mypage_layout_preview: 'Layout preview',
-        mypage_layout_n: 'New Submissions from Everyone',
-        mypage_layout_t: 'Featured Tags',
-        mypage_layout_e: 'Project Index',
-        mypage_layout_b: 'New Submissions from your Favorite Users',
-        mypage_layout_m: 'New Submissions on My pixiv',
         key: 'Key',
         bookmark: 'Tags',
         importexport: 'Import/Export',
@@ -4970,7 +5047,10 @@
       author_staccfeed: 'Staccfeed',
       sending: 'Sending',
       importing: 'Importing',
-      associate_tags: 'Associate tags'
+      associate_tags: 'Associate tags',
+      mypage_layout_history: 'Layout history',
+      mypage_layout_history_empty: 'Layout history is empty',
+      mypage_layout_history_help: 'Click list item to restore layout.'
     },
 
     ja: {
@@ -4979,14 +5059,6 @@
       pref: {
         general: '\u5168\u822c',
         popup: '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7',
-        mypage: '\u30c8\u30c3\u30d7\u30da\u30fc\u30b8',
-        mypage_layout_history: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74',
-        mypage_layout_preview: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u30d7\u30ec\u30d3\u30e5\u30fc',
-        mypage_layout_n: '\u307f\u3093\u306a\u306e\u65b0\u7740\u4f5c\u54c1',
-        mypage_layout_t: '\u6ce8\u76ee\u306e\u30bf\u30b0',
-        mypage_layout_e: '\u4f01\u753b\u76ee\u9332',
-        mypage_layout_b: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u65b0\u7740\u4f5c\u54c1',
-        mypage_layout_m: '\u30de\u30a4\u30d4\u30af\u65b0\u7740\u4f5c\u54c1',
         key: '\u30ad\u30fc',
         bookmark: '\u30bf\u30b0',
         importexport: '\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
@@ -5130,7 +5202,10 @@
       author_staccfeed: '\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9',
       sending: '\u9001\u4fe1\u4e2d',
       importing: '\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d',
-      associate_tags: '\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b'
+      associate_tags: '\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b',
+      mypage_layout_history: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74',
+      mypage_layout_history_empty: '\u5c65\u6b74\u304c\u7a7a\u3067\u3059',
+      mypage_layout_history_help: '\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002'
     }
   };
 
