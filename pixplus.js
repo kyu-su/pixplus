@@ -5118,6 +5118,7 @@
     {
       "date": "2013/02/xx",
       "version": "1.5.0",
+      "releasenote": "",
       "changes_i18n": {
         "en": [
           "[Fix][Extension] Fix can't save settings in General section."
@@ -5132,6 +5133,7 @@
     {
       "date": "2013/02/02",
       "version": "1.4.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/02/02/pixplus-1-4-0",
       "changes_i18n": {
         "en": [
           "[Add] Add tag association ui to bookmark mode.",
@@ -5151,6 +5153,7 @@
     {
       "date": "2012/12/16",
       "version": "1.3.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/12/16/pixplus-1-3-0",
       "changes_i18n": {
         "en": [
           "[Add] Add option to remove pixiv comic icon.",
@@ -5174,6 +5177,7 @@
     {
       "date": "2012/12/06",
       "version": "1.2.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/12/06/pixplus-1-2-2",
       "changes_i18n": {
         "en": [
           "[Fix] Fix manga layout is broken.",
@@ -5193,6 +5197,7 @@
     {
       "date": "2012/09/29",
       "version": "1.2.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/09/29/pixplus-1-2-1",
       "changes_i18n": {
         "en": [
           "[Fix] Minor fix for pixiv's update."
@@ -5206,6 +5211,7 @@
     {
       "date": "2012/08/27",
       "version": "1.2.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/27/pixplus-1-2-0",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Redirect jump.php\" setting.",
@@ -5225,6 +5231,7 @@
     {
       "date": "2012/08/14",
       "version": "1.1.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/14/pixplus-1-1-1",
       "changes_i18n": {
         "en": [
           "[Fix] Header area hidden by click navigator.",
@@ -5248,6 +5255,7 @@
     {
       "date": "2012/08/09",
       "version": "1.1.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/09/pixplus-1-1-0",
       "changes_i18n": {
         "en": [
           "[Add] Open popup from illust link in caption(author comment).",
@@ -5277,6 +5285,7 @@
     {
       "date": "2012/08/08",
       "version": "1.0.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/08/pixplus-1-0-0",
       "changes_i18n": {
         "en": [
           "Rewrite whole of source code.",
@@ -5300,6 +5309,7 @@
     {
       "date": "2012/08/05",
       "version": "0.9.4",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/05/pixplus-0-9-4",
       "changes_i18n": {
         "en": [
           "[Fix] Rating feature don't works."
@@ -5313,6 +5323,7 @@
     {
       "date": "2012/08/03",
       "version": "0.9.3",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/08/03/pixplus-0-9-3-2",
       "changes_i18n": {
         "en": [
           "[Fix] Support pixiv's update."
@@ -5326,6 +5337,7 @@
     {
       "date": "2012/06/29",
       "version": "0.9.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/06/29/pixplus-0-9-2",
       "changes_i18n": {
         "en": [
           "[Fix] If conf.popup.big_image=0, \"S\" key (conf.key.popup_open_big) opens medium image."
@@ -5339,6 +5351,7 @@
     {
       "date": "2012/06/26",
       "version": "0.9.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/06/25/pixplus-0-9-1",
       "changes_i18n": {
         "en": [
           "[Fix] Corresponds to pixiv's spec changes.",
@@ -5354,6 +5367,7 @@
     {
       "date": "2012/02/17",
       "version": "0.9.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/02/17/pixplus-0-9-0",
       "changes_i18n": {
         "en": [
           "[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)",
@@ -5369,6 +5383,7 @@
     {
       "date": "2012/02/11",
       "version": "0.8.3",
+      "releasenote": "http://my.opera.com/crckyl/blog/2012/02/11/pixplus-0-8-3",
       "changes": [
         "\u65b0\u7740\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
         "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
@@ -5379,6 +5394,7 @@
     {
       "date": "2011/10/27",
       "version": "0.8.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/10/27/pixplus-0-8-2",
       "changes": [
         "\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u56de\u7b54\u3059\u308b\u3068\u30a8\u30e9\u30fc\u30c0\u30a4\u30a2\u30ed\u30b0\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
         "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8(mypage.php)\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
@@ -5388,6 +5404,7 @@
     {
       "date": "2011/09/17",
       "version": "0.8.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/09/17/pixplus-0-8-1",
       "changes": [
         "pixiv\u306e\u5909\u66f4\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306a\u3069\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
         "conf.key.popup_manga_open_page\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
@@ -5397,6 +5414,7 @@
     {
       "date": "2011/09/03",
       "version": "0.8.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/09/03/pixplus-0-8-0",
       "changes": [
         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002",
         "\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
@@ -5409,6 +5427,7 @@
     {
       "date": "2011/08/21",
       "version": "0.7.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/08/21/pixplus-0-7-0",
       "changes": [
         "\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002",
         "\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002",
@@ -5419,6 +5438,7 @@
     {
       "date": "2011/07/24",
       "version": "0.6.3",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/07/24/pixplus-0-6-3",
       "changes": [
         "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
         "\u300c\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9\u300d\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
@@ -5429,6 +5449,7 @@
     {
       "date": "2011/06/26",
       "version": "0.6.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/06/26/pixplus-0-6-2",
       "changes": [
         "\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
         "\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
@@ -5438,6 +5459,7 @@
     {
       "date": "2011/05/21",
       "version": "0.6.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/05/21/pixplus-0-6-1",
       "changes": [
         "Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
         "\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
@@ -5451,6 +5473,7 @@
     {
       "date": "2011/05/13",
       "version": "0.6.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/05/13/pixplus-0-5-1",
       "changes": [
         "\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002",
         "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
@@ -5467,6 +5490,7 @@
     {
       "date": "2011/03/26",
       "version": "0.5.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/03/26/pixplus-0-5-1",
       "changes": [
         "\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
         "conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002",
@@ -5480,6 +5504,7 @@
     {
       "date": "2011/02/15",
       "version": "0.5.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/pixplus-0-5-0",
       "changes": [
         "conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002",
         "Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
@@ -5499,6 +5524,7 @@
     {
       "date": "2011/02/04",
       "version": "0.4.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/02/04/pixplus-0-4-0",
       "changes": [
         "pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002",
         "\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002",
@@ -5515,6 +5541,7 @@
     {
       "date": "2011/01/15",
       "version": "0.3.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/01/14/pixplus-0-3-2",
       "changes": [
         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
       ]
@@ -5523,6 +5550,7 @@
     {
       "date": "2011/01/14",
       "version": "0.3.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2011/01/14/pixplus-0-3-1",
       "changes": [
         "Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
         "conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
@@ -5534,6 +5562,7 @@
     {
       "date": "2010/12/26",
       "version": "0.3.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2010/12/26/pixplus-0-3-0",
       "changes": [
         "conf.fast_user_bookmark\u8ffd\u52a0\u3002",
         "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002",
@@ -5553,6 +5582,7 @@
     {
       "date": "2010/12/01",
       "version": "0.2.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2010/12/01/pixplus-0-2-0",
       "changes": [
         "Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
         "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002",
@@ -5566,6 +5596,7 @@
     {
       "date": "2010/11/14",
       "version": "0.1.2",
+      "releasenote": "http://my.opera.com/crckyl/blog/2010/11/14/pixplus-0-1-2",
       "changes": [
         "\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
         "\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
@@ -5580,6 +5611,7 @@
     {
       "date": "2010/11/02",
       "version": "0.1.1",
+      "releasenote": "http://my.opera.com/crckyl/blog/2010/11/02/pixplus-0-1-1",
       "changes": [
         "\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002",
         "conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
@@ -5590,6 +5622,7 @@
     {
       "date": "2010/10/27",
       "version": "0.1.0",
+      "releasenote": "http://my.opera.com/crckyl/blog/2010/10/27/pixplus-0-1-0",
       "changes": [
         "Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002",
         "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002",
