@@ -1261,7 +1261,12 @@
     create_tab_content_changelog: function(root) {
       var dl = _.e('dl', null, root);
       _.changelog.forEach(function(release) {
-        _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+        var dt = _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+        if (release.releasenote) {
+          dt.textContent += ' ';
+          _.e('a', {href: release.releasenote, text: _.configui.lng.pref.releasenote}, dt);
+        }
+
         var ul = _.e('ul', null, _.e('dd', null, dl));
         (
           release.changes_i18n
@@ -4826,6 +4831,7 @@
         'import': 'Import',
         about: 'About',
         changelog: 'Changelog',
+        releasenote: 'Release note',
         debug: 'Debug',
         'default': 'Default',
         add: 'Add',
@@ -4980,6 +4986,7 @@
         'import': '\u30a4\u30f3\u30dd\u30fc\u30c8',
         about: '\u60c5\u5831',
         changelog: '\u66f4\u65b0\u5c65\u6b74',
+        releasenote: '\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8',
         debug: '\u30c7\u30d0\u30c3\u30b0',
         'default': '\u30c7\u30d5\u30a9\u30eb\u30c8',
         add: '\u8ffd\u52a0',
