@@ -1235,27 +1235,30 @@
         'http://twitter.com/crckyl'
       ];
       var dl = _.e('dl', null, root);
-      [['Name', 'pixplus'],
-       ['Version', _.version() + ' - ' + _.release_date()],
-       ['Web', function(dd) {
-         var ul = _.e('ul', null, dd);
-         urls.forEach(function(url) {
-           _.e('a', {href: url, text: url}, _.e('li', null, ul));
-         });
-       }],
-       ['Mail', _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
-       ['License', 'Apache License 2.0']].forEach(function(p) {
-         var label = p[0], content = p[1];
-         _.e('dt', {text: label}, dl);
-         var dd = _.e('dd', null, dl);
-         if (content instanceof w.HTMLElement) {
-           dd.appendChild(content);
-         } else if (content.call) {
-           content(dd);
-         } else {
-           dd.textContent = content;
-         }
-       });
+      [
+        [_.configui.lng.pref.about_name, 'pixplus'],
+        [_.configui.lng.pref.about_version, _.version() + ' - ' + _.release_date()],
+        [_.configui.lng.pref.about_web, function(dd) {
+          var ul = _.e('ul', null, dd);
+          urls.forEach(function(url) {
+            _.e('a', {href: url, text: url}, _.e('li', null, ul));
+          });
+        }],
+        [_.configui.lng.pref.about_email,
+         _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
+        [_.configui.lng.pref.about_license, 'Apache License 2.0']
+      ].forEach(function(p) {
+        var label = p[0], content = p[1];
+        _.e('dt', {text: label}, dl);
+        var dd = _.e('dd', null, dl);
+        if (content instanceof w.HTMLElement) {
+          dd.appendChild(content);
+        } else if (content.call) {
+          content(dd);
+        } else {
+          dd.textContent = content;
+        }
+      });
     },
 
     create_tab_content_changelog: function(root) {
@@ -4830,6 +4833,11 @@
         'export': 'Export',
         'import': 'Import',
         about: 'About',
+        about_name: 'Name',
+        about_version: 'Version',
+        about_web: 'Web page',
+        about_email: 'Mail',
+        about_license: 'License',
         changelog: 'Changelog',
         releasenote: 'Release note',
         debug: 'Debug',
@@ -4985,6 +4993,11 @@
         'export': '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
         'import': '\u30a4\u30f3\u30dd\u30fc\u30c8',
         about: '\u60c5\u5831',
+        about_name: '\u540d\u524d',
+        about_version: '\u30d0\u30fc\u30b8\u30e7\u30f3',
+        about_web: '\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8',
+        about_email: '\u30e1\u30fc\u30eb',
+        about_license: '\u30e9\u30a4\u30bb\u30f3\u30b9',
         changelog: '\u66f4\u65b0\u5c65\u6b74',
         releasenote: '\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8',
         debug: '\u30c7\u30d0\u30c3\u30b0',
