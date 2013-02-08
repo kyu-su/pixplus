@@ -4397,11 +4397,11 @@
 
       _.conf.__init({
         get: function(section, item) {
-          return _extension_data.conf[_.conf.__key(section, item, true)] || null;
+          return _extension_data.conf[_.conf.__key(section, item)] || null;
         },
 
         set: function(section, item, value) {
-          _extension_data.conf[_.conf.__key(section, item, true)] = value;
+          _extension_data.conf[_.conf.__key(section, item)] = value;
 
           var ev = d.createEvent('Event');
           ev.initEvent('pixplusConfigSet', true, true);

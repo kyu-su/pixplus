@@ -27,11 +27,11 @@
 
     _.conf.__init({
       get: function(section, item) {
-        return storage[_.conf.__key(section, item, true)] || null;
+        return storage[_.conf.__key(section, item)] || null;
       },
 
       set: function(section, item, value) {
-        storage[_.conf.__key(section, item, true)] = value;
+        storage[_.conf.__key(section, item)] = value;
         send_message('config-set', {section: section, item: item, value: value});
       }
     });

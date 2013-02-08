@@ -10,7 +10,8 @@
       : (g.safari
          ? g.safari.extension.settings
          : g.localStorage // chrome
-        )));
+        ),
+    true));
 
   if (g.opera) {
     g.opera.extension.onmessage = function(event) {
