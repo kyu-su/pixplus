@@ -185,9 +185,9 @@ $(CHROME_MANIFEST_JSON): $(CHROME_MANIFEST_JSON).in $(SRC_USERJS)
              -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
            < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
-       test $$first -eq 1 && first=0 || echo ',' >> $@; \
-       /bin/echo -n "    \"$$size\": \"$(CHROME_ICON_DIR)/$$size.png\"" >> $@; \
-     done
+           test $$first -eq 1 && first=0 || echo ',' >> $@; \
+           /bin/echo -n "    \"$$size\": \"$(CHROME_ICON_DIR)/$$size.png\"" >> $@; \
+         done
 	@echo >> $@;
 	@sed -e '1,/@ICONS@/d' \
              -e 's/@VERSION@/$(VERSION)/' \
@@ -210,7 +210,12 @@ $(CRX): $(CHROME_DIST_FILES)
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
            cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
-	@$(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) --extension-output=$@
+	@if test -f $(CHROME_SIGN_KEY); then \
+           $(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) --extension-output=$@; \
+         else \
+           mkdir -p $(dir $(CHROME_SIGN_KEY)); \
+           $(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --extension-output=$@ --key-output=$(CHROME_SIGN_KEY); \
+         fi
 
 clean-chrome:
 	@rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
@@ -221,8 +226,8 @@ clean-chrome:
 $(SAFARI_INFO_PLIST): $(SAFARI_INFO_PLIST).in
 	@echo Create: $@
 	@sed -e 's/@VERSION@/$(VERSION)/' \
-         -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
-       < $< > $@
+             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+           < $< > $@
 
 $(SAFARI_SETTINGS_PLIST): $(SAFARI_SETTINGS_PLIST).in $(CONFIG_JSON)
 	@echo Create: $@
@@ -242,17 +247,19 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
 	@echo Build: $@
 	@rm -rf $(SAFARIEXTZ_TMP_DIR)
 	@for file in $(^:$(SAFARI_ROOT)/%=%); do \
-       d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
-       mkdir -p $$d/`dirname $$file`; \
-       cp $(SAFARI_ROOT)/$$file $$d/$$file; \
-     done
-	@cd $(SAFARIEXTZ_TMP_DIR) && \
-       $(XAR) -cf ../$@ $(SAFARIEXTZ:.safariextz=.safariextension) >/dev/null && \
-       : | openssl dgst -sign $(SAFARI_SIGN_KEY) -binary | wc -c > siglen.txt && \
-       $(XAR) --sign -f ../$@ --data-to-sign sha1_hash.dat --sig-size `cat siglen.txt` $(SAFARI_CERTS:%=--cert-loc %) >/dev/null && \
-       (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat sha1_hash.dat) | \
-         openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) > signature.dat && \
-       $(XAR) --inject-sig signature.dat -f ../$@ >/dev/null
+           d=$(SAFARIEXTZ_TMP_DIR)/$(SAFARIEXTZ:.safariextz=.safariextension); \
+           mkdir -p $$d/`dirname $$file`; \
+           cp $(SAFARI_ROOT)/$$file $$d/$$file; \
+         done
+	@$(XAR) -C $(SAFARIEXTZ_TMP_DIR) -cf $@ $(SAFARIEXTZ:.safariextz=.safariextension)
+	@if test -f $(SAFARI_SIGN_KEY); then \
+           : | openssl dgst -sign $(SAFARI_SIGN_KEY) -binary | wc -c > $(SAFARIEXTZ_TMP_DIR)/siglen.txt; \
+           $(XAR) --sign -f $@ --data-to-sign $(SAFARIEXTZ_TMP_DIR)/sha1_hash.dat \
+             --sig-size `cat $(SAFARIEXTZ_TMP_DIR)/siglen.txt` $(SAFARI_CERTS:%=--cert-loc %) >/dev/null; \
+           (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat $(SAFARIEXTZ_TMP_DIR)/sha1_hash.dat) | \
+             openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) > $(SAFARIEXTZ_TMP_DIR)/signature.dat; \
+           $(XAR) --inject-sig $(SAFARIEXTZ_TMP_DIR)/signature.dat -f ../$@ >/dev/null; \
+         fi
 	@chmod 644 $@
 
 clean-safari:
