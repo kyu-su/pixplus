@@ -1,7 +1,7 @@
 RSVG_CONVERT            = rsvg-convert
 ZIP                     = zip
-CRXMAKE                 = ext/crxmake/bin/crxmake
-XAR                     = xar
+CRXMAKE                 = $(CURDIR)/ext/crxmake/bin/crxmake
+XAR                     = $(CURDIR)/ext/xar/xar/src/xar
 PYTHON2                 = python2.7
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
@@ -12,7 +12,7 @@ SAFARIEXTZ_TMP_DIR      = $(CURDIR)/.safariextz
 
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX               = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
-BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null 2>&1 && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+BUILD_SAFARIEXTZ        = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
 LICENSE                 = LICENSE.TXT
 LIB_JS                  = lib.js

@@ -1,3 +1,6 @@
 [submodule "ext/crxmake"]
 	path = ext/crxmake
 	url = git://github.com/Constellation/crxmake.git
+[submodule "ext/xar"]
+	path = ext/xar
+	url = git://github.com/mackyle/xar
