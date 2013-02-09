@@ -1,0 +1,3 @@
+[submodule "ext/crxmake"]
+	path = ext/crxmake
+	url = git://github.com/Constellation/crxmake.git

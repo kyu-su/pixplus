@@ -1,8 +1,8 @@
 RSVG_CONVERT            = rsvg-convert
 ZIP                     = zip
+CRXMAKE                 = ext/crxmake/bin/crxmake
 XAR                     = xar
 PYTHON2                 = python2.7
-CHROME                  = $(shell ./find_chrome.sh)
 OEX                     = pixplus.oex
 CRX                     = pixplus.crx
 SAFARIEXTZ              = pixplus.safariextz
@@ -11,7 +11,7 @@ CRX_TMP_DIR             = $(CURDIR)/.crx
 SAFARIEXTZ_TMP_DIR      = $(CURDIR)/.safariextz
 
 BUILD_OEX               = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
-BUILD_CRX               = $(shell which "$(CHROME)" >/dev/null 2>&1 && echo yes || echo no)
+BUILD_CRX               = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
 BUILD_SAFARIEXTZ        = $(shell which "$(XAR)" >/dev/null 2>&1 && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
 LICENSE                 = LICENSE.TXT
@@ -211,13 +211,7 @@ $(CRX): $(CHROME_DIST_FILES)
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
            cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
-	@if test -f $(CHROME_SIGN_KEY); then \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY); \
-         else \
-           "$(CHROME)" --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=); \
-         fi
-	@mv $(CRX_TMP_DIR)/$(CRX) ./
-	@test -f $(CRX_TMP_DIR)/$(CRX:.crx=.pem) && mv $(CRX_TMP_DIR)/$(CRX:.crx=.pem) $(CHROME_SIGN_KEY) || :
+	@$(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) --extension-output=$@
 
 clean-chrome:
 	@rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
