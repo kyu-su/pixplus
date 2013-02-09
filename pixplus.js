@@ -5236,10 +5236,11 @@
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
-      "date": "2013/02/xx",
+      "date": "2013/02/10",
       "version": "1.5.0",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/02/09/pixplus-1-5-0",
       "changes_i18n": {
         "en": [
           "[Add] Add top-page layout history manager.",
@@ -5252,7 +5253,6 @@
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/02",
       "version": "1.4.0",
