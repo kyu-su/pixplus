@@ -55,7 +55,7 @@ SAFARI_ROOT             = $(CURDIR)/safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
 SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
-SAFARI_CERTS            = $(wildcard $(SAFARI_ROOT)/sign/cert??)
+SAFARI_CERTS            = $(sort $(wildcard $(SAFARI_ROOT)/sign/cert??))
 SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/key.pem
 SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ICON_FILES) \
                           $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ROOT)/$(SRC_USERJS)
