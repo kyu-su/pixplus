@@ -215,12 +215,12 @@ $(CRX): $(CHROME_DIST_FILES)
            mkdir -p $(CRX_TMP_DIR)/$(CRX:.crx=)/`dirname $$file`; \
            cp $(CHROME_ROOT)/$$file $(CRX_TMP_DIR)/$(CRX:.crx=)/$$file; \
          done
-	@if test -f $(CHROME_SIGN_KEY); then \
-           $(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) --extension-output=$@; \
-         else \
-           mkdir -p $(dir $(CHROME_SIGN_KEY)); \
-           $(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --extension-output=$@ --key-output=$(CHROME_SIGN_KEY); \
-         fi
+ifeq ($(wildcard $(CHROME_SIGN_KEY)),)
+	@mkdir -p $(dir $(CHROME_SIGN_KEY))
+	@$(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --extension-output=$@ --key-output=$(CHROME_SIGN_KEY)
+else
+	@$(CRXMAKE) --pack-extension=$(CRX_TMP_DIR)/$(CRX:.crx=) --pack-extension-key=$(CHROME_SIGN_KEY) --extension-output=$@
+endif
 
 clean-chrome:
 	@rm -f $(CRX) $(CHROME_MANIFEST_JSON) $(CHROME_ROOT)/$(SRC_USERJS) $(DIST_FILES:%=$(CHROME_ROOT)/%)
@@ -257,14 +257,13 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
            cp $(SAFARI_ROOT)/$$file $$d/$$file; \
          done
 	@$(XAR) -C $(SAFARIEXTZ_TMP_DIR) -cf $@ $(SAFARIEXTZ:.safariextz=.safariextension)
-	@if test -f $(SAFARI_SIGN_KEY); then \
-           : | openssl dgst -sign $(SAFARI_SIGN_KEY) -binary | wc -c > $(SAFARIEXTZ_TMP_DIR)/siglen.txt; \
-           $(XAR) --sign -f $@ --digestinfo-to-sign $(SAFARIEXTZ_TMP_DIR)/digestinfo.dat \
-             --sig-size `cat $(SAFARIEXTZ_TMP_DIR)/siglen.txt` $(SAFARI_CERTS:%=--cert-loc %) >/dev/null; \
-           openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) -in $(SAFARIEXTZ_TMP_DIR)/digestinfo.dat \
-             -out $(SAFARIEXTZ_TMP_DIR)/signature.dat; \
-           $(XAR) --inject-sig $(SAFARIEXTZ_TMP_DIR)/signature.dat -f $@ >/dev/null; \
-         fi
+ifeq ($(wildcard $(SAFARI_SIGN_KEY)),$(SAFARI_SIGN_KEY))
+	@: | openssl dgst -sign $(SAFARI_SIGN_KEY) -binary | wc -c > $(SAFARIEXTZ_TMP_DIR)/siglen.txt
+	@$(XAR) --sign -f $@ --digestinfo-to-sign $(SAFARIEXTZ_TMP_DIR)/digestinfo.dat \
+           --sig-size `cat $(SAFARIEXTZ_TMP_DIR)/siglen.txt` $(SAFARI_CERTS:%=--cert-loc %)
+	@openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) -in $(SAFARIEXTZ_TMP_DIR)/digestinfo.dat -out $(SAFARIEXTZ_TMP_DIR)/signature.dat
+	@$(XAR) --inject-sig $(SAFARIEXTZ_TMP_DIR)/signature.dat -f $@ >/dev/null
+endif
 	@chmod 644 $@
 
 clean-safari:
