@@ -4320,7 +4320,8 @@
 
     setup_item_actions: function() {
       _.qa('#item-container header .action').forEach(function(actions) {
-        var li = _.e('li', {cls: 'pp-layout-history'});
+        var li = _.e('li', {cls: 'pp-layout-history ui-tooltip',
+                            'data-tooltip': _.lang.current.mypage_layout_history});
         actions.insertBefore(li, actions.firstChild);
         _.onclick(li, _.mypage.history_manager.show);
       });
