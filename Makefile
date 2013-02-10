@@ -55,8 +55,8 @@ SAFARI_ROOT             = $(CURDIR)/safari/pixplus.safariextension
 SAFARI_INFO_PLIST       = $(SAFARI_ROOT)/Info.plist
 SAFARI_SETTINGS_PLIST   = $(SAFARI_ROOT)/Settings.plist
 SAFARI_ICON_FILES       = $(ICON_SIZE:%=$(SAFARI_ROOT)/Icon-%.png)
-SAFARI_CERTS            = $(patsubst %,$(SAFARI_ROOT)/sign/%,safari_cert.der safari_ca1.der safari_ca2.der)
-SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/safari_key.pem
+SAFARI_CERTS            = $(patsubst %,$(SAFARI_ROOT)/sign/%,cert00 cert01 cert02)
+SAFARI_SIGN_KEY         = $(SAFARI_ROOT)/sign/key.pem
 SAFARI_DIST_FILES       = $(SAFARI_INFO_PLIST) $(SAFARI_SETTINGS_PLIST) $(SAFARI_ICON_FILES) \
                           $(DIST_FILES:%=$(SAFARI_ROOT)/%) $(SAFARI_ROOT)/$(SRC_USERJS)
 
@@ -263,7 +263,7 @@ $(SAFARIEXTZ): $(SAFARI_DIST_FILES)
              --sig-size `cat $(SAFARIEXTZ_TMP_DIR)/siglen.txt` $(SAFARI_CERTS:%=--cert-loc %) >/dev/null; \
            (echo "3021300906052B0E03021A05000414" | xxd -r -p; cat $(SAFARIEXTZ_TMP_DIR)/sha1_hash.dat) | \
              openssl rsautl -sign -inkey $(SAFARI_SIGN_KEY) > $(SAFARIEXTZ_TMP_DIR)/signature.dat; \
-           $(XAR) --inject-sig $(SAFARIEXTZ_TMP_DIR)/signature.dat -f ../$@ >/dev/null; \
+           $(XAR) --inject-sig $(SAFARIEXTZ_TMP_DIR)/signature.dat -f $@ >/dev/null; \
          fi
 	@chmod 644 $@
 
