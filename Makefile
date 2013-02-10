@@ -74,6 +74,11 @@ endif
 
 all: $(ALL_TARGETS) feeds status
 
+deps: $(XAR)
+
+$(XAR):
+	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
+
 status:
 	@echo
 	@echo "$(GREASEMONKEY_JS):    yes"
