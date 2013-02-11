@@ -1914,7 +1914,7 @@
 
       var comment_no_comment = _.fastxml.q(root, '.comment-no-comment');
       if (comment_no_comment) {
-        _.popup.dom.comment_err_empty.textContent = _.fastxml.text(comment_no_comment);
+        illust.err_no_comment = _.fastxml.text(comment_no_comment);
       }
       return true;
     },
@@ -2458,6 +2458,10 @@
       dom.caption.innerHTML = illust.caption;
       _.process_caption(dom.caption, illust);
       _.redirect_jump_page(dom.caption);
+
+      if (illust.err_no_comment) {
+        dom.comment_err_empty.textContent = illust.err_no_comment;
+      }
 
       dom.taglist.innerHTML = illust.taglist;
       _.onclick(
