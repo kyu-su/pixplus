@@ -2266,12 +2266,12 @@
       }, [0, 0]);
 
       if (total_size[0] > max_width || total_size[1] > max_height) {
-        if (update_resize_mode) {
+        if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
           var aspect = total_size[0] / total_size[1];
           if (aspect < 1) {
             aspect = 1 / aspect;
           }
-          if (aspect >= 5) {
+          if (aspect >= _.conf.popup.fit_short_threshold) {
             _.popup.resize_mode = _.popup.FIT_SHORT;
           } else {
             _.popup.resize_mode = _.popup.FIT_LONG;
@@ -4938,6 +4938,7 @@
       {"key": "redirect_jump_page", "value": 1},
       {"key": "workaround", "value": 0, "hidden": true}
     ]},
+
     {"name": "popup", "items": [
       {"key": "preload", "value": true},
       {"key": "big_image", "value": false},
@@ -4957,11 +4958,14 @@
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
       {"key": "mouse_wheel", "value": 2},
-      {"key": "mouse_wheel_delta", "value": 1}
+      {"key": "mouse_wheel_delta", "value": 1},
+      {"key": "fit_short_threshold", "value": 5}
     ]},
+
     {"name": "mypage", "items": [
       {"key": "layout_history", "value": ""}
     ]},
+
     {"name": "key", "items": [
       {"key": "popup_prev", "value": "Backspace,a", "mode": "normal"},
       {"key": "popup_prev_direction", "value": "Left"},
@@ -5014,6 +5018,7 @@
       {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"},
       {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
     ]},
+
     {"name": "bookmark", "items": [
       {"key": "tag_order", "value": ""},
       {"key": "tag_aliases", "value": ""}
@@ -5105,7 +5110,8 @@
             desc: 'Mouse wheel operation',
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
           },
-          mouse_wheel_delta: 'Threshold for mouse wheel setting(if set negative value, invert direction)'
+          mouse_wheel_delta: 'Threshold for mouse wheel setting(if set negative value, invert direction)',
+          fit_short_threshold: 'Aspect ratio threshold for switch resize mode(0:Disable)'
         },
 
         key: {
@@ -5266,7 +5272,8 @@
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
           },
-          mouse_wheel_delta: '\u30db\u30a4\u30fc\u30eb\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)'
+          mouse_wheel_delta: '\u30db\u30a4\u30fc\u30eb\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)',
+          fit_short_threshold: '\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b\u7e26\u6a2a\u6bd4\u306e\u95be\u5024(0:\u7121\u52b9)'
         },
 
         key: {
