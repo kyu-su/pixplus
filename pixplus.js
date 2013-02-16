@@ -2265,13 +2265,21 @@
         return [a[0] + b[0], g.Math.max(a[1], b[1])];
       }, [0, 0]);
 
+
+      var image_layout = _.popup.dom.image_layout;
+      image_layout.style.maxWidth  = '';
+      image_layout.style.maxHeight = '';
+      image_layout.style.overflowX = '';
+      image_layout.style.overflowY = '';
+
       if (total_size[0] > max_width || total_size[1] > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
-          var aspect = total_size[0] / total_size[1];
-          if (aspect < 1) {
-            aspect = 1 / aspect;
+          var aspect   = total_size[0] / total_size[1],
+              aspect_a = aspect;
+          if (aspect_a < 1) {
+            aspect_a = 1 / aspect_a;
           }
-          if (aspect >= _.conf.popup.fit_short_threshold) {
+          if (aspect_a >= _.conf.popup.fit_short_threshold) {
             _.popup.resize_mode = _.popup.FIT_SHORT;
           } else {
             _.popup.resize_mode = _.popup.FIT_LONG;
@@ -2280,6 +2288,16 @@
 
         var mode = _.popup.resize_mode === _.popup.FIT_LONG ? 'min' : 'max';
         scale = g.Math.min(g.Math[mode](max_width / total_size[0], max_height / total_size[1]), 1);
+
+        if (_.popup.resize_mode && _.popup.resize_mode === _.popup.FIT_SHORT) {
+          if (aspect > 1) {
+            image_layout.style.maxWidth  = max_width  + 'px';
+            image_layout.style.overflowX = 'auto';
+          } else if (aspect < 1) {
+            image_layout.style.maxHeight = max_height + 'px';
+            image_layout.style.overflowY = 'auto';
+          }
+        }
       }
 
       _.popup.images.forEach(function(img, idx) {
@@ -2314,10 +2332,6 @@
         }
         return str;
       }).join('/');
-
-      var image_layout = _.popup.dom.image_layout;
-      image_layout.style.maxWidth  = max_width  + 'px';
-      image_layout.style.maxHeight = max_height + 'px';
     },
 
     calculate_max_content_size: function(content) {
@@ -4844,7 +4858,6 @@
     '#pp-popup-author-links a{margin-right:0.6em;font-weight:bold}',
     '#pp-popup-image-wrapper{display:block;border:1px solid #aaa;line-height:0;',
     'min-width:480px;min-height:360px}',
-    '#pp-popup-image-layout{overflow:auto}',
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc}',
     '.pp-popup-olc.pp-active:hover{opacity:0.6}',
     '#pp-popup-olc-prev{left:0}',
