@@ -3335,6 +3335,10 @@
       _.popup.dom.caption_wrapper.scrollTop += _.conf.popup.scroll_height;
     },
 
+    illust_can_scroll: function() {
+      return _.popup.input.illust_can_scroll_vertically() || _.popup.input.illust_can_scroll_horizontally();
+    },
+
     illust_can_scroll_vertically: function() {
       return _.popup.dom.image_layout.scrollHeight > _.popup.dom.image_layout.clientHeight;
     },
@@ -3656,7 +3660,7 @@
       });
 
       _.onwheel(dom.image_layout, function(ev) {
-        if (_.popup.input.illust_can_scroll_vertically()) {
+        if (_.popup.input.illust_can_scroll()) {
           ev.stopPropagation();
         }
         return false;
