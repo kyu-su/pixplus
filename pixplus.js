@@ -3363,6 +3363,16 @@
       _.popup.dom.image_layout.scrollLeft += _.conf.popup.scroll_height;
     },
 
+    illust_scroll_top: function() {
+      _.popup.dom.image_layout.scrollTop = 0;
+      _.popup.dom.image_layout.scrollLeft = 0;
+    },
+
+    illust_scroll_bottom: function() {
+      _.popup.dom.image_layout.scrollTop = _.popup.dom.image_layout.scrollHeight;
+      _.popup.dom.image_layout.scrollLeft = _.popup.dom.image_layout.scrollWidth;
+    },
+
     illust_page_up: function() {
       _.popup.dom.image_layout.scrollTop -= _.popup.dom.image_layout.clientHeight * 0.8;
     },
@@ -3518,6 +3528,14 @@
         keys: [
           'illust_scroll_left',
           'illust_scroll_right'
+        ]
+      }, {
+        cond: function() {
+          return _.popup.input.illust_can_scroll();
+        },
+        keys: [
+          'illust_scroll_top',
+          'illust_scroll_bottom'
         ]
       }, {
         cond: function() {
@@ -4982,6 +5000,8 @@
       {"key": "popup_illust_scroll_down", "value": "Down"},
       {"key": "popup_illust_scroll_left", "value": "Left"},
       {"key": "popup_illust_scroll_right", "value": "Right"},
+      {"key": "popup_illust_scroll_top", "value": "Home"},
+      {"key": "popup_illust_scroll_bottom", "value": "End"},
       {"key": "popup_illust_page_up", "value": "PageUp"},
       {"key": "popup_illust_page_down", "value": "PageDown"},
       {"key": "popup_open", "value": "Shift+f"},
@@ -5130,6 +5150,8 @@
           popup_illust_scroll_down: 'Scroll illust down',
           popup_illust_scroll_left: 'Scroll illust left',
           popup_illust_scroll_right: 'Scroll illust right',
+          popup_illust_scroll_top: 'Scroll illust to top',
+          popup_illust_scroll_bottom: 'Scroll illust to bottom',
           popup_illust_page_up: 'Scroll illust up (PageUp)',
           popup_illust_page_down: 'Scroll illust down (PageDown)',
           popup_open: 'Open illust page',
@@ -5292,6 +5314,8 @@
           popup_illust_scroll_down: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
           popup_illust_scroll_left: '\u30a4\u30e9\u30b9\u30c8\u3092\u5de6\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
           popup_illust_scroll_right: '\u30a4\u30e9\u30b9\u30c8\u3092\u53f3\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
+          popup_illust_scroll_top: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
+          popup_illust_scroll_bottom: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
           popup_illust_page_up: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageUp)',
           popup_illust_page_down: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageDown)',
           popup_open: '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f',
