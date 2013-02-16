@@ -2694,6 +2694,18 @@
           w.pixiv.rating.apply();
         } catch(ex) { }
       }
+    },
+
+    illust_can_scroll: function() {
+      return _.popup.illust_can_scroll_vertically() || _.popup.illust_can_scroll_horizontally();
+    },
+
+    illust_can_scroll_vertically: function() {
+      return _.popup.dom.image_layout.scrollHeight > _.popup.dom.image_layout.clientHeight;
+    },
+
+    illust_can_scroll_horizontally: function() {
+      return _.popup.dom.image_layout.scrollWidth > _.popup.dom.image_layout.clientWidth;
     }
   };
 
@@ -3335,18 +3347,6 @@
       _.popup.dom.caption_wrapper.scrollTop += _.conf.popup.scroll_height;
     },
 
-    illust_can_scroll: function() {
-      return _.popup.input.illust_can_scroll_vertically() || _.popup.input.illust_can_scroll_horizontally();
-    },
-
-    illust_can_scroll_vertically: function() {
-      return _.popup.dom.image_layout.scrollHeight > _.popup.dom.image_layout.clientHeight;
-    },
-
-    illust_can_scroll_horizontally: function() {
-      return _.popup.dom.image_layout.scrollWidth > _.popup.dom.image_layout.clientWidth;
-    },
-
     illust_scroll_up: function() {
       _.popup.dom.image_layout.scrollTop -= _.conf.popup.scroll_height;
     },
@@ -3379,6 +3379,19 @@
 
     illust_page_down: function() {
       _.popup.dom.image_layout.scrollTop += _.popup.dom.image_layout.clientHeight * 0.8;
+    },
+
+    switch_resize_mode: function() {
+      var modes = ['FIT_LONG', 'FIT_SHORT'].map(function(name) {
+        return _.popup[name];
+      });
+
+      var next = modes.indexOf(_.popup.resize_mode) + 1;
+      if (next < 0 || next >= modes.length) {
+        next = 0;
+      }
+      _.popup.resize_mode = modes[next];
+      _.popup.adjust();
     },
 
     open_profile: function() {
@@ -3513,7 +3526,7 @@
         ]
       }, {
         cond: function() {
-          return _.popup.input.illust_can_scroll_vertically();
+          return _.popup.illust_can_scroll_vertically();
         },
         keys: [
           'illust_scroll_up',
@@ -3523,7 +3536,7 @@
         ]
       }, {
         cond: function() {
-          return _.popup.input.illust_can_scroll_horizontally();
+          return _.popup.illust_can_scroll_horizontally();
         },
         keys: [
           'illust_scroll_left',
@@ -3531,7 +3544,7 @@
         ]
       }, {
         cond: function() {
-          return _.popup.input.illust_can_scroll();
+          return _.popup.illust_can_scroll();
         },
         keys: [
           'illust_scroll_top',
@@ -3550,6 +3563,7 @@
           'caption_scroll_down',
           'first',
           'last',
+          'switch_resize_mode',
           ['close', _.popup.hide],
           'open_profile',
           'open_illust',
@@ -3678,7 +3692,7 @@
       });
 
       _.onwheel(dom.image_layout, function(ev) {
-        if (_.popup.input.illust_can_scroll()) {
+        if (_.popup.illust_can_scroll()) {
           ev.stopPropagation();
         }
         return false;
@@ -5004,6 +5018,7 @@
       {"key": "popup_illust_scroll_bottom", "value": "End"},
       {"key": "popup_illust_page_up", "value": "PageUp"},
       {"key": "popup_illust_page_down", "value": "PageDown"},
+      {"key": "popup_switch_resize_mode", "value": "w"},
       {"key": "popup_open", "value": "Shift+f"},
       {"key": "popup_open_big", "value": "f"},
       {"key": "popup_open_profile", "value": "e"},
@@ -5154,6 +5169,7 @@
           popup_illust_scroll_bottom: 'Scroll illust to bottom',
           popup_illust_page_up: 'Scroll illust up (PageUp)',
           popup_illust_page_down: 'Scroll illust down (PageDown)',
+          popup_switch_resize_mode: 'Switch resize mode',
           popup_open: 'Open illust page',
           popup_open_big: 'Open image',
           popup_open_profile: 'Open profile',
@@ -5318,6 +5334,7 @@
           popup_illust_scroll_bottom: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b',
           popup_illust_page_up: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageUp)',
           popup_illust_page_down: '\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageDown)',
+          popup_switch_resize_mode: '\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b',
           popup_open: '\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f',
           popup_open_big: '\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f',
           popup_open_profile: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f',
