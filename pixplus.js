@@ -4984,7 +4984,7 @@
       {"key": "popup_next_direction", "value": "Right"},
       {"key": "popup_first", "value": "Home"},
       {"key": "popup_last", "value": "End"},
-      {"key": "popup_close", "value": "Escape"},
+      {"key": "popup_close", "value": "Escape,q"},
       {"key": "popup_caption_scroll_up", "value": "Up"},
       {"key": "popup_caption_scroll_down", "value": "Down"},
       {"key": "popup_caption_toggle", "value": "c"},
