@@ -2121,6 +2121,9 @@
     FIT_LONG:  0,
     FIT_SHORT: 1,
 
+    scrollbar_width:  0,
+    scrollbar_height: 0,
+
     create: function() {
       var dom = _.popup.dom;
       if (dom.created) {
@@ -2200,36 +2203,77 @@
 
 
       var image_layout = _.popup.dom.image_layout;
-      image_layout.style.maxWidth  = '';
-      image_layout.style.maxHeight = '';
-      image_layout.style.overflowX = '';
-      image_layout.style.overflowY = '';
+      [
+        'width', 'height',
+        'max-width', 'max-height',
+        'overflowX', 'overflowY',  // gecko
+        'overflow-x', 'overflow-y' // webkit
+      ].forEach(function(key) {
+        image_layout.style[key] = '';
+      });
 
       if (total_size[0] > max_width || total_size[1] > max_height) {
-        var aspect = total_size[0] / total_size[1];
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
-          var aspect_a = aspect;
-          if (aspect_a < 1) {
-            aspect_a = 1 / aspect_a;
+          var aspect = total_size[0] / total_size[1];
+          if (aspect < 1) {
+            aspect = 1 / aspect;
           }
-          if (aspect_a >= _.conf.popup.fit_short_threshold) {
+          if (aspect >= _.conf.popup.fit_short_threshold) {
             _.popup.resize_mode = _.popup.FIT_SHORT;
           } else {
             _.popup.resize_mode = _.popup.FIT_LONG;
           }
         }
 
-        var mode = _.popup.resize_mode === _.popup.FIT_LONG ? 'min' : 'max';
-        scale = g.Math.min(g.Math[mode](max_width / total_size[0], max_height / total_size[1]), 1);
+        if (_.popup.resize_mode === _.popup.FIT_SHORT) {
+          var sw = max_width / total_size[0],
+              sh = max_height / total_size[1];
 
-        if (_.popup.resize_mode && _.popup.resize_mode === _.popup.FIT_SHORT) {
-          if (aspect > 1) {
-            image_layout.style.maxWidth  = max_width  + 'px';
-            image_layout.style.overflowX = 'auto';
-          } else if (aspect < 1) {
+          g.setTimeout(function() {
+            var sw = image_layout.offsetWidth  - image_layout.clientWidth,
+                sh = image_layout.offsetHeight - image_layout.clientHeight,
+                change = false;
+            if (sw > 0 && sw !== _.popup.scrollbar_width) {
+              _.popup.scrollbar_width = sw;
+              change = true;
+            }
+            if (sh > 0 && sh !== _.popup.scrollbar_height) {
+              _.popup.scrollbar_height = sh;
+              change = true;
+            }
+            if (change) {
+              _.popup.adjust();
+            }
+          }, 0);
+
+          if (sw > sh) {
+            // vertical scroll
+            image_layout.style.width =
+              g.Math.min(max_width, total_size[0] + _.popup.scrollbar_width) + 'px';
+            max_width -= _.popup.scrollbar_width;
+            if (total_size[0] > max_width) {
+              scale = g.Math.max(max_width / total_size[0]);
+            }
+
             image_layout.style.maxHeight = max_height + 'px';
             image_layout.style.overflowY = 'auto';
+            image_layout.style['overflow-y'] = 'auto';
+          } else {
+            // horizontal scroll
+            image_layout.style.height =
+              g.Math.min(max_height, total_size[1] + _.popup.scrollbar_height) + 'px';
+            max_height -= _.popup.scrollbar_height;
+            if (total_size[1] > max_width) {
+              scale = max_height / total_size[1];
+            }
+
+            image_layout.style.maxWidth  = max_width  + 'px';
+            image_layout.style.overflowX = 'auto';
+            image_layout.style['overflow-x'] = 'auto';
           }
+
+        } else {
+          scale = g.Math.min(max_width / total_size[0], max_height / total_size[1], 1);
         }
       }
 
@@ -4110,7 +4154,9 @@
       if (this.cont) {
         this.cont.style.display = 'block';
         this.cont.style.overflowX = 'hidden';
+        this.cont.style['overflow-x'] = 'hidden';
         this.cont.style.overflowY = 'auto';
+        this.cont.style['overflow-y'] = 'auto';
       }
       this.update_height();
       this.update_float();
