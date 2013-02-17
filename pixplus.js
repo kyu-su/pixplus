@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.5.0
+// @version     1.6.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -5373,6 +5373,20 @@
   };
 
   _.changelog = [
+    {
+      "date": "2013/xx/xx",
+      "version": "1.6.0",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Add] Add resize mode settings and key bindings."
+        ],
+        "ja": [
+          "[\u8ffd\u52a0] \u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u306e\u8a2d\u5b9a\u3068\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u8ffd\u52a0\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/10",
