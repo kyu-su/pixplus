@@ -247,13 +247,11 @@ $(CRX_ICON_FILES): $(BUILD_DIR_CRX)/$(CRX_ICON_DIR)/%: $(BUILD_DIR_ICON)/%
 	@cp $< $@
 
 $(CRX): $(CRX_DIST_FILES)
-	@echo -n 'Generate: $(@:$(CURDIR)/%=%)'
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 ifeq ($(wildcard $(CRX_SIGN_KEY)),)
-	@echo ' (new signature)'
-	@mkdir -p $(dir $(CRX_SIGN_KEY))
-	@$(CRXMAKE) --pack-extension=$(BUILD_DIR_CRX) --extension-output=$@ --key-output=$(CRX_SIGN_KEY)
+	@echo 'Warn: $(CRX_SIGN_KEY:$(CURDIR)/%=%) not found'
+	@$(CRXMAKE) --pack-extension=$(BUILD_DIR_CRX) --extension-output=$@ --key-output=$(BUILD_DIR)/$(notdir $(CRX_SIGN_KEY))
 else
-	@echo ' ($(CRX_SIGN_KEY:$(CURDIR)/%=%))'
 	@$(CRXMAKE) --pack-extension=$(BUILD_DIR_CRX) --pack-extension-key=$(CRX_SIGN_KEY) --extension-output=$@
 endif
 	@echo
@@ -297,8 +295,10 @@ $(SAFARIEXTZ_ICON_FILES): $(BUILD_DIR_SAFARIEXTZ)/Icon-%: $(BUILD_DIR_ICON)/%
 $(SAFARIEXTZ): $(SAFARIEXTZ_DIST_FILES)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(XAR) -C $(dir $(BUILD_DIR_SAFARIEXTZ)) -cf $@ $(notdir $(BUILD_DIR_SAFARIEXTZ))
-ifeq ($(wildcard $(SAFARIEXTZ_SIGN_KEY)),$(SAFARIEXTZ_SIGN_KEY))
-	@echo 'Signing: $(@:$(CURDIR)/%=%)'
+ifeq ($(wildcard $(SAFARIEXTZ_SIGN_KEY)),)
+	@echo 'Warn: $(SAFARIEXTZ_SIGN_KEY:$(CURDIR)/%=%) not found'
+else
+	@echo 'Sign: $(@:$(CURDIR)/%=%)'
 	@: | openssl dgst -sign $(SAFARIEXTZ_SIGN_KEY) -binary | wc -c > $(BUILD_DIR)/siglen.txt
 	@$(XAR) --sign -f $@ --digestinfo-to-sign $(BUILD_DIR)/digestinfo.dat \
            --sig-size `cat $(BUILD_DIR)/siglen.txt` $(SAFARIEXTZ_CERTS:%=--cert-loc %)
