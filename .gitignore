@@ -1,10 +1,1 @@
-config.json
-lib.js
-data.js
-pixplus.user.js
-pixplus.oex
-pixplus.crx
-pixplus.safariextz
-.oex
-.crx
-.safariextz
+build
