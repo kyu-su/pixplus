@@ -2273,9 +2273,9 @@
       image_layout.style.overflowY = '';
 
       if (total_size[0] > max_width || total_size[1] > max_height) {
+        var aspect = total_size[0] / total_size[1];
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
-          var aspect   = total_size[0] / total_size[1],
-              aspect_a = aspect;
+          var aspect_a = aspect;
           if (aspect_a < 1) {
             aspect_a = 1 / aspect_a;
           }
