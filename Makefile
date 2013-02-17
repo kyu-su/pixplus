@@ -8,11 +8,6 @@ LICENSE                         = LICENSE.TXT
 ICON_SVG                        = pixplus.svg
 SRC_USERJS                      = pixplus.js
 
-FEED_ATOM                       = feed.atom
-CHANGELOG_JSON                  = changelog.json
-
-GREASEMONKEY_JS                 = $(BUILD_DIR)/pixplus.user.js
-
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
@@ -22,9 +17,16 @@ BUILD_DIR_ICON                  = $(BUILD_DIR)/icons
 BUILD_DIR_OEX                   = $(BUILD_DIR)/oex
 BUILD_DIR_CRX                   = $(BUILD_DIR)/crx
 BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
-OEX                             = $(BUILD_DIR)/pixplus.oex
-CRX                             = $(BUILD_DIR)/pixplus.crx
-SAFARIEXTZ                      = $(BUILD_DIR)/pixplus.safariextz
+
+FEED_ATOM                       = feed.atom
+CHANGELOG_JSON                  = changelog.json
+
+DIST_DIR                        = $(CURDIR)/dist
+OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
+GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
+OEX                             = $(DIST_DIR)/pixplus.oex
+CRX                             = $(DIST_DIR)/pixplus.crx
+SAFARIEXTZ                      = $(DIST_DIR)/pixplus.safariextz
 
 LIB_JS                          = $(BUILD_DIR)/lib.js
 DATA_JS                         = $(BUILD_DIR)/data.js
@@ -69,7 +71,7 @@ SAFARIEXTZ_DIST_FILES           = $(DIST_FILES_ALL:%=$(BUILD_DIR_SAFARIEXTZ)/%) 
                                   $(SAFARIEXTZ_USERJS) $(SAFARIEXTZ_INFO_PLIST) \
                                   $(SAFARIEXTZ_SETTINGS_PLIST) $(SAFARIEXTZ_ICON_FILES)
 
-ALL_TARGETS                     = $(GREASEMONKEY_JS)
+ALL_TARGETS                     = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
 ifeq ($(BUILD_OEX),yes)
 ALL_TARGETS                    += $(OEX)
@@ -96,7 +98,7 @@ $(XAR):
 
 clean:
 	@echo 'Cleaning'
-	@rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR) $(DIST_DIR)
 
 # ================ Feeds ================
 
@@ -109,6 +111,13 @@ feeds: $(FEED_ATOM)
 
 clean-feeds:
 	@rm -f $(FEED_ATOM)
+
+# ================ Opera UserJS ================
+
+$(OPERA_USERJS): $(SRC_USERJS)
+	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@cp $< $@
 
 # ================ GreaseMonkey ================
 
