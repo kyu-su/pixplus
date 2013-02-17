@@ -2187,6 +2187,29 @@
       dom.created = true;
     },
 
+    update_scrollbar_size: function() {
+      g.setTimeout(function() {
+        var scroller = _.popup.dom.image_scroller,
+            sw       = scroller.offsetWidth  - scroller.clientWidth,
+            sh       = scroller.offsetHeight - scroller.clientHeight,
+            change   = false;
+
+        if (sw > 0 && sw !== _.popup.scrollbar_width) {
+          _.popup.scrollbar_width = sw;
+          change = true;
+        }
+
+        if (sh > 0 && sh !== _.popup.scrollbar_height) {
+          _.popup.scrollbar_height = sh;
+          change = true;
+        }
+
+        if (change) {
+          _.popup.adjust();
+        }
+      }, 0);
+    },
+
     layout_images: function(max_width, max_height, update_resize_mode) {
       if (!_.popup.images || _.popup.images.length < 1) {
         return;
@@ -2230,22 +2253,7 @@
           var sw = max_width / total_size[0],
               sh = max_height / total_size[1];
 
-          g.setTimeout(function() {
-            var sw = image_scroller.offsetWidth  - image_scroller.clientWidth,
-                sh = image_scroller.offsetHeight - image_scroller.clientHeight,
-                change = false;
-            if (sw > 0 && sw !== _.popup.scrollbar_width) {
-              _.popup.scrollbar_width = sw;
-              change = true;
-            }
-            if (sh > 0 && sh !== _.popup.scrollbar_height) {
-              _.popup.scrollbar_height = sh;
-              change = true;
-            }
-            if (change) {
-              _.popup.adjust();
-            }
-          }, 0);
+          _.popup.update_scrollbar_size();
 
           if (sw > sh) {
             // vertical scroll
