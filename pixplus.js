@@ -2164,8 +2164,9 @@
       dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
       dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.root);
       dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.root);
-      dom.image_wrapper     = _.e('a', {id: 'pp-popup-image-wrapper'}, dom.root);
-      dom.image_layout      = _.e('div', {id: 'pp-popup-image-layout'}, dom.image_wrapper);
+      dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
+      dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
+      dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
@@ -2202,14 +2203,14 @@
       }, [0, 0]);
 
 
-      var image_layout = _.popup.dom.image_layout;
+      var image_scroller = _.popup.dom.image_scroller;
       [
         'width', 'height',
         'max-width', 'max-height',
         'overflowX', 'overflowY',  // gecko
         'overflow-x', 'overflow-y' // webkit
       ].forEach(function(key) {
-        image_layout.style[key] = '';
+        image_scroller.style[key] = '';
       });
 
       if (total_size[0] > max_width || total_size[1] > max_height) {
@@ -2230,8 +2231,8 @@
               sh = max_height / total_size[1];
 
           g.setTimeout(function() {
-            var sw = image_layout.offsetWidth  - image_layout.clientWidth,
-                sh = image_layout.offsetHeight - image_layout.clientHeight,
+            var sw = image_scroller.offsetWidth  - image_scroller.clientWidth,
+                sh = image_scroller.offsetHeight - image_scroller.clientHeight,
                 change = false;
             if (sw > 0 && sw !== _.popup.scrollbar_width) {
               _.popup.scrollbar_width = sw;
@@ -2248,28 +2249,28 @@
 
           if (sw > sh) {
             // vertical scroll
-            image_layout.style.width =
+            image_scroller.style.width =
               g.Math.min(max_width, total_size[0] + _.popup.scrollbar_width) + 'px';
             max_width -= _.popup.scrollbar_width;
             if (total_size[0] > max_width) {
               scale = g.Math.max(max_width / total_size[0]);
             }
 
-            image_layout.style.maxHeight = max_height + 'px';
-            image_layout.style.overflowY = 'auto';
-            image_layout.style['overflow-y'] = 'auto';
+            image_scroller.style.maxHeight = max_height + 'px';
+            image_scroller.style.overflowY = 'auto';
+            image_scroller.style['overflow-y'] = 'auto';
           } else {
             // horizontal scroll
-            image_layout.style.height =
+            image_scroller.style.height =
               g.Math.min(max_height, total_size[1] + _.popup.scrollbar_height) + 'px';
             max_height -= _.popup.scrollbar_height;
             if (total_size[1] > max_width) {
               scale = max_height / total_size[1];
             }
 
-            image_layout.style.maxWidth  = max_width  + 'px';
-            image_layout.style.overflowX = 'auto';
-            image_layout.style['overflow-x'] = 'auto';
+            image_scroller.style.maxWidth  = max_width  + 'px';
+            image_scroller.style.overflowX = 'auto';
+            image_scroller.style['overflow-x'] = 'auto';
           }
 
         } else {
@@ -2346,12 +2347,13 @@
       } else {
         _.popup.layout_images(max_size[0], max_size[1], update_resize_mode);
 
-        dom.image_layout.style.marginLeft = '0px';
-        dom.image_layout.style.marginTop = '0px';
-        dom.image_layout.style.marginLeft
-          = g.Math.floor((dom.image_wrapper.clientWidth - dom.image_layout.offsetWidth) / 2) + 'px';
-        dom.image_layout.style.marginTop
-          = g.Math.floor((dom.image_wrapper.clientHeight - dom.image_layout.offsetHeight) / 2) + 'px';
+        dom.image_layout.style.padding = '0px';
+
+        var mh = dom.image_scroller.clientWidth - dom.image_layout.offsetWidth,
+            mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
+        mh = g.Math.max(g.Math.floor(mh / 2), 0);
+        mv = g.Math.max(g.Math.floor(mv / 2), 0);
+        dom.image_layout.style.padding = mv + 'px ' + mh + 'px';
 
         var base_width = dom.image_wrapper.offsetWidth;
         dom.header.style.width = base_width + 'px';
@@ -2412,8 +2414,8 @@
       _.clear(dom.author_bookmarks);
       _.clear(dom.author_staccfeed);
 
+      dom.image_scroller.scrollTop = 0;
       _.clear(dom.image_layout);
-      dom.image_layout.scrollTop = 0;
       _.popup.resize_mode = _.popup.FIT_LONG;
 
       _.popup.bookmark.clear();
@@ -2546,9 +2548,9 @@
       }
 
       if (illust.manga.enable) {
-        dom.image_wrapper.href = illust.url_manga;
+        dom.image_layout.href = illust.url_manga;
       } else {
-        dom.image_wrapper.href = illust.image_url_big;
+        dom.image_layout.href = illust.image_url_big;
       }
       _.popup.set_images([(_.conf.popup.big_image && illust.image_big) || !illust.image_medium
                           ? illust.image_big
@@ -2688,11 +2690,11 @@
     },
 
     illust_can_scroll_vertically: function() {
-      return _.popup.dom.image_layout.scrollHeight > _.popup.dom.image_layout.clientHeight;
+      return _.popup.dom.image_scroller.scrollHeight > _.popup.dom.image_scroller.clientHeight;
     },
 
     illust_can_scroll_horizontally: function() {
-      return _.popup.dom.image_layout.scrollWidth > _.popup.dom.image_layout.clientWidth;
+      return _.popup.dom.image_scroller.scrollWidth > _.popup.dom.image_scroller.clientWidth;
     }
   };
 
@@ -2849,7 +2851,7 @@
         }
       }
 
-      _.popup.dom.image_wrapper.href = illust.url_manga + '#pp-manga-page-' + page;
+      _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.set_images(images);
       _.popup.manga.update_button();
       _.popup.set_status('');
@@ -3327,37 +3329,37 @@
     },
 
     illust_scroll_up: function() {
-      _.popup.dom.image_layout.scrollTop -= _.conf.popup.scroll_height;
+      _.popup.dom.image_scroller.scrollTop -= _.conf.popup.scroll_height;
     },
 
     illust_scroll_down: function() {
-      _.popup.dom.image_layout.scrollTop += _.conf.popup.scroll_height;
+      _.popup.dom.image_scroller.scrollTop += _.conf.popup.scroll_height;
     },
 
     illust_scroll_left: function() {
-      _.popup.dom.image_layout.scrollLeft -= _.conf.popup.scroll_height;
+      _.popup.dom.image_scroller.scrollLeft -= _.conf.popup.scroll_height;
     },
 
     illust_scroll_right: function() {
-      _.popup.dom.image_layout.scrollLeft += _.conf.popup.scroll_height;
+      _.popup.dom.image_scroller.scrollLeft += _.conf.popup.scroll_height;
     },
 
     illust_scroll_top: function() {
-      _.popup.dom.image_layout.scrollTop = 0;
-      _.popup.dom.image_layout.scrollLeft = 0;
+      _.popup.dom.image_scroller.scrollTop = 0;
+      _.popup.dom.image_scroller.scrollLeft = 0;
     },
 
     illust_scroll_bottom: function() {
-      _.popup.dom.image_layout.scrollTop = _.popup.dom.image_layout.scrollHeight;
-      _.popup.dom.image_layout.scrollLeft = _.popup.dom.image_layout.scrollWidth;
+      _.popup.dom.image_scroller.scrollTop = _.popup.dom.image_scroller.scrollHeight;
+      _.popup.dom.image_scroller.scrollLeft = _.popup.dom.image_scroller.scrollWidth;
     },
 
     illust_page_up: function() {
-      _.popup.dom.image_layout.scrollTop -= _.popup.dom.image_layout.clientHeight * 0.8;
+      _.popup.dom.image_scroller.scrollTop -= _.popup.dom.image_scroller.clientHeight * 0.8;
     },
 
     illust_page_down: function() {
-      _.popup.dom.image_layout.scrollTop += _.popup.dom.image_layout.clientHeight * 0.8;
+      _.popup.dom.image_scroller.scrollTop += _.popup.dom.image_scroller.clientHeight * 0.8;
     },
 
     switch_resize_mode: function() {
@@ -4819,8 +4821,9 @@
     '#pp-popup-tools{margin-left:0.6em}',
     '#pp-popup-tools a{margin-right:0.6em}',
     '#pp-popup-author-links a{margin-right:0.6em;font-weight:bold}',
-    '#pp-popup-image-wrapper{display:block;border:1px solid #aaa;line-height:0;',
-    'min-width:480px;min-height:360px}',
+    '#pp-popup-image-wrapper{line-height:0;border:1px solid #aaa}',
+    '#pp-popup-image-scroller{min-width:480px;min-height:360px}',
+    '#pp-popup-image-layout{display:block}',
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc}',
     '.pp-popup-olc.pp-active:hover{opacity:0.6}',
     '#pp-popup-olc-prev{left:0}',
