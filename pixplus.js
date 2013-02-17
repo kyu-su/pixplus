@@ -306,72 +306,15 @@
       return _.changelog[0].date;
     },
 
-    format: function(fmt) {
-      if (arguments.length < 1) {
-        return '';
-      } else if (arguments.length === 1) {
-        return g.String(fmt);
+    log: function(msg) {
+      if (g.console) {
+        g.console.log('pixplus: ' + msg);
       }
-
-      var res = '', i, j, arg, arg_idx = 1,
-          last_arg = arguments[arguments.length - 1],
-          f_flag = false, f_pad;
-
-      var add_with_pad = function(str) {
-        if (f_pad) {
-          while(f_pad[1] > str.length) {
-            res += f_pad[0];
-            f_pad[1] -= 1;
-          }
-        }
-        res += str;
-      };
-
-      for(i = 0; i < fmt.length; ++i) {
-        if (f_flag) {
-          switch(fmt[i]) {
-          case '%':
-            res += '%';
-            f_flag = false;
-            break;
-          case 's':
-            res += g.String(arguments[arg_idx++]);
-            f_flag = false;
-            break;
-          case 'd':
-            add_with_pad(arguments[arg_idx++].toString(10));
-            f_flag = false;
-            break;
-          case 'x':
-            add_with_pad(arguments[arg_idx++].toString(16));
-            f_flag = false;
-            break;
-
-          case '0':
-            for(j = ++i; j < fmt.length && /\d/.test(fmt[j]); ++j) ;
-            if (j < fmt.length) {
-              f_pad = ['0', g.parseInt(fmt.substring(i, j), 10)];
-            } else {
-              return res + ' [[FORMAT ERROR: Invalid format]]';
-            }
-            break;
-
-          default:
-            return res + ' [[FORMAT ERROR: Invalid format]]';
-          }
-        } else if (fmt[i] === '%') {
-          f_flag = true;
-          f_pad = null;
-        } else {
-          res += fmt[i];
-        }
-      }
-      return res;
     },
 
-    log: function() {
-      if (g.console) {
-        g.console.log('pixplus: ' + _.format.apply(this, arguments));
+    dbg: function() {
+      if (_.conf.general.debug) {
+        _.log.apply(this, arguments);
       }
     },
 
@@ -551,9 +494,7 @@
     },
 
     send_click: function(elem) {
-      if (_.conf.general.debug) {
-        _.log('send click event');
-      }
+      _.dbg('send click event');
       var doc  = elem.ownerDocument || d,
           ev   = doc.createEvent('MouseEvent'),
           view = doc.defaultView;
@@ -788,12 +729,10 @@
       _.listen(context, ['keypress', 'keydown'], function(ev, connection) {
         var key = _.key.parse_event(ev);
         if (key) {
-          if (_.conf.general.debug) {
-            _.log('keyevent type=%s key=%s', ev.type, key);
-          }
+          _.dbg('keyevent type=' + ev.type + ' key=' + key);
           var res = listener(key, ev, connection);
-          if (res && _.conf.general.debug) {
-            _.log('  canceled');
+          if (res) {
+            _.dbg('  canceled');
           }
           return res;
         }
@@ -854,8 +793,12 @@
         };
 
         for(var key in field_map) {
-          var value = field_map[key], li = _.e('li');
-          _.e('span', {text: _.format('0x%04x', value), css: 'float:right;margin-left:1em'}, li);
+          var value = field_map[key], li = _.e('li'), text = value.toString(16);
+          while(text.length < 4) {
+            text = '0' + text;
+          }
+          text = '0x' + text;
+          _.e('span', {text: text, css: 'float:right;margin-left:1em'}, li);
           li.appendChild(d.createTextNode(key));
           _.e('div', {css: 'clear:both'}, li);
           items.push([key, value, li]);
@@ -1703,9 +1646,7 @@
       }
       _.illust.last_link_count = links.length;
 
-      if (_.conf.general.debug) {
-        _.log('updating illust list');
-      }
+      _.dbg('updating illust list');
 
       var extract = function(link) {
         var list = _.illust.list;
@@ -1748,9 +1689,7 @@
         _.illust.last_link_count = 0;
       }
 
-      if (_.conf.general.debug) {
-        _.log('illust list updated - %d', new_list.length);
-      }
+      _.dbg('illust list updated - ' + new_list.length);
     },
 
     setup: function(root) {
@@ -1810,16 +1749,14 @@
         var script = _.fastxml.q(node, 'script', function(script) {
           var re = pattern.exec(_.fastxml.text(script, true));
           if (re) {
-            if (_.conf.general.debug) {
-              _.log('pixiv.context.%s = %s', name, re[1]);
-            }
+            _.dbg('pixiv.context.' + name + ' = ' + re[1]);
             value = re[1] === 'true';
             return true;
           }
           return false;
         });
         if (!script) {
-          _.log('[Error] Requested definition script not found - pixiv.context.%s', name);
+          _.log('[Error] Requested definition script not found - pixiv.context.' + name);
         }
         return value;
       };
@@ -1973,9 +1910,7 @@
           }
         });
 
-        if (_.conf.general.debug) {
-          _.log('trying to load image - ' + name + ':' + url);
-        }
+        _.dbg('trying to load image - ' + name + ':' + url);
         image.src = url;
         return image;
       };
@@ -2128,9 +2063,7 @@
           if (big) {
             big = false;
             img.src = illust.manga.pages[page][idx];
-            if (_.conf.general.debug) {
-              _.log('[Warn] big image for manga loading failed. falling back to default image.');
-            }
+            _.dbg('[Warn] big image for manga loading failed. falling back to default image.');
           } else {
             send_error();
           }
@@ -2602,7 +2535,7 @@
         return;
       }
       var msg = illust.error || 'Unknown error';
-      _.log('[Error] %s', msg);
+      _.log('[Error] ' + msg);
       _.popup.dom.image_layout.textContent = msg;
       _.popup.set_status('Error');
       _.popup.adjust();
@@ -2622,9 +2555,7 @@
 
     show: function(illust) {
       if (!_.popup.saved_context) {
-        if (_.conf.general.debug) {
-          _.log('saving pixiv.context');
-        }
+        _.dbg('saving pixiv.context');
         _.popup.saved_context = w.pixiv.context;
         w.pixiv.context = _.extend({ }, w.pixiv.context);
       }
@@ -2663,9 +2594,7 @@
       }
 
       if (_.popup.saved_context) {
-        if (_.conf.general.debug) {
-          _.log('restoring pixiv.context');
-        }
+        _.dbg('restoring pixiv.context');
         w.pixiv.context = _.popup.saved_context;
       } else {
         _.log('[Error] pixiv.context not saved (bug)');
@@ -2737,9 +2666,7 @@
           wrap = dom.bookmark_wrapper,
           min  = 40;
 
-      if (_.conf.general.debug) {
-        _.log('Max height: ' + h);
-      }
+      _.dbg('Max height: ' + h);
 
       var lists = _.qa('.bookmark_recommend_tag', wrap), last;
       lists = g.Array.prototype.filter.call(lists, function(l) {
@@ -2758,16 +2685,12 @@
         h = min * lists.length;
       }
 
-      if (_.conf.general.debug) {
-        _.log('Lists height: ' + h);
-      }
+      _.dbg('Lists height: ' + h);
 
       last = lists.pop();
       if (h - last.scrollHeight < min * lists.length) {
         last.style.maxHeight = (h - (min * lists.length)) + 'px';
-        if (_.conf.general.debug) {
-          _.log('Adjust last tag list: ' + last.style.maxHeight);
-        }
+        _.dbg('Adjust last tag list: ' + last.style.maxHeight);
       } else {
         last.style.maxHeight = '';
       }
@@ -3239,9 +3162,7 @@
 	}, {
 	  ajaxSettings: {dataType: 'text'}
 	}).done(function(data) {
-          if (_.conf.general.debug) {
-            _.log(data);
-          }
+          _.dbg(data);
           try {
             _.popup.tagedit.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
@@ -4527,7 +4448,7 @@
           _.mypage.save_layout();
         };
       } catch(ex) {
-        _.log('mypage error - %s', g.String(ex));
+        _.log('mypage error - ' + g.String(ex));
       }
     }
   };
@@ -4658,7 +4579,7 @@
       _.conf.__init(_.conf.__wrap_storage(g.localStorage));
     }
 
-    _.log('version=%s', _.version());
+    _.log('version=' + _.version());
     if (_.q('#login-block')) {
       _.log('not logged in');
       return;
@@ -4789,22 +4710,18 @@
           var confirmed = w.confirm(msg);
           waiting_confirmation = false; // workaround for chromium
           if (!confirmed) {
-            if (_.conf.general.debug) {
-              _.log('rating cancelled');
-            }
+            _.dbg('rating cancelled');
             return;
           }
         }
 
-        if (_.conf.general.debug) {
-          _.log('send rating');
-        }
+        _.dbg('send rating');
         w.pixiv.rating.rate = rate; // workaround for firefox
         rate_apply.apply(w.pixiv.rating, arguments);
         _.illust.unload(_.popup.illust);
       };
     } catch(ex) {
-      _.log('rating error - %s', g.String(ex));
+      _.log('rating error - ' + g.String(ex));
     }
 
     _.illust.setup(_.q('#wrapper'));
