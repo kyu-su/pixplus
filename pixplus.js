@@ -3728,8 +3728,9 @@
         return true;
       });
 
-      _.onwheel(dom.image_layout, function(ev) {
-        if (_.popup.illust_can_scroll()) {
+      _.onwheel(dom.image_scroller, function(ev) {
+        if ((ev.wheelDeltaX && _.popup.illust_can_scroll_horizontally()) ||
+            (ev.wheelDeltaY && _.popup.illust_can_scroll_vertically())) {
           ev.stopPropagation();
         }
         return false;
