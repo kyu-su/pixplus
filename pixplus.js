@@ -1814,7 +1814,7 @@
       illust.size = null;
       illust.manga = {enable: false, viewed: illust.manga ? !!illust.manga.viewed : false};
       if ((re = _.re.meta_size.exec(meta2))) {
-        illust.size = [g.parseInt(re[1], 10), g.parseInt(re[2], 10)];
+        illust.size = {width: g.parseInt(re[1], 10), height: g.parseInt(re[2], 10)};
       } else if ((re = _.re.meta_manga.exec(meta2))) {
         illust.manga.page_count = g.parseInt(re[1], 10);
         illust.manga.enable = illust.manga.page_count > 0;
@@ -2220,13 +2220,16 @@
       var scale = 1, natural_sizes, dom = _.popup.dom;
 
       natural_sizes = _.popup.images.map(function(img) {
-        return [img.naturalWidth, img.naturalHeight];
+        return {width: img.naturalWidth, height: img.naturalHeight};
       });
 
-      var total_size = natural_sizes.reduce(function(a, b) {
-        return [a[0] + b[0], g.Math.max(a[1], b[1])];
-      }, [0, 0]);
+      var total_width = 0, total_height = 0;
+      natural_sizes.forEach(function(size) {
+        total_width += size.width;
+        total_height = g.Math.max(total_height, size.height);
+      });
 
+      // initialize
 
       var image_scroller = dom.image_scroller;
       [
@@ -2238,9 +2241,11 @@
         image_scroller.style[key] = '';
       });
 
-      if (total_size[0] > max_width || total_size[1] > max_height) {
+      // calculate scale
+
+      if (total_width > max_width || total_height > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
-          var aspect = total_size[0] / total_size[1];
+          var aspect = total_width / total_height;
           if (aspect < 1) {
             aspect = 1 / aspect;
           }
@@ -2252,39 +2257,35 @@
         }
 
         if (_.popup.resize_mode === _.popup.FIT_LONG) {
-          scale = g.Math.min(max_width / total_size[0], max_height / total_size[1], 1);
+          scale = g.Math.min(max_width / total_width, max_height / total_height, 1);
         } else {
           var scroll_x = false, scroll_y = false;
           _.popup.update_scrollbar_size();
 
           if (_.popup.resize_mode === _.popup.FIT_SHORT) {
-            var sw = max_width / total_size[0],
-                sh = max_height / total_size[1];
+            var sw = max_width / total_width,
+                sh = max_height / total_height;
 
-            if (sw > sh) {
-              scroll_y = true;
-              if (total_size[0] > max_width) {
-                scale = g.Math.max((max_width - _.popup.scrollbar_width) / total_size[0]);
-              }
-            } else {
+            if (sw < sh) {
               scroll_x = true;
-              if (total_size[1] > max_width) {
-                scale = (max_height - _.popup.scrollbar_height) / total_size[1];
-              }
+              scale = g.Math.min((max_height - _.popup.scrollbar_height) / total_height, 1);
+            } else {
+              scroll_y = true;
+              scale = g.Math.min((max_width - _.popup.scrollbar_width) / total_width, 1);
             }
 
           } else {
             // original
-            if (total_size[0] > max_width) {
+            if (total_width > max_width) {
               scroll_x = true;
-            } else if (total_size[1] > max_height) {
+            } else if (total_height > max_height) {
               scroll_y = true;
             }
           }
 
           if (scroll_x) {
             image_scroller.style.height =
-              g.Math.min(max_height, total_size[1] + _.popup.scrollbar_height) + 'px';
+              g.Math.min(max_height, total_height + _.popup.scrollbar_height) + 'px';
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
             image_scroller.style['overflow-x'] = 'auto';
@@ -2292,7 +2293,7 @@
 
           if (scroll_y) {
             image_scroller.style.width =
-              g.Math.min(max_width, total_size[0] + _.popup.scrollbar_width) + 'px';
+              g.Math.min(max_width, total_width + _.popup.scrollbar_width) + 'px';
             image_scroller.style.maxHeight = max_height + 'px';
             image_scroller.style.overflowY = 'auto';
             image_scroller.style['overflow-y'] = 'auto';
@@ -2300,9 +2301,14 @@
         }
       }
 
+      // apply scale
+
       _.popup.images.forEach(function(img, idx) {
-        img.style.height = g.Math.floor(natural_sizes[idx][1] * scale) + 'px';
+        img.style.height = g.Math.floor(natural_sizes[idx].height * scale) + 'px';
       });
+      _.popup.scale = scale;
+
+      // centerize
 
       var height = g.Math.max.apply(g.Math, _.popup.images.map(function(img) {
         return img.offsetHeight;
@@ -2312,6 +2318,8 @@
         img.style.margin = g.Math.floor((height - img.offsetHeight) / 2) + 'px 0px 0px 0px';
       });
 
+      // update info area
+
       var size_list, illust = _.popup.illust;
       if (illust.size && !illust.manga.enable && !_.popup.manga.enable) {
         size_list = [illust.size];
@@ -2320,9 +2328,9 @@
       }
 
       dom.size.textContent = size_list.map(function(size, idx) {
-        var str = size.join('x'), more_info = [], re, img = _.popup.images[idx];
-        if (img.offsetWidth !== size[0]) {
-          more_info.push((g.Math.floor(img.offsetWidth * 100 / size[0]) / 100) + 'x');
+        var str = size.width + 'x' + size.height, more_info = [], re, img = _.popup.images[idx];
+        if (img.offsetWidth !== size.width) {
+          more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
         }
         if ((re = _.re.url_extension.exec(img.src))) {
           more_info.push(re[1]);
@@ -2332,6 +2340,8 @@
         }
         return str;
       }).join('/');
+
+      // update resize mode indicator
 
       dom.resize_mode.textContent = '[' + 'LSO'[_.popup.resize_mode] + ']';
       if (_.popup.resize_mode === _.popup.FIT_LONG) {
