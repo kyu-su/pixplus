@@ -5021,7 +5021,7 @@
       {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php"},
       {"key": "reverse", "value": 0},
       {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php"},
-      {"key": "overlay_control", "value": 0},
+      {"key": "overlay_control", "value": 0.3},
       {"key": "scroll_height", "value": 32},
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
