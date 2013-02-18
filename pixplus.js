@@ -3394,11 +3394,19 @@
     },
 
     illust_page_up: function() {
-      _.popup.dom.image_scroller.scrollTop -= _.popup.dom.image_scroller.clientHeight * 0.8;
+      if (_.popup.illust_can_scroll_vertically()) {
+        _.popup.dom.image_scroller.scrollTop -= _.popup.dom.image_scroller.clientHeight * 0.8;
+      } else {
+        _.popup.dom.image_scroller.scrollLeft -= _.popup.dom.image_scroller.clientWidth * 0.8;
+      }
     },
 
     illust_page_down: function() {
-      _.popup.dom.image_scroller.scrollTop += _.popup.dom.image_scroller.clientHeight * 0.8;
+      if (_.popup.illust_can_scroll_vertically()) {
+        _.popup.dom.image_scroller.scrollTop += _.popup.dom.image_scroller.clientHeight * 0.8;
+      } else {
+        _.popup.dom.image_scroller.scrollLeft += _.popup.dom.image_scroller.clientWidth * 0.8;
+      }
     },
 
     switch_resize_mode: function() {
@@ -3554,9 +3562,7 @@
         },
         keys: [
           'illust_scroll_up',
-          'illust_scroll_down',
-          'illust_page_up',
-          'illust_page_down'
+          'illust_scroll_down'
         ]
       }, {
         cond: function() {
@@ -3572,7 +3578,9 @@
         },
         keys: [
           'illust_scroll_top',
-          'illust_scroll_bottom'
+          'illust_scroll_bottom',
+          'illust_page_up',
+          'illust_page_down'
         ]
       }, {
         cond: function() {
