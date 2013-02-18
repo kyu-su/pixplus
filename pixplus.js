@@ -3402,15 +3402,19 @@
     },
 
     switch_resize_mode: function() {
-      var modes = ['FIT_LONG', 'FIT_SHORT', 'ORIGINAL'].map(function(name) {
-        return _.popup[name];
-      });
+      if (_.popup.scale >= 1) {
+        _.popup.resize_mode = _.popup.FIT_LONG;
+      } else {
+        var modes = ['FIT_LONG', 'FIT_SHORT', 'ORIGINAL'].map(function(name) {
+          return _.popup[name];
+        });
 
-      var next = modes.indexOf(_.popup.resize_mode) + 1;
-      if (next < 0 || next >= modes.length) {
-        next = 0;
+        var next = modes.indexOf(_.popup.resize_mode) + 1;
+        if (next < 0 || next >= modes.length) {
+          next = 0;
+        }
+        _.popup.resize_mode = modes[next];
       }
-      _.popup.resize_mode = modes[next];
       _.popup.adjust();
     },
 
