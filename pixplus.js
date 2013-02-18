@@ -2120,6 +2120,7 @@
 
     FIT_LONG:  0,
     FIT_SHORT: 1,
+    ORIGINAL:  2,
 
     scrollbar_width:  0,
     scrollbar_height: 0,
@@ -2249,40 +2250,52 @@
           }
         }
 
-        if (_.popup.resize_mode === _.popup.FIT_SHORT) {
-          var sw = max_width / total_size[0],
-              sh = max_height / total_size[1];
-
+        if (_.popup.resize_mode === _.popup.FIT_LONG) {
+          scale = g.Math.min(max_width / total_size[0], max_height / total_size[1], 1);
+        } else {
+          var scroll_x = false, scroll_y = false;
           _.popup.update_scrollbar_size();
 
-          if (sw > sh) {
-            // vertical scroll
-            image_scroller.style.width =
-              g.Math.min(max_width, total_size[0] + _.popup.scrollbar_width) + 'px';
-            max_width -= _.popup.scrollbar_width;
-            if (total_size[0] > max_width) {
-              scale = g.Math.max(max_width / total_size[0]);
+          if (_.popup.resize_mode === _.popup.FIT_SHORT) {
+            var sw = max_width / total_size[0],
+                sh = max_height / total_size[1];
+
+            if (sw > sh) {
+              scroll_y = true;
+              if (total_size[0] > max_width) {
+                scale = g.Math.max((max_width - _.popup.scrollbar_width) / total_size[0]);
+              }
+            } else {
+              scroll_x = true;
+              if (total_size[1] > max_width) {
+                scale = (max_height - _.popup.scrollbar_height) / total_size[1];
+              }
             }
 
-            image_scroller.style.maxHeight = max_height + 'px';
-            image_scroller.style.overflowY = 'auto';
-            image_scroller.style['overflow-y'] = 'auto';
           } else {
-            // horizontal scroll
+            // original
+            if (total_size[0] > max_width) {
+              scroll_x = true;
+            } else if (total_size[1] > max_height) {
+              scroll_y = true;
+            }
+          }
+
+          if (scroll_x) {
             image_scroller.style.height =
               g.Math.min(max_height, total_size[1] + _.popup.scrollbar_height) + 'px';
-            max_height -= _.popup.scrollbar_height;
-            if (total_size[1] > max_width) {
-              scale = max_height / total_size[1];
-            }
-
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
             image_scroller.style['overflow-x'] = 'auto';
           }
 
-        } else {
-          scale = g.Math.min(max_width / total_size[0], max_height / total_size[1], 1);
+          if (scroll_y) {
+            image_scroller.style.width =
+              g.Math.min(max_width, total_size[0] + _.popup.scrollbar_width) + 'px';
+            image_scroller.style.maxHeight = max_height + 'px';
+            image_scroller.style.overflowY = 'auto';
+            image_scroller.style['overflow-y'] = 'auto';
+          }
         }
       }
 
@@ -3371,7 +3384,7 @@
     },
 
     switch_resize_mode: function() {
-      var modes = ['FIT_LONG', 'FIT_SHORT'].map(function(name) {
+      var modes = ['FIT_LONG', 'FIT_SHORT', 'ORIGINAL'].map(function(name) {
         return _.popup[name];
       });
 
