@@ -2135,6 +2135,7 @@
       dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
       dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
       dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
+      dom.resize_mode       = _.e('a', {id: 'pp-popup-resize-mode'}, dom.rightbox);
       dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga'}, dom.rightbox);
       dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]'}, dom.rightbox);
       dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
@@ -2216,7 +2217,7 @@
         return;
       }
 
-      var scale = 1, natural_sizes;
+      var scale = 1, natural_sizes, dom = _.popup.dom;
 
       natural_sizes = _.popup.images.map(function(img) {
         return [img.naturalWidth, img.naturalHeight];
@@ -2227,7 +2228,7 @@
       }, [0, 0]);
 
 
-      var image_scroller = _.popup.dom.image_scroller;
+      var image_scroller = dom.image_scroller;
       [
         'width', 'height',
         'max-width', 'max-height',
@@ -2318,7 +2319,7 @@
         size_list = natural_sizes;
       }
 
-      _.popup.dom.size.textContent = size_list.map(function(size, idx) {
+      dom.size.textContent = size_list.map(function(size, idx) {
         var str = size.join('x'), more_info = [], re, img = _.popup.images[idx];
         if (img.offsetWidth !== size[0]) {
           more_info.push((g.Math.floor(img.offsetWidth * 100 / size[0]) / 100) + 'x');
@@ -2331,6 +2332,13 @@
         }
         return str;
       }).join('/');
+
+      dom.resize_mode.textContent = '[' + 'LSO'[_.popup.resize_mode] + ']';
+      if (_.popup.resize_mode === _.popup.FIT_LONG) {
+        dom.resize_mode.style.display = 'none';
+      } else {
+        dom.resize_mode.style.display = '';
+      }
     },
 
     calculate_max_content_size: function(content) {
@@ -3668,6 +3676,11 @@
 
       var dom = _.popup.dom;
 
+      _.onclick(dom.resize_mode, function() {
+        _.popup.input.switch_resize_mode();
+        return true;
+      });
+
       _.onclick(dom.button_bookmark, function() {
         _.popup.bookmark.toggle();
         return true;
@@ -4810,6 +4823,7 @@
     '#pp-popup-rightbox{float:right;font-size:80%}',
     '#pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}',
     '#pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}',
+    '#pp-popup-resize-mode{cursor:pointer}',
     '#pp-popup-status{color:#888}',
     '#pp-popup-header{position:absolute;background-color:#fff;line-height:1.1em;z-index:20001}',
     '#pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}',
