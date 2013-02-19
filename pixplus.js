@@ -2894,7 +2894,7 @@
       _.popup.set_images(images);
       _.popup.manga.update_button();
       _.popup.set_status('');
-      _.popup.adjust();
+      _.popup.adjust(true);
     },
 
     onerror: function(illust, page) {
