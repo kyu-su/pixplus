@@ -589,9 +589,9 @@
     },
 
     key_enabled: function(ev) {
-      return !(ev.target instanceof w.HTMLTextAreaElement
-               || (ev.target instanceof w.HTMLInputElement
-                   && (!ev.target.type || _.re.input_type_text.test(ev.target.type))));
+      return !(ev.target instanceof w.HTMLTextAreaElement ||
+               (ev.target instanceof w.HTMLInputElement &&
+                (!ev.target.type || _.re.input_type_text.test(ev.target.type))));
     },
 
     redirect_jump_page: function(root) {
@@ -1764,7 +1764,7 @@
       illust.rated = search_script(score, 'rated');
       illust.answered = search_script(question, 'answered');
 
-      var profile_area   = _.fastxml.q(root, '.user-unit'),
+      var profile_area   = _.fastxml.q(root, '.profile-unit'),
           avatar         = _.fastxml.q(profile_area, 'img.user-image'),
           author_link    = _.fastxml.q(profile_area, 'a.user-link'),
           author_name    = _.fastxml.q(author_link, 'h1.user'),
@@ -2875,9 +2875,9 @@
     },
 
     onload: function(illust, page, images) {
-      if (illust !== _.popup.illust
-          || !_.popup.manga.enable
-          || page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust ||
+          !_.popup.manga.enable ||
+          page !== _.popup.manga.page) {
         return;
       }
 
@@ -2898,9 +2898,9 @@
     },
 
     onerror: function(illust, page) {
-      if (illust !== _.popup.illust
-          || !_.popup.manga.enable
-          || page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust ||
+          !_.popup.manga.enable ||
+          page !== _.popup.manga.page) {
         return;
       }
       if (illust.error) {
@@ -3746,8 +3746,8 @@
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
         var endbtn = ev.target;
-        if (endbtn instanceof w.HTMLInputElement
-            && (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
+        if (endbtn instanceof w.HTMLInputElement &&
+            (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
           _.popup.tagedit.end();
           return true;
         }
@@ -3893,34 +3893,34 @@
             rect = _.bookmarkform.calc_tag_rect(group, r, grect);
             distance = g.Math.max(rect.left - x, x - rect.right);
 
-            if (!t_top.set || gidx < t_top.gidx
-                || (gidx === t_top.gidx
-                    && (rect.bottom < t_top.rect.top
-                        || (rect.top < t_top.rect.bottom && distance < t_top.distance)))) {
+            if (!t_top.set || gidx < t_top.gidx ||
+                (gidx === t_top.gidx &&
+                 (rect.bottom < t_top.rect.top ||
+                  (rect.top < t_top.rect.bottom && distance < t_top.distance)))) {
               set(t_top, gidx, idx, rect, distance);
             }
 
-            if (!t_bottom.set || gidx > t_bottom.gidx
-                || (gidx === t_bottom.gidx
-                    && (rect.top > t_bottom.rect.bottom
-                        || (rect.bottom > t_bottom.rect.top && distance < t_bottom.distance)))) {
+            if (!t_bottom.set || gidx > t_bottom.gidx ||
+                (gidx === t_bottom.gidx &&
+                 (rect.top > t_bottom.rect.bottom ||
+                  (rect.bottom > t_bottom.rect.top && distance < t_bottom.distance)))) {
               set(t_bottom, gidx, idx, rect, distance);
             }
 
             if (down) {
-              if ((gidx > sel.gidx || (gidx === sel.gidx && rect.top > sel.rect.bottom))
-                  && (!t_near.set || gidx < t_near.gidx
-                      || (gidx === t_near.gidx
-                          && (rect.bottom < t_near.rect.top
-                              || (rect.top < t_near.rect.bottom && distance < t_near.distance))))) {
+              if ((gidx > sel.gidx || (gidx === sel.gidx && rect.top > sel.rect.bottom)) &&
+                  (!t_near.set || gidx < t_near.gidx ||
+                   (gidx === t_near.gidx &&
+                    (rect.bottom < t_near.rect.top ||
+                     (rect.top < t_near.rect.bottom && distance < t_near.distance))))) {
                 set(t_near, gidx, idx, rect, distance);
               }
             } else {
-              if ((gidx < sel.gidx || (gidx === sel.gidx && rect.bottom < sel.rect.top))
-                  && (!t_near.set || gidx > t_near.gidx
-                      || (gidx === t_near.gidx
-                          && (rect.top > t_near.rect.bottom
-                              || (rect.bottom > t_near.rect.top && distance < t_near.distance))))) {
+              if ((gidx < sel.gidx || (gidx === sel.gidx && rect.bottom < sel.rect.top)) &&
+                  (!t_near.set || gidx > t_near.gidx ||
+                   (gidx === t_near.gidx &&
+                    (rect.top > t_near.rect.bottom ||
+                     (rect.bottom > t_near.rect.top && distance < t_near.distance))))) {
                 set(t_near, gidx, idx, rect, distance);
               }
             }
@@ -4593,16 +4593,63 @@
             _.illust.load(illust);
           }
         }
+      },
+
+      function(query) {
+        if (query.illust_id) {
+          return;
+        }
+
+        var favorite_button = _.q('.profile-unit .user-relation #favorite-button');
+        if (!favorite_button) {
+          _.log('[Error] fast_user_bookmark: favorite-button not found');
+          return;
+        }
+
+        _.onclick(favorite_button, function() {
+          if (favorite_button.classList.contains('following') ||
+              _.conf.general.fast_user_bookmark <= 0) {
+            return;
+          }
+
+          g.setTimeout(function() {
+            var dialog = _.q('.profile-unit .user-relation #favorite-preference');
+            if (!dialog) {
+              _.log('[Error] fast_user_bookmark: favorite-preference not found');
+              return;
+            }
+
+            var form = _.tag('form', dialog)[0];
+            if (!form) {
+              _.log('[Error] fast_user_bookmark: form not found');
+              return;
+            }
+
+            var restrict = _.conf.general.fast_user_bookmark - 1,
+                radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
+
+            if (!radio) {
+              _.log('[Error] fast_user_bookmark: restrict input not found');
+              return;
+            }
+
+            radio.checked = true;
+            _.xhr.post(form, function() {
+              favorite_button.classList.add('following');
+            });
+            _.send_click(_.q('.close', dialog));
+          }, 10);
+        });
       }
     ],
 
     '/bookmark.php': [
       function(query) {
         var bookmark_list, bookmark_list_ul;
-        if (_.conf.bookmark.tag_order.length < 1
-            || query.id
-            || !(bookmark_list = _.q('#bookmark_list'))
-            || !(bookmark_list_ul = _.q('ul', bookmark_list))) {
+        if (_.conf.bookmark.tag_order.length < 1 ||
+            query.id ||
+            !(bookmark_list = _.q('#bookmark_list')) ||
+            !(bookmark_list_ul = _.q('ul', bookmark_list))) {
           return;
         }
 
@@ -4691,9 +4738,8 @@
     }
 
     _.lang.current = (
-      _.lang[d.documentElement.getAttribute('lang')]
-        || _.lang[g.navigator.language]
-        || _.lang.en
+      _.lang[d.documentElement.getAttribute('lang')] ||
+        _.lang[g.navigator.language] || _.lang.en
     );
     _.key.init();
 
@@ -4737,38 +4783,6 @@
       } else if ((stacc_anc = _.q('.global-menu li.stacc a'))) {
         stacc_anc.href = '/stacc/my/home/' + _.conf.general.stacc_link + '/all';
       }
-    }
-
-    var user_bookmark = _.q('.user-unit .user-relation #favorite-button');
-    if (user_bookmark) {
-      _.onclick(user_bookmark, function() {
-        if (user_bookmark.classList.contains('following')
-            || _.conf.general.fast_user_bookmark <= 0) {
-          return;
-        }
-
-        g.setTimeout(function() {
-          var dialog = _.q('.user-unit .user-relation #favorite-preference');
-          if (!dialog) {
-            return;
-          }
-          var form = _.tag('form', dialog)[0];
-          if (!form) {
-            return;
-          }
-
-          var restrict = _.conf.general.fast_user_bookmark - 1,
-              radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
-          if (!radio) {
-            return;
-          }
-          radio.checked = true;
-          _.xhr.post(form, function() {
-            user_bookmark.classList.add('following');
-          });
-          _.send_click(_.q('.close', dialog));
-        }, 10);
-      });
     }
 
     var page_procs = _.page_procs[w.location.pathname];
@@ -5437,10 +5451,12 @@
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Add] Add resize mode settings and key bindings."
+          "[Add] Add resize mode settings and key bindings.",
+          "[Fix] Fix author does not shown properly in popup."
         ],
         "ja": [
-          "[\u8ffd\u52a0] \u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u306e\u8a2d\u5b9a\u3068\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u8ffd\u52a0\u3002"
+          "[\u8ffd\u52a0] \u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u306e\u8a2d\u5b9a\u3068\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u8ffd\u52a0\u3002",
+          "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
