@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">pixplus</title>
   <id>http://crckyl.ath.cx/pixplus/feed.atom</id>
-  <updated>2013-02-10T00:00:00Z</updated>
+  <updated>2013-02-23T00:00:00Z</updated>
   <link href="http://crckyl.ath.cx/pixplus" />
   <link href="http://crckyl.ath.cx/pixplus/feed.atom" rel="self" />
   <author>
@@ -12,6 +12,26 @@
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
   <generator>PyAtom</generator>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.6.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.6.0</id>
+    <updated>2013-02-23T00:00:00Z</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.6.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html">&lt;h1&gt;pixplus 1.6.0&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;[追加] リサイズモードの設定とキーバインドを追加。&lt;/li&gt;
+  &lt;li&gt;[修正] ポップアップに作者が表示されなくなっていた不具合を修正。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+  &lt;li&gt;[Add] Add resize mode settings and key bindings.&lt;/li&gt;
+  &lt;li&gt;[Fix] Fix author does not shown properly in popup.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
   <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
     <title type="text">pixplus 1.5.0</title>
     <id>http://crckyl.ath.cx/pixplus/archive/1.5.0</id>

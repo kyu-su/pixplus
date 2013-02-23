@@ -5445,8 +5445,9 @@
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
-      "date": "2013/xx/xx",
+      "date": "2013/02/23",
       "version": "1.6.0",
       "releasenote": "",
       "changes_i18n": {
@@ -5461,7 +5462,6 @@
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/10",
       "version": "1.5.0",
