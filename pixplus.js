@@ -2381,11 +2381,16 @@
 
     adjust_olc_icon: function(icon) {
       var olc  = icon.parentNode,
-          size = g.Math.min(g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8), 200);
+          size = g.Math.min(g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8), 200),
+          left = g.Math.floor((olc.offsetWidth  - size) / 2);
       icon.style.width  = size + 'px';
       icon.style.height = size + 'px';
-      icon.style.left   = g.Math.floor((olc.offsetWidth  - size) / 2) + 'px';
-      icon.style.top    = g.Math.floor((olc.offsetHeight - size) / 2) + 'px';
+      icon.style.left   = left + 'px';
+      if (olc.offsetHeight - size < olc.offsetWidth - size) {
+        icon.style.top  = g.Math.floor((olc.offsetHeight  - size) / 2) + 'px';
+      } else {
+        icon.style.top  = (olc.offsetHeight - size - left) + 'px';
+      }
     },
 
     adjust: function(update_resize_mode) {
@@ -4934,7 +4939,7 @@
     '#pp-popup-image-scroller{min-width:480px;min-height:360px}',
     '#pp-popup-image-layout{display:block}',
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;height:100%;line-height:0px}',
-    '.pp-popup-olc.pp-active:hover{opacity:0.4}',
+    '.pp-popup-olc.pp-active:hover{opacity:0.6}',
     '.pp-popup-olc svg{position:relative}',
     '.pp-popup-olc svg path{fill:#fff;stroke:#000;stroke-width:10;stroke-linejoin:round}',
     '#pp-popup-olc-next svg{transform:rotate(180deg)}',
