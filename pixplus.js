@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.6.0
+// @version     1.6.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -2379,18 +2379,26 @@
       ];
     },
 
-    adjust_olc_icon: function(icon) {
+    adjust_olc_icon: function(icon, next) {
       var olc  = icon.parentNode,
           size = g.Math.min(g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8), 200),
-          left = g.Math.floor((olc.offsetWidth  - size) / 2);
+          left = g.Math.min(g.Math.floor((olc.offsetWidth  - size) / 2), 50),
+          top;
+
+      if (olc.offsetHeight - size < olc.offsetWidth - size) {
+        top = g.Math.floor((olc.offsetHeight  - size) / 2);
+      } else {
+        top = olc.offsetHeight - size - left;
+      }
+
+      if (next) {
+        left = olc.offsetWidth - size - left;
+      }
+
       icon.style.width  = size + 'px';
       icon.style.height = size + 'px';
       icon.style.left   = left + 'px';
-      if (olc.offsetHeight - size < olc.offsetWidth - size) {
-        icon.style.top  = g.Math.floor((olc.offsetHeight  - size) / 2) + 'px';
-      } else {
-        icon.style.top  = (olc.offsetHeight - size - left) + 'px';
-      }
+      icon.style.top    = top  + 'px';
     },
 
     adjust: function(update_resize_mode) {
@@ -2454,7 +2462,7 @@
             (dom.image_scroller.clientLeft + dom.image_scroller.clientWidth - olc_width) + 'px';
 
           _.popup.adjust_olc_icon(dom.olc_prev_icon);
-          _.popup.adjust_olc_icon(dom.olc_next_icon);
+          _.popup.adjust_olc_icon(dom.olc_next_icon, true);
 
           dom.olc_prev.classList.add('pp-active');
           dom.olc_next.classList.add('pp-active');
@@ -5488,11 +5496,25 @@
   };
 
   _.changelog = [
+    {
+      "date": "2013/xx/xx",
+      "version": "1.6.1",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Change] Change \"Click area\" design."
+        ],
+        "ja": [
+          "[\u5909\u66f4] \u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/02/23",
       "version": "1.6.0",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/02/23/pixplus-1-6-0",
       "changes_i18n": {
         "en": [
           "[Add] Add resize mode settings and key bindings.",
