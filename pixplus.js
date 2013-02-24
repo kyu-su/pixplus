@@ -2164,9 +2164,9 @@
       dom.author_bookmarks  = _.e('a', {id: 'pp-popup-author-bookmarks'}, dom.author_links);
       dom.author_staccfeed  = _.e('a', {id: 'pp-popup-author-staccfeed'}, dom.author_links);
       dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
-      dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.root);
-      dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.root);
       dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
+      dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_wrapper);
+      dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_wrapper);
       dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
@@ -2394,8 +2394,7 @@
         mv = g.Math.max(g.Math.floor(mv / 2), 0);
         dom.image_layout.style.padding = mv + 'px ' + mh + 'px';
 
-        var base_width = dom.image_wrapper.offsetWidth;
-        dom.header.style.width = base_width + 'px';
+        dom.header.style.width = dom.image_wrapper.offsetWidth + 'px';
 
         var header_height = dom.image_wrapper.offsetHeight;
         if (!_.popup.comment.enable) {
@@ -2412,11 +2411,24 @@
         }
 
         var olc_width = _.conf.popup.overlay_control;
-        [dom.olc_prev, dom.olc_next].forEach(function(olc) {
-          olc.classList[_.conf.popup.overlay_control ? 'add' : 'remove']('pp-active');
-          olc.style.width = (_.conf.popup.overlay_control < 1 ? base_width * olc_width : olc_width) + 'px';
-          olc.style.height = dom.image_wrapper.offsetHeight + 'px';
-        });
+        if (olc_width <= 0) {
+          dom.olc_prev.classList.remove('pp-active');
+          dom.olc_next.classList.remove('pp-active');
+        } else {
+          if (olc_width < 1) {
+            olc_width = g.Math.floor(dom.image_scroller.clientWidth * olc_width);
+          }
+
+          dom.olc_prev.style.width = olc_width + 'px';
+          dom.olc_next.style.width = olc_width + 'px';
+
+          dom.olc_prev.style.left = dom.image_scroller.clientLeft + 'px';
+          dom.olc_next.style.left =
+            (dom.image_scroller.clientLeft + dom.image_scroller.clientWidth - olc_width) + 'px';
+
+          dom.olc_prev.classList.add('pp-active');
+          dom.olc_next.classList.add('pp-active');
+        }
       }
 
       root.style.left = g.Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
@@ -4893,13 +4905,11 @@
     '#pp-popup-tools{margin-left:0.6em}',
     '#pp-popup-tools a{margin-right:0.6em}',
     '#pp-popup-author-links a{margin-right:0.6em;font-weight:bold}',
-    '#pp-popup-image-wrapper{line-height:0;border:1px solid #aaa}',
+    '#pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}',
     '#pp-popup-image-scroller{min-width:480px;min-height:360px}',
     '#pp-popup-image-layout{display:block}',
-    '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc}',
+    '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;background-color:#ccc;height:100%}',
     '.pp-popup-olc.pp-active:hover{opacity:0.6}',
-    '#pp-popup-olc-prev{left:0}',
-    '#pp-popup-olc-next{right:0}',
     '#pp-popup-image-layout{display:inline-block;font-size:200%}',
 
     // bookmark
