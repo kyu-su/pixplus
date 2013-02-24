@@ -2381,7 +2381,7 @@
 
     adjust_olc_icon: function(icon) {
       var olc  = icon.parentNode,
-          size = g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8);
+          size = g.Math.min(g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8), 200);
       icon.style.width  = size + 'px';
       icon.style.height = size + 'px';
       icon.style.left   = g.Math.floor((olc.offsetWidth  - size) / 2) + 'px';
