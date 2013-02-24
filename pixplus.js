@@ -2136,7 +2136,7 @@
             icon  = d.createElementNS(svgns, 'svg'),
             path  = d.createElementNS(svgns, 'path');
         icon.setAttribute('viewBox', '0 0 100 100');
-        path.setAttribute('d', 'M 10 50 L 55 10 L 55 35 L 90 35 L 90 65 L 55 65 L 55 90 z');
+        path.setAttribute('d', 'M 10 90 L 65 35 L 65 60 L 90 60 L 90 90 z');
         icon.appendChild(path);
         olc.appendChild(icon);
         return icon;
@@ -4941,8 +4941,8 @@
     '.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;height:100%;line-height:0px}',
     '.pp-popup-olc.pp-active:hover{opacity:0.6}',
     '.pp-popup-olc svg{position:relative}',
-    '.pp-popup-olc svg path{fill:#fff;stroke:#000;stroke-width:10;stroke-linejoin:round}',
-    '#pp-popup-olc-next svg{transform:rotate(180deg)}',
+    '.pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}',
+    '#pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0)}',
     '#pp-popup-image-layout{display:inline-block;font-size:200%}',
 
     // bookmark
