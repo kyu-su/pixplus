@@ -2297,7 +2297,7 @@
           }
 
           if (scroll_x) {
-            image_scroller.style.height =
+            image_scroller.style.minHeight =
               g.Math.min(max_height, total_height + _.popup.scrollbar_height) + 'px';
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
@@ -2305,7 +2305,7 @@
           }
 
           if (scroll_y) {
-            image_scroller.style.width =
+            image_scroller.style.minWidth =
               g.Math.min(max_width, total_width + _.popup.scrollbar_width) + 'px';
             image_scroller.style.maxHeight = max_height + 'px';
             image_scroller.style.overflowY = 'auto';
@@ -2419,15 +2419,14 @@
         _.popup.tagedit.adjust(max_size[0], max_size[1]);
 
       } else {
+        dom.image_layout.style.margin = '0px';
+
         _.popup.layout_images(max_size[0], max_size[1], update_resize_mode);
 
-        dom.image_layout.style.padding = '0px';
-
-        var mh = dom.image_scroller.clientWidth - dom.image_layout.offsetWidth,
+        var mh = dom.image_scroller.clientWidth  - dom.image_layout.offsetWidth,
             mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
-        mh = g.Math.max(g.Math.floor(mh / 2), 0);
-        mv = g.Math.max(g.Math.floor(mv / 2), 0);
-        dom.image_layout.style.padding = mv + 'px ' + mh + 'px';
+        dom.image_layout.style.marginLeft = g.Math.max(g.Math.floor(mh / 2), 0) + 'px';
+        dom.image_layout.style.marginTop  = g.Math.max(g.Math.floor(mv / 2), 0) + 'px';
 
         dom.header.style.width = dom.image_wrapper.offsetWidth + 'px';
 
@@ -2503,7 +2502,6 @@
       _.clear(dom.author_bookmarks);
       _.clear(dom.author_staccfeed);
 
-      dom.image_scroller.scrollTop = 0;
       _.clear(dom.image_layout);
       _.popup.resize_mode = _.popup.FIT_LONG;
 
@@ -2521,6 +2519,7 @@
       _.popup.images.forEach(function(img) {
         dom.image_layout.appendChild(img);
       });
+      _.popup.dom.image_scroller.scrollTop = 0;
     },
 
     onload: function(illust) {
