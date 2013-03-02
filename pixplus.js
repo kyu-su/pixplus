@@ -2247,7 +2247,8 @@
       var image_scroller = dom.image_scroller;
       [
         'width', 'height',
-        'max-width', 'max-height',
+        'minWidth', 'minHeight',
+        'maxWidth', 'maxHeight',
         'overflowX', 'overflowY',  // gecko
         'overflow-x', 'overflow-y' // webkit
       ].forEach(function(key) {
