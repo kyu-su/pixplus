@@ -624,7 +624,7 @@
 
     re: {
       trim: /(?:^\s+|\s+$)/g,
-      image: /^(http:\/\/i\d+\.pixiv\.net\/img\d+\/img\/[^\/]+\/)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
+      image: /^(http:\/\/i\d+\.pixiv\.net\/img(?:\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
       xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
       xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
       xml_comment: /<!--.*?-->/g,
@@ -2298,7 +2298,7 @@
           }
 
           if (scroll_x) {
-            image_scroller.style.minHeight =
+            image_scroller.style.height =
               g.Math.min(max_height, total_height + _.popup.scrollbar_height) + 'px';
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
@@ -2306,7 +2306,7 @@
           }
 
           if (scroll_y) {
-            image_scroller.style.minWidth =
+            image_scroller.style.width =
               g.Math.min(max_width, total_width + _.popup.scrollbar_width) + 'px';
             image_scroller.style.maxHeight = max_height + 'px';
             image_scroller.style.overflowY = 'auto';
