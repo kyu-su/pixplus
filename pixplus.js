@@ -3779,8 +3779,17 @@
       });
 
       _.onwheel(dom.image_scroller, function(ev) {
-        if ((ev.wheelDeltaX && _.popup.illust_can_scroll_horizontally()) ||
-            (ev.wheelDeltaY && _.popup.illust_can_scroll_vertically())) {
+
+        /* Firefox
+         *   MouseScrollEvent::axis
+         *     HORIZONTAL_AXIS = 1
+         *     VERTICAL_AXIS   = 2
+         *
+         * https://developer.mozilla.org/en/docs/DOM/MouseScrollEvent
+         */
+
+        if (((ev.wheelDeltaX || ev.axis === 1) && _.popup.illust_can_scroll_horizontally()) ||
+            ((ev.wheelDeltaY || ev.axis === 2) && _.popup.illust_can_scroll_vertically())) {
           ev.stopPropagation();
         }
         return false;
