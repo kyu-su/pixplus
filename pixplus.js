@@ -5506,15 +5506,17 @@
 
   _.changelog = [
     {
-      "date": "2013/xx/xx",
+      "date": "2013/03/13",
       "version": "1.6.1",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/03/13/pixplus-1-6-1",
       "changes_i18n": {
         "en": [
-          "[Change] Change \"Click area\" design."
+          "[Change] Change \"Click area\" design.",
+          "[Fix] Minor fix for pixiv's change."
         ],
         "ja": [
-          "[\u5909\u66f4] \u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002"
+          "[\u5909\u66f4] \u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002",
+          "[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"
         ]
       }
     },
