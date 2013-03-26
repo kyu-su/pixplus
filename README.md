@@ -23,9 +23,9 @@ pixiv の UI を拡張するブラウザ拡張。
 * zip (oex を作る)
 * openssl (safariextz に署名する)
 
-    % git submodule update --init
-    % make deps
-    % make
+    git submodule update --init
+    make deps
+    make
 
 Safari 拡張を作成しない場合は `make deps` は不要。
 Chrome 拡張を作成しない場合は `git submodule update --init` も不要。
