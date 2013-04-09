@@ -19,7 +19,7 @@ pixiv の UI を拡張するブラウザ拡張。
 
 * make (GNU Make)
 * rsvg-convert (アイコンを作る)
-* python2.7 (pixplus.js に埋め込んでいる JSON からメタデータなどを作る)
+* python 2.7 or 2.6 (pixplus.js に埋め込んでいる JSON からメタデータなどを作る)
 * zip (oex を作る)
 * openssl (safariextz に署名する)
 
