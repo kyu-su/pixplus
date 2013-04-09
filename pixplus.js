@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.6.1
+// @version     1.6.2
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -5509,6 +5509,20 @@
   };
 
   _.changelog = [
+    {
+      "date": "2013/04/xx",
+      "version": "1.6.2",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix author status icon."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u4f5c\u8005\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u30a2\u30a4\u30b3\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/03/13",
