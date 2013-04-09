@@ -1772,9 +1772,9 @@
             return (link.attrs.href || '').indexOf('/stacc/') >= 0;
           });
 
-      illust.author_fav   = !!_.fastxml.q(profile_area, '#favorite-button.added');
-      illust.author_fav_m = !!_.fastxml.q(profile_area, '.list_fav');
-      illust.author_mypix = !!_.fastxml.q(profile_area, '#mypixiv-button.added');
+      illust.author_fav   = !!_.fastxml.q(profile_area, '#favorite-button.following');
+      illust.author_fav_m = !!_.fastxml.q(profile_area, '.user-relation .sprites-heart');
+      illust.author_mypix = !!_.fastxml.q(profile_area, '#mypixiv-button.mypixiv');
       illust.author_image = avatar ? avatar.attrs.src : null;
       illust.author_name  = '[Error]';
       illust.author_url   = '';
@@ -2159,7 +2159,7 @@
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
       dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
-      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment', css: 'display:none'}, dom.comment);
+      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment', cls: 'pp-hide'}, dom.comment);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
@@ -2186,7 +2186,7 @@
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
       if (!_.conf.popup.show_comment_form) {
-        dom.comment_form.style.display = 'none';
+        dom.comment_form.classList.add('pp-hide');
       }
 
       dom.comment_err_empty.textContent = 'Sorry, comments could not be found';
@@ -2245,15 +2245,7 @@
       // initialize
 
       var image_scroller = dom.image_scroller;
-      [
-        'width', 'height',
-        'minWidth', 'minHeight',
-        'maxWidth', 'maxHeight',
-        'overflowX', 'overflowY',  // gecko
-        'overflow-x', 'overflow-y' // webkit
-      ].forEach(function(key) {
-        image_scroller.style[key] = '';
-      });
+      image_scroller.style.cssText = '';
 
       // calculate scale
 
@@ -2359,9 +2351,9 @@
 
       dom.resize_mode.textContent = '[' + 'LSO'[_.popup.resize_mode] + ']';
       if (_.popup.resize_mode === _.popup.FIT_LONG) {
-        dom.resize_mode.style.display = 'none';
+        dom.resize_mode.classList.add('pp-hide');
       } else {
-        dom.resize_mode.style.display = '';
+        dom.resize_mode.classList.remove('pp-hide');
       }
     },
 
@@ -2485,15 +2477,15 @@
 
       _.clear(dom.title_link);
 
-      dom.button_manga.style.display = 'none';
-      dom.button_response.style.display = 'none';
+      dom.button_manga.classList.add('pp-hide');
+      dom.button_response.classList.add('pp-hide');
 
       _.clear(dom.caption);
       _.clear(dom.taglist);
       _.clear(dom.rating);
 
-      dom.author_status.style.display = 'none';
-      dom.author_image.style.display = 'none';
+      dom.author_status.classList.add('pp-hide');
+      dom.author_image.classList.add('pp-hide');
 
       _.clear(dom.datetime);
       _.clear(dom.tools);
@@ -2543,23 +2535,27 @@
       dom.title_link.href = illust.url_medium;
 
       dom.button_bookmark.href = illust.url_bookmark;
-      dom.button_bookmark.className = illust.bookmarked ? 'pp-active' : '';
+      if (illust.bookmarked) {
+        dom.button_bookmark.classList.add('pp-active');
+      } else {
+        dom.button_bookmark.classList.remove('pp-active');
+      }
 
       if (illust.has_image_response) {
         dom.button_response.classList.remove('pp-active');
+        dom.button_response.classList.remove('pp-hide');
         dom.button_response.href = illust.url_response;
-        dom.button_response.style.display = '';
       } else if (illust.image_response_to) {
         dom.button_response.classList.add('pp-active');
         dom.button_response.href
           = '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
-        dom.button_response.style.display = '';
+        dom.button_response.classList.remove('pp-hide');
       }
 
       if (illust.manga.enable) {
         dom.button_manga.href = illust.url_manga + '#pp-manga-thumbnail';
         _.popup.manga.update_button();
-        dom.button_manga.style.display = '';
+        dom.button_manga.classList.remove('pp-hide');
       }
 
       dom.caption.innerHTML = illust.caption;
@@ -2587,21 +2583,27 @@
       });
 
       if (_.conf.popup.author_status_icon) {
+        var cls;
+
         [
           ['fav', 'pp-fav'],
           ['fav_m', 'pp-fav-m'],
           ['mypix', 'pp-mypix']
         ].forEach(function(p) {
           if (illust['author_' + p[0]]) {
-            dom.author_status.className = p[1];
-            dom.author_status.style.display = '';
+            cls = p[1];
           }
         });
+
+        if (cls) {
+          dom.author_status.className = cls;
+          dom.author_status.classList.remove('pp-hide');
+        }
       }
 
       if (illust.author_image) {
         dom.author_image.src = illust.author_image;
-        dom.author_image.style.display = '';
+        dom.author_image.classList.remove('pp-hide');
       }
 
       var datetime = illust.datetime;
@@ -2678,13 +2680,14 @@
 
     set_status: function(text) {
       var dom = _.popup.dom;
-      dom.status.style.display = 'none';
       if (text) {
         dom.status.textContent = text;
-        dom.status.style.display = 'inline';
         if (text && dom.image_layout.childNodes.length < 1) {
           dom.image_layout.textContent = text;
         }
+        dom.status.classList.remove('pp-hide');
+      } else {
+        dom.status.classList.add('pp-hide');
       }
     },
 
@@ -3123,7 +3126,7 @@
         return;
       }
       _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
-      _.popup.dom.comment_err_empty.style.display = html ? 'none' : '';
+      _.popup.dom.comment_err_empty.classList[html ? 'add' : 'remove']('pp-hide');
       _.popup.adjust();
       _.popup.comment.scroll();
     },
@@ -3797,9 +3800,8 @@
 
       _.onclick(dom.comment_wrapper, function(ev) {
         if (ev.target === dom.comment_wrapper || ev.target === dom.comment) {
-          var visible = dom.comment_form.style.display === 'none';
-          dom.comment_form.style.display = visible ? '' : 'none';
-          _.conf.popup.show_comment_form = visible;
+          dom.comment_form.classList.toggle('pp-hide');
+          _.conf.popup.show_comment_form = !dom.comment_form.classList.contains('pp-hide');
         }
       });
 
@@ -4913,6 +4915,7 @@
   /* __DATA_BEGIN__ */
 
   _.css = [
+    '.pp-hide{display:none}',
     // popup
     '#pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}',
     '#pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}',
@@ -4943,8 +4946,9 @@
     '#pp-popup-info{padding-bottom:0.1em}',
     '#pp-popup-author-image{max-height:3.2em;float:left;border:1px solid #aaa;margin-right:0.2em}',
     '#pp-popup-author-image:hover{max-height:none}',
-    '#pp-popup-author-status{position:absolute;left:2px;margin-top:2px;display:inline-block;',
+    '#pp-popup-author-status{position:absolute;left:2px;margin-top:2px;',
     'background-image:url("', _.url.sprite, '")}',
+    '#pp-popup-author-status:not(.pp-hide){display:inline-block}',
     '#pp-popup-author-status.pp-fav{width:14px;height:14px;background-position:-200px -320px}',
     '#pp-popup-author-status.pp-fav-m{width:16px;height:14px;background-position:-200px -480px}',
     '#pp-popup-author-status.pp-mypix{width:14px;height:16px;background-position:0px -360px}',
