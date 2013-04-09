@@ -2811,7 +2811,7 @@
         if (l.scrollHeight > min) {
           return true;
         }
-        l.style.maxHeight = '';
+        l.style.maxHeight = 'none';
         return false;
       });
 
@@ -2830,7 +2830,7 @@
         last.style.maxHeight = (h - (min * lists.length)) + 'px';
         _.dbg('Adjust last tag list: ' + last.style.maxHeight);
       } else {
-        last.style.maxHeight = '';
+        last.style.maxHeight = 'none';
       }
       h -= last.offsetHeight;
 
@@ -4304,7 +4304,7 @@
         if (mh < 60) {
           this.disable_float_temp = true;
           this.unfloat();
-          this.cont.style.maxHeight = '';
+          this.cont.style.maxHeight = 'none';
           return;
         }
         if (!this.floating) {
