@@ -1823,9 +1823,7 @@
         return _.fastxml.text(node);
       });
 
-      illust.bookmarked = !!_.fastxml.q(root, '.action .bookmark a', function(node) {
-        return (node.attrs.href || '').indexOf('bookmark_detail.php') >= 0;
-      });
+      illust.bookmarked = !!_.fastxml.q(root, '.bookmark-container .bookmark-count');
 
       var response_to = _.fastxml.q(root, '.worksImageresponseInfo a');
       illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
