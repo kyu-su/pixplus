@@ -625,10 +625,6 @@
     re: {
       trim: /(?:^\s+|\s+$)/g,
       image: /^(http:\/\/i\d+\.pixiv\.net\/img(?:\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
-      xml_tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
-      xml_attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
-      xml_comment: /<!--.*?-->/g,
-      selector_token: /([#\.])/,
       author_profile: /\/member\.php\?id=(\d+)/,
       meta_size: /^(\d+)\u00d7(\d+)$/,
       meta_manga: /^[^ ]{1,10} (\d+)P$/,
@@ -1399,9 +1395,12 @@
 
   _.fastxml = {
     ignore_elements: /^(?:script|style)$/,
+    tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
+    attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
+    selector_token: /([#\.])/,
 
     parse: function(xml) {
-      var dom, node, tags = xml.replace(_.re.xml_cmment, '').split(_.re.xml_tag);
+      var dom, node, tags = xml.split(_.fastxml.tag);
       for(var i = 0; i + 2 < tags.length; i += 3) {
         var text = tags[i], tag = tags[i + 1].toLowerCase(),
             attrs = tags[i + 2] || '', raw = '<' + tag + attrs + '>';
@@ -1429,7 +1428,7 @@
         }
 
         var attr_map = { };
-        attrs = attrs.split(_.re.xml_attr);
+        attrs = attrs.split(_.fastxml.attr);
         for(var j = 1; j + 1 < attrs.length; j += 3) {
           attr_map[attrs[j]] = attrs[j + 1];
         }
@@ -1465,7 +1464,7 @@
       }
 
       var tokens = selector.split(' ').map(function(token) {
-        var terms = token.split(_.re.selector_token);
+        var terms = token.split(_.fastxml.selector_token);
         return function(node) {
           if (terms[0] && node.tag != terms[0]) {
             return false;
