@@ -4322,7 +4322,7 @@
         if (this.use_placeholder) {
           this.placeholder = this.wrap.cloneNode(false);
           this.placeholder.style.width = this.wrap.offsetWidth + 'px';
-          this.placeholder.style.height = '0px';
+          this.placeholder.style.height = this.wrap.offsetHeight + 'px';
           this.wrap.parentNode.insertBefore(this.placeholder, this.wrap);
         }
         this.wrap.classList.add('pp-float');
