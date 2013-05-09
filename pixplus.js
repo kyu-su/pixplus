@@ -2173,11 +2173,11 @@
       dom.author_staccfeed  = _.e('a', {id: 'pp-popup-author-staccfeed'}, dom.author_links);
       dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
       dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
-      dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_wrapper);
-      dom.olc_prev_icon     = olc_icon(dom.olc_prev);
-      dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_wrapper);
-      dom.olc_next_icon     = olc_icon(dom.olc_next, true);
       dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
+      dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_scroller);
+      dom.olc_prev_icon     = olc_icon(dom.olc_prev);
+      dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_scroller);
+      dom.olc_next_icon     = olc_icon(dom.olc_next, true);
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
