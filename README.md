@@ -8,10 +8,10 @@ pixiv の UI を拡張するブラウザ拡張。
 
 ## サポートしているブラウザ
 
-* Opera
-* Chrome
+* Opera (oex/UserJS)
+* Chrome (crx/Greasemonkey)
 * Firefox (Greasemonkey)
-* Safari
+* Safari (safariextz)
 
 ## ビルド方法
 
