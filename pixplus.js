@@ -4749,14 +4749,14 @@
         } catch(ex) { }
 
       }, function(query) {
-        var form          = _.q('form[action*="bookmark_setting.php"]'),
-            msgbox_bottom = _.q('.msgbox_bottom');
-        if (form && msgbox_bottom) {
+        var form        = _.q('form[action*="bookmark_setting.php"]'),
+            action_menu = _.q('.column-action-menu');
+        if (form && action_menu) {
           _.Floater.auto_run(function() {
-            msgbox_bottom.parentNode.removeChild(msgbox_bottom);
-            form.insertBefore(msgbox_bottom, form.firstChild);
-            msgbox_bottom.style.border = 'none';
-            new _.Floater(msgbox_bottom);
+            action_menu.parentNode.removeChild(action_menu);
+            form.insertBefore(action_menu, form.firstChild);
+            action_menu.style.border = 'none';
+            new _.Floater(action_menu);
           });
         }
       }
@@ -5040,8 +5040,8 @@
 
     // floater
     '.pp-float{position:fixed;top:0px}',
-    '.msgbox_bottom.pp-float{z-index:90;opacity:0.6}',
-    '.msgbox_bottom.pp-float:hover{opacity:1;}',
+    '.column-action-menu.pp-float{z-index:90;opacity:0.6}',
+    '.column-action-menu.pp-float:hover{opacity:1;}',
 
     // mypage layout
     '#page-mypage #item-container header .action .pp-layout-history{background-image:url(',
