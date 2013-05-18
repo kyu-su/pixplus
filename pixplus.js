@@ -3813,7 +3813,7 @@
       });
 
       _.onclick(dom.comment_wrapper, function(ev) {
-        if (ev.target === dom.comment_wrapper || ev.target === dom.comment) {
+        if (/^(?:pp-popup-comment-wrapper|pp-popup-comment)$/.test(ev.target.id)) {
           dom.comment_form.classList.toggle('pp-hide');
           _.conf.popup.show_comment_form = !dom.comment_form.classList.contains('pp-hide');
         }
