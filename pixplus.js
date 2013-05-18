@@ -5523,10 +5523,11 @@
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
-      "date": "2013/04/xx",
+      "date": "2013/05/18",
       "version": "1.6.2",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/05/18/pixplus-1-6-2",
       "changes_i18n": {
         "en": [
           "[Fix] Fix author status icon.",
@@ -5536,12 +5537,11 @@
         "ja": [
           "[\u4fee\u6b63] \u4f5c\u8005\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u30a2\u30a4\u30b3\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
           "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3066\u3082\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u306e\u8868\u793a\u304c\u5909\u5316\u3057\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
-          "[Fix] Firefox21\u3067\u8aad\u307f\u8fbc\u307f\u30a8\u30e9\u30fc\u304c\u767a\u751f\u3059\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+          "[\u4fee\u6b63] Firefox21\u3067\u8aad\u307f\u8fbc\u307f\u30a8\u30e9\u30fc\u304c\u767a\u751f\u3059\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/03/13",
       "version": "1.6.1",
