@@ -12,7 +12,12 @@ BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo
 BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
-BUILD_DIR                       = $(CURDIR)/build
+VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
+DESCRIPTION                     = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
+WEBSITE                         = http://crckyl.ath.cx/pixplus/
+WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
+
+BUILD_DIR                       = $(CURDIR)/temp
 BUILD_DIR_ICON                  = $(BUILD_DIR)/icons
 BUILD_DIR_OEX                   = $(BUILD_DIR)/oex
 BUILD_DIR_CRX                   = $(BUILD_DIR)/crx
@@ -21,7 +26,7 @@ BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
 FEED_ATOM                       = feed.atom
 CHANGELOG_JSON                  = changelog.json
 
-DIST_DIR                        = $(CURDIR)/dist
+DIST_DIR                        = $(CURDIR)/bin/$(VERSION)
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
 OEX                             = $(DIST_DIR)/pixplus.oex
@@ -36,11 +41,6 @@ ICON_FILES                      = $(ICON_SIZE:%=$(BUILD_DIR_ICON)/%.png)
 DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)
 DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
 DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
-
-VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-DESCRIPTION                     = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
-WEBSITE                         = http://crckyl.ath.cx/pixplus/
-WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
 OEX_USERJS                      = $(BUILD_DIR_OEX)/includes/$(SRC_USERJS)
 OEX_CONFIG_XML_IN               = $(CURDIR)/opera/config.xml.in
@@ -98,7 +98,7 @@ $(XAR):
 
 clean:
 	@echo 'Cleaning'
-	@rm -rf $(BUILD_DIR) $(DIST_DIR)
+	@rm -rf $(BUILD_DIR)
 
 # ================ Feeds ================
 
