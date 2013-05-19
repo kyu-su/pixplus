@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.6.2
+// @version     1.6.3
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
@@ -5523,6 +5523,18 @@
   };
 
   _.changelog = [
+    {
+      "date": "2013/05/xx",
+      "version": "1.6.3",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+        ],
+        "ja": [
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/05/18",
