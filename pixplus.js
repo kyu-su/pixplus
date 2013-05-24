@@ -177,7 +177,7 @@
           for(var i = 0; i < Math.floor(lines.length / 2); ++i) {
             var tag = lines[i * 2], alias = lines[i * 2 + 1];
             if (tag && alias) {
-              aliases[tag] = alias.split(/\s+/);
+              aliases[tag] = alias.replace(/(?:^\s+|\s+$)/g, '').split(/\s+/);
             }
           }
           return aliases;
