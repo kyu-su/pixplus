@@ -5560,8 +5560,10 @@
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Fix] Support new bookmark page."
         ],
         "ja": [
+          "[\u4fee\u6b63] \u65b0\u3057\u3044\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
         ]
       }
     },
