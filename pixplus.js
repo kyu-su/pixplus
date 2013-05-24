@@ -2868,6 +2868,9 @@
         _.popup.set_status('');
         _.popup.adjust();
 
+        if (!illust.bookmarked) {
+          ifr.contentWindow.pixplus.bookmarkform.autoinput_tag();
+        }
         _.popup.key.init(ifr.contentWindow);
       });
 
@@ -3863,8 +3866,11 @@
       }
     },
 
-    setup_autoinput: function(root) {
-      var illust_tags = _.qa('.work-tags-container .tag[data-tag]', root).map(function(tag) {
+    autoinput_tag: function() {
+      var illust_tags = _.qa(
+        '.work-tags-container .tag[data-tag]',
+        _.bookmarkform.dom.root
+      ).map(function(tag) {
         return tag.getAttribute('data-tag');
       });
 
@@ -3886,8 +3892,8 @@
       });
     },
 
-    setup_tag_order: function(root) {
-      var mytags = _.q('.tag-container.tag-cloud-container .list-items', root);
+    setup_tag_order: function() {
+      var mytags = _.q('.tag-container.tag-cloud-container .list-items', _.bookmarkform.dom.root);
       if (!mytags || _.conf.bookmark.tag_order.length < 1) {
         return;
       }
@@ -3896,7 +3902,7 @@
         return tag.querySelector('.tag').getAttribute('data-tag');
       });
 
-      var opt = _.q('.list-option.tag-order', root);
+      var opt = _.q('.list-option.tag-order', _.bookmarkform.dom.root);
       if (opt) {
         opt.parentNode.removeChild(opt);
       }
@@ -4034,14 +4040,14 @@
       return _.bookmarkform.select_nearest_tag(key);
     },
 
-    setup_key: function(root) {
+    setup_key: function() {
       var dom = _.bookmarkform.dom;
 
       dom.tags = [];
       dom.tag_groups = [];
-      dom.input_tag = _.q('input#input_tag', root);
+      dom.input_tag = _.q('input#input_tag', dom.root);
 
-      _.qa('.tag-container', root).forEach(function(g) {
+      _.qa('.tag-container', dom.root).forEach(function(g) {
         var tags = _.qa('.tag[data-tag]', g);
         if (tags.length) {
           dom.tags = dom.tags.concat(tags);
@@ -4053,7 +4059,8 @@
       _.key.listen(dom.input_tag, _.bookmarkform.onkey);
     },
 
-    setup_alias_ui: function(root) {
+    setup_alias_ui: function() {
+      var root = _.bookmarkform.dom.root;
       var first_tag_list = _.q('.work-tags-container', root);
       if (!first_tag_list) {
         return;
@@ -4214,10 +4221,6 @@
         if (hide_radio) {
           hide_radio.checked = true;
         }
-      }
-
-      if (!w.pixiv.context.queries.rest) {
-        _.bookmarkform.setup_autoinput(root);
       }
 
       _.bookmarkform.setup_tag_order(root);
