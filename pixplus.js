@@ -1899,9 +1899,10 @@
           }
         });
 
+        var err_on = statuses.html > 1;
         _.listen(image, 'error', function() {
           statuses[name] = -1;
-          if (statuses[other] < 0 && statuses.html > 1) {
+          if (statuses[other] < 0 && err_on) {
             send_error('Failed to load image - ' + url);
           }
         });
