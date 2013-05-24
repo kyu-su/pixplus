@@ -1755,7 +1755,7 @@
           return false;
         });
         if (!script) {
-          _.log('[Error] Requested definition script not found - pixiv.context.' + name);
+          _.log('[Warning] Requested definition script not found - pixiv.context.' + name);
         }
         return value;
       };
@@ -2257,13 +2257,15 @@
 
       // calculate scale
 
+      var aspect_ratio = total_width / total_height;
+      if (aspect_ratio < 1) {
+        aspect_ratio = 1 / aspect_ratio;
+      }
+      _.popup.aspect_ratio = aspect_ratio;
+
       if (total_width > max_width || total_height > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
-          var aspect = total_width / total_height;
-          if (aspect < 1) {
-            aspect = 1 / aspect;
-          }
-          if (aspect >= _.conf.popup.fit_short_threshold) {
+          if (aspect_ratio >= _.conf.popup.fit_short_threshold) {
             _.popup.resize_mode = _.popup.FIT_SHORT;
           } else {
             _.popup.resize_mode = _.popup.FIT_LONG;
@@ -2341,19 +2343,32 @@
         size_list = natural_sizes;
       }
 
-      dom.size.textContent = size_list.map(function(size, idx) {
-        var str = size.width + 'x' + size.height, more_info = [], re, img = _.popup.images[idx];
+      var size_text = size_list.map(function(size, idx) {
+        var str = size.width + 'x' + size.height,
+            more_info = [],
+            img = _.popup.images[idx],
+            re;
+
         if (img.offsetWidth !== size.width) {
           more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
         }
+
         if ((re = _.re.url_extension.exec(img.src))) {
           more_info.push(re[1]);
         }
+
         if (more_info) {
           str += '(' + more_info.join('/') + ')';
         }
+
         return str;
       }).join('/');
+
+      if (_.conf.general.debug) {
+        size_text += ' ar:' + (g.Math.floor(_.popup.aspect_ratio * 100) / 100);
+      }
+
+      dom.size.textContent = size_text;
 
       // update resize mode indicator
 
