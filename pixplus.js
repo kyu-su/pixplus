@@ -4,6 +4,8 @@
 // @version     1.6.4
 // @license     Apache License 2.0
 // @description pixivをほげる。
+// @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
+// @icon64      http://crckyl.ath.cx/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
 // @updateURL   http://crckyl.ath.cx/pixplus/archive/latest/pixplus.user.js
 // @include     http://www.pixiv.net/*
