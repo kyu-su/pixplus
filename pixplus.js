@@ -2829,7 +2829,8 @@
       }
 
       var ifr = _.popup.dom.bookmark_iframe,
-          win = ifr.contentWindow;
+          win = ifr.contentWindow,
+          doc = win.document;
 
       _.listen(win, 'unload', function() {
         connection.disconnect();
@@ -2839,6 +2840,9 @@
           _.popup.reload();
         }, 0);
       });
+
+      doc.documentElement.classList.add('pp-bookmark-iframe');
+      win.pixplus.bookmarkform.setup(doc.querySelector('#wrapper .layout-body'));
 
       _.popup.dom.root.classList.add('pp-bookmark-mode');
       ifr.style.display = 'block';
@@ -2882,7 +2886,7 @@
       });
 
       ifr.style.display = 'none';
-      ifr.src = illust.url_bookmark.replace(/#.*/, '') + '#pixplus-iframe';
+      ifr.src = illust.url_bookmark;
 
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.bookmark_iframe = ifr;
@@ -4791,23 +4795,6 @@
             new _.Floater(action_menu);
           });
         }
-      }
-    ],
-
-    '/bookmark_add.php': [
-      function(query) {
-        if (w.location.hash !== '#pixplus-iframe') {
-          return;
-        }
-
-        d.documentElement.classList.add('pp-bookmark-iframe');
-
-        var show = w.pixiv.bookmarkTag.show;
-        w.pixiv.bookmarkTag.show = function() {
-          var r = show.apply(this, arguments);
-          _.bookmarkform.setup(_.q('#wrapper .layout-body'));
-          return r;
-        };
       }
     ]
   };
