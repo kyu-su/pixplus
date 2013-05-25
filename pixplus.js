@@ -2801,13 +2801,11 @@
     enable: false,
 
     clear: function() {
-      if (_.popup.dom.bookmark_iframe) {
-        _.popup.dom.bookmark_iframe.src = 'data:text/plain,';
-        _.popup.dom.bookmark_iframe = null;
-      }
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
+      _.popup.dom.bookmark_iframe = null;
       _.popup.bookmark.enable = false;
+      w.focus(); // for Firefox
     },
 
     adjust: function(w, h) {
