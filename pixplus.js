@@ -5548,10 +5548,11 @@
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
-      "date": "2013/05/xx",
+      "date": "2013/05/26",
       "version": "1.6.3",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/05/25/pixplus-1-6-3",
       "changes_i18n": {
         "en": [
           "[Fix] Support new bookmark page."
@@ -5562,7 +5563,6 @@
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/05/18",
       "version": "1.6.2",
