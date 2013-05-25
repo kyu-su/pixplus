@@ -319,7 +319,7 @@
     },
 
     trim: function(text) {
-      return text ? text.replace(_.re.trim, '') : '';
+      return text ? text.replace(/(?:^\s+|\s+$)/g, '') : '';
     },
 
     as_array: function(obj) {
@@ -591,7 +591,8 @@
     key_enabled: function(ev) {
       return !(ev.target instanceof w.HTMLTextAreaElement ||
                (ev.target instanceof w.HTMLInputElement &&
-                (!ev.target.type || _.re.input_type_text.test(ev.target.type))));
+                (!ev.target.type ||
+                 /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
     },
 
     redirect_jump_page: function(root) {
@@ -600,7 +601,7 @@
       }
       _.qa('a[href*="jump.php"]', root).forEach(function(link) {
         var re;
-        if ((re = _.re.url_jump.exec(link.href))) {
+        if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/.exec(link.href))) {
           link.href = g.decodeURIComponent(re[1]);
         }
       });
@@ -619,23 +620,6 @@
         });
         return map;
       }
-    },
-
-    re: {
-      trim: /(?:^\s+|\s+$)/g,
-      image: /^(http:\/\/i\d+\.pixiv\.net\/img(?:\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/,
-      author_profile: /\/member\.php\?id=(\d+)/,
-      meta_size: /^(\d+)\u00d7(\d+)$/,
-      meta_manga: /^[^ ]{1,10} (\d+)P$/,
-      manga_page: /pixiv\.context\.images\[(\d+)\]\.(push|unshift)\('([^']*)'\)/,
-      manga_image_suffix: /(_p\d+\.\w+)(?=\?|$)/,
-      hash_manga_page: /^#pp-manga-page-(\d+)$/,
-      url_extension: /\.(\w+)(?:\?|$)/,
-      repost: /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/,
-      url_bookmark: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/,
-      url_member_illust: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/,
-      url_jump: /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/,
-      input_type_text: /^(?:text|search|tel|url|email|password|number)$/i
     },
 
     workaround: {
@@ -1565,7 +1549,7 @@
       }
 
       var re;
-      if (!(re = _.re.image.exec(url))) {
+      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/img(?:\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/.exec(url))) {
         return null;
       }
 
@@ -1782,7 +1766,7 @@
       }
       if (author_link) {
         illust.author_url = author_link.attrs.href;
-        if ((re = _.re.author_profile.exec(illust.author_url))) {
+        if ((re = /\/member\.php\?id=(\d+)/.exec(illust.author_url))) {
           illust.author_id = g.parseInt(re[1], 10);
         }
       }
@@ -1805,15 +1789,15 @@
 
       illust.datetime = _.fastxml.text(meta[0]);
       illust.repost = null;
-      if ((re = _.re.repost.exec(html))) {
+      if ((re = /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/.exec(html))) {
         illust.repost = {year: re[1], month: re[2], date: re[3], hour: re[4], minute: re[5]};
       }
 
       illust.size = null;
       illust.manga = {enable: false, viewed: illust.manga ? !!illust.manga.viewed : false};
-      if ((re = _.re.meta_size.exec(meta2))) {
+      if ((re = /^(\d+)\u00d7(\d+)$/.exec(meta2))) {
         illust.size = {width: g.parseInt(re[1], 10), height: g.parseInt(re[2], 10)};
-      } else if ((re = _.re.meta_manga.exec(meta2))) {
+      } else if ((re = /^[^ ]{1,10} (\d+)P$/.exec(meta2))) {
         illust.manga.page_count = g.parseInt(re[1], 10);
         illust.manga.enable = illust.manga.page_count > 0;
       }
@@ -1977,14 +1961,14 @@
     },
 
     parse_manga_html: function(illust, html) {
-      var terms = html.split(_.re.manga_page),
+      var terms = html.split(/pixiv\.context\.images\[(\d+)\]\.(push|unshift)\('([^']*)'\)/),
           pages = [], count = 0;
 
       for(var i = 1; i + 2 < terms.length; i += 4) {
         var page = g.parseInt(terms[i], 10),
             op = terms[i + 1] /* (push|unshift) */,
             url = terms[i + 2],
-            url_big = url.replace(_.re.manga_image_suffix, '_big$1');
+            url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
 
         if (page > pages.length) {
           return false;
@@ -2082,7 +2066,7 @@
 
     parse_illust_url: function(url) {
       var re;
-      if (!(re = _.re.url_member_illust.exec(url))) {
+      if (!(re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
         return null;
       }
       var query = _.url.parse_query(re[1]);
@@ -2353,7 +2337,7 @@
           more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
         }
 
-        if ((re = _.re.url_extension.exec(img.src))) {
+        if ((re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
           more_info.push(re[1]);
         }
 
@@ -4673,7 +4657,7 @@
         if (w.location.hash === '#pp-manga-thumbnail') {
           var toggle_thumbnail = _.q('#toggle-thumbnail');
           _.send_click(toggle_thumbnail);
-        } else if ((re = _.re.hash_manga_page.exec(w.location.hash))) {
+        } else if ((re = /^#pp-manga-page-(\d+)$/.exec(w.location.hash))) {
           try {
             w.pixiv.manga.move(g.parseInt(re[1], 10));
           } catch(ex) { }
@@ -4888,7 +4872,7 @@
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
         var re;
-        if ((re = _.re.url_bookmark.exec(link.href))) {
+        if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/.exec(link.href))) {
           if (re[1]) {
             var query = _.url.parse_query(re[1]);
             if (!query.id && !query.rest) {
