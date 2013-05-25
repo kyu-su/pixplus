@@ -5,6 +5,7 @@
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @namespace   http://my.opera.com/crckyl/
+// @updateURL   http://crckyl.ath.cx/pixplus/archive/latest/pixplus.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
 // ==/UserScript==
