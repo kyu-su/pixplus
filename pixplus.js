@@ -5118,7 +5118,7 @@
     {"name": "general", "items": [
       {"key": "debug", "value": false},
       {"key": "bookmark_hide", "value": false},
-      {"key": "float_tag_list", "value": 2},
+      {"key": "float_tag_list", "value": 1},
       {"key": "tag_separator_style2", "value": "2px solid #dae1e7"},
       {"key": "stacc_link", "value": ""},
       {"key": "rate_confirm", "value": true},
