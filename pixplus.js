@@ -4237,56 +4237,6 @@
     }
   };
 
-  _.pager = {
-    loaded: false,
-    callbacks: [],
-
-    load: function() {
-      if (_.pager.loaded) {
-        return;
-      }
-      _.pager.loaded = true;
-      _.pager.callbacks.forEach(function(func) {
-        func();
-      });
-      _.pager.callbacks = [];
-    },
-
-    check: function() {
-      if (_.pager.loaded) {
-        return true;
-      }
-      if (w.AutoPagerize || w.AutoPatchWork || _.q('#AutoPatchWork-Bar')) {
-        _.pager.load();
-        return true;
-      }
-      return false;
-    },
-
-    wait: function(callback) {
-      if (_.pager.check()) {
-        callback();
-        return;
-      }
-      _.pager.callbacks.push(callback);
-    },
-
-    init: function() {
-      if (_.pager.check()) {
-        return;
-      }
-
-      _.listen(
-        w,
-        ['GM_AutoPagerizeLoaded', 'AutoPatchWork.initialized'],
-        function(ev, connection) {
-          _.pager.load();
-          connection.disconnect();
-        }
-      );
-    }
-  };
-
   _.Floater = function(wrap, cont, ignore_elements) {
     this.wrap = wrap;
     this.cont = cont;
@@ -4412,11 +4362,11 @@
     },
 
     auto_run: function(func) {
-      if (_.conf.general.float_tag_list === 1) {
-        func();
-      } else if (_.conf.general.float_tag_list === 2) {
-        _.pager.wait(func);
+      if (_.conf.general.float_tag_list === 0) {
+        return;
       }
+
+      func();
     },
 
     update_float: function() {
@@ -4940,7 +4890,6 @@
 
     _.illust.setup(_.q('#wrapper'));
 
-    _.pager.init();
     _.Floater.init();
     _.mypage.init();
     w.addEventListener('load', _.Floater.update_height, false);
@@ -5250,7 +5199,7 @@
           bookmark_hide: 'Make private bookmark by default',
           float_tag_list: {
             desc: 'Enable float view for tag list',
-            hint: ['Disable', 'Enable', 'Pager']
+            hint: ['Disable', 'Enable']
           },
           tag_separator_style2: 'Separator style for tag list',
           stacc_link: {
@@ -5415,7 +5364,7 @@
           bookmark_hide: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b',
           float_tag_list: {
             desc: '\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b',
-            hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u30e3']
+            hint: ['\u7121\u52b9', '\u6709\u52b9']
           },
           tag_separator_style2: '\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb',
           stacc_link: {
