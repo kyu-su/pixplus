@@ -2916,7 +2916,6 @@
       }
       _.popup.bookmark.clear();
       _.popup.show(_.popup.illust);
-      _.popup.adjust();
     },
 
     toggle: function() {
