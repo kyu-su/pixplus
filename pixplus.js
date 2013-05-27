@@ -10,6 +10,7 @@
 // @updateURL   http://crckyl.ath.cx/pixplus/archive/latest/pixplus.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
+// @run-at      document-start
 // ==/UserScript==
 
 (function(g, w, unsafeWindow, entrypoint) {
@@ -24,13 +25,13 @@
       false; // __GREASEMONKEY_REMOVE__
 
   var inject = function(data) {
-    var s = w.document.createElement('script');
+    var s = w.document.createElement('script'), d = w.document;
     s.setAttribute('type', 'text/javascript');
     s.textContent
       = ('(' + entrypoint.toString() + ')'
          + '(this,this.window,this.window.document,'
          + g.JSON.stringify(data) + ')');
-    w.document.body.appendChild(s);
+    (d.body || d.documentElement || d).appendChild(s);
   };
 
   var send_message;
@@ -4589,10 +4590,6 @@
     },
 
     init: function() {
-      if (w.location.pathname !== '/mypage.php') {
-        return;
-      }
-
       _.mypage.setup_item_actions();
 
       try {
@@ -4610,6 +4607,10 @@
   };
 
   _.page_procs = {
+    '/mypage.php': [
+      _.mypage.init
+    ],
+
     '/member_illust.php': [
       function() {
         var re;
@@ -4756,52 +4757,12 @@
     ]
   };
 
-  _.run = function() {
-    _.run = function() { };
+  _.setup_ready = function() {
+    _.lang.setup();
 
-    if (_extension_data) {
-      var config_set_data = _.e('div', {css: 'display:none'}, d.body);
-
-      _.conf.__init({
-        get: function(section, item) {
-          return _extension_data.conf[_.conf.__key(section, item)] || null;
-        },
-
-        set: function(section, item, value) {
-          _extension_data.conf[_.conf.__key(section, item)] = value;
-
-          var ev = d.createEvent('Event');
-          ev.initEvent('pixplusConfigSet', true, true);
-          config_set_data.setAttribute('data-pp-section', section);
-          config_set_data.setAttribute('data-pp-item',    item);
-          config_set_data.setAttribute('data-pp-value',   value);
-          config_set_data.dispatchEvent(ev);
-        }
-      });
-    } else {
-      _.conf.__init(_.conf.__wrap_storage(g.localStorage));
-    }
-
-    _.log('version=' + _.version());
-    if (_.q('#login-block')) {
-      _.log('not logged in');
-      return;
-    }
-
-    _.lang.current = (
-      _.lang[d.documentElement.getAttribute('lang')] ||
-        _.lang[g.navigator.language] || _.lang.en
-    );
-    _.key.init();
-
-    _.e('style', {text: _.css}, d.body);
-    _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
-
-    if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
-      w.location.href = g.decodeURIComponent(w.location.search.substring(1));
-      return;
-    }
     _.redirect_jump_page();
+
+    _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
@@ -4883,12 +4844,60 @@
     } catch(ex) {
       _.log('rating error - ' + g.String(ex));
     }
+  };
 
-    _.illust.setup(_.q('#wrapper'));
+  _.run = function() {
+    _.run = function() { };
+
+    if (_extension_data) {
+      var config_set_data = _.e('div', {css: 'display:none'}, d.body);
+
+      _.conf.__init({
+        get: function(section, item) {
+          return _extension_data.conf[_.conf.__key(section, item)] || null;
+        },
+
+        set: function(section, item, value) {
+          _extension_data.conf[_.conf.__key(section, item)] = value;
+
+          var ev = d.createEvent('Event');
+          ev.initEvent('pixplusConfigSet', true, true);
+          config_set_data.setAttribute('data-pp-section', section);
+          config_set_data.setAttribute('data-pp-item',    item);
+          config_set_data.setAttribute('data-pp-value',   value);
+          config_set_data.dispatchEvent(ev);
+        }
+      });
+    } else {
+      _.conf.__init(_.conf.__wrap_storage(g.localStorage));
+    }
+
+    if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
+      w.location.href = g.decodeURIComponent(w.location.search.substring(1));
+      return;
+    }
+
+    _.log('version=' + _.version());
+    if (_.q('#login-block')) {
+      _.log('not logged in');
+      return;
+    }
+
+    _.lang.setup();
+    _.key.init();
+
+    _.e('style', {text: _.css}, d.documentElement || d);
+
+    _.illust.setup(d.documentElement);
 
     _.Floater.init();
-    _.mypage.init();
     w.addEventListener('load', _.Floater.update_height, false);
+
+    if (d.readyState === 'loading') {
+      w.addEventListener('DOMContentLoaded', _.setup_ready, false);
+    } else {
+      _.setup_ready();
+    }
   };
 
   /* __DATA_BEGIN__ */
@@ -5492,6 +5501,14 @@
       mypage_layout_history: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74',
       mypage_layout_history_empty: '\u5c65\u6b74\u304c\u7a7a\u3067\u3059',
       mypage_layout_history_help: '\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002'
+    },
+
+    setup: function() {
+      var lng;
+      if (d.documentElement) {
+        lng = d.documentElement.lang;
+      }
+      _.lang.current = (lng || _.lang[g.navigator.language] || _.lang.en);
     }
   };
 
@@ -5502,9 +5519,11 @@
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "Improve boot performance",
           "[Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17"
         ],
         "ja": [
+          "\u8d77\u52d5\u3092\u9ad8\u901f\u5316\u3002",
           "[\u4fee\u6b63][Firefox] Firefox ESR 17\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
         ]
       }
@@ -6095,9 +6114,5 @@
 
   /* __DATA_END__ */
 
-  if (g.opera && d.readyState === 'loading') {
-    w.addEventListener('DOMContentLoaded', _.run, false);
-  } else {
-    _.run();
-  }
+  _.run();
 });
