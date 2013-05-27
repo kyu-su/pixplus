@@ -5506,7 +5506,7 @@
     setup: function() {
       var lng;
       if (d.documentElement) {
-        lng = d.documentElement.lang;
+        lng = _.lang[d.documentElement.lang];
       }
       _.lang.current = (lng || _.lang[g.navigator.language] || _.lang.en);
     }
