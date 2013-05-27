@@ -4794,15 +4794,7 @@
     );
     _.key.init();
 
-    var css_append = [
-      '.pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:',
-      _.conf.general.tag_separator_style2,
-      '}.pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:',
-      _.conf.general.tag_separator_style2,
-      '}'
-    ].join('');
-
-    _.e('style', {text: _.css + css_append}, d.body);
+    _.e('style', {text: _.css}, d.body);
     _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
 
     if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
@@ -5063,7 +5055,10 @@
     '#pp-layout-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}',
     '#pp-layout-preview li.pp-open{font-weight:bold;color:#444}',
     '#pp-layout-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}',
-    '#pp-layout-preview li.pp-open div{display:block}'
+    '#pp-layout-preview li.pp-open div{display:block}',
+
+    '.pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}',
+    '.pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:2px solid #dae1e7}'
   ].join('');
 
   _.conf.__schema = [
@@ -5072,7 +5067,6 @@
       {"key": "debug", "value": false},
       {"key": "bookmark_hide", "value": false},
       {"key": "float_tag_list", "value": 1},
-      {"key": "tag_separator_style2", "value": "2px solid #dae1e7"},
       {"key": "stacc_link", "value": ""},
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
@@ -5205,7 +5199,6 @@
             desc: 'Enable float view for tag list',
             hint: ['Disable', 'Enable']
           },
-          tag_separator_style2: 'Separator style for tag list',
           stacc_link: {
             desc: 'Change \'Stacc feed\' link',
             hint: [{value: 'nochange', desc: 'Do not change'},
@@ -5370,7 +5363,6 @@
             desc: '\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b',
             hint: ['\u7121\u52b9', '\u6709\u52b9']
           },
-          tag_separator_style2: '\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb',
           stacc_link: {
             desc: '\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148',
             hint: [{value: 'nochange', desc: '\u5909\u66f4\u3057\u306a\u3044'},
