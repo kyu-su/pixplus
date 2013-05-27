@@ -2803,6 +2803,11 @@
   _.popup.bookmark = {
     enable: false,
 
+    iframe_window: function() {
+      var win = _.popup.dom.bookmark_iframe.contentWindow;
+      return win.wrappedJSObject || win;
+    },
+
     clear: function() {
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
@@ -2812,9 +2817,8 @@
     },
 
     adjust: function(w, h) {
-      var win = _.popup.dom.bookmark_iframe.contentWindow,
-          doc = win.document,
-          de = doc.documentElement,
+      var win = _.popup.bookmark.iframe_window(),
+          de = win.document.documentElement,
           wrapper = _.popup.dom.bookmark_wrapper;
 
       wrapper.style.width  = 'auto';
@@ -2832,8 +2836,9 @@
       }
 
       var ifr = _.popup.dom.bookmark_iframe,
-          win = ifr.contentWindow,
-          doc = win.document;
+          win = _.popup.bookmark.iframe_window(),
+          doc = win.document,
+          bm  = win.pixplus.bookmarkform;
 
       _.listen(win, 'unload', function() {
         connection.disconnect();
@@ -2845,21 +2850,20 @@
       });
 
       doc.documentElement.classList.add('pp-bookmark-iframe');
-      win.pixplus.bookmarkform.setup(doc.querySelector('#wrapper .layout-body'));
+      bm.setup(doc.querySelector('#wrapper .layout-body'));
 
+      _.popup.key.init(win);
       _.popup.dom.root.classList.add('pp-bookmark-mode');
       ifr.style.display = 'block';
       _.popup.set_status('');
       _.popup.adjust();
 
-      var bm = win.pixplus.bookmarkform;
       if (!illust.bookmarked) {
         bm.autoinput_tag();
       }
       if (bm.dom.input_tag) {
         bm.dom.input_tag.focus();
       }
-      _.popup.key.init(win);
     },
 
     start: function() {
@@ -2901,7 +2905,7 @@
         return;
       }
 
-      var win = _.popup.dom.bookmark_iframe.contentWindow;
+      var win = _.popup.bookmark.iframe_window();
       win.pixplus.bookmarkform.dom.form.submit();
     },
 
@@ -5506,8 +5510,10 @@
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17"
         ],
         "ja": [
+          "[\u4fee\u6b63][Firefox] Firefox ESR 17\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
