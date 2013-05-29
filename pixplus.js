@@ -116,191 +116,6 @@
     }
   };
 
-  _.conf = {
-    __key_prefix: '__pixplus_',
-    __is_extension: false,
-
-    __conv: {
-      'string': function(value) {
-        return g.String(value);
-      },
-      'number': function(value) {
-        return g.parseFloat(value) || 0;
-      },
-      'boolean': function(value) {
-        return g.String(value).toLowerCase() === 'true';
-      },
-
-      bookmark_tag_order: {
-        parse: function(str) {
-          var ary = [], ary_ary = [], lines = str.split(/[\r\n]+/);
-          for(var i = 0; i < lines.length; ++i) {
-            var tag = lines[i];
-            if (tag === '-') {
-              if (ary_ary.length) {
-                ary.push(ary_ary);
-              }
-              ary_ary = [];
-            } else if (tag === '*') {
-              ary_ary.push(null);
-            } else if (tag) {
-              ary_ary.push(tag);
-            }
-          }
-          if (ary_ary.length) {
-            ary.push(ary_ary);
-          }
-          return ary;
-        },
-
-        dump: function(bm_tag_order) {
-          var str = '';
-          if (!bm_tag_order) {
-            return str;
-          }
-          for(var i = 0; i < bm_tag_order.length; ++i) {
-            var ary = bm_tag_order[i];
-            for(var j = 0; j < ary.length; ++j) {
-              if (ary[j] === null) {
-                ary[j] = '*';
-              }
-            }
-            if (i) {
-              str += '-\n';
-            }
-            str += ary.join('\n') + '\n';
-          }
-          return str;
-        }
-      },
-
-      bookmark_tag_aliases: {
-        parse: function(str) {
-          var aliases = {};
-          var lines = str.split(/[\r\n]+/);
-          for(var i = 0; i < Math.floor(lines.length / 2); ++i) {
-            var tag = lines[i * 2], alias = lines[i * 2 + 1];
-            if (tag && alias) {
-              aliases[tag] = alias.replace(/(?:^\s+|\s+$)/g, '').split(/\s+/);
-            }
-          }
-          return aliases;
-        },
-
-        dump: function(bm_tag_aliases) {
-          var str = '';
-          for(var key in bm_tag_aliases) {
-            str += key + '\n' + bm_tag_aliases[key].join(' ') + '\n';
-          }
-          return str;
-        }
-      }
-    },
-
-    __export: function(key_prefix) {
-      var storage = { };
-      _.conf.__schema.forEach(function(section) {
-        section.items.forEach(function(item) {
-          var value = _.conf[section.name][item.key];
-          var conv = _.conf.__conv[section.name + '_' + item.key];
-          if (conv) {
-            value = conv.dump(value);
-          } else {
-            value = g.String(value);
-          }
-          storage[key_prefix + section.name + '_' + item.key] = value;
-        });
-      });
-      return storage;
-    },
-
-    __import: function(data) {
-      _.conf.__schema.forEach(function(section) {
-        section.items.forEach(function(item) {
-          var key = section.name + '_' + item.key;
-          var value = data[key];
-          if (typeof(value) === 'undefined') {
-            return;
-          }
-
-          var conv = _.conf.__conv[key];
-          if (conv) {
-            value = conv.parse(value);
-          } else if ((conv = _.conf.__conv[typeof(item.value)])) {
-            value = conv(value);
-          }
-
-          _.conf[section.name][item.key] = value;
-        });
-      });
-    },
-
-    __key: function(section, item) {
-      return _.conf.__key_prefix + section + '_' + item;
-    },
-
-    __parse: function(section, item, value) {
-      var conv = _.conf.__conv[typeof(_.conf.__defaults[section][item])];
-      if (conv) {
-        value = conv(value);
-      }
-      conv = _.conf.__conv[section + '_' + item];
-      if (conv) {
-        value = conv.parse(value);
-      }
-      return value;
-    },
-
-    __dump: function(section, item, value) {
-      var conv = _.conf.__conv[section + '_' + item];
-      if (conv) {
-        return conv.dump(value);
-      } else {
-        return g.String(value);
-      }
-    },
-
-    __wrap_storage: function(storage) {
-      return {
-        get: function(section, item) {
-          return storage.getItem(_.conf.__key(section, item));
-        },
-
-        set: function(section, item, value) {
-          storage.setItem(_.conf.__key(section, item), value);
-        }
-      };
-    },
-
-    __init: function(storage) {
-      _.conf.__defaults = { };
-      _.conf.__schema.forEach(function(section) {
-        _.conf.__defaults[section.name] = { };
-        section.items.forEach(function(item) {
-          _.conf.__defaults[section.name][item.key] = item.value;
-        });
-      });
-
-      _.conf.__schema.forEach(function(section) {
-        var conf_section = _.conf[section.name] = { };
-
-        section.items.forEach(function(item) {
-          var value = storage.get(section.name, item.key);
-          value = _.conf.__parse(section.name, item.key, value === null ? item.value : value);
-
-          conf_section.__defineGetter__(item.key, function() {
-            return value;
-          });
-
-          conf_section.__defineSetter__(item.key, function(new_value) {
-            value = new_value;
-            storage.set(section.name, item.key, _.conf.__dump(section.name, item.key, value));
-          });
-        });
-      });
-    }
-  };
-
   _.extend(_, {
     version: function() {
       return _.changelog[0].version;
@@ -308,18 +123,6 @@
 
     release_date: function() {
       return _.changelog[0].date;
-    },
-
-    log: function(msg) {
-      if (g.console) {
-        g.console.log('pixplus: ' + msg);
-      }
-    },
-
-    dbg: function() {
-      if (_.conf.general.debug) {
-        _.log.apply(this, arguments);
-      }
     },
 
     trim: function(text) {
@@ -355,80 +158,17 @@
       return _.as_array((context || d).querySelectorAll(query));
     },
 
-    xhr: {
-      cache: { },
-
-      remove_cache: function(url) {
-        _.xhr.cache[url] = null;
-      },
-
-      request: function(method, url, headers, data, cb_success, cb_error) {
-        var xhr = new w.XMLHttpRequest();
-        xhr.onload = function() {
-          _.xhr.cache[url] = xhr.responseText;
-          cb_success(xhr.responseText);
-        };
-        if (cb_error) {
-          xhr.onerror = function() {
-            cb_error();
-          };
+    mod: function(obj) {
+      for(var key in obj) {
+        if (obj.hasOwnProperty(key) && obj[key] instanceof g.Function) {
+          obj[key] = (function(orig) {
+            return function() {
+              return orig.apply(obj, arguments);
+            };
+          })(obj[key]);
         }
-        xhr.open(method, url, true);
-        if (headers) {
-          headers.forEach(function(p) {
-            xhr.setRequestHeader(p[0], p[1]);
-          });
-        }
-        xhr.send(data);
-      },
-
-      get: function(url, cb_success, cb_error) {
-        if (_.xhr.cache[url]) {
-          cb_success(_.xhr.cache[url]);
-          return;
-        }
-        _.xhr.request('GET', url, null, null, cb_success, cb_error);
-      },
-
-      post: function(form, cb_success, cb_error) {
-        _.xhr.request(
-          'POST',
-          form.getAttribute('action'),
-          [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
-          _.xhr.serialize(form),
-          cb_success, cb_error
-        );
-      },
-
-      serialize: function(form) {
-        var data = '', data_map = { };
-        if (form instanceof w.HTMLFormElement) {
-          _.tag('input', form).forEach(function(input) {
-            switch((input.type || '').toLowerCase()) {
-            case 'reset':
-            case 'submit':
-              break;
-            case 'checkbox':
-            case 'radio':
-              if (!input.checked) {
-                break;
-              }
-            default:
-              data_map[input.name] = input.value;
-              break;
-            }
-          });
-        } else {
-          data_map = form;
-        }
-        for(var key in data_map) {
-          if (data) {
-            data += '&';
-          }
-          data += g.encodeURIComponent(key) + '=' + g.encodeURIComponent(data_map[key]);
-        }
-        return data;
       }
+      return obj;
     },
 
     listen: function(context, events, listener, throttling) {
@@ -498,7 +238,7 @@
     },
 
     send_click: function(elem) {
-      _.dbg('send click event');
+      _.debug('send click event');
       var doc  = elem.ownerDocument || d,
           ev   = doc.createEvent('MouseEvent'),
           view = doc.defaultView;
@@ -580,10 +320,12 @@
       return elem;
     },
 
-    clear: function(element) {
-      while(element.childNodes.length) {
-        element.removeChild(element.childNodes[0]);
-      }
+    clear: function() {
+      g.Array.prototype.forEach.call(arguments, function(elem) {
+        while(elem.childNodes.length) {
+          elem.removeChild(elem.childNodes[0]);
+        }
+      });
     },
 
     open: function(url) {
@@ -597,18 +339,6 @@
                (ev.target instanceof w.HTMLInputElement &&
                 (!ev.target.type ||
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
-    },
-
-    redirect_jump_page: function(root) {
-      if (_.conf.general.redirect_jump_page !== 2) {
-        return;
-      }
-      _.qa('a[href*="jump.php"]', root).forEach(function(link) {
-        var re;
-        if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/.exec(link.href))) {
-          link.href = g.decodeURIComponent(re[1]);
-        }
-      });
     },
 
     url: {
@@ -631,7 +361,285 @@
     }
   });
 
-  _.key = {
+  ['log', 'error', 'debug', 'warn'].forEach(function(name) {
+    if (g.console) {
+      _[name] = function(msg) {
+        if (name !== 'debug' || _.conf.general.debug) {
+          g.console[name]('pixplus: [' + name + '] ' + msg);
+        }
+      };
+    } else {
+      _[name] = function() { };
+    }
+  });
+
+  _.conf = _.mod({
+    __key_prefix: '__pixplus_',
+    __is_extension: false,
+
+    __conv: {
+      'string': function(value) {
+        return g.String(value);
+      },
+      'number': function(value) {
+        return g.parseFloat(value) || 0;
+      },
+      'boolean': function(value) {
+        return g.String(value).toLowerCase() === 'true';
+      },
+
+      bookmark_tag_order: {
+        parse: function(str) {
+          var ary = [], ary_ary = [], lines = str.split(/[\r\n]+/);
+          for(var i = 0; i < lines.length; ++i) {
+            var tag = lines[i];
+            if (tag === '-') {
+              if (ary_ary.length) {
+                ary.push(ary_ary);
+              }
+              ary_ary = [];
+            } else if (tag === '*') {
+              ary_ary.push(null);
+            } else if (tag) {
+              ary_ary.push(tag);
+            }
+          }
+          if (ary_ary.length) {
+            ary.push(ary_ary);
+          }
+          return ary;
+        },
+
+        dump: function(bm_tag_order) {
+          var str = '';
+          if (!bm_tag_order) {
+            return str;
+          }
+          for(var i = 0; i < bm_tag_order.length; ++i) {
+            var ary = bm_tag_order[i];
+            for(var j = 0; j < ary.length; ++j) {
+              if (ary[j] === null) {
+                ary[j] = '*';
+              }
+            }
+            if (i) {
+              str += '-\n';
+            }
+            str += ary.join('\n') + '\n';
+          }
+          return str;
+        }
+      },
+
+      bookmark_tag_aliases: {
+        parse: function(str) {
+          var aliases = {};
+          var lines = str.split(/[\r\n]+/);
+          for(var i = 0; i < Math.floor(lines.length / 2); ++i) {
+            var tag = lines[i * 2], alias = lines[i * 2 + 1];
+            if (tag && alias) {
+              aliases[tag] = alias.replace(/(?:^\s+|\s+$)/g, '').split(/\s+/);
+            }
+          }
+          return aliases;
+        },
+
+        dump: function(bm_tag_aliases) {
+          var str = '';
+          for(var key in bm_tag_aliases) {
+            str += key + '\n' + bm_tag_aliases[key].join(' ') + '\n';
+          }
+          return str;
+        }
+      }
+    },
+
+    __export: function(key_prefix) {
+      var that = this;
+      var storage = { };
+      this.__schema.forEach(function(section) {
+        section.items.forEach(function(item) {
+          var value = that[section.name][item.key];
+          var conv = that.__conv[section.name + '_' + item.key];
+          if (conv) {
+            value = conv.dump(value);
+          } else {
+            value = g.String(value);
+          }
+          storage[key_prefix + section.name + '_' + item.key] = value;
+        });
+      });
+      return storage;
+    },
+
+    __import: function(data) {
+      var that = this;
+      this.__schema.forEach(function(section) {
+        section.items.forEach(function(item) {
+          var key = section.name + '_' + item.key;
+          var value = data[key];
+          if (typeof(value) === 'undefined') {
+            return;
+          }
+
+          var conv = that.__conv[key];
+          if (conv) {
+            value = conv.parse(value);
+          } else if ((conv = that.__conv[typeof(item.value)])) {
+            value = conv(value);
+          }
+
+          that[section.name][item.key] = value;
+        });
+      });
+    },
+
+    __key: function(section, item) {
+      return this.__key_prefix + section + '_' + item;
+    },
+
+    __parse: function(section, item, value) {
+      var conv = this.__conv[typeof(this.__defaults[section][item])];
+      if (conv) {
+        value = conv(value);
+      }
+      conv = this.__conv[section + '_' + item];
+      if (conv) {
+        value = conv.parse(value);
+      }
+      return value;
+    },
+
+    __dump: function(section, item, value) {
+      var conv = this.__conv[section + '_' + item];
+      if (conv) {
+        return conv.dump(value);
+      } else {
+        return g.String(value);
+      }
+    },
+
+    __wrap_storage: function(storage) {
+      var that = this;
+      return {
+        get: function(section, item) {
+          return storage.getItem(that.__key(section, item));
+        },
+
+        set: function(section, item, value) {
+          storage.setItem(that.__key(section, item), value);
+        }
+      };
+    },
+
+    __init: function(storage) {
+      var that = this;
+      this.__defaults = { };
+      this.__schema.forEach(function(section) {
+        that.__defaults[section.name] = { };
+        section.items.forEach(function(item) {
+          that.__defaults[section.name][item.key] = item.value;
+        });
+      });
+
+      this.__schema.forEach(function(section) {
+        var conf_section = that[section.name] = { };
+
+        section.items.forEach(function(item) {
+          var value = storage.get(section.name, item.key);
+          value = that.__parse(section.name, item.key, value === null ? item.value : value);
+
+          conf_section.__defineGetter__(item.key, function() {
+            return value;
+          });
+
+          conf_section.__defineSetter__(item.key, function(new_value) {
+            value = new_value;
+            storage.set(section.name, item.key, that.__dump(section.name, item.key, value));
+          });
+        });
+      });
+    }
+  });
+
+  _.xhr = _.mod({
+    cache: { },
+
+    remove_cache: function(url) {
+      this.cache[url] = null;
+    },
+
+    request: function(method, url, headers, data, cb_success, cb_error) {
+      var that = this;
+      var xhr = new w.XMLHttpRequest();
+      xhr.onload = function() {
+        that.cache[url] = xhr.responseText;
+        cb_success(xhr.responseText);
+      };
+      if (cb_error) {
+        xhr.onerror = function() {
+          cb_error();
+        };
+      }
+      xhr.open(method, url, true);
+      if (headers) {
+        headers.forEach(function(p) {
+          xhr.setRequestHeader(p[0], p[1]);
+        });
+      }
+      xhr.send(data);
+    },
+
+    get: function(url, cb_success, cb_error) {
+      if (this.cache[url]) {
+        cb_success(this.cache[url]);
+        return;
+      }
+      this.request('GET', url, null, null, cb_success, cb_error);
+    },
+
+    post: function(form, cb_success, cb_error) {
+      this.request(
+        'POST',
+        form.getAttribute('action'),
+        [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
+        this.serialize(form),
+        cb_success, cb_error
+      );
+    },
+
+    serialize: function(form) {
+      var data = '', data_map = { };
+      if (form instanceof w.HTMLFormElement) {
+        _.tag('input', form).forEach(function(input) {
+          switch((input.type || '').toLowerCase()) {
+          case 'reset':
+          case 'submit':
+            break;
+          case 'checkbox':
+          case 'radio':
+            if (!input.checked) {
+              break;
+            }
+          default:
+            data_map[input.name] = input.value;
+            break;
+          }
+        });
+      } else {
+        data_map = form;
+      }
+      for(var key in data_map) {
+        if (data) {
+          data += '&';
+        }
+        data += g.encodeURIComponent(key) + '=' + g.encodeURIComponent(data_map[key]);
+      }
+      return data;
+    }
+  });
+
+  _.key = _.mod({
     code_map: { },
     name_map: { },
     encode_map: {Spacebar: 'Space', Esc: 'Escape'},
@@ -652,7 +660,7 @@
         }
 
         if (key) {
-          keys.push(_.key.encode_map[key] || key);
+          keys.push(this.encode_map[key] || key);
         }
 
       } else if (ev.keyIdentifier) {
@@ -661,7 +669,7 @@
           if (c <= 0) {
             // error
           } else if (c <= 0x20) {
-            key = _.key.code_map[c] || ('_c' + String(c));
+            key = this.code_map[c] || ('_c' + String(c));
           } else if (c < 0x7f) {
             key = g.String.fromCharCode(c).toLowerCase();
           } else if (c === 0x7f) {
@@ -673,16 +681,16 @@
           key = ev.keyIdentifier;
         }
         if (key) {
-          keys.push(_.key.encode_map[key] || key);
+          keys.push(this.encode_map[key] || key);
         }
 
       } else if (ev.type === 'keypress') {
         var c = ev.keyCode || ev.charCode;
         if (c === ev.which && c > 0x20 && c < 0x7f) {
           key = g.String.fromCharCode(c).toLowerCase();
-          keys.push(_.key.encode_map[key] || key);
-        } else if (_.key.code_map[c]) {
-          keys.push(_.key.code_map[c]);
+          keys.push(this.encode_map[key] || key);
+        } else if (this.code_map[c]) {
+          keys.push(this.code_map[c]);
         } else if (c > 0) {
           keys.push('_c' + g.String(c));
         }
@@ -709,13 +717,14 @@
     },
 
     listen: function(context, listener) {
+      var that = this;
       _.listen(context, ['keypress', 'keydown'], function(ev, connection) {
-        var key = _.key.parse_event(ev);
+        var key = that.parse_event(ev);
         if (key) {
-          _.dbg('keyevent type=' + ev.type + ' key=' + key);
+          _.debug('keyevent type=' + ev.type + ' key=' + key);
           var res = listener(key, ev, connection);
           if (res) {
-            _.dbg('  canceled');
+            _.debug('  canceled');
           }
           return res;
         }
@@ -724,6 +733,8 @@
     },
 
     init: function() {
+      var that = this;
+
       var keys = [
         [8, 'Backspace'], [9, 'Tab'], [13, 'Enter'], [27, 'Escape'],
         [32, 'Space'], [33, 'PageUp'], [34, 'PageDown'], [35, 'End'],
@@ -737,8 +748,8 @@
 
       keys.forEach(function(p) {
         var code = p[0], name = p[1];
-        _.key.code_map[code] = name;
-        _.key.name_map[name] = code;
+        that.code_map[code] = name;
+        that.name_map[name] = code;
       });
 
       [
@@ -747,13 +758,13 @@
         [' ', 'Space'],
         ['\t', 'Tab']
       ].forEach(function(p) {
-        _.key.encode_map[p[0]] = p[1];
-        _.key.decode_map[p[1]] = p[0];
+        that.encode_map[p[0]] = p[1];
+        that.decode_map[p[1]] = p[0];
       });
     }
-  };
+  });
 
-  _.configui = {
+  _.configui = _.mod({
     dom: { },
     shown: false,
     lng: null,
@@ -838,10 +849,11 @@
         return;
       }
 
-      _.configui.lng = _.lang.current;
-      _.configui.root = root;
-      _.configui.menu = menu;
+      this.lng = _.lang.current;
+      this.root = root;
+      this.menu = menu;
 
+      var that = this;
       if (menu) {
         var btn = _.e('a', {text: 'pixplus', 'href': '#'}, _.e('li'));
         _.onclick(btn, function() {
@@ -852,7 +864,7 @@
               _.open(extension_data.base_uri + 'options.html');
             }
           } else {
-            _.configui.toggle();
+            that.toggle();
           }
           return true;
         });
@@ -862,8 +874,9 @@
 
     create_tab_content: function(root, section) {
       var table = _.e('table', null, root);
-      var lang_conf = _.configui.lng.conf, last_mode;
+      var lang_conf = this.lng.conf, last_mode;
 
+      var that = this;
       section.items.forEach(function(item) {
         if (!_.conf.general.debug && item.hidden) {
           return;
@@ -917,9 +930,9 @@
           } else {
             control = _.e('input', null, value);
 
-            var field_map = (_.configui.bitfield[section.name] || { })[item.key];
+            var field_map = (that.bitfield[section.name] || { })[item.key];
             if (field_map) {
-              _.configui.bitfield.setup(control, field_map);
+              that.bitfield.setup(control, field_map);
             }
           }
           control_propname = 'value';
@@ -935,7 +948,7 @@
         });
         
         _.onclick(
-          _.e('button', {'text': _.configui.lng.pref['default']}, row.insertCell(-1)),
+          _.e('button', {'text': that.lng.pref['default']}, row.insertCell(-1)),
           function() {
             _.conf[section.name][item.key] = item.value;
             control[control_propname] = item.value;
@@ -945,8 +958,9 @@
     },
 
     create_tab_content_key: function(root, section) {
-      _.configui.create_tab_content(root, section);
+      this.create_tab_content(root, section);
 
+      var that = this;
       var editor_row;
 
       function close_editor(row, input) {
@@ -1000,12 +1014,12 @@
           add_input.value = key;
           return true;
         });
-        _.onclick(_.e('button', {text: _.configui.lng.pref.add}, add_line), function() {
+        _.onclick(_.e('button', {text: that.lng.pref.add}, add_line), function() {
           add(add_input.value);
           add_input.value = '';
           apply();
         });
-        _.onclick(_.e('button', {text: _.configui.lng.pref.close}, add_line), close_editor);
+        _.onclick(_.e('button', {text: that.lng.pref.close}, add_line), close_editor);
 
         row.parentNode.insertBefore(editor_row, row.nextSibling);
       }
@@ -1021,7 +1035,7 @@
     },
 
     create_tab_content_bookmark: function(root, section) {
-      _.e('div', {text: _.configui.lng.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
+      _.e('div', {text: this.lng.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
 
       var tag_order_textarea = _.e('textarea', null, root);
       tag_order_textarea.value = _.conf.bookmark.tag_order.map(function(a) {
@@ -1046,10 +1060,10 @@
       });
 
 
-      _.e('div', {text: _.configui.lng.conf.bookmark.tag_aliases}, root);
+      _.e('div', {text: this.lng.conf.bookmark.tag_aliases}, root);
 
       var tag_alias_table = _.e('table', {id: 'pp-config-bookmark-tag-aliases'}, root);
-      _.onclick(_.e('button', {text: _.configui.lng.pref.add}, root), function() {
+      _.onclick(_.e('button', {text: this.lng.pref.add}, root), function() {
         add_row();
       });
 
@@ -1087,11 +1101,11 @@
       var toolbar  = _.e('div', {id: 'pp-config-importexport-toolbar'}, root);
       var textarea = _.e('textarea', null, root);
 
-      _.onclick(_.e('button', {text: _.configui.lng.pref['export']}, toolbar), function() {
+      _.onclick(_.e('button', {text: this.lng.pref['export']}, toolbar), function() {
         textarea.value = JSON.stringify(_.conf.__export(''), null, 2);
       });
 
-      _.onclick(_.e('button', {text: _.configui.lng.pref['import']}, toolbar), function() {
+      _.onclick(_.e('button', {text: this.lng.pref['import']}, toolbar), function() {
         var data;
         try {
           data = JSON.parse(textarea.value);
@@ -1112,17 +1126,17 @@
       ];
       var dl = _.e('dl', null, root);
       [
-        [_.configui.lng.pref.about_name, 'pixplus'],
-        [_.configui.lng.pref.about_version, _.version() + ' - ' + _.release_date()],
-        [_.configui.lng.pref.about_web, function(dd) {
+        [this.lng.pref.about_name, 'pixplus'],
+        [this.lng.pref.about_version, _.version() + ' - ' + _.release_date()],
+        [this.lng.pref.about_web, function(dd) {
           var ul = _.e('ul', null, dd);
           urls.forEach(function(url) {
             _.e('a', {href: url, text: url}, _.e('li', null, ul));
           });
         }],
-        [_.configui.lng.pref.about_email,
+        [this.lng.pref.about_email,
          _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
-        [_.configui.lng.pref.about_license, 'Apache License 2.0']
+        [this.lng.pref.about_license, 'Apache License 2.0']
       ].forEach(function(p) {
         var label = p[0], content = p[1];
         _.e('dt', {text: label}, dl);
@@ -1138,18 +1152,19 @@
     },
 
     create_tab_content_changelog: function(root) {
+      var that = this;
       var dl = _.e('dl', null, root);
       _.changelog.forEach(function(release) {
         var dt = _.e('dt', {text: release.version + ' - ' + release.date}, dl);
         if (release.releasenote) {
           dt.textContent += ' ';
-          _.e('a', {href: release.releasenote, text: _.configui.lng.pref.releasenote}, dt);
+          _.e('a', {href: release.releasenote, text: that.lng.pref.releasenote}, dt);
         }
 
         var ul = _.e('ul', null, _.e('dd', null, dl));
         (
           release.changes_i18n
-            ? release.changes_i18n[_.configui.lng.__name__]
+            ? release.changes_i18n[that.lng.__name__]
             : release.changes
         ).forEach(function(change) {
           _.e('li', {text: change}, ul);
@@ -1158,14 +1173,15 @@
     },
 
     create_tab_content_debug: function(root) {
+      var that = this;
       var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
       ['en', 'ja'].forEach(function(name) {
         _.onclick(_.e('button', {text: name}, langbar), function() {
-          _.configui.lng = _.lang[name];
-          _.configui.dom.root.parentNode.removeChild(_.configui.dom.root);
-          _.configui.dom = { };
-          _.configui.shown = false;
-          _.configui.show();
+          that.lng = _.lang[name];
+          that.dom.root.parentNode.removeChild(that.dom.root);
+          that.dom = { };
+          that.shown = false;
+          that.show();
         });
       });
 
@@ -1247,44 +1263,47 @@
         return;
       }
 
-      var dom = _.configui.dom;
-      var label = _.e('label', {text: _.configui.lng.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
+      var that = this;
+      var dom = this.dom;
+      var label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
       var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
-      (_.configui['create_tab_content_' + name] || _.configui.create_tab_content)(content, create_args);
+
+      (this['create_tab_content_' + name] || this.create_tab_content)(content, create_args);
       dom.content.appendChild(content);
       dom[name] = {label: label, content: content};
       _.onclick(label, function() {
-        _.configui.activate_tab(dom[name]);
+        that.activate_tab(dom[name]);
         return true;
       });
     },
 
     create: function() {
-      var dom = _.configui.dom;
+      var that = this;
+      var dom = this.dom;
       if (dom.created) {
         return;
       }
 
-      dom.root    = _.e('div', {id: 'pp-config'}, _.configui.root);
+      dom.root    = _.e('div', {id: 'pp-config'}, this.root);
       dom.tabbar  = _.e('div', {id: 'pp-config-tabbar'});
       dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
-      if (_.configui.menu) {
+      if (this.menu) {
         _.onclick(
           _.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar),
           function() {
-            _.configui.hide();
+            that.hide();
             return true;
           }
         );
       }
 
       _.conf.__schema.forEach(function(section) {
-        _.configui.create_tab(section.name, section);
+        that.create_tab(section.name, section);
       });
-      ['importexport', 'about', 'changelog'].forEach(_.configui.create_tab);
+      ['importexport', 'about', 'changelog'].forEach(this.create_tab);
       if (_.conf.general.debug) {
-        _.configui.create_tab('debug');
+        that.create_tab('debug');
       }
 
       dom.root.appendChild(dom.tabbar);
@@ -1292,102 +1311,141 @@
 
       dom.created = true;
 
-      _.configui.activate_tab(dom.general);
+      this.activate_tab(dom.general);
     },
 
     activate_tab: function(tab) {
-      var lasttab = _.configui.dom.lasttab;
+      var lasttab = this.dom.lasttab;
       if (lasttab) {
         lasttab.label.classList.remove('pp-active');
         lasttab.content.classList.remove('pp-active');
       }
       tab.label.classList.add('pp-active');
       tab.content.classList.add('pp-active');
-      _.configui.dom.lasttab = tab;
+      this.dom.lasttab = tab;
     },
 
     show: function() {
-      _.configui.create();
-      _.configui.dom.root.classList.add('pp-show');
-      _.configui.shown = true;
+      this.create();
+      this.dom.root.classList.add('pp-show');
+      this.shown = true;
     },
 
     hide: function() {
-      _.configui.dom.root.classList.remove('pp-show');
-      _.configui.shown = false;
+      this.dom.root.classList.remove('pp-show');
+      this.shown = false;
     },
 
     toggle: function() {
-      if (_.configui.shown) {
-        _.configui.hide();
+      if (this.shown) {
+        this.hide();
       } else {
-        _.configui.show();
+        this.show();
       }
     }
-  };
+  });
 
   // __LIBRARY_END__
 
-  _.reorder_tag_list = function(list, cb_get_tagname) {
-    var list_parent = list.parentNode, lists = [list];
-
-    var tags = _.tag('li', list), tag_map = { };
-    tags.forEach(function(tag) {
-      var tagname = cb_get_tagname(tag);
-      if (tagname) {
-        tag_map[tagname] = tag;
-        tag.parentNode.removeChild(tag);
+  _.extend(_, {
+    redirect_jump_page: function(root) {
+      if (_.conf.general.redirect_jump_page !== 2) {
+        return;
       }
-    });
-
-    var all_list, all_list_before;
-
-    var add_list = function() {
-      var new_list = list.cloneNode(false);
-      list_parent.insertBefore(new_list, list.nextSibling);
-      list = new_list;
-      lists.push(list);
-      return list;
-    };
-
-    _.conf.bookmark.tag_order.forEach(function(tag_order, idx) {
-      if (idx > 0) {
-        add_list();
-      }
-      tag_order.forEach(function(tag) {
-        if (tag) {
-          if (tag_map[tag]) {
-            list.appendChild(tag_map[tag]);
-            tag_map[tag] = null;
-          }
-        } else {
-          all_list = list;
-          all_list_before = list.lastChild;
+      _.qa('a[href*="jump.php"]', root).forEach(function(link) {
+        var re;
+        if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?jump\.php\?(.+)$/.exec(link.href))) {
+          link.href = g.decodeURIComponent(re[1]);
         }
       });
-    });
+    },
 
-    for(var tag in tag_map) {
-      if (!tag_map[tag]) {
-        continue;
+    modify_caption: function(caption, base_illust) {
+      if (!caption) {
+        return;
       }
-      if (!all_list) {
-        all_list = add_list();
+
+      var last = null;
+      _.qa('a[href*="mode=medium"]', caption).forEach(function(link) {
+        var query = _.illust.parse_illust_url(link.href);
+        if (query && query.mode === 'medium' && query.illust_id) {
+          var illust = _.illust.create_from_id(query.illust_id);
+          illust.link = link;
+          illust.connection = _.onclick(illust.link, function() {
+            _.popup.show(illust);
+            return true;
+          });
+          illust.prev = last || base_illust;
+          if (last) {
+            last.next = illust;
+          }
+          last = illust;
+        }
+      });
+
+      if (last) {
+        last.next = base_illust;
       }
-      all_list.insertBefore(tag_map[tag], all_list_before ? all_list_before.nextSibling : null);
+    },
+
+    reorder_tag_list: function(list, cb_get_tagname) {
+      var list_parent = list.parentNode, lists = [list];
+
+      var tags = _.tag('li', list), tag_map = { };
+      tags.forEach(function(tag) {
+        var tagname = cb_get_tagname(tag);
+        if (tagname) {
+          tag_map[tagname] = tag;
+          tag.parentNode.removeChild(tag);
+        }
+      });
+
+      var all_list, all_list_before;
+
+      var add_list = function() {
+        var new_list = list.cloneNode(false);
+        list_parent.insertBefore(new_list, list.nextSibling);
+        list = new_list;
+        lists.push(list);
+        return list;
+      };
+
+      _.conf.bookmark.tag_order.forEach(function(tag_order, idx) {
+        if (idx > 0) {
+          add_list();
+        }
+        tag_order.forEach(function(tag) {
+          if (tag) {
+            if (tag_map[tag]) {
+              list.appendChild(tag_map[tag]);
+              tag_map[tag] = null;
+            }
+          } else {
+            all_list = list;
+            all_list_before = list.lastChild;
+          }
+        });
+      });
+
+      for(var tag in tag_map) {
+        if (!tag_map[tag]) {
+          continue;
+        }
+        if (!all_list) {
+          all_list = add_list();
+        }
+        all_list.insertBefore(tag_map[tag], all_list_before ? all_list_before.nextSibling : null);
+      }
+
+      return lists;
     }
+  });
 
-    return lists;
-  };
-
-  _.fastxml = {
+  _.fastxml = _.mod({
     ignore_elements: /^(?:script|style)$/,
-    tag: /<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/,
-    attr: /\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/,
-    selector_token: /([#\.])/,
 
     parse: function(xml) {
-      var dom, node, tags = xml.split(_.fastxml.tag);
+      var dom, node, tags = xml.split(/<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/);
       for(var i = 0; i + 2 < tags.length; i += 3) {
         var text = tags[i], tag = tags[i + 1].toLowerCase(),
             attrs = tags[i + 2] || '', raw = '<' + tag + attrs + '>';
@@ -1415,7 +1473,7 @@
         }
 
         var attr_map = { };
-        attrs = attrs.split(_.fastxml.attr);
+        attrs = attrs.split(/\s([a-zA-Z0-9-]+)=\"([^\"]+)\"/);
         for(var j = 1; j + 1 < attrs.length; j += 3) {
           attr_map[attrs[j]] = attrs[j + 1];
         }
@@ -1451,7 +1509,7 @@
       }
 
       var tokens = selector.split(' ').map(function(token) {
-        var terms = token.split(_.fastxml.selector_token);
+        var terms = token.split(/([#\.])/);
         return function(node) {
           if (terms[0] && node.tag != terms[0]) {
             return false;
@@ -1511,26 +1569,27 @@
 
     qa: function(root, selector) {
       var nodes = [];
-      _.fastxml.q(root, selector, function(node) {
+      this.q(root, selector, function(node) {
         nodes.push(node);
       });
       return nodes;
     },
 
     src: function(node, all) {
-      if (!node || (!all && _.fastxml.ignore_elements.test(node.tag))) {
+      if (!node || (!all && this.ignore_elements.test(node.tag))) {
         return '';
       }
       if (node.text) {
         return node.text;
       }
+      var that = this;
       return node.raw_open + node.children.reduce(function(a, b) {
-        return a + _.fastxml.src(b, all);
+        return a + that.src(b, all);
       }, '') + (node.raw_close || '');
     },
 
     text: function(node, all) {
-      if (!node || (!all && _.fastxml.ignore_elements.test(node.tag))) {
+      if (!node || (!all && this.ignore_elements.test(node.tag))) {
         return '';
       }
       if (node.text) {
@@ -1540,9 +1599,9 @@
         return a + (b.text || '');
       }, '');
     }
-  };
+  });
 
-  _.illust = {
+  _.illust = _.mod({
     root: null,
     last_link_count: 0,
     list: [ ],
@@ -1590,10 +1649,10 @@
       var illust, images = _.tag('img', link);
 
       for(var i = 0; i < images.length; ++i) {
-        var p = _.illust.parse_image_url(images[i].src, allow_types);
+        var p = this.parse_image_url(images[i].src, allow_types);
         if (!p && images[i].hasAttribute('data-src')) {
           // lazy load support
-          p = _.illust.parse_image_url(images[i].getAttribute('data-src'), allow_types);
+          p = this.parse_image_url(images[i].getAttribute('data-src'), allow_types);
         }
         if (!p) {
           continue;
@@ -1610,7 +1669,7 @@
         return null;
       }
 
-      _.extend(illust, _.illust.create_from_id(illust.id), {
+      _.extend(illust, this.create_from_id(illust.id), {
         link: link,
         next: null
       });
@@ -1626,16 +1685,18 @@
     },
 
     update: function() {
-      var links = _.qa('a[href*="member_illust.php?mode=medium"]', _.illust.root);
-      if (links.length === _.illust.last_link_count) {
+      var links = _.qa('a[href*="member_illust.php?mode=medium"]', this.root);
+      if (links.length === this.last_link_count) {
         return;
       }
-      _.illust.last_link_count = links.length;
+      this.last_link_count = links.length;
 
-      _.dbg('updating illust list');
+      _.debug('updating illust list');
+
+      var that = this;
 
       var extract = function(link) {
-        var list = _.illust.list;
+        var list = that.list;
         for(var i = 0; i < list.length; ++i) {
           var illust = list[i];
           if (illust.link === link) {
@@ -1650,7 +1711,7 @@
       links.forEach(function(link) {
         var illust = extract(link);
         if (!illust) {
-          illust = _.illust.create(link);
+          illust = that.create(link);
         }
         if (!illust) {
           return;
@@ -1666,28 +1727,28 @@
         new_list.push(illust);
       });
 
-      _.illust.list.forEach(function(illust) {
+      this.list.forEach(function(illust) {
         illust.connection.disconnect();
       });
-      _.illust.list = new_list;
+      this.list = new_list;
 
       if (new_list.length < 1) {
-        _.illust.last_link_count = 0;
+        this.last_link_count = 0;
       }
 
-      _.dbg('illust list updated - ' + new_list.length);
+      _.debug('illust list updated - ' + new_list.length);
     },
 
     setup: function(root) {
       if (!root) {
-        _.log('root of illust list not specified');
+        _.error('Illust list root not specified');
         return;
       }
 
-      _.illust.root = root;
-      _.illust.update();
+      this.root = root;
+      this.update();
 
-      _.listen(_.illust.root, 'DOMNodeInserted', _.illust.update, true);
+      _.listen(this.root, 'DOMNodeInserted', this.update, true);
     },
 
     parse_medium_html: function(illust, html) {
@@ -1701,7 +1762,7 @@
 
       var img = _.fastxml.q(root, '.works_display a img');
       if (img) {
-        var p = _.illust.parse_image_url(img.attrs.src, '_m');
+        var p = this.parse_image_url(img.attrs.src, '_m');
         if (p) {
           if (p.id !== illust.id) {
             illust.error = 'Invalid medium image url';
@@ -1735,14 +1796,14 @@
         var script = _.fastxml.q(node, 'script', function(script) {
           var re = pattern.exec(_.fastxml.text(script, true));
           if (re) {
-            _.dbg('pixiv.context.' + name + ' = ' + re[1]);
+            _.debug('pixiv.context.' + name + ' = ' + re[1]);
             value = re[1] === 'true';
             return true;
           }
           return false;
         });
         if (!script) {
-          _.log('[Warning] Requested definition script not found - pixiv.context.' + name);
+          _.warn('Requested definition script not found - pixiv.context.' + name);
         }
         return value;
       };
@@ -1816,7 +1877,7 @@
       illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
       illust.image_response_to  = null;
       if (response_to) {
-        var query = _.illust.parse_illust_url(response_to.attrs.href);
+        var query = this.parse_illust_url(response_to.attrs.href);
         if (query && query.mode === 'medium' && query.illust_id) {
           illust.image_response_to = query.illust_id;
         }
@@ -1845,6 +1906,8 @@
         _.popup.onload(illust);
         return;
       }
+
+      var that = this;
 
       var error_sent = false;
       var send_error = function(msg) {
@@ -1895,7 +1958,7 @@
           }
         });
 
-        _.dbg('trying to load image - ' + name + ':' + url);
+        _.debug('trying to load image - ' + name + ':' + url);
         image.src = url;
         return image;
       };
@@ -1914,7 +1977,7 @@
       }
 
       _.xhr.get(illust.url_medium, function(text) {
-        if (!_.illust.parse_medium_html(illust, text)) {
+        if (!that.parse_medium_html(illust, text)) {
           send_error();
           return;
         }
@@ -1948,7 +2011,7 @@
         }
 
         if (_.conf.popup.preload && illust.manga.enable) {
-          _.illust.load_manga_page(illust, 0);
+          that.load_manga_page(illust, 0);
         }
 
       }, function() {
@@ -2003,10 +2066,12 @@
     },
 
     load_manga_page: function(illust, page) {
+      var that = this;
+
       if (!illust.manga.pages) {
         _.xhr.get(illust.url_manga, function(text) {
-          if (_.illust.parse_manga_html(illust, text)) {
-            _.illust.load_manga_page(illust, page);
+          if (that.parse_manga_html(illust, text)) {
+            that.load_manga_page(illust, page);
           } else {
             _.popup.manga.onerror(illust, page);
           }
@@ -2058,7 +2123,7 @@
           if (big) {
             big = false;
             img.src = page_data.image_urls[idx];
-            _.dbg('[Warn] big image for manga loading failed. falling back to default image.');
+            _.warn('Big image for manga loading failed. Falling back to default image.');
           } else {
             send_error();
           }
@@ -2079,37 +2144,9 @@
       }
       return query;
     }
-  };
+  });
 
-  _.process_caption = function(caption, base_illust) {
-    if (!caption) {
-      return;
-    }
-
-    var last = null;
-    _.qa('a[href*="mode=medium"]', caption).forEach(function(link) {
-      var query = _.illust.parse_illust_url(link.href);
-      if (query && query.mode === 'medium' && query.illust_id) {
-        var illust = _.illust.create_from_id(query.illust_id);
-        illust.link = link;
-        illust.connection = _.onclick(illust.link, function() {
-          _.popup.show(illust);
-          return true;
-        });
-        illust.prev = last || base_illust;
-        if (last) {
-          last.next = illust;
-        }
-        last = illust;
-      }
-    });
-
-    if (last) {
-      last.next = base_illust;
-    }
-  };
-
-  _.popup = {
+  _.popup = _.mod({
     dom: { },
     images: [],
     saved_context: null,
@@ -2122,7 +2159,7 @@
     scrollbar_height: 0,
 
     create: function() {
-      var dom = _.popup.dom;
+      var dom = this.dom;
       if (dom.created) {
         return;
       }
@@ -2187,11 +2224,12 @@
 
       dom.comment_err_empty.textContent = 'Sorry, comments could not be found';
 
-      _.popup.input.init();
+      this.input.init();
 
+      var that = this;
       _.listen(w, 'resize', function() {
-        if (_.popup.running) {
-          _.popup.adjust();
+        if (that.running) {
+          that.adjust();
         }
       }, true);
 
@@ -2199,36 +2237,39 @@
     },
 
     update_scrollbar_size: function() {
+      var that = this;
       g.setTimeout(function() {
-        var scroller = _.popup.dom.image_scroller,
+        var scroller = that.dom.image_scroller,
             sw       = scroller.offsetWidth  - scroller.clientWidth,
             sh       = scroller.offsetHeight - scroller.clientHeight,
             change   = false;
 
-        if (sw > 0 && sw !== _.popup.scrollbar_width) {
-          _.popup.scrollbar_width = sw;
+        if (sw > 0 && sw !== that.scrollbar_width) {
+          that.scrollbar_width = sw;
           change = true;
         }
 
-        if (sh > 0 && sh !== _.popup.scrollbar_height) {
-          _.popup.scrollbar_height = sh;
+        if (sh > 0 && sh !== that.scrollbar_height) {
+          that.scrollbar_height = sh;
           change = true;
         }
 
         if (change) {
-          _.popup.adjust();
+          that.adjust();
         }
       }, 0);
     },
 
     layout_images: function(max_width, max_height, update_resize_mode) {
-      if (!_.popup.images || _.popup.images.length < 1) {
+      if (!this.images || this.images.length < 1) {
         return;
       }
 
-      var scale = 1, natural_sizes, dom = _.popup.dom;
+      var that = this;
 
-      natural_sizes = _.popup.images.map(function(img) {
+      var scale = 1, natural_sizes, dom = this.dom;
+
+      natural_sizes = this.images.map(function(img) {
         return {width: img.naturalWidth, height: img.naturalHeight};
       });
 
@@ -2249,33 +2290,33 @@
       if (aspect_ratio < 1) {
         aspect_ratio = 1 / aspect_ratio;
       }
-      _.popup.aspect_ratio = aspect_ratio;
+      this.aspect_ratio = aspect_ratio;
 
       if (total_width > max_width || total_height > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
           if (aspect_ratio >= _.conf.popup.fit_short_threshold) {
-            _.popup.resize_mode = _.popup.FIT_SHORT;
+            this.resize_mode = this.FIT_SHORT;
           } else {
-            _.popup.resize_mode = _.popup.FIT_LONG;
+            this.resize_mode = this.FIT_LONG;
           }
         }
 
-        if (_.popup.resize_mode === _.popup.FIT_LONG) {
+        if (this.resize_mode === this.FIT_LONG) {
           scale = g.Math.min(max_width / total_width, max_height / total_height, 1);
         } else {
           var scroll_x = false, scroll_y = false;
-          _.popup.update_scrollbar_size();
+          this.update_scrollbar_size();
 
-          if (_.popup.resize_mode === _.popup.FIT_SHORT) {
+          if (this.resize_mode === this.FIT_SHORT) {
             var sw = max_width / total_width,
                 sh = max_height / total_height;
 
             if (sw < sh) {
               scroll_x = true;
-              scale = g.Math.min((max_height - _.popup.scrollbar_height) / total_height, 1);
+              scale = g.Math.min((max_height - this.scrollbar_height) / total_height, 1);
             } else {
               scroll_y = true;
-              scale = g.Math.min((max_width - _.popup.scrollbar_width) / total_width, 1);
+              scale = g.Math.min((max_width - this.scrollbar_width) / total_width, 1);
             }
 
           } else {
@@ -2289,7 +2330,7 @@
 
           if (scroll_x) {
             image_scroller.style.height =
-              g.Math.min(max_height, total_height + _.popup.scrollbar_height) + 'px';
+              g.Math.min(max_height, total_height + this.scrollbar_height) + 'px';
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
             image_scroller.style['overflow-x'] = 'auto';
@@ -2297,7 +2338,7 @@
 
           if (scroll_y) {
             image_scroller.style.width =
-              g.Math.min(max_width, total_width + _.popup.scrollbar_width) + 'px';
+              g.Math.min(max_width, total_width + this.scrollbar_width) + 'px';
             image_scroller.style.maxHeight = max_height + 'px';
             image_scroller.style.overflowY = 'auto';
             image_scroller.style['overflow-y'] = 'auto';
@@ -2307,25 +2348,25 @@
 
       // apply scale
 
-      _.popup.images.forEach(function(img, idx) {
+      this.images.forEach(function(img, idx) {
         img.style.height = g.Math.floor(natural_sizes[idx].height * scale) + 'px';
       });
-      _.popup.scale = scale;
+      this.scale = scale;
 
       // centerize
 
-      var height = g.Math.max.apply(g.Math, _.popup.images.map(function(img) {
+      var height = g.Math.max.apply(g.Math, this.images.map(function(img) {
         return img.offsetHeight;
       }));
 
-      _.popup.images.forEach(function(img) {
+      this.images.forEach(function(img) {
         img.style.margin = g.Math.floor((height - img.offsetHeight) / 2) + 'px 0px 0px 0px';
       });
 
       // update info area
 
-      var size_list, illust = _.popup.illust;
-      if (illust.size && !illust.manga.enable && !_.popup.manga.enable) {
+      var size_list, illust = this.illust;
+      if (illust.size && !illust.manga.enable && !this.manga.enable) {
         size_list = [illust.size];
       } else {
         size_list = natural_sizes;
@@ -2334,7 +2375,7 @@
       var size_text = size_list.map(function(size, idx) {
         var str = size.width + 'x' + size.height,
             more_info = [],
-            img = _.popup.images[idx],
+            img = that.images[idx],
             re;
 
         if (img.offsetWidth !== size.width) {
@@ -2353,15 +2394,15 @@
       }).join('/');
 
       if (_.conf.general.debug) {
-        size_text += ' ar:' + (g.Math.floor(_.popup.aspect_ratio * 100) / 100);
+        size_text += ' ar:' + (g.Math.floor(this.aspect_ratio * 100) / 100);
       }
 
       dom.size.textContent = size_text;
 
       // update resize mode indicator
 
-      dom.resize_mode.textContent = '[' + 'LSO'[_.popup.resize_mode] + ']';
-      if (_.popup.resize_mode === _.popup.FIT_LONG) {
+      dom.resize_mode.textContent = '[' + 'LSO'[this.resize_mode] + ']';
+      if (this.resize_mode === this.FIT_LONG) {
         dom.resize_mode.classList.add('pp-hide');
       } else {
         dom.resize_mode.classList.remove('pp-hide');
@@ -2369,10 +2410,10 @@
     },
 
     calculate_max_content_size: function(content) {
-      var c, dom = _.popup.dom, root = dom.root, de = d.documentElement;
-      if (_.popup.bookmark.enable) {
+      var c, dom = this.dom, root = dom.root, de = d.documentElement;
+      if (this.bookmark.enable) {
         c = dom.bookmark_wrapper;
-      } else if (_.popup.tagedit.enable) {
+      } else if (this.tagedit.enable) {
         c = dom.tagedit_wrapper;
       } else {
         c = dom.image_wrapper;
@@ -2406,26 +2447,26 @@
     },
 
     adjust: function(update_resize_mode) {
-      if (!_.popup.running) {
+      if (!this.running) {
         return;
       }
 
-      var dom = _.popup.dom, root = dom.root, de = d.documentElement,
-          max_size = _.popup.calculate_max_content_size();
+      var dom = this.dom, root = dom.root, de = d.documentElement,
+          max_size = this.calculate_max_content_size();
 
       root.style.left = '0px';
       root.style.top  = '0px';
 
-      if (_.popup.bookmark.enable) {
-        _.popup.bookmark.adjust(max_size[0], max_size[1]);
+      if (this.bookmark.enable) {
+        this.bookmark.adjust(max_size[0], max_size[1]);
 
-      } else if (_.popup.tagedit.enable) {
-        _.popup.tagedit.adjust(max_size[0], max_size[1]);
+      } else if (this.tagedit.enable) {
+        this.tagedit.adjust(max_size[0], max_size[1]);
 
       } else {
         dom.image_layout.style.margin = '0px';
 
-        _.popup.layout_images(max_size[0], max_size[1], update_resize_mode);
+        this.layout_images(max_size[0], max_size[1], update_resize_mode);
 
         var mh = dom.image_scroller.clientWidth  - dom.image_layout.offsetWidth,
             mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
@@ -2435,7 +2476,7 @@
         dom.header.style.width = dom.image_wrapper.offsetWidth + 'px';
 
         var header_height = dom.image_wrapper.offsetHeight;
-        if (!_.popup.comment.enable) {
+        if (!this.comment.enable) {
           header_height = g.Math.floor(header_height * _.conf.popup.caption_height);
         }
 
@@ -2464,8 +2505,8 @@
           dom.olc_next.style.left =
             (dom.image_scroller.clientLeft + dom.image_scroller.clientWidth - olc_width) + 'px';
 
-          _.popup.adjust_olc_icon(dom.olc_prev_icon);
-          _.popup.adjust_olc_icon(dom.olc_next_icon, true);
+          this.adjust_olc_icon(dom.olc_prev_icon);
+          this.adjust_olc_icon(dom.olc_next_icon, true);
 
           dom.olc_prev.classList.add('pp-active');
           dom.olc_next.classList.add('pp-active');
@@ -2484,53 +2525,54 @@
     },
 
     clear: function() {
-      var dom = _.popup.dom;
-
-      _.clear(dom.title_link);
+      var dom = this.dom;
 
       dom.button_manga.classList.add('pp-hide');
       dom.button_response.classList.add('pp-hide');
-
-      _.clear(dom.caption);
-      _.clear(dom.taglist);
-      _.clear(dom.rating);
-
       dom.author_status.classList.add('pp-hide');
       dom.author_image.classList.add('pp-hide');
 
-      _.clear(dom.datetime);
-      _.clear(dom.tools);
+      _.clear(
+        dom.title_link,
+        dom.caption,
+        dom.taglist,
+        dom.rating,
+        dom.datetime,
+        dom.tools,
+        dom.author_profile,
+        dom.author_works,
+        dom.author_bookmarks,
+        dom.author_staccfeed,
+        dom.image_layout
+      );
 
-      _.clear(dom.author_profile);
-      _.clear(dom.author_works);
-      _.clear(dom.author_bookmarks);
-      _.clear(dom.author_staccfeed);
+      this.resize_mode = this.FIT_LONG;
 
-      _.clear(dom.image_layout);
-      _.popup.resize_mode = _.popup.FIT_LONG;
-
-      _.popup.bookmark.clear();
-      _.popup.manga.clear();
-      _.popup.question.clear();
-      _.popup.comment.clear();
-      _.popup.tagedit.clear();
+      this.bookmark.clear();
+      this.manga.clear();
+      this.question.clear();
+      this.comment.clear();
+      this.tagedit.clear();
     },
 
     set_images: function(images) {
-      var dom = _.popup.dom;
-      _.popup.images = images;
+      var dom = this.dom;
+      this.images = images;
       _.clear(dom.image_layout);
-      _.popup.images.forEach(function(img) {
+      this.images.forEach(function(img) {
         dom.image_layout.appendChild(img);
       });
-      _.popup.dom.image_scroller.scrollTop = 0;
+      this.dom.image_scroller.scrollTop = 0;
     },
 
     onload: function(illust) {
-      var dom = _.popup.dom;
-      if (illust !== _.popup.illust || _.popup.bookmark.enable || _.popup.tagedit.enable) {
+      if (illust !== this.illust || this.bookmark.enable || this.tagedit.enable) {
         return;
       }
+
+      var that = this;
+      var dom = this.dom;
+
       if (_.conf.popup.preload) {
         if (illust.prev) {
           _.illust.load(illust.prev);
@@ -2540,7 +2582,7 @@
         }
       }
 
-      _.popup.clear();
+      this.clear();
 
       dom.title_link.innerHTML = illust.title;
       dom.title_link.href = illust.url_medium;
@@ -2565,12 +2607,12 @@
 
       if (illust.manga.enable) {
         dom.button_manga.href = illust.url_manga + '#pp-manga-thumbnail';
-        _.popup.manga.update_button();
+        this.manga.update_button();
         dom.button_manga.classList.remove('pp-hide');
       }
 
       dom.caption.innerHTML = illust.caption;
-      _.process_caption(dom.caption, illust);
+      _.modify_caption(dom.caption, illust);
       _.redirect_jump_page(dom.caption);
 
       if (illust.err_no_comment) {
@@ -2581,7 +2623,7 @@
       _.onclick(
         _.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist),
         function() {
-          _.popup.tagedit.start();
+          that.tagedit.start();
           return true;
         }
       );
@@ -2654,9 +2696,9 @@
       } else {
         dom.image_layout.href = illust.image_url_big;
       }
-      _.popup.set_images([(_.conf.popup.big_image && illust.image_big) || !illust.image_medium
-                          ? illust.image_big
-                          : illust.image_medium]);
+      this.set_images([(_.conf.popup.big_image && illust.image_big) || !illust.image_medium
+                       ? illust.image_big
+                       : illust.image_medium]);
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -2674,23 +2716,24 @@
         }
       } catch(ex) { }
 
-      _.popup.set_status('');
-      _.popup.adjust(true);
+      this.set_status('');
+      this.adjust(true);
     },
 
     onerror: function(illust) {
-      if (illust !== _.popup.illust || _.popup.bookmark.enable || _.popup.tagedit.enable) {
+      if (illust !== this.illust || this.bookmark.enable || this.tagedit.enable) {
         return;
       }
+
       var msg = illust.error || 'Unknown error';
-      _.log('[Error] ' + msg);
-      _.popup.dom.image_layout.textContent = msg;
-      _.popup.set_status('Error');
-      _.popup.adjust();
+      _.error(msg);
+      this.dom.image_layout.textContent = msg;
+      this.set_status('Error');
+      this.adjust();
     },
 
     set_status: function(text) {
-      var dom = _.popup.dom;
+      var dom = this.dom;
       if (text) {
         dom.status.textContent = text;
         if (text && dom.image_layout.childNodes.length < 1) {
@@ -2703,84 +2746,84 @@
     },
 
     show: function(illust) {
-      if (!_.popup.saved_context) {
-        _.dbg('saving pixiv.context');
-        _.popup.saved_context = w.pixiv.context;
+      if (!this.saved_context) {
+        _.debug('saving pixiv.context');
+        this.saved_context = w.pixiv.context;
         w.pixiv.context = _.extend({ }, w.pixiv.context);
       }
 
       if (!illust) {
-        _.popup.hide();
+        this.hide();
         return;
       }
 
-      if (_.popup.bookmark.enable) {
-        _.popup.bookmark.end();
+      if (this.bookmark.enable) {
+        this.bookmark.end();
       }
-      if (_.popup.tagedit.enable) {
-        _.popup.tagedit.end();
+      if (this.tagedit.enable) {
+        this.tagedit.end();
       }
 
-      var dom = _.popup.dom;
-      _.popup.create();
+      var dom = this.dom;
+      this.create();
       dom.root.style.fontSize = _.conf.popup.font_size;
       dom.header.style.opacity = _.conf.popup.caption_opacity;
 
-      _.popup.illust = illust;
-      _.popup.running = true;
+      this.illust = illust;
+      this.running = true;
       if (!dom.root.parentNode) {
         d.body.insertBefore(dom.root, d.body.firstChild);
       }
-      _.popup.set_status('Loading');
-      _.popup.adjust();
+      this.set_status('Loading');
+      this.adjust();
       _.illust.load(illust);
       _.lazy_scroll(illust.image_thumb);
     },
 
     hide: function() {
-      if (!_.popup.running) {
+      if (!this.running) {
         return;
       }
 
-      if (_.popup.saved_context) {
-        _.dbg('restoring pixiv.context');
-        w.pixiv.context = _.popup.saved_context;
+      if (this.saved_context) {
+        _.debug('restoring pixiv.context');
+        w.pixiv.context = this.saved_context;
       } else {
-        _.log('[Error] pixiv.context not saved (bug)');
+        _.error('pixiv.context not saved (bug)');
       }
 
-      var dom = _.popup.dom;
+      var dom = this.dom;
       if (dom.root.parentNode) {
         dom.root.parentNode.removeChild(dom.root);
       }
-      _.popup.clear();
-      _.popup.running = false;
+      this.clear();
+      this.running = false;
     },
 
     reload: function() {
-      _.illust.unload(_.popup.illust);
-      _.popup.show(_.popup.illust);
+      _.illust.unload(this.illust);
+      this.show(this.illust);
     },
 
     show_caption: function() {
-      _.popup.dom.header.classList.add('pp-show');
+      this.dom.header.classList.add('pp-show');
     },
 
     hide_caption: function() {
-      _.popup.question.blur();
-      _.popup.dom.header.classList.remove('pp-show');
+      this.question.blur();
+      this.dom.header.classList.remove('pp-show');
     },
 
     toggle_caption: function() {
-      if (_.popup.dom.header.classList.contains('pp-show')) {
-        _.popup.hide_caption();
+      if (this.dom.header.classList.contains('pp-show')) {
+        this.hide_caption();
       } else {
-        _.popup.show_caption();
+        this.show_caption();
       }
     },
 
     send_rate: function(score) {
-      if (_.popup.illust.rating && !_.popup.illust.rated) {
+      if (this.illust.rating && !this.illust.rated) {
         try {
           w.pixiv.rating.rate = score;
           w.pixiv.rating.apply();
@@ -2789,52 +2832,53 @@
     },
 
     illust_can_scroll: function() {
-      return _.popup.illust_can_scroll_vertically() || _.popup.illust_can_scroll_horizontally();
+      return this.illust_can_scroll_vertically() || this.illust_can_scroll_horizontally();
     },
 
     illust_can_scroll_vertically: function() {
-      return _.popup.dom.image_scroller.scrollHeight > _.popup.dom.image_scroller.clientHeight;
+      return this.dom.image_scroller.scrollHeight > this.dom.image_scroller.clientHeight;
     },
 
     illust_can_scroll_horizontally: function() {
-      return _.popup.dom.image_scroller.scrollWidth > _.popup.dom.image_scroller.clientWidth;
+      return this.dom.image_scroller.scrollWidth > this.dom.image_scroller.clientWidth;
     }
-  };
+  });
 
-  _.popup.bookmark = {
+  _.popup.bookmark = _.mod({
     enable: false,
 
     clear: function() {
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
-      _.popup.dom.bookmark_iframe = null;
-      _.popup.bookmark.enable = false;
+      this.iframe = null;
+      this.enable = false;
       w.focus(); // for Firefox
     },
 
     adjust: function(w, h) {
-      var ifr = _.popup.dom.bookmark_iframe,
-          win = ifr.contentWindow.wrappedJSObject || ifr.contentWindow,
+      var ifr = this.iframe,
+          win = ifr.contentWindow,
           de = ifr.contentDocument.documentElement,
-          wrapper = _.popup.dom.bookmark_wrapper;
+          wrapper = _.popup.dom.bookmark_wrapper,
+          bm  = (win.wrappedJSObject || win).pixplus.bookmarkform;
 
       wrapper.style.width  = 'auto';
       wrapper.style.height = 'auto';
 
-      if (win.pixplus && win.pixplus.bookmarkform) {
-        win.pixplus.bookmarkform.adjust(w, h);
-      }
+      bm.adjust(w, h);
 
       wrapper.style.width  = g.Math.min(de.scrollWidth,  w) + 'px';
       wrapper.style.height = g.Math.min(de.scrollHeight, h) + 'px';
     },
 
     onready: function(illust) {
-      if (illust !== _.popup.illust || !_.popup.bookmark.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
 
-      var ifr = _.popup.dom.bookmark_iframe,
+      var that = this;
+
+      var ifr = this.iframe,
           win = ifr.contentWindow,
           de = ifr.contentDocument.documentElement;
 
@@ -2845,7 +2889,7 @@
       _.listen(win, 'unload', function() {
         ifr.style.visibility = 'hidden';
         w.setTimeout(function() {
-          _.popup.bookmark.clear();
+          that.clear();
           _.popup.reload();
         }, 0);
       });
@@ -2860,16 +2904,16 @@
     },
 
     onload: function(illust) {
-      if (illust !== _.popup.illust || !_.popup.bookmark.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
 
-      _.popup.bookmark.onready(illust);
+      this.onready(illust);
 
-      var ifr = _.popup.dom.bookmark_iframe,
-          win = ifr.contentWindow.wrappedJSObject || ifr.contentWindow,
+      var ifr = this.iframe,
+          win = ifr.contentWindow,
           doc = ifr.contentDocument,
-          bm  = win.pixplus.bookmarkform;
+          bm  = (win.wrappedJSObject || win).pixplus.bookmarkform;
 
       bm.setup(doc.querySelector('#wrapper .layout-body'));
       if (!illust.bookmarked) {
@@ -2883,32 +2927,34 @@
     },
 
     start: function() {
-      if (_.popup.bookmark.enable) {
+      if (this.enable) {
         return;
       }
 
+      var that = this;
+
       var illust = _.popup.illust;
-      _.popup.bookmark.enable = true;
+      this.enable = true;
       _.popup.set_status('Loading');
 
       var ifr = _.e('iframe');
 
       _.listen(ifr, 'DOMFrameContentLoaded', function(ev) {
-        _.popup.bookmark.onready(illust);
+        that.onready(illust);
       });
 
       _.listen(ifr, 'load', function(ev) {
         w.setTimeout(function() {
-          _.popup.bookmark.onload(illust);
+          that.onload(illust);
         }, 0);
       });
 
       _.listen(ifr, 'error', function() {
-        if (illust !== _.popup.illust || !_.popup.bookmark.enable) {
+        if (illust !== _.popup.illust || !that.enable) {
           return;
         }
 
-        _.popup.bookmark.enable = false;
+        that.enable = false;
         _.popup.set_status('Error');
       });
 
@@ -2916,74 +2962,70 @@
       ifr.src = illust.url_bookmark;
 
       _.clear(_.popup.dom.bookmark_wrapper);
-      _.popup.dom.bookmark_iframe = ifr;
+      this.iframe = ifr;
       _.popup.dom.bookmark_wrapper.appendChild(ifr);
     },
 
     submit: function() {
-      if (!_.popup.bookmark.enable) {
+      if (!this.enable) {
         return;
       }
 
-      var ifr = _.popup.dom.bookmark_iframe,
-          win = ifr.contentWindow.wrappedJSObject || ifr.contentWindow;
-      win.pixplus.bookmarkform.dom.form.submit();
+      var win = this.iframe.contentWindow;
+      (win.wrappedJSObject || win).pixplus.bookmarkform.dom.form.submit();
     },
 
     end: function() {
-      if (!_.popup.bookmark.enable) {
+      if (!this.enable) {
         return;
       }
-      _.popup.bookmark.clear();
+      this.clear();
       _.popup.show(_.popup.illust);
     },
 
     toggle: function() {
-      if (_.popup.bookmark.enable) {
-        _.popup.bookmark.end();
+      if (this.enable) {
+        this.end();
       } else {
-        _.popup.bookmark.start();
+        this.start();
       }
     }
-  };
+  });
 
-  _.popup.manga = {
+  _.popup.manga = _.mod({
     enable: false,
     page: -1,
 
     clear: function() {
-      _.popup.manga.enable = false;
-      _.popup.manga.page = -1;
-      _.popup.manga.update_button();
+      this.enable = false;
+      this.page = -1;
+      this.update_button();
     },
 
     onload: function(illust, page, images) {
-      if (illust !== _.popup.illust ||
-          !_.popup.manga.enable ||
-          page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust || !this.enable || page !== this.page) {
         return;
       }
 
       if (_.conf.popup.preload) {
-        if (_.popup.manga.page > 0) {
-          _.illust.load_manga_page(illust, _.popup.manga.page - 1);
+        if (this.page > 0) {
+          _.illust.load_manga_page(illust, this.page - 1);
         }
-        if (_.popup.manga.page + 1 < illust.manga.pages.length) {
-          _.illust.load_manga_page(illust, _.popup.manga.page + 1);
+        if (this.page + 1 < illust.manga.pages.length) {
+          _.illust.load_manga_page(illust, this.page + 1);
         }
       }
 
+      this.update_button();
+
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.set_images(images);
-      _.popup.manga.update_button();
       _.popup.set_status('');
       _.popup.adjust(true);
     },
 
     onerror: function(illust, page) {
-      if (illust !== _.popup.illust ||
-          !_.popup.manga.enable ||
-          page !== _.popup.manga.page) {
+      if (illust !== _.popup.illust || !this.enable || page !== this.page) {
         return;
       }
       if (illust.error) {
@@ -2994,25 +3036,27 @@
     },
 
     update_button: function() {
-      var page, illust = _.popup.illust, pages = illust.manga.pages;
+      var illust = _.popup.illust,
+          pages = illust.manga.pages,
+          page;
 
-      if (_.popup.manga.page >= 0 && pages) {
+      if (this.page >= 0 && pages) {
         page = 1;
-        for(var i = 0; i < _.popup.manga.page; ++i) {
+        for(var i = 0; i < this.page; ++i) {
           page += pages[i].image_urls.length;
         }
 
-        var img_cnt = pages[_.popup.manga.page].image_urls.length;
+        var img_cnt = pages[this.page].image_urls.length;
         if (img_cnt > 1) {
           page = page + '-' + (page + img_cnt - 1);
         }
 
       } else {
-        page = _.popup.manga.page + 1;
+        page = this.page + 1;
       }
 
       _.popup.dom.button_manga.textContent = '[M:' + page + '/' + illust.manga.page_count + ']';
-      _.popup.dom.button_manga.classList[_.popup.manga.page >= 0 ? 'add' : 'remove']('pp-active');
+      _.popup.dom.button_manga.classList[this.page >= 0 ? 'add' : 'remove']('pp-active');
     },
 
     show: function(page) {
@@ -3021,45 +3065,44 @@
         return;
       }
       if (page < 0 || (illust.manga.pages && page >= illust.manga.pages.length)) {
-        _.popup.manga.end();
+        this.end();
         return;
       }
-      _.popup.manga.enable = true;
-      _.popup.manga.page = page;
-      _.popup.manga.update_button();
+      this.enable = true;
+      this.page = page;
+      this.update_button();
       illust.manga.viewed = true;
       _.popup.set_status('Loading');
-      _.illust.load_manga_page(illust, _.popup.manga.page);
+      _.illust.load_manga_page(illust, this.page);
     },
 
     start: function() {
-      if (_.popup.manga.enable) {
+      if (this.enable) {
         return;
       }
-      _.popup.manga.show(0);
+      this.show(0);
     },
 
     end: function() {
-      if (!_.popup.manga.enable) {
+      if (!this.enable) {
         return;
       }
-      _.popup.manga.clear();
+      this.clear();
       _.popup.show(_.popup.illust);
     },
 
     toggle: function() {
-      if (_.popup.manga.enable) {
-        _.popup.manga.end();
+      if (this.enable) {
+        this.end();
       } else {
-        _.popup.manga.start();
+        this.start();
       }
     }
-  };
+  });
 
-  _.popup.question = {
+  _.popup.question = _.mod({
     enabled: function() {
-      return !!_.q('.questionnaire .list.visible, .questionnaire .stats.visible',
-                   _.popup.dom.rating);
+      return !!_.q('.questionnaire .list.visible,.questionnaire .stats.visible', _.popup.dom.rating);
     },
 
     clear: function() {
@@ -3071,14 +3114,14 @@
 
     get_selected: function() {
       var active = d.activeElement;
-      if (_.popup.question.get_buttons().indexOf(active) >= 0) {
+      if (this.get_buttons().indexOf(active) >= 0) {
         return active;
       }
       return null;
     },
 
     blur: function() {
-      var selected = _.popup.question.get_selected();
+      var selected = this.get_selected();
       if (selected) {
         selected.blur();
       }
@@ -3086,7 +3129,7 @@
 
     select_button: function(move) {
       var buttons;
-      if (move === 0 || (buttons = _.popup.question.get_buttons()).length < 1) {
+      if (move === 0 || (buttons = this.get_buttons()).length < 1) {
         return;
       }
 
@@ -3108,23 +3151,22 @@
     },
 
     select_prev: function() {
-      _.popup.question.select_button(-1);
+      this.select_button(-1);
     },
 
     select_next : function() {
-      _.popup.question.select_button(1);
+      this.select_button(1);
     },
 
     submit: function() {
-      var selected = _.popup.question.get_selected();
+      var selected = this.get_selected();
       if (selected) {
         _.send_click(selected);
       }
     },
 
     start: function() {
-      var toggle = _.q('.questionnaire .toggle-list, .questionnaire .toggle-stats',
-                       _.popup.dom.rating);
+      var toggle = _.q('.questionnaire .toggle-list,.questionnaire .toggle-stats', _.popup.dom.rating);
       if (toggle) {
         _.popup.show_caption();
         _.send_click(toggle);
@@ -3132,24 +3174,20 @@
     },
 
     end: function() {
-      _.popup.question.blur();
-      _.qa(
-        '.questionnaire .list, .questionnaire .stats',
-        _.popup.dom.rating
-      ).forEach(function(elem) {
+      this.blur();
+      _.qa('.questionnaire .list,.questionnaire .stats', _.popup.dom.rating).forEach(function(elem) {
         elem.classList.remove('visible');
       });
     }
-  };
+  });
 
-  _.popup.comment = {
+  _.popup.comment = _.mod({
     enable: false,
 
     clear: function() {
       _.popup.dom.root.classList.remove('pp-comment-mode');
-      _.clear(_.popup.dom.comment_form);
-      _.clear(_.popup.dom.comment_history);
-      _.popup.comment.enable = false;
+      _.clear(_.popup.dom.comment_form, _.popup.dom.comment_history);
+      this.enable = false;
     },
 
     scroll: function() {
@@ -3157,17 +3195,17 @@
     },
 
     onload: function(illust, html) {
-      if (illust !== _.popup.illust || !_.popup.comment.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
       _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
       _.popup.dom.comment_err_empty.classList[html ? 'add' : 'remove']('pp-hide');
       _.popup.adjust();
-      _.popup.comment.scroll();
+      this.scroll();
     },
 
     onerror: function(illust, message) {
-      if (illust !== _.popup.illust || !_.popup.comment.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
       _.popup.dom.comment_history.textContent = message || 'Error';
@@ -3176,10 +3214,11 @@
     reload: function() {
       var illust = _.popup.illust;
       if (!illust.author_id) {
-        _.popup.comment.onerror(illust, 'Author id not specified');
+        this.onerror(illust, 'Author id not specified');
         return;
       }
 
+      var that = this;
       try {
         w.pixiv.api.post('/rpc_comment_history.php', {
 	  i_id: illust.id,
@@ -3190,15 +3229,15 @@
           try {
             var obj  = g.JSON.parse(data),
                 html = obj.data.html_array.join('');
-            _.popup.comment.onload(illust, html);
+            that.onload(illust, html);
           } catch(ex) {
-            _.popup.comment.onerror(illust, g.String(ex));
+            that.onerror(illust, g.String(ex));
           }
 	}).fail(function(data) {
-          _.popup.comment.onerror(illust, data);
+          that.onerror(illust, data);
         });
       } catch(ex) {
-        _.popup.comment.onerror(illust);
+        this.onerror(illust);
         return;
       }
       _.popup.dom.comment_history.textContent = 'Loading';
@@ -3211,20 +3250,22 @@
         return;
       }
 
-      var form  = _.e('form',
-                      {action: '/member_illust.php', method: 'POST'},
-                      _.popup.dom.comment_form);
+      var that = this;
+
+      var form  = _.e('form', {action: '/member_illust.php', method: 'POST'}, _.popup.dom.comment_form);
       var input = _.e('input', {name: 'comment'}, form);
+
       for(var name in data) {
         if (name === 'submit' || name === 'comment') {
           continue;
         }
         _.e('input', {type: 'hidden', name: name, value: data[name]}, form);
       }
+
       _.listen(form, 'submit', function() {
         _.xhr.post(form, function() {
-          _.popup.comment.setup_form();
-          _.popup.comment.reload();
+          that.setup_form();
+          that.reload();
         }, function() {
           g.alert('Error!');
         });
@@ -3234,46 +3275,46 @@
     },
 
     start: function() {
-      if (_.popup.comment.enable) {
+      if (this.enable) {
         return;
       }
-      _.popup.comment.enable = true;
-      _.popup.comment.setup_form();
+      this.enable = true;
+      this.setup_form();
       if (_.popup.dom.comment_history.childNodes.length < 1) {
-        _.popup.comment.reload();
+        this.reload();
       }
       _.popup.dom.root.classList.add('pp-comment-mode');
       _.popup.show_caption();
       _.popup.adjust();
-      _.popup.comment.scroll();
+      this.scroll();
     },
 
     end: function() {
-      if (!_.popup.comment.enable) {
+      if (!this.enable) {
         return;
       }
       _.popup.dom.root.classList.remove('pp-comment-mode');
-      _.popup.comment.enable = false;
+      this.enable = false;
       _.popup.adjust();
       _.popup.dom.caption_wrapper.scrollTop = 0;
     },
 
     toggle: function() {
-      if (_.popup.comment.enable) {
-        _.popup.comment.end();
+      if (this.enable) {
+        this.end();
       } else {
-        _.popup.comment.start();
+        this.start();
       }
     }
-  };
+  });
 
-  _.popup.tagedit = {
+  _.popup.tagedit = _.mod({
     enable: false,
 
     clear: function() {
       _.popup.dom.root.classList.remove('pp-tagedit-mode');
       _.clear(_.popup.dom.tagedit_wrapper);
-      _.popup.tagedit.enable = false;
+      this.enable = false;
     },
 
     adjust: function(w, h) {
@@ -3289,7 +3330,7 @@
     },
 
     onload: function(illust, html) {
-      if (illust !== _.popup.illust || !_.popup.tagedit.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
       _.clear(_.popup.dom.tagedit_wrapper);
@@ -3309,11 +3350,11 @@
     },
 
     onerror: function(illust, message) {
-      if (illust !== _.popup.illust || !_.popup.tagedit.enable) {
+      if (illust !== _.popup.illust || !this.enable) {
         return;
       }
       if (!_.popup.dom.root.classList.contains('pp-tagedit-mode')) {
-        _.popup.tagedit.enable = false;
+        this.enable = false;
       }
       _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
     },
@@ -3321,10 +3362,11 @@
     reload: function() {
       var illust = _.popup.illust;
       if (!illust.author_id) {
-        _.popup.tagedit.onerror(illust, 'Author id not specified');
+        this.onerror(illust, 'Author id not specified');
         return;
       }
 
+      var that = this;
       try {
         w.pixiv.api.post('/rpc_tag_edit.php', {
           mode: 'first',
@@ -3334,46 +3376,48 @@
 	}, {
 	  ajaxSettings: {dataType: 'text'}
 	}).done(function(data) {
-          _.dbg(data);
+          _.debug(data);
           try {
-            _.popup.tagedit.onload(illust, g.JSON.parse(data).html);
+            that.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
-            _.popup.tagedit.onerror(illust, g.String(ex));
+            that.onerror(illust, g.String(ex));
           }  
 	}).fail(function(data) {
-          _.popup.tagedit.onerror(illust, data);
+          that.onerror(illust, data);
         });
       } catch(ex) {
-        _.popup.tagedit.onerror(illust);
+        this.onerror(illust);
         return;
       }
       _.popup.dom.tagedit_wrapper.textContent = 'Loading';
     },
 
     start: function() {
-      if (_.popup.tagedit.enable) {
+      if (this.enable) {
         return;
       }
-      _.popup.tagedit.enable = true;
-      _.popup.tagedit.reload();
+      this.enable = true;
+      this.reload();
       _.popup.dom.root.classList.add('pp-tagedit-mode');
       _.popup.adjust();
     },
 
     end: function() {
-      if (!_.popup.tagedit.enable) {
+      if (!this.enable) {
         return;
       }
+      this.enable = false;
       _.popup.dom.root.classList.remove('pp-tagedit-mode');
-      _.popup.tagedit.enable = false;
       _.popup.adjust();
     }
-  };
+  });
 
-  _.popup.input = {
+  _.popup.input = _.mod({
     wheel_delta: 0,
 
     init: function() {
+      var that = this;
+
       ['auto_manga', 'reverse'].forEach(function(name) {
         var mode = _.conf.popup[name], value;
         if (mode === 2) {
@@ -3386,7 +3430,7 @@
         } else {
           value = mode === 1;
         }
-        _.popup.input[name] = value;
+        that[name] = value;
       });
 
       _.popup.key.init();
@@ -3398,20 +3442,20 @@
         _.popup.manga.show(_.popup.manga.page - 1);
         return;
       }
-      _.popup.show(_.popup.illust[_.popup.input.reverse ? 'next' : 'prev']);
+      _.popup.show(_.popup.illust[this.reverse ? 'next' : 'prev']);
     },
 
     next: function() {
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page + 1);
         return;
-      } else if (_.popup.input.auto_manga
+      } else if (this.auto_manga
                  && _.popup.illust.manga.enable
                  && !_.popup.illust.manga.viewed) {
         _.popup.manga.start();
         return;
       }
-      _.popup.show(_.popup.illust[_.popup.input.reverse ? 'prev' : 'next']);
+      _.popup.show(_.popup.illust[this.reverse ? 'prev' : 'next']);
     },
 
     prev_direction: function() {
@@ -3571,9 +3615,9 @@
       }
       _.open(_.popup.illust.url_manga + hash);
     }
-  };
+  });
 
-  _.popup.key = {
+  _.popup.key = _.mod({
     maps: [
       {
         cond: function() {
@@ -3703,7 +3747,7 @@
     ],
 
     init: function(context) {
-      var maps = _.popup.key.maps;
+      var maps = this.maps;
       _.key.listen(context || w, function(key, ev, connection) {
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
@@ -3739,9 +3783,9 @@
         return false;
       });
     }
-  };
+  });
 
-  _.popup.mouse = {
+  _.popup.mouse = _.mod({
     init: function() {
       _.onwheel(w, function(ev) {
         if (!_.popup.running || _.conf.popup.mouse_wheel === 0) {
@@ -3850,9 +3894,9 @@
         return false;
       });
     }
-  };
+  });
 
-  _.bookmarkform = {
+  _.bookmarkform = _.mod({
     dom: {},
 
     calc_tag_rect: function(group, rect, grect) {
@@ -3866,39 +3910,35 @@
     },
 
     select_tag: function(gidx, idx, rect) {
-      var dom = _.bookmarkform.dom,
-          sel = _.bookmarkform.sel;
-
-      if (sel.tag) {
-        sel.tag.classList.remove('pp-tag-select');
+      if (this.sel.tag) {
+        this.sel.tag.classList.remove('pp-tag-select');
       }
 
       if (gidx >= 0) {
-        var group = dom.tag_groups[gidx][0];
+        var group = this.dom.tag_groups[gidx][0];
 
-        sel.gidx = gidx;
-        sel.idx = idx;
-        sel.tag = dom.tag_groups[gidx][1][idx];
-        sel.rect = rect;
+        this.sel.gidx = gidx;
+        this.sel.idx = idx;
+        this.sel.tag = this.dom.tag_groups[gidx][1][idx];
+        this.sel.rect = rect;
 
         if (!rect) {
-          sel.rect = _.bookmarkform.calc_tag_rect(group, sel.tag.getClientRects()[0]);
+          this.sel.rect = this.calc_tag_rect(group, this.sel.tag.getClientRects()[0]);
         }
-        g.console.log(sel.rect);
 
-        sel.tag.classList.add('pp-tag-select');
-        _.lazy_scroll(sel.tag, group, group);
+        this.sel.tag.classList.add('pp-tag-select');
+        _.lazy_scroll(this.sel.tag, group, group);
 
       } else {
-        sel.tag  = null;
-        sel.rect = null;
+        this.sel.tag  = null;
+        this.sel.rect = null;
       }
     },
 
     autoinput_tag: function() {
       var illust_tags = _.qa(
         '.work-tags-container .tag[data-tag]',
-        _.bookmarkform.dom.root
+        this.dom.root
       ).map(function(tag) {
         return tag.getAttribute('data-tag');
       });
@@ -3922,7 +3962,7 @@
     },
 
     setup_tag_order: function() {
-      var mytags = _.q('.tag-container.tag-cloud-container .list-items', _.bookmarkform.dom.root);
+      var mytags = _.q('.tag-container.tag-cloud-container .list-items', this.dom.root);
       if (!mytags || _.conf.bookmark.tag_order.length < 1) {
         return;
       }
@@ -3931,15 +3971,17 @@
         return tag.querySelector('.tag').getAttribute('data-tag');
       });
 
-      var opt = _.q('.list-option.tag-order', _.bookmarkform.dom.root);
+      var opt = _.q('.list-option.tag-order', this.dom.root);
       if (opt) {
         opt.parentNode.removeChild(opt);
       }
     },
 
     select_nearest_tag: function(key) {
-      var dom = _.bookmarkform.dom,
-          sel = _.bookmarkform.sel;
+      var that = this;
+
+      var dom = this.dom,
+          sel = this.sel;
 
       var gidx = sel.gidx, idx = sel.idx;
       if (key === 'Right') {
@@ -3953,7 +3995,7 @@
         } else {
           ++idx;
         }
-        _.bookmarkform.select_tag(gidx, idx);
+        this.select_tag(gidx, idx);
         return true;
       } else if (key === 'Left') {
         if (idx <= 0) {
@@ -3966,7 +4008,7 @@
         } else {
           --idx;
         }
-        _.bookmarkform.select_tag(gidx, idx);
+        this.select_tag(gidx, idx);
         return true;
       }
 
@@ -3997,7 +4039,7 @@
 
           g.Array.prototype.map.call(tag.getClientRects(), function(r) {
             var rect, distance;
-            rect = _.bookmarkform.calc_tag_rect(group, r, grect);
+            rect = that.calc_tag_rect(group, r, grect);
             distance = g.Math.max(rect.left - x, x - rect.right);
 
             if (!t_top.set || gidx < t_top.gidx ||
@@ -4038,39 +4080,36 @@
       if (!t_near.set) {
         t_near = down ? t_top : t_bottom;
       }
-      _.bookmarkform.select_tag(t_near.gidx, t_near.idx, t_near.rect);
+      that.select_tag(t_near.gidx, t_near.idx, t_near.rect);
       return true;
     },
 
     onkey: function(key, ev) {
-      var dom = _.bookmarkform.dom,
-          sel = _.bookmarkform.sel;
-
-      if (!sel.tag) {
+      if (!this.sel.tag) {
         if (key === 'Down') {
-          _.bookmarkform.select_tag(dom.tag_groups.length - 1, 0);
+          this.select_tag(this.dom.tag_groups.length - 1, 0);
           return true;
         } else if (key === 'Escape') {
-          dom.input_tag.blur();
+          this.dom.input_tag.blur();
           return true;
         }
         return false;
       }
 
       if (key === 'Space') {
-        _.send_click(sel.tag);
+        _.send_click(this.sel.tag);
         return true;
 
       } else if (key === 'Escape') {
-        _.bookmarkform.select_tag(-1);
+        this.select_tag(-1);
         return true;
       }
 
-      return _.bookmarkform.select_nearest_tag(key);
+      return this.select_nearest_tag(key);
     },
 
     setup_key: function() {
-      var dom = _.bookmarkform.dom;
+      var dom = this.dom;
 
       dom.tags = [];
       dom.tag_groups = [];
@@ -4084,11 +4123,13 @@
         }
       });
 
-      _.key.listen(dom.input_tag, _.bookmarkform.onkey);
+      _.key.listen(dom.input_tag, this.onkey);
     },
 
     setup_alias_ui: function() {
-      var root = _.bookmarkform.dom.root;
+      var that = this;
+
+      var root = this.dom.root;
       var first_tag_list = _.q('.work-tags-container', root);
       if (!first_tag_list) {
         return;
@@ -4117,8 +4158,7 @@
       var tag1, tag2;
 
       var select = function(tag, button) {
-        var dom   = _.bookmarkform.dom,
-            first = dom.tag_groups[0][1].indexOf(tag) >= 0;
+        var first = that.dom.tag_groups[0][1].indexOf(tag) >= 0;
 
         if (first) {
           if (tag1) {
@@ -4146,7 +4186,7 @@
         }
       };
 
-      _.bookmarkform.dom.tag_groups.forEach(function(grp) {
+      this.dom.tag_groups.forEach(function(grp) {
         grp[1].forEach(function(tag) {
           var tag_t  = tag.getAttribute('data-tag'),
               button = _.e('button', {cls: 'pp-tag-associate-button',
@@ -4181,16 +4221,15 @@
     },
 
     adjust: function(width, height) {
-      if (!_.bookmarkform.dom.root) {
+      if (!this.dom.root) {
         return;
       }
 
-      var dom = _.bookmarkform.dom,
-          min = 80;
+      var min = 80;
 
-      _.dbg('Max height: ' + height);
+      _.debug('Max height: ' + height);
 
-      var lists = _.qa('.tag-container', dom.root), last;
+      var lists = _.qa('.tag-container', this.dom.root), last;
       lists = g.Array.prototype.filter.call(lists, function(l) {
         if (l.scrollHeight > min) {
           return true;
@@ -4205,18 +4244,18 @@
 
       height -= lists.reduce(function(h, l) {
         return h - l.offsetHeight;
-      }, dom.root.offsetHeight);
+      }, this.dom.root.offsetHeight);
 
       if (height < min * lists.length) {
         height = min * lists.length;
       }
 
-      _.dbg('Lists height: ' + height);
+      _.debug('Lists height: ' + height);
 
       last = lists.pop();
       if (height - last.scrollHeight < min * lists.length) {
         last.style.maxHeight = (height - (min * lists.length)) + 'px';
-        _.dbg('Adjust last tag list: ' + last.style.maxHeight);
+        _.debug('Adjust last tag list: ' + last.style.maxHeight);
       } else {
         last.style.maxHeight = 'none';
       }
@@ -4239,11 +4278,10 @@
         return;
       }
 
-      var dom = _.bookmarkform.dom;
-      dom.root = root;
-      dom.form = form;
+      this.dom.root = root;
+      this.dom.form = form;
 
-      _.bookmarkform.sel = {
+      this.sel = {
         tag:  null,
         rect: null
       };
@@ -4255,11 +4293,11 @@
         }
       }
 
-      _.bookmarkform.setup_tag_order(root);
-      _.bookmarkform.setup_key(root);
-      _.bookmarkform.setup_alias_ui(root);
+      this.setup_tag_order(root);
+      this.setup_key(root);
+      this.setup_alias_ui(root);
     }
-  };
+  });
 
   _.Floater = function(wrap, cont, ignore_elements) {
     this.wrap = wrap;
@@ -4406,51 +4444,53 @@
     }
   });
 
-  _.mypage = {
-    history_manager: {
+  _.mypage = _.mod({
+    history_manager: _.mod({
       create: function() {
-        if (_.mypage.history_manager.dom) {
+        if (this.dom) {
           return;
         }
 
-        var dom = _.mypage.history_manager.dom = {};
+        var that = this;
 
-        dom.root = _.e('div', {id: 'pp-layout-history-manager'});
-        dom.header = _.e('header', null, dom.root);
-        dom.error = _.e('p', {cls: 'pp-error-message'}, dom.root);
-        dom.table = _.e('table', null, dom.root);
+        this.dom = {};
+        this.dom.root = _.e('div', {id: 'pp-layout-history-manager'});
+        this.dom.header = _.e('header', null, this.dom.root);
+        this.dom.error = _.e('p', {cls: 'pp-error-message'}, this.dom.root);
+        this.dom.table = _.e('table', null, this.dom.root);
 
-        _.onclick(_.e('span', {text: '\u00d7', css: 'cursor:pointer'}, dom.header), function() {
-          _.mypage.history_manager.hide();
+        _.onclick(_.e('span', {text: '\u00d7', css: 'cursor:pointer'}, this.dom.header), function() {
+          that.hide();
         });
-        _.e('h2', {text: _.lang.current.mypage_layout_history}, dom.header);
+        _.e('h2', {text: _.lang.current.mypage_layout_history}, this.dom.header);
 
-        var row = dom.table.insertRow(-1);
-        dom.list = _.e('ul', {id: 'pp-layout-history'}, row.insertCell(-1));
-        dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
+        var row = this.dom.table.insertRow(-1);
+        this.dom.list = _.e('ul', {id: 'pp-layout-history'}, row.insertCell(-1));
+        this.dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
 
-        _.e('p', {text: _.lang.current.mypage_layout_history_help}, dom.root);
+        _.e('p', {text: _.lang.current.mypage_layout_history_help}, this.dom.root);
 
         _.listen(w, 'resize', function() {
-          if (!dom.root.parentNode) {
+          if (!that.dom.root.parentNode) {
             return;
           }
-          _.mypage.history_manager.centerize();
+          that.centerize();
         }, true);
 
         _.key.listen(w, function(key, ev, connection) {
-          if (!dom.root.parentNode) {
+          if (!that.dom.root.parentNode) {
             return;
           }
           if (key === 'Escape') {
-            _.mypage.history_manager.hide();
+            that.hide();
           }
         });
       },
 
       preview: function(layout) {
-        var dom = _.mypage.history_manager.dom;
-        _.clear(dom.preview);
+        var that = this;
+
+        _.clear(this.dom.preview);
 
         var name_map = {};
         _.qa('#item-container header h1').forEach(function(h, i) {
@@ -4459,7 +4499,7 @@
         });
 
         layout.split('').forEach(function(d) {
-          var item = _.e('li', {text: name_map[d.toLowerCase()]}, dom.preview);
+          var item = _.e('li', {text: name_map[d.toLowerCase()]}, that.dom.preview);
           if (d.toUpperCase() === d) {
             item.classList.add('pp-open');
           }
@@ -4468,19 +4508,19 @@
       },
 
       refresh: function() {
-        _.mypage.history_manager.create();
+        var that = this;
 
-        var dom = _.mypage.history_manager.dom;
-        _.clear(dom.list);
-        _.clear(dom.preview);
+        this.create();
+
+        _.clear(this.dom.list, this.dom.preview);
 
         var history = _.conf.mypage.layout_history;
         if (!history) {
-          dom.error.textContent = _.lang.current.mypage_layout_history_empty;
-          dom.root.classList.add('pp-error');
+          this.dom.error.textContent = _.lang.current.mypage_layout_history_empty;
+          this.dom.root.classList.add('pp-error');
           return;
         } else {
-          dom.root.classList.remove('pp-error');
+          this.dom.root.classList.remove('pp-error');
         }
 
         history = history.split(',').map(function(entry) {
@@ -4499,7 +4539,7 @@
             text = layout;
           }
 
-          item = _.e('li', {text: text}, dom.list);
+          item = _.e('li', {text: text}, that.dom.list);
 
           _.listen(item, 'mouseover', function() {
             if (item === last_active) {
@@ -4510,7 +4550,7 @@
             }
             item.classList.add('pp-active');
             last_active = item;
-            _.mypage.history_manager.preview(layout);
+            that.preview(layout);
           });
 
           _.onclick(item, function() {
@@ -4519,44 +4559,42 @@
 
           if (idx === 0) {
             item.classList.add('pp-active');
-            _.mypage.history_manager.preview(layout);
+            that.preview(layout);
             last_active = item;
           }
         });
       },
 
       centerize: function() {
-        var dom = _.mypage.history_manager.dom,
-            de  = d.documentElement;
-        dom.root.style.left = g.Math.floor((de.clientWidth  - dom.root.offsetWidth)  / 2) + 'px';
-        dom.root.style.top  = g.Math.floor((de.clientHeight - dom.root.offsetHeight) / 2) + 'px';
+        var de  = d.documentElement;
+        this.dom.root.style.left = g.Math.floor((de.clientWidth  - this.dom.root.offsetWidth)  / 2) + 'px';
+        this.dom.root.style.top  = g.Math.floor((de.clientHeight - this.dom.root.offsetHeight) / 2) + 'px';
       },
 
       show: function() {
-        _.mypage.history_manager.refresh();
+        this.refresh();
 
-        var dom = _.mypage.history_manager.dom;
-        if (!dom.root.parentNode) {
-          d.body.appendChild(dom.root);
+        if (!this.dom.root.parentNode) {
+          d.body.appendChild(this.dom.root);
         }
 
-        _.mypage.history_manager.centerize();
+        this.centerize();
       },
 
       hide: function() {
-        var dom = _.mypage.history_manager.dom;
-        if (dom && dom.root.parentNode) {
-          dom.root.parentNode.removeChild(dom.root);
+        if (this.dom && this.dom.root.parentNode) {
+          this.dom.root.parentNode.removeChild(this.dom.root);
         }
       }
-    },
+    }),
 
     setup_item_actions: function() {
+      var that = this;
       _.qa('#item-container header .action').forEach(function(actions) {
         var li = _.e('li', {cls: 'pp-layout-history ui-tooltip',
                             'data-tooltip': _.lang.current.mypage_layout_history});
         actions.insertBefore(li, actions.firstChild);
-        _.onclick(li, _.mypage.history_manager.show);
+        _.onclick(li, that.history_manager.show);
       });
     },
 
@@ -4609,21 +4647,23 @@
     },
 
     init: function() {
-      _.mypage.setup_item_actions();
+      var that = this;
+
+      this.setup_item_actions();
 
       try {
-        _.mypage.save_layout();
+        this.save_layout();
 
         var pixiv_mypage_update = w.pixiv.mypage.update;
         w.pixiv.mypage.update = function() {
           pixiv_mypage_update.apply(this, arguments);
-          _.mypage.save_layout();
+          that.save_layout();
         };
       } catch(ex) {
         _.log('mypage error - ' + g.String(ex));
       }
     }
-  };
+  });
 
   _.page_procs = {
     '/mypage.php': [
@@ -4648,7 +4688,7 @@
           return;
         }
 
-        _.process_caption(_.q('.work-info .caption'));
+        _.modify_caption(_.q('.work-info .caption'));
 
         var manga = _.q('.works_display a[href*="mode=manga"]');
         if (manga) {
@@ -4673,7 +4713,7 @@
 
         var favorite_button = _.q('.profile-unit .user-relation #favorite-button');
         if (!favorite_button) {
-          _.log('[Error] fast_user_bookmark: favorite-button not found');
+          _.error('fast_user_bookmark: favorite-button not found');
           return;
         }
 
@@ -4686,13 +4726,13 @@
           g.setTimeout(function() {
             var dialog = _.q('.profile-unit .user-relation #favorite-preference');
             if (!dialog) {
-              _.log('[Error] fast_user_bookmark: favorite-preference not found');
+              _.error('fast_user_bookmark: favorite-preference not found');
               return;
             }
 
             var form = _.tag('form', dialog)[0];
             if (!form) {
-              _.log('[Error] fast_user_bookmark: form not found');
+              _.error('fast_user_bookmark: form not found');
               return;
             }
 
@@ -4700,7 +4740,7 @@
                 radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
 
             if (!radio) {
-              _.log('[Error] fast_user_bookmark: restrict input not found');
+              _.error('fast_user_bookmark: restrict input not found');
               return;
             }
 
@@ -4802,7 +4842,7 @@
     if (_.conf.general.stacc_link && _.conf.general.stacc_link !== 'nochange') {
       var stacc_anc;
       if (['all', 'mypixiv', 'favorite', 'self'].indexOf(_.conf.general.stacc_link) < 0) {
-        _.log('[Error] Invalid value - conf.genera.stacc_link=' + _.conf.general.stacc_link);
+        _.error('Invalid value - conf.genera.stacc_link=' + _.conf.general.stacc_link);
       } else if ((stacc_anc = _.q('.global-menu li.stacc a'))) {
         stacc_anc.href = '/stacc/my/home/' + _.conf.general.stacc_link + '/all';
       }
@@ -4850,12 +4890,12 @@
           var confirmed = w.confirm(msg);
           waiting_confirmation = false; // workaround for chromium
           if (!confirmed) {
-            _.dbg('rating cancelled');
+            _.debug('rating cancelled');
             return;
           }
         }
 
-        _.dbg('send rating');
+        _.debug('send rating');
         w.pixiv.rating.rate = rate; // workaround for firefox
         rate_apply.apply(w.pixiv.rating, arguments);
         _.illust.unload(_.popup.illust);
