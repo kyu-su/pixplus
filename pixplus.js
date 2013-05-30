@@ -5008,11 +5008,12 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
 #pp-popup-image-layout{display:block}\
-.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;height:100%;line-height:0px}\
+.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;bottom:0px;height:100%;line-height:0px}\
 .pp-popup-olc.pp-active:hover{opacity:0.6}\
 .pp-popup-olc svg{position:relative}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
-#pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0)}\
+#pp-popup-olc-prev{left:0px}\
+#pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
 #pp-popup-image-layout{display:inline-block;font-size:200%}\
 \
 /* bookmark */\
