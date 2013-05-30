@@ -341,17 +341,15 @@
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
     },
 
-    url: {
-      parse_query: function(query) {
-        var map = { };
-        query.substring(1).split('&').forEach(function(p) {
-          var pair = p.split('=', 2).map(function(t) {
-            return g.decodeURIComponent(t);
-          });
-          map[pair[0]] = pair[1] || '';
+    parse_query: function(query) {
+      var map = { };
+      query.substring(1).split('&').forEach(function(p) {
+        var pair = p.split('=', 2).map(function(t) {
+          return g.decodeURIComponent(t);
         });
-        return map;
-      }
+        map[pair[0]] = pair[1] || '';
+      });
+      return map;
     },
 
     workaround: {
@@ -2136,7 +2134,7 @@
       if (!(re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
         return null;
       }
-      var query = _.url.parse_query(re[1]);
+      var query = _.parse_query(re[1]);
       if (query.illust_id) {
         query.illust_id = g.parseInt(query.illust_id, 10);
       }
@@ -4827,7 +4825,7 @@
         var re;
         if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/.exec(link.href))) {
           if (re[1]) {
-            var query = _.url.parse_query(re[1]);
+            var query = _.parse_query(re[1]);
             if (!query.id && !query.rest) {
               link.href += '&rest=hide';
             }
@@ -4849,7 +4847,7 @@
 
     var page_procs = _.page_procs[w.location.pathname];
     if (page_procs) {
-      var query = _.url.parse_query(w.location.search);
+      var query = _.parse_query(w.location.search);
       page_procs.forEach(function(func) {
         func(query);
       });
