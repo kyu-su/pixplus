@@ -342,8 +342,6 @@
     },
 
     url: {
-      sprite: 'http://source.pixiv.net/source/images/sprite-2nd.png?20120528',
-
       parse_query: function(query) {
         var map = { };
         query.substring(1).split('&').forEach(function(p) {
@@ -2197,7 +2195,7 @@
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
       dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
-      dom.author_status     = _.e('img', {id: 'pp-popup-author-status'}, dom.info);
+      dom.author_status     = _.e('img', {id: 'pp-popup-author-status', cls: 'pp-sprite'}, dom.info);
       dom.datetime          = _.e('div', {id: 'pp-popup-date'}, dom.info);
       dom.size_tools        = _.e('div', {id: 'pp-popup-size-tools'}, dom.info);
       dom.size              = _.e('span', {id: 'pp-popup-size'}, dom.info);
@@ -2641,22 +2639,18 @@
       });
 
       if (_.conf.popup.author_status_icon) {
-        var cls;
-
         [
           ['fav', 'pp-fav'],
           ['fav_m', 'pp-fav-m'],
           ['mypix', 'pp-mypix']
         ].forEach(function(p) {
           if (illust['author_' + p[0]]) {
-            cls = p[1];
+            dom.author_status.classList.add(p[1]);
+            dom.author_status.classList.remove('pp-hide');
+          } else {
+            dom.author_status.classList.remove(p[1]);
           }
         });
-
-        if (cls) {
-          dom.author_status.className = cls;
-          dom.author_status.classList.remove('pp-hide');
-        }
       }
 
       if (illust.author_image) {
@@ -4968,6 +4962,7 @@
 
   _.css = [
     '.pp-hide{display:none}',
+    '.pp-sprite{background-image:url("http://source.pixiv.net/source/images/sprites-s001ad680da.png")}',
     // popup
     '#pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}',
     '#pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}',
@@ -4999,12 +4994,11 @@
     '#pp-popup-info{padding-bottom:0.1em}',
     '#pp-popup-author-image{max-height:3.2em;float:left;border:1px solid #aaa;margin-right:0.2em}',
     '#pp-popup-author-image:hover{max-height:none}',
-    '#pp-popup-author-status{position:absolute;left:2px;margin-top:2px;',
-    'background-image:url("', _.url.sprite, '")}',
+    '#pp-popup-author-status{position:absolute;left:2px;margin:2px}',
     '#pp-popup-author-status:not(.pp-hide){display:inline-block}',
-    '#pp-popup-author-status.pp-fav{width:14px;height:14px;background-position:-200px -320px}',
-    '#pp-popup-author-status.pp-fav-m{width:16px;height:14px;background-position:-200px -480px}',
-    '#pp-popup-author-status.pp-mypix{width:14px;height:16px;background-position:0px -360px}',
+    '#pp-popup-author-status.pp-fav{width:14px;height:14px;background-position:-53px 0px}',
+    '#pp-popup-author-status.pp-fav-m{width:16px;height:16px;background-position:-116px -20px}',
+    '#pp-popup-author-status.pp-mypix{width:16px;height:16px;background-position:-139px -56px}',
     '#pp-popup-author-image:hover~#pp-popup-author-status{display:none}',
     '#pp-popup-tools{margin-left:0.6em}',
     '#pp-popup-tools a{margin-right:0.6em}',
