@@ -2267,7 +2267,7 @@
 
       var that = this;
 
-      var scale = 1, natural_sizes, dom = this.dom;
+      var natural_sizes, dom = this.dom;
 
       natural_sizes = this.images.map(function(img) {
         return {width: img.naturalWidth, height: img.naturalHeight};
@@ -2286,7 +2286,10 @@
 
       // calculate scale
 
-      var aspect_ratio = total_width / total_height;
+      var scale = 1,
+          update_scale = false,
+          aspect_ratio = total_width / total_height;
+
       if (aspect_ratio < 1) {
         aspect_ratio = 1 / aspect_ratio;
       }
@@ -2300,9 +2303,22 @@
             this.resize_mode = this.FIT_LONG;
           }
         }
+        update_scale = true;
+      }
 
+      // update resize mode indicator
+
+      dom.resize_mode.textContent = '[' + 'LSO'[this.resize_mode] + ']';
+      if (this.resize_mode === this.FIT_LONG) {
+        dom.resize_mode.classList.add('pp-hide');
+      } else {
+        dom.resize_mode.classList.remove('pp-hide');
+      }
+
+      if (update_scale) {
         if (this.resize_mode === this.FIT_LONG) {
           scale = g.Math.min(max_width / total_width, max_height / total_height, 1);
+
         } else {
           var scroll_x = false, scroll_y = false;
           this.update_scrollbar_size();
@@ -2349,7 +2365,7 @@
       // apply scale
 
       this.images.forEach(function(img, idx) {
-        img.style.height = g.Math.floor(natural_sizes[idx].height * scale) + 'px';
+        img.style.height = g.Math.round(natural_sizes[idx].height * scale) + 'px';
       });
       this.scale = scale;
 
@@ -2398,15 +2414,6 @@
       }
 
       dom.size.textContent = size_text;
-
-      // update resize mode indicator
-
-      dom.resize_mode.textContent = '[' + 'LSO'[this.resize_mode] + ']';
-      if (this.resize_mode === this.FIT_LONG) {
-        dom.resize_mode.classList.add('pp-hide');
-      } else {
-        dom.resize_mode.classList.remove('pp-hide');
-      }
     },
 
     calculate_max_content_size: function(content) {
@@ -2472,8 +2479,6 @@
             mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
         dom.image_layout.style.marginLeft = g.Math.max(g.Math.floor(mh / 2), 0) + 'px';
         dom.image_layout.style.marginTop  = g.Math.max(g.Math.floor(mv / 2), 0) + 'px';
-
-        dom.header.style.width = dom.image_wrapper.offsetWidth + 'px';
 
         var header_height = dom.image_wrapper.offsetHeight;
         if (!this.comment.enable) {
@@ -4971,7 +4976,8 @@
     '#pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}',
     '#pp-popup-resize-mode{cursor:pointer}',
     '#pp-popup-status{color:#888}',
-    '#pp-popup-header{position:absolute;background-color:#fff;line-height:1.1em;z-index:20001}',
+    '#pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;',
+    'background-color:#fff;line-height:1.1em;z-index:20001}',
     '#pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}',
     '.pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}',
     '#pp-popup-caption-wrapper{overflow-y:auto}',
