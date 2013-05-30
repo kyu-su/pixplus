@@ -171,15 +171,19 @@
       return obj;
     },
 
-    listen: function(context, events, listener, throttling) {
+    listen: function(context, events, listener, options) {
       var throttling_timer;
+
+      if (!options) {
+        options = {};
+      }
 
       if (!g.Array.isArray(events)) {
         events = [events];
       }
 
       var wrapper = function(ev) {
-        if (throttling) {
+        if (options.async) {
           if (throttling_timer) {
             return;
           }
@@ -203,28 +207,28 @@
             return;
           }
           events.forEach(function(event) {
-            context.removeEventListener(event, wrapper, false);
+            context.removeEventListener(event, wrapper, !!options.capture);
           });
           connection.disconnected = true;
         }
       };
 
       events.forEach(function(event) {
-        context.addEventListener(event, wrapper, false);
+        context.addEventListener(event, wrapper, !!options.capture);
       });
       return connection;
     },
 
-    onclick: function(context, listener) {
+    onclick: function(context, listener, options) {
       return _.listen(context, 'click', function(ev, connection) {
         if (ev.button !== 0 || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.metaKey) {
           return false;
         }
         return listener(ev, connection);
-      });
+      }, options);
     },
 
-    onwheel: function(context, listener) {
+    onwheel: function(context, listener, options) {
       return _.listen(
         context,
         ['DOMMouseScroll', 'mousewheel'],
@@ -233,7 +237,8 @@
             return false;
           }
           return listener(ev, connection);
-        }
+        },
+        options
       );
     },
 
@@ -1744,7 +1749,7 @@
       this.root = root;
       this.update();
 
-      _.listen(this.root, 'DOMNodeInserted', this.update, true);
+      _.listen(this.root, 'DOMNodeInserted', this.update, {async: true});
     },
 
     parse_medium_html: function(illust, html) {
@@ -2227,7 +2232,7 @@
         if (that.running) {
           that.adjust();
         }
-      }, true);
+      }, {async: true});
 
       dom.created = true;
     },
@@ -2502,7 +2507,6 @@
           dom.olc_prev.style.width = olc_width + 'px';
           dom.olc_next.style.width = olc_width + 'px';
 
-          dom.olc_prev.style.left = dom.image_scroller.clientLeft + 'px';
           dom.olc_next.style.left =
             (dom.image_scroller.clientLeft + dom.image_scroller.clientWidth - olc_width) + 'px';
 
@@ -4415,8 +4419,8 @@
         inst.init();
       });
 
-      _.listen(w, 'scroll', _.Floater.update_float, true);
-      _.listen(w, 'resize', _.Floater.update_height, true);
+      _.listen(w, 'scroll', _.Floater.update_float, {async: true});
+      _.listen(w, 'resize', _.Floater.update_height, {async: true});
       _.Floater.initialized = true;
     },
 
@@ -4472,7 +4476,7 @@
             return;
           }
           that.centerize();
-        }, true);
+        }, {async: true});
 
         _.key.listen(w, function(key, ev, connection) {
           if (!that.dom.root.parentNode) {
