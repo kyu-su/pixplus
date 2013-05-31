@@ -2843,15 +2843,15 @@
       }
     },
 
-    illust_can_scroll: function() {
+    can_scroll: function() {
       return this.illust_can_scroll_vertically() || this.illust_can_scroll_horizontally();
     },
 
-    illust_can_scroll_vertically: function() {
+    can_scroll_vertically: function() {
       return this.dom.image_scroller.scrollHeight > this.dom.image_scroller.clientHeight;
     },
 
-    illust_can_scroll_horizontally: function() {
+    can_scroll_horizontally: function() {
       return this.dom.image_scroller.scrollWidth > this.dom.image_scroller.clientWidth;
     }
   });
@@ -3424,7 +3424,22 @@
     }
   });
 
-  _.popup.input = _.mod({
+  _.popup.input = _.mod((function(mod) {
+
+    for(var i = 1; i <= 10; ++i) {
+      mod['rate' + (i <= 9 ? '0' : '') + i] = (function(i) {
+        return function() {
+          if (_.conf.popup.rate_key) {
+            _.popup.send_rate(i);
+            return true;
+          }
+          return false;
+        };
+      })(i);
+    }
+
+    return mod;
+  })({
     wheel_delta: 0,
 
     init: function() {
@@ -3449,41 +3464,86 @@
       _.popup.mouse.init();
     },
 
+    /*
+     * direction
+     *   0: vertical
+     *   1: horizontal
+     *   2: vertical(prior) or horizontal
+     */
+    scroll: function(elem, direction, offset) {
+      var prop, page, max, value;
+
+      if (direction === 2) {
+        if (elem.scrollHeight > elem.clientHeight) {
+          direction = 0;
+        } else if (elem.scrollWidth > elem.clientWidth) {
+          direction = 1;
+        } else {
+          return false;
+        }
+      }
+
+      if (direction === 0) {
+        prop = 'scrollTop';
+        page = elem.clientHeight;
+        max = elem.scrollHeight - page;
+      } else if (direction === 1) {
+        prop = 'scrollLeft';
+        page = elem.clientWidth;
+        max = elem.scrollWidth - page;
+      } else {
+        return false;
+      }
+
+      if (offset > -1 && offset < 1) {
+        offset = g.Math.floor(page * offset);
+      }
+
+      value = g.Math.min(g.Math.max(0, elem[prop] + offset), max);
+      if (value !== elem[prop]) {
+        elem[prop] = value;
+        return true;
+      }
+
+      return false;
+    },
+
     prev: function() {
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page - 1);
-        return;
+      } else {
+        _.popup.show(_.popup.illust[this.reverse ? 'next' : 'prev']);
       }
-      _.popup.show(_.popup.illust[this.reverse ? 'next' : 'prev']);
+      return true;
     },
 
     next: function() {
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page + 1);
-        return;
-      } else if (this.auto_manga
-                 && _.popup.illust.manga.enable
-                 && !_.popup.illust.manga.viewed) {
+      } else if (this.auto_manga && _.popup.illust.manga.enable && !_.popup.illust.manga.viewed) {
         _.popup.manga.start();
-        return;
+      } else {
+        _.popup.show(_.popup.illust[this.reverse ? 'prev' : 'next']);
       }
-      _.popup.show(_.popup.illust[this.reverse ? 'prev' : 'next']);
+      return true;
     },
 
     prev_direction: function() {
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page - 1);
-        return;
+      } else {
+        _.popup.show(_.popup.illust.prev);
       }
-      _.popup.show(_.popup.illust.prev);
+      return true;
     },
 
     next_direction: function() {
       if (_.popup.manga.enable) {
         _.popup.manga.show(_.popup.manga.page + 1);
-        return;
+      } else {
+        _.popup.show(_.popup.illust.next);
       }
-      _.popup.show(_.popup.illust.next);
+      return true;
     },
 
     first: function() {
@@ -3492,6 +3552,7 @@
       } else {
         _.popup.show(_.illust.list[0]);
       }
+      return true;
     },
 
     last: function() {
@@ -3500,61 +3561,57 @@
       } else {
         _.popup.show(_.illust.list[_.illust.list.length - 1]);
       }
+      return true;
     },
 
     caption_scroll_up: function() {
-      _.popup.dom.caption_wrapper.scrollTop -= _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.caption_wrapper, 0, -_.conf.popup.scroll_height);
     },
 
     caption_scroll_down: function() {
-      _.popup.dom.caption_wrapper.scrollTop += _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.caption_wrapper, 0, _.conf.popup.scroll_height);
     },
 
     illust_scroll_up: function() {
-      _.popup.dom.image_scroller.scrollTop -= _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.image_scroller, 0, -_.conf.popup.scroll_height);
     },
 
     illust_scroll_down: function() {
-      _.popup.dom.image_scroller.scrollTop += _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.image_scroller, 0, _.conf.popup.scroll_height);
     },
 
     illust_scroll_left: function() {
-      _.popup.dom.image_scroller.scrollLeft -= _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.image_scroller, 1, -_.conf.popup.scroll_height);
     },
 
     illust_scroll_right: function() {
-      _.popup.dom.image_scroller.scrollLeft += _.conf.popup.scroll_height;
+      return this.scroll(_.popup.dom.image_scroller, 1, _.conf.popup.scroll_height);
     },
 
     illust_scroll_top: function() {
       _.popup.dom.image_scroller.scrollTop = 0;
       _.popup.dom.image_scroller.scrollLeft = 0;
+      return true;
     },
 
     illust_scroll_bottom: function() {
       _.popup.dom.image_scroller.scrollTop = _.popup.dom.image_scroller.scrollHeight;
       _.popup.dom.image_scroller.scrollLeft = _.popup.dom.image_scroller.scrollWidth;
+      return true;
     },
 
     illust_page_up: function() {
-      if (_.popup.illust_can_scroll_vertically()) {
-        _.popup.dom.image_scroller.scrollTop -= _.popup.dom.image_scroller.clientHeight * 0.8;
-      } else {
-        _.popup.dom.image_scroller.scrollLeft -= _.popup.dom.image_scroller.clientWidth * 0.8;
-      }
+      return this.scroll(_.popup.dom.image_scroller, 2, -0.8);
     },
 
     illust_page_down: function() {
-      if (_.popup.illust_can_scroll_vertically()) {
-        _.popup.dom.image_scroller.scrollTop += _.popup.dom.image_scroller.clientHeight * 0.8;
-      } else {
-        _.popup.dom.image_scroller.scrollLeft += _.popup.dom.image_scroller.clientWidth * 0.8;
-      }
+      return this.scroll(_.popup.dom.image_scroller, 2, 0.8);
     },
 
     switch_resize_mode: function() {
+      var newval;
       if (_.popup.scale >= 1) {
-        _.popup.resize_mode = _.popup.FIT_LONG;
+        newval = _.popup.FIT_LONG;
       } else {
         var modes = ['FIT_LONG', 'FIT_SHORT', 'ORIGINAL'].map(function(name) {
           return _.popup[name];
@@ -3564,39 +3621,24 @@
         if (next < 0 || next >= modes.length) {
           next = 0;
         }
-        _.popup.resize_mode = modes[next];
+        newval = modes[next];
       }
-      _.popup.adjust();
-    },
-
-    open_profile: function() {
-      _.open(_.popup.dom.author_profile.href);
-    },
-
-    open_illust: function() {
-      _.open(_.popup.dom.author_works.href);
-    },
-
-    open_bookmark: function() {
-      _.open(_.popup.dom.author_bookmarks.href);
-    },
-
-    open_staccfeed: function() {
-      _.open(_.popup.dom.author_staccfeed.href);
-    },
-
-    open_response: function() {
-      if (_.popup.illust.has_image_response || _.popup.illust.image_response_to) {
-        _.open(_.popup.dom.button_response.href);
+      if (newval !== _.popup.resize_mode) {
+        _.popup.resize_mode = newval;
+        _.popup.adjust();
+        return true;
       }
+      return false;
     },
 
-    open_bookmark_detail: function() {
-      _.open(_.popup.illust.url_bookmark_detail);
+    close: function() {
+      _.popup.hide();
+      return true;
     },
 
     open: function() {
       _.open(_.popup.illust.url_medium);
+      return true;
     },
 
     open_big: function() {
@@ -3612,183 +3654,266 @@
       } else {
         _.open(_.popup.illust.image_url_big);
       }
+      return true;
+    },
+
+    open_profile: function() {
+      _.open(_.popup.dom.author_profile.href);
+      return true;
+    },
+
+    open_illust: function() {
+      _.open(_.popup.dom.author_works.href);
+      return true;
+    },
+
+    open_bookmark: function() {
+      _.open(_.popup.dom.author_bookmarks.href);
+      return true;
+    },
+
+    open_staccfeed: function() {
+      _.open(_.popup.dom.author_staccfeed.href);
+      return true;
+    },
+
+    open_response: function() {
+      if (_.popup.illust.has_image_response || _.popup.illust.image_response_to) {
+        _.open(_.popup.dom.button_response.href);
+        return true;
+      }
+      return false;
+    },
+
+    open_bookmark_detail: function() {
+      _.open(_.popup.illust.url_bookmark_detail);
+      return true;
     },
 
     open_manga_thumbnail: function() {
       _.open(_.popup.illust.url_manga + '#pp-manga-thumbnail');
+      return true;
+    },
+
+    reload: function() {
+      _.popup.reload();
+      return true;
+    },
+
+    caption_toggle: function() {
+      _.popup.toggle_caption();
+      return true;
+    },
+
+    comment_toggle: function() {
+      _.popup.comment.toggle();
+      return true;
     },
 
     // manga mode
 
-    manga_open_page: function() {
-      var hash = '';
-      if (_.popup.manga.enable) {
-        hash = '#pp-manga-page-' + _.popup.manga.page;
+    manga_start: function() {
+      if (_.popup.illust.manga.enable && !_.popup.manga.enable) {
+        _.popup.manga.start();
+        return true;
       }
-      _.open(_.popup.illust.url_manga + hash);
+      return false;
+    },
+
+    manga_end: function() {
+      if (_.popup.manga.enable) {
+        _.popup.manga.end();
+        return true;
+      }
+      return false;
+    },
+
+    manga_open_page: function() {
+      if (_.popup.manga.enable) {
+        var hash = '';
+        if (_.popup.manga.enable) {
+          hash = '#pp-manga-page-' + _.popup.manga.page;
+        }
+        _.open(_.popup.illust.url_manga + hash);
+        return true;
+      }
+      return false;
+    },
+
+    // question mode
+    qrate_start: function() {
+      if (!_.popup.question.enabled()) {
+        _.popup.question.start();
+        return true;
+      }
+      return false;
+    },
+
+    qrate_end: function() {
+      if (_.popup.question.enabled()) {
+        _.popup.question.end();
+        return true;
+      }
+      return false;
+    },
+
+    qrate_submit: function() {
+      if (_.popup.question.enabled()) {
+        _.popup.question.submit();
+        return true;
+      }
+      return false;
+    },
+
+    qrate_select_prev: function() {
+      if (_.popup.question.enabled()) {
+        _.popup.question.select_prev();
+        return true;
+      }
+      return false;
+    },
+
+    qrate_select_next: function() {
+      if (_.popup.question.enabled()) {
+        _.popup.question.select_next();
+        return true;
+      }
+      return false;
+    },
+
+    // bookmark mode
+
+    bookmark_start: function() {
+      _.popup.bookmark.start();
+      return true;
+    },
+
+    bookmark_end: function() {
+      if (_.popup.bookmark.enable) {
+        _.popup.bookmark.end();
+        return true;
+      }
+      return false;
+    },
+
+    bookmark_submit: function() {
+      if (_.popup.bookmark.enable) {
+        _.popup.bookmark.submit();
+        return true;
+      }
+      return false;
+    },
+
+    // tag edit mode
+
+    tag_edit_start: function() {
+      if (!_.popup.tagedit.enable) {
+        _.popup.tagedit.start();
+        return true;
+      }
+      return false;
+    },
+
+    tag_edit_end: function() {
+      if (_.popup.tagedit.enable) {
+        _.popup.tagedit.end();
+        return true;
+      }
+      return false;
     }
-  });
+  }));
 
   _.popup.key = _.mod({
-    maps: [
-      {
-        cond: function() {
-          return _.popup.bookmark.enable;
-        },
-        stop: true,
-        keys: [
-          ['bookmark_submit', _.popup.bookmark.submit],
-          ['bookmark_end', _.popup.bookmark.end]
-        ]
-      }, {
-        cond: function() {
-          return _.popup.manga.enable;
-        },
-        keys: [
-          'manga_open_page',
-          ['manga_end', _.popup.manga.end]
-        ]
-      }, {
-        cond: function() {
-          return _.popup.illust.manga.enable && !_.popup.manga.enable;
-        },
-        keys: [
-          ['manga_start', _.popup.manga.start]
-        ]
-      }, {
-        cond: function() {
-          return !_.popup.question.enabled();
-        },
-        keys: [
-          ['qrate_start', _.popup.question.start]
-        ]
-      }, {
-        cond: _.popup.question.enabled,
-        keys: [
-          ['qrate_select_prev', _.popup.question.select_prev],
-          ['qrate_select_next', _.popup.question.select_next],
-          ['qrate_submit', _.popup.question.submit],
-          ['qrate_end', _.popup.question.end]
-        ]
-      }, {
-        cond: function() {
-          return !_.popup.tagedit.enable;
-        },
-        keys: [
-          ['tag_edit_start', _.popup.tagedit.start]
-        ]
-      }, {
-        cond: function() {
-          return _.popup.tagedit.enable;
-        },
-        keys: [
-          ['tag_edit_end', _.popup.tagedit.end]
-        ]
-      }, {
-        cond: function() {
-          return _.conf.popup.rate_key;
-        },
-        keys: [
-          ['rate01', _.popup.send_rate, 1],
-          ['rate02', _.popup.send_rate, 2],
-          ['rate03', _.popup.send_rate, 3],
-          ['rate04', _.popup.send_rate, 4],
-          ['rate05', _.popup.send_rate, 5],
-          ['rate06', _.popup.send_rate, 6],
-          ['rate07', _.popup.send_rate, 7],
-          ['rate08', _.popup.send_rate, 8],
-          ['rate09', _.popup.send_rate, 9],
-          ['rate10', _.popup.send_rate, 10]
-        ]
-      }, {
-        cond: function() {
-          return _.popup.illust_can_scroll_vertically();
-        },
-        keys: [
-          'illust_scroll_up',
-          'illust_scroll_down'
-        ]
-      }, {
-        cond: function() {
-          return _.popup.illust_can_scroll_horizontally();
-        },
-        keys: [
-          'illust_scroll_left',
-          'illust_scroll_right'
-        ]
-      }, {
-        cond: function() {
-          return _.popup.illust_can_scroll();
-        },
-        keys: [
-          'illust_scroll_top',
-          'illust_scroll_bottom',
-          'illust_page_up',
-          'illust_page_down'
-        ]
-      }, {
-        cond: function() {
-          return true;
-        },
-        keys: [
-          'prev',
-          'next',
-          'prev_direction',
-          'next_direction',
-          'caption_scroll_up',
-          'caption_scroll_down',
-          'first',
-          'last',
-          'switch_resize_mode',
-          ['close', _.popup.hide],
-          'open_profile',
-          'open_illust',
-          'open_bookmark',
-          'open_staccfeed',
-          'open_response',
-          ['bookmark_start', _.popup.bookmark.start],
-          'open_bookmark_detail',
-          'open',
-          'open_big',
-          ['reload', _.popup.reload],
-          ['caption_toggle', _.popup.toggle_caption],
-          ['comment_toggle', _.popup.comment.toggle],
-          'open_manga_thumbnail'
-        ]
-      }
+    keys: [
+      'bookmark_submit',
+      'bookmark_end',
+
+      function() {
+        return _.popup.bookmark.enable;
+      },
+
+      'qrate_start',
+      'qrate_end',
+      'qrate_submit',
+      'qrate_select_prev',
+      'qrate_select_next',
+
+      'illust_scroll_up',
+      'illust_scroll_down',
+      'illust_scroll_left',
+      'illust_scroll_right',
+      'illust_scroll_top',
+      'illust_scroll_bottom',
+      'illust_page_up',
+      'illust_page_down',
+
+      'prev',
+      'next',
+      'prev_direction',
+      'next_direction',
+      'first',
+      'last',
+      'caption_scroll_up',
+      'caption_scroll_down',
+      'switch_resize_mode',
+      'close',
+
+      'rate01',
+      'rate02',
+      'rate03',
+      'rate04',
+      'rate05',
+      'rate06',
+      'rate07',
+      'rate08',
+      'rate09',
+      'rate10',
+
+      'open',
+      'open_big',
+      'open_profile',
+      'open_illust',
+      'open_bookmark',
+      'open_staccfeed',
+      'open_response',
+      'open_bookmark_detail',
+      'open_manga_thumbnail',
+      'bookmark_start',
+      'reload',
+      'caption_toggle',
+      'comment_toggle',
+
+      'manga_start',
+      'manga_end',
+      'manga_open_page',
+
+      'tag_edit_start',
+      'tag_edit_end'
     ],
 
     init: function(context) {
-      var maps = this.maps;
+      var that = this;
+
       _.key.listen(context || w, function(key, ev, connection) {
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
         }
 
-        for(var i = 0; i < maps.length; ++i) {
-          if (!maps[i].cond()) {
+        for(var i = 0; i < that.keys.length; ++i) {
+          var item = that.keys[i];
+
+          if (item instanceof g.Function) {
+            if (item()) {
+              break;
+            }
             continue;
           }
-          var keys = maps[i].keys;
 
-          for(var j = 0; j < keys.length; ++j) {
-            var action = keys[j], name, args = [];
-            if (g.Array.isArray(action)) {
-              args = action.slice(2);
-              name = action[0];
-              action = action[1];
-            } else {
-              name = action;
-              action = _.popup.input[name];
-            }
-            if (_.conf.key['popup_' + name].split(',').indexOf(key) >= 0) {
-              action.apply(null, args);
+          if (_.conf.key['popup_' + item].split(',').indexOf(key) >= 0) {
+            var action = _.popup.input[item];
+            if (action()) {
               return true;
             }
-          }
-
-          if (maps[i].stop) {
-            break;
           }
         }
 
@@ -3882,8 +4007,8 @@
          * https://developer.mozilla.org/en/docs/DOM/MouseScrollEvent
          */
 
-        if (((ev.wheelDeltaX || ev.axis === 1) && _.popup.illust_can_scroll_horizontally()) ||
-            ((ev.wheelDeltaY || ev.axis === 2) && _.popup.illust_can_scroll_vertically())) {
+        if (((ev.wheelDeltaX || ev.axis === 1) && _.popup.can_scroll_horizontally()) ||
+            ((ev.wheelDeltaY || ev.axis === 2) && _.popup.can_scroll_vertically())) {
           ev.stopPropagation();
         }
         return false;
@@ -5201,7 +5326,7 @@ text-align:center;background-color:#eee}\
       {"key": "popup_illust_scroll_top", "value": "Home"},
       {"key": "popup_illust_scroll_bottom", "value": "End"},
       {"key": "popup_illust_page_up", "value": "PageUp"},
-      {"key": "popup_illust_page_down", "value": "PageDown"},
+      {"key": "popup_illust_page_down", "value": "PageDown,Space"},
       {"key": "popup_switch_resize_mode", "value": "w"},
       {"key": "popup_open", "value": "Shift+f"},
       {"key": "popup_open_big", "value": "f"},
