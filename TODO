@@ -1,2 +1,1 @@
-* 縦スクロールバーが出ていて、 #pp-popup-title の幅が画像よりも大きいとき、 #pp-popup-image-scroller のサイズ計算が変になる。
 * [Firefox/Chrome] スクロールバーが出てるとき、 .pp-popup-olc 上でホイール操作によってスクロールできない。

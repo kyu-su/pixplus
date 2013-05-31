@@ -2346,17 +2346,22 @@
             }
           }
 
+          image_scroller.style.maxWidth  = max_width  + 'px';
+          image_scroller.style.maxHeight = max_height + 'px';
+
           if (scroll_x) {
-            image_scroller.style.height =
-              g.Math.min(max_height, total_height + this.scrollbar_height) + 'px';
+            if (total_height + this.scrollbar_height > max_height) {
+              image_scroller.style.height = max_height + 'px';
+            }
             image_scroller.style.maxWidth  = max_width  + 'px';
             image_scroller.style.overflowX = 'auto';
             image_scroller.style['overflow-x'] = 'auto';
           }
 
           if (scroll_y) {
-            image_scroller.style.width =
-              g.Math.min(max_width, total_width + this.scrollbar_width) + 'px';
+            if (total_width + this.scrollbar_width > max_width) {
+              image_scroller.style.width = max_width + 'px';
+            }
             image_scroller.style.maxHeight = max_height + 'px';
             image_scroller.style.overflowY = 'auto';
             image_scroller.style['overflow-y'] = 'auto';
