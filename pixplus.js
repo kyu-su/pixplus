@@ -2340,7 +2340,8 @@
             // original
             if (total_width > max_width) {
               scroll_x = true;
-            } else if (total_height > max_height) {
+            }
+            if (total_height > max_height) {
               scroll_y = true;
             }
           }
@@ -2495,20 +2496,25 @@
           dom.caption_wrapper.style.height = caption_height + 'px';
         }
 
-        var olc_width = _.conf.popup.overlay_control;
-        if (olc_width <= 0) {
+        var width = _.conf.popup.overlay_control;
+        if (width <= 0) {
           dom.olc_prev.classList.remove('pp-active');
           dom.olc_next.classList.remove('pp-active');
         } else {
-          if (olc_width < 1) {
-            olc_width = g.Math.floor(dom.image_scroller.clientWidth * olc_width);
+          if (width < 1) {
+            width = g.Math.floor(dom.image_scroller.clientWidth * width);
           }
 
-          dom.olc_prev.style.width = olc_width + 'px';
-          dom.olc_next.style.width = olc_width + 'px';
+          // avoid overlap with scrollbar
 
-          dom.olc_next.style.left =
-            (dom.image_scroller.clientLeft + dom.image_scroller.clientWidth - olc_width) + 'px';
+          var height = dom.image_scroller.clientHeight;
+
+          dom.olc_prev.style.width  = width  + 'px';
+          dom.olc_next.style.width  = width  + 'px';
+          dom.olc_prev.style.height = height + 'px';
+          dom.olc_next.style.height = height + 'px';
+
+          dom.olc_next.style.right = this.scrollbar_width + 'px';
 
           this.adjust_olc_icon(dom.olc_prev_icon);
           this.adjust_olc_icon(dom.olc_next_icon, true);
@@ -5008,7 +5014,7 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
 #pp-popup-image-layout{display:block}\
-.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;bottom:0px;height:100%;line-height:0px}\
+.pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}\
 .pp-popup-olc.pp-active:hover{opacity:0.6}\
 .pp-popup-olc svg{position:relative}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
