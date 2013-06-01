@@ -1612,6 +1612,25 @@
         allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
       }
 
+      /*
+       *   http://i1.pixiv.net/img9/img/username/99999999_m.jpg
+       *   (Thumbnail; 2013-) http://i2.pixiv.net/img-inf/img/2013/01/23/01/23/45/99999999_0123abcdef_s.jpg?8888888888
+       *
+       *   2013/01/23/01/23/45: Probably, upload time (YYYY/MM/DD/HH/MM/SS; JST?)
+       *   99999999: Illust id; Sequential number; /member_illust.php?mode=medium&illust_id=99999999
+       *   _0123abcdef: Random string; Added to limit anonymous access
+       *   _s: 'Small'; /mypage.php, /bookmark_new_illust.php, /new_illust.php, /member_illust.php?id=, etc...
+       *   _m: 'Medium'; /member_illust.php?mode=medium&illust_id=99999999
+       *   _100: 100x100 (fit); Showcase, beside of illust list; /search.php; "注目の企画目録"; /user_event.php
+       *   _128x128: 128x128 (cropped); Ranking Calendar; /ranking_log.php
+       *   _240ms: 240x240 (fit); /stacc
+       *   _240mw: 240x (fit width); /tags.php
+       *   _p0: Manga first page (might be scaled); _p0, _p1, p2, ..., _p9, _p10, ...
+       *   _big_p0: Original size image of manga first page
+       *   ?8888888888: Added after resubmitted; Probably, unix-time
+       *
+       */
+
       var re;
       if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/.exec(url))) {
         return null;
