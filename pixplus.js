@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.6.4
+// @version     1.7.0
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
@@ -5693,8 +5693,8 @@ text-align:center;background-color:#eee}\
 
   _.changelog = [
     {
-      "date": "2013/05/xx",
-      "version": "1.6.4",
+      "date": "2013/06/xx",
+      "version": "1.7.0",
       "releasenote": "",
       "changes_i18n": {
         "en": [
