@@ -21,6 +21,5 @@
       "all_frames": true
     }
   ],
-  "permissions": ["http://www.pixiv.net/*"],
   "update_url": "http://crckyl.ath.cx/pixplus/update.php?browser=chrome&version=@VERSION@"
 }
