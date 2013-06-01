@@ -2186,7 +2186,7 @@
       dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
       dom.title_link        = _.e('a', null, dom.title);
       dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
-      dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.root);
+      dom.header            = _.e('div', {id: 'pp-popup-header', cls: 'pp-hide'}, dom.root);
       dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
@@ -2708,9 +2708,12 @@
       } else {
         dom.image_layout.href = illust.image_url_big;
       }
-      this.set_images([(_.conf.popup.big_image && illust.image_big) || !illust.image_medium
-                       ? illust.image_big
-                       : illust.image_medium]);
+
+      if ((_.conf.popup.big_image && illust.image_big) || !illust.image_medium) {
+        this.set_images([illust.image_big]);
+      } else {
+        this.set_images([illust.image_medium]);
+      }
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -2727,6 +2730,8 @@
           w.pixiv.context.hasQuestionnaire = false;
         }
       } catch(ex) { }
+
+      this.dom.header.classList.remove('pp-hide');
 
       this.set_status('');
       this.adjust(true);
@@ -2809,6 +2814,7 @@
         dom.root.parentNode.removeChild(dom.root);
       }
       this.clear();
+      this.dom.header.classList.add('pp-hide');
       this.running = false;
     },
 
