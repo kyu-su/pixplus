@@ -1618,11 +1618,11 @@
        *
        *   2013/01/23/01/23/45: Probably, upload time (YYYY/MM/DD/HH/MM/SS; JST?)
        *   99999999: Illust id; Sequential number; /member_illust.php?mode=medium&illust_id=99999999
-       *   _0123abcdef: Random string; Added to limit anonymous access
+       *   _0123abcdef: Random 10 characters ([0-9a-f]); Added to limit anonymous access
        *   _s: 'Small'; /mypage.php, /bookmark_new_illust.php, /new_illust.php, /member_illust.php?id=, etc...
        *   _m: 'Medium'; /member_illust.php?mode=medium&illust_id=99999999
        *   _100: 100x100 (fit); Showcase, beside of illust list; /search.php; "注目の企画目録"; /user_event.php
-       *   _128x128: 128x128 (cropped); Ranking Calendar; /ranking_log.php
+       *   _128x128: 128x128 (cropped); /ranking_log.php, /stacc
        *   _240ms: 240x240 (fit); /stacc
        *   _240mw: 240x (fit width); /tags.php
        *   _p0: Manga first page (might be scaled); _p0, _p1, p2, ..., _p9, _p10, ...
