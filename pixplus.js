@@ -1613,23 +1613,28 @@
       }
 
       var re;
-      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/img(?:\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/.exec(url))) {
+      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+)(\.\w+(?:\?.*)?)$/.exec(url))) {
         return null;
       }
 
-      if (allow_types.indexOf(re[3]) >= 0) {
-        var id = g.parseInt(re[2], 10), url_base = re[1] + re[2], url_suffix = re[4];
+      if (allow_types.indexOf(re[4]) >= 0) {
+        var id = g.parseInt(re[3], 10);
         if (id < 1) {
           return null;
         }
 
-        return {
-          id: id,
-          image_url_base: url_base,
-          image_url_suffix: url_suffix,
-          image_url_medium: url_base + '_m' + url_suffix,
-          image_url_big: url_base + url_suffix
-        };
+        if (re[2] === '-inf') {
+          return {id: id};
+        } else {
+          var url_base = re[1] + re[3], url_suffix = re[5];
+          return {
+            id: id,
+            image_url_base: url_base,
+            image_url_suffix: url_suffix,
+            image_url_medium: url_base + '_m' + url_suffix,
+            image_url_big: url_base + url_suffix
+          };
+        }
       }
       return null;
     },
