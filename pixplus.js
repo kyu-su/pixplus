@@ -4985,15 +4985,6 @@
       });
     }
 
-    if (_.conf.general.stacc_link && _.conf.general.stacc_link !== 'nochange') {
-      var stacc_anc;
-      if (['all', 'mypixiv', 'favorite', 'self'].indexOf(_.conf.general.stacc_link) < 0) {
-        _.error('Invalid value - conf.genera.stacc_link=' + _.conf.general.stacc_link);
-      } else if ((stacc_anc = _.q('.global-menu li.stacc a'))) {
-        stacc_anc.href = '/stacc/my/home/' + _.conf.general.stacc_link + '/all';
-      }
-    }
-
     var page_procs = _.page_procs[w.location.pathname];
     if (page_procs) {
       var query = _.parse_query(w.location.search);
@@ -5281,7 +5272,6 @@ text-align:center;background-color:#eee}\
       {"key": "debug", "value": false},
       {"key": "bookmark_hide", "value": false},
       {"key": "float_tag_list", "value": 1},
-      {"key": "stacc_link", "value": ""},
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
       {"key": "fast_user_bookmark", "value": 0},
@@ -5412,14 +5402,6 @@ text-align:center;background-color:#eee}\
           float_tag_list: {
             desc: 'Enable float view for tag list',
             hint: ['Disable', 'Enable']
-          },
-          stacc_link: {
-            desc: 'Change \'Stacc feed\' link',
-            hint: [{value: 'nochange', desc: 'Do not change'},
-                   {value: 'all', desc: 'All'},
-                   {value: 'favorite', desc: 'Favorite'},
-                   {value: 'mypixiv', desc: 'MyPixiv'},
-                   {value: 'self', desc: 'Self'}]
           },
           rate_confirm: 'Show confirmation dialog when rating',
           disable_effect: 'Disable UI animation',
@@ -5576,14 +5558,6 @@ text-align:center;background-color:#eee}\
           float_tag_list: {
             desc: '\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b',
             hint: ['\u7121\u52b9', '\u6709\u52b9']
-          },
-          stacc_link: {
-            desc: '\u4e0a\u90e8\u30e1\u30cb\u30e5\u30fc\u306e\u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148',
-            hint: [{value: 'nochange', desc: '\u5909\u66f4\u3057\u306a\u3044'},
-                   {value: 'all', desc: '\u3059\u3079\u3066'},
-                   {value: 'favorite', desc: '\u304a\u6c17\u306b\u5165\u308a'},
-                   {value: 'mypixiv', desc: '\u30de\u30a4\u30d4\u30af'},
-                   {value: 'self', desc: '\u3042\u306a\u305f'}]
           },
           rate_confirm: '\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b',
           disable_effect: '\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b',
