@@ -5325,7 +5325,7 @@ text-align:center;background-color:#eee}\
       {"key": "popup_illust_scroll_right", "value": "Right"},
       {"key": "popup_illust_scroll_top", "value": "Home"},
       {"key": "popup_illust_scroll_bottom", "value": "End"},
-      {"key": "popup_illust_page_up", "value": "PageUp"},
+      {"key": "popup_illust_page_up", "value": "PageUp,Backspace,a"},
       {"key": "popup_illust_page_down", "value": "PageDown,Space"},
       {"key": "popup_switch_resize_mode", "value": "w"},
       {"key": "popup_open", "value": "Shift+f"},
