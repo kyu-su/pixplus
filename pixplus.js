@@ -3899,6 +3899,8 @@
           return false;
         }
 
+        var cancel = false;
+
         for(var i = 0; i < that.keys.length; ++i) {
           var item = that.keys[i];
 
@@ -3911,13 +3913,14 @@
 
           if (_.conf.key['popup_' + item].split(',').indexOf(key) >= 0) {
             var action = _.popup.input[item];
+            cancel = true;
             if (action()) {
-              return true;
+              break;
             }
           }
         }
 
-        return false;
+        return cancel;
       });
     }
   });
