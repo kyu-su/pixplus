@@ -5323,7 +5323,7 @@ text-align:center;background-color:#eee}\
       {"key": "show_comment_form", "value": true},
       {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1},
-      {"key": "fit_short_threshold", "value": 5}
+      {"key": "fit_short_threshold", "value": 4}
     ]},
 
     {"name": "mypage", "items": [
