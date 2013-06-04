@@ -1622,11 +1622,12 @@
        *   _s: 'Small'; /mypage.php, /bookmark_new_illust.php, /new_illust.php, /member_illust.php?id=, etc...
        *   _m: 'Medium'; /member_illust.php?mode=medium&illust_id=99999999
        *   _100: 100x100 (fit); Showcase, beside of illust list; /search.php; "注目の企画目録"; /user_event.php
-       *   _128x128: 128x128 (cropped); /ranking_log.php, /stacc
-       *   _240ms: 240x240 (fit); /stacc
-       *   _240mw: 240x (fit width); /tags.php
+       *   _128x128: 128x128 (cropped, jpg); /ranking_log.php, /stacc
+       *   _240ms: 240x240 (fit, jpg); /stacc
+       *   _240mw: 240x (fit width, jpg); /tags.php
        *   _p0: Manga first page (might be scaled); _p0, _p1, p2, ..., _p9, _p10, ...
        *   _big_p0: Original size image of manga first page
+       *   _128x128_p0: Manga page thumbnail (cropped, jpg)
        *   ?8888888888: Added after resubmitted; Probably, unix-time
        *
        */
