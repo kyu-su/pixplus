@@ -2695,11 +2695,8 @@
       dom.datetime.textContent = datetime;
 
       illust.tools.forEach(function(tool) {
-        _.e(
-          'a',
-          {href: '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag', text: tool},
-          dom.tools
-        );
+        var url = '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag';
+        _.e('a', {href: url, text: tool}, dom.tools);
       });
 
       if (illust.author_id) {
