@@ -4802,7 +4802,7 @@
       w.location.reload();
     },
 
-    init: function() {
+    run: function() {
       var that = this;
 
       this.setup_item_actions();
@@ -4821,13 +4821,25 @@
     }
   });
 
-  _.page_procs = {
-    '/mypage.php': [
-      _.mypage.init
-    ],
+  _.pages = _.mod({
+    run: function() {
+      var re;
+      re = /^\/(\w+)\./.exec(w.location.pathname);
+      if (re && this[re[1]]) {
+        this[re[1]].run(_.parse_query(w.location.search));
+      }
+    },
 
-    '/member_illust.php': [
-      function() {
+    mypage: _.mypage,
+
+    member_illust: _.mod({
+      run: function(query) {
+        this.manga_thumbnail(query);
+        this.manga_medium(query);
+        this.fast_user_bookmark(query);
+      },
+
+      manga_thumbnail: function() {
         var re;
         if (w.location.hash === '#pp-manga-thumbnail') {
           var toggle_thumbnail = _.q('#toggle-thumbnail');
@@ -4839,7 +4851,7 @@
         }
       },
 
-      function(query) {
+      manga_medium: function(query) {
         if (query.mode !== 'medium' || !query.illust_id) {
           return;
         }
@@ -4862,7 +4874,7 @@
         }
       },
 
-      function(query) {
+      fast_user_bookmark: function(query) {
         if (query.illust_id) {
           return;
         }
@@ -4908,10 +4920,15 @@
           }, 10);
         });
       }
-    ],
+    }),
 
-    '/bookmark.php': [
-      function(query) {
+    bookmark: _.mod({
+      run: function(query) {
+        this.float_tag_list(query);
+        this.float_action_menu(query);
+      },
+
+      float_tag_list: function(query) {
         var bookmark_list, bookmark_list_ul;
         if (_.conf.bookmark.tag_order.length < 1 ||
             query.id ||
@@ -4957,7 +4974,9 @@
           }
         } catch(ex) { }
 
-      }, function(query) {
+      },
+
+      float_action_menu: function() {
         var form        = _.q('form[action*="bookmark_setting.php"]'),
             action_menu = _.q('.column-action-menu');
         if (form && action_menu) {
@@ -4969,19 +4988,28 @@
           });
         }
       }
-    ],
+    }),
 
-    '/search.php': [
-      function() {
-        var size_ul = _.q('#search-option ul>li>label>input[name="size"]');
-        if (size_ul) {
-          size_ul = size_ul.parentNode.parentNode.parentNode;
-        } else {
-          return;
-        }
+    search: _.mod({
+      run: function() {
+        var that = this;
+        ['size', 'radio'].forEach(function(name) {
+          var ul = _.q('#search-option ul>li>label>input[name="' + name + '"]');
+          if (!ul) {
+            return;
+          }
+          ul = ul.parentNode.parentNode.parentNode;
 
+          var li    = _.e('li', {id: 'pp-search-' + name + '-custom'}, ul),
+              radio = _.e('input', {type: 'radio', name: name}, _.e('label', null, li));
+
+          that[name](ul, li, radio);
+        });
+      },
+
+      size: function(ul, li, radio) {
         w.pixiv.search.parseSizeOption = function(value) {
-	  var size = (value || '').split('-', 2).map(function(p) {
+          var size = (value || '').split('-', 2).map(function(p) {
             return p.split('x');
           });
 
@@ -4992,15 +5020,13 @@
               wgt = max[0] || null,
               hgt = max[1] || wgt;
 
-	  return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
+          return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
         };
 
-        var li    = _.e('li', {id: 'pp-search-size-custom'}, size_ul),
-	    radio = _.e('input', {type: 'radio', name: 'size'}, _.e('label', null, li)),
-	    wlt	  = _.e('input', {type: 'text'}, li),
-	    hlt	  = _.e('input', {type: 'text'}, li),
-	    wgt	  = _.e('input', {type: 'text'}, li),
-	    hgt	  = _.e('input', {type: 'text'}, li);
+        var wlt	  = _.e('input', {type: 'text'}, li),
+            hlt	  = _.e('input', {type: 'text'}, li),
+            wgt	  = _.e('input', {type: 'text'}, li),
+            hgt	  = _.e('input', {type: 'text'}, li);
 
         [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
           p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
@@ -5009,12 +5035,12 @@
         _.listen([wlt, hlt, wgt, hgt], 'input', function(ev) {
           radio.value = wlt.value + 'x' + hlt.value + '-' + wgt.value + 'x' + hgt.value;
         });
+      },
 
-      }, function() {
-        // ratio = (width - height) / min(width, height)
+      ratio: function(ul, li, radio) {
       }
-    ]
-  };
+    })
+  });
 
   _.setup_ready = function() {
     _.lang.setup();
@@ -5039,13 +5065,7 @@
       });
     }
 
-    var page_procs = _.page_procs[w.location.pathname];
-    if (page_procs) {
-      var query = _.parse_query(w.location.search);
-      page_procs.forEach(function(func) {
-        func(query);
-      });
-    }
+    _.pages.run(_.parse_query(w.location.search));
 
     _.Floater.auto_run(function() {
       var wrap = _.q('.ui-layout-west');
