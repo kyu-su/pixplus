@@ -171,11 +171,15 @@
       return obj;
     },
 
-    listen: function(context, events, listener, options) {
+    listen: function(targets, events, listener, options) {
       var throttling_timer;
 
       if (!options) {
         options = {};
+      }
+
+      if (!g.Array.isArray(targets)) {
+        targets = [targets];
       }
 
       if (!g.Array.isArray(events)) {
@@ -207,14 +211,18 @@
             return;
           }
           events.forEach(function(event) {
-            context.removeEventListener(event, wrapper, !!options.capture);
+            targets.forEach(function(target) {
+              target.removeEventListener(event, wrapper, !!options.capture);
+            });
           });
           connection.disconnected = true;
         }
       };
 
       events.forEach(function(event) {
-        context.addEventListener(event, wrapper, !!options.capture);
+        targets.forEach(function(target) {
+          target.addEventListener(event, wrapper, !!options.capture);
+        });
       });
       return connection;
     },
@@ -4984,6 +4992,50 @@
           });
         }
       }
+    ],
+
+    '/search.php': [
+      function() {
+        var size_ul = _.q('#search-option ul>li>label>input[name="size"]');
+        if (size_ul) {
+          size_ul = size_ul.parentNode.parentNode.parentNode;
+        } else {
+          return;
+        }
+
+        w.pixiv.search.parseSizeOption = function(value) {
+	  var size = (value || '').split('-', 2).map(function(p) {
+            return p.split('x');
+          });
+
+          var min = size[0] || [],
+              max = size[1] || [],
+              wlt = min[0] || null,
+              hlt = min[1] || wlt,
+              wgt = max[0] || null,
+              hgt = max[1] || wgt;
+
+	  return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
+        };
+
+        var li    = _.e('li', {id: 'pp-search-size-custom'}, size_ul),
+	    radio = _.e('input', {type: 'radio', name: 'size'}, _.e('label', null, li)),
+	    wlt	  = _.e('input', {type: 'text'}, li),
+	    hlt	  = _.e('input', {type: 'text'}, li),
+	    wgt	  = _.e('input', {type: 'text'}, li),
+	    hgt	  = _.e('input', {type: 'text'}, li);
+
+        [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
+          p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
+        });
+
+        _.listen([wlt, hlt, wgt, hgt], 'input', function(ev) {
+          radio.value = wlt.value + 'x' + hlt.value + '-' + wgt.value + 'x' + hgt.value;
+        });
+
+      }, function() {
+        // ratio = (width - height) / min(width, height)
+      }
     ]
   };
 
@@ -5126,6 +5178,8 @@
   _.css = '\
 .pp-hide{display:none}\
 .pp-sprite{background-image:url("http://source.pixiv.net/source/images/sprites-s001ad680da.png")}\
+input.pp-flat-input{border:none}\
+input.pp-flat-input:not(:hover):not(:focus){background:transparent}\
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
 #pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}\
@@ -5286,6 +5340,9 @@ text-align:center;background-color:#eee}\
 #pp-layout-preview li.pp-open{font-weight:bold;color:#444}\
 #pp-layout-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}\
 #pp-layout-preview li.pp-open div{display:block}\
+\
+/* search */\
+#pp-search-size-custom input[type="text"]{width:3em;padding:0px;height:auto;border:1px solid #eee}\
 \
 .pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}\
 .pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:2px solid #dae1e7}\
