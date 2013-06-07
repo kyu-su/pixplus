@@ -4991,23 +4991,30 @@
     }),
 
     search: _.mod({
-      run: function() {
+      run: function(query) {
         var that = this;
-        ['size', 'radio'].forEach(function(name) {
-          var ul = _.q('#search-option ul>li>label>input[name="' + name + '"]');
-          if (!ul) {
+        ['size', 'ratio'].forEach(function(name) {
+          var inputs = _.qa('#search-option ul>li>label>input[name="' + name + '"]');
+          if (!inputs.length) {
             return;
           }
-          ul = ul.parentNode.parentNode.parentNode;
+
+          var ul = inputs[0].parentNode.parentNode.parentNode;
 
           var li    = _.e('li', {id: 'pp-search-' + name + '-custom'}, ul),
-              radio = _.e('input', {type: 'radio', name: name}, _.e('label', null, li));
+              radio = _.e('input', {type: 'radio', name: name}, _.e('label', null, li)),
+              curr  = inputs.filter(function(i){return i.checked;})[0];
 
-          that[name](ul, li, radio);
+          if (!curr) {
+            radio.checked = true;
+          }
+
+          inputs.push(radio);
+          that[name](query, ul, li, radio, inputs);
         });
       },
 
-      size: function(ul, li, radio) {
+      size: function(query, ul, li, radio, inputs) {
         w.pixiv.search.parseSizeOption = function(value) {
           var size = (value || '').split('-', 2).map(function(p) {
             return p.split('x');
@@ -5023,21 +5030,81 @@
           return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
         };
 
-        var wlt	  = _.e('input', {type: 'text'}, li),
-            hlt	  = _.e('input', {type: 'text'}, li),
-            wgt	  = _.e('input', {type: 'text'}, li),
-            hgt	  = _.e('input', {type: 'text'}, li);
+        var wlt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
+            hlt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
+            wgt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
+            hgt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li);
 
         [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
           p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
         });
 
-        _.listen([wlt, hlt, wgt, hgt], 'input', function(ev) {
+        var update = function() {
           radio.value = wlt.value + 'x' + hlt.value + '-' + wgt.value + 'x' + hgt.value;
+        };
+
+        wlt.value = query.wlt || '';
+        hlt.value = query.hlt || '';
+        wgt.value = query.wgt || '';
+        hgt.value = query.hgt || '';
+        update();
+
+        _.listen([wlt, hlt, wgt, hgt], 'input', function() {
+          update();
+          radio.checked = true;
         });
       },
 
-      ratio: function(ul, li, radio) {
+      ratio: function(query, ul, li, radio, inputs) {
+        var range   = _.e('input', {type: 'range', min: -3, max: 3, step: 0.01}, li),
+            input   = _.e('input', {type: 'text', id: 'pp-search-ratio-custom-text'}, li),
+            preview = _.e('div', {id: 'pp-search-ratio-custom-preview'}, li),
+            pbox    = _.e('div', null, preview);
+
+        _.listen(inputs, 'change', function() {
+          preview.classList[radio.checked ? 'remove' : 'add']('pp-hide');
+        });
+
+        var update = function(ratio, set) {
+          if (typeof(ratio) !== 'number') {
+            return;
+          }
+
+          var width = 80, height = 80;
+
+          // ratio = (width - height) / min(width, height)
+          if (ratio > 0) {
+            // landscape
+            height = width / (ratio + 1);
+          } else {
+            // portrait
+            width = height / (1 - ratio);
+          }
+
+          preview.style.marginLeft = range.offsetLeft + 'px';
+
+          var pos = g.Math.max(0, g.Math.min((ratio + 3) / 6, 1)) * range.clientWidth;
+          pbox.style.width = width + 'px';
+          pbox.style.height = height + 'px';
+          pbox.style.marginLeft = pos - g.Math.floor(width / 2) + 'px';
+
+          radio.value = ratio;
+        };
+
+        update(g.parseFloat(query.ratio));
+        range.value = input.value = query.ratio;
+
+        _.listen(range, 'change', function() {
+          update(g.parseFloat(range.value));
+          input.value = range.value;
+          radio.checked = true;
+        });
+
+        _.listen(input, 'input', function() {
+          update(g.parseFloat(input.value));
+          range.value = input.value;
+          radio.checked = true;
+        });
       }
     })
   });
@@ -5339,7 +5406,13 @@ text-align:center;background-color:#eee}\
 #pp-layout-preview li.pp-open div{display:block}\
 \
 /* search */\
-#pp-search-size-custom input[type="text"]{width:3em;padding:0px;height:auto;border:1px solid #eee}\
+.pp-search-custom-input{width:3em;padding:0px !important;height:auto !important;border:1px solid #eee}\
+#pp-search-ratio-custom-text{width:3em;padding:0px;height:auto}\
+#pp-search-ratio-custom-preview{display:none}\
+input[type="range"]:active~#pp-search-ratio-custom-preview{display:block}\
+input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
+#pp-search-ratio-custom-preview{position:absolute}\
+#pp-search-ratio-custom-preview div{background-color:#ccc}\
 \
 .pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}\
 .pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:2px solid #dae1e7}\
