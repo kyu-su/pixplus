@@ -5025,6 +5025,28 @@
             new _.Floater(wrapper);
           });
         }
+
+        this.set_default_options(query);
+      },
+
+      set_default_options: function(query) {
+        var form = _.q('.header form[action="/search.php"]');
+
+        [
+          's_mode', 'order', 'scd',
+          'wlt', 'hlt', 'wgt', 'hgt',
+          'ratio', 'r18'
+        ].forEach(function(name) {
+          if (!query.hasOwnProperty(name)) {
+            return;
+          }
+
+          var input = _.q('input[name="' + name + '"]', form);
+          if (!input) {
+            input = _.e('input', {type: 'hidden', name: name}, form);
+          }
+          input.value = query[name];
+        });
       },
 
       size: function(query, ul, li, radio, inputs) {
