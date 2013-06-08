@@ -858,7 +858,7 @@
         return;
       }
 
-      this.lng = _.lang.current;
+      this.lng = _.lng;
       this.root = root;
       this.menu = menu;
 
@@ -1186,7 +1186,7 @@
       var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
       ['en', 'ja'].forEach(function(name) {
         _.onclick(_.e('button', {text: name}, langbar), function() {
-          that.lng = _.lang[name];
+          that.lng = _.i18n[name];
           that.dom.root.parentNode.removeChild(that.dom.root);
           that.dom = { };
           that.shown = false;
@@ -2686,7 +2686,7 @@
 
       var datetime = illust.datetime;
       if (illust.repost) {
-        var repost = _.lang.current.repost;
+        var repost = _.lng.repost;
         for(var key in illust.repost) {
           repost = repost.replace('$' + key, illust.repost[key]);
         }
@@ -2700,17 +2700,16 @@
       });
 
       if (illust.author_id) {
-        var lng = _.lang.current;
         dom.author_profile.href = '/member.php?id=' + illust.author_id;
         dom.author_profile.innerHTML = illust.author_name;
         dom.author_works.href = '/member_illust.php?id=' + illust.author_id;
-        dom.author_works.textContent = lng.author_works;
+        dom.author_works.textContent = _.lng.author_works;
         dom.author_bookmarks.href = '/bookmark.php?id=' + illust.author_id;
-        dom.author_bookmarks.textContent = lng.author_bookmarks;
+        dom.author_bookmarks.textContent = _.lng.author_bookmarks;
       }
       if (illust.author_staccfeed) {
         dom.author_staccfeed.href = illust.author_staccfeed;
-        dom.author_staccfeed.textContent = lng.author_staccfeed;
+        dom.author_staccfeed.textContent = _.lng.author_staccfeed;
       }
 
       if (illust.manga.enable) {
@@ -4291,7 +4290,7 @@
         return;
       }
 
-      var starter = _.e('button', {text: _.lang.current.associate_tags,
+      var starter = _.e('button', {text: _.lng.associate_tags,
                                    cls: 'btn_type03', css: 'float:right'});
       first_tag_list.insertBefore(starter, first_tag_list.firstChild);
 
@@ -4356,13 +4355,13 @@
       });
 
       var start = function() {
-        starter.textContent = _.lang.current.cancel;
+        starter.textContent = _.lng.cancel;
         root.classList.add('pp-associate-tag');
         tag1 = tag2 = null;
       };
 
       var end = function() {
-        starter.textContent = _.lang.current.associate_tags;
+        starter.textContent = _.lng.associate_tags;
         root.classList.remove('pp-associate-tag');
       };
 
@@ -4618,13 +4617,13 @@
         _.onclick(_.e('span', {text: '\u00d7', css: 'cursor:pointer'}, this.dom.header), function() {
           that.hide();
         });
-        _.e('h2', {text: _.lang.current.mypage_layout_history}, this.dom.header);
+        _.e('h2', {text: _.lng.mypage_layout_history}, this.dom.header);
 
         var row = this.dom.table.insertRow(-1);
         this.dom.list = _.e('ul', {id: 'pp-layout-history'}, row.insertCell(-1));
         this.dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
 
-        _.e('p', {text: _.lang.current.mypage_layout_history_help}, this.dom.root);
+        _.e('p', {text: _.lng.mypage_layout_history_help}, this.dom.root);
 
         _.listen(w, 'resize', function() {
           if (!that.dom.root.parentNode) {
@@ -4672,7 +4671,7 @@
 
         var history = _.conf.mypage.layout_history;
         if (!history) {
-          this.dom.error.textContent = _.lang.current.mypage_layout_history_empty;
+          this.dom.error.textContent = _.lng.mypage_layout_history_empty;
           this.dom.root.classList.add('pp-error');
           return;
         } else {
@@ -4748,7 +4747,7 @@
       var that = this;
       _.qa('#item-container header .action').forEach(function(actions) {
         var li = _.e('li', {cls: 'pp-layout-history ui-tooltip',
-                            'data-tooltip': _.lang.current.mypage_layout_history});
+                            'data-tooltip': _.lng.mypage_layout_history});
         actions.insertBefore(li, actions.firstChild);
         _.onclick(li, that.history_manager.show);
       });
@@ -5145,7 +5144,7 @@
   });
 
   _.setup_ready = function() {
-    _.lang.setup();
+    _.i18n.setup();
 
     _.redirect_jump_page();
 
@@ -5195,7 +5194,7 @@
           return;
         }
 
-        var msg = _.lang.current.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
+        var msg = _.lng.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
         var rate = w.pixiv.rating.rate; // workaround for firefox
 
         if (_.conf.general.rate_confirm) {
@@ -5255,7 +5254,7 @@
       return;
     }
 
-    _.lang.setup();
+    _.i18n.setup();
     _.key.init();
 
     _.e('style', {text: _.css}, d.documentElement || d);
@@ -5442,7 +5441,8 @@ text-align:center;background-color:#eee}\
 #pp-layout-preview li.pp-open div{display:block}\
 \
 /* search */\
-.pp-search-custom-input{width:3em;padding:0px !important;height:auto !important;border:1px solid #eee}\
+#pp-search-size-custom input[type="text"]{\
+width:3em;padding:0px;height:auto;border:1px solid #eee}\
 #pp-search-ratio-custom-text{width:3em;padding:0px;height:auto}\
 #pp-search-ratio-custom-preview{display:none}\
 input[type="range"]:active~#pp-search-ratio-custom-preview{display:block}\
@@ -5557,7 +5557,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     // __CONFIG_END__
   ];
 
-  _.lang = {
+  _.i18n = {
     en: {
       __name__: 'en',
 
@@ -5873,9 +5873,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     setup: function() {
       var lng;
       if (d.documentElement) {
-        lng = _.lang[d.documentElement.lang];
+        lng = _.i18n[d.documentElement.lang];
       }
-      _.lang.current = (lng || _.lang[g.navigator.language] || _.lang.en);
+      _.lng = (lng || _.i18n[g.navigator.language] || _.i18n.en);
     }
   };
 
