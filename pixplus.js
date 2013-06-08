@@ -3248,11 +3248,11 @@
       var that = this;
       try {
         w.pixiv.api.post('/rpc_comment_history.php', {
-	  i_id: illust.id,
-	  u_id: illust.author_id
-	}, {
-	  ajaxSettings: {dataType: 'text'}
-	}).done(function(data) {
+          i_id: illust.id,
+          u_id: illust.author_id
+        }, {
+          ajaxSettings: {dataType: 'text'}
+        }).done(function(data) {
           try {
             var obj  = g.JSON.parse(data),
                 html = obj.data.html_array.join('');
@@ -3260,7 +3260,7 @@
           } catch(ex) {
             that.onerror(illust, g.String(ex));
           }
-	}).fail(function(data) {
+        }).fail(function(data) {
           that.onerror(illust, data);
         });
       } catch(ex) {
@@ -3397,19 +3397,19 @@
       try {
         w.pixiv.api.post('/rpc_tag_edit.php', {
           mode: 'first',
-	  i_id: illust.id,
-	  u_id: illust.author_id,
-	  e_id: w.pixiv.user.id
-	}, {
-	  ajaxSettings: {dataType: 'text'}
-	}).done(function(data) {
+          i_id: illust.id,
+          u_id: illust.author_id,
+          e_id: w.pixiv.user.id
+        }, {
+          ajaxSettings: {dataType: 'text'}
+        }).done(function(data) {
           _.debug(data);
           try {
             that.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
             that.onerror(illust, g.String(ex));
           }  
-	}).fail(function(data) {
+        }).fail(function(data) {
           that.onerror(illust, data);
         });
       } catch(ex) {
@@ -5064,10 +5064,10 @@
           return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
         };
 
-        var wlt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wlt}, li),
-	    hlt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hlt}, li),
-	    wgt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wgt}, li),
-	    hgt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hgt}, li);
+        var wlt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wlt}, li),
+            hlt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hlt}, li),
+            wgt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wgt}, li),
+            hgt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hgt}, li);
 
         [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
           p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
