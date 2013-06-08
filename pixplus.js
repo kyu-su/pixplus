@@ -5064,10 +5064,10 @@
           return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
         };
 
-        var wlt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
-            hlt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
-            wgt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li),
-            hgt	  = _.e('input', {type: 'text', cls: 'pp-search-custom-input'}, li);
+        var wlt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wlt}, li),
+	    hlt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hlt}, li),
+	    wgt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wgt}, li),
+	    hgt	= _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hgt}, li);
 
         [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
           p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
@@ -5711,7 +5711,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       associate_tags: 'Associate tags',
       mypage_layout_history: 'Layout history',
       mypage_layout_history_empty: 'Layout history is empty',
-      mypage_layout_history_help: 'Click list item to restore layout.'
+      mypage_layout_history_help: 'Click list item to restore layout.',
+      search_wlt: 'Min width <=',
+      search_hlt: 'Min height <=',
+      search_wgt: '<= Max width',
+      search_hgt: '<= Max height'
     },
 
     ja: {
@@ -5867,7 +5871,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       associate_tags: '\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b',
       mypage_layout_history: '\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74',
       mypage_layout_history_empty: '\u5c65\u6b74\u304c\u7a7a\u3067\u3059',
-      mypage_layout_history_help: '\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002'
+      mypage_layout_history_help: '\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002',
+      search_wlt: '\u5e45\u306e\u6700\u5c0f\u5024 <=',
+      search_hlt: '\u9ad8\u3055\u306e\u6700\u5c0f\u5024 <=',
+      search_wgt: '<= \u5e45\u306e\u6700\u5927\u5024',
+      search_hgt: '<= \u9ad8\u3055\u306e\u6700\u5927\u5024'
     },
 
     setup: function() {
