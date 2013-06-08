@@ -367,10 +367,6 @@
 
     calculate_ratio: function(width, height) {
       return (width - height) / g.Math.min(width, height);
-    },
-
-    workaround: {
-      OPERA1250_REDRAWFIX: 0x80
     }
   });
 
@@ -784,79 +780,6 @@
     root: null,
     menu: null,
 
-    bitfield: {
-      general: {
-        workaround: _.workaround
-      },
-
-      setup: function(input, field_map) {
-        var list = _.e('ul', {cls: 'pp-config-bitfield-list'}), items = [ ];
-
-        var update = function() {
-          var value = g.parseInt(input.value, 10) || 0;
-          items.forEach(function(item) {
-            item[2].classList[(value & item[1]) === item[1] ? 'add' : 'remove']('pp-active');
-          });
-        };
-
-        for(var key in field_map) {
-          var value = field_map[key], li = _.e('li'), text = value.toString(16);
-          while(text.length < 4) {
-            text = '0' + text;
-          }
-          text = '0x' + text;
-          _.e('span', {text: text, css: 'float:right;margin-left:1em'}, li);
-          li.appendChild(d.createTextNode(key));
-          _.e('div', {css: 'clear:both'}, li);
-          items.push([key, value, li]);
-        }
-        items.sort(function(a, b) {
-          return a[1] - b[1];
-        });
-
-        items.forEach(function(item) {
-          var flags = item[1];
-
-          _.listen(item[2], 'mousedown', function() {
-            var value = g.parseInt(input.value, 10) || 0;
-            if ((value & flags) === flags) {
-              value &= ~flags;
-            } else {
-              value |= flags;
-            }
-            input.value = value;
-
-            var ev = d.createEvent('Event');
-            ev.initEvent('input', true, true);
-            input.dispatchEvent(ev);
-
-            update();
-            return true;
-          });
-
-          list.appendChild(item[2]);
-        });
-
-        var show = function() {
-          if (list.parentNode) {
-            return;
-          }
-          update();
-          input.parentNode.appendChild(list);
-        };
-
-        var hide = function() {
-          if (!list.parentNode) {
-            return;
-          }
-          list.parentNode.removeChild(list);
-        };
-
-        _.listen(input, 'focus', show);
-        _.listen(input, 'blur', hide);
-      }
-    },
-
     init: function(root, menu, extension_data) {
       if (!root) {
         return;
@@ -942,11 +865,6 @@
             });
           } else {
             control = _.e('input', null, value);
-
-            var field_map = (that.bitfield[section.name] || { })[item.key];
-            if (field_map) {
-              that.bitfield.setup(control, field_map);
-            }
           }
           control_propname = 'value';
         }
@@ -2552,13 +2470,6 @@
 
       root.style.left = g.Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
       root.style.top  = g.Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
-
-      if (_.conf.general.workaround & _.workaround.OPERA1250_REDRAWFIX) {
-        root.style.borderColor = '#aaaaab';
-        g.setTimeout(function() {
-          root.style.borderColor = '';
-        }, 0);
-      }
     },
 
     clear: function() {
@@ -5423,9 +5334,6 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 #pp-config-escaper{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}\
 #pp-config-escaper input{display:block;width:100%;box-sizing:border-box}\
 #pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}\
-.pp-config-bitfield-list{position:absolute;border:1px solid #888;background-color:#fff}\
-.pp-config-bitfield-list li{padding:0.2em 0.4em;cursor:pointer}\
-.pp-config-bitfield-list li.pp-active{background-color:#ddf;font-weight:bold}\
 \
 /* key editor */\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
@@ -5483,8 +5391,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
       {"key": "fast_user_bookmark", "value": 0},
-      {"key": "redirect_jump_page", "value": 1},
-      {"key": "workaround", "value": 0, "hidden": true}
+      {"key": "redirect_jump_page", "value": 1}
     ]},
 
     {"name": "popup", "items": [
@@ -5620,8 +5527,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           redirect_jump_page: {
             desc: 'Redirect jump.php',
             hint: ['Disable', 'Open target', 'Modify link']
-          },
-          workaround: 'Workaround (debug mode only)'
+          }
         },
 
         popup: {
@@ -5780,8 +5686,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           redirect_jump_page: {
             desc: 'jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b',
             hint: ['\u7121\u52b9', '\u30da\u30fc\u30b8\u3092\u958b\u304f', '\u30ea\u30f3\u30af\u3092\u5909\u66f4']
-          },
-          workaround: '\u30ef\u30fc\u30af\u30a2\u30e9\u30a6\u30f3\u30c9 (\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9\u306e\u307f)'
+          }
         },
 
         popup: {
