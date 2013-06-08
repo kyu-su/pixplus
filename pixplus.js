@@ -356,7 +356,7 @@
 
     parse_query: function(query) {
       var map = { };
-      query.substring(1).split('&').forEach(function(p) {
+      query.replace(/^.*?\?/, '').split('&').forEach(function(p) {
         var pair = p.split('=', 2).map(function(t) {
           return g.decodeURIComponent(t);
         });
@@ -5029,22 +5029,34 @@
       },
 
       set_default_options: function(query) {
+        var keys = ['s_mode', 'order', 'scd',
+                    'wlt', 'hlt', 'wgt', 'hgt',
+                    'ratio', 'r18'];
+
         var form = _.q('.header form[action="/search.php"]');
 
-        [
-          's_mode', 'order', 'scd',
-          'wlt', 'hlt', 'wgt', 'hgt',
-          'ratio', 'r18'
-        ].forEach(function(name) {
-          if (!query.hasOwnProperty(name)) {
+        keys.forEach(function(key) {
+          if (!query.hasOwnProperty(key)) {
             return;
           }
 
-          var input = _.q('input[name="' + name + '"]', form);
+          var input = _.q('input[name="' + key + '"]', form);
           if (!input) {
-            input = _.e('input', {type: 'hidden', name: name}, form);
+            input = _.e('input', {type: 'hidden', name: key}, form);
           }
-          input.value = query[name];
+          input.value = query[key];
+        });
+
+        _.qa('.column-related .tag a[href^="/search.php?"]').forEach(function(tag) {
+          var params = _.parse_query(tag.href);
+
+          keys.forEach(function(key) {
+            if (query.hasOwnProperty(key)) {
+              params[key] = query[key];
+            }
+          });
+
+          tag.href = '/search.php?' + _.xhr.serialize(params);
         });
       },
 
