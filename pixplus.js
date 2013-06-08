@@ -5149,7 +5149,11 @@
   };
 
   _.run = function() {
-    _.run = function() { };
+    if (!d.documentElement) {
+      // for gecko
+      g.setTimeout(_.run, 100);
+      return;
+    }
 
     if (_extension_data) {
       var config_set_data = _.e('div', {css: 'display:none'}, d.body);
@@ -5179,16 +5183,10 @@
       return;
     }
 
-    _.log('version=' + _.version());
-    if (_.q('#login-block')) {
-      _.log('not logged in');
-      return;
-    }
-
     _.i18n.setup();
     _.key.init();
 
-    _.e('style', {text: _.css}, d.documentElement || d);
+    _.e('style', {text: _.css}, d.documentElement);
 
     _.illust.setup(d.documentElement);
 
