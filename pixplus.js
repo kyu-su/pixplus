@@ -1873,12 +1873,12 @@
       }
 
       illust.size = null;
-      illust.manga = {enable: false, viewed: illust.manga ? !!illust.manga.viewed : false};
+      illust.manga = {available: false, viewed: illust.manga ? !!illust.manga.viewed : false};
       if ((re = /^(\d+)\u00d7(\d+)$/.exec(meta2))) {
         illust.size = {width: g.parseInt(re[1], 10), height: g.parseInt(re[2], 10)};
       } else if ((re = /^[^ ]{1,10} (\d+)P$/.exec(meta2))) {
         illust.manga.page_count = g.parseInt(re[1], 10);
-        illust.manga.enable = illust.manga.page_count > 0;
+        illust.manga.available = illust.manga.page_count > 0;
       }
 
       illust.tools = _.fastxml.qa(work_info, '.meta .tools li').map(function(node) {
@@ -2024,7 +2024,7 @@
           }
         }
 
-        if (_.conf.popup.preload && illust.manga.enable) {
+        if (_.conf.popup.preload && illust.manga.available) {
           that.load_manga_page(illust, 0);
         }
 
@@ -2402,7 +2402,7 @@
       // update info area
 
       var size_list, illust = this.illust;
-      if (illust.size && !illust.manga.enable && !this.manga.enable) {
+      if (illust.size && !illust.manga.available && !this.manga.active) {
         size_list = [illust.size];
       } else {
         size_list = natural_sizes;
@@ -2438,9 +2438,9 @@
 
     calculate_max_content_size: function(content) {
       var c, dom = this.dom, root = dom.root, de = d.documentElement;
-      if (this.bookmark.enable) {
+      if (this.bookmark.active) {
         c = dom.bookmark_wrapper;
-      } else if (this.tagedit.enable) {
+      } else if (this.tagedit.active) {
         c = dom.tagedit_wrapper;
       } else {
         c = dom.image_wrapper;
@@ -2484,10 +2484,10 @@
       root.style.left = '0px';
       root.style.top  = '0px';
 
-      if (this.bookmark.enable) {
+      if (this.bookmark.active) {
         this.bookmark.adjust(max_size[0], max_size[1]);
 
-      } else if (this.tagedit.enable) {
+      } else if (this.tagedit.active) {
         this.tagedit.adjust(max_size[0], max_size[1]);
 
       } else {
@@ -2501,7 +2501,7 @@
         dom.image_layout.style.marginTop  = g.Math.max(g.Math.floor(mv / 2), 0) + 'px';
 
         var header_height = dom.image_wrapper.offsetHeight;
-        if (!this.comment.enable) {
+        if (!this.comment.active) {
           header_height = g.Math.floor(header_height * _.conf.popup.caption_height);
         }
 
@@ -2595,7 +2595,7 @@
     },
 
     onload: function(illust) {
-      if (illust !== this.illust || this.bookmark.enable || this.tagedit.enable) {
+      if (illust !== this.illust || this.bookmark.active || this.tagedit.active) {
         return;
       }
 
@@ -2634,7 +2634,7 @@
         dom.button_response.classList.remove('pp-hide');
       }
 
-      if (illust.manga.enable) {
+      if (illust.manga.available) {
         dom.button_manga.href = illust.url_manga + '#pp-manga-thumbnail';
         this.manga.update_button();
         dom.button_manga.classList.remove('pp-hide');
@@ -2712,7 +2712,7 @@
         dom.author_staccfeed.textContent = _.lng.author_staccfeed;
       }
 
-      if (illust.manga.enable) {
+      if (illust.manga.available) {
         dom.image_layout.href = illust.url_manga;
       } else {
         dom.image_layout.href = illust.image_url_big;
@@ -2747,7 +2747,7 @@
     },
 
     onerror: function(illust) {
-      if (illust !== this.illust || this.bookmark.enable || this.tagedit.enable) {
+      if (illust !== this.illust || this.bookmark.active || this.tagedit.active) {
         return;
       }
 
@@ -2783,10 +2783,10 @@
         return;
       }
 
-      if (this.bookmark.enable) {
+      if (this.bookmark.active) {
         this.bookmark.end();
       }
-      if (this.tagedit.enable) {
+      if (this.tagedit.active) {
         this.tagedit.end();
       }
 
@@ -2872,13 +2872,13 @@
   });
 
   _.popup.bookmark = _.mod({
-    enable: false,
+    active: false,
 
     clear: function() {
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
       this.iframe = null;
-      this.enable = false;
+      this.active = false;
       w.focus(); // for Firefox
     },
 
@@ -2899,7 +2899,7 @@
     },
 
     onready: function(illust) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
 
@@ -2931,7 +2931,7 @@
     },
 
     onload: function(illust) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
 
@@ -2954,14 +2954,14 @@
     },
 
     start: function() {
-      if (this.enable) {
+      if (this.active) {
         return;
       }
 
       var that = this;
 
       var illust = _.popup.illust;
-      this.enable = true;
+      this.active = true;
       _.popup.set_status('Loading');
 
       var ifr = _.e('iframe');
@@ -2977,11 +2977,11 @@
       });
 
       _.listen(ifr, 'error', function() {
-        if (illust !== _.popup.illust || !that.enable) {
+        if (illust !== _.popup.illust || !that.active) {
           return;
         }
 
-        that.enable = false;
+        that.active = false;
         _.popup.set_status('Error');
       });
 
@@ -2994,7 +2994,7 @@
     },
 
     submit: function() {
-      if (!this.enable) {
+      if (!this.active) {
         return;
       }
 
@@ -3003,7 +3003,7 @@
     },
 
     end: function() {
-      if (!this.enable) {
+      if (!this.active) {
         return;
       }
       this.clear();
@@ -3011,7 +3011,7 @@
     },
 
     toggle: function() {
-      if (this.enable) {
+      if (this.active) {
         this.end();
       } else {
         this.start();
@@ -3020,17 +3020,17 @@
   });
 
   _.popup.manga = _.mod({
-    enable: false,
+    active: false,
     page: -1,
 
     clear: function() {
-      this.enable = false;
+      this.active = false;
       this.page = -1;
       this.update_button();
     },
 
     onload: function(illust, page, images) {
-      if (illust !== _.popup.illust || !this.enable || page !== this.page) {
+      if (illust !== _.popup.illust || !this.active || page !== this.page) {
         return;
       }
 
@@ -3052,7 +3052,7 @@
     },
 
     onerror: function(illust, page) {
-      if (illust !== _.popup.illust || !this.enable || page !== this.page) {
+      if (illust !== _.popup.illust || !this.active || page !== this.page) {
         return;
       }
       if (illust.error) {
@@ -3088,14 +3088,14 @@
 
     show: function(page) {
       var illust = _.popup.illust;
-      if (!illust.manga.enable) {
+      if (!illust.manga.available) {
         return;
       }
       if (page < 0 || (illust.manga.pages && page >= illust.manga.pages.length)) {
         this.end();
         return;
       }
-      this.enable = true;
+      this.active = true;
       this.page = page;
       this.update_button();
       illust.manga.viewed = true;
@@ -3104,14 +3104,14 @@
     },
 
     start: function() {
-      if (this.enable) {
+      if (this.active) {
         return;
       }
       this.show(0);
     },
 
     end: function() {
-      if (!this.enable) {
+      if (!this.active) {
         return;
       }
       this.clear();
@@ -3119,7 +3119,7 @@
     },
 
     toggle: function() {
-      if (this.enable) {
+      if (this.active) {
         this.end();
       } else {
         this.start();
@@ -3128,7 +3128,7 @@
   });
 
   _.popup.question = _.mod({
-    enabled: function() {
+    is_active: function() {
       return !!_.q('.questionnaire .list.visible,.questionnaire .stats.visible', _.popup.dom.rating);
     },
 
@@ -3209,12 +3209,12 @@
   });
 
   _.popup.comment = _.mod({
-    enable: false,
+    active: false,
 
     clear: function() {
       _.popup.dom.root.classList.remove('pp-comment-mode');
       _.clear(_.popup.dom.comment_form, _.popup.dom.comment_history);
-      this.enable = false;
+      this.active = false;
     },
 
     scroll: function() {
@@ -3222,7 +3222,7 @@
     },
 
     onload: function(illust, html) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
       _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
@@ -3232,7 +3232,7 @@
     },
 
     onerror: function(illust, message) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
       _.popup.dom.comment_history.textContent = message || 'Error';
@@ -3302,10 +3302,10 @@
     },
 
     start: function() {
-      if (this.enable) {
+      if (this.active) {
         return;
       }
-      this.enable = true;
+      this.active = true;
       this.setup_form();
       if (_.popup.dom.comment_history.childNodes.length < 1) {
         this.reload();
@@ -3317,17 +3317,17 @@
     },
 
     end: function() {
-      if (!this.enable) {
+      if (!this.active) {
         return;
       }
       _.popup.dom.root.classList.remove('pp-comment-mode');
-      this.enable = false;
+      this.active = false;
       _.popup.adjust();
       _.popup.dom.caption_wrapper.scrollTop = 0;
     },
 
     toggle: function() {
-      if (this.enable) {
+      if (this.active) {
         this.end();
       } else {
         this.start();
@@ -3336,12 +3336,12 @@
   });
 
   _.popup.tagedit = _.mod({
-    enable: false,
+    active: false,
 
     clear: function() {
       _.popup.dom.root.classList.remove('pp-tagedit-mode');
       _.clear(_.popup.dom.tagedit_wrapper);
-      this.enable = false;
+      this.active = false;
     },
 
     adjust: function(w, h) {
@@ -3357,7 +3357,7 @@
     },
 
     onload: function(illust, html) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
       _.clear(_.popup.dom.tagedit_wrapper);
@@ -3377,11 +3377,11 @@
     },
 
     onerror: function(illust, message) {
-      if (illust !== _.popup.illust || !this.enable) {
+      if (illust !== _.popup.illust || !this.active) {
         return;
       }
       if (!_.popup.dom.root.classList.contains('pp-tagedit-mode')) {
-        this.enable = false;
+        this.active = false;
       }
       _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
     },
@@ -3420,20 +3420,20 @@
     },
 
     start: function() {
-      if (this.enable) {
+      if (this.active) {
         return;
       }
-      this.enable = true;
+      this.active = true;
       this.reload();
       _.popup.dom.root.classList.add('pp-tagedit-mode');
       _.popup.adjust();
     },
 
     end: function() {
-      if (!this.enable) {
+      if (!this.active) {
         return;
       }
-      this.enable = false;
+      this.active = false;
       _.popup.dom.root.classList.remove('pp-tagedit-mode');
       _.popup.adjust();
     }
@@ -3524,7 +3524,7 @@
     },
 
     prev: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(_.popup.manga.page - 1);
       } else {
         _.popup.show(_.popup.illust[this.reverse ? 'next' : 'prev']);
@@ -3533,9 +3533,9 @@
     },
 
     next: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(_.popup.manga.page + 1);
-      } else if (this.auto_manga && _.popup.illust.manga.enable && !_.popup.illust.manga.viewed) {
+      } else if (this.auto_manga && _.popup.illust.manga.available && !_.popup.illust.manga.viewed) {
         _.popup.manga.start();
       } else {
         _.popup.show(_.popup.illust[this.reverse ? 'prev' : 'next']);
@@ -3544,7 +3544,7 @@
     },
 
     prev_direction: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(_.popup.manga.page - 1);
       } else {
         _.popup.show(_.popup.illust.prev);
@@ -3553,7 +3553,7 @@
     },
 
     next_direction: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(_.popup.manga.page + 1);
       } else {
         _.popup.show(_.popup.illust.next);
@@ -3562,7 +3562,7 @@
     },
 
     first: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(0);
       } else {
         _.popup.show(_.illust.list[0]);
@@ -3571,7 +3571,7 @@
     },
 
     last: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.show(_.popup.illust.manga.pages.length - 1);
       } else {
         _.popup.show(_.illust.list[_.illust.list.length - 1]);
@@ -3657,8 +3657,8 @@
     },
 
     open_big: function() {
-      if (_.popup.illust.manga.enable) {
-        if (_.popup.manga.enable) {
+      if (_.popup.illust.manga.available) {
+        if (_.popup.manga.active) {
           var page = _.popup.illust.manga.pages[_.popup.manga.page];
           page.image_urls_big.forEach(function(url, idx) {
             _.open(url);
@@ -3728,7 +3728,7 @@
     // manga mode
 
     manga_start: function() {
-      if (_.popup.illust.manga.enable && !_.popup.manga.enable) {
+      if (_.popup.illust.manga.available && !_.popup.manga.active) {
         _.popup.manga.start();
         return true;
       }
@@ -3736,7 +3736,7 @@
     },
 
     manga_end: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         _.popup.manga.end();
         return true;
       }
@@ -3744,9 +3744,9 @@
     },
 
     manga_open_page: function() {
-      if (_.popup.manga.enable) {
+      if (_.popup.manga.active) {
         var hash = '';
-        if (_.popup.manga.enable) {
+        if (_.popup.manga.active) {
           hash = '#pp-manga-page-' + _.popup.manga.page;
         }
         _.open(_.popup.illust.url_manga + hash);
@@ -3757,7 +3757,7 @@
 
     // question mode
     qrate_start: function() {
-      if (!_.popup.question.enabled()) {
+      if (!_.popup.question.is_active()) {
         _.popup.question.start();
         return true;
       }
@@ -3765,7 +3765,7 @@
     },
 
     qrate_end: function() {
-      if (_.popup.question.enabled()) {
+      if (_.popup.question.is_active()) {
         _.popup.question.end();
         return true;
       }
@@ -3773,7 +3773,7 @@
     },
 
     qrate_submit: function() {
-      if (_.popup.question.enabled()) {
+      if (_.popup.question.is_active()) {
         _.popup.question.submit();
         return true;
       }
@@ -3781,7 +3781,7 @@
     },
 
     qrate_select_prev: function() {
-      if (_.popup.question.enabled()) {
+      if (_.popup.question.is_active()) {
         _.popup.question.select_prev();
         return true;
       }
@@ -3789,7 +3789,7 @@
     },
 
     qrate_select_next: function() {
-      if (_.popup.question.enabled()) {
+      if (_.popup.question.is_active()) {
         _.popup.question.select_next();
         return true;
       }
@@ -3804,7 +3804,7 @@
     },
 
     bookmark_end: function() {
-      if (_.popup.bookmark.enable) {
+      if (_.popup.bookmark.active) {
         _.popup.bookmark.end();
         return true;
       }
@@ -3812,7 +3812,7 @@
     },
 
     bookmark_submit: function() {
-      if (_.popup.bookmark.enable) {
+      if (_.popup.bookmark.active) {
         _.popup.bookmark.submit();
         return true;
       }
@@ -3822,7 +3822,7 @@
     // tag edit mode
 
     tag_edit_start: function() {
-      if (!_.popup.tagedit.enable) {
+      if (!_.popup.tagedit.active) {
         _.popup.tagedit.start();
         return true;
       }
@@ -3830,7 +3830,7 @@
     },
 
     tag_edit_end: function() {
-      if (_.popup.tagedit.enable) {
+      if (_.popup.tagedit.active) {
         _.popup.tagedit.end();
         return true;
       }
@@ -3844,7 +3844,7 @@
       'bookmark_end',
 
       function() {
-        return _.popup.bookmark.enable;
+        return _.popup.bookmark.active;
       },
 
       'qrate_start',
