@@ -365,6 +365,10 @@
       return map;
     },
 
+    calculate_ratio: function(width, height) {
+      return (width - height) / g.Math.min(width, height);
+    },
+
     workaround: {
       OPERA1250_REDRAWFIX: 0x80
     }
@@ -2418,11 +2422,15 @@
           more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
         }
 
+        if (_.conf.general.debug) {
+          more_info.push('ar:' + (g.Math.floor(_.calculate_ratio(size.width, size.height) * 100) / 100));
+        }
+
         if ((re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
           more_info.push(re[1]);
         }
 
-        if (more_info) {
+        if (more_info.length > 0) {
           str += '(' + more_info.join('/') + ')';
         }
 
