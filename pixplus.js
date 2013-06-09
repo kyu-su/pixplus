@@ -773,6 +773,56 @@
     }
   });
 
+  _.ui = _.mod({
+    slider: function(min, max, step) {
+      var slider;
+      slider = _.e('input', {type: 'range', min: min, max: max, step: step});
+      if (slider.type === 'range') {
+        return slider;
+      }
+
+      var rail, knob;
+      slider = _.e('div', {cls: 'pp-slider'});
+      rail = _.e('div', {cls: 'pp-slider-rail'}, slider);
+      knob = _.e('div', {cls: 'pp-slider-knob'}, rail);
+
+      slider.__defineSetter__('value', function(value) {
+        var pos;
+        value = g.Math.max(min, g.Math.min(value, max));
+        pos = (value - min) / (max - min);
+        knob.style.left = (pos * 100) + '%';
+      });
+
+      slider.__defineGetter__('value', function(value) {
+        return (max - min) * (knob.offsetLeft + 4) / rail.offsetWidth + min;
+      });
+
+      _.listen(knob, 'mousedown', function(ev) {
+        var x, conn1, conn2;
+
+        x = ev.screenX - (knob.offsetLeft + 4);
+        slider.classList.add('pp-active');
+
+        conn1= _.listen(w, 'mousemove', function(ev) {
+          var pos = ev.screenX - x;
+          pos = g.Math.max(0, g.Math.min(pos, rail.offsetWidth));
+          knob.style.left = pos + 'px';
+
+          ev = d.createEvent('Event');
+          ev.initEvent('change', true, true);
+          slider.dispatchEvent(ev);
+        });
+
+        conn2 = _.listen(w, 'mouseup', function(ev) {
+          conn1.disconnect();
+          conn2.disconnect();
+          slider.classList.remove('pp-active');
+        });
+      });
+      return slider;
+    }
+  });
+
   _.configui = _.mod({
     dom: { },
     shown: false,
@@ -5021,8 +5071,10 @@
       },
 
       ratio: function(query, ul, li, radio, inputs) {
-        var range   = _.e('input', {type: 'range', min: -3, max: 3, step: 0.01}, li),
-            input   = _.e('input', {type: 'text', id: 'pp-search-ratio-custom-text'}, li),
+        var slider  = _.ui.slider(-3, 3, 0.01);
+        li.appendChild(slider);
+
+        var input   = _.e('input', {type: 'text', id: 'pp-search-ratio-custom-text'}, li),
             preview = _.e('div', {id: 'pp-search-ratio-custom-preview'}, li),
             pbox    = _.e('div', null, preview);
 
@@ -5046,9 +5098,9 @@
             width = height / (1 - ratio);
           }
 
-          preview.style.marginLeft = range.offsetLeft + 'px';
+          preview.style.marginLeft = slider.offsetLeft + 'px';
 
-          var pos = g.Math.max(0, g.Math.min((ratio + 3) / 6, 1)) * range.clientWidth;
+          var pos = g.Math.max(0, g.Math.min((ratio + 3) / 6, 1)) * slider.clientWidth;
           pbox.style.width = width + 'px';
           pbox.style.height = height + 'px';
           pbox.style.marginLeft = pos - g.Math.floor(width / 2) + 'px';
@@ -5057,17 +5109,17 @@
         };
 
         update(g.parseFloat(query.ratio));
-        range.value = input.value = query.ratio || '';
+        slider.value = input.value = query.ratio || '';
 
-        _.listen(range, 'change', function() {
-          update(g.parseFloat(range.value));
-          input.value = range.value;
+        _.listen(slider, 'change', function() {
+          update(g.parseFloat(slider.value));
+          input.value = slider.value;
           radio.checked = true;
         });
 
         _.listen(input, 'input', function() {
           update(g.parseFloat(input.value));
-          range.value = input.value;
+          slider.value = input.value;
           radio.checked = true;
         });
       }
@@ -5207,6 +5259,12 @@
 .pp-sprite{background-image:url("http://source.pixiv.net/source/images/sprites-s001ad680da.png")}\
 input.pp-flat-input{border:none}\
 input.pp-flat-input:not(:hover):not(:focus){background:transparent}\
+\
+/* ui */\
+.pp-slider{display:inline-block;vertical-align:middle;padding:7px 4px}\
+.pp-slider-rail{position:relative;width:160px;height:2px;background-color:#aaa}\
+.pp-slider-knob{position:absolute;width:8px;height:16px;margin:-7px -4px;background-color:#ccc}\
+\
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
 #pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}\
@@ -5372,8 +5430,9 @@ width:3em;padding:0px;height:auto;border:1px solid #eee}\
 #pp-search-ratio-custom-text{width:3em;padding:0px;height:auto}\
 #pp-search-ratio-custom-preview{display:none}\
 input[type="range"]:active~#pp-search-ratio-custom-preview{display:block}\
+.pp-slider.pp-active~#pp-search-ratio-custom-preview{display:block}\
 input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
-#pp-search-ratio-custom-preview{position:absolute}\
+#pp-search-ratio-custom-preview{position:absolute;margin-top:0.4em}\
 #pp-search-ratio-custom-preview div{background-color:#ccc}\
 \
 .pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}\
