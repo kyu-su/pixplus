@@ -13,6 +13,8 @@
 // @run-at      document-start
 // ==/UserScript==
 
+'use strict';
+
 (function(g, w, unsafeWindow, entrypoint) {
   if (w.location.href.indexOf('pixivreader') >= 0) {
     return;
@@ -2164,7 +2166,7 @@
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
       dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
-      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment', cls: 'pp-hide'}, dom.comment);
+      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment pp-hide'}, dom.comment);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
