@@ -125,29 +125,8 @@
       return _.changelog[0].date;
     },
 
-    trim: function(text) {
+    strip: function(text) {
       return text ? text.replace(/(?:^\s+|\s+$)/g, '') : '';
-    },
-
-    as_array: function(obj) {
-      if (!obj) {
-        return [];
-      }
-      return g.Array.prototype.slice.call(obj);
-    },
-
-    uniq: function(list) {
-      var new_list = [];
-      for(var i = 0; i < list.length; ++i) {
-        if (new_list.indexOf(list[i]) < 0) {
-          new_list.push(list[i]);
-        }
-      }
-      return new_list;
-    },
-
-    tag: function(tag, context) {
-      return _.as_array((context || d).getElementsByTagName(tag));
     },
 
     q: function(query, context) {
@@ -155,7 +134,8 @@
     },
 
     qa: function(query, context) {
-      return _.as_array((context || d).querySelectorAll(query));
+      var list = (context || d).querySelectorAll(query);
+      return g.Array.prototype.slice.call(list);
     },
 
     mod: function(obj) {
@@ -620,7 +600,7 @@
     serialize: function(form) {
       var data = '', data_map = { };
       if (form instanceof w.HTMLFormElement) {
-        _.tag('input', form).forEach(function(input) {
+        _.qa('input', form).forEach(function(input) {
           switch((input.type || '').toLowerCase()) {
           case 'reset':
           case 'submit':
@@ -709,20 +689,18 @@
         return null;
       }
 
-      if (ev.ctrlKey) {
-        keys.unshift('Control');
-      }
-      if (ev.shiftKey) {
-        keys.unshift('Shift');
-      }
-      if (ev.altKey) {
-        keys.unshift('Alt');
-      }
-      if (ev.metaKey) {
-        keys.unshift('Meta');
-      }
+      [
+        [ev.ctrlKey, 'Control'],
+        [ev.shiftKey, 'Shift'],
+        [ev.altKey, 'Alt'],
+        [ev.metaKey, 'Meta']
+      ].forEach(function(p) {
+        if (p[0] && keys.indexOf(p[1]) < 0) {
+          keys.unshift(p[1]);
+        }
+      });
 
-      return _.uniq(keys).join('+');
+      return keys.join('+');
     },
 
     listen: function(context, listener) {
@@ -1006,7 +984,7 @@
       }
 
       _.qa('tr', root).forEach(function(row) {
-        var input = _.tag('input', row)[0];
+        var input = _.q('input', row);
         if (input) {
           _.listen(input, 'focus', function() {
             open_editor(row, input);
@@ -1051,7 +1029,7 @@
       function save() {
         var aliases = { };
         g.Array.prototype.forEach.call(tag_alias_table.rows, function(row) {
-          var inputs = _.tag('input', row);
+          var inputs = _.qa('input', row);
           if (inputs.length === 2 && inputs[0].value) {
             aliases[inputs[0].value] = inputs[1].value.split(/\s+/);
           }
@@ -1372,7 +1350,7 @@
     reorder_tag_list: function(list, cb_get_tagname) {
       var list_parent = list.parentNode, lists = [list];
 
-      var tags = _.tag('li', list), tag_map = { };
+      var tags = _.qa('li', list), tag_map = { };
       tags.forEach(function(tag) {
         var tagname = cb_get_tagname(tag);
         if (tagname) {
@@ -1632,7 +1610,7 @@
     },
 
     create: function(link, allow_types, cb_onshow) {
-      var illust, images = _.tag('img', link);
+      var illust, images = _.qa('img', link);
 
       for(var i = 0; i < images.length; ++i) {
         var p = this.parse_image_url(images[i].src, allow_types);
@@ -4619,7 +4597,7 @@
         var name_map = {};
         _.qa('#item-container header h1').forEach(function(h, i) {
           var key = w.pixiv.mypage.order[i];
-          name_map[key] = _.trim(h.textContent);
+          name_map[key] = _.strip(h.textContent);
         });
 
         layout.split('').forEach(function(d) {
@@ -4866,7 +4844,7 @@
               return;
             }
 
-            var form = _.tag('form', dialog)[0];
+            var form = _.q('form', dialog);
             if (!form) {
               _.error('fast_user_bookmark: form not found');
               return;
@@ -4907,7 +4885,7 @@
 
         bookmark_list.classList.add('pp-bookmark-tag-list');
 
-        var first_list, items = _.tag('li', bookmark_list_ul);
+        var first_list, items = _.qa('li', bookmark_list_ul);
         first_list = bookmark_list_ul.cloneNode(false);
         items[0].parentNode.removeChild(items[0]);
         items[1].parentNode.removeChild(items[1]);
@@ -4916,7 +4894,7 @@
         bookmark_list_ul.parentNode.insertBefore(first_list, bookmark_list_ul);
 
         var lists = _.reorder_tag_list(bookmark_list_ul, function(item) {
-          var a = _.tag('a', item)[0];
+          var a = _.q('a', item);
           if (!a || !a.firstChild || a.firstChild.nodeType !== w.Node.TEXT_NODE) {
             return null;
           }
