@@ -559,6 +559,14 @@
     },
 
     request: function(method, url, headers, data, cb_success, cb_error) {
+      if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add)\.php(?:\?|$)/.test(url)) {
+        _.error('XHR: URL not allowed - ' + url);
+        if (cb_error) {
+          cb_error();
+        }
+        return;
+      }
+
       var that = this;
       var xhr = new w.XMLHttpRequest();
       xhr.onload = function() {
