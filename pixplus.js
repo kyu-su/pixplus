@@ -764,15 +764,22 @@
   _.ui = _.mod({
     slider: function(min, max, step) {
       var slider;
-      slider = _.e('input', {type: 'range', min: min, max: max, step: step});
-      if (slider.type === 'range') {
-        return slider;
+
+      if (!_.conf.general.debug) {
+        slider = _.e('input', {type: 'range', min: min, max: max, step: step});
+        if (slider.type === 'range') {
+          return slider;
+        }
       }
 
       var rail, knob;
       slider = _.e('div', {cls: 'pp-slider'});
       rail = _.e('div', {cls: 'pp-slider-rail'}, slider);
       knob = _.e('div', {cls: 'pp-slider-knob'}, rail);
+
+      // if (_.conf.general.debug) {
+      //   slider.classList.add('pp-debug');
+      // }
 
       slider.__defineSetter__('value', function(value) {
         var pos;
@@ -5059,7 +5066,8 @@
       },
 
       ratio: function(query, ul, li, radio, inputs) {
-        var slider  = _.ui.slider(-3, 3, 0.01);
+        var min = -1.5, max = 1.5;
+        var slider  = _.ui.slider(min, max, 0.01);
         li.appendChild(slider);
 
         var input   = _.e('input', {type: 'text', id: 'pp-search-ratio-custom-text'}, li),
@@ -5088,7 +5096,7 @@
 
           preview.style.marginLeft = slider.offsetLeft + 'px';
 
-          var pos = g.Math.max(0, g.Math.min((ratio + 3) / 6, 1)) * slider.clientWidth;
+          var pos = g.Math.max(0, g.Math.min((ratio - min) / (max - min), 1)) * slider.clientWidth;
           pbox.style.width = width + 'px';
           pbox.style.height = height + 'px';
           pbox.style.marginLeft = pos - g.Math.floor(width / 2) + 'px';
@@ -5251,7 +5259,11 @@ input.pp-flat-input:not(:hover):not(:focus){background:transparent}\
 /* ui */\
 .pp-slider{display:inline-block;vertical-align:middle;padding:7px 4px}\
 .pp-slider-rail{position:relative;width:160px;height:2px;background-color:#aaa}\
-.pp-slider-knob{position:absolute;width:8px;height:16px;margin:-7px -4px;background-color:#ccc}\
+.pp-slider-knob{position:absolute;border:1px outset #ddd;background-color:#ccc;\
+width:6px;height:14px;margin:-7px -4px}\
+.pp-slider.pp-debug{outline:1px solid rgba(255,0,0,0.5)}\
+.pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}\
+.pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}\
 \
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
