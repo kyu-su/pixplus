@@ -2823,7 +2823,7 @@
     },
 
     can_scroll: function() {
-      return this.illust_can_scroll_vertically() || this.illust_can_scroll_horizontally();
+      return this.can_scroll_vertically() || this.can_scroll_horizontally();
     },
 
     can_scroll_vertically: function() {
@@ -3568,15 +3568,23 @@
     },
 
     illust_scroll_top: function() {
-      _.popup.dom.image_scroller.scrollTop = 0;
-      _.popup.dom.image_scroller.scrollLeft = 0;
-      return true;
+      if (_.popup.can_scroll()) {
+        var el = _.popup.dom.image_scroller;
+        el.scrollLeft = 0;
+        el.scrollTop = 0;
+        return true;
+      }
+      return false;
     },
 
     illust_scroll_bottom: function() {
-      _.popup.dom.image_scroller.scrollTop = _.popup.dom.image_scroller.scrollHeight;
-      _.popup.dom.image_scroller.scrollLeft = _.popup.dom.image_scroller.scrollWidth;
-      return true;
+      if (_.popup.can_scroll()) {
+        var el = _.popup.dom.image_scroller;
+        el.scrollLeft = el.scrollWidth;
+        el.scrollTop = el.scrollHeight;
+        return true;
+      }
+      return false;
     },
 
     illust_page_up: function() {
