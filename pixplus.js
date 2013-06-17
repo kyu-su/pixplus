@@ -4793,13 +4793,62 @@
       }
     },
 
+    fast_user_bookmark: function() {
+      var favorite_button = _.q('.profile-unit .user-relation #favorite-button');
+      if (!favorite_button) {
+        _.warn('fast_user_bookmark: favorite-button not found');
+        return;
+      }
+
+      _.onclick(favorite_button, function() {
+        if (favorite_button.classList.contains('following') ||
+            _.conf.general.fast_user_bookmark <= 0) {
+          return;
+        }
+
+        g.setTimeout(function() {
+          var dialog = _.q('.profile-unit .user-relation #favorite-preference');
+          if (!dialog) {
+            _.error('fast_user_bookmark: favorite-preference not found');
+            return;
+          }
+
+          var form = _.q('form', dialog);
+          if (!form) {
+            _.error('fast_user_bookmark: form not found');
+            return;
+          }
+
+          var restrict = _.conf.general.fast_user_bookmark - 1,
+              radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
+
+          if (!radio) {
+            _.error('fast_user_bookmark: restrict input not found');
+            return;
+          }
+
+          radio.checked = true;
+          _.xhr.post(form, function() {
+            favorite_button.classList.add('following');
+          });
+          _.send_click(_.q('.close', dialog));
+        }, 10);
+      });
+    },
+
     mypage: _.mypage,
+
+    member: _.mod({
+      run: function(query) {
+        _.pages.fast_user_bookmark();
+      }
+    }),
 
     member_illust: _.mod({
       run: function(query) {
         this.manga_thumbnail(query);
         this.manga_medium(query);
-        this.fast_user_bookmark(query);
+        _.pages.fast_user_bookmark();
       },
 
       manga_thumbnail: function() {
@@ -4835,53 +4884,6 @@
             _.illust.load(illust);
           }
         }
-      },
-
-      fast_user_bookmark: function(query) {
-        if (query.illust_id) {
-          return;
-        }
-
-        var favorite_button = _.q('.profile-unit .user-relation #favorite-button');
-        if (!favorite_button) {
-          _.error('fast_user_bookmark: favorite-button not found');
-          return;
-        }
-
-        _.onclick(favorite_button, function() {
-          if (favorite_button.classList.contains('following') ||
-              _.conf.general.fast_user_bookmark <= 0) {
-            return;
-          }
-
-          g.setTimeout(function() {
-            var dialog = _.q('.profile-unit .user-relation #favorite-preference');
-            if (!dialog) {
-              _.error('fast_user_bookmark: favorite-preference not found');
-              return;
-            }
-
-            var form = _.q('form', dialog);
-            if (!form) {
-              _.error('fast_user_bookmark: form not found');
-              return;
-            }
-
-            var restrict = _.conf.general.fast_user_bookmark - 1,
-                radio    = _.q('input[name="restrict"][value="' + restrict + '"]', form);
-
-            if (!radio) {
-              _.error('fast_user_bookmark: restrict input not found');
-              return;
-            }
-
-            radio.checked = true;
-            _.xhr.post(form, function() {
-              favorite_button.classList.add('following');
-            });
-            _.send_click(_.q('.close', dialog));
-          }, 10);
-        });
       }
     }),
 
