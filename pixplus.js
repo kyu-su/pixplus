@@ -5262,7 +5262,7 @@
 
   _.css = '\
 .pp-hide{display:none}\
-.pp-sprite{background-image:url("http://source.pixiv.net/source/images/sprites-s001ad680da.png")}\
+.pp-sprite{background-image:url("http://source.pixiv.net/source/images/sprite-2nd.png?20120528")}\
 input.pp-flat-input{border:none}\
 input.pp-flat-input:not(:hover):not(:focus){background:transparent}\
 \
@@ -5308,9 +5308,9 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-author-image:hover{max-height:none}\
 #pp-popup-author-status{position:absolute;left:2px;margin:2px}\
 #pp-popup-author-status:not(.pp-hide){display:inline-block}\
-#pp-popup-author-status.pp-fav{width:14px;height:14px;background-position:-53px 0px}\
-#pp-popup-author-status.pp-fav-m{width:16px;height:16px;background-position:-116px -20px}\
-#pp-popup-author-status.pp-mypix{width:16px;height:16px;background-position:-139px -56px}\
+#pp-popup-author-status.pp-fav{width:14px;height:14px;background-position:-200px -320px}\
+#pp-popup-author-status.pp-fav-m{width:16px;height:14px;background-position:-200px -480px}\
+#pp-popup-author-status.pp-mypix{width:14px;height:16px;background-position:0px -360px}\
 #pp-popup-author-image:hover~#pp-popup-author-status{display:none}\
 #pp-popup-tools{margin-left:0.6em}\
 #pp-popup-tools a{margin-right:0.6em}\
