@@ -20,8 +20,10 @@ pixiv の UI を拡張するブラウザ拡張。
 * make (GNU Make)
 * rsvg-convert (アイコンを作る)
 * python 2.7 or 2.6 (pixplus.js に埋め込んでいる JSON からメタデータなどを作る)
-* zip (oex を作る)
-* openssl (safariextz に署名する)
+* zip (oex)
+* ruby (crx)
+* rubyzip (crx)
+* openssl (crx/safariextz)
 
 ```bash
 $ git submodule update --init
@@ -34,8 +36,7 @@ Chrome 拡張を作成しない場合は `git submodule update --init` も不要
 
 ### Safari 拡張に署名する方法
 
-1.  [Safari Dev Center](https://developer.apple.com/devcenter/safari/)
-    で証明書を発行し、 Extension Builder で適当な safariextz を作成する。
+1.  [Safari Dev Center] で証明書を発行し、 Extension Builder で適当な safariextz を作成する。
 2.  証明書を発行する際に使用した Keychain Access.app
     で鍵を pkcs12 形式でエクスポートする。
 3.  エクスポートした p12 ファイルから openssl コマンドで秘密鍵を
@@ -49,3 +50,5 @@ Chrome 拡張を作成しない場合は `git submodule update --init` も不要
 ```bash
 $ safari/prepare_sign.sh hoge.safariextz Certificates.p12
 ```
+
+[Safari Dev Center]: https://developer.apple.com/devcenter/safari/
