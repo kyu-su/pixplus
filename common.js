@@ -1,5 +1,5 @@
 // this file loaded in both of background page and option page
 
 (function(g, _) {
-  _.lang.current = _.lang[g.navigator.language] || _.lang.en;
+  _.lng = _.i18n[g.navigator.language] || _.i18n.en;
 })(this, this.window.pixplus);

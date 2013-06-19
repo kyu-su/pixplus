@@ -20,7 +20,7 @@
       var import_message = _.q('#import-message');
       if (import_message) {
         _.configui.hide();
-        import_message.textContent = _.lang.current.importing;
+        import_message.textContent = _.lng.importing;
         import_message.style.display = '';
       }
     };
