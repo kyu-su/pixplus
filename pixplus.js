@@ -91,7 +91,7 @@
   }
 
   if (send_message) {
-    w.document.addEventListener('pixplusConfigSet', function(ev) {
+    w.addEventListener('pixplusConfigSet', function(ev) {
       var data = {};
       ['section', 'item', 'value'].forEach(function(attr) {
         data[attr] = ev.target.getAttribute('data-pp-' + attr);
@@ -5213,7 +5213,7 @@
     }
 
     if (_extension_data) {
-      var config_set_data = _.e('div', {css: 'display:none'}, d.body);
+      var config_set_data = _.e('div', {css: 'display:none'}, d.documentElement);
 
       _.conf.__init({
         get: function(section, item) {
