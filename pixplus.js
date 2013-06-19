@@ -922,7 +922,7 @@
           }
           _.conf[section.name][item.key] = value;
         });
-        
+
         _.onclick(
           _.e('button', {'text': that.lng.pref['default']}, row.insertCell(-1)),
           function() {
@@ -3334,7 +3334,6 @@
         var tw = _.e('div', {id: 'pp-popup-tagedit-table-wrapper'});
         table.parentNode.replaceChild(tw, table);
         tw.appendChild(table);
-        
       }
 
       _.popup.adjust();
@@ -3372,7 +3371,7 @@
             that.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
             that.onerror(illust, g.String(ex));
-          }  
+          }
         }).fail(function(data) {
           that.onerror(illust, data);
         });
