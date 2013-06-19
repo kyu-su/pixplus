@@ -1633,7 +1633,7 @@
         var p = this.parse_image_url(images[i].src, allow_types);
         if (!p && images[i].hasAttribute('data-src')) {
           // lazy load support
-          p = this.parse_image_url(images[i].getAttribute('data-src'), allow_types);
+          p = this.parse_image_url(images[i].dataset.src, allow_types);
         }
         if (!p) {
           continue;
@@ -4071,7 +4071,7 @@
 
       var aliases = _.conf.bookmark.tag_aliases;
       _.qa('.tag-container.tag-cloud-container .tag[data-tag]').map(function(tag) {
-        var tags = [tag.getAttribute('data-tag')], alist;
+        var tags = [tag.dataset.tag], alist;
         alist = aliases[tags[0]];
         if (alist) {
           tags = tags.concat(alist);
@@ -4268,8 +4268,8 @@
       var associate = function(tag1, tag2) {
         _.send_click(tag2);
 
-        tag1 = tag1.getAttribute('data-tag');
-        tag2 = tag2.getAttribute('data-tag');
+        tag1 = tag1.dataset.tag;
+        tag2 = tag2.dataset.tag;
 
         _.log('tag alias: ' + tag1 + ' => ' + tag2);
 
@@ -4314,7 +4314,7 @@
 
       this.dom.tag_groups.forEach(function(grp) {
         grp[1].forEach(function(tag) {
-          var tag_t  = tag.getAttribute('data-tag'),
+          var tag_t  = tag.dataset.tag,
               button = _.e('button', {cls: 'pp-tag-associate-button',
                                       text: tag_t, 'data-tag': tag_t});
           tag.parentNode.insertBefore(button, tag.nextSibling);
