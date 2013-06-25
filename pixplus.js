@@ -5896,15 +5896,16 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
   _.changelog = [
     {
-      "date": "2013/06/xx",
+      "date": "2013/06/25",
       "version": "1.7.0",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/06/25/pixplus-1-7-0",
       "changes_i18n": {
         "en": [
           "Improve boot performance.",
           "[Add] Added some features that extends \"Advanced Search\" dialog.",
           "[Remove] Remove \"Change 'Stacc feed' link\" option.",
           "[Remove] Remove \"Separator style for tag list\" option.",
+          "[Fix] Fix manga mode always reports error.",
           "[Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17"
         ],
         "ja": [
@@ -5912,6 +5913,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           "[\u8ffd\u52a0] \u300c\u691c\u7d22\u30aa\u30d7\u30b7\u30e7\u30f3\u300d\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u3044\u304f\u3064\u304b\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002",
           "[\u524a\u9664] \u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148\u3092\u5909\u66f4\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002",
           "[\u524a\u9664] \u300c\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002",
+          "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
           "[\u4fee\u6b63][Firefox] Firefox ESR 17\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
         ]
       }
