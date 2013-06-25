@@ -131,6 +131,10 @@
       return text ? text.replace(/(?:^\s+|\s+$)/g, '') : '';
     },
 
+    escape_regex: function(text) {
+      return text.replace(/([\.\?\*\+\|\(\)\[\]\\])/g, '\\$1');
+    },
+
     q: function(query, context) {
       return (context || d).querySelector(query);
     },
@@ -2843,79 +2847,76 @@
     clear: function() {
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
-      this.iframe = null;
       this.active = false;
       w.focus(); // for Firefox
     },
 
     adjust: function(w, h) {
-      var ifr = this.iframe,
-          win = ifr.contentWindow,
-          de = ifr.contentDocument.documentElement,
-          wrapper = _.popup.dom.bookmark_wrapper,
-          bm  = (win.wrappedJSObject || win).pixplus.bookmarkform;
-
-      wrapper.style.width  = 'auto';
-      wrapper.style.height = 'auto';
-
-      bm.adjust(w, h);
-
-      wrapper.style.width  = g.Math.min(de.scrollWidth,  w) + 'px';
-      wrapper.style.height = g.Math.min(de.scrollHeight, h) + 'px';
+      if (this.active) {
+        _.bookmarkform.adjust(w, h);
+      }
     },
 
-    onready: function(illust) {
+    onload: function(illust, html) {
       if (illust !== _.popup.illust || !this.active) {
         return;
       }
+
+      var root = _.fastxml.parse(html),
+          body = _.fastxml.q(root, '.layout-body');
+
+      var re, wrapper = _.popup.dom.bookmark_wrapper;
+
+      wrapper.innerHTML = _.fastxml.src(body, true);
+
+      (function(re) {
+        if (!re) {
+          return;
+        }
+
+        var tags = re[1].replace(/\\([\\\"])/g, '$1');
+
+        w.pixiv.context.tags = tags;
+
+        var load = w.pixiv.bookmarkTag.load;
+        w.pixiv.bookmarkTag.load = function(){};
+        w.pixiv.bookmarkTag.setup(_.q('.tag-cloud-container', wrapper));
+        w.pixiv.bookmarkTag.load = load;
+
+        w.pixiv.tag.setup();
+
+        w.pixiv.bookmarkTag.data = g.JSON.parse(tags);
+        w.pixiv.bookmarkTag.initialize();
+        w.pixiv.bookmarkTag.show();
+        w.pixiv.bookmarkTag.tagContainer.removeClass('loading-indicator');
+
+      })(/>pixiv\.context\.tags\s*=\s*\'([^\']+)';/.exec(html));
+
+      _.onclick(wrapper, function(ev) {
+        if (ev.target.classList.contains('tag')) {
+          w.pixiv.tag.toggle(ev.target.dataset.tag);
+        }
+      });
 
       var that = this;
 
-      var ifr = this.iframe,
-          win = ifr.contentWindow,
-          de = ifr.contentDocument.documentElement;
+      _.bookmarkform.setup(wrapper, !illust.bookmarked, function() {
+        _.xhr.remove_cache(illust.url_bookmark);
 
-      if (!de || de.classList.contains('pp-bookmark-iframe')) {
-        return;
-      }
-
-      _.listen(win, 'unload', function() {
-        ifr.style.visibility = 'hidden';
-        w.setTimeout(function() {
-          that.clear();
+        if (illust === _.popup.illust && _.popup.bookmark.active) {
+          that.end();
           _.popup.reload();
-        }, 0);
+        }
       });
 
-      de.classList.add('pp-bookmark-iframe');
+      if (_.bookmarkform.dom.input_tag) {
+        g.setTimeout(function() {
+          _.bookmarkform.dom.input_tag.focus();
+        }, 0);
+      }
 
-      _.popup.key.init(win);
       _.popup.dom.root.classList.add('pp-bookmark-mode');
-      ifr.style.display = 'block';
       _.popup.set_status('');
-      _.popup.adjust();
-    },
-
-    onload: function(illust) {
-      if (illust !== _.popup.illust || !this.active) {
-        return;
-      }
-
-      this.onready(illust);
-
-      var ifr = this.iframe,
-          win = ifr.contentWindow,
-          doc = ifr.contentDocument,
-          bm  = (win.wrappedJSObject || win).pixplus.bookmarkform;
-
-      bm.setup(doc.querySelector('#wrapper .layout-body'));
-      if (!illust.bookmarked) {
-        bm.autoinput_tag();
-      }
-      if (bm.dom.input_tag) {
-        bm.dom.input_tag.focus();
-      }
-
       _.popup.adjust();
     },
 
@@ -2930,19 +2931,9 @@
       this.active = true;
       _.popup.set_status('Loading');
 
-      var ifr = _.e('iframe');
-
-      _.listen(ifr, 'DOMFrameContentLoaded', function(ev) {
-        that.onready(illust);
-      });
-
-      _.listen(ifr, 'load', function(ev) {
-        w.setTimeout(function() {
-          that.onload(illust);
-        }, 0);
-      });
-
-      _.listen(ifr, 'error', function() {
+      _.xhr.get(illust.url_bookmark, function(html) {
+        that.onload(illust, html);
+      }, function() {
         if (illust !== _.popup.illust || !that.active) {
           return;
         }
@@ -2950,13 +2941,6 @@
         that.active = false;
         _.popup.set_status('Error');
       });
-
-      ifr.style.display = 'none';
-      ifr.src = illust.url_bookmark;
-
-      _.clear(_.popup.dom.bookmark_wrapper);
-      this.iframe = ifr;
-      _.popup.dom.bookmark_wrapper.appendChild(ifr);
     },
 
     submit: function() {
@@ -2964,8 +2948,7 @@
         return;
       }
 
-      var win = this.iframe.contentWindow;
-      (win.wrappedJSObject || win).pixplus.bookmarkform.dom.form.submit();
+      _.bookmarkform.dom.form.submit();
     },
 
     end: function() {
@@ -4064,29 +4047,32 @@
     },
 
     autoinput_tag: function() {
-      var illust_tags = _.qa(
-        '.work-tags-container .tag[data-tag]',
-        this.dom.root
-      ).map(function(tag) {
-        return tag.getAttribute('data-tag');
+      if (!this.dom.input_tag) {
+        return;
+      }
+
+      var illust_tags = _.qa('.work-tags-container .tag[data-tag]', this.dom.root).map(function(tag) {
+        return tag.dataset.tag;
       });
 
+      var tags_value = [];
+
       var aliases = _.conf.bookmark.tag_aliases;
-      _.qa('.tag-container.tag-cloud-container .tag[data-tag]').map(function(tag) {
-        var tags = [tag.dataset.tag], alist;
-        alist = aliases[tags[0]];
-        if (alist) {
-          tags = tags.concat(alist);
-        }
-        for(var i = 0; i < tags.length; ++i) {
-          for(var j = 0; j < illust_tags.length; ++j) {
-            if (illust_tags[j].indexOf(tags[i]) >= 0) {
-              _.send_click(tag);
-              return;
-            }
+      _.qa('.tag-container.tag-cloud-container .tag[data-tag]').forEach(function(tage) {
+        var tag = tage.dataset.tag, pattern;
+
+        pattern = new g.RegExp([tag].concat(aliases[tag] || []).map(_.escape_regex).join('|'));
+
+        for(var i = 0; i < illust_tags.length; ++i) {
+          if (pattern.test(illust_tags[i])) {
+            tags_value.push(tag);
+            break;
           }
         }
       });
+
+      this.dom.input_tag.value = tags_value.join(' ');
+      w.pixiv.tag.update();
     },
 
     setup_tag_order: function() {
@@ -4096,7 +4082,7 @@
       }
 
       _.reorder_tag_list(mytags, function(tag) {
-        return tag.querySelector('.tag').getAttribute('data-tag');
+        return tag.querySelector('.tag').dataset.tag;
       });
 
       var opt = _.q('.list-option.tag-order', this.dom.root);
@@ -4396,7 +4382,7 @@
       });
     },
 
-    setup: function(root) {
+    setup: function(root, autoinput, cb_submit) {
       if (!root) {
         return;
       }
@@ -4424,6 +4410,25 @@
       this.setup_tag_order(root);
       this.setup_key(root);
       this.setup_alias_ui(root);
+
+      if (autoinput) {
+        this.autoinput_tag();
+      }
+
+      form.setAttribute('action', '/bookmark_add.php');
+      _.listen(form, 'submit', function() {
+        _.xhr.post(form, function() {
+          cb_submit();
+        }, function() {
+          g.alert('Error!');
+        });
+
+        _.qa('input[type="submit"]', form).forEach(function(btn) {
+          btn.value = _.lng.sending;
+          btn.setAttribute('disabled', '');
+        });
+        return true;
+      });
     }
   });
 
@@ -5333,8 +5338,16 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup.pp-bookmark-mode #pp-popup-image-wrapper{display:none}\
 #pp-popup.pp-bookmark-mode .pp-popup-olc{display:none}\
 #pp-popup.pp-bookmark-mode #pp-popup-bookmark-wrapper{display:block}\
-#pp-popup-bookmark-wrapper iframe{width:100%;height:100%;border:none}\
 \
+#pp-popup-bookmark-wrapper .layout-body{margin:0px;border:none}\
+#pp-popup-bookmark-wrapper .bookmark-detail-unit{border-radius:0px;border:none}\
+#pp-popup-bookmark-wrapper .bookmark-list-unit{border-radius:0px;border:none;margin:0px}\
+#pp-popup-bookmark-wrapper .tag-container{overflow-y:auto}\
+#pp-popup-bookmark-wrapper .list-container+.list-container{margin-top:0px}\
+#pp-popup-bookmark-wrapper ._list-unit{padding-top:4px;padding-bottom:4px}\
+#pp-popup-bookmark-wrapper .tag-cloud{padding:4px !important}\
+\
+#pp-popup-bookmark-wrapper iframe{width:100%;height:100%;border:none}\
 .pp-bookmark-iframe{overflow:auto}\
 .pp-bookmark-iframe>body>*:not(#wrapper){display:none}\
 .pp-bookmark-iframe #wrapper>*:not(.layout-body){display:none}\
