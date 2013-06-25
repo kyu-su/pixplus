@@ -1513,6 +1513,10 @@
 
       var test = function(node) {
         var tidx = tokens.length - 1;
+        if (!tokens[tidx--](node)) {
+          return false;
+        }
+        node = node.parent;
         while(tidx >= 0 && node) {
           if (tokens[tidx](node)) {
             --tidx;
@@ -2009,37 +2013,35 @@
     },
 
     parse_manga_html: function(illust, html) {
-      var terms = html.split(/pixiv\.context\.images\[(\d+)\]\.(push|unshift)\('([^']*)'\)/),
-          pages = [], count = 0;
+      var that = this, pages = [], cnt = 0;
 
-      for(var i = 1; i + 2 < terms.length; i += 4) {
-        var page = g.parseInt(terms[i], 10),
-            op = terms[i + 1] /* (push|unshift) */,
-            url = terms[i + 2],
-            url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+      var root = _.fastxml.parse(html);
+      _.fastxml.qa(root, '.manga .item-container').forEach(function(page) {
+        var urls = [], urls_big = [];
 
-        if (page > pages.length) {
-          return false;
-        }
-        if (page === pages.length) {
+        g.console.log(page);
+        _.fastxml.qa(page, 'img').forEach(function(img) {
+          if (img.attrs['data-filter'] !== 'manga-image') {
+            return;
+          }
+
+          var url = img.attrs['data-src'] || img.attrs.src;
+          urls.push(url);
+          urls_big.push(url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1'));
+          ++cnt;
+        });
+
+        if (urls.length) {
           pages.push({
-            image_urls: [],
-            image_urls_big: [],
+            image_urls: urls,
+            image_urls_big: urls_big,
             images: []
           });
         }
+      });
 
-        if (pages.length > 0 && page === pages.length - 1) {
-          pages[page].image_urls[op](url);
-          pages[page].image_urls_big[op](url_big);
-          ++count;
-        } else {
-          return false;
-        }
-      }
-
-      if (count !== illust.manga.page_count) {
-        return false;
+      if (cnt !== illust.manga.page_count) {
+        _.warn('Manga page count mismatch!');
       }
 
       illust.manga.pages = pages;
