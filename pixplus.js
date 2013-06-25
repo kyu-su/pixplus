@@ -2021,19 +2021,25 @@
       var that = this, pages = [], cnt = 0;
 
       var root = _.fastxml.parse(html);
-      _.fastxml.qa(root, '.manga .item-container').forEach(function(page) {
+      _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
         var urls = [], urls_big = [];
 
-        g.console.log(page);
         _.fastxml.qa(page, 'img').forEach(function(img) {
           if (img.attrs['data-filter'] !== 'manga-image') {
             return;
           }
 
-          var url = img.attrs['data-src'] || img.attrs.src;
-          urls.push(url);
-          urls_big.push(url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1'));
+          var url = img.attrs['data-src'] || img.attrs.src,
+              url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+
           ++cnt;
+          if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
+            urls.unshift(url);
+            urls_big.unshift(url_big);
+          } else {
+            urls.push(url);
+            urls_big.push(url_big);
+          }
         });
 
         if (urls.length) {
@@ -2046,7 +2052,8 @@
       });
 
       if (cnt !== illust.manga.page_count) {
-        _.warn('Manga page count mismatch!');
+        _.error('Manga page count mismatch!');
+        return false;
       }
 
       illust.manga.pages = pages;
