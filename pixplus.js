@@ -717,7 +717,7 @@
       return keys.join('+');
     },
 
-    listen: function(context, listener) {
+    listen: function(context, listener, options) {
       var that = this;
       _.listen(context, ['keypress', 'keydown'], function(ev, connection) {
         var key = that.parse_event(ev);
@@ -730,7 +730,7 @@
           return res;
         }
         return false;
-      });
+      }, options);
     },
 
     init: function() {
@@ -1423,6 +1423,7 @@
 
   _.fastxml = _.mod({
     ignore_elements: /^(?:script|style)$/,
+    query_cache: {},
 
     parse: function(xml) {
       var dom, node, tags = xml.split(/<(\/?[a-zA-Z0-9]+)( [^<>]*?\/?)?>/);
@@ -3892,7 +3893,7 @@
         }
 
         return cancel;
-      });
+      }, {capture: true});
     }
   });
 
