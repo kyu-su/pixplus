@@ -15,7 +15,11 @@
 
 'use strict';
 
-(function(g, w, unsafeWindow, entrypoint) {
+(function(entrypoint) {
+  var w = window,
+      g = this || window,
+      unsafeWindow = g.unsafeWindow;
+
   if (w.location.href.indexOf('pixivreader') >= 0) {
     return;
   }
@@ -31,7 +35,7 @@
     s.setAttribute('type', 'text/javascript');
     s.textContent
       = ('(' + entrypoint.toString() + ')'
-         + '(this,this.window,this.window.document,'
+         + '(this || window,window,window.document,'
          + g.JSON.stringify(data) + ')');
     (d.body || d.documentElement || d).appendChild(s);
   };
@@ -99,7 +103,9 @@
       send_message('config-set', data);
     }, false);
   }
-})(this, this.window, this.unsafeWindow, function(g, w, d, _extension_data) {
+})(function(g, w, d, _extension_data) {
+
+  'use strict';
 
   if (w.pixplus) {
     return;
