@@ -13,8 +13,6 @@
 // @run-at      document-start
 // ==/UserScript==
 
-'use strict';
-
 (function(entrypoint) {
   var w = window,
       g = this || window,
@@ -104,8 +102,6 @@
     }, false);
   }
 })(function(g, w, d, _extension_data) {
-
-  'use strict';
 
   if (w.pixplus) {
     return;
