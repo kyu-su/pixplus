@@ -5904,6 +5904,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
       "date": "2013/06/26",
       "version": "1.7.1",
@@ -5918,7 +5919,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/06/25",
       "version": "1.7.0",
