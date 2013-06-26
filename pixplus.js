@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.7.0
+// @version     1.7.1
 // @license     Apache License 2.0
 // @description pixivをほげる。
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
