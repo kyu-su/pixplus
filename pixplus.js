@@ -1772,15 +1772,19 @@
 
       var work_info = _.fastxml.q(root, '.work-info'),
           score     = _.fastxml.q(work_info, '.score'),
-          question  = _.fastxml.q(work_info, '.questionnaire');
+          question  = _.fastxml.q(work_info, '.questionnaire'),
+          tags_tmpl = _.fastxml.q(root, '#template-work-tags'),
+          tags      = _.fastxml.q(root, '.work-tags .tags-container');
 
       illust.title    = _.fastxml.text(_.fastxml.q(work_info, '.title'));
       illust.caption  = _.fastxml.src(_.fastxml.q(work_info, '.caption'));
-      illust.taglist  =
-        _.fastxml.src(_.fastxml.q(root, '#template-work-tags'), true) +
-        _.fastxml.src(_.fastxml.q(root, '.work-tags .tags-container'));
+      illust.taglist  = _.fastxml.src(tags_tmpl, true) + _.fastxml.src(tags);
       illust.rating   = _.fastxml.src(score);
       illust.question = _.fastxml.src(question, true);
+
+      illust.tags = _.fastxml.qa(tags, '.tag .text').map(function(tag) {
+        return _.strip(_.fastxml.text(tag));
+      });
 
       var search_script = function(node, name) {
         var pattern = new g.RegExp('pixiv\\.context\\.' + name + '\\s*=\\s*(true|false)');
