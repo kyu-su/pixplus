@@ -26,7 +26,7 @@ BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
 FEED_ATOM                       = feed.atom
 CHANGELOG_JSON                  = changelog.json
 
-DIST_DIR                        = $(CURDIR)/bin/$(VERSION)
+DIST_DIR                        = $(CURDIR)/bin
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
 OEX                             = $(DIST_DIR)/pixplus.oex
@@ -61,8 +61,8 @@ CRX_DIST_FILES                  = $(DIST_FILES_ALL:%=$(BUILD_DIR_CRX)/%) \
 
 SAFARIEXTZ_CERTS                = $(sort $(wildcard $(CURDIR)/safari/sign/cert??))
 SAFARIEXTZ_SIGN_KEY             = $(CURDIR)/safari/sign/key.pem
-SAFARIEXTZ_INFO_PLIST_IN	= $(CURDIR)/safari/Info.plist.in
-SAFARIEXTZ_SETTINGS_PLIST_IN	= $(CURDIR)/safari/Settings.plist.in
+SAFARIEXTZ_INFO_PLIST_IN        = $(CURDIR)/safari/Info.plist.in
+SAFARIEXTZ_SETTINGS_PLIST_IN    = $(CURDIR)/safari/Settings.plist.in
 SAFARIEXTZ_USERJS               = $(BUILD_DIR_SAFARIEXTZ)/$(SRC_USERJS)
 SAFARIEXTZ_INFO_PLIST           = $(BUILD_DIR_SAFARIEXTZ)/Info.plist
 SAFARIEXTZ_SETTINGS_PLIST       = $(BUILD_DIR_SAFARIEXTZ)/Settings.plist
@@ -78,17 +78,17 @@ ALL_TARGETS                    += $(OEX)
 endif
 
 ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS	               += $(CRX)
+ALL_TARGETS                    += $(CRX)
 endif
 
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-ALL_TARGETS	               += $(SAFARIEXTZ)
+ALL_TARGETS                    += $(SAFARIEXTZ)
 endif
 
 all: $(ALL_TARGETS) feeds
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
-	@echo '$(notdir $(OEX)):	    $(BUILD_OEX)'
-	@echo '$(notdir $(CRX)):	    $(BUILD_CRX)'
+	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
+	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
 	@echo '$(notdir $(SAFARIEXTZ)): $(BUILD_SAFARIEXTZ)'
 
 deps: $(XAR)
