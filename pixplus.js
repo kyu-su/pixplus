@@ -3331,6 +3331,8 @@
         tw.appendChild(table);
       }
 
+      _.popup.set_status('');
+      _.popup.dom.root.classList.add('pp-tagedit-mode');
       _.popup.adjust();
     },
 
@@ -3342,6 +3344,7 @@
         this.active = false;
       }
       _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
+      _.popup.set_status('Error');
     },
 
     reload: function() {
@@ -3361,7 +3364,6 @@
         }, {
           ajaxSettings: {dataType: 'text'}
         }).done(function(data) {
-          _.debug(data);
           try {
             that.onload(illust, g.JSON.parse(data).html);
           } catch(ex) {
@@ -3374,7 +3376,8 @@
         this.onerror(illust);
         return;
       }
-      _.popup.dom.tagedit_wrapper.textContent = 'Loading';
+
+      _.popup.set_status('Loading');
     },
 
     start: function() {
@@ -3383,7 +3386,6 @@
       }
       this.active = true;
       this.reload();
-      _.popup.dom.root.classList.add('pp-tagedit-mode');
       _.popup.adjust();
     },
 
