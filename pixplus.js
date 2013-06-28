@@ -2194,7 +2194,7 @@
       dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
       dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
       dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment pp-hide'}, dom.comment);
-      dom.taglist           = _.e('div', {id: 'pp-popup-taglist', cls: 'work-tags'}, dom.header);
+      dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
       dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
@@ -3190,6 +3190,7 @@
       }
       _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
       _.popup.dom.comment_err_empty.classList[html ? 'add' : 'remove']('pp-hide');
+      _.popup.set_status('');
       _.popup.adjust();
       this.scroll();
     },
@@ -3199,6 +3200,7 @@
         return;
       }
       _.popup.dom.comment_history.textContent = message || 'Error';
+      _.popup.set_status('Error');
     },
 
     reload: function() {
@@ -3230,7 +3232,9 @@
         this.onerror(illust);
         return;
       }
+
       _.popup.dom.comment_history.textContent = 'Loading';
+      _.popup.set_status('Loading');
     },
 
     setup_form: function() {
