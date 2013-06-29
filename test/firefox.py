@@ -4,6 +4,8 @@ import urllib
 
 from selenium import webdriver
 
+import util
+
 class Firefox:
   addons = {
     'greasemonkey': 748,
@@ -19,28 +21,9 @@ class Firefox:
   def prepare_addon(self, addonid, name):
     filename = 'addon-%d-latest.xpi' % addonid
     url = 'https://addons.mozilla.org/firefox/downloads/latest/%d/%s' % (addonid, filename)
-
     if not os.path.exists(filename) or os.stat(filename).st_mtime < time.time() - 60 * 60 * 24:
-      sys.stdout.write('Download addon %s (%d)...' % (name, addonid))
-      sys.stdout.flush()
-
-      fp = urllib.urlopen(url)
-      try:
-        bin = fp.read()
-      finally:
-        fp.close()
-        pass
-
-      fp = open(filename, 'wb')
-      try:
-        fp.write(bin)
-      finally:
-        fp.close()
-        pass
-
-      print(' Done')
+      util.download(url, filename)
       pass
-
     return filename
 
   def add_addons(self, addons):
