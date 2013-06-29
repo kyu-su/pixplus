@@ -59,7 +59,7 @@ class Test_TagEdit(TestCase):
 
     tagid = int(m.group(1))
     tag = self.driver.execute_script('return document.getElementById("tag%d").textContent' % tagid)
-    tag = urllib.unquote(tag)
+    tag = urllib.unquote(tag.encode('utf-8')).decode('utf-8')
     self.assertTrue(tag)
     self.assertIn(tag, tags)
 

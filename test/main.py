@@ -116,7 +116,7 @@ def main():
   tests = load_tests()
   test(Firefox(['greasemonkey']).driver, config, tests)
   test(Firefox(['scriptish']).driver, config, tests)
-  # test(Chrome().driver, config, tests)
+  test(Chrome().driver, config, tests)
   pass
 
 if __name__ == '__main__':
