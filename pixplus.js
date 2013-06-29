@@ -2,7 +2,7 @@
 // @name        pixplus.js
 // @author      wowo
 // @version     1.7.2
-// @license     Apache License 2.0
+// @license     The MIT License
 // @description pixivをほげる。
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
 // @icon64      http://crckyl.ath.cx/pixplus/pixplus_64.png
@@ -1118,7 +1118,7 @@
         }],
         [this.lng.pref.about_email,
          _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
-        [this.lng.pref.about_license, 'Apache License 2.0']
+        [this.lng.pref.about_license, 'The MIT License']
       ].forEach(function(p) {
         var label = p[0], content = p[1];
         _.e('dt', {text: label}, dl);
