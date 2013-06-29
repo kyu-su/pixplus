@@ -4,6 +4,7 @@ import unittest
 
 from firefox import Firefox
 from chrome import Chrome
+from opera import Opera
 
 def make_tests(clslist, driver, config):
   tests = []
@@ -20,9 +21,6 @@ def make_tests(clslist, driver, config):
   return tests
 
 def load_tests():
-  # from test3_tagedit import Test_TagEdit
-  # return [Test_TagEdit]
-
   tests = []
 
   for filename in sorted(os.listdir('.')):
@@ -86,25 +84,31 @@ def login(driver, config):
   driver.find_element_by_class_name('login-form').submit()
 
   if driver.current_url != 'http://www.pixiv.net/mypage.php':
-    raise 'Login failed!'
+    raise RuntimeError('Login failed!')
 
   save_cookie(driver)
   pass
 
-def test(driver, config, tests):
-  suite = unittest.TestSuite()
-  suite.addTests(make_tests(tests, driver, config))
+def test(browser, config, tests):
+  driver = browser.driver
 
-  driver.set_window_size(1280, 800)
-  driver.get('http://www.pixiv.net/')
-  load_cookie(driver)
-  driver.get('http://www.pixiv.net/')
+  try:
+    suite = unittest.TestSuite()
+    suite.addTests(make_tests(tests, driver, config))
 
-  if driver.current_url == 'http://www.pixiv.net/':
-    login(driver, config)
+    browser.set_window_size(1280, 800)
+    driver.get('http://www.pixiv.net/')
+    load_cookie(driver)
+    driver.get('http://www.pixiv.net/')
+
+    if driver.current_url == 'http://www.pixiv.net/':
+      login(driver, config)
+      pass
+
+    unittest.TextTestRunner(verbosity = 2).run(suite)
+  finally:
+    browser.quit()
     pass
-
-  unittest.TextTestRunner(verbosity = 2).run(suite)
   pass
 
 def main():
@@ -114,9 +118,12 @@ def main():
     return
 
   tests = load_tests()
-  test(Firefox(['greasemonkey']).driver, config, tests)
-  test(Firefox(['scriptish']).driver, config, tests)
-  test(Chrome().driver, config, tests)
+
+  test(Firefox(['greasemonkey']), config, tests)
+  test(Firefox(['scriptish']), config, tests)
+  test(Chrome(), config, tests)
+  test(Opera('extension'), config, tests)
+  test(Opera('userjs'), config, tests)
   pass
 
 if __name__ == '__main__':

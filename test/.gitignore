@@ -2,3 +2,5 @@
 *.pyc
 config.json
 cookie.json
+selenium-*.jar
+selenium.log

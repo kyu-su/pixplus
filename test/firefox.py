@@ -4,9 +4,10 @@ import urllib
 
 from selenium import webdriver
 
+from browser import Browser
 import util
 
-class Firefox:
+class Firefox(Browser):
   addons = {
     'greasemonkey': 748,
     'scriptish': 231203
@@ -15,7 +16,7 @@ class Firefox:
   def __init__(self, addons):
     self.profile = webdriver.FirefoxProfile()
     self.add_addons(addons)
-    self.driver = webdriver.Firefox(firefox_profile = self.profile)
+    Browser.__init__(self, webdriver.Firefox(firefox_profile = self.profile))
     pass
 
   def prepare_addon(self, addonid, name):

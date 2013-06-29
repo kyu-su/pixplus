@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import urllib2
 
 def download(url, filename):
