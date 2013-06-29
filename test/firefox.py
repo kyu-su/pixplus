@@ -35,39 +35,19 @@ class Firefox:
       pass
     pass
 
-  def copy_file(self, path_from, path_to):
-    if os.path.isdir(path_to):
-      path_to = os.path.join(path_to, os.path.basename(path_from))
-      pass
-
-    fp = open(path_from, 'rb')
-    try:
-      data = fp.read()
-    finally:
-      fp.close()
-      pass
-
-    fp = open(path_to, 'wb')
-    try:
-      fp.write(data)
-    finally:
-      fp.close()
-      pass
-    pass
-
   def setup_greasemonkey(self):
     path_gm = os.path.join(self.profile.path, 'gm_scripts')
     os.mkdir(path_gm)
-    self.copy_file('gm_config.xml', os.path.join(path_gm, 'config.xml'))
-    self.copy_file('../bin/pixplus.user.js', path_gm)
+    util.copy_file('gm_config.xml', os.path.join(path_gm, 'config.xml'))
+    util.copy_file('../bin/pixplus.user.js', path_gm)
     self.profile.set_preference('extensions.greasemonkey.stats.prompted', True)
     pass
 
   def setup_scriptish(self):
     path_st = os.path.join(self.profile.path, 'scriptish_scripts')
     os.mkdir(path_st)
-    self.copy_file('scriptish-config.json', path_st)
-    self.copy_file('../bin/pixplus.user.js', path_st)
+    util.copy_file('scriptish-config.json', path_st)
+    util.copy_file('../bin/pixplus.user.js', path_st)
     os.utime(os.path.join(path_st, 'pixplus.user.js'), (2000000000, 2000000000))
     pass
 

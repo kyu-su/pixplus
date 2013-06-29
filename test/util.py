@@ -29,3 +29,23 @@ def download(url, filename):
   sys.stdout.write('\n')
   sys.stdout.flush()
   pass
+
+def copy_file(path_from, path_to):
+  if os.path.isdir(path_to):
+    path_to = os.path.join(path_to, os.path.basename(path_from))
+    pass
+
+  fp = open(path_from, 'rb')
+  try:
+    data = fp.read()
+  finally:
+    fp.close()
+    pass
+
+  fp = open(path_to, 'wb')
+  try:
+    fp.write(data)
+  finally:
+    fp.close()
+    pass
+  pass
