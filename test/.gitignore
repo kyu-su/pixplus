@@ -1,0 +1,4 @@
+*.xpi
+*.pyc
+config.json
+cookie.json

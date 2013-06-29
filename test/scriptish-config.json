@@ -1,0 +1,15 @@
+{"excludes":[],"scripts":[{
+  "domains":[],
+  "includes":["http://www.pixiv.net/*"],
+  "matches":[],
+  "screenshots":[],
+  "requires":[],
+  "resources":[],
+  "filename":"pixplus.user.js",
+  "id":"pixplus.js@httpmy.opera.comcrckyl",
+  "name":"pixplus.js",
+  "enabled":true,
+  "basedir":".",
+  "modified":2000000000000,
+  "run-at":"document-start"
+}]}
