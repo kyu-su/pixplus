@@ -174,7 +174,7 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
              -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
            < $< > $@
-	@grep '://' $(LICENSE) | sed -e '2,$$d' -e 's/^ */  <license href="/' -e 's/ *$$/">/' >> $@
+	@echo '  <license>' >> $@
 	@cat $(LICENSE) >> $@
 	@echo '  </license>' >> $@
 	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
