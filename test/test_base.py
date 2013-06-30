@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 
 class TestCase(unittest.TestCase):
+
   def __init__(self, driver, config, testname):
     unittest.TestCase.__init__(self, testname)
     self.driver = driver
