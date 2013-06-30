@@ -1,4 +1,5 @@
 import sys, os
+import argparse
 import json
 import unittest
 
@@ -21,7 +22,7 @@ def make_tests(clslist, driver, config):
   return tests
 
 def load_tests():
-  tests = []
+  tests = {}
 
   for filename in sorted(os.listdir('.')):
     if not filename.startswith('test') or not filename.endswith('.py'):
@@ -30,10 +31,14 @@ def load_tests():
     name = filename.split('.', 1)[0]
     mod = __import__(name, {}, {}, [], 0)
 
+    classes = []
     for aname in dir(mod):
       if not aname.startswith('Test_'):
         continue
-      tests.append(getattr(mod, aname))
+      classes.append(getattr(mod, aname))
+      pass
+    if classes:
+      tests[name] = classes
       pass
     pass
 
@@ -112,18 +117,54 @@ def test(browser, config, tests):
   pass
 
 def main():
+  all_tests = load_tests()
+  browser_names = (
+    'fx', 'fx_greasemonkey', 'fx_scriptish',
+    'chrome',
+    'opera', 'opera_oex', 'opera_userjs'
+    )
+
+  parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
+  parser.add_argument('-t', metavar = 'TEST', choices = all_tests.keys(),
+                      dest = 'tests', action = 'append',
+                      help = ','.join(sorted(all_tests.keys())))
+  parser.add_argument('-b', metavar = 'BROWSER', choices = browser_names,
+                      dest = 'browsers', action = 'append',
+                      help = ','.join(browser_names))
+  args = parser.parse_args()
+
   config = read_json('config.json')
   if config is None:
     print('Error: Create "config.json" first')
     return
 
-  tests = load_tests()
+  tests = []
+  for name in (args.tests or sorted(all_tests.keys())):
+    tests += all_tests[name]
+    pass
 
-  test(Firefox(['greasemonkey']), config, tests)
-  test(Firefox(['scriptish']), config, tests)
-  test(Chrome(), config, tests)
-  test(Opera('extension'), config, tests)
-  test(Opera('userjs'), config, tests)
+  browsers = args.browsers
+  if not browsers:
+    browsers = browser_names
+    pass
+
+  if 'fx' in browsers or 'fx_greasemonkey' in browsers:
+    test(Firefox(['greasemonkey']), config, tests)
+    pass
+  if 'fx' in browsers or 'fx_scriptish' in browsers:
+    test(Firefox(['scriptish']), config, tests)
+    pass
+
+  if 'chrome' in browsers:
+    test(Chrome(), config, tests)
+    pass
+
+  if 'opera' in browsers or 'opera_oex' in browsers:
+    test(Opera('extension'), config, tests)
+    pass
+  if 'opera' in browsers or 'opera_userjs' in browsers:
+    test(Opera('userjs'), config, tests)
+    pass
   pass
 
 if __name__ == '__main__':
