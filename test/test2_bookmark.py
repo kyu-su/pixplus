@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from test_base import TestCase
 
 class Test_Bookmark(TestCase):
+
   def unbookmark(self, illust_id = None):
     if illust_id is None:
       illust_id = self.popup_get_illust_id()
@@ -12,6 +13,11 @@ class Test_Bookmark(TestCase):
 
     url = self.driver.current_url
     self.open('/bookmark.php')
+
+    if self.browser.name == 'opera':
+      self.driver.execute_script('window.confirm=function(){return true}')
+      pass
+
     link = self.q('a[href*="illust_id=%d"]' % illust_id)
     checkbox = self.q('input[name="book_id[]"]', link.parent)
     checkbox.click()
@@ -45,8 +51,10 @@ class Test_Bookmark(TestCase):
     input_tag.send_keys(Keys.SPACE)
     self.assertEquals(input_tag.get_attribute('value'), first_tag.get_attribute('data-tag'))
 
-    input_tag.send_keys(Keys.ESCAPE)
-    self.assertFalse(self.has_class(first_tag, 'pp-tag-select'))
+    if self.browser.name != 'opera':
+      input_tag.send_keys(Keys.ESCAPE)
+      self.assertFalse(self.has_class(first_tag, 'pp-tag-select'))
+      pass
 
     form = self.q('form[action*="bookmark_add.php"]', popup)
     form.submit()

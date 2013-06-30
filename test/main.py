@@ -7,7 +7,7 @@ from firefox import Firefox
 from chrome import Chrome
 from opera import Opera
 
-def make_tests(clslist, driver, config):
+def make_tests(clslist, browser, config):
   tests = []
   for cls in clslist:
     for name in dir(cls):
@@ -15,7 +15,7 @@ def make_tests(clslist, driver, config):
         continue
       attr = getattr(cls, name)
       if callable(attr):
-        tests.append(cls(driver, config, name))
+        tests.append(cls(browser, config, name))
         pass
       pass
     pass
@@ -95,13 +95,13 @@ def login(driver, config):
   pass
 
 def test(browser, config, tests):
-  driver = browser.driver
-
   try:
     suite = unittest.TestSuite()
-    suite.addTests(make_tests(tests, driver, config))
+    suite.addTests(make_tests(tests, browser, config))
 
     browser.set_window_size(1280, 800)
+
+    driver = browser.driver
     driver.get('http://www.pixiv.net/')
     load_cookie(driver)
     driver.get('http://www.pixiv.net/')

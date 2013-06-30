@@ -3,6 +3,7 @@ from selenium import webdriver
 from browser import Browser
 
 class Chrome(Browser):
+  name = 'chrome'
 
   def __init__(self):
     self.options = webdriver.ChromeOptions()

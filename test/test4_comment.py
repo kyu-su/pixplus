@@ -3,6 +3,7 @@ import time
 from test_base import TestCase
 
 class Test_Comment(TestCase):
+
   def test_comment(self):
     self.open_test_user()
     popup = self.open_popup()
@@ -31,4 +32,5 @@ class Test_Comment(TestCase):
 
     self.assertTrue(self.xa(xpath))
     pass
+
   pass

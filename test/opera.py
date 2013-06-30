@@ -2,6 +2,7 @@ import os
 import tempfile
 import subprocess
 import time
+import httplib
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -12,6 +13,7 @@ from browser import Browser
 import util
 
 class Opera(Browser):
+  name = 'opera'
   selenium_jar_url = 'https://selenium.googlecode.com/files/selenium-server-standalone-2.33.0.jar'
 
   def __init__(self, mode):
@@ -55,7 +57,7 @@ class Opera(Browser):
   def quit(self):
     try:
       Browser.quit(self)
-    except http_client.BadStatusLine:
+    except httplib.BadStatusLine:
       pass
 
     self.process.kill()

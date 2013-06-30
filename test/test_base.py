@@ -1,13 +1,14 @@
 import unittest
+import time
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 
 class TestCase(unittest.TestCase):
-
-  def __init__(self, driver, config, testname):
+  def __init__(self, browser, config, testname):
     unittest.TestCase.__init__(self, testname)
-    self.driver = driver
+    self.browser = browser
+    self.driver = browser.driver
     self.config = config
     pass
 
@@ -17,7 +18,11 @@ class TestCase(unittest.TestCase):
     pass
 
   def alert_accept(self):
-    Alert(self.driver).accept()
+    if self.browser.name == 'opera':
+      time.sleep(1)
+    else:
+      Alert(self.driver).accept()
+      pass
     pass
 
   def open(self, url):
@@ -101,7 +106,6 @@ class TestCase(unittest.TestCase):
     pass
 
   def find_illust(self, callback, *args):
-    self.open_test_user()
     popup = self.open_popup()
 
     while True:

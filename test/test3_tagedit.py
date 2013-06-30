@@ -5,6 +5,7 @@ import urllib
 from test_base import TestCase
 
 class Test_TagEdit(TestCase):
+
   def check_tag_editable(self, popup, query):
     self.driver.execute_script('pixplus.popup.tagedit.start()')
     self.popup_wait_load()
@@ -33,6 +34,7 @@ class Test_TagEdit(TestCase):
     pass
 
   def test_tagedit_add(self):
+    self.open_test_user()
     add_tag = self.find_tag_editable('input#add_tag')
     tags = self.popup_get_tags()
 
@@ -51,6 +53,11 @@ class Test_TagEdit(TestCase):
     pass
 
   def test_tagedit_delete(self):
+    self.open_test_user()
+    if self.browser.name == 'opera':
+      self.driver.execute_script('window.confirm=function(){return true}')
+      pass
+
     del_btn = self.find_tag_editable('input[onclick^="delTag("]')
     tags = self.popup_get_tags()
 

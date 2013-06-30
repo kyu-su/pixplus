@@ -8,6 +8,7 @@ from browser import Browser
 import util
 
 class Firefox(Browser):
+  name = 'firefox'
   addons = {
     'greasemonkey': 748,
     'scriptish': 231203
