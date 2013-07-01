@@ -3,7 +3,9 @@ import shutil
 
 class Browser:
 
-  def __init__(self):
+  def __init__(self, config):
+    self.rootdir = config['rootdir']
+    self.bindir = config['bindir']
     self.driver = None
     self.profiledir = None
     pass

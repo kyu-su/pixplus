@@ -8,11 +8,13 @@ from selenium.webdriver import DesiredCapabilities
 from browser_seleniumserver import BrowserSeleniumServer
 import util
 
+curdir = os.path.abspath(os.path.dirname(__file__))
+
 class Safari(BrowserSeleniumServer):
   name = 'safari'
 
-  def __init__(self):
-    BrowserSeleniumServer.__init__(self)
+  def __init__(self, config):
+    BrowserSeleniumServer.__init__(self, config)
 
     self.backup_suffix = '-bkp%d' % time.time()
     self.backup_list = []
@@ -83,8 +85,8 @@ class Safari(BrowserSeleniumServer):
       fp.close()
       pass
 
-    util.copy_file('../bin/pixplus.safariextz', extdir)
-    util.copy_file('safari/Extensions.plist', extdir)
+    util.copy_file(os.path.join(self.bindir, 'pixplus.safariextz'), extdir)
+    util.copy_file(os.path.join(curdir, 'Extensions.plist'), extdir)
     pass
 
   pass

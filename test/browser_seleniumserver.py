@@ -12,8 +12,8 @@ import util
 class BrowserSeleniumServer(Browser):
   selenium_server_url = 'https://selenium.googlecode.com/files/selenium-server-standalone-2.33.0.jar'
 
-  def __init__(self):
-    Browser.__init__(self)
+  def __init__(self, config):
+    Browser.__init__(self, config)
     self.start_server()
     pass
 

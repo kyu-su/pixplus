@@ -5,18 +5,20 @@ from selenium.webdriver import DesiredCapabilities
 from browser_seleniumserver import BrowserSeleniumServer
 import util
 
+curdir = os.path.abspath(os.path.dirname(__file__))
+
 class Opera(BrowserSeleniumServer):
   name = 'opera'
 
-  def __init__(self, mode):
-    BrowserSeleniumServer.__init__(self)
+  def __init__(self, mode, config):
+    BrowserSeleniumServer.__init__(self, config)
 
     self.userjs = []
     self.extensions = []
     if mode == 'userjs':
-      self.userjs.append('../pixplus.js')
+      self.userjs.append(os.path.join(self.rootdir, 'pixplus.js'))
     elif mode == 'extension':
-      self.extensions.append('../bin/pixplus.oex')
+      self.extensions.append(os.path.join(self.bindir, 'pixplus.oex'))
     else:
       raise ValueError('Invalid mode - %s' % mode)
 
@@ -34,7 +36,7 @@ class Opera(BrowserSeleniumServer):
 
   def create_profile(self):
     BrowserSeleniumServer.create_profile(self)
-    util.copy_file('opera/operaprefs.ini', self.profiledir)
+    util.copy_file(os.path.join(curdir, 'operaprefs.ini'), self.profiledir)
     self.install_userjs()
     self.install_extensions()
     pass

@@ -9,6 +9,10 @@ from chrome import Chrome
 from opera import Opera
 from safari import Safari
 
+testdir = os.path.abspath(os.path.dirname(__file__))
+rootdir = os.path.dirname(testdir)
+bindir  = os.path.join(rootdir, 'bin')
+
 def make_tests(clslist, browser, config):
   tests = []
   for cls in clslist:
@@ -68,7 +72,7 @@ def write_json(filename, obj):
   pass
 
 def load_cookie(driver):
-  cookie = read_json('cookie.json', {})
+  cookie = read_json(os.path.join(testdir, 'cookie.json'), {})
   for name, item in cookie.items():
     print('Cookie: %s=%s' % (item['name'], item['value']))
     driver.add_cookie(item)
@@ -80,7 +84,7 @@ def save_cookie(driver):
   for key in ['PHPSESSID']:
     cookie[key] = driver.get_cookie(key)
     pass
-  write_json('cookie.json', cookie)
+  write_json(os.path.join(testdir, 'cookie.json'), cookie)
   pass
 
 def login(driver, config):
@@ -139,10 +143,13 @@ def main():
                       help = ','.join(browser_names))
   args = parser.parse_args()
 
-  config = read_json('config.json')
+  config = read_json(os.path.join(testdir, 'config.json'))
   if config is None:
     print('Error: Create "config.json" first')
     return
+
+  config['rootdir'] = rootdir
+  config['bindir'] = bindir
 
   tests = []
   for name in (args.tests or sorted(all_tests.keys())):
@@ -155,25 +162,25 @@ def main():
     pass
 
   if 'fx' in browsers or 'fx_greasemonkey' in browsers:
-    test(Firefox(['greasemonkey']), config, tests)
+    test(Firefox('greasemonkey', config), config, tests)
     pass
   if 'fx' in browsers or 'fx_scriptish' in browsers:
-    test(Firefox(['scriptish']), config, tests)
+    test(Firefox('scriptish', config), config, tests)
     pass
 
   if 'chrome' in browsers:
-    test(Chrome(), config, tests)
+    test(Chrome(config), config, tests)
     pass
 
   if 'opera' in browsers or 'opera_oex' in browsers:
-    test(Opera('extension'), config, tests)
+    test(Opera('extension', config), config, tests)
     pass
   if 'opera' in browsers or 'opera_userjs' in browsers:
-    test(Opera('userjs'), config, tests)
+    test(Opera('userjs', config), config, tests)
     pass
 
   if 'safari' in browsers:
-    test(Safari(), config, tests)
+    test(Safari(config), config, tests)
     pass
   pass
 
