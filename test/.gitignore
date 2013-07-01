@@ -1,6 +1,6 @@
 *.xpi
 *.pyc
+*.log
 config.json
 cookie.json
 selenium-*.jar
-selenium.log

@@ -2,10 +2,12 @@ import sys, os
 import argparse
 import json
 import unittest
+import time
 
 from firefox import Firefox
 from chrome import Chrome
 from opera import Opera
+from safari import Safari
 
 def make_tests(clslist, browser, config):
   tests = []
@@ -88,6 +90,9 @@ def login(driver, config):
   driver.find_element_by_id('login_password').send_keys(config['password'])
   driver.find_element_by_class_name('login-form').submit()
 
+  # safari magic...
+  time.sleep(1)
+
   if driver.current_url != 'http://www.pixiv.net/mypage.php':
     raise RuntimeError('Login failed!')
 
@@ -121,7 +126,8 @@ def main():
   browser_names = (
     'fx', 'fx_greasemonkey', 'fx_scriptish',
     'chrome',
-    'opera', 'opera_oex', 'opera_userjs'
+    'opera', 'opera_oex', 'opera_userjs',
+    'safari'
     )
 
   parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
@@ -164,6 +170,10 @@ def main():
     pass
   if 'opera' in browsers or 'opera_userjs' in browsers:
     test(Opera('userjs'), config, tests)
+    pass
+
+  if 'safari' in browsers:
+    test(Safari(), config, tests)
     pass
   pass
 

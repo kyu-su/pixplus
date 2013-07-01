@@ -15,18 +15,21 @@ class Firefox(Browser):
     }
 
   def __init__(self, addons):
+    Browser.__init__(self)
     self.profile = webdriver.FirefoxProfile()
     self.add_addons(addons)
-    Browser.__init__(self, webdriver.Firefox(firefox_profile = self.profile))
+    self.profiledir = self.profile.path
+    self.driver = webdriver.Firefox(firefox_profile = self.profile)
     pass
 
   def prepare_addon(self, addonid, name):
     filename = 'addon-%d-latest.xpi' % addonid
     url = 'https://addons.mozilla.org/firefox/downloads/latest/%d/%s' % (addonid, filename)
-    if not os.path.exists(filename) or os.stat(filename).st_mtime < time.time() - 60 * 60 * 24:
-      util.download(url, filename)
+    dlpath = 'firefox/%s' % filename
+    if not os.path.exists(dlpath) or os.stat(dlpath).st_mtime < time.time() - 60 * 60 * 24:
+      util.download(url, dlpath)
       pass
-    return filename
+    return dlpath
 
   def add_addons(self, addons):
     for name in addons:
@@ -40,7 +43,7 @@ class Firefox(Browser):
   def setup_greasemonkey(self):
     path_gm = os.path.join(self.profile.path, 'gm_scripts')
     os.mkdir(path_gm)
-    util.copy_file('gm_config.xml', os.path.join(path_gm, 'config.xml'))
+    util.copy_file('firefox/gm_config.xml', os.path.join(path_gm, 'config.xml'))
     util.copy_file('../bin/pixplus.user.js', path_gm)
     self.profile.set_preference('extensions.greasemonkey.stats.prompted', True)
     pass
@@ -48,7 +51,7 @@ class Firefox(Browser):
   def setup_scriptish(self):
     path_st = os.path.join(self.profile.path, 'scriptish_scripts')
     os.mkdir(path_st)
-    util.copy_file('scriptish-config.json', path_st)
+    util.copy_file('firefox/scriptish-config.json', path_st)
     util.copy_file('../bin/pixplus.user.js', path_st)
     os.utime(os.path.join(path_st, 'pixplus.user.js'), (2000000000, 2000000000))
     pass

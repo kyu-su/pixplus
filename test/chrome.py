@@ -6,13 +6,10 @@ class Chrome(Browser):
   name = 'chrome'
 
   def __init__(self):
+    Browser.__init__(self)
     self.options = webdriver.ChromeOptions()
     self.options.add_extension('../bin/pixplus.crx')
-    Browser.__init__(self, webdriver.Chrome(chrome_options = self.options))
-    pass
-
-  def quit(self):
-    self.driver.quit()
+    self.driver = webdriver.Chrome(chrome_options = self.options)
     pass
 
   pass

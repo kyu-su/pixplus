@@ -1,22 +1,16 @@
 import os
-import tempfile
-import subprocess
-import time
-import httplib
 
-from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
-from selenium.webdriver.common import utils as selutils
+from selenium.webdriver import DesiredCapabilities
 
-from browser import Browser
+from browser_seleniumserver import BrowserSeleniumServer
 import util
 
-class Opera(Browser):
+class Opera(BrowserSeleniumServer):
   name = 'opera'
-  selenium_jar_url = 'https://selenium.googlecode.com/files/selenium-server-standalone-2.33.0.jar'
 
   def __init__(self, mode):
+    BrowserSeleniumServer.__init__(self)
+
     self.userjs = []
     self.extensions = []
     if mode == 'userjs':
@@ -32,42 +26,15 @@ class Opera(Browser):
     self.caps.update(DesiredCapabilities.OPERA)
     self.caps['opera.profile'] = self.profiledir
 
-    jar = self.download_selenium()
-    self.port = selutils.free_port()
-
-    self.log_fp = open('selenium.log', 'w')
-    self.process = subprocess.Popen(
-      ['java', '-jar', jar, '-port', str(self.port)],
-      stdout = self.log_fp, stderr = subprocess.STDOUT
-      )
-
-    while not selutils.is_connectable(self.port):
-      time.sleep(1)
-      pass
-
-    Browser.__init__(self, RemoteWebDriver(
-        'http://localhost:%d/wd/hub' % self.port,
-        desired_capabilities = self.caps
-        ))
+    self.create_driver(self.caps)
     pass
 
   def set_window_size(self, width, height):
     pass
 
-  def quit(self):
-    try:
-      Browser.quit(self)
-    except httplib.BadStatusLine:
-      pass
-
-    self.process.kill()
-    self.process.wait()
-    self.log_fp.close()
-    pass
-
   def create_profile(self):
-    self.profiledir = tempfile.mkdtemp()
-    util.copy_file('operaprefs.ini', self.profiledir)
+    BrowserSeleniumServer.create_profile(self)
+    util.copy_file('opera/operaprefs.ini', self.profiledir)
     self.install_userjs()
     self.install_extensions()
     pass
@@ -138,12 +105,5 @@ class Opera(Browser):
     fp_widgets_dat.write('</preferences>')
     fp_widgets_dat.close()
     pass
-
-  def download_selenium(self):
-    filename = self.selenium_jar_url.split('/').pop()
-    if not os.path.exists(filename):
-      util.download(self.selenium_jar_url, filename)
-      pass
-    return filename
 
   pass
