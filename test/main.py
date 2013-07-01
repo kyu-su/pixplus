@@ -91,15 +91,31 @@ def save_cookie(driver):
 def login(driver, config):
   print('Logging in...')
   driver.get('https://www.secure.pixiv.net/login.php')
-  driver.find_element_by_id('login_pixiv_id').send_keys(config['username'])
-  driver.find_element_by_id('login_password').send_keys(config['password'])
-  driver.find_element_by_class_name('login-form').submit()
+
+  btn = driver.find_elements_by_class_name('login-button')
+  if btn:
+    btn[0].click()
+    pass
+
+  form = driver.find_element_by_css_selector('form[action="/login.php"]')
+
+  e_id = form.find_element_by_name('pixiv_id')
+  e_id.clear()
+  e_id.send_keys(config['username'])
+
+  e_pw = form.find_element_by_name('pass')
+  e_pw.clear()
+  e_pw.send_keys(config['password'])
+
+  form.submit()
 
   # safari magic...
   time.sleep(1)
 
   if driver.current_url != 'http://www.pixiv.net/mypage.php':
-    raise RuntimeError('Login failed!')
+    print('Login failed!')
+    raw_input('Please login manually and press enter...')
+    pass
 
   save_cookie(driver)
   pass
