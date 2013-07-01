@@ -1,4 +1,5 @@
 import time
+import warnings
 
 from selenium.webdriver import ActionChains
 
@@ -18,6 +19,7 @@ class Test_Rate(TestCase):
 
     # move_to_element is not supported by safari driver yet
     if self.browser.name == 'safari':
+      warnings.warn('ActionChains.move_to_element_with_offset() is currently not supported by safari driver', FutureWarning)
       rating.click()
     else:
       action_chains = ActionChains(self.driver)

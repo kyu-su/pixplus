@@ -1,4 +1,5 @@
 import time
+import warnings
 
 from selenium.webdriver.common.keys import Keys
 
@@ -44,7 +45,9 @@ class Test_Bookmark(TestCase):
     input_tag = self.q('#input_tag', popup)
     first_tag = self.q('.tag-cloud-container .tag', popup)
 
-    if self.browser.name != 'safari':
+    if self.browser.name == 'safari':
+      warnings.warn('WebElement.send_keys(Keys.ARROW_DOWN) is currently not working on safari driver', FutureWarning)
+    else:
       input_tag.clear()
       # do not works with safari driver...
       input_tag.send_keys(Keys.ARROW_DOWN)
@@ -53,7 +56,9 @@ class Test_Bookmark(TestCase):
       input_tag.send_keys(Keys.SPACE)
       self.assertEquals(input_tag.get_attribute('value'), first_tag.get_attribute('data-tag'))
 
-      if self.browser.name != 'opera':
+      if self.browser.name == 'opera':
+        warnings.warn('WebElement.send_keys(Keys.ESCAPE) is currently not working on opera driver', FutureWarning)
+      else:
         input_tag.send_keys(Keys.ESCAPE)
         self.assertFalse(self.has_class(first_tag, 'pp-tag-select'))
         pass

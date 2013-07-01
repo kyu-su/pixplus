@@ -1,8 +1,9 @@
 import sys, os
 import argparse
 import json
-import unittest
 import time
+import unittest
+import warnings
 
 from firefox import Firefox
 from chrome import Chrome
