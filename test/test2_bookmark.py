@@ -14,7 +14,7 @@ class Test_Bookmark(TestCase):
     url = self.driver.current_url
     self.open('/bookmark.php')
 
-    if self.browser.name == 'opera':
+    if not self.browser.supports_alert:
       self.driver.execute_script('window.confirm=function(){return true}')
       pass
 
@@ -44,16 +44,19 @@ class Test_Bookmark(TestCase):
     input_tag = self.q('#input_tag', popup)
     first_tag = self.q('.tag-cloud-container .tag', popup)
 
-    input_tag.clear()
-    input_tag.send_keys(Keys.ARROW_DOWN)
-    self.assertTrue(self.has_class(first_tag, 'pp-tag-select'))
+    if self.browser.name != 'safari':
+      input_tag.clear()
+      # do not works with safari driver...
+      input_tag.send_keys(Keys.ARROW_DOWN)
+      self.assertTrue(self.has_class(first_tag, 'pp-tag-select'))
 
-    input_tag.send_keys(Keys.SPACE)
-    self.assertEquals(input_tag.get_attribute('value'), first_tag.get_attribute('data-tag'))
+      input_tag.send_keys(Keys.SPACE)
+      self.assertEquals(input_tag.get_attribute('value'), first_tag.get_attribute('data-tag'))
 
-    if self.browser.name != 'opera':
-      input_tag.send_keys(Keys.ESCAPE)
-      self.assertFalse(self.has_class(first_tag, 'pp-tag-select'))
+      if self.browser.name != 'opera':
+        input_tag.send_keys(Keys.ESCAPE)
+        self.assertFalse(self.has_class(first_tag, 'pp-tag-select'))
+        pass
       pass
 
     form = self.q('form[action*="bookmark_add.php"]', popup)

@@ -34,6 +34,7 @@ class BrowserSeleniumServer(Browser):
   def start_server(self):
     jar = self.download_selenium_server()
     self.server_port = selutils.free_port()
+    print('Start selenium server: %d' % self.server_port)
 
     self.server_log_fp = open('selenium-%d.log' % time.time(), 'w')
     self.server_process = subprocess.Popen(
@@ -51,10 +52,12 @@ class BrowserSeleniumServer(Browser):
       Browser.quit(self)
     except httplib.BadStatusLine:
       pass
-
-    self.server_process.kill()
-    self.server_process.wait()
-    self.server_log_fp.close()
+    finally:
+      print('Stop selenium server')
+      self.server_process.kill()
+      self.server_process.wait()
+      self.server_log_fp.close()
+      pass
     pass
 
   pass

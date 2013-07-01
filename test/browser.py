@@ -2,6 +2,7 @@ import tempfile
 import shutil
 
 class Browser:
+  supports_alert = True
 
   def __init__(self, config):
     self.rootdir = config['rootdir']

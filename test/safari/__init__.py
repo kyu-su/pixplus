@@ -12,6 +12,7 @@ curdir = os.path.abspath(os.path.dirname(__file__))
 
 class Safari(BrowserSeleniumServer):
   name = 'safari'
+  supports_alert = False
 
   def __init__(self, config):
     BrowserSeleniumServer.__init__(self, config)
@@ -44,6 +45,8 @@ class Safari(BrowserSeleniumServer):
 
   def backup(self, path):
     print('Backup: %s' % path)
+    if not os.path.exists(path):
+      return
     os.rename(path, path + self.backup_suffix)
     self.backup_list.append((path, path + self.backup_suffix))
     pass

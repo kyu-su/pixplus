@@ -54,7 +54,7 @@ class Test_TagEdit(TestCase):
 
   def test_tagedit_delete(self):
     self.open_test_user()
-    if self.browser.name == 'opera':
+    if not self.browser.supports_alert:
       self.driver.execute_script('window.confirm=function(){return true}')
       pass
 

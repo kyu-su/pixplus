@@ -18,10 +18,10 @@ class TestCase(unittest.TestCase):
     pass
 
   def alert_accept(self):
-    if self.browser.name == 'opera':
-      time.sleep(1)
-    else:
+    if self.browser.supports_alert:
       Alert(self.driver).accept()
+    else:
+      time.sleep(1)
       pass
     pass
 

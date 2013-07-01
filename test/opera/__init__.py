@@ -9,6 +9,7 @@ curdir = os.path.abspath(os.path.dirname(__file__))
 
 class Opera(BrowserSeleniumServer):
   name = 'opera'
+  supports_alert = False
 
   def __init__(self, mode, config):
     BrowserSeleniumServer.__init__(self, config)
