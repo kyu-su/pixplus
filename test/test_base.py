@@ -95,7 +95,17 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_get_illust_data(self, name = None):
-    obj = self.driver.execute_script('return pixplus.popup.illust')
+    obj = self.driver.execute_script('''
+      return (function(illust) {
+        var r = {};
+        for(var key in illust) {
+          if (!/^(?:prev|next)$/.test(key)) {
+            r[key] = illust[key];
+          }
+        }
+        return r;
+      })(pixplus.popup.illust);
+    ''')
     if name is not None:
       return obj[name]
     return obj
