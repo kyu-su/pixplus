@@ -336,8 +336,8 @@
     },
 
     key_enabled: function(ev) {
-      return !(ev.target instanceof w.HTMLTextAreaElement ||
-               (ev.target instanceof w.HTMLInputElement &&
+      return !(ev.target instanceof g.HTMLTextAreaElement ||
+               ((ev.target instanceof g.HTMLInputElement) &&
                 (!ev.target.type ||
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
     },
@@ -615,7 +615,7 @@
 
     serialize: function(form) {
       var data = '', data_map = { };
-      if (form instanceof w.HTMLFormElement) {
+      if (form instanceof g.HTMLFormElement) {
         _.qa('input', form).forEach(function(input) {
           switch((input.type || '').toLowerCase()) {
           case 'reset':
@@ -1123,7 +1123,7 @@
         var label = p[0], content = p[1];
         _.e('dt', {text: label}, dl);
         var dd = _.e('dd', null, dl);
-        if (content instanceof w.HTMLElement) {
+        if (content instanceof g.HTMLElement) {
           dd.appendChild(content);
         } else if (content.call) {
           content(dd);
@@ -3949,7 +3949,7 @@
         }
 
         return cancel;
-      }, {capture: true});
+      });
     }
   });
 
@@ -4054,7 +4054,7 @@
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
         var endbtn = ev.target;
-        if (endbtn instanceof w.HTMLInputElement &&
+        if (endbtn instanceof g.HTMLInputElement &&
             (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
           _.popup.tagedit.end();
           return true;
@@ -4295,6 +4295,7 @@
       });
 
       _.key.listen(dom.input_tag, this.onkey);
+      dom.input_tag.setAttribute('autocomplete', 'off');
     },
 
     setup_alias_ui: function() {
