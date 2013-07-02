@@ -1562,7 +1562,14 @@
       return nodes;
     },
 
-    src: function(node, all) {
+    html: function(node, all) {
+      if (!node || (!all && this.ignore_elements.test(node.tag))) {
+        return '';
+      }
+      return (node.raw_open || '') + this.inner_html(node, all) + (node.raw_close || '');
+    },
+
+    inner_html: function(node, all) {
       if (!node || (!all && this.ignore_elements.test(node.tag))) {
         return '';
       }
@@ -1570,9 +1577,9 @@
         return node.text;
       }
       var that = this;
-      return node.raw_open + node.children.reduce(function(a, b) {
-        return a + that.src(b, all);
-      }, '') + (node.raw_close || '');
+      return node.children.reduce(function(a, b) {
+        return a + that.html(b, all);
+      }, '');
     },
 
     text: function(node, all) {
@@ -1770,21 +1777,30 @@
         return false;
       }
 
+      // error check end
+
       var work_info = _.fastxml.q(root, '.work-info'),
+          title     = _.fastxml.q(work_info, '.title'),
+          caption   = _.fastxml.q(work_info, '.caption'),
           score     = _.fastxml.q(work_info, '.score'),
           question  = _.fastxml.q(work_info, '.questionnaire'),
           tags_tmpl = _.fastxml.q(root, '#template-work-tags'),
           tags      = _.fastxml.q(root, '.work-tags .tags-container');
 
-      illust.title    = _.fastxml.text(_.fastxml.q(work_info, '.title'));
-      illust.caption  = _.fastxml.src(_.fastxml.q(work_info, '.caption'));
-      illust.taglist  = _.fastxml.src(tags_tmpl, true) + _.fastxml.src(tags);
-      illust.rating   = _.fastxml.src(score);
-      illust.question = _.fastxml.src(question, true);
-
+      illust.title = _.strip(_.fastxml.text(title));
+      illust.caption = _.strip(_.fastxml.inner_html(caption));
       illust.tags = _.fastxml.qa(tags, '.tag .text').map(function(tag) {
         return _.strip(_.fastxml.text(tag));
       });
+      illust.score = {};
+      ['view', 'rated', 'score'].forEach(function(name) {
+        var node = _.fastxml.q(score, '.' + name + '-count');
+        illust.score[name] = g.parseInt(_.strip(_.fastxml.text(node)));
+      });
+
+      illust.taglist  = _.fastxml.html(tags_tmpl, true) + _.fastxml.html(tags);
+      illust.rating   = _.fastxml.html(score);
+      illust.question = _.fastxml.html(question, true);
 
       var search_script = function(node, name) {
         var pattern = new g.RegExp('pixiv\\.context\\.' + name + '\\s*=\\s*(true|false)');
@@ -1811,27 +1827,26 @@
           avatar         = _.fastxml.q(profile_area, 'img.user-image'),
           author_link    = _.fastxml.q(profile_area, 'a.user-link'),
           author_name    = _.fastxml.q(author_link, 'h1.user'),
-          staccfeed_link = _.fastxml.q(root, '.extaraNavi p a', function(link) {
-            return (link.attrs.href || '').indexOf('/stacc/') >= 0;
+          staccfeed_link = _.fastxml.q(root, '.column-header .tabs a', function(link) {
+            return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.attrs.href);
           });
 
-      illust.author_fav   = !!_.fastxml.q(profile_area, '#favorite-button.following');
-      illust.author_fav_m = !!_.fastxml.q(profile_area, '.user-relation .sprites-heart');
-      illust.author_mypix = !!_.fastxml.q(profile_area, '#mypixiv-button.mypixiv');
-      illust.author_image = avatar ? avatar.attrs.src : null;
-      illust.author_name  = '[Error]';
-      illust.author_url   = '';
-      illust.author_id    = 0;
-      if (author_name) {
-        illust.author_name = _.fastxml.text(author_name);
-      }
+      illust.author_id              = null;
+      illust.author_name            = author_name ? _.fastxml.text(author_name) : null;
+      illust.author_favorite        = !!_.fastxml.q(profile_area, '#favorite-button.following');
+      illust.author_mutual_favorite = !!_.fastxml.q(profile_area, '.user-relation .sprites-heart');
+      illust.author_mypixiv         = !!_.fastxml.q(profile_area, '#mypixiv-button.mypixiv');
+      illust.author_url             = null;
+      illust.author_image_url       = avatar ? avatar.attrs.src : null;
+      illust.author_staccfeed_url   = staccfeed_link ? staccfeed_link.attrs.href : null;
+      illust.author_is_me           = null;
+
       if (author_link) {
         illust.author_url = author_link.attrs.href;
         if ((re = /\/member\.php\?id=(\d+)/.exec(illust.author_url))) {
           illust.author_id = g.parseInt(re[1], 10);
         }
       }
-      illust.author_staccfeed = staccfeed_link ? staccfeed_link.attrs.href : null;
 
       if (!illust.author_id) {
         if ((re = /pixiv\.context\.userId\s*=\s*([\'\"])(\d+)\1;/.exec(html))) {
@@ -1840,9 +1855,7 @@
       }
 
       try {
-        if (illust.author_id == w.pixiv.user.id) {
-          illust.author_name  = '[Me]';
-        }
+        illust.author_is_me = illust.author_id == w.pixiv.user.id;
       } catch(ex) { }
 
       var meta = _.fastxml.qa(work_info, '.meta li'),
@@ -1864,7 +1877,7 @@
       }
 
       illust.tools = _.fastxml.qa(work_info, '.meta .tools li').map(function(node) {
-        return _.fastxml.text(node);
+        return _.strip(_.fastxml.text(node));
       });
 
       illust.bookmarked = !!_.fastxml.q(root, '.bookmark-container .bookmark-count');
@@ -2650,11 +2663,11 @@
 
       if (_.conf.popup.author_status_icon) {
         [
-          ['fav', 'pp-fav'],
-          ['fav_m', 'pp-fav-m'],
-          ['mypix', 'pp-mypix']
+          ['favorite', 'pp-fav'],
+          ['mutual_favorite', 'pp-fav-m'],
+          ['mypixiv', 'pp-mypix']
         ].forEach(function(p) {
-          if (illust['author_' + p[0]]) {
+          if (illust['author_' + [p[0]]]) {
             dom.author_status.classList.add(p[1]);
             dom.author_status.classList.remove('pp-hide');
           } else {
@@ -2663,8 +2676,8 @@
         });
       }
 
-      if (illust.author_image) {
-        dom.author_image.src = illust.author_image;
+      if (illust.author_image_url) {
+        dom.author_image.src = illust.author_image_url;
         dom.author_image.classList.remove('pp-hide');
       }
 
@@ -2685,14 +2698,18 @@
 
       if (illust.author_id) {
         dom.author_profile.href = '/member.php?id=' + illust.author_id;
-        dom.author_profile.innerHTML = illust.author_name;
+        if (illust.author_is_me) {
+          dom.author_profile.innerHTML = '[Me]';
+        } else {
+          dom.author_profile.innerHTML = illust.author_name || '[Error]';
+        }
         dom.author_works.href = '/member_illust.php?id=' + illust.author_id;
         dom.author_works.textContent = _.lng.author_works;
         dom.author_bookmarks.href = '/bookmark.php?id=' + illust.author_id;
         dom.author_bookmarks.textContent = _.lng.author_bookmarks;
       }
-      if (illust.author_staccfeed) {
-        dom.author_staccfeed.href = illust.author_staccfeed;
+      if (illust.author_staccfeed_url) {
+        dom.author_staccfeed.href = illust.author_staccfeed_url;
         dom.author_staccfeed.textContent = _.lng.author_staccfeed;
       }
 
@@ -2900,7 +2917,7 @@
 
       var re, wrapper = _.popup.dom.bookmark_wrapper;
 
-      wrapper.innerHTML = _.fastxml.src(body, true);
+      wrapper.innerHTML = _.fastxml.html(body, true);
 
       (function(re) {
         if (!re) {
