@@ -1589,9 +1589,10 @@
       if (node.text) {
         return node.text;
       }
-      return node.children.reduce(function(a, b) {
-        return a + (b.text || '');
-      }, '');
+      var that = this;
+      return node.children.map(function(c) {
+        return c.text || that.text(c);
+      }).join('');
     }
   });
 
