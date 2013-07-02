@@ -92,12 +92,7 @@ def login(driver, config):
   print('Logging in...')
   driver.get('https://www.secure.pixiv.net/login.php')
 
-  btn = driver.find_elements_by_class_name('login-button')
-  if btn:
-    btn[0].click()
-    pass
-
-  form = driver.find_element_by_css_selector('form[action="/login.php"]')
+  form = driver.find_elements_by_css_selector('form[action="/login.php"]').pop()
 
   e_id = form.find_element_by_name('pixiv_id')
   e_id.clear()
