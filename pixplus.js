@@ -1883,15 +1883,16 @@
 
       illust.bookmarked = !!_.fastxml.q(root, '.bookmark-container .bookmark-count');
 
-      var response_to = _.fastxml.q(root, '.worksImageresponseInfo a');
       illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
       illust.image_response_to  = null;
-      if (response_to) {
-        var query = this.parse_illust_url(response_to.attrs.href);
-        if (query && query.mode === 'medium' && query.illust_id) {
-          illust.image_response_to = query.illust_id;
+      _.fastxml.q(root, '.worksImageresponseInfo a', function(link) {
+        re = /^\/member_illust\.php\?.*&(?:amp;)?illust_id=(\d+).*&(?:amp;)?uarea=response_out(?:&|$)/.exec(link.attrs.href);
+        if (re) {
+          illust.image_response_to = g.parseInt(re[1]);
+          return true;
         }
-      }
+        return false;
+      });
 
       var comment_form_data = _.fastxml.qa(root, '.worksOption form input');
       if (comment_form_data.length > 0) {
