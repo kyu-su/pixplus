@@ -16,8 +16,8 @@ class Test_Rate(TestCase):
     rating = self.find_illust(lambda popup: self.qa('#pp-popup-rating .score .rating:not(.rated)', popup))
     rating = rating[0]
     self.driver.execute_script('pixplus.popup.show_caption()')
+    self.assertEquals(self.popup_get_illust_data('rated'), False)
 
-    # move_to_element is not supported by safari driver yet
     if self.browser.name == 'safari':
       warnings.warn('ActionChains.move_to_element_with_offset() is currently not supported by safari driver', FutureWarning)
       rating.click()
@@ -34,8 +34,11 @@ class Test_Rate(TestCase):
       pass
 
     self.assertTrue(self.qa('#pp-popup-rating .score .rating.rated'))
+
     self.popup_reload()
+
     self.assertTrue(self.qa('#pp-popup-rating .score .rating.rated'))
+    self.assertEquals(self.popup_get_illust_data('rated'), True)
     pass
 
   pass
