@@ -57,8 +57,12 @@ class TestCase(unittest.TestCase):
   def has_class(self, element, classname):
     return ' %s ' % classname in ' %s ' % element.get_attribute('class')
 
-  def open_popup(self):
-    self.driver.execute_script('pixplus.popup.show(pixplus.illust.list[0])')
+  def open_popup(self, illust_id = None):
+    if illust_id is not None:
+      self.driver.execute_script('pixplus.popup.show(pixplus.illust.create_from_id(%d))' % illust_id)
+    else:
+      self.driver.execute_script('pixplus.popup.show(pixplus.illust.list[0])')
+      pass
     popup = self.q('#pp-popup')
     self.assertTrue(popup.is_displayed())
     self.popup_wait_load()
