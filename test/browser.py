@@ -1,3 +1,4 @@
+import os
 import tempfile
 import shutil
 
@@ -24,7 +25,7 @@ class Browser:
     try:
       self.driver.quit()
     finally:
-      if self.profiledir:
+      if self.profiledir and os.path.exists(self.profiledir):
         print('Remove profile: %s' % self.profiledir)
         shutil.rmtree(self.profiledir)
         pass
