@@ -6,6 +6,9 @@ from test_base import TestCase
 
 class Test_TagEdit(TestCase):
 
+  def get_tags(self):
+    return set(self.popup_get_illust_data('tags'))
+
   def check_tag_editable(self, popup, query):
     self.driver.execute_script('pixplus.popup.tagedit.start()')
     self.popup_wait_load()
@@ -25,18 +28,18 @@ class Test_TagEdit(TestCase):
 
   def tag_edit_check(self, tags):
     for i in range(10):
-      if self.popup_get_tags() == tags:
+      if self.get_tags() == tags:
         break
       time.sleep(1)
       self.popup_reload()
       pass
-    self.assertEquals(self.popup_get_tags(), tags)
+    self.assertEquals(self.get_tags(), tags)
     pass
 
   def test_tagedit_add(self):
     self.open_test_user()
     add_tag = self.find_tag_editable('input#add_tag')
-    tags = self.popup_get_tags()
+    tags = self.get_tags()
 
     tag = 't%d' % time.time()
     add_tag.send_keys(tag)
@@ -59,7 +62,7 @@ class Test_TagEdit(TestCase):
       pass
 
     del_btn = self.find_tag_editable('input[onclick^="delTag("]')
-    tags = self.popup_get_tags()
+    tags = self.get_tags()
 
     m = re.match(r'delTag\((\d+),\s*\d+\)', del_btn.get_attribute('onclick'))
     self.assertIsNotNone(m)

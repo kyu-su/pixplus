@@ -64,15 +64,10 @@ class TestCase(unittest.TestCase):
     self.popup_wait_load()
     return popup
 
-  def popup_get_status(self):
-    status = self.driver.find_element_by_id('pp-popup-status')
-    if status.is_displayed():
-      return status.text
-    return ''
-
   def popup_wait_load(self):
-    self.wait_until(lambda driver: 'Loading' not in self.popup_get_status())
-    self.assertFalse('Error' in self.popup_get_status())
+    popup = self.q('#pp-popup')
+    self.wait_until(lambda driver: not self.has_class(popup, 'pp-loading'))
+    self.assertFalse(self.has_class(popup, 'pp-error'))
     pass
 
   def popup_send_keys(self, keys):
@@ -95,11 +90,11 @@ class TestCase(unittest.TestCase):
     self.popup_wait_load()
     pass
 
-  def popup_get_illust_id(self):
-    return self.driver.execute_script('return pixplus.popup.illust.id')
-
-  def popup_get_tags(self):
-    return set(self.driver.execute_script('return pixplus.popup.illust.tags'))
+  def popup_get_illust_data(self, name = None):
+    obj = self.driver.execute_script('return pixplus.popup.illust')
+    if name is not None:
+      return obj[name]
+    return obj
 
   def open_test_user(self):
     self.open('/member_illust.php?id=%d' % self.config['test-user'])

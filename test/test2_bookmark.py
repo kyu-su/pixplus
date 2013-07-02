@@ -9,7 +9,7 @@ class Test_Bookmark(TestCase):
 
   def unbookmark(self, illust_id = None):
     if illust_id is None:
-      illust_id = self.popup_get_illust_id()
+      illust_id = self.popup_get_illust_data('id')
       pass
 
     url = self.driver.current_url
