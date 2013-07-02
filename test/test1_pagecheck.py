@@ -15,6 +15,8 @@ class Test_PageCheck(TestCase):
     '/member_illust.php',
     '/response.php?illust_id=11437736',
     '/member_illust.php?mode=medium&illust_id=11437736',
+    '/member.php?id=11',
+    '/member_illust.php?id=11',
     '/tags.php?tag=pixiv',
     '/search.php?s_mode=s_tag&word=pixiv'
     )
