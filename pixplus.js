@@ -2726,7 +2726,7 @@
 
       this.dom.header.classList.remove('pp-hide');
 
-      this.set_status('');
+      this.status_complete();
       this.adjust(true);
     },
 
@@ -2738,11 +2738,11 @@
       var msg = illust.error || 'Unknown error';
       _.error(msg);
       this.dom.image_layout.textContent = msg;
-      this.set_status('Error');
+      this.status_error();
       this.adjust();
     },
 
-    set_status: function(text) {
+    set_status_text: function(text) {
       var dom = this.dom;
       if (text) {
         dom.status.textContent = text;
@@ -2753,6 +2753,25 @@
       } else {
         dom.status.classList.add('pp-hide');
       }
+    },
+
+    status_loading: function(message) {
+      this.dom.root.classList.add('pp-loading');
+      this.dom.root.classList.remove('pp-error');
+      this.set_status_text('Loading');
+    },
+
+    status_complete: function() {
+      this.dom.root.classList.remove('pp-loading');
+      this.dom.root.classList.remove('pp-error');
+      this.set_status_text('');
+    },
+
+    status_error: function(message) {
+      this.dom.root.classList.remove('pp-loading');
+      this.dom.root.classList.add('pp-error');
+      this.set_status_text('Error');
+      _.error(message);
     },
 
     show: function(illust) {
@@ -2784,7 +2803,7 @@
       if (!dom.root.parentNode) {
         d.body.insertBefore(dom.root, d.body.firstChild);
       }
-      this.set_status('Loading');
+      this.status_loading();
       this.adjust();
       _.illust.load(illust);
       _.lazy_scroll(illust.image_thumb);
@@ -2930,7 +2949,7 @@
       }
 
       _.popup.dom.root.classList.add('pp-bookmark-mode');
-      _.popup.set_status('');
+      _.popup.status_complete();
       _.popup.adjust();
     },
 
@@ -2943,7 +2962,7 @@
 
       var illust = _.popup.illust;
       this.active = true;
-      _.popup.set_status('Loading');
+      _.popup.status_loading();
 
       _.xhr.get(illust.url_bookmark, function(html) {
         that.onload(illust, html);
@@ -2953,7 +2972,7 @@
         }
 
         that.active = false;
-        _.popup.set_status('Error');
+        _.popup.status_error();
       });
     },
 
@@ -3010,7 +3029,7 @@
 
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.set_images(images);
-      _.popup.set_status('');
+      _.popup.status_complete();
       _.popup.adjust(true);
     },
 
@@ -3021,7 +3040,7 @@
       if (illust.error) {
         _.popup.dom.image_layout.textContent = illust.error;
       }
-      _.popup.set_status('Error');
+      _.popup.status_error();
       _.popup.adjust();
     },
 
@@ -3062,7 +3081,7 @@
       this.page = page;
       this.update_button();
       illust.manga.viewed = true;
-      _.popup.set_status('Loading');
+      _.popup.status_loading();
       _.illust.load_manga_page(illust, this.page);
     },
 
@@ -3190,7 +3209,7 @@
       }
       _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
       _.popup.dom.comment_err_empty.classList[html ? 'add' : 'remove']('pp-hide');
-      _.popup.set_status('');
+      _.popup.status_complete();
       _.popup.adjust();
       this.scroll();
     },
@@ -3200,7 +3219,7 @@
         return;
       }
       _.popup.dom.comment_history.textContent = message || 'Error';
-      _.popup.set_status('Error');
+      _.popup.status_error();
     },
 
     reload: function() {
@@ -3234,7 +3253,7 @@
       }
 
       _.popup.dom.comment_history.textContent = 'Loading';
-      _.popup.set_status('Loading');
+      _.popup.status_loading();
     },
 
     setup_form: function() {
@@ -3339,7 +3358,7 @@
         tw.appendChild(table);
       }
 
-      _.popup.set_status('');
+      _.popup.status_complete();
       _.popup.dom.root.classList.add('pp-tagedit-mode');
       _.popup.adjust();
     },
@@ -3352,7 +3371,7 @@
         this.active = false;
       }
       _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
-      _.popup.set_status('Error');
+      _.popup.status_error();
     },
 
     reload: function() {
@@ -3385,7 +3404,7 @@
         return;
       }
 
-      _.popup.set_status('Loading');
+      _.popup.status_loading();
     },
 
     start: function() {
