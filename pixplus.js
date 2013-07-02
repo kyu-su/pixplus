@@ -3867,6 +3867,13 @@
       'qrate_select_prev',
       'qrate_select_next',
 
+      'manga_start',
+      'manga_end',
+      'manga_open_page',
+
+      'tag_edit_start',
+      'tag_edit_end',
+
       'illust_scroll_up',
       'illust_scroll_down',
       'illust_scroll_left',
@@ -3910,14 +3917,7 @@
       'bookmark_start',
       'reload',
       'caption_toggle',
-      'comment_toggle',
-
-      'manga_start',
-      'manga_end',
-      'manga_open_page',
-
-      'tag_edit_start',
-      'tag_edit_end'
+      'comment_toggle'
     ],
 
     init: function(context) {
