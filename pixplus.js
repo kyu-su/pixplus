@@ -4927,11 +4927,11 @@
       manga_thumbnail: function() {
         var re;
         if (w.location.hash === '#pp-manga-thumbnail') {
-          var toggle_thumbnail = _.q('#toggle-thumbnail');
+          var toggle_thumbnail = _.q('.toggle-thumbnail');
           _.send_click(toggle_thumbnail);
         } else if ((re = /^#pp-manga-page-(\d+)$/.exec(w.location.hash))) {
           try {
-            w.pixiv.manga.move(g.parseInt(re[1], 10));
+            w.pixiv.mangaViewer.listView.move(g.parseInt(re[1], 10));
           } catch(ex) { }
         }
       },
