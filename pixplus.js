@@ -1803,26 +1803,11 @@
       illust.rating   = _.fastxml.html(score);
       illust.question = _.fastxml.html(question, true);
 
-      var search_script = function(node, name) {
-        var pattern = new g.RegExp('pixiv\\.context\\.' + name + '\\s*=\\s*(true|false)');
-        var value = false;
-        var script = _.fastxml.q(node, 'script', function(script) {
-          var re = pattern.exec(_.fastxml.text(script, true));
-          if (re) {
-            _.debug('pixiv.context.' + name + ' = ' + re[1]);
-            value = re[1] === 'true';
-            return true;
-          }
-          return false;
-        });
-        if (!script) {
-          _.warn('Requested definition script not found - pixiv.context.' + name);
-        }
-        return value;
-      };
-
-      illust.rated = search_script(score, 'rated');
-      illust.answered = search_script(question, 'answered');
+      illust.rated = !!_.fastxml.q(score, '.rating.rated');
+      illust.answered = null;
+      if (question) {
+        illust.answered = !_.fastxml.q(question, '.list');
+      }
 
       var profile_area   = _.fastxml.q(root, '.profile-unit'),
           avatar         = _.fastxml.q(profile_area, 'img.user-image'),
