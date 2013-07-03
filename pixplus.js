@@ -2954,12 +2954,24 @@
 
       var that = this;
 
-      _.bookmarkform.setup(wrapper, !illust.bookmarked, function() {
-        _.xhr.remove_cache(illust.url_bookmark);
+      _.bookmarkform.setup(wrapper, {
+        autoinput: !illust.bookmarked,
+        submit: function() {
+          _.popup.status_loading();
+        },
+        success: function() {
+          _.popup.status_complete();
 
-        if (illust === _.popup.illust && _.popup.bookmark.active) {
-          that.end();
-          _.popup.reload();
+          _.xhr.remove_cache(illust.url_bookmark);
+
+          if (illust === _.popup.illust && _.popup.bookmark.active) {
+            that.end();
+            _.popup.reload();
+          }
+        },
+        error: function() {
+          _.popup.status_error();
+          g.alert('Error!');
         }
       });
 
@@ -4442,7 +4454,7 @@
       });
     },
 
-    setup: function(root, autoinput, cb_submit) {
+    setup: function(root, options) {
       if (!root) {
         return;
       }
@@ -4471,16 +4483,18 @@
       this.setup_key(root);
       this.setup_alias_ui(root);
 
-      if (autoinput) {
+      if (options.autoinput) {
         this.autoinput_tag();
       }
 
       form.setAttribute('action', '/bookmark_add.php');
       _.listen(form, 'submit', function() {
+        options.submit();
+
         _.xhr.post(form, function() {
-          cb_submit();
+          options.success();
         }, function() {
-          g.alert('Error!');
+          options.error();
         });
 
         _.qa('input[type="submit"]', form).forEach(function(btn) {
