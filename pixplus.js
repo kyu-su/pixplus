@@ -3923,7 +3923,7 @@
     init: function(context) {
       var that = this;
 
-      _.key.listen(context || w, function(key, ev, connection) {
+      _.key.listen(context || d, function(key, ev, connection) {
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
         }
@@ -4668,7 +4668,7 @@
           that.centerize();
         }, {async: true});
 
-        _.key.listen(w, function(key, ev, connection) {
+        _.key.listen(d, function(key, ev, connection) {
           if (!that.dom.root.parentNode) {
             return;
           }
