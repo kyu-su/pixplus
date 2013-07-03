@@ -9,11 +9,6 @@ class Test_KeyBind(TestCase):
 
   # TODO
   #
-  # {"key": "popup_qrate_start", "value": "d", "start_mode": "question"},
-  # {"key": "popup_qrate_select_prev", "value": "Up", "mode": "question"},
-  # {"key": "popup_qrate_select_next", "value": "Down", "mode": "question"},
-  # {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "question"},
-  # {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"},
   # {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
   # {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
 
@@ -319,6 +314,82 @@ class Test_KeyBind(TestCase):
     self.popup_reload_and_check_state(lambda: self.has_class(bookmark_btn, 'pp-active'))
 
     self.unbookmark()
+    pass
+
+  def check_has_question(self, popup):
+    question = self.qa('#pp-popup-rating .questionnaire', popup)
+    if not question:
+      return None
+
+    if self.popup_get_illust_data('answered') != False:
+      return None
+
+    return question[0]
+
+  def test_question(self):
+    self.open_test_user()
+    question = self.find_illust(self.check_has_question)
+    header = self.q('#pp-popup-header')
+
+    self.send_keys('d')
+    self.assertTrue(self.q('.list', question).is_displayed())
+    self.assertTrue(self.has_class(header, 'pp-show'))
+
+    self.send_keys('d')
+    self.assertFalse(self.q('.list', question).is_displayed())
+    self.assertTrue(self.has_class(header, 'pp-show'))
+
+    self.send_keys('d')
+    self.assertTrue(self.q('.list', question).is_displayed())
+    self.assertTrue(self.has_class(header, 'pp-show'))
+
+    items = self.qa('.list li input[type="button"][data-key]', question)
+
+    for i in range(len(items)):
+      self.send_keys(Keys.DOWN)
+      self.assertEquals(self.driver.switch_to_active_element(), items[i])
+      pass
+    self.send_keys(Keys.DOWN)
+    self.assertEquals(self.driver.switch_to_active_element(), items[0])
+
+    self.blur()
+
+    for i in range(len(items) - 1, -1, -1):
+      self.send_keys(Keys.UP)
+      self.assertEquals(self.driver.switch_to_active_element(), items[i])
+      pass
+    self.send_keys(Keys.UP)
+    self.assertEquals(self.driver.switch_to_active_element(), items[-1])
+
+    self.blur()
+
+    answer_idx = int(time.time()) % len(items)
+    for i in range(answer_idx + 1):
+      self.send_keys(Keys.DOWN)
+      pass
+    self.assertEquals(self.driver.switch_to_active_element(), items[answer_idx])
+    self.assertEquals(items[answer_idx].get_attribute('data-key'), str(answer_idx + 1))
+    answer = items[answer_idx].get_attribute('value')
+
+    self.send_keys(Keys.SPACE)
+
+    for i in range(10):
+      if not self.q('.list', question).is_displayed():
+        break
+      time.sleep(1)
+      pass
+
+    self.assertFalse(self.q('.list', question).is_displayed())
+    self.assertFalse(self.q('.stats', question).is_displayed())
+    self.assertIn(answer, self.q('.status', question).text)
+
+    self.blur()
+
+    self.send_keys('d')
+    self.assertTrue(self.q('.stats', question).is_displayed())
+
+    self.send_keys('d')
+    self.assertFalse(self.q('.stats', question).is_displayed())
     pass
 
   pass

@@ -112,17 +112,14 @@ class TestCase(unittest.TestCase):
 
   def find_illust(self, callback, *args):
     popup = self.open_popup()
-
     while True:
       r = callback(popup, *args)
       if r:
         return r
-
       self.popup_next()
-      self.assertTrue(popup.is_displayed())
+      self.assertTrue(self.qa('#pp-popup'))
       pass
-
-    raise 'Could not find requested illust'
+    pass
 
   def unbookmark(self, illust_id = None):
     if illust_id is None:
