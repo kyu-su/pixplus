@@ -26,16 +26,6 @@ class Test_TagEdit(TestCase):
   def find_tag_editable(self, query):
     return self.find_illust(self.check_tag_editable, query)
 
-  def tag_edit_check(self, tags):
-    for i in range(10):
-      if self.get_tags() == tags:
-        break
-      time.sleep(1)
-      self.popup_reload()
-      pass
-    self.assertEquals(self.get_tags(), tags)
-    pass
-
   def test_tagedit_add(self):
     self.open_test_user()
     add_tag = self.find_tag_editable('input#add_tag')
@@ -52,7 +42,7 @@ class Test_TagEdit(TestCase):
     self.popup_wait_load()
 
     tags.add(tag)
-    self.tag_edit_check(tags)
+    self.popup_reload_and_check_state(lambda: self.get_tags() == tags)
     pass
 
   def test_tagedit_delete(self):
@@ -82,7 +72,7 @@ class Test_TagEdit(TestCase):
     self.popup_wait_load()
 
     tags.remove(tag)
-    self.tag_edit_check(tags)
+    self.popup_reload_and_check_state(lambda: self.get_tags() == tags)
     pass
 
   pass

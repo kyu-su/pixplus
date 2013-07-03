@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 
 class TestCase(unittest.TestCase):
+
   def __init__(self, browser, config, testname):
     unittest.TestCase.__init__(self, testname)
     self.browser = browser
@@ -122,5 +123,35 @@ class TestCase(unittest.TestCase):
       pass
 
     raise 'Could not find requested illust'
+
+  def unbookmark(self, illust_id = None):
+    if illust_id is None:
+      illust_id = self.popup_get_illust_data('id')
+      pass
+
+    url = self.driver.current_url
+    self.open('/bookmark.php')
+
+    if not self.browser.supports_alert:
+      self.driver.execute_script('window.confirm=function(){return true}')
+      pass
+
+    link = self.q('a[href*="illust_id=%d"]' % illust_id)
+    checkbox = self.q('input[name="book_id[]"]', link.parent)
+    checkbox.click()
+    self.q('input[type="submit"][name="del"]').click()
+    self.alert_accept()
+    self.driver.get(url)
+    pass
+
+  def popup_reload_and_check_state(self, callback):
+    for i in range(10):
+      if callback():
+        break
+      time.sleep(1)
+      self.popup_reload()
+      pass
+    self.assertTrue(callback())
+    pass
 
   pass

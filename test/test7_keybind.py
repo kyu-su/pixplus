@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
@@ -5,41 +7,14 @@ from test_base import TestCase
 
 class Test_KeyBind(TestCase):
 
-  # done
-  #
-  # {"key": "popup_prev", "value": "Backspace,a", "mode": "normal"},
-  # {"key": "popup_next", "value": "Space"},
-  # {"key": "popup_last", "value": "End"},
-  # {"key": "popup_first", "value": "Home"},
-  # {"key": "popup_prev_direction", "value": "Left"},
-  # {"key": "popup_next_direction", "value": "Right"},
-  # {"key": "popup_close", "value": "Escape,q"},
-  # {"key": "popup_caption_toggle", "value": "c"},
-  # {"key": "popup_comment_toggle", "value": "Shift+c"},
-  # {"key": "popup_open", "value": "Shift+f"},
-  # {"key": "popup_open_big", "value": "f"},
-  # {"key": "popup_open_profile", "value": "e"},
-  # {"key": "popup_open_illust", "value": "r"},
-  # {"key": "popup_open_bookmark", "value": "t"},
-  # {"key": "popup_open_staccfeed", "value": "y"},
-  # {"key": "popup_open_response", "value": "Shift+r"},
-  # {"key": "popup_open_bookmark_detail", "value": "Shift+b"},
-  # {"key": "popup_open_manga_thumbnail", "value": "Shift+v"},
-  # {"key": "popup_manga_start", "value": "v", "start_mode": "manga"},
-  # {"key": "popup_manga_open_page", "value": "Shift+f", "mode": "manga"},
-  # {"key": "popup_manga_end", "value": "v,Escape", "end_mode": "manga"},
-
   # TODO
   #
-  # {"key": "popup_bookmark_start", "value": "b", "start_mode": "bookmark"},
   # {"key": "popup_qrate_start", "value": "d", "start_mode": "question"},
-  # {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
-  # {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
-  # {"key": "popup_bookmark_end", "value": "Escape", "end_mode": "bookmark"},
   # {"key": "popup_qrate_select_prev", "value": "Up", "mode": "question"},
   # {"key": "popup_qrate_select_next", "value": "Down", "mode": "question"},
   # {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "question"},
   # {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"},
+  # {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
   # {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
 
   # TODO
@@ -76,6 +51,10 @@ class Test_KeyBind(TestCase):
     if self.qa('#pp-popup'):
       self.popup_wait_load()
       pass
+    pass
+
+  def blur(self):
+    self.driver.execute_script('document.activeElement.blur()')
     pass
 
   def test_move(self):
@@ -273,6 +252,73 @@ class Test_KeyBind(TestCase):
 
     self.send_keys('v')
     self.assertTrue(self.q('#pp-popup-button-manga:not(.pp-active)').is_displayed())
+    pass
+
+  def test_bookmark(self):
+    self.open_test_user()
+
+    self.open_popup()
+    bookmark_btn = self.q('#pp-popup-button-bookmark')
+    if self.has_class(bookmark_btn, 'pp-active'):
+      self.unbookmark()
+      self.open_popup()
+      bookmark_btn = self.q('#pp-popup-button-bookmark')
+      pass
+
+    self.assertFalse(self.has_class(bookmark_btn, 'pp-active'))
+
+    self.send_keys('b')
+    self.assertTrue(self.qa('#pp-popup.pp-bookmark-mode'))
+    self.assertTrue(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    ####
+
+    input_tag = self.q('#pp-popup-bookmark-wrapper #input_tag')
+    tags = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container .tag')
+
+    input_tag.clear()
+
+    input_tag.send_keys(Keys.ARROW_DOWN)
+    self.assertTrue(self.has_class(tags[0], 'pp-tag-select'))
+
+    input_tag.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.has_class(tags[0], 'pp-tag-select'))
+    self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
+
+    input_tag.send_keys(Keys.SPACE)
+    self.assertEquals(input_tag.get_attribute('value'), tags[1].get_attribute('data-tag'))
+    self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
+    self.assertTrue(self.has_class(tags[1], 'selected'))
+
+    input_tag.send_keys(Keys.SPACE)
+    self.assertEquals(input_tag.get_attribute('value'), '')
+    self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
+    self.assertFalse(self.has_class(tags[1], 'selected'))
+
+    input_tag.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.has_class(tags[1], 'pp-tag-select'))
+
+    ####
+
+    self.blur()
+
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.qa('#pp-popup.pp-bookmark-mode'))
+    self.assertFalse(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    self.send_keys('b')
+    self.assertTrue(self.qa('#pp-popup.pp-bookmark-mode'))
+    self.assertTrue(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    self.blur()
+
+    self.send_keys(Keys.SPACE)
+    self.assertFalse(self.qa('#pp-popup.pp-bookmark-mode'))
+    self.assertFalse(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    self.popup_reload_and_check_state(lambda: self.has_class(bookmark_btn, 'pp-active'))
+
+    self.unbookmark()
     pass
 
   pass
