@@ -2487,9 +2487,6 @@
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
 
-      root.style.left = '0px';
-      root.style.top  = '0px';
-
       if (this.bookmark.active) {
         this.bookmark.adjust(max_size[0], max_size[1]);
 
@@ -2822,9 +2819,14 @@
       if (!dom.root.parentNode) {
         d.body.insertBefore(dom.root, d.body.firstChild);
       }
-      this.status_loading();
-      this.adjust();
-      _.illust.load(illust);
+      if (illust.loaded) {
+        this.status_complete();
+        this.onload(illust);
+      } else {
+        this.status_loading();
+        this.adjust();
+        _.illust.load(illust);
+      }
       _.lazy_scroll(illust.image_thumb);
     },
 
