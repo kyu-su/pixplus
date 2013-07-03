@@ -3013,8 +3013,7 @@
       if (!this.active) {
         return;
       }
-
-      _.bookmarkform.dom.form.submit();
+      _.bookmarkform.submit();
     },
 
     end: function() {
@@ -4454,6 +4453,23 @@
       });
     },
 
+    submit: function() {
+      this.options.submit();
+
+      var that = this;
+      _.xhr.post(this.dom.form, function() {
+        that.options.success();
+      }, function() {
+        that.options.error();
+      });
+
+      _.qa('input[type="submit"]', this.dom.form).forEach(function(btn) {
+        btn.value = _.lng.sending;
+        btn.setAttribute('disabled', '');
+      });
+      return true;
+    },
+
     setup: function(root, options) {
       if (!root) {
         return;
@@ -4466,6 +4482,8 @@
 
       this.dom.root = root;
       this.dom.form = form;
+
+      this.options = options;
 
       this.sel = {
         tag:  null,
@@ -4488,21 +4506,7 @@
       }
 
       form.setAttribute('action', '/bookmark_add.php');
-      _.listen(form, 'submit', function() {
-        options.submit();
-
-        _.xhr.post(form, function() {
-          options.success();
-        }, function() {
-          options.error();
-        });
-
-        _.qa('input[type="submit"]', form).forEach(function(btn) {
-          btn.value = _.lng.sending;
-          btn.setAttribute('disabled', '');
-        });
-        return true;
-      });
+      _.listen(form, 'submit', this.submit);
     }
   });
 
