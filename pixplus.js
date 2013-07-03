@@ -336,8 +336,8 @@
     },
 
     key_enabled: function(ev) {
-      return !(ev.target instanceof g.HTMLTextAreaElement ||
-               ((ev.target instanceof g.HTMLInputElement) &&
+      return !(/^textarea$/i.test(ev.target.nodeName) ||
+               (/^input$/i.test(ev.target.nodeName) &&
                 (!ev.target.type ||
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
     },
@@ -615,7 +615,7 @@
 
     serialize: function(form) {
       var data = '', data_map = { };
-      if (form instanceof g.HTMLFormElement) {
+      if (/^form$/i.test(form.nodeName)) {
         _.qa('input', form).forEach(function(input) {
           switch((input.type || '').toLowerCase()) {
           case 'reset':
@@ -1123,7 +1123,7 @@
         var label = p[0], content = p[1];
         _.e('dt', {text: label}, dl);
         var dd = _.e('dd', null, dl);
-        if (content instanceof g.HTMLElement) {
+        if (content.nodeName) {
           dd.appendChild(content);
         } else if (content.call) {
           content(dd);
@@ -4055,8 +4055,7 @@
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
         var endbtn = ev.target;
-        if (endbtn instanceof g.HTMLInputElement &&
-            (endbtn.getAttribute('onclick') || '').indexOf('endTagEdit') >= 0) {
+        if (/^input$/i.test(endbtn) && /endTagEdit/.test(endbtn.getAttribute('onclick'))) {
           _.popup.tagedit.end();
           return true;
         }
