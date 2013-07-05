@@ -1,9 +1,10 @@
+import warnings
 import time
 
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
-from test_base import TestCase
+from test_base import *
 
 class Test_KeyBind(TestCase):
 
@@ -352,6 +353,10 @@ class Test_KeyBind(TestCase):
     self.assertEquals(self.driver.switch_to_active_element(), items[-1])
 
     self.blur()
+
+    if self.repeatable:
+      warnings.warn('Skipping answering question')
+      return
 
     answer_idx = int(time.time()) % len(items)
     for i in range(answer_idx + 1):

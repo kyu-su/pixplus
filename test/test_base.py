@@ -5,12 +5,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 
 class TestCase(unittest.TestCase):
+  repeatable = True
 
   def __init__(self, browser, config, testname):
     unittest.TestCase.__init__(self, testname)
     self.browser = browser
     self.driver = browser.driver
     self.config = config
+    self.repeatable = config.get('repeatable', False)
     pass
 
   @classmethod

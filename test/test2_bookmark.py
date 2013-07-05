@@ -18,7 +18,9 @@ class Test_Bookmark(TestCase):
       bookmark_btn = self.q('#pp-popup-button-bookmark', popup)
       pass
 
-    self.assertFalse(self.has_class(bookmark_btn, 'pp-active'))
+    self.popup_reload_and_check_state(
+      lambda: not self.has_class(bookmark_btn, 'pp-active')
+      )
 
     self.driver.execute_script('pixplus.popup.bookmark.start()')
     self.popup_wait_load()

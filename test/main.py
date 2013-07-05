@@ -134,6 +134,8 @@ def main():
   parser.add_argument('-b', metavar = 'BROWSER', choices = browser_names,
                       dest = 'browsers', action = 'append',
                       help = ','.join(browser_names))
+  parser.add_argument('--repeatable', dest = 'repeatable',
+                      action = 'store_true', default = False)
   args = parser.parse_args()
 
   config = read_json(os.path.join(testdir, 'config.json'))
@@ -143,6 +145,7 @@ def main():
 
   config['rootdir'] = rootdir
   config['bindir'] = bindir
+  config['repeatable'] = args.repeatable
 
   tests = []
   if args.tests:
@@ -158,6 +161,9 @@ def main():
     pass
   else:
     for cls in all_tests.values():
+      if args.repeatable and not cls.repeatable:
+        warnings.warn('Skipping %s because it is not repeatable' % cls.__name__)
+        continue
       tests += [(cls, n) for n in cls.list_tests()]
       pass
     pass

@@ -6,6 +6,7 @@ from selenium.webdriver import ActionChains
 from test_base import TestCase
 
 class Test_Rate(TestCase):
+  repeatable = False
 
   def test_rate(self):
     self.open_test_user()

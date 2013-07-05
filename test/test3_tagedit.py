@@ -5,6 +5,7 @@ import urllib
 from test_base import TestCase
 
 class Test_TagEdit(TestCase):
+  repeatable = False
 
   def get_tags(self):
     return set(self.popup_get_illust_data('tags'))

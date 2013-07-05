@@ -43,8 +43,8 @@ class Test_FastFollow(TestCase):
     pass
 
   def test_fast_follow(self):
-    self.follow(11, False)
     self.follow(11, True)
+    self.follow(11, False)
     pass
 
   pass
