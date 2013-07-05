@@ -35,6 +35,10 @@ class TestCase(unittest.TestCase):
     self.wait_until(lambda d: d.execute_script('return !!window.pixplus'))
     pass
 
+  def reload(self):
+    self.driver.get(self.driver.current_url)
+    pass
+
   def q(self, selector, context = None):
     if context is None:
       context = self.driver
