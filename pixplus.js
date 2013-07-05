@@ -1146,7 +1146,7 @@
         var ul = _.e('ul', null, _.e('dd', null, dl));
         (
           release.changes_i18n
-            ? release.changes_i18n[that.lng.__name__]
+            ? (release.changes_i18n[that.lng.__name__] || release.changes_i18n.en)
             : release.changes
         ).forEach(function(change) {
           _.e('li', {text: change}, ul);
@@ -5995,8 +5995,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
-        ],
-        "ja": [
+          "[Fix] Fix ESC key is not working.",
+          "[Fix] Fix Shift+V key (open manga thumbnail page) is not working.",
+          "[Fix] Fix image response support"
         ]
       }
     },
