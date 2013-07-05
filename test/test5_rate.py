@@ -23,12 +23,8 @@ class Test_Rate(TestCase):
       rating.click()
     else:
       action_chains = ActionChains(self.driver)
-      action_chains.move_to_element_with_offset(rating, 220, 10).perform()
-      time.sleep(1)
-      action_chains.click().perform()
-
+      action_chains.move_to_element_with_offset(rating, 220, 10).click().perform()
       self.alert_accept()
-
       rate = self.q('.rate', rating)
       self.assertEqual(rate.size['width'], 234)
       pass
