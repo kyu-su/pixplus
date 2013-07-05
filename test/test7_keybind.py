@@ -166,35 +166,30 @@ class Test_KeyBind(TestCase):
     pass
 
   def test_open(self):
-    self.prepare()
-
-    self.open_popup()
-    self.check_id(0)
-
-    illust = self.popup_get_illust_data()
-
+    self.open('/')
+    self.open_popup(1580459)
     self.handle_open()
 
     self.send_keys('F')
-    self.poll_open(illust['url_medium'])
+    self.poll_open('/member_illust.php?mode=medium&illust_id=1580459')
 
     self.send_keys('f')
-    self.poll_open(illust['image_url_big'])
+    self.poll_open('http://i1.pixiv.net/img01/img/pixiv/1580459.jpg')
 
     self.send_keys('e')
-    self.poll_open('http://www.pixiv.net/member.php?id=%d' % illust['author_id'])
+    self.poll_open('/member.php?id=11')
 
     self.send_keys('r')
-    self.poll_open('http://www.pixiv.net/member_illust.php?id=%d' % illust['author_id'])
+    self.poll_open('/member_illust.php?id=11')
 
     self.send_keys('t')
-    self.poll_open('http://www.pixiv.net/bookmark.php?id=%d' % illust['author_id'])
+    self.poll_open('/bookmark.php?id=11')
 
     self.send_keys('y')
-    self.poll_open(illust['author_staccfeed_url'])
+    self.poll_open('/stacc/pixiv')
 
     self.send_keys('B')
-    self.poll_open(illust['url_bookmark_detail'])
+    self.poll_open('/bookmark_detail.php?illust_id=1580459')
     pass
 
   def test_image_response(self):
@@ -205,7 +200,7 @@ class Test_KeyBind(TestCase):
     btn = self.q('#pp-popup-button-response:not(.pp-active)')
     self.assertTrue(btn.is_displayed())
     self.send_keys('R')
-    self.poll_open('http://www.pixiv.net/response.php?illust_id=1580459')
+    self.poll_open('/response.php?illust_id=1580459')
 
     self.open('/response.php?illust_id=1580459')
     self.handle_open()
@@ -214,7 +209,7 @@ class Test_KeyBind(TestCase):
     btn = self.q('#pp-popup-button-response.pp-active')
     self.assertTrue(btn.is_displayed())
     self.send_keys('R')
-    self.poll_open('http://www.pixiv.net/member_illust.php?mode=medium&illust_id=1580459')
+    self.poll_open('/member_illust.php?mode=medium&illust_id=1580459')
     pass
 
   def test_manga(self):

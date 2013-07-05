@@ -16,20 +16,25 @@ class Test_IllustData(TestCase):
         u'\u516c\u5f0f\u4f01\u753b',
         u'\u8a18\u5ff5\u65e5'
         ],
-     'author_id': 11,
-     'author_name': u'pixiv\u4e8b\u52d9\u5c40',
-     'author_staccfeed_url': '/stacc/pixiv',
-     'author_is_me': False,
-     'author_favorite': True,
+
+     'author_id':              11,
+     'author_name':            u'pixiv\u4e8b\u52d9\u5c40',
+     'author_is_me':           False,
+     'author_favorite':        True,
      'author_mutual_favorite': False,
-     'author_mypixiv': False,
-     'size': {'width': 749, 'height': 711},
-     'manga': {'available': False, 'viewed': False},
-     'url_bookmark': '/bookmark_add.php?type=illust&illust_id=1580459',
-     'url_bookmark_detail': '/bookmark_detail.php?illust_id=1580459',
-     'url_manga': '/member_illust.php?mode=manga&illust_id=1580459',
-     'url_medium': '/member_illust.php?mode=medium&illust_id=1580459',
-     'url_response': '/response.php?illust_id=1580459'
+     'author_mypixiv':         False,
+     'size':                   {'width': 749, 'height': 711},
+     'manga':                  {'available': False, 'viewed': False},
+     'url_medium':             '/member_illust.php?mode=medium&illust_id=1580459',
+     'url_author_profile':     '/member.php?id=11',
+     'url_author_works':       '/member_illust.php?id=11',
+     'url_author_bookmarks':   '/bookmark.php?id=11',
+     'url_author_staccfeed':   '/stacc/pixiv',
+     'url_bookmark':           '/bookmark_add.php?type=illust&illust_id=1580459',
+     'url_bookmark_detail':    '/bookmark_detail.php?illust_id=1580459',
+     'url_manga':              '/member_illust.php?mode=manga&illust_id=1580459',
+     'url_response':           '/response.php?illust_id=1580459',
+     'url_response_to':        None
      }
     ]
 
