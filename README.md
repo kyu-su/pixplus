@@ -3,6 +3,10 @@ pixplus
 
 Browser extension for pixiv.
 
+## Screenshot
+
+![Popup](screenshot/mac_opera12_popup.png)
+
 ## Supported browsers
 
 * Opera 12 (oex/UserJS)
