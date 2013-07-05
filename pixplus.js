@@ -1635,14 +1635,38 @@
 
     create_from_id: function(id) {
       return {
-        id:                  id,
-        url_medium:          '/member_illust.php?mode=medium&illust_id=' + id,
-        url_bookmark:        '/bookmark_add.php?type=illust&illust_id=' + id,
-        url_bookmark_detail: '/bookmark_detail.php?illust_id=' + id,
-        url_manga:           '/member_illust.php?mode=manga&illust_id=' + id,
-        url_response:        '/response.php?illust_id=' + id,
-        manga:               { }
+        id:                   id,
+        url_medium:           '/member_illust.php?mode=medium&illust_id=' + id,
+        url_author_profile:   null,
+        url_author_works:     null,
+        url_author_bookmarks: null,
+        url_author_staccfeed: null,
+        url_bookmark:         '/bookmark_add.php?type=illust&illust_id=' + id,
+        url_bookmark_detail:  '/bookmark_detail.php?illust_id=' + id,
+        url_manga:            '/member_illust.php?mode=manga&illust_id=' + id,
+        url_response:         '/response.php?illust_id=' + id,
+        url_response_to:      null,
+        manga:                { }
       };
+    },
+
+    update_urls: function(illust) {
+      if (illust.author_id) {
+        illust.url_author_profile   = '/member.php?id=' + illust.author_id;
+        illust.url_author_works     = '/member_illust.php?id=' + illust.author_id;
+        illust.url_author_bookmarks = '/bookmark.php?id=' + illust.author_id;
+      } else {
+        illust.url_author_profile   = null;
+        illust.url_author_works     = null;
+        illust.url_author_bookmarks = null;
+      }
+
+      if (illust.image_response_to) {
+        illust.url_response_to =
+          '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
+      } else {
+        illust.url_response_to = null;
+      }
     },
 
     create: function(link, allow_types, cb_onshow) {
@@ -1822,16 +1846,11 @@
       illust.author_favorite        = !!_.fastxml.q(profile_area, '#favorite-button.following');
       illust.author_mutual_favorite = !!_.fastxml.q(profile_area, '.user-relation .sprites-heart');
       illust.author_mypixiv         = !!_.fastxml.q(profile_area, '#mypixiv-button.mypixiv');
-      illust.author_url             = null;
       illust.author_image_url       = avatar ? avatar.attrs.src : null;
-      illust.author_staccfeed_url   = staccfeed_link ? staccfeed_link.attrs.href : null;
       illust.author_is_me           = null;
 
-      if (author_link) {
-        illust.author_url = author_link.attrs.href;
-        if ((re = /\/member\.php\?id=(\d+)/.exec(illust.author_url))) {
-          illust.author_id = g.parseInt(re[1], 10);
-        }
+      if (author_link && (re = /\/member\.php\?id=(\d+)/.exec(author_link.attrs.href))) {
+        illust.author_id = g.parseInt(re[1], 10);
       }
 
       if (!illust.author_id) {
@@ -1843,6 +1862,12 @@
       try {
         illust.author_is_me = illust.author_id == w.pixiv.user.id;
       } catch(ex) { }
+
+      illust.url_author_staccfeed = null;
+      if (staccfeed_link) {
+        illust.url_author_staccfeed =
+          staccfeed_link.attrs.href.replace(/^http:\/\/www.pixiv.net(?=\/)/, '');
+      }
 
       var meta = _.fastxml.qa(work_info, '.meta li'),
           meta2 = _.fastxml.text(meta[1]);
@@ -1879,6 +1904,7 @@
         return false;
       });
 
+
       var comment_form_data = _.fastxml.qa(root, '.worksOption form input');
       if (comment_form_data.length > 0) {
         illust.comment_form_data = { };
@@ -1894,6 +1920,8 @@
       if (comment_no_comment) {
         illust.err_no_comment = _.fastxml.text(comment_no_comment);
       }
+
+      _.illust.update_urls(illust);
       return true;
     },
 
@@ -2610,8 +2638,7 @@
         dom.button_response.href = illust.url_response;
       } else if (illust.image_response_to) {
         dom.button_response.classList.add('pp-active');
-        dom.button_response.href
-          = '/member_illust.php?mode=medium&illust_id=' + illust.image_response_to;
+        dom.button_response.href = illust.url_response_to;
         dom.button_response.classList.remove('pp-hide');
       }
 
@@ -2681,19 +2708,19 @@
       });
 
       if (illust.author_id) {
-        dom.author_profile.href = '/member.php?id=' + illust.author_id;
+        dom.author_profile.href = illust.url_author_profile;
         if (illust.author_is_me) {
           dom.author_profile.innerHTML = '[Me]';
         } else {
           dom.author_profile.innerHTML = illust.author_name || '[Error]';
         }
-        dom.author_works.href = '/member_illust.php?id=' + illust.author_id;
+        dom.author_works.href = illust.url_author_works;
         dom.author_works.textContent = _.lng.author_works;
-        dom.author_bookmarks.href = '/bookmark.php?id=' + illust.author_id;
+        dom.author_bookmarks.href = illust.url_author_bookmarks;
         dom.author_bookmarks.textContent = _.lng.author_bookmarks;
       }
-      if (illust.author_staccfeed_url) {
-        dom.author_staccfeed.href = illust.author_staccfeed_url;
+      if (illust.url_author_staccfeed) {
+        dom.author_staccfeed.href = illust.url_author_staccfeed;
         dom.author_staccfeed.textContent = _.lng.author_staccfeed;
       }
 
@@ -3685,30 +3712,35 @@
     },
 
     open_profile: function() {
-      _.open(_.popup.dom.author_profile.href);
+      _.open(_.popup.illust.url_author_profile);
       return true;
     },
 
     open_illust: function() {
-      _.open(_.popup.dom.author_works.href);
+      _.open(_.popup.illust.url_author_works);
       return true;
     },
 
     open_bookmark: function() {
-      _.open(_.popup.dom.author_bookmarks.href);
+      _.open(_.popup.illust.url_author_bookmarks);
       return true;
     },
 
     open_staccfeed: function() {
-      _.open(_.popup.dom.author_staccfeed.href);
+      _.open(_.popup.illust.url_author_staccfeed);
       return true;
     },
 
     open_response: function() {
-      if (_.popup.illust.has_image_response || _.popup.illust.image_response_to) {
-        _.open(_.popup.dom.button_response.href);
+      if (_.popup.illust.has_image_response) {
+        _.open(_.popup.illust.url_response);
         return true;
       }
+
+      if (_.popup.illust.image_response_to) {
+        _.open(_.popup.illust.url_response_to);
+      }
+
       return false;
     },
 
