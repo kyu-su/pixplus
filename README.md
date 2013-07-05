@@ -1,29 +1,26 @@
 pixplus
 =======
 
-## pixplus とは
+Browser extension for pixiv.
 
-pixiv の UI を拡張するブラウザ拡張。
-サムネイルをクリックすると、対象のイラストをポップアップで表示する。
+## Supported browsers
 
-## サポートしているブラウザ
-
-* Opera (oex/UserJS)
+* Opera 12 (oex/UserJS)
 * Chrome (crx/Greasemonkey)
 * Firefox (Greasemonkey)
 * Safari (safariextz)
 
-## ビルド方法
-
-必要なもの:
+## Requirements to build
 
 * make (GNU Make)
-* rsvg-convert (アイコンを作る)
-* python 2.7 or 2.6 (pixplus.js に埋め込んでいる JSON からメタデータなどを作る)
+* rsvg-convert
+* python 2.7 or 2.6
 * zip (oex)
 * ruby (crx)
 * rubyzip (crx)
 * openssl (crx/safariextz)
+
+## How to build
 
 ```bash
 $ git submodule update --init
@@ -31,24 +28,24 @@ $ make deps
 $ make
 ```
 
-Safari 拡張を作成しない場合は `make deps` は不要。
-Chrome 拡張を作成しない場合は `git submodule update --init` も不要。
+You can skip `make deps` if you don't want to build safariextz.
 
-### Safari 拡張に署名する方法
+You can skip `git submodule update --init` and `make deps`
+if you don't want to build crx and safariextz.
 
-1.  [Safari Dev Center] で証明書を発行し、 Extension Builder で適当な safariextz を作成する。
-2.  証明書を発行する際に使用した Keychain Access.app
-    で鍵を pkcs12 形式でエクスポートする。
-3.  エクスポートした p12 ファイルから openssl コマンドで秘密鍵を
-    PEM 形式で抜き出す。
-4.  作成した safariextz から証明書を DER 形式で抜き出し、 safari/sign/
-    下に cert??.crt のファイル名で保存(?? は連番、通常は 00 〜 02)。
-5.  `make clean; make` する。
+## How to sign safariextz
 
-3, 4 についてはスクリプトを用意している。
+1.  Get signing certificates from [Safari Dev Center].
+1.  Make an empty extension, **foo.safariextz**.
+1.  Export secret key from **Keychain Access.app** as pkcs12 format.
+1.  Extract certificates from **foo.safariextz** and put into **safari/sign/??.crt**. (??: 00~02)
+1.  Convert exported pkcs12 file to PEM format and put into **safari/sign/key.pem**.
+1.  `make clean; make`
+
+You can shortcut step4~5 by following:
 
 ```bash
-$ safari/prepare_sign.sh hoge.safariextz Certificates.p12
+$ safari/prepare_sign.sh foo.safariextz Certificates.p12
 ```
 
 [Safari Dev Center]: https://developer.apple.com/devcenter/safari/
