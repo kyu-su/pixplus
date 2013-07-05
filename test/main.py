@@ -14,20 +14,6 @@ testdir = os.path.abspath(os.path.dirname(__file__))
 rootdir = os.path.dirname(testdir)
 bindir  = os.path.join(rootdir, 'bin')
 
-def make_tests(clslist, browser, config):
-  tests = []
-  for cls in clslist:
-    for name in dir(cls):
-      if not name.startswith('test_'):
-        continue
-      attr = getattr(cls, name)
-      if callable(attr):
-        tests.append(cls(browser, config, name))
-        pass
-      pass
-    pass
-  return tests
-
 def load_tests():
   tests = {}
 
@@ -38,15 +24,11 @@ def load_tests():
     name = filename.split('.', 1)[0]
     mod = __import__(name, {}, {}, [], 0)
 
-    classes = []
     for aname in dir(mod):
       if not aname.startswith('Test_'):
         continue
-      classes.append(getattr(mod, aname))
-      pass
-    if classes:
-      tests[name] = classes
-      pass
+      tests[name] = getattr(mod, aname)
+      break
     pass
 
   return tests
@@ -118,7 +100,7 @@ def login(driver, config):
 def test(browser, config, tests):
   try:
     suite = unittest.TestSuite()
-    suite.addTests(make_tests(tests, browser, config))
+    suite.addTests([cls(browser, config, testname) for cls, testname in tests])
 
     browser.set_window_size(1280, 800)
 
@@ -147,9 +129,8 @@ def main():
     )
 
   parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
-  parser.add_argument('-t', metavar = 'TEST', choices = all_tests.keys(),
-                      dest = 'tests', action = 'append',
-                      help = ','.join(sorted(all_tests.keys())))
+  parser.add_argument('-t', dest = 'tests', action = 'append',
+                      help = 'TEST or TEST:METHOD')
   parser.add_argument('-b', metavar = 'BROWSER', choices = browser_names,
                       dest = 'browsers', action = 'append',
                       help = ','.join(browser_names))
@@ -164,8 +145,21 @@ def main():
   config['bindir'] = bindir
 
   tests = []
-  for name in (args.tests or sorted(all_tests.keys())):
-    tests += all_tests[name]
+  if args.tests:
+    for name in args.tests:
+      if ':' in name:
+        name = name.split(':')
+        tests.append((all_tests[name[0]], name[1]))
+      else:
+        cls = all_tests[name]
+        tests += [(cls, n) for n in cls.list_tests()]
+        pass
+      pass
+    pass
+  else:
+    for cls in all_tests.values():
+      tests += [(cls, n) for n in cls.list_tests()]
+      pass
     pass
 
   browsers = args.browsers

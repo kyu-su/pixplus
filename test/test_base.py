@@ -13,6 +13,10 @@ class TestCase(unittest.TestCase):
     self.config = config
     pass
 
+  @classmethod
+  def list_tests(cls):
+    return filter(lambda n: n.startswith('test_'), dir(cls))
+
   def wait_until(self, callback):
     wait = WebDriverWait(self.driver, 10)
     wait.until(callback)
