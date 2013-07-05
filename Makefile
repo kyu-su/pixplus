@@ -96,9 +96,9 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
-clean:
+clean: clean-feeds
 	@echo 'Cleaning'
-	@rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR) $(DIST_DIR)
 
 # ================ Feeds ================
 
