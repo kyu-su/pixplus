@@ -2500,6 +2500,10 @@
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
 
+      // needed for manga spread-page layout...
+      root.style.left = '0px';
+      root.style.top  = '0px';
+
       if (this.bookmark.active) {
         this.bookmark.adjust(max_size[0], max_size[1]);
 
