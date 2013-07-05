@@ -9,11 +9,6 @@ class Test_KeyBind(TestCase):
 
   # TODO
   #
-  # {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
-  # {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
-
-  # TODO
-  #
   # {"key": "popup_caption_scroll_up", "value": "Up"},
   # {"key": "popup_caption_scroll_down", "value": "Down"},
   # {"key": "popup_illust_scroll_up", "value": "Up"},
@@ -385,6 +380,24 @@ class Test_KeyBind(TestCase):
 
     self.send_keys('d')
     self.assertFalse(self.q('.stats', question).is_displayed())
+    pass
+
+  def test_tag_edit(self):
+    self.open_test_user()
+    self.driver.execute_script('pixplus.conf.key.popup_tag_edit_start="Shift+t"')
+    self.open_test_user()
+
+    popup = self.open_popup()
+    self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
+    self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
+
+    self.send_keys('T')
+    self.assertTrue(self.has_class(popup, 'pp-tagedit-mode'))
+    self.assertTrue(self.q('#pp-popup-tagedit-wrapper').is_displayed())
+
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
+    self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
     pass
 
   pass
