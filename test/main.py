@@ -134,6 +134,7 @@ def main():
   parser.add_argument('-b', metavar = 'BROWSER', choices = browser_names,
                       dest = 'browsers', action = 'append',
                       help = ','.join(browser_names))
+  parser.add_argument('--firefox', metavar = 'COMMAND', dest = 'firefox')
   parser.add_argument('--repeatable', dest = 'repeatable',
                       action = 'store_true', default = False)
   args = parser.parse_args()
@@ -143,8 +144,9 @@ def main():
     print('Error: Create "config.json" first')
     return
 
-  config['rootdir'] = rootdir
-  config['bindir'] = bindir
+  config['rootdir']    = rootdir
+  config['bindir']     = bindir
+  config['firefox']    = args.firefox
   config['repeatable'] = args.repeatable
 
   tests = []

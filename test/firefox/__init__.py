@@ -21,7 +21,14 @@ class Firefox(Browser):
     self.profile = webdriver.FirefoxProfile()
     self.add_addon(mode)
     self.profiledir = self.profile.path
-    self.driver = webdriver.Firefox(firefox_profile = self.profile)
+
+    binary = None
+    if config['firefox']:
+      from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+      binary = FirefoxBinary(config['firefox'])
+      pass
+
+    self.driver = webdriver.Firefox(firefox_profile = self.profile, firefox_binary = binary)
     pass
 
   def prepare_addon(self, addonid, name):
