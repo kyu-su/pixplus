@@ -2874,15 +2874,30 @@
 
     show_caption: function() {
       this.dom.header.classList.add('pp-show');
+      this.dom.header.classList.remove('pp-hide');
     },
 
     hide_caption: function() {
       this.question.blur();
-      this.dom.header.classList.remove('pp-show');
+
+      var h = this.dom.header;
+      h.classList.remove('pp-show');
+      if (this.is_caption_visible()) {
+        h.classList.add('pp-hide');
+      }
+    },
+
+    is_caption_visible: function() {
+      var h = this.dom.header;
+      return (!h.classList.contains('pp-hide') &&
+              (h.classList.contains('pp-show') ||
+               (h.oMatchesSelector && h.oMatchesSelector(':hover')) ||
+               (h.mozMatchesSelector && h.mozMatchesSelector(':hover')) ||
+               (h.webkitMatchesSelector && h.webkitMatchesSelector(':hover'))));
     },
 
     toggle_caption: function() {
-      if (this.dom.header.classList.contains('pp-show')) {
+      if (this.is_caption_visible()) {
         this.hide_caption();
       } else {
         this.show_caption();
