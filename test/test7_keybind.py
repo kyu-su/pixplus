@@ -351,7 +351,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_has_question(self, popup):
-    question = self.qa('#pp-popup-rating .questionnaire', popup)
+    question = self.qa('#pp-popup-rating .questionnaire')
     if not question:
       return None
 

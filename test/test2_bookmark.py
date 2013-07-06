@@ -9,13 +9,13 @@ class Test_Bookmark(TestCase):
 
   def test_bookmark(self):
     self.open_test_user()
-    popup = self.open_popup()
+    self.open_popup()
 
-    bookmark_btn = self.q('#pp-popup-button-bookmark', popup)
+    bookmark_btn = self.q('#pp-popup-button-bookmark')
     if self.has_class(bookmark_btn, 'pp-active'):
       self.unbookmark()
-      popup = self.open_popup()
-      bookmark_btn = self.q('#pp-popup-button-bookmark', popup)
+      self.open_popup()
+      bookmark_btn = self.q('#pp-popup-button-bookmark')
       pass
 
     self.popup_reload_and_check_state(
@@ -25,7 +25,7 @@ class Test_Bookmark(TestCase):
     self.driver.execute_script('pixplus.popup.bookmark.start()')
     self.popup_wait_load()
 
-    form = self.q('form[action*="bookmark_add.php"]', popup)
+    form = self.q('#pp-popup-bookmark-wrapper form[action*="bookmark_add.php"]')
     form.submit()
     self.popup_wait_load()
 
