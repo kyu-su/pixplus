@@ -5,6 +5,11 @@ import time
 import unittest
 import warnings
 
+_path = os.path.join(os.path.dirname(__file__), 'selenium', 'py')
+if os.path.exists(_path) and _path not in sys.path:
+  sys.path.insert(0, _path)
+  pass
+
 from firefox import Firefox
 from chrome import Chrome
 from opera import Opera
