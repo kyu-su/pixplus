@@ -24,6 +24,7 @@ class Test_KeyBind(TestCase):
 
   def prepare(self):
     self.open_test_user()
+    self.wait_illust_list()
     self.illust_id_list = self.driver.execute_script(
       'return pixplus.illust.list.map(function(i){return i.id})'
       )

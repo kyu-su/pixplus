@@ -37,6 +37,10 @@ class TestCase(unittest.TestCase):
     self.wait_until(lambda d: d.execute_script('return !!window.pixplus'))
     pass
 
+  def wait_illust_list(self):
+    self.wait_until(lambda d: d.execute_script('return pixplus.illust.list.length>0'))
+    pass
+
   def reload(self):
     self.driver.get(self.driver.current_url)
     pass
@@ -45,6 +49,7 @@ class TestCase(unittest.TestCase):
     if context is None:
       context = self.driver
       pass
+    self.wait_until(lambda d: self.qa(selector, context))
     return context.find_element_by_css_selector(selector)
 
   def qa(self, selector, context = None):
@@ -72,8 +77,12 @@ class TestCase(unittest.TestCase):
     if illust_id is not None:
       self.driver.execute_script('pixplus.popup.show(pixplus.illust.create_from_id(%d))' % illust_id)
     else:
+      self.wait_illust_list()
       self.driver.execute_script('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
       pass
+
+    self.wait_until(lambda d: self.qa('#pp-popup'))
+
     popup = self.q('#pp-popup')
     self.assertTrue(popup.is_displayed())
     self.popup_wait_load()
