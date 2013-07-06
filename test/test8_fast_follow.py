@@ -10,6 +10,7 @@ class Test_FastFollow(TestCase):
     self.q('.user-relation #favorite-button.following').click()
     time.sleep(1)
     self.q('.user-relation #favorite-preference input.button.remove').click()
+    time.sleep(1)
     self.reload()
     self.assertFalse(self.has_class(self.q('.user-relation #favorite-button'), 'following'))
     pass
@@ -43,8 +44,8 @@ class Test_FastFollow(TestCase):
     pass
 
   def test_fast_follow(self):
-    self.follow(11, True)
-    self.follow(11, False)
+    self.follow(self.config['test-user'], True)
+    self.follow(self.config['test-user'], False)
     pass
 
   pass
