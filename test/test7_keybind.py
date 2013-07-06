@@ -410,11 +410,7 @@ class Test_KeyBind(TestCase):
 
     self.send_keys(Keys.SPACE)
 
-    for i in range(10):
-      if not self.q('.list', question).is_displayed():
-        break
-      time.sleep(1)
-      pass
+    self.wait_until(lambda d: not self.q('.list', question).is_displayed())
 
     self.assertFalse(self.q('.list', question).is_displayed())
     self.assertFalse(self.q('.stats', question).is_displayed())
