@@ -117,12 +117,54 @@ class Test_KeyBind(TestCase):
     self.open_popup()
     self.check_id(0)
 
+    title = self.q('#pp-popup-title')
     header = self.q('#pp-popup-header')
+
+    action_chains = ActionChains(self.driver)
+    action_chains.move_to_element(title).perform()
+
     self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertFalse(header.is_displayed())
     self.send_keys('c')
     self.assertTrue(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertTrue(header.is_displayed())
     self.send_keys('c')
     self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertFalse(header.is_displayed())
+
+    action_chains.move_to_element(header).perform()
+
+    self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertTrue(header.is_displayed())
+    self.send_keys('c')
+    self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertTrue(self.has_class(header, 'pp-hide'))
+    self.assertFalse(header.is_displayed())
+    self.send_keys('c')
+    self.assertTrue(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertTrue(header.is_displayed())
+
+    action_chains.move_to_element(title).perform()
+
+    self.assertTrue(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertTrue(header.is_displayed())
+    self.send_keys('c')
+    self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertFalse(header.is_displayed())
+
+    action_chains.move_to_element(header).perform()
+
+    self.assertFalse(self.has_class(header, 'pp-show'))
+    self.assertFalse(self.has_class(header, 'pp-hide'))
+    self.assertTrue(header.is_displayed())
+
 
     comment = self.q('#pp-popup-comment')
     self.assertFalse(comment.is_displayed())
