@@ -2843,7 +2843,13 @@
         this.adjust();
         _.illust.load(illust);
       }
+
       _.lazy_scroll(illust.image_thumb);
+      if (_.conf.popup.mark_visited && illust.link && w.history.replaceState) {
+        var url = w.location.href;
+        w.history.replaceState({}, '', illust.link.href);
+        w.history.replaceState({}, '', url);
+      }
     },
 
     hide: function() {
@@ -5609,7 +5615,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "show_comment_form", "value": true},
       {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1},
-      {"key": "fit_short_threshold", "value": 4}
+      {"key": "fit_short_threshold", "value": 4},
+      {"key": "mark_visited", "value": true}
     ]},
 
     {"name": "mypage", "items": [
@@ -5754,7 +5761,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
           },
           mouse_wheel_delta: 'Threshold for mouse wheel setting(if set negative value, invert direction)',
-          fit_short_threshold: 'Aspect ratio threshold for switch resize mode(0:Disable)'
+          fit_short_threshold: 'Aspect ratio threshold for switch resize mode(0:Disable)',
+          mark_visited: 'Mark link as visited'
         },
 
         key: {
@@ -5913,7 +5921,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
           },
           mouse_wheel_delta: '\u30db\u30a4\u30fc\u30eb\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)',
-          fit_short_threshold: '\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b\u7e26\u6a2a\u6bd4\u306e\u95be\u5024(0:\u7121\u52b9)'
+          fit_short_threshold: '\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b\u7e26\u6a2a\u6bd4\u306e\u95be\u5024(0:\u7121\u52b9)',
+          mark_visited: '\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b'
         },
 
         key: {
@@ -6014,6 +6023,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Add] Add \"Mark link as visited\" option.",
           "[Fix] Fix ESC key is not working.",
           "[Fix] Fix Shift+V key (open manga thumbnail page) is not working.",
           "[Fix] Fix image response support"
