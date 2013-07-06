@@ -2414,6 +2414,14 @@
         img.style.margin = g.Math.floor((height - img.offsetHeight) / 2) + 'px 0px 0px 0px';
       });
 
+      // update wrapper size
+
+      dom.image_layout.style.width = this.images.reduce(function(width, img) {
+        return width + img.offsetWidth;
+      }, 0) + 'px';
+
+      dom.image_layout.style.height = height + 'px';
+
       // update info area
 
       var size_list, illust = this.illust;
@@ -2499,10 +2507,6 @@
 
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
-
-      // needed for manga spread-page layout...
-      root.style.left = '0px';
-      root.style.top  = '0px';
 
       if (this.bookmark.active) {
         this.bookmark.adjust(max_size[0], max_size[1]);
