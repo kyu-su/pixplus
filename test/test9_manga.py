@@ -60,6 +60,15 @@ class Test_Rate(TestCase):
     pass
 
   def test_manga(self):
+    self.open('/member_illust.php?mode=manga&illust_id=6209105')
+    self.assertEquals(self.driver.execute_script('return pixiv.context.pages'),
+                      [[1], [2], [3]])
+    self.assertEquals(self.driver.execute_script('return pixiv.context.images'),
+                      ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',
+                       'http://i1.pixiv.net/img01/img/pixiv/6209105_p1.jpg',
+                       'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
+
+
     self.open_test_user()
 
     ids = self.driver.execute_script('''
