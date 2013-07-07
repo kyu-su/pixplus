@@ -127,6 +127,7 @@ class TestCase(unittest.TestCase):
 
   def open_test_user(self):
     self.open('/member_illust.php?id=%d' % self.config['test-user'])
+    self.wait_illust_list()
     pass
 
   def find_illust(self, callback, *args):
