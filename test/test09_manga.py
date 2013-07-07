@@ -1,6 +1,6 @@
 from test_base import TestCase
 
-class Test_Rate(TestCase):
+class Test_Manga(TestCase):
 
   def check(self, illust_id):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
@@ -8,6 +8,8 @@ class Test_Rate(TestCase):
     images = self.driver.execute_script('return pixiv.context.images')
 
     self.open_popup(illust_id)
+    self.driver.execute_script('pixplus.popup.manga.start()')
+    self.popup_wait_load()
     manga = self.driver.execute_script('return pixplus.popup.illust.manga')
 
     self.assertEquals(manga['page_count'], len(images))

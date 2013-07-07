@@ -537,6 +537,8 @@ class Test_KeyBind(TestCase):
     time.sleep(2)
     self.check_scrollbar(False, False, False)
 
+    self.driver.execute_script('pixplus.conf.popup.big_image=false')
+    self.open_test_user()
     pass
 
   pass
