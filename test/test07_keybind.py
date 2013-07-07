@@ -20,7 +20,6 @@ class Test_KeyBind(TestCase):
   # {"key": "popup_illust_scroll_bottom", "value": "End"},
   # {"key": "popup_illust_page_up", "value": "PageUp"},
   # {"key": "popup_illust_page_down", "value": "PageDown"},
-  # {"key": "popup_switch_resize_mode", "value": "w"},
 
   def prepare(self):
     self.open_test_user()
@@ -441,6 +440,103 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.ESCAPE)
     self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
+    pass
+
+  def check_size(self, popup, fit_width, overflow_v, overflow_h):
+    data = self.popup_get_illust_data()
+    iw, ih = data['size']['width'], data['size']['height']
+    sw, sh = self.driver.execute_script('''
+      return [document.documentElement.clientWidth,
+              document.documentElement.clientHeight];
+    ''')
+
+    if (ih > sh) != overflow_v:
+      return False
+    if (iw > sw) != overflow_h:
+      return False
+
+    if ((float(iw) / sw) < (float(ih) / sh)) != fit_width:
+      return False
+
+    return True
+
+  def check_scrollbar(self, vertical, horizontal, strict):
+    cw, ch, sw, sh, lw, lh = self.driver.execute_script('''
+      return (function(s, l) {
+        return [s.clientWidth, s.clientHeight, s.scrollWidth, s.scrollHeight,
+                l.offsetWidth, l.offsetHeight];
+      })(pixplus.popup.dom.image_scroller, pixplus.popup.dom.image_layout);
+    ''')
+
+    self.assertEquals(sh > ch, vertical)
+    self.assertEquals(sw > cw, horizontal)
+
+    if not vertical:
+      self.assertEquals(ch, sh)
+      if strict:
+        self.assertEquals(ch, lh)
+        pass
+      pass
+
+    if not horizontal:
+      self.assertEquals(cw, sw)
+      if strict:
+        self.assertEquals(cw, lw)
+        pass
+      pass
+    pass
+
+  def test_resize_mode(self):
+    self.open_test_user()
+    self.driver.execute_script('pixplus.conf.popup.big_image=true')
+    self.driver.execute_script('pixplus.conf.popup.fit_short_threshold=0')
+
+    self.find_illust(self.check_size, True, True, False)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(True, False, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, False, False)
+
+    self.find_illust(self.check_size, False, False, True)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, True, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, False, False)
+
+    self.find_illust(self.check_size, True, True, True)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(True, False, True)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(True, True, True)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, False, False)
+
+    self.find_illust(self.check_size, False, True, True)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, True, True)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(True, True, True)
+    self.send_keys('w')
+    time.sleep(2)
+    self.check_scrollbar(False, False, False)
+
     pass
 
   pass

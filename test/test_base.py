@@ -90,8 +90,12 @@ class TestCase(unittest.TestCase):
 
   def popup_wait_load(self):
     popup = self.q('#pp-popup')
-    self.wait_until(lambda driver: not self.has_class(popup, 'pp-loading'))
+    self.wait_until(lambda d: not self.has_class(popup, 'pp-loading'))
     self.assertFalse(self.has_class(popup, 'pp-error'))
+    pass
+
+  def popup_wait_big_image(self):
+    self.wait_until(lambda d: d.execute_script('return pixplus.popup.images[0]===pixplus.popup.illust.image_big'))
     pass
 
   def popup_reload(self):
