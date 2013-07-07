@@ -25,7 +25,7 @@ class BrowserSeleniumServer(Browser):
     pass
 
   def download_selenium_server(self):
-    filename = os.path.join(os.path.dirname(__file__), 'selenium', 'server-standalone.jar')
+    filename = os.path.join(os.path.dirname(__file__), 'selenium', 'selenium-standalone.jar')
     filename = os.path.abspath(filename)
     if os.path.exists(filename):
       return filename
