@@ -1,9 +1,7 @@
-* Manga mode
-* Advanced search ui
-* Mypage layout history
-* Author status icon
 * Resize mode
-* Mouse wheel setting
 * Remove pixpedia/comic icon setting
 * Redirect jump.php setting
+* Mouse wheel setting
 * Settings ui
+* Advanced search ui
+* Mypage layout history
