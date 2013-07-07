@@ -23,8 +23,10 @@ class Test_Rate(TestCase):
       warnings.warn('ActionChains.move_to_element_with_offset() is currently not supported by safari driver', FutureWarning)
       rating.click()
     else:
-      action_chains = ActionChains(self.driver)
-      action_chains.move_to_element_with_offset(rating, 220, 10).click().perform()
+      ac = ActionChains(self.driver)
+      ac.move_to_element_with_offset(rating, 210, 10).perform()
+      # click() moves cursor to center on Firefox22
+      ac.click_and_hold().release().perform()
       self.alert_accept()
       rate = self.q('.rate', rating)
       self.assertEqual(rate.size['width'], 234)
