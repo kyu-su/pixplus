@@ -5182,17 +5182,23 @@
           var min = size[0] || [],
               max = size[1] || [],
               wlt = min[0] || null,
-              hlt = min[1] || wlt,
+              hlt = min[1] || null,
               wgt = max[0] || null,
-              hgt = max[1] || wgt;
+              hgt = max[1] || null;
 
           return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
         };
 
-        var wlt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wlt}, li),
-            hlt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hlt}, li),
-            wgt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_wgt}, li),
-            hgt = _.e('input', {type: 'text', cls: 'ui-tooltip', 'data-tooltip': _.lng.search_hgt}, li);
+        var e = ['wlt', 'hlt', 'wgt', 'hgt'].map(function(n) {
+          return _.e('input', {
+            id: 'pp-search-size-custom-' + n,
+            type: 'text',
+            cls: 'ui-tooltip',
+            'data-tooltip': _.lng['search_' + n]
+          }, li);
+        });
+
+        var wlt = e[0], hlt = e[1], wgt = e[2], hgt = e[3];
 
         [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
           p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
