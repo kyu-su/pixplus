@@ -4717,10 +4717,15 @@
         this.dom = {};
         this.dom.root = _.e('div', {id: 'pp-layout-history-manager'});
         this.dom.header = _.e('header', null, this.dom.root);
+        this.dom.close_btn = _.e('span', {
+          id: 'pp-layout-history-manager-close',
+          text: '\u00d7',
+          css: 'cursor:pointer'
+        }, this.dom.header);
         this.dom.error = _.e('p', {cls: 'pp-error-message'}, this.dom.root);
         this.dom.table = _.e('table', null, this.dom.root);
 
-        _.onclick(_.e('span', {text: '\u00d7', css: 'cursor:pointer'}, this.dom.header), function() {
+        _.onclick(this.dom.close_btn, function() {
           that.hide();
         });
         _.e('h2', {text: _.lng.mypage_layout_history}, this.dom.header);
@@ -4760,7 +4765,7 @@
         });
 
         layout.split('').forEach(function(d) {
-          var item = _.e('li', {text: name_map[d.toLowerCase()]}, that.dom.preview);
+          var item = _.e('li', {text: name_map[d.toLowerCase()], 'data-pp-key': d}, that.dom.preview);
           if (d.toUpperCase() === d) {
             item.classList.add('pp-open');
           }
@@ -4800,7 +4805,7 @@
             text = layout;
           }
 
-          item = _.e('li', {text: text}, that.dom.list);
+          item = _.e('li', {text: text, 'data-pp-layout': layout}, that.dom.list);
 
           _.listen(item, 'mouseover', function() {
             if (item === last_active) {
