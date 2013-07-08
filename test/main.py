@@ -167,7 +167,8 @@ def main():
       pass
     pass
   else:
-    for cls in all_tests.values():
+    for name in sorted(all_tests.keys()):
+      cls = all_tests[name]
       if args.repeatable and not cls.repeatable:
         warnings.warn('Skipping %s because it is not repeatable' % cls.__name__)
         continue
