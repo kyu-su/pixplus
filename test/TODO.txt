@@ -1,4 +1,3 @@
-* Redirect jump.php setting
 * Mouse wheel setting
 * Settings ui
 * Advanced search ui
