@@ -152,13 +152,17 @@ class TestCase(unittest.TestCase):
       pass
     pass
 
-  def unbookmark(self, illust_id = None):
+  def unbookmark(self, illust_id = None, hidden = False):
     if illust_id is None:
       illust_id = self.popup_get_illust_data('id')
       pass
 
     url = self.driver.current_url
-    self.open('/bookmark.php')
+    if hidden:
+      self.open('/bookmark.php?rest=hide')
+    else:
+      self.open('/bookmark.php')
+      pass
 
     if not self.browser.supports_alert:
       self.js('window.confirm=function(){return true}')
