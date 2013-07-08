@@ -1,4 +1,3 @@
-* Remove pixpedia/comic icon setting
 * Redirect jump.php setting
 * Mouse wheel setting
 * Settings ui
