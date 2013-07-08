@@ -189,8 +189,11 @@ class TestCase(unittest.TestCase):
   def js(self, script):
     return self.driver.execute_script(script)
 
+  def get_conf(self, key):
+    return self.js('return pixplus.conf.%s' % key)
+
   def set_conf(self, key, value):
-    old = self.js('return pixplus.conf.%s' % key)
+    old = self.get_conf(key)
     self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
     if key not in self.changed_conf:
       self.changed_conf[key] = old
