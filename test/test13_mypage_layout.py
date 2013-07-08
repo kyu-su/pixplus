@@ -96,4 +96,22 @@ class Test_Mypage(TestCase):
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
     pass
 
+  def test_layout4(self):
+    layouts, times = self.set_layout_history(['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
+    self.set_cookie('bEtNm')
+    self.open('/mypage.php')
+
+    self.q('.pp-layout-history').click()
+    self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
+
+    self.check_pixiv_jsobj('TeBmN')
+    self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
+
+    self.q('.pp-layout-history').click()
+    self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
+
+    self.check_pixiv_jsobj('ntebm')
+    self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
+    pass
+
   pass
