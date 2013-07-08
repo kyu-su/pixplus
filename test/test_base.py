@@ -1,5 +1,6 @@
 import unittest
 import time
+import json
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
@@ -13,11 +14,17 @@ class TestCase(unittest.TestCase):
     self.driver = browser.driver
     self.config = config
     self.repeatable = config.get('repeatable', False)
+    self.changed_conf = {}
     pass
 
   @classmethod
   def list_tests(cls):
     return filter(lambda n: n.startswith('test_'), dir(cls))
+
+  def tearDown(self):
+    self.reset_conf()
+    time.sleep(1)
+    pass
 
   def wait_until(self, callback):
     wait = WebDriverWait(self.driver, 10)
@@ -34,11 +41,11 @@ class TestCase(unittest.TestCase):
 
   def open(self, url):
     self.driver.get('http://www.pixiv.net%s' % url)
-    self.wait_until(lambda d: d.execute_script('return !!window.pixplus'))
+    self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
   def wait_illust_list(self):
-    self.wait_until(lambda d: d.execute_script('return pixplus.illust.list.length>0'))
+    self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
     pass
 
   def reload(self):
@@ -75,10 +82,10 @@ class TestCase(unittest.TestCase):
 
   def open_popup(self, illust_id = None, idx = None):
     if illust_id is not None:
-      self.driver.execute_script('pixplus.popup.show(pixplus.illust.create_from_id(%d))' % illust_id)
+      self.js('pixplus.popup.show(pixplus.illust.create_from_id(%d))' % illust_id)
     else:
       self.wait_illust_list()
-      self.driver.execute_script('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
+      self.js('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
       pass
 
     self.wait_until(lambda d: self.qa('#pp-popup'))
@@ -95,26 +102,26 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_wait_big_image(self):
-    self.wait_until(lambda d: d.execute_script('return pixplus.popup.images[0]===pixplus.popup.illust.image_big'))
+    self.wait_until(lambda d: self.js('return pixplus.popup.images[0]===pixplus.popup.illust.image_big'))
     pass
 
   def popup_reload(self):
-    self.driver.execute_script('pixplus.popup.reload()')
+    self.js('pixplus.popup.reload()')
     self.popup_wait_load()
     pass
 
   def popup_prev(self):
-    self.driver.execute_script('pixplus.popup.input.prev()')
+    self.js('pixplus.popup.input.prev()')
     self.popup_wait_load()
     pass
 
   def popup_next(self):
-    self.driver.execute_script('pixplus.popup.input.next()')
+    self.js('pixplus.popup.input.next()')
     self.popup_wait_load()
     pass
 
   def popup_get_illust_data(self, name = None):
-    obj = self.driver.execute_script('''
+    obj = self.js('''
       return (function(illust) {
         var r = {};
         for(var key in illust) {
@@ -154,7 +161,7 @@ class TestCase(unittest.TestCase):
     self.open('/bookmark.php')
 
     if not self.browser.supports_alert:
-      self.driver.execute_script('window.confirm=function(){return true}')
+      self.js('window.confirm=function(){return true}')
       pass
 
     link = self.q('a[href*="illust_id=%d"]' % illust_id)
@@ -173,6 +180,25 @@ class TestCase(unittest.TestCase):
       self.popup_reload()
       pass
     self.assertTrue(callback())
+    pass
+
+  def js(self, script):
+    return self.driver.execute_script(script)
+
+  def set_conf(self, key, value):
+    old = self.js('return pixplus.conf.%s' % key)
+    self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
+    if key not in self.changed_conf:
+      self.changed_conf[key] = old
+      pass
+    pass
+
+  def reset_conf(self):
+    for key, value in self.changed_conf.items():
+      self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
+      pass
+    self.changed_conf = {}
+    self.reload()
     pass
 
   pass

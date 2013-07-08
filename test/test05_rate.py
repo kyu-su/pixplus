@@ -11,12 +11,12 @@ class Test_Rate(TestCase):
   def test_rate(self):
     self.open_test_user()
     if not self.browser.supports_alert:
-      self.driver.execute_script('pixplus.conf.general.rate_confirm=false')
+      self.set_conf('general.rate_confirm', False)
       pass
 
     rating = self.find_illust(lambda popup: self.qa('#pp-popup-rating .score .rating:not(.rated)', popup))
     rating = rating[0]
-    self.driver.execute_script('pixplus.popup.show_caption()')
+    self.js('pixplus.popup.show_caption()')
     self.assertEquals(self.popup_get_illust_data('rated'), False)
 
     if self.browser.name == 'safari':

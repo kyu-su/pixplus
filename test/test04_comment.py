@@ -8,7 +8,7 @@ class Test_Comment(TestCase):
     self.open_test_user()
     popup = self.open_popup()
 
-    self.driver.execute_script('pixplus.popup.comment.start()')
+    self.js('pixplus.popup.comment.start()')
     self.popup_wait_load()
 
     form_query = '#pp-popup-comment-form form[action="/member_illust.php"]'

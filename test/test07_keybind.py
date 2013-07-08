@@ -23,9 +23,7 @@ class Test_KeyBind(TestCase):
 
   def prepare(self):
     self.open_test_user()
-    self.illust_id_list = self.driver.execute_script(
-      'return pixplus.illust.list.map(function(i){return i.id})'
-      )
+    self.illust_id_list = self.js('return pixplus.illust.list.map(function(i){return i.id})')
     pass
 
   def check_id(self, idx):
@@ -44,7 +42,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def blur(self):
-    self.driver.execute_script('document.activeElement.blur()')
+    self.js('document.activeElement.blur()')
     pass
 
   def test_move(self):
@@ -70,7 +68,7 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
     self.check_closed()
 
-    self.driver.execute_script('pixplus.conf.popup.reverse=1')
+    self.set_conf('popup.reverse', 1)
     self.open_test_user()
 
     self.open_popup()
@@ -91,9 +89,6 @@ class Test_KeyBind(TestCase):
     self.check_id(0)
     self.send_keys(Keys.SPACE)
     self.check_closed()
-
-    self.driver.execute_script('pixplus.conf.popup.reverse=0')
-    self.open_test_user()
     pass
 
   def test_close(self):
@@ -176,7 +171,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def handle_open(self):
-    self.driver.execute_script('''
+    self.js('''
       window.open = function(url) {
         pixplus.test_handle_open = url;
       };
@@ -187,7 +182,7 @@ class Test_KeyBind(TestCase):
     self.assertTrue(url)
     opened = None
     for i in range(10):
-      opened = self.driver.execute_script('''
+      opened = self.js('''
         return (function() {
           var r = pixplus.test_handle_open;
           pixplus.test_handle_open = null;
@@ -426,7 +421,7 @@ class Test_KeyBind(TestCase):
 
   def test_tag_edit(self):
     self.open_test_user()
-    self.driver.execute_script('pixplus.conf.key.popup_tag_edit_start="Shift+t"')
+    self.set_conf('key.popup_tag_edit_start', 'Shift+t')
     self.open_test_user()
 
     popup = self.open_popup()
@@ -445,7 +440,7 @@ class Test_KeyBind(TestCase):
   def check_size(self, popup, fit_width, overflow_v, overflow_h):
     data = self.popup_get_illust_data()
     iw, ih = data['size']['width'], data['size']['height']
-    sw, sh = self.driver.execute_script('''
+    sw, sh = self.js('''
       return [document.documentElement.clientWidth,
               document.documentElement.clientHeight];
     ''')
@@ -461,7 +456,7 @@ class Test_KeyBind(TestCase):
     return True
 
   def check_scrollbar(self, vertical, horizontal, strict):
-    cw, ch, sw, sh, lw, lh = self.driver.execute_script('''
+    cw, ch, sw, sh, lw, lh = self.js('''
       return (function(s, l) {
         return [s.clientWidth, s.clientHeight, s.scrollWidth, s.scrollHeight,
                 l.offsetWidth, l.offsetHeight];
@@ -488,8 +483,8 @@ class Test_KeyBind(TestCase):
 
   def test_resize_mode(self):
     self.open_test_user()
-    self.driver.execute_script('pixplus.conf.popup.big_image=true')
-    self.driver.execute_script('pixplus.conf.popup.fit_short_threshold=0')
+    self.set_conf('popup.big_image', True)
+    self.set_conf('popup.fit_short_threshold', 0)
 
     self.find_illust(self.check_size, True, True, False)
     self.popup_wait_big_image()
@@ -536,9 +531,6 @@ class Test_KeyBind(TestCase):
     self.send_keys('w')
     time.sleep(2)
     self.check_scrollbar(False, False, False)
-
-    self.driver.execute_script('pixplus.conf.popup.big_image=false')
-    self.open_test_user()
     pass
 
   pass

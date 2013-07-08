@@ -24,7 +24,7 @@ class Test_FastFollow(TestCase):
       pass
 
     fast_user_bookmark = 2 if restrict else 1
-    self.driver.execute_script('pixplus.conf.general.fast_user_bookmark=%d' % fast_user_bookmark)
+    self.set_conf('general.fast_user_bookmark', fast_user_bookmark)
     self.reload()
 
     btn = self.q('.user-relation #favorite-button')

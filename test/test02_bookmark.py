@@ -22,7 +22,7 @@ class Test_Bookmark(TestCase):
       lambda: not self.has_class(bookmark_btn, 'pp-active')
       )
 
-    self.driver.execute_script('pixplus.popup.bookmark.start()')
+    self.js('pixplus.popup.bookmark.start()')
     self.popup_wait_load()
 
     form = self.q('#pp-popup-bookmark-wrapper form[action*="bookmark_add.php"]')

@@ -4,13 +4,13 @@ class Test_Manga(TestCase):
 
   def check(self, illust_id):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
-    pages = self.driver.execute_script('return pixiv.context.pages')
-    images = self.driver.execute_script('return pixiv.context.images')
+    pages = self.js('return pixiv.context.pages')
+    images = self.js('return pixiv.context.images')
 
     self.open_popup(illust_id)
-    self.driver.execute_script('pixplus.popup.manga.start()')
+    self.js('pixplus.popup.manga.start()')
     self.popup_wait_load()
-    manga = self.driver.execute_script('return pixplus.popup.illust.manga')
+    manga = self.js('return pixplus.popup.illust.manga')
 
     self.assertEquals(manga['page_count'], len(images))
     self.assertEquals(len(manga['pages']), len(pages))
@@ -20,7 +20,7 @@ class Test_Manga(TestCase):
       pass
 
     for page in range(len(pages)):
-      self.driver.execute_script('pixplus.popup.manga.show(%d)' % page)
+      self.js('pixplus.popup.manga.show(%d)' % page)
       self.popup_wait_load()
 
       scroller = self.q('#pp-popup-image-scroller')
@@ -63,9 +63,8 @@ class Test_Manga(TestCase):
 
   def test_manga(self):
     self.open('/member_illust.php?mode=manga&illust_id=6209105')
-    self.assertEquals(self.driver.execute_script('return pixiv.context.pages'),
-                      [[1], [2], [3]])
-    self.assertEquals(self.driver.execute_script('return pixiv.context.images'),
+    self.assertEquals(self.js('return pixiv.context.pages'), [[1], [2], [3]])
+    self.assertEquals(self.js('return pixiv.context.images'),
                       ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',
                        'http://i1.pixiv.net/img01/img/pixiv/6209105_p1.jpg',
                        'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
@@ -73,7 +72,7 @@ class Test_Manga(TestCase):
 
     self.open_test_user()
 
-    ids = self.driver.execute_script('''
+    ids = self.js('''
       return pixplus.illust.list.map(function(illust) {
         return illust.id;
       });

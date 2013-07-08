@@ -11,7 +11,7 @@ class Test_TagEdit(TestCase):
     return set(self.popup_get_illust_data('tags'))
 
   def check_tag_editable(self, popup, query):
-    self.driver.execute_script('pixplus.popup.tagedit.start()')
+    self.js('pixplus.popup.tagedit.start()')
     self.popup_wait_load()
     self.assertTrue(self.has_class(popup, 'pp-tagedit-mode'))
 
@@ -19,7 +19,7 @@ class Test_TagEdit(TestCase):
     if target:
       return target[0]
 
-    self.driver.execute_script('pixplus.popup.tagedit.end()')
+    self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
     self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
     pass
@@ -39,7 +39,7 @@ class Test_TagEdit(TestCase):
     self.q(query).click()
     self.wait_until(lambda driver: not self.qa(query))
 
-    self.driver.execute_script('pixplus.popup.tagedit.end()')
+    self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
 
     tags.add(tag)
@@ -49,7 +49,7 @@ class Test_TagEdit(TestCase):
   def test_tagedit_delete(self):
     self.open_test_user()
     if not self.browser.supports_alert:
-      self.driver.execute_script('window.confirm=function(){return true}')
+      self.js('window.confirm=function(){return true}')
       pass
 
     del_btn = self.find_tag_editable('input[onclick^="delTag("]')
@@ -59,7 +59,7 @@ class Test_TagEdit(TestCase):
     self.assertIsNotNone(m)
 
     tagid = int(m.group(1))
-    tag = self.driver.execute_script('return document.getElementById("tag%d").textContent' % tagid)
+    tag = self.js('return document.getElementById("tag%d").textContent' % tagid)
     tag = urllib.unquote(tag.encode('utf-8')).decode('utf-8')
     self.assertTrue(tag)
     self.assertIn(tag, tags)
@@ -69,7 +69,7 @@ class Test_TagEdit(TestCase):
 
     self.wait_until(lambda driver: not self.qa('#tag%d' % tagid) or self.q('#tag%d' % tagid).text != tag)
 
-    self.driver.execute_script('pixplus.popup.tagedit.end()')
+    self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
 
     tags.remove(tag)
