@@ -1,7 +1,5 @@
 import time
 
-from selenium.webdriver import ActionChains
-
 from test_base import TestCase
 
 class Test_FastFollow(TestCase):

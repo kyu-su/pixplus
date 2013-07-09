@@ -2,16 +2,12 @@ import unittest
 import time
 import json
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.alert import Alert
-
 class TestCase(unittest.TestCase):
   repeatable = True
 
   def __init__(self, browser, config, testname):
     unittest.TestCase.__init__(self, testname)
-    self.browser = browser
-    self.driver = browser.driver
+    self.b = browser
     self.config = config
     self.repeatable = config.get('repeatable', False)
     self.changed_conf = {}
@@ -21,61 +17,24 @@ class TestCase(unittest.TestCase):
   def list_tests(cls):
     return filter(lambda n: n.startswith('test_'), dir(cls))
 
+  def __getattr__(self, name):
+    if hasattr(self.b, name):
+      return getattr(self.b, name)
+    raise AttributeError()
+
   def tearDown(self):
     self.reset_conf()
     time.sleep(1)
     pass
 
-  def wait_until(self, callback):
-    wait = WebDriverWait(self.driver, 10)
-    wait.until(callback)
-    pass
-
-  def alert_accept(self):
-    if self.browser.supports_alert:
-      Alert(self.driver).accept()
-    else:
-      time.sleep(1)
-      pass
-    pass
-
   def open(self, url):
-    self.driver.get('http://www.pixiv.net%s' % url)
+    self.b.open('http://www.pixiv.net%s' % url)
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
   def wait_illust_list(self):
     self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
     pass
-
-  def reload(self):
-    self.driver.get(self.driver.current_url)
-    pass
-
-  def q(self, selector, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    self.wait_until(lambda d: self.qa(selector, context))
-    return context.find_element_by_css_selector(selector)
-
-  def qa(self, selector, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_elements_by_css_selector(selector)
-
-  def x(self, xpath, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_element_by_xpath(xpath)
-
-  def xa(self, xpath, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_elements_by_xpath(xpath)
 
   def has_class(self, element, classname):
     return ' %s ' % classname in ' %s ' % element.get_attribute('class')
@@ -157,14 +116,14 @@ class TestCase(unittest.TestCase):
       illust_id = self.popup_get_illust_data('id')
       pass
 
-    url = self.driver.current_url
+    url = self.b.url
     if hidden:
       self.open('/bookmark.php?rest=hide')
     else:
       self.open('/bookmark.php')
       pass
 
-    if not self.browser.supports_alert:
+    if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
       pass
 
@@ -172,8 +131,10 @@ class TestCase(unittest.TestCase):
     checkbox = self.q('input[name="book_id[]"]', link.parent)
     checkbox.click()
     self.q('input[type="submit"][name="del"]').click()
-    self.alert_accept()
-    self.driver.get(url)
+    if self.b.supports_alert:
+      self.alert_accept()
+      pass
+    self.b.open(url)
     pass
 
   def popup_reload_and_check_state(self, callback):
@@ -185,9 +146,6 @@ class TestCase(unittest.TestCase):
       pass
     self.assertTrue(callback())
     pass
-
-  def js(self, script):
-    return self.driver.execute_script(script)
 
   def get_conf(self, key):
     return self.js('return pixplus.conf.%s' % key)
@@ -207,10 +165,5 @@ class TestCase(unittest.TestCase):
     self.changed_conf = {}
     self.reload()
     pass
-
-  def geom(self, element):
-    pos = element.location
-    size = element.size
-    return pos['x'], pos['y'], size['width'], size['height']
 
   pass

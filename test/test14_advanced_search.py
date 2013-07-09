@@ -2,8 +2,6 @@ import urlparse
 import warnings
 import time
 
-from selenium.webdriver import ActionChains
-
 from test_base import TestCase
 
 class Test_AdvancedSearch(TestCase):
@@ -33,8 +31,8 @@ class Test_AdvancedSearch(TestCase):
     self.set_size(wlt, hlt, wgt, hgt)
     self.q('#search-option .content form').submit()
 
-    self.assertTrue(self.driver.current_url.startswith('http://www.pixiv.net/search.php?'))
-    url = urlparse.urlparse(self.driver.current_url)
+    self.assertTrue(self.url.startswith('http://www.pixiv.net/search.php?'))
+    url = urlparse.urlparse(self.url)
     query = dict(urlparse.parse_qsl(url.query))
 
     for name in 'wlt', 'hlt', 'wgt', 'hgt':
@@ -55,8 +53,7 @@ class Test_AdvancedSearch(TestCase):
   def check_slider(self, slider, knob, text):
     sx, sy, sw, sh = self.geom(slider)
 
-    ac = ActionChains(self.driver)
-
+    ac = self.ac()
     ac.click_and_hold(knob or slider).move_by_offset(sw * 2, 0).release().perform()
 
     self.assertEquals(text.get_attribute('value'), '1.5')
@@ -89,7 +86,7 @@ class Test_AdvancedSearch(TestCase):
 
     slider = self.q('#pp-search-ratio-custom-slider')
     if slider.tag_name != 'input':
-      warnings.warn('%s seems not supports <input type=range>' % self.browser.name)
+      warnings.warn('%s seems not supports <input type=range>' % self.b.name)
       return
 
     text = self.q('#pp-search-ratio-custom-text')

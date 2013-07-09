@@ -48,7 +48,7 @@ class Test_TagEdit(TestCase):
 
   def test_tagedit_delete(self):
     self.open_test_user()
-    if not self.browser.supports_alert:
+    if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
       pass
 
@@ -65,7 +65,9 @@ class Test_TagEdit(TestCase):
     self.assertIn(tag, tags)
 
     del_btn.click()
-    self.alert_accept()
+    if self.b.supports_alert:
+      self.alert_accept()
+      pass
 
     self.wait_until(lambda driver: not self.qa('#tag%d' % tagid) or self.q('#tag%d' % tagid).text != tag)
 

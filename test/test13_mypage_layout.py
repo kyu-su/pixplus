@@ -1,8 +1,6 @@
 import urllib
 import time
 
-from selenium.webdriver import ActionChains
-
 from test_base import TestCase
 
 class Test_Mypage(TestCase):
@@ -62,8 +60,7 @@ class Test_Mypage(TestCase):
     btn = self.q('.pp-layout-history')
     self.assertTrue(btn.get_attribute('data-tooltip'))
 
-    ac = ActionChains(self.driver)
-    ac.move_to_element(btn).perform()
+    self.ac().move_to_element(btn).perform()
     self.assertTrue(self.q('#ui-tooltip-container').is_displayed())
     self.assertEquals(self.q('#ui-tooltip-container p').text, btn.get_attribute('data-tooltip'))
 
@@ -76,8 +73,7 @@ class Test_Mypage(TestCase):
     self.assertEquals(map(lambda e: e.text, history), times_s)
 
     for item in history:
-      ac = ActionChains(self.driver)
-      ac.move_to_element(item).perform()
+      self.ac().move_to_element(item).perform()
 
       layout = ''.join(map(lambda e: e.get_attribute('data-pp-key'), self.qa('#pp-layout-preview li')))
       self.assertEquals(item.get_attribute('data-pp-layout'), layout)

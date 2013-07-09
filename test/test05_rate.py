@@ -1,8 +1,6 @@
 import time
 import warnings
 
-from selenium.webdriver import ActionChains
-
 from test_base import TestCase
 
 class Test_Rate(TestCase):
@@ -17,7 +15,7 @@ class Test_Rate(TestCase):
     score = (int(time.time()) % 9) + 1
     width = score * 26
 
-    ac = ActionChains(self.driver)
+    ac = self.ac()
     ac.move_to_element_with_offset(rating, width - 10, 10).perform()
     # click() moves cursor to center on Firefox22
     ac.click_and_hold().release().perform()
@@ -38,8 +36,8 @@ class Test_Rate(TestCase):
     pass
 
   def test_rate(self):
-    if not self.browser.supports_alert:
-      warnings.warn('%s is not supports alert handling' % self.browser.name)
+    if not self.b.supports_alert:
+      warnings.warn('%s is not supports alert handling' % self.b.name)
       return
 
     self.open_test_user()

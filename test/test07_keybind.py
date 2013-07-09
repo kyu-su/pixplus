@@ -1,7 +1,6 @@
 import warnings
 import time
 
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 from test_base import *
@@ -35,7 +34,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def send_keys(self, keys):
-    ActionChains(self.driver).send_keys(keys).perform()
+    self.ac().send_keys(keys).perform()
     if self.qa('#pp-popup'):
       self.popup_wait_load()
       pass
@@ -114,8 +113,7 @@ class Test_KeyBind(TestCase):
     title = self.q('#pp-popup-title')
     header = self.q('#pp-popup-header')
 
-    action_chains = ActionChains(self.driver)
-    action_chains.move_to_element(title).perform()
+    self.ac().move_to_element(title).perform()
 
     self.assertFalse(self.has_class(header, 'pp-show'))
     self.assertFalse(self.has_class(header, 'pp-hide'))
@@ -129,7 +127,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.has_class(header, 'pp-hide'))
     self.assertFalse(header.is_displayed())
 
-    action_chains.move_to_element(header).perform()
+    self.ac().move_to_element(header).perform()
 
     self.assertFalse(self.has_class(header, 'pp-show'))
     self.assertFalse(self.has_class(header, 'pp-hide'))
@@ -143,7 +141,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.has_class(header, 'pp-hide'))
     self.assertTrue(header.is_displayed())
 
-    action_chains.move_to_element(title).perform()
+    self.ac().move_to_element(title).perform()
 
     self.assertTrue(self.has_class(header, 'pp-show'))
     self.assertFalse(self.has_class(header, 'pp-hide'))
@@ -153,7 +151,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.has_class(header, 'pp-hide'))
     self.assertFalse(header.is_displayed())
 
-    action_chains.move_to_element(header).perform()
+    self.ac().move_to_element(header).perform()
 
     self.assertFalse(self.has_class(header, 'pp-show'))
     self.assertFalse(self.has_class(header, 'pp-hide'))
@@ -374,19 +372,19 @@ class Test_KeyBind(TestCase):
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
-      self.assertEquals(self.driver.switch_to_active_element(), items[i])
+      self.assertEquals(self.b.driver.switch_to_active_element(), items[i])
       pass
     self.send_keys(Keys.DOWN)
-    self.assertEquals(self.driver.switch_to_active_element(), items[0])
+    self.assertEquals(self.b.driver.switch_to_active_element(), items[0])
 
     self.blur()
 
     for i in range(len(items) - 1, -1, -1):
       self.send_keys(Keys.UP)
-      self.assertEquals(self.driver.switch_to_active_element(), items[i])
+      self.assertEquals(self.b.driver.switch_to_active_element(), items[i])
       pass
     self.send_keys(Keys.UP)
-    self.assertEquals(self.driver.switch_to_active_element(), items[-1])
+    self.assertEquals(self.b.driver.switch_to_active_element(), items[-1])
 
     self.blur()
 
@@ -398,7 +396,7 @@ class Test_KeyBind(TestCase):
     for i in range(answer_idx + 1):
       self.send_keys(Keys.DOWN)
       pass
-    self.assertEquals(self.driver.switch_to_active_element(), items[answer_idx])
+    self.assertEquals(self.b.driver.switch_to_active_element(), items[answer_idx])
     self.assertEquals(items[answer_idx].get_attribute('data-key'), str(answer_idx + 1))
     answer = items[answer_idx].get_attribute('value')
 
