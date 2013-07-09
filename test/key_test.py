@@ -6,10 +6,16 @@ if os.path.exists(_path) and _path not in sys.path:
   pass
 
 from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver import ActionChains
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
-d = webdriver.Chrome()
+d = WebDriver(
+  'http://localhost:%d/wd/hub' % int(sys.argv[1]),
+  desired_capabilities = DesiredCapabilities.FIREFOX
+  )
+
 d.get('file://%s/key_test.html' % os.path.abspath(os.path.dirname(__file__)))
 
 keys = [

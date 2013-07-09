@@ -689,13 +689,15 @@
           keys.push(this.encode_map[key] || key);
         }
 
-      } else if (ev.type === 'keypress') {
-        var c = ev.keyCode || ev.charCode;
-        if (c === ev.which && c > 0x20 && c < 0x7f) {
+      } else {
+        var k = ev.keyCode, c = ev.charCode;
+        if (c >= 0x20 && c < 0x7f) {
           key = g.String.fromCharCode(c).toLowerCase();
           keys.push(this.encode_map[key] || key);
-        } else if (this.code_map[c]) {
-          keys.push(this.code_map[c]);
+        } else if (this.code_map[k]) {
+          keys.push(this.code_map[k]);
+        } else if (k > 0) {
+          keys.push('_k' + g.String(k));
         } else if (c > 0) {
           keys.push('_c' + g.String(c));
         }
@@ -720,14 +722,26 @@
     },
 
     listen: function(context, listener, options) {
-      var that = this;
-      _.listen(context, ['keypress', 'keydown'], function(ev, connection) {
+      var that = this, suspend = null;
+      _.listen(context, ['keydown', 'keypress', 'keyup'], function(ev, connection) {
+        if (ev.type === 'keyup') {
+          suspend = null;
+          return false;
+        }
+
         var key = that.parse_event(ev);
+        if (suspend === key && ev.type === 'keypress') {
+          return true;
+        }
+
         if (key) {
           _.debug('keyevent type=' + ev.type + ' key=' + key);
-          var res = listener(key, ev, connection);
+          var res = !!listener(key, ev, connection);
           if (res) {
             _.debug('  canceled');
+            if (ev.type === 'keydown') {
+              suspend = key;
+            }
           }
           return res;
         }

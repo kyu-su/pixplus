@@ -4,6 +4,7 @@
   pixplus.key.init();
   pixplus.key.listen(window, function(key, ev) {
     document.querySelector('textarea').value += ev.type + '=' + key + ' charCode=' + ev.charCode + ' keyCode=' + ev.keyCode + ' which=' + ev.which + '\n';
+    return true;
   });
 </script>
 <input></input>
