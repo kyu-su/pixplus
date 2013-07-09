@@ -208,4 +208,9 @@ class TestCase(unittest.TestCase):
     self.reload()
     pass
 
+  def geom(self, element):
+    pos = element.location
+    size = element.size
+    return pos['x'], pos['y'], size['width'], size['height']
+
   pass

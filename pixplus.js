@@ -768,18 +768,18 @@
   });
 
   _.ui = _.mod({
-    slider: function(min, max, step) {
+    slider: function(min, max, step, attrs) {
       var slider;
 
       if (!_.conf.general.debug) {
-        slider = _.e('input', {type: 'range', min: min, max: max, step: step});
+        slider = _.e('input', _.extend({type: 'range', min: min, max: max, step: step}, attrs));
         if (slider.type === 'range') {
           return slider;
         }
       }
 
       var rail, knob;
-      slider = _.e('div', {cls: 'pp-slider'});
+      slider = _.e('div', _.extend({cls: 'pp-slider'}, attrs));
       rail = _.e('div', {cls: 'pp-slider-rail'}, slider);
       knob = _.e('div', {cls: 'pp-slider-knob'}, rail);
 
@@ -5222,7 +5222,7 @@
 
       ratio: function(query, ul, li, radio, inputs) {
         var min = -1.5, max = 1.5;
-        var slider  = _.ui.slider(min, max, 0.01);
+        var slider  = _.ui.slider(min, max, 0.01, {id: 'pp-search-ratio-custom-slider'});
         li.appendChild(slider);
 
         var input   = _.e('input', {type: 'text', id: 'pp-search-ratio-custom-text'}, li),

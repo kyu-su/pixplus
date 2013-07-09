@@ -27,13 +27,8 @@ class Test_Manga(TestCase):
       layout   = self.q('#pp-popup-image-layout')
       images   = self.qa('#pp-popup-image-layout img')
 
-      sl, ss = scroller.location, scroller.size
-      sx, sy = sl['x'], sl['y']
-      sw, sh = ss['width'], ss['height']
-
-      ll, ls = layout.location, layout.size
-      lx, ly = ll['x'], ll['y']
-      lw, lh = ls['width'], ls['height']
+      sx, sy, sw, sh = self.geom(scroller)
+      lx, ly, lw, lh = self.geom(layout)
 
       self.assertTrue(lx >= sx)
       self.assertTrue(ly >= sy)
@@ -49,14 +44,11 @@ class Test_Manga(TestCase):
 
       x = lx
       for img in images:
-        location = img.location
-        size = img.size
-
-        h = size['height']
-        self.assertTrue(h <= lh)
-        self.assertEquals(x, location['x'])
-        self.assertEquals(location['y'] - ly, (lh - h) / 2)
-        x += size['width']
+        ix, iy, iw, ih = self.geom(img)
+        self.assertTrue(ih <= lh)
+        self.assertEquals(x, ix)
+        self.assertEquals(iy - ly, (lh - ih) / 2)
+        x += iw
         pass
       pass
     pass
