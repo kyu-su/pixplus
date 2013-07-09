@@ -1,6 +1,5 @@
 import urlparse
 import warnings
-import time
 
 from test_base import TestCase
 
@@ -51,25 +50,10 @@ class Test_AdvancedSearch(TestCase):
     pass
 
   def check_slider(self, slider, knob, text):
+    ac = self.ac()
     sx, sy, sw, sh = self.geom(slider)
 
-    ac = self.ac()
-    ac.click_and_hold(knob or slider).move_by_offset(sw * 2, 0).release().perform()
-
-    self.assertEquals(text.get_attribute('value'), '1.5')
-    self.assertEquals(self.get_radio('ratio').get_attribute('value'), '1.5')
-    if knob:
-      kx, ky, kw, kh = self.geom(knob)
-      self.assertEquals(kx, sx + sw - kw)
-      self.assertEquals(ky, sy)
-      pass
-
-    if knob:
-      ac.click_and_hold(knob)
-    else:
-      ac.move_to_element_with_offset(slider, 2, 4).click_and_hold()
-      pass
-    ac.move_by_offset(-sw * 2, 0).release().perform()
+    ac.click_and_hold(knob or slider).move_by_offset(-sw, 0).release().perform()
 
     self.assertEquals(text.get_attribute('value'), '-1.5')
     self.assertEquals(self.get_radio('ratio').get_attribute('value'), '-1.5')
@@ -78,14 +62,33 @@ class Test_AdvancedSearch(TestCase):
       self.assertEquals(kx, sx)
       self.assertEquals(ky, sy)
       pass
+
+    if knob:
+      ac.click_and_hold(knob)
+    else:
+      ac.move_to_element_with_offset(slider, 2, 4).click_and_hold()
+      pass
+    ac.move_by_offset(sw * 2, 0).release().perform()
+
+    self.assertEquals(text.get_attribute('value'), '1.5')
+    self.assertEquals(self.get_radio('ratio').get_attribute('value'), '1.5')
+    if knob:
+      kx, ky, kw, kh = self.geom(knob)
+      self.assertEquals(kx, sx + sw - kw)
+      self.assertEquals(ky, sy)
+      pass
     pass
 
   def test_ratio(self):
+    if self.b.name == 'opera':
+      warnings.warn('This test is currently not works on opera...')
+      return
+
     self.open('/search.php?s_mode=s_tag&word=pixiv')
     self.q('.search-option').click()
 
     slider = self.q('#pp-search-ratio-custom-slider')
-    if slider.tag_name != 'input':
+    if slider.tag_name.lower() != 'input':
       warnings.warn('%s seems not supports <input type=range>' % self.b.name)
       return
 

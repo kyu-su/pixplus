@@ -13,7 +13,7 @@ from selenium.webdriver.common.keys import Keys
 
 d = WebDriver(
   'http://localhost:%d/wd/hub' % int(sys.argv[1]),
-  desired_capabilities = DesiredCapabilities.FIREFOX
+  desired_capabilities = DesiredCapabilities.OPERA
   )
 
 d.get('file://%s/key_test.html' % os.path.abspath(os.path.dirname(__file__)))
@@ -25,7 +25,8 @@ keys = [
   Keys.ARROW_DOWN,
   Keys.SPACE,
   Keys.ENTER,
-  Keys.ESCAPE
+  Keys.ESCAPE,
+  '\x1b'
   ]
 
 for key in keys:

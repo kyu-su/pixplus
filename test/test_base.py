@@ -137,7 +137,7 @@ class TestCase(unittest.TestCase):
     self.b.open(url)
     pass
 
-  def popup_reload_and_check_state(self, callback):
+  def popup_poll_reload(self, callback):
     for i in range(10):
       if callback():
         break

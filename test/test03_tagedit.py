@@ -43,7 +43,7 @@ class Test_TagEdit(TestCase):
     self.popup_wait_load()
 
     tags.add(tag)
-    self.popup_reload_and_check_state(lambda: self.get_tags() == tags)
+    self.popup_poll_reload(lambda: self.get_tags() == tags)
     pass
 
   def test_tagedit_delete(self):
@@ -75,7 +75,7 @@ class Test_TagEdit(TestCase):
     self.popup_wait_load()
 
     tags.remove(tag)
-    self.popup_reload_and_check_state(lambda: self.get_tags() == tags)
+    self.popup_poll_reload(lambda: self.get_tags() == tags)
     pass
 
   pass

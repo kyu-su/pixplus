@@ -16,9 +16,9 @@ class Test_Mypage(TestCase):
     pass
 
   def check_pixiv_jsobj(self, layout):
-    self.assertEquals(self.js('return pixiv.mypage.order'), list(layout.lower()))
-    self.assertEquals(self.js('return pixiv.mypage.visible'),
-                      dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))
+    order, visible = tuple(self.js('return [pixiv.mypage.order, pixiv.mypage.visible]'))
+    self.assertEquals(order, list(layout.lower()))
+    self.assertEquals(visible, dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))
     pass
 
   def check_update(self, layout):
@@ -100,11 +100,17 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
 
+    time.sleep(1)
+    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
+
     self.check_pixiv_jsobj('TeBmN')
     self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
+
+    time.sleep(1)
+    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
 
     self.check_pixiv_jsobj('ntebm')
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])

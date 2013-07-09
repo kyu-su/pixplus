@@ -33,8 +33,18 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.qa('#pp-popup'))
     pass
 
-  def send_keys(self, keys):
-    self.ac().send_keys(keys).perform()
+  def send_keys(self, keys, context = None):
+    if self.b.name == 'opera' and keys == Keys.ESCAPE:
+      # https://github.com/operasoftware/operadriver/issues/85
+      keys = '\x1b'
+      pass
+
+    if context:
+      context.send_keys(keys)
+    else:
+      self.ac().send_keys(keys).perform()
+      pass
+
     if self.qa('#pp-popup'):
       self.popup_wait_load()
       pass
@@ -298,24 +308,24 @@ class Test_KeyBind(TestCase):
 
     input_tag.clear()
 
-    input_tag.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.ARROW_DOWN, input_tag)
     self.assertTrue(self.has_class(tags[0], 'pp-tag-select'))
 
-    input_tag.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.ARROW_RIGHT, input_tag)
     self.assertFalse(self.has_class(tags[0], 'pp-tag-select'))
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
 
-    input_tag.send_keys(Keys.SPACE)
+    self.send_keys(Keys.SPACE, input_tag)
     self.assertEquals(input_tag.get_attribute('value'), tags[1].get_attribute('data-tag'))
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertTrue(self.has_class(tags[1], 'selected'))
 
-    input_tag.send_keys(Keys.SPACE)
+    self.send_keys(Keys.SPACE, input_tag)
     self.assertEquals(input_tag.get_attribute('value'), '')
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertFalse(self.has_class(tags[1], 'selected'))
 
-    input_tag.send_keys(Keys.ESCAPE)
+    self.send_keys(Keys.ESCAPE, input_tag)
     self.assertFalse(self.has_class(tags[1], 'pp-tag-select'))
 
     ####
@@ -336,7 +346,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.qa('#pp-popup.pp-bookmark-mode'))
     self.assertFalse(self.q('#pp-popup-bookmark-wrapper').is_displayed())
 
-    self.popup_reload_and_check_state(lambda: self.has_class(bookmark_btn, 'pp-active'))
+    self.popup_poll_reload(lambda: self.qa('#pp-popup-button-bookmark.pp-active'))
 
     self.unbookmark()
     pass
@@ -368,23 +378,30 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.q('.list', question).is_displayed())
     self.assertTrue(self.has_class(header, 'pp-show'))
 
-    items = self.qa('.list li input[type="button"][data-key]', question)
+    def keyvalue(el):
+      return el.get_attribute('data-key'), el.get_attribute('value')
+
+    def active():
+      el = self.b.driver.switch_to_active_element()
+      return keyvalue(el)
+
+    items = map(keyvalue, self.qa('.list li input[type="button"][data-key]', question))
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
-      self.assertEquals(self.b.driver.switch_to_active_element(), items[i])
+      self.assertEquals(active(), items[i])
       pass
     self.send_keys(Keys.DOWN)
-    self.assertEquals(self.b.driver.switch_to_active_element(), items[0])
+    self.assertEquals(active(), items[0])
 
     self.blur()
 
     for i in range(len(items) - 1, -1, -1):
       self.send_keys(Keys.UP)
-      self.assertEquals(self.b.driver.switch_to_active_element(), items[i])
+      self.assertEquals(active(), items[i])
       pass
     self.send_keys(Keys.UP)
-    self.assertEquals(self.b.driver.switch_to_active_element(), items[-1])
+    self.assertEquals(active(), items[-1])
 
     self.blur()
 
@@ -396,7 +413,7 @@ class Test_KeyBind(TestCase):
     for i in range(answer_idx + 1):
       self.send_keys(Keys.DOWN)
       pass
-    self.assertEquals(self.b.driver.switch_to_active_element(), items[answer_idx])
+    self.assertEquals(active(), items[answer_idx])
     self.assertEquals(items[answer_idx].get_attribute('data-key'), str(answer_idx + 1))
     answer = items[answer_idx].get_attribute('value')
 
@@ -488,46 +505,46 @@ class Test_KeyBind(TestCase):
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(True, False, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, False, False)
 
     self.find_illust(self.check_size, False, False, True)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, True, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, False, False)
 
     self.find_illust(self.check_size, True, True, True)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(True, False, True)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(True, True, True)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, False, False)
 
     self.find_illust(self.check_size, False, True, True)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, True, True)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(True, True, True)
     self.send_keys('w')
-    time.sleep(2)
+    time.sleep(1)
     self.check_scrollbar(False, False, False)
     pass
 

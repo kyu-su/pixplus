@@ -17,7 +17,7 @@ class Test_Bookmark(TestCase):
       bookmark_btn = self.q('#pp-popup-button-bookmark')
       pass
 
-    self.popup_reload_and_check_state(
+    self.popup_poll_reload(
       lambda: not self.has_class(bookmark_btn, 'pp-active')
       )
 
@@ -33,7 +33,7 @@ class Test_Bookmark(TestCase):
     form.submit()
     self.popup_wait_load()
 
-    self.popup_reload_and_check_state(lambda: self.has_class(bookmark_btn, 'pp-active'))
+    self.popup_poll_reload(lambda: self.has_class(bookmark_btn, 'pp-active'))
 
     self.unbookmark(hidden = hide)
     pass
