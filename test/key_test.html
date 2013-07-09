@@ -1,0 +1,10 @@
+<script src="../temp/lib.js"></script>
+<script>
+  pixplus.conf={general:{debug:1}};
+  pixplus.key.init();
+  pixplus.key.listen(window, function(key, ev) {
+    document.querySelector('textarea').value += ev.type + '=' + key + ' charCode=' + ev.charCode + ' keyCode=' + ev.keyCode + ' which=' + ev.which + '\n';
+  });
+</script>
+<input></input>
+<textarea style="width:100%;height:30em"></textarea>
