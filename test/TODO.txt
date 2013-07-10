@@ -1,3 +1,2 @@
 * Mouse wheel setting
 * Settings ui
-* Advanced search ui
