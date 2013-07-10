@@ -32,6 +32,11 @@ class TestCase(unittest.TestCase):
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
+  def wait_page_load(self):
+    time.sleep(1)
+    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
+    pass
+
   def wait_illust_list(self):
     self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
     pass
@@ -80,17 +85,7 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_get_illust_data(self, name = None):
-    obj = self.js('''
-      return (function(illust) {
-        var r = {};
-        for(var key in illust) {
-          if (!/^(?:prev|next)$/.test(key)) {
-            r[key] = illust[key];
-          }
-        }
-        return r;
-      })(pixplus.popup.illust);
-    ''')
+    obj = self.safe_get_jsobj('pixplus.popup.illust')
     if name is not None:
       return obj[name]
     return obj
@@ -111,29 +106,42 @@ class TestCase(unittest.TestCase):
       pass
     pass
 
-  def unbookmark(self, illust_id = None, hidden = False):
+  def unbookmark(self, illust_id = None):
     if illust_id is None:
       illust_id = self.popup_get_illust_data('id')
       pass
 
     url = self.b.url
-    if hidden:
+
+    def check():
+      return self.js('''
+        var link = document.querySelector('input[name="book_id[]"]~a[href*="illust_id=%d"]');
+        if (!link) {
+          return false;
+        }
+
+        var check = link.parentNode.querySelector('input[name="book_id[]"]');
+        check.checked = true;
+        return true;
+      ''' % illust_id)
+
+    self.open('/bookmark.php')
+    checked = check()
+    if not checked:
       self.open('/bookmark.php?rest=hide')
-    else:
-      self.open('/bookmark.php')
+      self.assertTrue(check())
       pass
 
     if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
       pass
 
-    link = self.q('a[href*="illust_id=%d"]' % illust_id)
-    checkbox = self.q('input[name="book_id[]"]', link.parent)
-    checkbox.click()
     self.q('input[type="submit"][name="del"]').click()
     if self.b.supports_alert:
       self.alert_accept()
       pass
+
+    self.wait_page_load()
     self.b.open(url)
     pass
 
@@ -165,5 +173,31 @@ class TestCase(unittest.TestCase):
     self.changed_conf = {}
     self.reload()
     pass
+
+  def safe_get_jsobj(self, name):
+    obj = self.js('''
+      return (function copy(o) {
+        if (!o || /^(?:number|boolean|string)$/.test(typeof(o))) {
+          return o;
+        } else if (typeof(o) === 'object') {
+          if (o.constructor === Object) {
+            var c = {};
+            for(var k in o) {
+              if (/^(?:prev|next)$/.test(k)) {
+                continue;
+              }
+              c[k] = copy(o[k]);
+            }
+            return c;
+          } else if (o.constructor === Array) {
+            return o.map(function(e) {
+              return copy(e);
+            });
+          }
+        }
+        return null;
+      })(%s);
+    ''' % name)
+    return obj
 
   pass

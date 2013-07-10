@@ -10,7 +10,7 @@ class Test_Manga(TestCase):
     self.open_popup(illust_id)
     self.js('pixplus.popup.manga.start()')
     self.popup_wait_load()
-    manga = self.js('return pixplus.popup.illust.manga')
+    manga = self.safe_get_jsobj('pixplus.popup.illust.manga')
 
     self.assertEquals(manga['page_count'], len(images))
     self.assertEquals(len(manga['pages']), len(pages))

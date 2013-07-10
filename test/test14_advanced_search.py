@@ -29,6 +29,7 @@ class Test_AdvancedSearch(TestCase):
 
     self.set_size(wlt, hlt, wgt, hgt)
     self.q('#search-option .content form').submit()
+    self.wait_page_load()
 
     self.assertTrue(self.url.startswith('http://www.pixiv.net/search.php?'))
     url = urlparse.urlparse(self.url)
@@ -50,6 +51,10 @@ class Test_AdvancedSearch(TestCase):
     pass
 
   def check_slider(self, slider, knob, text):
+    if self.b.name == 'safari':
+      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
+      return
+
     ac = self.ac()
     sx, sy, sw, sh = self.geom(slider)
 

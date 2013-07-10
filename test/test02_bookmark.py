@@ -35,11 +35,12 @@ class Test_Bookmark(TestCase):
 
     self.popup_poll_reload(lambda: self.has_class(bookmark_btn, 'pp-active'))
 
-    self.unbookmark(hidden = hide)
+    self.unbookmark()
     pass
 
   def test_bookmark(self):
     self.open_test_user()
+    self.set_conf('general.bookmark_hide', False)
     self.check(False)
     pass
 

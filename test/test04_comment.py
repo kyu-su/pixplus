@@ -22,7 +22,14 @@ class Test_Comment(TestCase):
     self.wait_until(lambda driver: self.qa(form_query + ' input[name="comment"]:not([disabled])'))
 
     xpath = '//*[@id="pp-popup-comment-history"]//li[text()[contains(.,"%s")]]' % message
-    self.popup_poll_reload(lambda: self.xa(xpath))
+    for i in range(10):
+      if self.xa(xpath):
+        break
+      time.sleep(1)
+      self.js('pixplus.popup.comment.reload()')
+      self.popup.wait_load()
+      pass
+    self.assertTrue(self.xa(xpath))
     pass
 
   pass

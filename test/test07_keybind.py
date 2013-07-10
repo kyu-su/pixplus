@@ -115,6 +115,10 @@ class Test_KeyBind(TestCase):
     pass
 
   def test_header(self):
+    if self.b.name == 'safari':
+      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
+      return
+
     self.prepare()
 
     self.open_popup()

@@ -1,5 +1,6 @@
 import urllib
 import time
+import warnings
 
 from test_base import TestCase
 
@@ -60,9 +61,13 @@ class Test_Mypage(TestCase):
     btn = self.q('.pp-layout-history')
     self.assertTrue(btn.get_attribute('data-tooltip'))
 
-    self.ac().move_to_element(btn).perform()
-    self.assertTrue(self.q('#ui-tooltip-container').is_displayed())
-    self.assertEquals(self.q('#ui-tooltip-container p').text, btn.get_attribute('data-tooltip'))
+    if self.b.name == 'safari':
+      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
+    else:
+      self.ac().move_to_element(btn).perform()
+      self.assertTrue(self.q('#ui-tooltip-container').is_displayed())
+      self.assertEquals(self.q('#ui-tooltip-container p').text, btn.get_attribute('data-tooltip'))
+      pass
 
     btn.click()
     self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
@@ -72,11 +77,15 @@ class Test_Mypage(TestCase):
     self.assertEquals(map(lambda e: e.get_attribute('data-pp-layout'), history), layouts)
     self.assertEquals(map(lambda e: e.text, history), times_s)
 
-    for item in history:
-      self.ac().move_to_element(item).perform()
+    if self.b.name == 'safari':
+      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
+    else:
+      for item in history:
+        self.ac().move_to_element(item).perform()
 
-      layout = ''.join(map(lambda e: e.get_attribute('data-pp-key'), self.qa('#pp-layout-preview li')))
-      self.assertEquals(item.get_attribute('data-pp-layout'), layout)
+        layout = ''.join(map(lambda e: e.get_attribute('data-pp-key'), self.qa('#pp-layout-preview li')))
+        self.assertEquals(item.get_attribute('data-pp-layout'), layout)
+        pass
       pass
     pass
 
@@ -100,8 +109,7 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
 
-    time.sleep(1)
-    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
+    self.wait_page_load()
 
     self.check_pixiv_jsobj('TeBmN')
     self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
@@ -109,8 +117,7 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
 
-    time.sleep(1)
-    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
+    self.wait_page_load()
 
     self.check_pixiv_jsobj('ntebm')
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])

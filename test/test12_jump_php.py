@@ -8,7 +8,7 @@ class Test_Jumpphp(TestCase):
     self.open('/')
     self.set_conf('general.redirect_jump_page', 0)
     self.js('location.href="/jump.php?http%3a%2f%2fexample%2ecom%2f"')
-    self.assertEquals(self.url, 'http://www.pixiv.net/jump.php?http%3a%2f%2fexample%2ecom%2f')
+    self.wait_until(lambda d: self.url == 'http://www.pixiv.net/jump.php?http%3a%2f%2fexample%2ecom%2f')
 
     self.open('/')
     self.set_conf('general.redirect_jump_page', 1)
