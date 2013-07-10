@@ -2864,7 +2864,9 @@
       }
 
       _.lazy_scroll(illust.image_thumb);
-      if (_.conf.popup.mark_visited && illust.link && w.history.replaceState) {
+
+      // On Opera 12.10+, this will breaks down <a href> path resolution. Looks like a bug...
+      if (!w.opera && _.conf.popup.mark_visited && illust.link && w.history.replaceState) {
         var url = w.location.href;
         w.history.replaceState({}, '', illust.link.href);
         w.history.replaceState({}, '', url);
