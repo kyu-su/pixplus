@@ -723,15 +723,10 @@
 
     listen: function(context, listener, options) {
       var that = this, suspend = null;
-      _.listen(context, ['keydown', 'keypress', 'keyup'], function(ev, connection) {
-        if (ev.type === 'keyup') {
-          suspend = null;
-          return false;
-        }
-
+      return _.listen(context, ['keydown', 'keypress'], function(ev, connection) {
         var key = that.parse_event(ev);
         if (suspend === key && ev.type === 'keypress') {
-          return true;
+          return false;
         }
 
         if (key) {
@@ -2857,6 +2852,8 @@
       if (!dom.root.parentNode) {
         d.body.insertBefore(dom.root, d.body.firstChild);
       }
+      _.popup.key.activate();
+
       if (illust.loaded) {
         this.status_complete();
         this.onload(illust);
@@ -2875,6 +2872,8 @@
     },
 
     hide: function() {
+      _.popup.key.inactivate();
+
       if (!this.running) {
         return;
       }
@@ -3553,7 +3552,6 @@
         that[name] = value;
       });
 
-      _.popup.key.init();
       _.popup.mouse.init();
     },
 
@@ -3997,10 +3995,14 @@
       'comment_toggle'
     ],
 
-    init: function(context) {
+    activate: function() {
+      if (this.conn) {
+        return;
+      }
+
       var that = this;
 
-      _.key.listen(context || d, function(key, ev, connection) {
+      this.conn = _.key.listen(d, function(key, ev, connection) {
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
         }
@@ -4028,6 +4030,13 @@
 
         return cancel;
       });
+    },
+
+    inactivate: function() {
+      if (this.conn) {
+        this.conn.disconnect();
+        this.conn = null;
+      }
     }
   });
 
@@ -4756,15 +4765,6 @@
           }
           that.centerize();
         }, {async: true});
-
-        _.key.listen(d, function(key, ev, connection) {
-          if (!that.dom.root.parentNode) {
-            return;
-          }
-          if (key === 'Escape') {
-            that.hide();
-          }
-        });
       },
 
       preview: function(layout) {
@@ -4859,11 +4859,28 @@
         }
 
         this.centerize();
+
+        if (this.conn) {
+          this.conn.disconnect();
+        }
+        var that = this;
+        this.conn = _.key.listen(d, function(key, ev, connection) {
+          if (!that.dom.root.parentNode) {
+            return;
+          }
+          if (key === 'Escape') {
+            that.hide();
+          }
+        });
       },
 
       hide: function() {
         if (this.dom && this.dom.root.parentNode) {
           this.dom.root.parentNode.removeChild(this.dom.root);
+        }
+        if (this.conn) {
+          this.conn.disconnect();
+          this.conn = null;
         }
       }
     }),
