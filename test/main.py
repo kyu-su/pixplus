@@ -10,14 +10,14 @@ if os.path.exists(_path) and _path not in sys.path:
   sys.path.insert(0, _path)
   pass
 
+from selenium.webdriver.common import utils as selutils
+
 from firefox import Firefox
 from chrome import Chrome
 from opera import Opera
 from safari import Safari
 
 testdir = os.path.abspath(os.path.dirname(__file__))
-rootdir = os.path.dirname(testdir)
-bindir  = os.path.join(rootdir, 'bin')
 
 def load_tests():
   tests = {}
@@ -75,17 +75,17 @@ def save_cookie(driver):
   write_json(os.path.join(testdir, 'cookie.json'), cookie)
   pass
 
-def login(driver, config):
+def login(browser, config):
   print('Logging in...')
-  driver.get('https://www.secure.pixiv.net/login.php')
+  browser.open('https://www.secure.pixiv.net/login.php')
 
-  form = driver.find_elements_by_css_selector('form[action="/login.php"]')[-1]
+  form = browser.qa('form[action*="login.php"]')[-1]
 
-  e_id = form.find_element_by_name('pixiv_id')
+  e_id = browser.q('input[name="pixiv_id"]', form)
   e_id.clear()
   e_id.send_keys(config['username'])
 
-  e_pw = form.find_element_by_name('pass')
+  e_pw = browser.q('input[name="pass"]', form)
   e_pw.clear()
   e_pw.send_keys(config['password'])
 
@@ -94,28 +94,28 @@ def login(driver, config):
   # safari magic...
   time.sleep(1)
 
-  if driver.current_url != 'http://www.pixiv.net/mypage.php':
+  if browser.url != 'http://www.pixiv.net/mypage.php':
     print('Login failed!')
     raw_input('Please login manually and press enter...')
     pass
 
-  save_cookie(driver)
+  save_cookie(browser.driver)
   pass
 
 def test(browser, config, tests):
+  browser.start()
   try:
     suite = unittest.TestSuite()
     suite.addTests([cls(browser, config, testname) for cls, testname in tests])
 
     browser.set_window_size(1280, 800)
 
-    driver = browser.driver
-    driver.get('http://www.pixiv.net/')
-    load_cookie(driver)
-    driver.get('http://www.pixiv.net/')
+    browser.open('http://www.pixiv.net/')
+    load_cookie(browser.driver)
+    browser.open('http://www.pixiv.net/')
 
-    if driver.current_url == 'http://www.pixiv.net/':
-      login(driver, config)
+    if browser.url == 'http://www.pixiv.net/':
+      login(browser, config)
       pass
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
@@ -125,23 +125,39 @@ def test(browser, config, tests):
   pass
 
 def main():
+  from browser import Browser
+  import firefox
+  import chrome
+  import opera
+  import safari
+
+  browsers = [
+    (firefox, firefox.Firefox),
+    (chrome, chrome.Chrome),
+    (opera, opera.Opera),
+    (safari, safari.Safari)
+    ]
+
   all_tests = load_tests()
-  browser_names = (
-    'fx', 'fx_greasemonkey', 'fx_scriptish',
-    'chrome',
-    'opera', 'opera_oex', 'opera_userjs',
-    'safari'
-    )
+  browser_names = map(lambda b: b[1].name, browsers)
 
   parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
+
+  parser.add_argument('-p', dest = 'server_port', type = int,
+                      required = True, help = 'Selenium server port')
   parser.add_argument('-t', dest = 'tests', action = 'append',
                       help = 'TEST or TEST:METHOD')
   parser.add_argument('-b', metavar = 'BROWSER', choices = browser_names,
                       dest = 'browsers', action = 'append',
                       help = ','.join(browser_names))
-  parser.add_argument('--firefox', metavar = 'COMMAND', dest = 'firefox')
   parser.add_argument('--repeatable', dest = 'repeatable',
                       action = 'store_true', default = False)
+
+  for mod, browser in browsers:
+    browser.browserdir = os.path.dirname(mod.__file__)
+    browser.register_args(parser)
+    pass
+
   args = parser.parse_args()
 
   config = read_json(os.path.join(testdir, 'config.json'))
@@ -149,10 +165,11 @@ def main():
     print('Error: Create "config.json" first')
     return
 
-  config['rootdir']    = rootdir
-  config['bindir']     = bindir
-  config['firefox']    = args.firefox
-  config['repeatable'] = args.repeatable
+  Browser.testdir = testdir
+  Browser.rootdir = os.path.dirname(testdir)
+  Browser.bindir = os.path.join(Browser.rootdir, 'bin')
+  Browser.args = args
+  Browser.config = config
 
   tests = []
   if args.tests:
@@ -176,31 +193,10 @@ def main():
       pass
     pass
 
-  browsers = args.browsers
-  if not browsers:
-    browsers = browser_names
-    pass
-
-  if 'fx' in browsers or 'fx_greasemonkey' in browsers:
-    test(Firefox('greasemonkey', config), config, tests)
-    pass
-  if 'fx' in browsers or 'fx_scriptish' in browsers:
-    test(Firefox('scriptish', config), config, tests)
-    pass
-
-  if 'chrome' in browsers:
-    test(Chrome(config), config, tests)
-    pass
-
-  if 'opera' in browsers or 'opera_oex' in browsers:
-    test(Opera('extension', config), config, tests)
-    pass
-  if 'opera' in browsers or 'opera_userjs' in browsers:
-    test(Opera('userjs', config), config, tests)
-    pass
-
-  if 'safari' in browsers:
-    test(Safari(config), config, tests)
+  for mod, browser in browsers:
+    if args.browsers and browser.name not in args.browsers:
+      continue
+    test(browser(), config, tests)
     pass
   pass
 

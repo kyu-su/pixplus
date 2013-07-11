@@ -2,42 +2,42 @@ import os
 
 from selenium.webdriver import DesiredCapabilities
 
-from browser_seleniumserver import BrowserSeleniumServer
 import util
+from browser import Browser
 
-curdir = os.path.abspath(os.path.dirname(__file__))
-
-class Opera(BrowserSeleniumServer):
+class Opera(Browser):
   name = 'opera'
+  capname = 'OPERA'
   supports_alert = False
 
-  def __init__(self, mode, config):
-    BrowserSeleniumServer.__init__(self, config)
+  @classmethod
+  def register_args(self, parser):
+    parser.add_argument('--opera-mode', dest = 'opera_mode',
+                        choices = ['userjs', 'oex'],
+                        default = 'oex', help = 'userjs,oex')
+    pass
 
+  def prepare_caps(self, caps):
     self.userjs = []
     self.extensions = []
-    if mode == 'userjs':
+    if self.args.opera_mode == 'userjs':
       self.userjs.append(os.path.join(self.rootdir, 'pixplus.js'))
-    elif mode == 'extension':
+    elif self.args.opera_mode == 'oex':
       self.extensions.append(os.path.join(self.bindir, 'pixplus.oex'))
     else:
-      raise ValueError('Invalid mode - %s' % mode)
+      raise ValueError('Invalid mode')
 
     self.create_profile()
 
-    self.caps = {}
-    self.caps.update(DesiredCapabilities.OPERA)
-    self.caps['opera.profile'] = self.profiledir
-
-    self.create_driver(self.caps)
+    caps['opera.profile'] = self.profiledir
     pass
 
   def set_window_size(self, width, height):
     pass
 
   def create_profile(self):
-    BrowserSeleniumServer.create_profile(self)
-    util.copy_file(os.path.join(curdir, 'operaprefs.ini'), self.profiledir)
+    Browser.create_profile(self)
+    util.copy_file(os.path.join(self.browserdir, 'operaprefs.ini'), self.profiledir)
     self.install_userjs()
     self.install_extensions()
     pass

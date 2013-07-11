@@ -3,20 +3,15 @@ import time
 import shutil
 import zipfile
 
-from selenium.webdriver import DesiredCapabilities
-
-from browser_seleniumserver import BrowserSeleniumServer
 import util
+from browser import Browser
 
-curdir = os.path.abspath(os.path.dirname(__file__))
-
-class Safari(BrowserSeleniumServer):
+class Safari(Browser):
   name = 'safari'
+  capname = 'SAFARI'
   supports_alert = False
 
-  def __init__(self, config):
-    BrowserSeleniumServer.__init__(self, config)
-
+  def prepare_caps(self, caps):
     self.backup_suffix = '-bkp%d' % time.time()
     self.backup_list = []
 
@@ -89,7 +84,7 @@ class Safari(BrowserSeleniumServer):
       pass
 
     util.copy_file(os.path.join(self.bindir, 'pixplus.safariextz'), extdir)
-    util.copy_file(os.path.join(curdir, 'Extensions.plist'), extdir)
+    util.copy_file(os.path.join(self.browserdir, 'Extensions.plist'), extdir)
     pass
 
   pass

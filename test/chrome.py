@@ -1,17 +1,29 @@
 import os
-
-from selenium import webdriver
+import base64
 
 from browser import Browser
 
 class Chrome(Browser):
   name = 'chrome'
+  capname = 'CHROME'
 
-  def __init__(self, config):
-    Browser.__init__(self, config)
-    self.options = webdriver.ChromeOptions()
-    self.options.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
-    self.driver = webdriver.Chrome(chrome_options = self.options)
+  def prepare_caps(self, caps):
+    self.extensions = []
+    self.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
+
+    caps['chromeOptions'] = {
+      'extensions': self.extensions
+      }
+    pass
+
+  def add_extension(self, filename):
+    fp = open(filename, 'rb')
+    try:
+      data = fp.read()
+    finally:
+      fp.close()
+      pass
+    self.extensions.append(base64.b64encode(data))
     pass
 
   pass

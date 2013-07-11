@@ -32,11 +32,6 @@ class TestCase(unittest.TestCase):
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
-  def wait_page_load(self):
-    time.sleep(1)
-    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
-    pass
-
   def wait_illust_list(self):
     self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
     pass

@@ -1,47 +1,67 @@
 import os
-import tempfile
 import shutil
+import httplib
 
 from selenium.webdriver import ActionChains
+from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 
 class Browser:
+  name = None
+  capname = None
   supports_alert = True
 
-  def __init__(self, config):
-    self.rootdir = config['rootdir']
-    self.bindir = config['bindir']
+  def __init__(self):
     self.driver = None
     self.profiledir = None
     pass
 
-  def create_profile(self):
-    self.profiledir = tempfile.mkdtemp()
-    print('%s: %s' % (self.name, self.profiledir))
+  @classmethod
+  def register_args(self, parser):
     pass
 
-  def set_window_size(self, width, height):
-    self.driver.set_window_size(width, height)
+  def start(self):
+    caps = {}
+    caps.update(getattr(DesiredCapabilities, self.capname))
+    self.prepare_caps(caps)
+    self.driver = WebDriver(
+      'http://localhost:%d/wd/hub' % self.args.server_port,
+      desired_capabilities = caps
+      )
     pass
 
   def quit(self):
     try:
       self.driver.quit()
-    finally:
-      if self.profiledir and os.path.exists(self.profiledir):
-        print('Remove profile: %s' % self.profiledir)
-        shutil.rmtree(self.profiledir)
-        pass
+    except httplib.BadStatusLine:
       pass
+    pass
+
+  def create_profile(self):
+    self.profiledir = os.path.join(self.testdir, 'profile', self.name)
+    if os.path.exists(self.profiledir):
+      shutil.rmtree(self.profiledir)
+      pass
+    os.makedirs(self.profiledir)
+    return self.profiledir
+
+  def set_window_size(self, width, height):
+    self.driver.set_window_size(width, height)
     pass
 
   @property
   def url(self):
     return self.driver.current_url
 
+  def wait_page_load(self):
+    self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
+    pass
+
   def open(self, url):
     self.driver.get(url)
+    self.wait_page_load()
     pass
 
   def reload(self):
