@@ -24,10 +24,8 @@ class Test_Bookmark(TestCase):
     self.js('pixplus.popup.bookmark.start()')
     self.popup_wait_load()
 
-    if hide:
-      q = '#pp-popup-bookmark-wrapper input[type="radio"][name="restrict"][value="1"]:checked'
-      self.assertTrue(self.qa(q))
-      pass
+    q = '#pp-popup-bookmark-wrapper input[type="radio"][name="restrict"][value="%d"]:checked'
+    self.assertTrue(self.qa(q % (1 if hide else 0)))
 
     form = self.q('#pp-popup-bookmark-wrapper form[action*="bookmark_add.php"]')
     form.submit()
