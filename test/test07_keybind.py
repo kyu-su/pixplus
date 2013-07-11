@@ -320,12 +320,12 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
 
     self.send_keys(Keys.SPACE, input_tag)
-    self.assertEquals(input_tag.get_attribute('value'), tags[1].get_attribute('data-tag'))
+    self.assertEquals(input_tag.get_attribute('value').strip(), tags[1].get_attribute('data-tag'))
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertTrue(self.has_class(tags[1], 'selected'))
 
     self.send_keys(Keys.SPACE, input_tag)
-    self.assertEquals(input_tag.get_attribute('value'), '')
+    self.assertEquals(input_tag.get_attribute('value').strip(), '')
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertFalse(self.has_class(tags[1], 'selected'))
 

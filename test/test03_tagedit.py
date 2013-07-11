@@ -1,6 +1,11 @@
 import time
 import re
-import urllib
+
+try:
+  from urllib.parse import unquote
+except ImportError:
+  from urllib import unquote
+  pass
 
 from test_base import TestCase
 
@@ -60,7 +65,7 @@ class Test_TagEdit(TestCase):
 
     tagid = int(m.group(1))
     tag = self.js('return document.getElementById("tag%d").textContent' % tagid)
-    tag = urllib.unquote(tag.encode('utf-8')).decode('utf-8')
+    tag = unquote(tag.encode('utf-8')).decode('utf-8')
     self.assertTrue(tag)
     self.assertIn(tag, tags)
 

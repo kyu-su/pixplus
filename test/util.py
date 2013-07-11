@@ -7,29 +7,39 @@ except ImportError:
   pass
 
 def download(url, filename):
-  sys.stdout.write('Download: %s ' % filename)
+  sys.stdout.write('Download: %s ' % url)
   sys.stdout.write('  0%')
   sys.stdout.flush()
 
   src = urlopen(url)
   dst = open(filename, 'wb')
 
-  size = int(src.info().getheader('Content-Length'))
-  written = 0
+  try:
+    size = int(src.info()['Content-Length'])
+    written = 0
 
-  while True:
-    buf = src.read(1024 * 100)
-    if not buf:
-      break
-    dst.write(buf)
-    dst.flush()
-    written += len(buf)
-    sys.stdout.write('\b' * 4 + '%3d%%' % (written * 100 / size))
-    sys.stdout.flush()
-    pass
+    while True:
+      buf = src.read(1024 * 100)
+      if not buf:
+        break
+      dst.write(buf)
+      dst.flush()
+      written += len(buf)
+      sys.stdout.write('\b' * 4 + '%3d%%' % (written * 100 / size))
+      sys.stdout.flush()
+      pass
 
-  dst.close()
-  src.close()
+    dst.close()
+    src.close()
+
+  except:
+    try:
+      dst.close()
+      src.close()
+    except:
+      pass
+    os.unlink(filename)
+    raise
 
   sys.stdout.write('\n')
   sys.stdout.flush()

@@ -16,7 +16,8 @@ class Test_Manga(TestCase):
     self.assertEquals(len(manga['pages']), len(pages))
 
     for page in range(len(pages)):
-      self.assertEquals(manga['pages'][page]['image_urls'], map(lambda p: images[p - 1], pages[page]))
+      self.assertEquals(manga['pages'][page]['image_urls'],
+                        list(map(lambda p: images[p - 1], pages[page])))
       pass
 
     for page in range(len(pages)):

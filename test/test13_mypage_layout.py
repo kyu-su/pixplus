@@ -1,6 +1,16 @@
-import urllib
 import time
 import warnings
+
+try:
+  from urllib.parse import quote
+except ImportError:
+  from urllib import quote
+  pass
+
+try:
+  from functools import reduce
+except ImportError:
+  pass
 
 from test_base import TestCase
 
@@ -12,7 +22,7 @@ class Test_Mypage(TestCase):
       cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
       cookie.append('%s_v=%d' % (c, 1 if c in layout else 0))
       pass
-    cookie = urllib.quote('&'.join(cookie), '')
+    cookie = quote('&'.join(cookie), '')
     self.js('document.cookie="pixiv_mypage=%s;domain=pixiv.net;path=/"' % cookie)
     pass
 
@@ -32,13 +42,13 @@ class Test_Mypage(TestCase):
     now = int(time.time()) * 1000
     day = 1000 * 60 * 60 * 24
     offsets = reduce(lambda a, b: a + [a[-1] + a[-2]], range(len(layouts)), [1, 2])[2:]
-    times = map(lambda o: now - day * o, offsets)
+    times = list(map(lambda o: now - day * o, offsets))
     self.set_conf('mypage.layout_history', ','.join(map(':'.join, zip(layouts, map(str, times)))))
     return layouts, times
 
   def get_layout_history(self):
     history = self.get_conf('mypage.layout_history')
-    return map(lambda e: e.split(':')[0], history.split(','))
+    return list(map(lambda e: e.split(':')[0], history.split(',')))
 
   def test_layout1(self):
     self.open('/mypage.php')
@@ -73,9 +83,9 @@ class Test_Mypage(TestCase):
     self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
 
     history = self.qa('#pp-layout-history li')
-    times_s = map(lambda t: time.strftime('%Y/%m/%d', time.localtime(t / 1000)).replace('/0', '/'), times)
-    self.assertEquals(map(lambda e: e.get_attribute('data-pp-layout'), history), layouts)
-    self.assertEquals(map(lambda e: e.text, history), times_s)
+    times_s = list(map(lambda t: time.strftime('%Y/%m/%d', time.localtime(t / 1000)).replace('/0', '/'), times))
+    self.assertEquals(list(map(lambda e: e.get_attribute('data-pp-layout'), history)), layouts)
+    self.assertEquals(list(map(lambda e: e.text, history)), times_s)
 
     if self.b.name == 'safari':
       warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
