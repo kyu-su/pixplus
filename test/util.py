@@ -1,12 +1,17 @@
 import sys, os
-import urllib2
+
+try:
+  from urllib.request import urlopen
+except ImportError:
+  from urllib2 import urlopen
+  pass
 
 def download(url, filename):
   sys.stdout.write('Download: %s ' % filename)
   sys.stdout.write('  0%')
   sys.stdout.flush()
 
-  src = urllib2.urlopen(url)
+  src = urlopen(url)
   dst = open(filename, 'wb')
 
   size = int(src.info().getheader('Content-Length'))

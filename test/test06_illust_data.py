@@ -3,22 +3,22 @@ from test_base import TestCase
 class Test_IllustData(TestCase):
   illust_list = [
     {'id': 1580459,
-     'title': u'\u3010\u4f01\u753b\u3011\u30d4\u30af\u30b7\u30d6\u305f\u3093\u3092\u63cf\u3053\u3046\uff01',
-     'caption': u'2008\u5e749\u670810\u65e5\u3067pixiv\u306f\u30b5\u30fc\u30d3\u30b9\u958b\u59cb1\u5468\u5e74\u3092\u8fce\u3048\u307e\u3059\u3002<br />\u305d\u3053\u3067\u3001pixiv1\u5468\u5e74\u8a18\u5ff5\u4f01\u753b\u3068\u3057\u3066\u3001pixiv\u3068\u3044\u3046\u30b5\u30fc\u30d3\u30b9\u3092\u64ec\u4eba\u5316\u3057\u305f\u30ad\u30e3\u30e9\u30af\u30bf\u30fc\u300c\u30d4\u30af\u30b7\u30d6\u305f\u3093\u300d\u3092\u5927\u52df\u96c6\uff01<br />\u7686\u3055\u3093\u304c\u8003\u3048\u308b\u300c\u30d4\u30af\u30b7\u30d6\u305f\u3093\u300d\u3092\u30a4\u30e9\u30b9\u30c8\u306b\u3057\u3066\u307f\u307e\u305b\u3093\u304b\uff1f <br /><br />Special Thanks:\u300c\u307f\u3093\u306a\u3067\u30d4\u30af\u30b7\u30d6\u305f\u3093\u63cf\u3053\u3046\u305c\uff01\u300d<strong><a href="http://www.pixiv.net/member_illust.php?mode=medium&amp;illust_id=14567">illust/14567</a></strong><br />\u300cpixiv\u304a\u8a95\u751f\u65e5\u300d <strong><a href="http://www.pixiv.net/member_illust.php?mode=medium&amp;illust_id=1469262">illust/1469262</a></strong> <br />\u30d4\u30af\u30b7\u30d6\u305f\u3093\u3000\u2192\u3000<a href="http://tinyurl.com/6yx3f5" target="_blank">http://tinyurl.com/6yx3f5</a>',
+     'title': '\u3010\u4f01\u753b\u3011\u30d4\u30af\u30b7\u30d6\u305f\u3093\u3092\u63cf\u3053\u3046\uff01',
+     'caption': '2008\u5e749\u670810\u65e5\u3067pixiv\u306f\u30b5\u30fc\u30d3\u30b9\u958b\u59cb1\u5468\u5e74\u3092\u8fce\u3048\u307e\u3059\u3002<br />\u305d\u3053\u3067\u3001pixiv1\u5468\u5e74\u8a18\u5ff5\u4f01\u753b\u3068\u3057\u3066\u3001pixiv\u3068\u3044\u3046\u30b5\u30fc\u30d3\u30b9\u3092\u64ec\u4eba\u5316\u3057\u305f\u30ad\u30e3\u30e9\u30af\u30bf\u30fc\u300c\u30d4\u30af\u30b7\u30d6\u305f\u3093\u300d\u3092\u5927\u52df\u96c6\uff01<br />\u7686\u3055\u3093\u304c\u8003\u3048\u308b\u300c\u30d4\u30af\u30b7\u30d6\u305f\u3093\u300d\u3092\u30a4\u30e9\u30b9\u30c8\u306b\u3057\u3066\u307f\u307e\u305b\u3093\u304b\uff1f <br /><br />Special Thanks:\u300c\u307f\u3093\u306a\u3067\u30d4\u30af\u30b7\u30d6\u305f\u3093\u63cf\u3053\u3046\u305c\uff01\u300d<strong><a href="http://www.pixiv.net/member_illust.php?mode=medium&amp;illust_id=14567">illust/14567</a></strong><br />\u300cpixiv\u304a\u8a95\u751f\u65e5\u300d <strong><a href="http://www.pixiv.net/member_illust.php?mode=medium&amp;illust_id=1469262">illust/1469262</a></strong> <br />\u30d4\u30af\u30b7\u30d6\u305f\u3093\u3000\u2192\u3000<a href="http://tinyurl.com/6yx3f5" target="_blank">http://tinyurl.com/6yx3f5</a>',
      'tags': [
-        u'pixiv\u30a2\u30a4\u30b3\u30f3\u304c\u30b4\u30fc\u30b8\u30e3\u30b9',
-        u'\u30aa\u30d5\u30a3\u30b7\u30e3\u30eb',
-        u'\u30d4\u30af\u30b7\u30d6\u305f\u3093',
-        u'\u4f01\u753b',
-        u'\u4f01\u753b\u4e3b',
-        u'\u4f01\u753b\u76ee\u9332',
-        u'\u516c\u5f0f',
-        u'\u516c\u5f0f\u4f01\u753b',
-        u'\u8a18\u5ff5\u65e5'
+        'pixiv\u30a2\u30a4\u30b3\u30f3\u304c\u30b4\u30fc\u30b8\u30e3\u30b9',
+        '\u30aa\u30d5\u30a3\u30b7\u30e3\u30eb',
+        '\u30d4\u30af\u30b7\u30d6\u305f\u3093',
+        '\u4f01\u753b',
+        '\u4f01\u753b\u4e3b',
+        '\u4f01\u753b\u76ee\u9332',
+        '\u516c\u5f0f',
+        '\u516c\u5f0f\u4f01\u753b',
+        '\u8a18\u5ff5\u65e5'
         ],
 
      'author_id':              11,
-     'author_name':            u'pixiv\u4e8b\u52d9\u5c40',
+     'author_name':            'pixiv\u4e8b\u52d9\u5c40',
      'author_is_me':           False,
      'author_favorite':        True,
      'author_mutual_favorite': False,

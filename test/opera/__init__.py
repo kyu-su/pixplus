@@ -1,4 +1,5 @@
 import os
+import random
 
 from selenium.webdriver import DesiredCapabilities
 
@@ -68,7 +69,7 @@ class Opera(Browser):
 
     for oex in self.extensions:
       filename = os.path.basename(oex)
-      uuid = '-'.join(map(lambda s: os.urandom(s).encode('hex'), (4, 2, 2, 2, 6)))
+      uuid = '-'.join(map(lambda s: ('%%0%dx' % s) % random.getrandbits(s * 4), (4, 2, 2, 2, 6)))
       util.copy_file(oex, path_widgets)
 
       fp_widgets_dat.write('''

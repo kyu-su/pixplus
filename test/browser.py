@@ -1,6 +1,11 @@
 import os
 import shutil
-import httplib
+
+try:
+  import http.client as http_client
+except ImportError:
+  import httplib as http_client
+  pass
 
 from selenium.webdriver import ActionChains
 from selenium.webdriver import DesiredCapabilities
@@ -35,7 +40,7 @@ class Browser:
   def quit(self):
     try:
       self.driver.quit()
-    except httplib.BadStatusLine:
+    except http_client.BadStatusLine:
       pass
     pass
 
@@ -61,7 +66,6 @@ class Browser:
 
   def open(self, url):
     self.driver.get(url)
-    self.wait_page_load()
     pass
 
   def reload(self):

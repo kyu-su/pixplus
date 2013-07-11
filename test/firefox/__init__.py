@@ -2,9 +2,19 @@ import sys, os
 import time
 import urllib
 import zipfile
-from cStringIO import StringIO
 import base64
-from elementtree.ElementTree import ElementTree
+
+try:
+  from io import BytesIO
+except ImportError:
+  from cStringIO import StringIO as BytesIO
+  pass
+
+try:
+  from elementtree.ElementTree import ElementTree
+except ImportError:
+  from xml.etree.ElementTree import ElementTree
+  pass
 
 import util
 from browser import Browser
@@ -70,7 +80,7 @@ class Firefox(Browser):
     z.extractall(extract_path)
 
     doc = ElementTree(file = os.path.join(extract_path, 'install.rdf'))
-    eid = doc.find('//{http://www.mozilla.org/2004/em-rdf#}id').text
+    eid = doc.find('.//{http://www.mozilla.org/2004/em-rdf#}id').text
     os.rename(extract_path, os.path.join(os.path.dirname(extract_path), eid))
     pass
 
@@ -91,7 +101,7 @@ class Firefox(Browser):
     pass
 
   def b64(self):
-    fp = StringIO()
+    fp = BytesIO()
     z = zipfile.ZipFile(fp, 'w', zipfile.ZIP_DEFLATED)
     for base, dirs, files in os.walk(self.profiledir):
       for filename in files:
@@ -100,6 +110,12 @@ class Firefox(Browser):
         pass
       pass
     z.close()
-    return base64.encodestring(fp.getvalue())
+
+    data = base64.b64encode(fp.getvalue())
+    try:
+      data = str(data, 'ascii')
+    except TypeError:
+      pass
+    return data
 
   pass

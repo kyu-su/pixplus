@@ -1,5 +1,10 @@
-import urlparse
 import warnings
+
+try:
+  import urllib.parse as urlparse
+except ImportError:
+  import urlparse
+  pass
 
 from test_base import TestCase
 

@@ -139,7 +139,7 @@ def main():
     ]
 
   all_tests = load_tests()
-  browser_names = map(lambda b: b[1].name, browsers)
+  browser_names = list(map(lambda b: b[1].name, browsers))
 
   parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
 

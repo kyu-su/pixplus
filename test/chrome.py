@@ -23,7 +23,12 @@ class Chrome(Browser):
     finally:
       fp.close()
       pass
-    self.extensions.append(base64.b64encode(data))
+    data = base64.b64encode(data)
+    try:
+      data = str(data, 'ascii')
+    except TypeError:
+      pass
+    self.extensions.append(data)
     pass
 
   pass
