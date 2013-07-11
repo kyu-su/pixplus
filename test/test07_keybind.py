@@ -389,7 +389,7 @@ class Test_KeyBind(TestCase):
       el = self.b.driver.switch_to_active_element()
       return keyvalue(el)
 
-    items = map(keyvalue, self.qa('.list li input[type="button"][data-key]', question))
+    items = list(map(keyvalue, self.qa('.list li input[type="button"][data-key]', question)))
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
@@ -409,7 +409,7 @@ class Test_KeyBind(TestCase):
 
     self.blur()
 
-    if self.repeatable:
+    if self.args.repeatable:
       warnings.warn('Skipping answering question')
       return
 
@@ -418,16 +418,14 @@ class Test_KeyBind(TestCase):
       self.send_keys(Keys.DOWN)
       pass
     self.assertEquals(active(), items[answer_idx])
-    self.assertEquals(items[answer_idx].get_attribute('data-key'), str(answer_idx + 1))
-    answer = items[answer_idx].get_attribute('value')
+    self.assertEquals(items[answer_idx][0], str(answer_idx + 1))
+    answer = items[answer_idx][1]
 
     self.send_keys(Keys.SPACE)
 
-    self.wait_until(lambda d: not self.q('.list', question).is_displayed())
-
+    self.wait_until(lambda d: answer in self.q('.status', question).text)
     self.assertFalse(self.q('.list', question).is_displayed())
     self.assertFalse(self.q('.stats', question).is_displayed())
-    self.assertIn(answer, self.q('.status', question).text)
 
     self.blur()
 
