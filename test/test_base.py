@@ -176,11 +176,20 @@ class TestCase(unittest.TestCase):
 
   def safe_get_jsobj(self, name):
     obj = self.js('''
+      var isobj = function(obj) {
+        var pt = obj;
+        while(true) {
+          if (Object.getPrototypeOf(pt = Object.getPrototypeOf(pt)) === null) {
+            break;
+          }
+        }
+        return Object.getPrototypeOf(obj) === pt;
+      };
       return (function copy(o) {
         if (!o || /^(?:number|boolean|string)$/.test(typeof(o))) {
           return o;
         } else if (typeof(o) === 'object') {
-          if (o.constructor === Object) {
+          if (isobj(o)) {
             var c = {};
             for(var k in o) {
               if (/^(?:prev|next)$/.test(k)) {
@@ -189,7 +198,7 @@ class TestCase(unittest.TestCase):
               c[k] = copy(o[k]);
             }
             return c;
-          } else if (o.constructor === Array) {
+          } else if (Array.isArray(o)) {
             return o.map(function(e) {
               return copy(e);
             });
