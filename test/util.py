@@ -1,4 +1,5 @@
 import sys, os
+import json
 
 try:
   from urllib.request import urlopen
@@ -60,6 +61,27 @@ def copy_file(path_from, path_to):
   fp = open(path_to, 'wb')
   try:
     fp.write(data)
+  finally:
+    fp.close()
+    pass
+  pass
+
+def read_json(filename, default = None):
+  if not os.path.exists(filename):
+    return default
+
+  fp = open(filename)
+  try:
+    return json.load(fp)
+  finally:
+    fp.close()
+    pass
+  pass
+
+def write_json(filename, obj):
+  fp = open(filename, 'w')
+  try:
+    json.dump(obj, fp)
   finally:
     fp.close()
     pass

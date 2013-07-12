@@ -1,7 +1,5 @@
 import sys, os
 import argparse
-import json
-import time
 import unittest
 import warnings
 
@@ -10,8 +8,7 @@ if os.path.exists(_path) and _path not in sys.path:
   sys.path.insert(0, _path)
   pass
 
-from selenium.webdriver.common import utils as selutils
-
+import util
 from firefox import Firefox
 from chrome import Chrome
 from opera import Opera
@@ -38,29 +35,8 @@ def load_tests():
 
   return tests
 
-def read_json(filename, default = None):
-  if not os.path.exists(filename):
-    return default
-
-  fp = open(filename)
-  try:
-    return json.load(fp)
-  finally:
-    fp.close()
-    pass
-  pass
-
-def write_json(filename, obj):
-  fp = open(filename, 'w')
-  try:
-    json.dump(obj, fp)
-  finally:
-    fp.close()
-    pass
-  pass
-
 def load_cookie(driver):
-  cookie = read_json(os.path.join(testdir, 'cookie.json'), {})
+  cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
   for name, item in cookie.items():
     print('Cookie: %s=%s' % (item['name'], item['value']))
     driver.add_cookie(item)
@@ -72,7 +48,7 @@ def save_cookie(driver):
   for key in ['PHPSESSID']:
     cookie[key] = driver.get_cookie(key)
     pass
-  write_json(os.path.join(testdir, 'cookie.json'), cookie)
+  util.write_json(os.path.join(testdir, 'cookie.json'), cookie)
   pass
 
 def login(browser, config):
@@ -91,8 +67,7 @@ def login(browser, config):
 
   form.submit()
 
-  # safari magic...
-  time.sleep(1)
+  browser.wait_page_load()
 
   if browser.url != 'http://www.pixiv.net/mypage.php':
     print('Login failed!')
@@ -160,7 +135,7 @@ def main():
 
   args = parser.parse_args()
 
-  config = read_json(os.path.join(testdir, 'config.json'))
+  config = util.read_json(os.path.join(testdir, 'config.json'))
   if config is None:
     print('Error: Create "config.json" first')
     return
