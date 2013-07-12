@@ -116,10 +116,15 @@ class Browser:
     return self.driver.execute_script(script, *args)
 
   def geom(self, element):
-    return tuple(map(round, self.js('''
+    if self.name == 'firefox':
+      pos = element.location
+      size = element.size
+      return pos['x'], pos['y'], size['width'], size['height']
+
+    return tuple(map(int, self.js('''
       var elem = arguments[0];
       var rect = elem.getBoundingClientRect();
-      return [rect.left, rect.top, rect.width, rect.height];
+      return [rect.left, rect.top, elem.offsetWidth, elem.offsetHeight];
     ''', element)))
 
   pass

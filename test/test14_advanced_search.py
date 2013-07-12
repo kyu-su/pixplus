@@ -133,9 +133,10 @@ class Test_AdvancedSearch(TestCase):
 
     knob = self.q('.pp-slider-knob', slider)
     kx, ky, kw, kh = self.geom(knob)
+    self.assertEquals(kx - rx, (rw - kw) / 2)
+    self.assertEquals(ky, sy)
     self.assertEquals(kw, 8)
     self.assertEquals(kh, 16)
-    self.assertEquals(kx, rx + (rw / 2) - (kw / 2))
 
     text = self.q('#pp-search-ratio-custom-text')
     self.check_slider(slider, knob, text)
