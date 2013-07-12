@@ -7,10 +7,12 @@ class Test_Rate(TestCase):
   repeatable = False
 
   def check(self, confirm):
-    rating = self.find_illust(lambda popup: self.qa('#pp-popup-rating .score .rating:not(.rated)', popup))
-    rating = rating[0]
+    self.find_illust(lambda popup: not self.popup_get_illust_data('rated'))
+
     self.js('pixplus.popup.show_caption()')
-    self.assertEquals(self.popup_get_illust_data('rated'), False)
+    time.sleep(1)
+
+    rating = self.q('#pp-popup-rating .score .rating:not(.rated)')
 
     score = (int(time.time()) % 9) + 1
     width = score * 26
@@ -41,12 +43,14 @@ class Test_Rate(TestCase):
       return
 
     self.open_test_user()
+    self.wait_page_load()
     self.set_conf('general.rate_confirm', True)
     self.check(True)
     pass
 
   def test_rate_noconfirm(self):
     self.open_test_user()
+    self.wait_page_load()
     self.set_conf('general.rate_confirm', False)
     self.check(False)
     pass

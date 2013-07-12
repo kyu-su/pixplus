@@ -30,6 +30,9 @@ class TestCase(unittest.TestCase):
 
   def open(self, url):
     self.b.open('http://www.pixiv.net%s' % url)
+    if self.qa('.error strong'):
+      self.reload()
+      pass
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
