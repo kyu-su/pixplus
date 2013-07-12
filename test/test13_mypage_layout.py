@@ -16,24 +16,27 @@ from test_base import TestCase
 
 class Test_Mypage(TestCase):
 
-  def set_cookie(self, layout):
+  def set_layout_cookie(self, layout):
+    self.wait_page_load()
     cookie = ['token=20100713']
     for c in 'ntebm':
       cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
       cookie.append('%s_v=%d' % (c, 1 if c in layout else 0))
       pass
     cookie = quote('&'.join(cookie), '')
-    self.js('document.cookie="pixiv_mypage=%s;domain=pixiv.net;path=/"' % cookie)
+    self.set_cookie('pixiv_mypage', cookie, 'pixiv.net', '/')
+    time.sleep(1)
     pass
 
   def check_pixiv_jsobj(self, layout):
+    self.wait_page_load()
     order, visible = tuple(self.js('return [pixiv.mypage.order, pixiv.mypage.visible]'))
     self.assertEquals(order, list(layout.lower()))
     self.assertEquals(visible, dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))
     pass
 
   def check_update(self, layout):
-    self.set_cookie(layout)
+    self.set_layout_cookie(layout)
     self.reload()
     self.check_pixiv_jsobj(layout)
     pass
@@ -64,7 +67,7 @@ class Test_Mypage(TestCase):
 
   def test_layout2(self):
     layouts, times = self.set_layout_history(['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
-    self.set_cookie(layouts[0])
+    self.set_layout_cookie(layouts[0])
 
     self.open('/mypage.php')
 
@@ -102,32 +105,28 @@ class Test_Mypage(TestCase):
   def test_layout3(self):
     layouts, times = self.set_layout_history(['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
 
-    self.set_cookie('TeBmN')
+    self.set_layout_cookie('TeBmN')
     self.open('/mypage.php')
     self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
-    self.set_cookie('ntebm')
+    self.set_layout_cookie('ntebm')
     self.open('/mypage.php')
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
     pass
 
   def test_layout4(self):
     layouts, times = self.set_layout_history(['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
-    self.set_cookie('bEtNm')
+    self.set_layout_cookie('bEtNm')
     self.open('/mypage.php')
 
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
-
-    self.wait_page_load()
 
     self.check_pixiv_jsobj('TeBmN')
     self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
-
-    self.wait_page_load()
 
     self.check_pixiv_jsobj('ntebm')
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])

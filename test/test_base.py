@@ -23,6 +23,7 @@ class TestCase(unittest.TestCase):
     raise AttributeError()
 
   def tearDown(self):
+    self.wait_page_load()
     self.reset_conf()
     time.sleep(1)
     pass
@@ -46,8 +47,6 @@ class TestCase(unittest.TestCase):
       self.wait_illust_list()
       self.js('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
       pass
-
-    self.wait_until(lambda d: self.qa('#pp-popup'))
 
     popup = self.q('#pp-popup')
     self.assertTrue(popup.is_displayed())

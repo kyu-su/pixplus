@@ -1,5 +1,7 @@
 import os
 import shutil
+import time
+import json
 
 try:
   import http.client as http_client
@@ -61,6 +63,7 @@ class Browser:
     return self.driver.current_url
 
   def wait_page_load(self):
+    time.sleep(1)
     self.wait_until(lambda d: self.js('return document.readyState==="complete"'))
     pass
 
@@ -73,7 +76,7 @@ class Browser:
     pass
 
   def wait_until(self, callback):
-    wait = WebDriverWait(self.driver, 10)
+    wait = WebDriverWait(self.driver, 20)
     wait.until(callback)
     pass
 
@@ -126,5 +129,10 @@ class Browser:
       var rect = elem.getBoundingClientRect();
       return [rect.left, rect.top, elem.offsetWidth, elem.offsetHeight];
     ''', element)))
+
+  def set_cookie(self, name, value, domain, path):
+    cookie = '%s=%s; domain=%s; path=%s' % (name, value, domain, path)
+    self.js('document.cookie=%s' % json.dumps(cookie))
+    pass
 
   pass

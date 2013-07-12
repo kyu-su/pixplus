@@ -1,9 +1,13 @@
+import time
+
 from test_base import TestCase
 
 class Test_Manga(TestCase):
 
   def check(self, illust_id):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
+    self.wait_page_load()
+
     pages = self.js('return pixiv.context.pages')
     images = self.js('return pixiv.context.images')
 
@@ -56,6 +60,8 @@ class Test_Manga(TestCase):
 
   def test_manga(self):
     self.open('/member_illust.php?mode=manga&illust_id=6209105')
+    self.wait_page_load()
+
     self.assertEquals(self.js('return pixiv.context.pages'), [[1], [2], [3]])
     self.assertEquals(self.js('return pixiv.context.images'),
                       ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',

@@ -35,14 +35,6 @@ def load_tests():
 
   return tests
 
-def load_cookie(driver):
-  cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
-  for name, item in cookie.items():
-    print('Cookie: %s=%s' % (item['name'], item['value']))
-    driver.add_cookie(item)
-    pass
-  pass
-
 def save_cookie(driver):
   cookie = {}
   for key in ['PHPSESSID']:
@@ -86,7 +78,13 @@ def test(browser, config, tests):
     browser.set_window_size(1280, 800)
 
     browser.open('http://www.pixiv.net/')
-    load_cookie(browser.driver)
+
+    cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
+    for name, item in cookie.items():
+      browser.set_cookie(*map(lambda n: item[n], ('name', 'value', 'domain', 'path')))
+      pass
+    pass
+
     browser.open('http://www.pixiv.net/')
 
     if browser.url == 'http://www.pixiv.net/':
