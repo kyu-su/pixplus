@@ -39,7 +39,6 @@ class Opera(Browser):
   def create_profile(self):
     Browser.create_profile(self)
     util.copy_file(os.path.join(self.browserdir, 'operaprefs.ini'), self.profiledir)
-    util.copy_file(os.path.join(self.browserdir, 'urlfilter.ini'), self.profiledir)
     self.install_userjs()
     self.install_extensions()
     pass
