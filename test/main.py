@@ -8,6 +8,8 @@ if os.path.exists(_path) and _path not in sys.path:
   sys.path.insert(0, _path)
   pass
 
+import selenium.common.exceptions
+
 import util
 from firefox import Firefox
 from chrome import Chrome
@@ -59,9 +61,9 @@ def login(browser, config):
 
   form.submit()
 
-  browser.wait_page_load()
-
-  if browser.url != 'http://www.pixiv.net/mypage.php':
+  try:
+    browser.wait_until(lambda d: browser.url == 'http://www.pixiv.net/mypage.php')
+  except selenium.common.exceptions.TimeoutException:
     print('Login failed!')
     raw_input('Please login manually and press enter...')
     pass

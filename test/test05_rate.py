@@ -43,14 +43,12 @@ class Test_Rate(TestCase):
       return
 
     self.open_test_user()
-    self.wait_page_load()
     self.set_conf('general.rate_confirm', True)
     self.check(True)
     pass
 
   def test_rate_noconfirm(self):
     self.open_test_user()
-    self.wait_page_load()
     self.set_conf('general.rate_confirm', False)
     self.check(False)
     pass

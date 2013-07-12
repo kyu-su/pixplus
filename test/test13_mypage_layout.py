@@ -17,7 +17,6 @@ from test_base import TestCase
 class Test_Mypage(TestCase):
 
   def set_layout_cookie(self, layout):
-    self.wait_page_load()
     cookie = ['token=20100713']
     for c in 'ntebm':
       cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
@@ -29,7 +28,6 @@ class Test_Mypage(TestCase):
     pass
 
   def check_pixiv_jsobj(self, layout):
-    self.wait_page_load()
     order, visible = tuple(self.js('return [pixiv.mypage.order, pixiv.mypage.visible]'))
     self.assertEquals(order, list(layout.lower()))
     self.assertEquals(visible, dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))

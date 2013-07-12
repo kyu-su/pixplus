@@ -71,7 +71,6 @@ class Test_FloatTagList(TestCase):
     self.check(self.q('.ui-layout-west'), True)
 
     self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.wait_page_load()
     headers = self.qa('#pp-search-header > *')
     self.assertEquals(len(headers), 3)
     self.assertTrue(self.has_class(headers[0], 'column-label'))
@@ -91,7 +90,6 @@ class Test_FloatTagList(TestCase):
     self.check(self.q('.ui-layout-west'), False)
 
     self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.wait_page_load()
     self.assertFalse(self.qa('#pp-search-header'))
     pass
 
