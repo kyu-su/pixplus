@@ -47,7 +47,7 @@ def login(browser, config):
   print('Logging in...')
   browser.open('https://www.secure.pixiv.net/login.php')
 
-  form = browser.qa('form[action*="login.php"]')[-1]
+  form = browser.wait_until(lambda d: browser.qa('form[action*="login.php"]'))[-1]
 
   e_id = browser.q('input[name="pixiv_id"]', form)
   e_id.clear()

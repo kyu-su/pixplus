@@ -77,8 +77,7 @@ class Browser:
 
   def wait_until(self, callback):
     wait = WebDriverWait(self.driver, 20)
-    wait.until(callback)
-    pass
+    return wait.until(callback)
 
   def ac(self):
     return ActionChains(self.driver)
@@ -87,8 +86,7 @@ class Browser:
     if context is None:
       context = self.driver
       pass
-    self.wait_until(lambda d: self.qa(selector, context))
-    return context.find_element_by_css_selector(selector)
+    return self.wait_until(lambda d: self.qa(selector, context))[0]
 
   def qa(self, selector, context = None):
     if context is None:
