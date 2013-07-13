@@ -6064,7 +6064,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       if (d.documentElement) {
         lng = _.i18n[d.documentElement.lang];
       }
-      _.lng = (lng || _.i18n[g.navigator.language] || _.i18n.en);
+      if (!lng && g.navigator) {
+        lng = _.i18n[g.navigator.language];
+      }
+      _.lng = lng || _.i18n.en;
     }
   };
 

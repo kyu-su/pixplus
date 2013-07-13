@@ -127,7 +127,7 @@ class Browser:
     return tuple(map(int, self.js('''
       var elem = arguments[0];
       var rect = elem.getBoundingClientRect();
-      return [rect.left, rect.top, elem.offsetWidth, elem.offsetHeight];
+      return [rect.left, rect.top, rect.width, rect.height];
     ''', element)))
 
   def set_cookie(self, name, value, domain, path):

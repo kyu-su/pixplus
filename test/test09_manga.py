@@ -10,7 +10,11 @@ class Test_Manga(TestCase):
     pages = self.js('return pixiv.context.pages')
     images = self.js('return pixiv.context.images')
 
+    time.sleep(1)
+
     self.open_popup(illust_id)
+    time.sleep(1)
+
     self.js('pixplus.popup.manga.start()')
     self.popup_wait_load()
     manga = self.safe_get_jsobj('pixplus.popup.illust.manga')
@@ -27,12 +31,8 @@ class Test_Manga(TestCase):
       self.js('pixplus.popup.manga.show(%d)' % page)
       self.popup_wait_load()
 
-      scroller = self.q('#pp-popup-image-scroller')
-      layout   = self.q('#pp-popup-image-layout')
-      images   = self.qa('#pp-popup-image-layout img')
-
-      sx, sy, sw, sh = self.geom(scroller)
-      lx, ly, lw, lh = self.geom(layout)
+      sx, sy, sw, sh = self.geom(self.q('#pp-popup-image-scroller'))
+      lx, ly, lw, lh = self.geom(self.q('#pp-popup-image-layout'))
 
       self.assertTrue(lx >= sx)
       self.assertTrue(ly >= sy)
@@ -42,6 +42,8 @@ class Test_Manga(TestCase):
 
       self.assertEquals(lx - sx, (sw - lw) / 2)
       self.assertEquals(ly - sy, (sh - lh) / 2)
+
+      images = self.qa('#pp-popup-image-layout img')
 
       self.assertEquals(list(map(lambda i: i.get_attribute('src'), images)),
                         manga['pages'][page]['image_urls'])
