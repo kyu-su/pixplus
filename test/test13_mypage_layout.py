@@ -120,11 +120,17 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
 
+    time.sleep(1)
+    self.wait_page_load()
+
     self.check_pixiv_jsobj('TeBmN')
     self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
+
+    time.sleep(1)
+    self.wait_page_load()
 
     self.check_pixiv_jsobj('ntebm')
     self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])

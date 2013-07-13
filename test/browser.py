@@ -69,6 +69,7 @@ class Browser:
 
   def open(self, url):
     self.driver.get(url)
+    time.sleep(1)
     self.wait_page_load()
     pass
 
