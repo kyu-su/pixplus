@@ -1,5 +1,6 @@
 import warnings
 import time
+import random
 
 try:
   import urllib.parse as urlparse
@@ -51,9 +52,10 @@ class Test_AdvancedSearch(TestCase):
     pass
 
   def test_size(self):
-    self.check_size(1, 2, 3, 4)
-    self.check_size(5, None, 6, None)
-    self.check_size(None, 7, None, 8)
+    r = lambda: random.randint(1, 2000)
+    self.check_size(*sorted(random.sample(range(2000), 4)))
+    self.check_size(r(), None, r(), None)
+    self.check_size(None, r(), None, r())
     pass
 
   def check_slider(self, slider, knob, text):
