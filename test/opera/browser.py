@@ -11,13 +11,6 @@ class Opera(Browser):
   capname = 'OPERA'
   supports_alert = False
 
-  @classmethod
-  def register_args(self, parser):
-    parser.add_argument('--opera-mode', dest = 'opera_mode',
-                        choices = ['userjs', 'oex'],
-                        default = 'oex', help = 'userjs,oex')
-    pass
-
   def prepare_caps(self, caps):
     self.userjs = []
     self.extensions = []
@@ -110,4 +103,10 @@ class Opera(Browser):
     fp_widgets_dat.close()
     pass
 
+  pass
+
+def register_args(parser):
+  parser.add_argument('--opera-mode', dest = 'opera_mode',
+                      choices = ['userjs', 'oex'],
+                      default = 'oex', help = 'userjs,oex')
   pass

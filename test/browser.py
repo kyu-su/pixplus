@@ -25,10 +25,6 @@ class Browser:
     self.profiledir = None
     pass
 
-  @classmethod
-  def register_args(self, parser):
-    pass
-
   def start(self):
     caps = {}
     caps.update(getattr(DesiredCapabilities, self.capname))

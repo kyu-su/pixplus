@@ -125,8 +125,10 @@ def main():
                       action = 'store_true', default = False)
 
   for mod, browser in browsers:
+    if hasattr(mod, 'register_args'):
+      mod.register_args(parser)
+      pass
     browser.browserdir = os.path.dirname(mod.__file__)
-    browser.register_args(parser)
     pass
 
   args = parser.parse_args()

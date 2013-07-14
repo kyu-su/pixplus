@@ -1,1 +1,1 @@
-from .browser import Safari
+from .browser import *

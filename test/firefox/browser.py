@@ -19,22 +19,14 @@ except ImportError:
 import util
 from browser import Browser
 
+ADDONS = {
+  'greasemonkey': 748,
+  'scriptish': 231203
+  }
+
 class Firefox(Browser):
   name = 'firefox'
   capname = 'FIREFOX'
-  addons = {
-    'greasemonkey': 748,
-    'scriptish': 231203
-    }
-
-  @classmethod
-  def register_args(self, parser):
-    parser.add_argument('--firefox-command', dest = 'firefox_bin')
-    parser.add_argument('--firefox-mode', dest = 'firefox_mode',
-                        choices = self.addons.keys(),
-                        default = 'greasemonkey',
-                        help = ','.join(self.addons.keys()))
-    pass
 
   def prepare_caps(self, caps):
     self.user_prefs = {}
@@ -67,7 +59,7 @@ class Firefox(Browser):
     return dlpath
 
   def add_addon(self, name):
-    filename = self.prepare_addon(self.addons[name], name)
+    filename = self.prepare_addon(ADDONS[name], name)
     print('Setup %s' % name)
     self.install_xpi(filename)
     getattr(self, 'setup_%s' % name)()
@@ -118,4 +110,12 @@ class Firefox(Browser):
       pass
     return data
 
+  pass
+
+def register_args(parser):
+  parser.add_argument('--firefox-command', dest = 'firefox_bin')
+  parser.add_argument('--firefox-mode', dest = 'firefox_mode',
+                      choices = ADDONS.keys(),
+                      default = 'greasemonkey',
+                      help = ','.join(ADDONS.keys()))
   pass

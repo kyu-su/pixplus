@@ -1,1 +1,1 @@
-from .browser import Opera
+from .browser import *
