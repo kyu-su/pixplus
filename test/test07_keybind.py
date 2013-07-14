@@ -56,6 +56,7 @@ class Test_KeyBind(TestCase):
 
   def test_move(self):
     self.prepare()
+    self.set_conf('popup.fit_short_threshold', 0)
 
     self.open_popup()
     self.check_id(0)
