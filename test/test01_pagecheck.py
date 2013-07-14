@@ -18,7 +18,11 @@ class Test_PageCheck(TestCase):
     '/member.php?id=11',
     '/member_illust.php?id=11',
     '/tags.php?tag=pixiv',
-    '/search.php?s_mode=s_tag&word=pixiv'
+    '/search.php?s_mode=s_tag&word=pixiv',
+    '/cate_r18.php',
+    '/new_illust_r18.php',
+    '/user_event.php?type=r18',
+    '/questionnaire_illust.php'
     )
 
   def test_pages(self):
