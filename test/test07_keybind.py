@@ -456,7 +456,11 @@ class Test_KeyBind(TestCase):
 
   def check_size(self, popup, fit_width, overflow_v, overflow_h):
     data = self.popup_get_illust_data()
-    iw, ih = data['size']['width'], data['size']['height']
+    size = data['size']
+    if size is None:
+      return False
+
+    iw, ih = size['width'], size['height']
     sw, sh = self.js('''
       return [document.documentElement.clientWidth,
               document.documentElement.clientHeight];
