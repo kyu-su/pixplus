@@ -6079,9 +6079,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "changes_i18n": {
         "en": [
           "[Add] Add \"Mark link as visited\" option.",
-          "[Fix] Fix ESC key is not working.",
-          "[Fix] Fix Shift+V key (open manga thumbnail page) is not working.",
-          "[Fix] Fix image response support"
+          "[Fix] ESC key is not working.",
+          "[Fix] Shift+V key (open manga thumbnail page) is not working.",
+          "[Fix] Image response support.",
+          "[Fix] Can't view access restricted illust.",
+          "[Fix] Minor bug fixes."
         ]
       }
     },
