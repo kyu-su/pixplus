@@ -2,6 +2,7 @@ import sys, os
 import argparse
 import unittest
 import warnings
+import subprocess
 
 import selenium.common.exceptions
 
@@ -162,6 +163,8 @@ def main():
       tests += [(cls, n) for n in cls.list_tests()]
       pass
     pass
+
+  subprocess.call(['make', '-C', Browser.rootdir])
 
   for mod, browser in browsers:
     if args.browsers and browser.name not in args.browsers:
