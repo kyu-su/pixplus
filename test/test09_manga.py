@@ -4,16 +4,20 @@ from test_base import TestCase
 
 class Test_Manga(TestCase):
 
+  def geom2(self, element):
+    if self.b.name == 'opera':
+      pos = element.location
+      size = element.size
+      return pos['x'], pos['y'], size['width'], size['height']
+    return self.geom(element)
+
   def check(self, illust_id):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
 
     pages = self.js('return pixiv.context.pages')
     images = self.js('return pixiv.context.images')
 
-    time.sleep(1)
-
     self.open_popup(illust_id)
-    time.sleep(1)
 
     self.js('pixplus.popup.manga.start()')
     self.popup_wait_load()
@@ -31,8 +35,8 @@ class Test_Manga(TestCase):
       self.js('pixplus.popup.manga.show(%d)' % page)
       self.popup_wait_load()
 
-      sx, sy, sw, sh = self.geom(self.q('#pp-popup-image-scroller'))
-      lx, ly, lw, lh = self.geom(self.q('#pp-popup-image-layout'))
+      sx, sy, sw, sh = self.geom2(self.q('#pp-popup-image-scroller'))
+      lx, ly, lw, lh = self.geom2(self.q('#pp-popup-image-layout'))
 
       self.assertTrue(lx >= sx)
       self.assertTrue(ly >= sy)
