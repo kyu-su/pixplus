@@ -455,13 +455,19 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
     pass
 
-  def check_size(self, popup, fit_width, overflow_v, overflow_h):
+  def check_size(self, popup, fit_width, overflow_v, overflow_h, min_width, min_height):
     data = self.popup_get_illust_data()
     size = data['size']
     if size is None:
       return False
 
     iw, ih = size['width'], size['height']
+
+    if min_width is not None and iw < min_width:
+      return False
+    if min_height is not None and ih < min_height:
+      return False
+
     sw, sh = self.js('''
       return [document.documentElement.clientWidth,
               document.documentElement.clientHeight];
@@ -508,7 +514,7 @@ class Test_KeyBind(TestCase):
     self.set_conf('popup.big_image', True)
     self.set_conf('popup.fit_short_threshold', 0)
 
-    self.find_illust(self.check_size, True, True, False)
+    self.find_illust(self.check_size, True, True, False, None, None)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
@@ -518,7 +524,7 @@ class Test_KeyBind(TestCase):
     time.sleep(1)
     self.check_scrollbar(False, False, False)
 
-    self.find_illust(self.check_size, False, False, True)
+    self.find_illust(self.check_size, False, False, True, None, None)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
@@ -528,7 +534,27 @@ class Test_KeyBind(TestCase):
     time.sleep(1)
     self.check_scrollbar(False, False, False)
 
-    self.find_illust(self.check_size, True, True, True)
+    self.find_illust(self.check_size, True, True, False, 490, None)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(True, False, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(False, False, False)
+
+    self.find_illust(self.check_size, False, False, True, None, 370)
+    self.popup_wait_big_image()
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(False, True, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(False, False, False)
+
+    self.find_illust(self.check_size, True, True, True, None, None)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
@@ -541,7 +567,7 @@ class Test_KeyBind(TestCase):
     time.sleep(1)
     self.check_scrollbar(False, False, False)
 
-    self.find_illust(self.check_size, False, True, True)
+    self.find_illust(self.check_size, False, True, True, None, None)
     self.popup_wait_big_image()
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
