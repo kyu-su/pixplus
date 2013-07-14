@@ -117,6 +117,7 @@ class Test_AdvancedSearch(TestCase):
     self.set_conf('general.debug', True)
     self.open('/search.php?s_mode=s_tag&word=pixiv')
     self.q('.search-option').click()
+    self.js('pixplus.lazy_scroll(arguments[0])', self.q('#pp-search-ratio-custom-slider'))
 
     slider = self.q('#pp-search-ratio-custom-slider.pp-slider')
     sx, sy, sw, sh = self.geom(slider)
