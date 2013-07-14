@@ -13,7 +13,7 @@ class Test_Comment(TestCase):
 
     form_query = '#pp-popup-comment-form form[action="/member_illust.php"]'
     form = self.q(form_query)
-    comment = self.q('input[name="comment"]', form)
+    comment = self.q(form_query + ' input[name="comment"]')
 
     message = 'c%d' % time.time()
     comment.send_keys(message)

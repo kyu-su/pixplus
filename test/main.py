@@ -46,11 +46,11 @@ def login(browser, config):
 
   form = browser.wait_until(lambda d: browser.qa('form[action*="login.php"]'))[-1]
 
-  e_id = browser.q('input[name="pixiv_id"]', form)
+  e_id = form.find_element_by_css_selector('input[name="pixiv_id"]')
   e_id.clear()
   e_id.send_keys(config['username'])
 
-  e_pw = browser.q('input[name="pass"]', form)
+  e_pw = form.find_element_by_css_selector('input[name="pass"]')
   e_pw.clear()
   e_pw.send_keys(config['password'])
 

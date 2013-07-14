@@ -1,4 +1,5 @@
 import warnings
+import time
 
 try:
   import urllib.parse as urlparse
@@ -117,14 +118,16 @@ class Test_AdvancedSearch(TestCase):
     self.set_conf('general.debug', True)
     self.open('/search.php?s_mode=s_tag&word=pixiv')
     self.q('.search-option').click()
+    time.sleep(1)
     self.js('pixplus.lazy_scroll(arguments[0])', self.q('#pp-search-ratio-custom-slider'))
+    time.sleep(1)
 
     slider = self.q('#pp-search-ratio-custom-slider.pp-slider')
     sx, sy, sw, sh = self.geom(slider)
     self.assertEquals(sw, 168)
     self.assertEquals(sh, 16)
 
-    rx, ry, rw, rh = self.geom(self.q('.pp-slider-rail', slider))
+    rx, ry, rw, rh = self.geom(self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-rail'))
     self.assertEquals(rw, 160)
     self.assertEquals(rh, 2)
     self.assertEquals(rx - sx, 4)
@@ -132,7 +135,7 @@ class Test_AdvancedSearch(TestCase):
     self.assertEquals((sx + sw) - (rx + rw), 4)
     self.assertEquals((sy + sh) - (ry + rh), 7)
 
-    knob = self.q('.pp-slider-knob', slider)
+    knob = self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-knob')
     kx, ky, kw, kh = self.geom(knob)
     self.assertEquals(kx - rx, (rw - kw) / 2)
     self.assertEquals(ky, sy)

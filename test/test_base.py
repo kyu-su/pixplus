@@ -28,11 +28,14 @@ class TestCase(unittest.TestCase):
     time.sleep(1)
     pass
 
-  def open(self, url):
-    self.b.open('http://www.pixiv.net%s' % url)
+  def open(self, path):
+    url = 'http://www.pixiv.net%s' % path
+    self.b.open(url)
+
     if self.qa('.error strong'):
       self.reload()
       pass
+
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     pass
 
@@ -95,7 +98,7 @@ class TestCase(unittest.TestCase):
   def find_illust(self, callback, *args):
     popup = self.open_popup()
     while True:
-      r = callback(popup, *args)
+      r = callback(*args)
       if r:
         return r
       self.popup_next()

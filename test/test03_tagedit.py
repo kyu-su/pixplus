@@ -15,18 +15,18 @@ class Test_TagEdit(TestCase):
   def get_tags(self):
     return set(self.popup_get_illust_data('tags'))
 
-  def check_tag_editable(self, popup, query):
+  def check_tag_editable(self, query):
     self.js('pixplus.popup.tagedit.start()')
     self.popup_wait_load()
-    self.assertTrue(self.has_class(popup, 'pp-tagedit-mode'))
+    self.assertTrue(self.qa('#pp-popup.pp-tagedit-mode'))
 
-    target = self.qa(query, popup)
+    target = self.qa('#pp-popup-tagedit-wrapper ' + query)
     if target:
       return target[0]
 
     self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
-    self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
+    self.assertTrue(self.qa('#pp-popup:not(.pp-tagedit-mode)'))
     pass
 
   def find_tag_editable(self, query):

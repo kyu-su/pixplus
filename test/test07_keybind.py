@@ -356,7 +356,7 @@ class Test_KeyBind(TestCase):
     self.unbookmark()
     pass
 
-  def check_has_question(self, popup):
+  def check_has_question(self):
     question = self.qa('#pp-popup-rating .questionnaire')
     if not question:
       return None
@@ -368,19 +368,19 @@ class Test_KeyBind(TestCase):
 
   def test_question(self):
     self.open_test_user()
-    question = self.find_illust(self.check_has_question)
+    self.find_illust(self.check_has_question)
     header = self.q('#pp-popup-header')
 
     self.send_keys('d')
-    self.assertTrue(self.q('.list', question).is_displayed())
+    self.assertTrue(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
     self.assertTrue(self.has_class(header, 'pp-show'))
 
     self.send_keys('d')
-    self.assertFalse(self.q('.list', question).is_displayed())
+    self.assertFalse(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
     self.assertTrue(self.has_class(header, 'pp-show'))
 
     self.send_keys('d')
-    self.assertTrue(self.q('.list', question).is_displayed())
+    self.assertTrue(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
     self.assertTrue(self.has_class(header, 'pp-show'))
 
     def keyvalue(el):
@@ -390,7 +390,7 @@ class Test_KeyBind(TestCase):
       el = self.b.driver.switch_to_active_element()
       return keyvalue(el)
 
-    items = list(map(keyvalue, self.qa('.list li input[type="button"][data-key]', question)))
+    items = list(map(keyvalue, self.qa('#pp-popup-rating .questionnaire .list li input[type="button"][data-key]')))
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
@@ -424,17 +424,19 @@ class Test_KeyBind(TestCase):
 
     self.send_keys(Keys.SPACE)
 
-    self.wait_until(lambda d: answer in self.q('.status', question).text)
-    self.assertFalse(self.q('.list', question).is_displayed())
-    self.assertFalse(self.q('.stats', question).is_displayed())
+    time.sleep(1)
+
+    self.wait_until(lambda d: answer in self.q('#pp-popup-rating .questionnaire .status').text)
+    self.assertFalse(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
+    self.assertFalse(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
 
     self.blur()
 
     self.send_keys('d')
-    self.assertTrue(self.q('.stats', question).is_displayed())
+    self.assertTrue(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
 
     self.send_keys('d')
-    self.assertFalse(self.q('.stats', question).is_displayed())
+    self.assertFalse(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
     pass
 
   def test_tag_edit(self):
@@ -455,7 +457,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
     pass
 
-  def check_size(self, popup, fit_width, overflow_v, overflow_h, min_width, min_height):
+  def check_size(self, fit_width, overflow_v, overflow_h, min_width, min_height):
     data = self.popup_get_illust_data()
     size = data['size']
     if size is None:

@@ -37,6 +37,7 @@ class Browser:
       'http://localhost:%d/wd/hub' % self.args.server_port,
       desired_capabilities = caps
       )
+    self.driver.implicitly_wait(2)
     pass
 
   def quit(self):
@@ -63,7 +64,6 @@ class Browser:
     return self.driver.current_url
 
   def wait_page_load(self):
-    # self.wait_until(lambda d: self.js('return document.readyState') in ['interactive', 'complete'])
     self.wait_until(lambda d: self.js('return document&&document.readyState==="complete"'))
     pass
 
@@ -84,29 +84,17 @@ class Browser:
   def ac(self):
     return ActionChains(self.driver)
 
-  def q(self, selector, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return self.wait_until(lambda d: self.qa(selector, context))[0]
+  def q(self, selector):
+    return self.driver.find_element_by_css_selector(selector)
 
-  def qa(self, selector, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_elements_by_css_selector(selector)
+  def qa(self, selector):
+    return self.driver.find_elements_by_css_selector(selector)
 
-  def x(self, xpath, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_element_by_xpath(xpath)
+  def x(self, xpath):
+    return self.driver.find_element_by_xpath(xpath)
 
-  def xa(self, xpath, context = None):
-    if context is None:
-      context = self.driver
-      pass
-    return context.find_elements_by_xpath(xpath)
+  def xa(self, xpath):
+    return self.driver.find_elements_by_xpath(xpath)
 
   def alert_accept(self):
     if self.supports_alert:
