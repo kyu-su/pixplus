@@ -25,7 +25,7 @@ def print_conf(conf):
       type_safari = 'TextField'
       value_safari = '<string>%s</string>' % escape(str(value))
       more = ''
-      if item.has_key('hint'):
+      if 'hint' in item:
         type_safari = 'PopUpButton'
         more = '''
       <key>Titles</key>
@@ -50,11 +50,16 @@ def print_conf(conf):
           pass
         value_safari = '<%s/>' % value
         pass
-      print (format % {'name':          name,
-                       'value':         quoteattr(str(value)),
-                       'type_safari':   type_safari,
-                       'value_safari':  value_safari,
-                       'more':          more}).encode('utf-8')
+
+      params = {
+        'name':          name,
+        'value':         quoteattr(str(value)),
+        'type_safari':   type_safari,
+        'value_safari':  value_safari,
+        'more':          more
+        }
+
+      print(format % params)
       pass
     pass
   pass

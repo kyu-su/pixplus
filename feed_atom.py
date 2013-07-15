@@ -1,24 +1,5 @@
 import sys
 import json
-import datetime
-
-try:
-  import pyatom
-except ImportError:
-  sys.stderr.write('WARNING: To generate feed.atom, pyatom is required.\n')
-  sys.exit(0)
-  pass
-
-url_home    = 'http://crckyl.ath.cx/'
-url_pixplus = 'http://crckyl.ath.cx/pixplus'
-url_feed    = 'http://crckyl.ath.cx/pixplus/feed.atom'
-url_version = 'http://crckyl.ath.cx/pixplus/archive/%s'
-
-author = {
-  'name':  'wowo',
-  'uri':   'http://crckyl.ath.cx/',
-  'email': 'crckyl@myopera.com'
-  }
 
 def gen_changes(changes):
   out = ['<ul>']
@@ -29,19 +10,27 @@ def gen_changes(changes):
   return out
 
 def gen_atom(changelog):
-  feed = pyatom.AtomFeed(
-    title    = 'pixplus',
-    subtitle = 'pixplus changelogs',
-    feed_url = url_feed,
-    url      = url_pixplus,
-    author   = author
-    )
+  print('''
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">pixplus</title>
+  <id>http://crckyl.ath.cx/pixplus/feed.atom</id>
+  <updated>2013-06-26T00:00:00Z</updated>
+  <link href="http://crckyl.ath.cx/pixplus" />
+  <link href="http://crckyl.ath.cx/pixplus/feed.atom" rel="self" />
+  <author>
+    <name>wowo</name>
+    <uri>http://crckyl.ath.cx/</uri>
+    <email>crckyl@myopera.com</email>
+  </author>
+  <subtitle type="text">pixplus changelogs</subtitle>
+'''.strip('\n'))
 
   for item in changelog:
     version = item['version']
-    time = datetime.datetime.strptime(item['date'], '%Y/%m/%d')
+    date = item['date']
 
-    changes = ['<h1>pixplus %s</h1>' % version]
+    changes = []
     changes_i18n = item.get('changes_i18n')
     if changes_i18n:
       for lng in 'ja', 'en':
@@ -54,17 +43,28 @@ def gen_atom(changelog):
       changes += gen_changes(item.get('changes'))
       pass
 
-    feed.add(
-      title        = 'pixplus %s' % version,
-      content      = '\n'.join(changes),
-      content_type = 'html',
-      author       = author,
-      url          = url_version % version,
-      updated      = time
-      )
+    print('''
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus %(ver)s</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/%(ver)s</id>
+    <updated>%(date)sT00:00:00+09:00</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/%(ver)s" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplus %(ver)s</h1>
+      %(changes)s
+    ]]></content>
+  </entry>
+'''.strip('\n') % {'ver': version,
+                   'date': date.replace('/', '-'),
+                   'changes': '\n      '.join(changes)})
     pass
 
-  sys.stdout.write(feed.to_string().encode('utf-8'))
+  print('</feed>')
   pass
 
 if __name__ == '__main__':

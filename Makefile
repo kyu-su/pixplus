@@ -2,7 +2,7 @@ RSVG_CONVERT                    = rsvg-convert
 ZIP                             = zip
 CRXMAKE                         = $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
-PYTHON2                         = python2.7
+PYTHON                          = python
 
 LICENSE                         = LICENSE.TXT
 ICON_SVG                        = pixplus.svg
@@ -104,7 +104,7 @@ clean: clean-feeds
 
 $(FEED_ATOM): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@$(PYTHON2) feed_atom.py < $< > $@
+	@$(PYTHON) feed_atom.py < $< > $@
 	@echo
 
 feeds: $(FEED_ATOM)
@@ -180,7 +180,7 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
 	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OEX_ICON_DIR)/$$size.png\" />" >> $@; done
 	@sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@$(PYTHON2) conf-parser.py opera < $(CONFIG_JSON) >> $@
+	@$(PYTHON) conf-parser.py opera < $(CONFIG_JSON) >> $@
 	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OEX_USERJS): $(SRC_USERJS)
@@ -269,7 +269,7 @@ $(SAFARIEXTZ_SETTINGS_PLIST): $(SAFARIEXTZ_SETTINGS_PLIST_IN) $(CONFIG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e '/__SETTINGS__/,$$d' < $< > $@
-	@$(PYTHON2) conf-parser.py safari < $(CONFIG_JSON) >> $@
+	@$(PYTHON) conf-parser.py safari < $(CONFIG_JSON) >> $@
 	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARIEXTZ_USERJS): $(SRC_USERJS)

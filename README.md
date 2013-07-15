@@ -18,7 +18,7 @@ Browser extension for pixiv.
 
 * make (GNU Make)
 * rsvg-convert
-* python 2.7 or 2.6
+* python
 * zip (oex)
 * ruby (crx)
 * rubyzip (crx)
