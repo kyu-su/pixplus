@@ -2,16 +2,11 @@ import time
 import warnings
 
 try:
-  from urllib.parse import quote
-except ImportError:
-  from urllib import quote
-  pass
-
-try:
   from functools import reduce
 except ImportError:
   pass
 
+import util
 from test_base import TestCase
 
 class Test_Mypage(TestCase):
@@ -25,7 +20,7 @@ class Test_Mypage(TestCase):
         cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
         cookie.append('%s_v=%d' % (c, 1 if c in layout else 0))
         pass
-      cookie = quote('&'.join(cookie), '')
+      cookie = util.quote('&'.join(cookie), '')
       pass
     self.set_cookie('pixiv_mypage', cookie, 'pixiv.net', '/')
     time.sleep(1)

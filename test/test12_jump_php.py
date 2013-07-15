@@ -1,10 +1,6 @@
-from test_base import TestCase
+import util
 
-try:
-  from urllib.parse import quote
-except ImportError:
-  from urllib import quote
-  pass
+from test_base import TestCase
 
 class Test_Jumpphp(TestCase):
 
@@ -23,7 +19,7 @@ class Test_Jumpphp(TestCase):
     link = self.find_illust(lambda: self.xa('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]'))
     link = link[0]
     self.js('pixplus.popup.show_caption()')
-    self.assertEquals(link.get_attribute('href'), 'http://www.pixiv.net/jump.php?' + quote(link.text, ''))
+    self.assertEquals(link.get_attribute('href'), 'http://www.pixiv.net/jump.php?' + util.quote(link.text, ''))
 
     self.set_conf('general.redirect_jump_page', 2)
     self.popup_reload()

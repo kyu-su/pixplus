@@ -2,12 +2,7 @@ import warnings
 import time
 import random
 
-try:
-  import urllib.parse as urlparse
-except ImportError:
-  import urlparse
-  pass
-
+import util
 from test_base import TestCase
 
 class Test_AdvancedSearch(TestCase):
@@ -28,6 +23,7 @@ class Test_AdvancedSearch(TestCase):
     radio = self.get_radio('size')
     value = '%sx%s-%sx%s' % tuple(map(lambda a: '' if a is None else str(a), [wlt, hlt, wgt, hgt]))
     self.assertEquals(radio.get_attribute('value'), value)
+    time.sleep(1)
     pass
 
   def check_size(self, wlt, hlt, wgt, hgt):
@@ -39,8 +35,8 @@ class Test_AdvancedSearch(TestCase):
     self.wait_page_load()
 
     self.assertTrue(self.url.startswith('http://www.pixiv.net/search.php?'))
-    url = urlparse.urlparse(self.url)
-    query = dict(urlparse.parse_qsl(url.query))
+    url = util.urlparse(self.url)
+    query = dict(util.parse_qsl(url.query))
 
     for name in 'wlt', 'hlt', 'wgt', 'hgt':
       value = locals()[name]

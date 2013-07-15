@@ -7,6 +7,13 @@ except ImportError:
   from urllib2 import urlopen
   pass
 
+try:
+  from urllib.parse import urlparse, parse_qsl, quote, unquote
+except ImportError:
+  from urlparse import urlparse, parse_qsl
+  from urllib import quote, unquote
+  pass
+
 def download(url, filename):
   sys.stdout.write('Download: %s ' % url)
   sys.stdout.write('  0%')
