@@ -3,6 +3,8 @@ from test_base import TestCase
 class Test_AuthorStatusIcon(TestCase):
 
   def test_author_status_icon(self):
+    self.set_conf('popup.author_status_icon', True)
+
     self.open('/mypixiv_new_illust.php')
     self.open_popup()
     self.js('pixplus.popup.show_caption()')
