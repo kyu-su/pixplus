@@ -599,76 +599,62 @@ class Test_KeyBind(TestCase):
       pass
     pass
 
+  def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height):
+    self.find_illust(self.check_size, fit_width, overflow_v, overflow_h, min_width, min_height)
+
+    data = self.popup_get_illust_data()
+    illust_id = data['id']
+    size = data['size']
+    width, height = size['width'], size['height']
+    ratio = int(max(width, height) * 10 / min(width, height)) / 10
+
+
+    self.set_conf('popup.fit_short_threshold', ratio + 0.1)
+    self.open_popup(illust_id)
+    self.popup_wait_big_image()
+
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
+    if overflow_v and overflow_h:
+      self.send_keys('w')
+      time.sleep(1)
+      self.check_scrollbar(True, True, True)
+      pass
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(False, False, False)
+
+
+    self.set_conf('popup.fit_short_threshold', ratio)
+    self.open_popup(illust_id)
+    self.popup_wait_big_image()
+
+    self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
+    if overflow_v and overflow_h:
+      self.send_keys('w')
+      time.sleep(1)
+      self.check_scrollbar(True, True, True)
+      pass
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(False, False, False)
+    self.send_keys('w')
+    time.sleep(1)
+    self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
+    pass
+
   def test_resize_mode(self):
     self.open_test_user()
     self.set_conf('popup.big_image', True)
-    self.set_conf('popup.fit_short_threshold', 0)
 
-    self.find_illust(self.check_size, True, True, False, None, None)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(True, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
-
-    self.find_illust(self.check_size, False, False, True, None, None)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, True, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
-
-    self.find_illust(self.check_size, True, True, False, 490, None)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(True, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
-
-    self.find_illust(self.check_size, False, False, True, None, 370)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, True, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
-
-    self.find_illust(self.check_size, True, True, True, None, None)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(True, False, True)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(True, True, True)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
-
-    self.find_illust(self.check_size, False, True, True, None, None)
-    self.popup_wait_big_image()
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, True, True)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(True, True, True)
-    self.send_keys('w')
-    time.sleep(1)
-    self.check_scrollbar(False, False, False)
+    self.check_resize_mode(True, True, False, None, None)
+    self.check_resize_mode(False, False, True, None, None)
+    self.check_resize_mode(True, True, False, 490, None)
+    self.check_resize_mode(False, False, True, None, 370)
+    self.check_resize_mode(True, True, True, None, None)
+    self.check_resize_mode(False, True, True, None, None)
     pass
 
   pass

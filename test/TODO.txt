@@ -1,7 +1,6 @@
 * conf.popup.show_comment_form
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
-* conf.popup.fit_short_threshold
 * conf.popup.mark_visited
 * conf.key.popup_caption_scroll_up
 * conf.key.popup_caption_scroll_down
