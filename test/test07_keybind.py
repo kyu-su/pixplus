@@ -478,7 +478,8 @@ class Test_KeyBind(TestCase):
       el = self.b.driver.switch_to_active_element()
       return keyvalue(el)
 
-    items = list(map(keyvalue, self.qa('#pp-popup-rating .questionnaire .list li input[type="button"][data-key]')))
+    items = self.qa('#pp-popup-rating .questionnaire .list li input[type="button"][data-key]')
+    items = [keyvalue(i) for i in items]
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)

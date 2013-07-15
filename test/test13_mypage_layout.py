@@ -42,13 +42,13 @@ class Test_Mypage(TestCase):
     now = int(time.time()) * 1000
     day = 1000 * 60 * 60 * 24
     offsets = reduce(lambda a, b: a + [a[-1] + a[-2]], range(len(layouts)), [1, 2])[2:]
-    times = list(map(lambda o: now - day * o, offsets))
+    times = [now - day * o for o in offsets]
     self.set_conf('mypage.layout_history', ','.join(map(':'.join, zip(layouts, map(str, times)))))
     return layouts, times
 
   def get_layout_history(self):
     history = self.get_conf('mypage.layout_history')
-    return list(map(lambda e: e.split(':')[0], history.split(',')))
+    return [e.split(':')[0] for e in history.split(',')]
 
   def test_layout1(self):
     self.set_layout_cookie(None)
@@ -84,9 +84,9 @@ class Test_Mypage(TestCase):
     self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
 
     history = self.qa('#pp-layout-history li')
-    times_s = list(map(lambda t: time.strftime('%Y/%m/%d', time.localtime(t / 1000)).replace('/0', '/'), times))
-    self.assertEquals(list(map(lambda e: e.get_attribute('data-pp-layout'), history)), layouts)
-    self.assertEquals(list(map(lambda e: e.text, history)), times_s)
+    times_s = [time.strftime('%Y/%m/%d', time.localtime(t / 1000)).replace('/0', '/') for t in times]
+    self.assertEquals([e.get_attribute('data-pp-layout') for e in history], layouts)
+    self.assertEquals([e.text for e in history], times_s)
 
     if self.b.name == 'safari':
       warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
