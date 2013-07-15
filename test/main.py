@@ -73,7 +73,7 @@ def test(browser, config, tests):
     suite = unittest.TestSuite()
     suite.addTests([cls(browser, config, testname) for cls, testname in tests])
 
-    browser.set_window_size(1280, 800)
+    browser.set_window_size(1024, 768)
 
     browser.open('http://www.pixiv.net/')
 
