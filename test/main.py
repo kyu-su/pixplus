@@ -79,7 +79,9 @@ def test(browser, config, tests):
 
     cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
     for name, item in cookie.items():
-      browser.set_cookie(*map(lambda n: item[n], ('name', 'value', 'domain', 'path')))
+      browser.set_cookie(item['name'], item['value'],
+                         item.get('domain', '.pixiv.net'),
+                         item['path'])
       pass
     pass
 

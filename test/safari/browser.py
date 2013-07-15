@@ -20,6 +20,8 @@ class Safari(Browser):
     except:
       self.restore()
       raise
+
+    caps['safari.extension.noInstall'] = True
     pass
 
   def setup(self):
@@ -30,12 +32,6 @@ class Safari(Browser):
     self.backup(os.path.join(library_path, 'Cookies'))
 
     self.install_extensions()
-
-    self.caps = {}
-    self.caps.update(DesiredCapabilities.SAFARI)
-    self.caps['safari.extension.noInstall'] = True
-
-    self.create_driver(self.caps)
     pass
 
   def backup(self, path):
@@ -58,31 +54,25 @@ class Safari(Browser):
 
   def quit(self):
     try:
-      BrowserSeleniumServer.quit(self)
+      Browser.quit(self)
     finally:
       self.restore()
       pass
     pass
 
   def install_extensions(self):
+    driver = os.path.join(self.browserdir, 'SafariDriver.safariextz')
+    if not os.path.exists(driver):
+      print('****************************************************************')
+      print('%s not found. Put it in safari directory first.' % os.path.basename(driver))
+      print('You can get it from seLenium-server-standalone.jar by following:')
+      print('  unzip -j selenium-server-standalone*.jar org/openqa/selenium/safari/SafariDriver.safariextz')
+      print('****************************************************************')
+      raise RuntimeError()
+
     extdir = os.path.join(os.getenv('HOME'), 'Library', 'Safari', 'Extensions')
     os.makedirs(extdir)
-
-    jar = self.download_selenium_server()
-    jarzip = zipfile.ZipFile(jar, 'r')
-    try:
-      driverext = jarzip.read('org/openqa/selenium/safari/SafariDriver.safariextz')
-    finally:
-      jarzip.close()
-      pass
-
-    fp = open(os.path.join(extdir, 'SafariDriver.safariextz'), 'wb')
-    try:
-      fp.write(driverext)
-    finally:
-      fp.close()
-      pass
-
+    util.copy_file(driver, extdir)
     util.copy_file(os.path.join(self.bindir, 'pixplus.safariextz'), extdir)
     util.copy_file(os.path.join(self.browserdir, 'Extensions.plist'), extdir)
     pass
