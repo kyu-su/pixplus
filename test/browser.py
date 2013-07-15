@@ -115,7 +115,12 @@ class Browser:
     ''', element)))
 
   def set_cookie(self, name, value, domain, path):
-    cookie = '%s=%s; domain=%s; path=%s' % (name, value, domain, path)
+    expires = ''
+    if value is None:
+      value = ''
+      expires = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      pass
+    cookie = '%s=%s; domain=%s; path=%s%s' % (name, value, domain, path, expires)
     self.js('document.cookie=%s' % json.dumps(cookie))
     pass
 

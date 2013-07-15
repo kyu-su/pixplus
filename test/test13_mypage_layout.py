@@ -17,12 +17,16 @@ from test_base import TestCase
 class Test_Mypage(TestCase):
 
   def set_layout_cookie(self, layout):
-    cookie = ['token=20100713']
-    for c in 'ntebm':
-      cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
-      cookie.append('%s_v=%d' % (c, 1 if c in layout else 0))
+    if layout is None:
+      cookie = None
+    else:
+      cookie = ['token=20100713']
+      for c in 'ntebm':
+        cookie.append('%s_o=%d' % (c, layout.lower().index(c)))
+        cookie.append('%s_v=%d' % (c, 1 if c in layout else 0))
+        pass
+      cookie = quote('&'.join(cookie), '')
       pass
-    cookie = quote('&'.join(cookie), '')
     self.set_cookie('pixiv_mypage', cookie, 'pixiv.net', '/')
     time.sleep(1)
     pass
@@ -52,6 +56,7 @@ class Test_Mypage(TestCase):
     return list(map(lambda e: e.split(':')[0], history.split(',')))
 
   def test_layout1(self):
+    self.set_layout_cookie(None)
     self.open('/mypage.php')
     self.check_pixiv_jsobj('NTEBM')
 
