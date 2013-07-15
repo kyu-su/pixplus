@@ -75,12 +75,12 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_prev(self):
-    self.js('pixplus.popup.input.prev()')
+    self.js('pixplus.popup.input.prev_direction()')
     self.popup_wait_load()
     pass
 
   def popup_next(self):
-    self.js('pixplus.popup.input.next()')
+    self.js('pixplus.popup.input.next_direction()')
     self.popup_wait_load()
     pass
 

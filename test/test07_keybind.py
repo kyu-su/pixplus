@@ -54,9 +54,11 @@ class Test_KeyBind(TestCase):
     self.js('document.activeElement.blur()')
     pass
 
-  def test_move(self):
-    self.prepare()
+  def test_move1(self):
     self.set_conf('popup.fit_short_threshold', 0)
+    self.set_conf('popup.reverse', 0)
+    self.set_conf('popup.auto_manga', 0)
+    self.prepare()
 
     self.open_popup()
     self.check_id(0)
@@ -77,9 +79,13 @@ class Test_KeyBind(TestCase):
     self.check_id(-1)
     self.send_keys(Keys.SPACE)
     self.check_closed()
+    pass
 
+  def test_move2(self):
+    self.set_conf('popup.fit_short_threshold', 0)
     self.set_conf('popup.reverse', 1)
-    self.open_test_user()
+    self.set_conf('popup.auto_manga', 0)
+    self.prepare()
 
     self.open_popup()
     self.check_id(0)
@@ -99,6 +105,88 @@ class Test_KeyBind(TestCase):
     self.check_id(0)
     self.send_keys(Keys.SPACE)
     self.check_closed()
+    pass
+
+  def test_move3(self):
+    self.set_conf('popup.fit_short_threshold', 0)
+    self.set_conf('popup.reverse', 0)
+    self.set_conf('popup.auto_manga', 1)
+    self.prepare()
+
+    self.find_illust(lambda: self.popup_get_illust_data('manga')['available'])
+    illust_id = self.popup_get_illust_data('id')
+    illust_idx = self.illust_id_list.index(illust_id)
+
+    self.send_keys(Keys.SPACE)
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.SPACE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx + 1)
+    self.send_keys(Keys.ARROW_LEFT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.js('pixplus.popup.illust.manga.viewed=false')
+    self.send_keys(Keys.SPACE)
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.js('pixplus.popup.illust.manga.viewed=false')
+    self.send_keys(Keys.ARROW_LEFT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx - 1)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx + 1)
+    pass
+
+  def test_move4(self):
+    self.set_conf('popup.fit_short_threshold', 0)
+    self.set_conf('popup.reverse', 1)
+    self.set_conf('popup.auto_manga', 1)
+    self.prepare()
+
+    self.find_illust(lambda: self.popup_get_illust_data('manga')['available'])
+    illust_id = self.popup_get_illust_data('id')
+    illust_idx = self.illust_id_list.index(illust_id)
+
+    self.send_keys(Keys.SPACE)
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.SPACE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx - 1)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.js('pixplus.popup.illust.manga.viewed=false')
+    self.send_keys(Keys.SPACE)
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ESCAPE)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.js('pixplus.popup.illust.manga.viewed=false')
+    self.send_keys(Keys.ARROW_LEFT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx - 1)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.assertFalse(self.js('return pixplus.popup.manga.active'))
+    self.check_id(illust_idx + 1)
     pass
 
   def test_close(self):
