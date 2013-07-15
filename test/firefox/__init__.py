@@ -1,1 +1,1 @@
-from .browser import *
+from .firefox import *

@@ -42,6 +42,32 @@ class Test_IllustData(TestCase):
      }
     ]
 
+  @classmethod
+  def python2_support(cls):
+    import sys
+    if sys.version >= '3':
+      return
+
+    import codecs
+
+    def convert(o):
+      if isinstance(o, str):
+        return codecs.unicode_escape_decode(o)[0]
+      elif isinstance(o, dict):
+        for key, value in o.items():
+          o[key] = convert(value)
+          pass
+        pass
+      elif isinstance(o, list):
+        for idx, value in enumerate(o):
+          o[idx] = convert(value)
+          pass
+        pass
+      return o
+
+    cls.illust_list = convert(cls.illust_list)
+    pass
+
   def test_illust_data(self):
     self.open('/')
 
@@ -57,3 +83,5 @@ class Test_IllustData(TestCase):
     pass
 
   pass
+
+Test_IllustData.python2_support()
