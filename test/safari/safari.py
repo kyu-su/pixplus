@@ -2,6 +2,7 @@ import os
 import time
 import shutil
 import zipfile
+import subprocess
 
 import util
 from browser import Browser
@@ -14,6 +15,8 @@ class Safari(Browser):
   def prepare_caps(self, caps):
     self.backup_suffix = '-bkp%d' % time.time()
     self.backup_list = []
+
+    subprocess.call('killall cookied >/dev/null 2>&1', shell = True)
 
     try:
       self.setup()
