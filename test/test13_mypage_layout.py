@@ -120,7 +120,6 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="TeBmN"]').click()
 
-    time.sleep(1)
     self.wait_page_load()
 
     self.check_pixiv_jsobj('TeBmN')
@@ -129,7 +128,6 @@ class Test_Mypage(TestCase):
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
 
-    time.sleep(1)
     self.wait_page_load()
 
     self.check_pixiv_jsobj('ntebm')

@@ -60,12 +60,12 @@ class Browser:
     return self.driver.current_url
 
   def wait_page_load(self):
+    time.sleep(1)
     self.wait_until(lambda d: self.js('return document&&document.readyState==="complete"'))
     pass
 
   def open(self, url):
     self.driver.get(url)
-    time.sleep(1)
     self.wait_page_load()
     pass
 

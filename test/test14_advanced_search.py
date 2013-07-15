@@ -23,7 +23,6 @@ class Test_AdvancedSearch(TestCase):
     radio = self.get_radio('size')
     value = '%sx%s-%sx%s' % tuple(map(lambda a: '' if a is None else str(a), [wlt, hlt, wgt, hgt]))
     self.assertEquals(radio.get_attribute('value'), value)
-    time.sleep(1)
     pass
 
   def check_size(self, wlt, hlt, wgt, hgt):
