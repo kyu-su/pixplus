@@ -1,5 +1,4 @@
 import time
-import warnings
 
 from test_base import TestCase
 
@@ -39,7 +38,7 @@ class Test_Rate(TestCase):
 
   def test_rate(self):
     if not self.b.supports_alert:
-      warnings.warn('%s is not supports alert handling' % self.b.name)
+      self.skipTest('%s is not supports alert handling' % self.b.name)
       return
 
     self.open_test_user()

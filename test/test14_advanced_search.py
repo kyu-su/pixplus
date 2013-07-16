@@ -89,7 +89,7 @@ class Test_AdvancedSearch(TestCase):
 
   def test_ratio(self):
     if self.b.name == 'opera':
-      warnings.warn('This test is currently not works on opera...')
+      self.skipTest('This test is currently not works on opera...')
       return
 
     self.open('/search.php?s_mode=s_tag&word=pixiv')
@@ -97,7 +97,7 @@ class Test_AdvancedSearch(TestCase):
 
     slider = self.q('#pp-search-ratio-custom-slider')
     if slider.tag_name.lower() != 'input':
-      warnings.warn('%s seems not supports <input type=range>' % self.b.name)
+      self.skipTest('%s seems not supports <input type=range>' % self.b.name)
       return
 
     text = self.q('#pp-search-ratio-custom-text')

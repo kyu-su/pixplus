@@ -9,7 +9,6 @@ class TestCase(unittest.TestCase):
     unittest.TestCase.__init__(self, testname)
     self.b = browser
     self.config = config
-    self.repeatable = config.get('repeatable', False)
     self.changed_conf = {}
     pass
 
@@ -21,6 +20,12 @@ class TestCase(unittest.TestCase):
     if hasattr(self.b, name):
       return getattr(self.b, name)
     raise AttributeError()
+
+  def setUp(self):
+    if self.args.repeatable and not self.repeatable:
+      self.skipTest('%s is not repeatable' % self.__class__.__name__)
+      pass
+    pass
 
   def tearDown(self):
     self.wait_page_load()
@@ -208,5 +213,11 @@ class TestCase(unittest.TestCase):
       })(%s);
     ''' % name)
     return obj
+
+  def skipTest(self, reason):
+    if hasattr(unittest.TestCase, 'skipTest'):
+      unittest.TestCase.skipTest(self, reason)
+      return
+    raise unittest.SkipTest(reason)
 
   pass

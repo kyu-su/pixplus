@@ -205,7 +205,7 @@ class Test_KeyBind(TestCase):
 
   def test_header(self):
     if self.b.name == 'safari':
-      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
+      self.skipTest('safaridriver is currently not supports move_to_*')
       return
 
     self.prepare()

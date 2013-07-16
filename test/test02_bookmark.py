@@ -1,5 +1,4 @@
 import time
-import warnings
 
 from selenium.webdriver.common.keys import Keys
 

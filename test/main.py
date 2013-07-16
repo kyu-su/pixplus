@@ -1,7 +1,6 @@
 import sys, os
 import argparse
 import unittest
-import warnings
 import subprocess
 
 import selenium.common.exceptions
@@ -147,23 +146,12 @@ def main():
   Browser.config = config
 
   tests = []
-  if args.tests:
-    for name in args.tests:
-      if ':' in name:
-        name = name.split(':')
-        tests.append((all_tests[name[0]], name[1]))
-      else:
-        cls = all_tests[name]
-        tests += [(cls, n) for n in cls.list_tests()]
-        pass
-      pass
-    pass
-  else:
-    for name in sorted(all_tests.keys()):
+  for name in (args.tests or sorted(all_tests.keys())):
+    if ':' in name:
+      name = name.split(':')
+      tests.append((all_tests[name[0]], name[1]))
+    else:
       cls = all_tests[name]
-      if args.repeatable and not cls.repeatable:
-        warnings.warn('Skipping %s because it is not repeatable' % cls.__name__)
-        continue
       tests += [(cls, n) for n in cls.list_tests()]
       pass
     pass
