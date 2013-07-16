@@ -2196,6 +2196,8 @@
     scrollbar_width:  0,
     scrollbar_height: 0,
 
+    resize_mode: 0, // FIT_LONG
+
     create: function() {
       var dom = this.dom;
       if (dom.created) {
@@ -2217,9 +2219,9 @@
       dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
       dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
       dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
-      dom.resize_mode       = _.e('a', {id: 'pp-popup-resize-mode'}, dom.rightbox);
-      dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga'}, dom.rightbox);
-      dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]'}, dom.rightbox);
+      dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
+      dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
+      dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'}, dom.rightbox);
       dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
       dom.title_link        = _.e('a', null, dom.title);
       dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
@@ -2299,13 +2301,15 @@
     },
 
     layout_images: function(max_width, max_height, update_resize_mode) {
-      if (!this.images || this.images.length < 1) {
-        return;
-      }
-
       var that = this;
 
       var natural_sizes, dom = this.dom;
+
+      if (!this.images || this.images.length <= 0) {
+        dom.image_layout.style.width  = 'auto';
+        dom.image_layout.style.height = 'auto';
+        return;
+      }
 
       natural_sizes = this.images.map(function(img) {
         return {width: img.naturalWidth, height: img.naturalHeight};
@@ -2412,68 +2416,27 @@
 
       // apply scale
 
+      var layout_height = 0, layout_width = 0, image_height = [];
       this.images.forEach(function(img, idx) {
-        img.style.height = g.Math.round(natural_sizes[idx].height * scale) + 'px';
+        var nsize  = natural_sizes[idx],
+            height = g.Math.round(nsize.height * scale);
+        img.style.height = height + 'px';
+        if (height > layout_height) {
+          layout_height = height;
+        }
+        layout_width += img.parentNode ? img.offsetWidth : g.Math.round(nsize.width * scale);
+        image_height.push(height);
       });
+
+      this.images.forEach(function(img, idx) {
+        var mtop = g.Math.floor((layout_height - image_height[idx]) / 2);
+        img.style.margin = mtop + 'px 0px 0px 0px';
+      });
+
+      dom.image_layout.style.width  = layout_width + 'px';
+      dom.image_layout.style.height = layout_height + 'px';
+
       this.scale = scale;
-
-      // centerize
-
-      var height = g.Math.max.apply(g.Math, this.images.map(function(img) {
-        return img.offsetHeight;
-      }));
-
-      this.images.forEach(function(img) {
-        img.style.margin = g.Math.floor((height - img.offsetHeight) / 2) + 'px 0px 0px 0px';
-      });
-
-      // update wrapper size
-
-      dom.image_layout.style.width = this.images.reduce(function(width, img) {
-        return width + img.offsetWidth;
-      }, 0) + 'px';
-
-      dom.image_layout.style.height = height + 'px';
-
-      // update info area
-
-      var size_list, illust = this.illust;
-      if (illust.size && !illust.manga.available && !this.manga.active) {
-        size_list = [illust.size];
-      } else {
-        size_list = natural_sizes;
-      }
-
-      var size_text = size_list.map(function(size, idx) {
-        var str = size.width + 'x' + size.height,
-            more_info = [],
-            img = that.images[idx],
-            re;
-
-        if (img.offsetWidth !== size.width) {
-          more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
-        }
-
-        if (_.conf.general.debug) {
-          more_info.push('ar:' + (g.Math.floor(_.calculate_ratio(size.width, size.height) * 100) / 100));
-        }
-
-        if ((re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
-          more_info.push(re[1]);
-        }
-
-        if (more_info.length > 0) {
-          str += '(' + more_info.join('/') + ')';
-        }
-
-        return str;
-      }).join('/');
-
-      if (_.conf.general.debug) {
-        size_text += ' ar:' + (g.Math.floor(this.aspect_ratio * 100) / 100);
-      }
-
-      dom.size.textContent = size_text;
     },
 
     calculate_max_content_size: function(content) {
@@ -2581,6 +2544,52 @@
 
       root.style.left = g.Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
       root.style.top  = g.Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
+
+      this.update_info();
+    },
+
+    update_info: function() {
+      var that = this;
+
+      var size_list, illust = this.illust;
+      if (illust.size && !illust.manga.available && !this.manga.active) {
+        size_list = [illust.size];
+      } else {
+        size_list = this.images.map(function(img) {
+          return {width: img.naturalWidth, height: img.naturalHeight};
+        });
+      }
+
+      var size_text = size_list.map(function(size, idx) {
+        var str = size.width + 'x' + size.height,
+            more_info = [],
+            img = that.images[idx],
+            re;
+
+        if (img.offsetWidth !== size.width) {
+          more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
+        }
+
+        if (_.conf.general.debug) {
+          more_info.push('ar:' + (g.Math.floor(_.calculate_ratio(size.width, size.height) * 100) / 100));
+        }
+
+        if ((re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
+          more_info.push(re[1]);
+        }
+
+        if (more_info.length > 0) {
+          str += '(' + more_info.join('/') + ')';
+        }
+
+        return str;
+      }).join('/');
+
+      if (_.conf.general.debug) {
+        size_text += ' ar:' + (g.Math.floor(this.aspect_ratio * 100) / 100);
+      }
+
+      this.dom.size.textContent = size_text;
     },
 
     clear: function() {
@@ -2605,6 +2614,8 @@
         dom.image_layout
       );
 
+      this.images = [];
+
       this.resize_mode = this.FIT_LONG;
 
       this.bookmark.clear();
@@ -2617,11 +2628,19 @@
     set_images: function(images) {
       var dom = this.dom;
       this.images = images;
-      _.clear(dom.image_layout);
-      this.images.forEach(function(img) {
-        dom.image_layout.appendChild(img);
-      });
+      this.adjust(true);
+      if (dom.image_layout.childElementCount === images.length) {
+        this.images.forEach(function(img, idx) {
+          dom.image_layout.replaceChild(img, dom.image_layout.children[idx]);
+        });
+      } else {
+        _.clear(dom.image_layout);
+        this.images.forEach(function(img) {
+          dom.image_layout.appendChild(img);
+        });
+      }
       this.dom.image_scroller.scrollTop = 0;
+      this.adjust();
     },
 
     onload: function(illust) {
@@ -2641,7 +2660,12 @@
         }
       }
 
-      this.clear();
+      // this.clear();
+      dom.button_manga.classList.add('pp-hide');
+      dom.button_response.classList.add('pp-hide');
+      dom.author_status.classList.add('pp-hide');
+      dom.author_image.classList.add('pp-hide');
+      this.resize_mode = this.FIT_LONG;
 
       dom.title_link.innerHTML = illust.title;
       dom.title_link.href = illust.url_medium;
@@ -2723,6 +2747,7 @@
       }
       dom.datetime.textContent = datetime;
 
+      _.clear(dom.tools);
       illust.tools.forEach(function(tool) {
         var url = '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag';
         _.e('a', {href: url, text: tool}, dom.tools);
@@ -2751,12 +2776,6 @@
         dom.image_layout.href = illust.image_url_big;
       }
 
-      if ((_.conf.popup.big_image && illust.image_big) || !illust.image_medium) {
-        this.set_images([illust.image_big]);
-      } else {
-        this.set_images([illust.image_medium]);
-      }
-
       try {
         w.pixiv.context.illustId = illust.id;
         w.pixiv.context.userId = illust.author_id;
@@ -2771,12 +2790,18 @@
         } else {
           w.pixiv.context.hasQuestionnaire = false;
         }
-      } catch(ex) { }
+      } catch(ex) {
+        _.error(ex);
+      }
 
       this.dom.header.classList.remove('pp-hide');
 
       this.status_complete();
-      this.adjust(true);
+      if ((_.conf.popup.big_image && illust.image_big) || !illust.image_medium) {
+        this.set_images([illust.image_big]);
+      } else {
+        this.set_images([illust.image_medium]);
+      }
     },
 
     onerror: function(illust) {
@@ -2795,9 +2820,6 @@
       var dom = this.dom;
       if (text) {
         dom.status.textContent = text;
-        if (text && dom.image_layout.childNodes.length < 1) {
-          dom.image_layout.textContent = text;
-        }
         dom.status.classList.remove('pp-hide');
       } else {
         dom.status.classList.add('pp-hide');
@@ -3120,9 +3142,8 @@
       this.update_button();
 
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
-      _.popup.set_images(images);
       _.popup.status_complete();
-      _.popup.adjust(true);
+      _.popup.set_images(images);
     },
 
     onerror: function(illust, page) {
@@ -5459,7 +5480,7 @@ width:6px;height:14px;margin:-7px -4px}\
 #pp-popup-rightbox{float:right;font-size:80%}\
 #pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}\
 #pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}\
-#pp-popup-resize-mode{cursor:pointer}\
+#pp-popup-button-resize-mode{cursor:pointer}\
 #pp-popup-status{color:#888}\
 #pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;\
 background-color:#fff;line-height:1.1em;z-index:20001}\
