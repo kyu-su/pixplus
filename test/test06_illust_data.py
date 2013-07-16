@@ -1,3 +1,5 @@
+from selenium.webdriver.support.select import Select
+
 from test_base import TestCase
 
 class Test_IllustData(TestCase):
@@ -110,17 +112,28 @@ class Test_IllustData(TestCase):
     pass
 
   def test_illust_data(self):
-    self.open('/')
+    self.open('/setting_user.php')
+    lang = Select(self.q('select[name="user_language"]'))
 
-    for data in self.illust_list:
-      self.open_popup(data['id'])
+    lang_names = ['ja', 'fr', 'ko', 'ru', 'th', 'zh', 'zh_tw', 'es', 'en']
+    self.assertEquals(set([o.get_attribute('value') for o in lang.options]), set(lang_names))
 
-      illust_data = self.popup_get_illust_data()
-      for key, value in data.items():
-        self.assertEquals(illust_data[key], value)
+    for lang_name in lang_names:
+      lang = Select(self.q('select[name="user_language"]'))
+      lang.select_by_value(lang_name)
+      self.q('form[action="setting_user.php"]').submit()
+      self.wait_page_load()
+      self.assertEquals(self.q('select[name="user_language"]').get_attribute('value'), lang_name)
+
+      for data in self.illust_list:
+        self.open_popup(data['id'])
+
+        illust_data = self.popup_get_illust_data()
+        for key, value in data.items():
+          self.assertEquals(illust_data[key], value)
+          pass
         pass
       pass
-
     pass
 
   pass
