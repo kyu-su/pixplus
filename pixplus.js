@@ -301,24 +301,47 @@
     },
 
     e: function(name, options, parent) {
-      var elem = d.createElement(name);
-      if (options) {
-        for(var key in options) {
-          if (key === 'text') {
-            elem.textContent = options[key];
-          } else if (key === 'css') {
-            elem.style.cssText = options[key];
-          } else if (key === 'cls') {
-            elem.className = options[key];
-          } else {
-            elem.setAttribute(key, options[key]);
-          }
+      if (!options) {
+        options = { };
+      }
+
+      var elem, nsuri;
+
+      if (options.ns) {
+        nsuri = _.namespaces[options.ns] || options.ns;
+        delete options.ns;
+      } else if (_.namespaces[name]) {
+        nsuri = _.namespaces[name];
+      } else if (parent) {
+        nsuri = parent.namespaceURI;
+      }
+
+      if (nsuri) {
+        elem = d.createElementNS(nsuri, name);
+      } else {
+        elem = d.createElement(name);
+      }
+
+      for(var key in options) {
+        if (key === 'text') {
+          elem.textContent = options[key];
+        } else if (key === 'css') {
+          elem.style.cssText = options[key];
+        } else if (key === 'cls') {
+          elem.className = options[key];
+        } else {
+          elem.setAttribute(key, options[key]);
         }
       }
+
       if (parent) {
         parent.appendChild(elem);
       }
       return elem;
+    },
+
+    namespaces: {
+      svg: 'http://www.w3.org/2000/svg'
     },
 
     clear: function() {
@@ -2204,17 +2227,6 @@
         return;
       }
 
-      var olc_icon = function(olc, next) {
-        var svgns = 'http://www.w3.org/2000/svg',
-            icon  = d.createElementNS(svgns, 'svg'),
-            path  = d.createElementNS(svgns, 'path');
-        icon.setAttribute('viewBox', '0 0 100 100');
-        path.setAttribute('d', 'M 10 90 L 65 35 L 65 60 L 90 60 L 90 90 z');
-        icon.appendChild(path);
-        olc.appendChild(icon);
-        return icon;
-      };
-
       dom.root              = _.e('div', {id: 'pp-popup'});
       dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
       dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
@@ -2251,9 +2263,9 @@
       dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
       dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
       dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_scroller);
-      dom.olc_prev_icon     = olc_icon(dom.olc_prev);
+      dom.olc_prev_icon     = this.create_olc_icon(dom.olc_prev);
       dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_scroller);
-      dom.olc_next_icon     = olc_icon(dom.olc_next, true);
+      dom.olc_next_icon     = this.create_olc_icon(dom.olc_next);
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
@@ -2274,6 +2286,12 @@
       }, {async: true});
 
       dom.created = true;
+    },
+
+    create_olc_icon: function(parent) {
+      var icon = _.e('svg', {viewBox: '0 0 100 100'}, parent);
+      _.e('path', {'d': 'M 10 90 L 65 35 L 65 60 L 90 60 L 90 90 z'}, icon);
+      return icon;
     },
 
     update_scrollbar_size: function() {
