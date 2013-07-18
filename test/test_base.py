@@ -65,6 +65,10 @@ class TestCase(unittest.TestCase):
     self.popup_wait_load()
     return popup
 
+  def close_popup(self):
+    self.js('pixplus.popup.hide()')
+    pass
+
   def popup_wait_load(self):
     popup = self.q('#pp-popup')
     self.wait_until(lambda d: not self.has_class(popup, 'pp-loading'))

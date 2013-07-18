@@ -2,6 +2,8 @@ import os
 import shutil
 import time
 import json
+import base64
+from PIL import Image
 
 try:
   import http.client as http_client
@@ -14,6 +16,8 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
+
+import util
 
 class Browser:
   name = None
@@ -123,5 +127,11 @@ class Browser:
     cookie = '%s=%s; domain=%s; path=%s%s' % (name, value, domain, path, expires)
     self.js('document.cookie=%s' % json.dumps(cookie))
     pass
+
+  def screenshot(self):
+    ss = self.driver.get_screenshot_as_base64()
+    ss = bytes(ss, 'ascii')
+    io = util.BytesIO(base64.b64decode(ss))
+    return Image.open(io).convert('RGB')
 
   pass

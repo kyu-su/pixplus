@@ -1,4 +1,3 @@
 * pixplus.configui module
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
-* conf.popup.mark_visited
