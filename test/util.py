@@ -14,6 +14,12 @@ except ImportError:
   from urllib import quote, unquote
   pass
 
+try:
+  from io import BytesIO
+except ImportError:
+  from cStringIO import StringIO as BytesIO
+  pass
+
 def download(url, filename):
   sys.stdout.write('Download: %s ' % url)
   sys.stdout.write('  0%')

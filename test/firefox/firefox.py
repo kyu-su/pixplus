@@ -5,12 +5,6 @@ import zipfile
 import base64
 
 try:
-  from io import BytesIO
-except ImportError:
-  from cStringIO import StringIO as BytesIO
-  pass
-
-try:
   from elementtree.ElementTree import ElementTree
 except ImportError:
   from xml.etree.ElementTree import ElementTree
@@ -93,7 +87,7 @@ class Firefox(Browser):
     pass
 
   def b64(self):
-    fp = BytesIO()
+    fp = util.BytesIO()
     z = zipfile.ZipFile(fp, 'w', zipfile.ZIP_DEFLATED)
     for base, dirs, files in os.walk(self.profiledir):
       for filename in files:
