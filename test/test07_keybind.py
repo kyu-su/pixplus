@@ -1,24 +1,12 @@
 import warnings
 import time
+import math
 
 from selenium.webdriver.common.keys import Keys
 
 from test_base import *
 
 class Test_KeyBind(TestCase):
-
-  # TODO
-  #
-  # {"key": "popup_caption_scroll_up", "value": "Up"},
-  # {"key": "popup_caption_scroll_down", "value": "Down"},
-  # {"key": "popup_illust_scroll_up", "value": "Up"},
-  # {"key": "popup_illust_scroll_down", "value": "Down"},
-  # {"key": "popup_illust_scroll_left", "value": "Left"},
-  # {"key": "popup_illust_scroll_right", "value": "Right"},
-  # {"key": "popup_illust_scroll_top", "value": "Home"},
-  # {"key": "popup_illust_scroll_bottom", "value": "End"},
-  # {"key": "popup_illust_page_up", "value": "PageUp"},
-  # {"key": "popup_illust_page_down", "value": "PageDown"},
 
   def prepare(self):
     self.open_test_user()
@@ -656,6 +644,146 @@ class Test_KeyBind(TestCase):
     self.check_resize_mode(False, False, True, None, 370)
     self.check_resize_mode(True, True, True, None, None)
     self.check_resize_mode(False, True, True, None, None)
+    pass
+
+  def check_scrollable(self, vertical, horizontal):
+    self.popup_wait_big_image()
+    self.js('''
+      pixplus.popup.resize_mode = pixplus.popup.ORIGINAL;
+      pixplus.popup.adjust();
+    ''')
+
+    time.sleep(2)
+
+    cw, ch, sw, sh = self.js('''
+      var s = pixplus.popup.dom.image_scroller;
+      return [s.clientWidth, s.clientHeight, s.scrollWidth, s.scrollHeight];
+    ''')
+
+    if vertical == 0:
+      if (sh - ch) != 0:
+        return False
+      pass
+    elif (sh - ch) < vertical:
+      return False
+
+    if horizontal == 0:
+      if (sw - cw) != 0:
+        return False
+      pass
+    elif (sw - cw) < horizontal:
+      return False
+
+    return cw, ch, sw, sh
+
+  def check_scroll_pos(self, top, left):
+    t, l = self.js('''
+      var s = pixplus.popup.dom.image_scroller;
+      return [s.scrollTop, s.scrollLeft];
+    ''')
+    self.assertEquals(t, top)
+    self.assertEquals(l, left)
+    pass
+
+  def test_scroll(self):
+    self.set_conf('popup.big_image', True)
+    self.open_test_user()
+    cw, ch, sw, sh = self.find_illust(self.check_scrollable, 100, 100)
+
+    self.check_scroll_pos(0, 0)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_scroll_pos(32, 0)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_scroll_pos(64, 0)
+    self.send_keys(Keys.ARROW_UP)
+    self.check_scroll_pos(32, 0)
+    self.set_conf('popup.scroll_height', 16)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_scroll_pos(48, 0)
+    self.send_keys(Keys.ARROW_UP)
+    self.check_scroll_pos(32, 0)
+
+    self.check_scroll_pos(32, 0)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.check_scroll_pos(32, 16)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.check_scroll_pos(32, 32)
+    self.send_keys(Keys.ARROW_LEFT)
+    self.check_scroll_pos(32, 16)
+    self.set_conf('popup.scroll_height', 32)
+    self.send_keys(Keys.ARROW_RIGHT)
+    self.check_scroll_pos(32, 48)
+    self.send_keys(Keys.ARROW_LEFT)
+    self.check_scroll_pos(32, 16)
+
+    self.send_keys(Keys.END)
+    self.check_scroll_pos(sh - ch, sw - cw)
+    self.send_keys(Keys.HOME)
+    self.check_scroll_pos(0, 0)
+    pass
+
+  def test_pageupdown_v(self):
+    self.set_conf('popup.big_image', True)
+    self.open_test_user()
+    cw, ch, sw, sh = self.find_illust(self.check_scrollable, 2000, 0)
+    pagedown, pageup = math.floor(ch * 0.8), math.floor(ch * -0.8)
+    self.check_scroll_pos(0, 0)
+    self.send_keys(Keys.PAGE_DOWN)
+    self.check_scroll_pos(pagedown, 0)
+    self.send_keys(Keys.PAGE_DOWN)
+    self.check_scroll_pos(pagedown * 2, 0)
+    self.send_keys(Keys.PAGE_UP)
+    self.check_scroll_pos(pagedown * 2 + pageup, 0)
+    pass
+
+  def test_pageupdown_h(self):
+    self.set_conf('popup.big_image', True)
+    self.open_test_user()
+    cw, ch, sw, sh = self.find_illust(self.check_scrollable, 0, 2000)
+    pagedown, pageup = math.floor(cw * 0.8), math.floor(cw * -0.8)
+    self.check_scroll_pos(0, 0)
+    self.send_keys(Keys.PAGE_DOWN)
+    self.check_scroll_pos(0, pagedown)
+    self.send_keys(Keys.PAGE_DOWN)
+    self.check_scroll_pos(0, pagedown * 2)
+    self.send_keys(Keys.PAGE_UP)
+    self.check_scroll_pos(0, pagedown * 2 + pageup)
+    pass
+
+  def check_caption_scrollable(self):
+    self.js('pixplus.popup.show_caption()')
+    cw, ch, sw, sh, cap_ch, cap_sh = self.js('''
+      var s = pixplus.popup.dom.image_scroller,
+          c = pixplus.popup.dom.caption_wrapper;
+      return [s.clientWidth, s.clientHeight, s.scrollWidth, s.scrollHeight,
+              c.clientHeight, c.scrollHeight];
+    ''')
+    return cw == sw and ch == sh and (cap_sh - cap_ch) > 100
+
+  def check_caption_scroll_pos(self, top, left):
+    t, l = self.js('''
+      var c = pixplus.popup.dom.caption_wrapper;
+      return [c.scrollTop, c.scrollLeft];
+    ''')
+    self.assertEquals(t, top)
+    self.assertEquals(l, left)
+    pass
+
+  def test_caption_scroll(self):
+    self.open_test_user()
+    self.find_illust(self.check_caption_scrollable)
+    self.check_caption_scroll_pos(0, 0)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_caption_scroll_pos(32, 0)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_caption_scroll_pos(64, 0)
+    self.send_keys(Keys.ARROW_UP)
+    self.check_caption_scroll_pos(32, 0)
+    self.set_conf('popup.scroll_height', 16)
+    self.send_keys(Keys.ARROW_DOWN)
+    self.check_caption_scroll_pos(48, 0)
+    self.send_keys(Keys.ARROW_UP)
+    self.check_caption_scroll_pos(32, 0)
     pass
 
   pass
