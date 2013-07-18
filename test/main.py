@@ -74,20 +74,21 @@ def test(browser, config, tests):
 
     browser.set_window_size(1024, 768)
 
-    browser.open('http://www.pixiv.net/')
+    if list(filter(lambda p: p[0].run_in_pixiv, tests)):
+      browser.open('http://www.pixiv.net/')
 
-    cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
-    for name, item in cookie.items():
-      browser.set_cookie(item['name'], item['value'],
-                         item.get('domain', '.pixiv.net'),
-                         item['path'])
-      pass
-    pass
+      cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
+      for name, item in cookie.items():
+        browser.set_cookie(item['name'], item['value'],
+                           item.get('domain', '.pixiv.net'),
+                           item['path'])
+        pass
 
-    browser.open('http://www.pixiv.net/')
+      browser.open('http://www.pixiv.net/')
 
-    if browser.url == 'http://www.pixiv.net/':
-      login(browser, config)
+      if browser.url == 'http://www.pixiv.net/':
+        login(browser, config)
+        pass
       pass
 
     unittest.TextTestRunner(verbosity = 2).run(suite)

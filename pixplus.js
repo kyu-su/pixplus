@@ -706,10 +706,6 @@
           keys.push(this.encode_map[key] || key);
         } else if (this.code_map[k]) {
           keys.push(this.code_map[k]);
-        } else if (k > 0) {
-          keys.push('_k' + g.String(k));
-        } else if (c > 0) {
-          keys.push('_c' + g.String(c));
         }
       }
 
@@ -758,7 +754,8 @@
       var that = this;
 
       var keys = [
-        [8, 'Backspace'], [9, 'Tab'], [13, 'Enter'], [27, 'Escape'],
+        [8, 'Backspace'], [9, 'Tab'], [13, 'Enter'],
+        [16, 'Shift'], [17, 'Control'], [18, 'Alt'], [27, 'Escape'],
         [32, 'Space'], [33, 'PageUp'], [34, 'PageDown'], [35, 'End'],
         [36, 'Home'], [37, 'Left'], [38, 'Up'], [39, 'Right'],
         [40, 'Down'], [45, 'Insert'], [46, 'Delete']

@@ -3,6 +3,7 @@ import time
 import json
 
 class TestCase(unittest.TestCase):
+  run_in_pixiv = True
   repeatable = True
 
   def __init__(self, browser, config, testname):

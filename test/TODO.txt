@@ -1,6 +1,3 @@
-* conf.popup.mouse_wheel
-* conf.popup.mouse_wheel_delta
-* conf.popup.mark_visited
 * conf.key.popup_caption_scroll_up
 * conf.key.popup_caption_scroll_down
 * conf.key.popup_illust_scroll_up
@@ -11,5 +8,7 @@
 * conf.key.popup_illust_scroll_bottom
 * conf.key.popup_illust_page_up
 * conf.key.popup_illust_page_down
-* pixplus.key module
 * pixplus.configui module
+* conf.popup.mouse_wheel
+* conf.popup.mouse_wheel_delta
+* conf.popup.mark_visited
