@@ -10,8 +10,8 @@ Browser extension for pixiv.
 ## Supported browsers
 
 * Opera 12 (oex/UserJS)
-* Chrome (crx/Greasemonkey)
-* Firefox (Greasemonkey)
+* Chromium (crx/Greasemonkey)
+* Firefox / Firefox ESR (Greasemonkey)
 * Safari (safariextz)
 
 ## Requirements to build
