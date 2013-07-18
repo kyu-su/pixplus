@@ -58,10 +58,9 @@ class Test_AdvancedSearch(TestCase):
       warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
       return
 
-    ac = self.ac()
     sx, sy, sw, sh = self.geom(slider)
 
-    ac.click_and_hold(knob or slider).move_by_offset(-sw, 0).release().perform()
+    self.ac().click_and_hold(knob or slider).move_by_offset(-sw, 0).release().perform()
 
     self.assertEquals(text.get_attribute('value'), '-1.5')
     self.assertEquals(self.get_radio('ratio').get_attribute('value'), '-1.5')
@@ -71,6 +70,7 @@ class Test_AdvancedSearch(TestCase):
       self.assertEquals(ky, sy)
       pass
 
+    ac = self.ac()
     if knob:
       ac.click_and_hold(knob)
     else:

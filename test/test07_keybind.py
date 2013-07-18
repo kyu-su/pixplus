@@ -21,23 +21,6 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.qa('#pp-popup'))
     pass
 
-  def send_keys(self, keys, context = None):
-    if self.b.name == 'opera' and keys == Keys.ESCAPE:
-      # https://github.com/operasoftware/operadriver/issues/85
-      keys = '\x1b'
-      pass
-
-    if context:
-      context.send_keys(keys)
-    else:
-      self.ac().send_keys(keys).perform()
-      pass
-
-    if self.qa('#pp-popup'):
-      self.popup_wait_load()
-      pass
-    pass
-
   def blur(self):
     self.js('document.activeElement.blur()')
     pass
