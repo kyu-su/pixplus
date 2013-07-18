@@ -751,7 +751,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_caption_scrollable(self):
-    self.js('pixplus.popup.show_caption()')
+    self.popup_show_caption()
     cw, ch, sw, sh, cap_ch, cap_sh = self.js('''
       var s = pixplus.popup.dom.image_scroller,
           c = pixplus.popup.dom.caption_wrapper;

@@ -75,6 +75,10 @@ class TestCase(unittest.TestCase):
     self.wait_until(lambda d: self.js('return pixplus.popup.images[0]===pixplus.popup.illust.image_big'))
     pass
 
+  def popup_show_caption(self):
+    self.js('pixplus.popup.show_caption()')
+    pass
+
   def popup_reload(self):
     self.js('pixplus.popup.reload()')
     self.popup_wait_load()

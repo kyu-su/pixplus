@@ -8,7 +8,7 @@ class Test_Rate(TestCase):
   def check(self, confirm):
     self.find_illust(lambda: not self.popup_get_illust_data('rated'))
 
-    self.js('pixplus.popup.show_caption()')
+    self.popup_show_caption()
     time.sleep(1)
 
     rating = self.q('#pp-popup-rating .score .rating:not(.rated)')
