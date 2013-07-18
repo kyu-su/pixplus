@@ -97,12 +97,7 @@ class Firefox(Browser):
       pass
     z.close()
 
-    data = base64.b64encode(fp.getvalue())
-    try:
-      data = str(data, 'ascii')
-    except TypeError:
-      pass
-    return data
+    return base64.b64encode(fp.getvalue()).encode('utf-8')
 
   pass
 

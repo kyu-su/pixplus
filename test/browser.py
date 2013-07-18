@@ -129,8 +129,7 @@ class Browser:
     pass
 
   def screenshot(self):
-    ss = self.driver.get_screenshot_as_base64()
-    ss = bytes(ss, 'ascii')
+    ss = self.driver.get_screenshot_as_base64().encode('ascii')
     io = util.BytesIO(base64.b64decode(ss))
     return Image.open(io).convert('RGB')
 
