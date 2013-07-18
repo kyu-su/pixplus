@@ -790,6 +790,9 @@
       if (!_.conf.general.debug) {
         slider = _.e('input', _.extend({type: 'range', min: min, max: max, step: step}, attrs));
         if (slider.type === 'range') {
+          slider.set_value = function(value) {
+            slider.value = value;
+          };
           return slider;
         }
       }
@@ -803,16 +806,15 @@
       //   slider.classList.add('pp-debug');
       // }
 
-      slider.__defineSetter__('value', function(value) {
+      // div.__define[GS]etter__ are not works on FirefoxESR...
+
+      slider.set_value = function(value) {
         var pos;
-        value = g.Math.max(min, g.Math.min(value, max));
+        value = g.Math.max(min, g.Math.min(g.parseFloat(value), max));
         pos = (value - min) / (max - min);
         knob.style.left = (pos * 100) + '%';
-      });
-
-      slider.__defineGetter__('value', function(value) {
-        return (max - min) * (knob.offsetLeft + 4) / rail.offsetWidth + min;
-      });
+        return slider.value = value;
+      };
 
       _.listen(knob, 'mousedown', function(ev) {
         var x, conn1, conn2;
@@ -824,6 +826,7 @@
           var pos = ev.screenX - x;
           pos = g.Math.max(0, g.Math.min(pos, rail.offsetWidth));
           knob.style.left = pos + 'px';
+          slider.value = (max - min) * pos / rail.offsetWidth + min;
 
           ev = d.createEvent('Event');
           ev.initEvent('change', true, true);
@@ -835,6 +838,8 @@
           conn2.disconnect();
           slider.classList.remove('pp-active');
         });
+
+        return true;
       });
       return slider;
     }
@@ -5316,7 +5321,7 @@
         };
 
         update(g.parseFloat(query.ratio));
-        slider.value = input.value = query.ratio || '';
+        slider.set_value(input.value = query.ratio || '0');
 
         _.listen(slider, 'change', function() {
           update(g.parseFloat(slider.value));
@@ -5326,7 +5331,7 @@
 
         _.listen(input, 'input', function() {
           update(g.parseFloat(input.value));
-          slider.value = input.value;
+          slider.set_value(input.value);
           radio.checked = true;
         });
       }
