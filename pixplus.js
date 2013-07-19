@@ -863,7 +863,7 @@
 
       var that = this;
       if (menu) {
-        var btn = _.e('a', {text: 'pixplus', 'href': '#'}, _.e('li'));
+        var btn = _.e('li', {id: 'pp-config-btn', cls: 'notification-button'}, menu);
         _.onclick(btn, function() {
           if (extension_data) {
             if (extension_data.open_options) {
@@ -876,7 +876,6 @@
           }
           return true;
         });
-        menu.insertBefore(btn.parentNode, menu.firstChild);
       }
     },
 
@@ -5351,7 +5350,7 @@
 
     _.redirect_jump_page();
 
-    _.configui.init(_.q('body>header'), _.q('body>header nav.link-list ul'), _extension_data);
+    _.configui.init(_.q('body>header'), _.q('body>header .layout-wrapper>.notifications'), _extension_data);
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
@@ -5588,6 +5587,24 @@ border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}\
 #pp-popup-tagedit-table-wrapper{overflow:auto}\
 \
 /* config ui */\
+#pp-config-btn{border-radius:5px;margin-left:2px;cursor:pointer;\
+background-image:url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\
+AAAEwgAABMIBvM+QGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKiSURB\
+VDiNrZVNSJRRFIafc0dNSyktwxaVQeZPBpGQQWMOrQqFHLNVEEJQtmjhKoRWFbQVoYI2YpsIzdkk\
+tSghM6KFEUQ50xT0BxJmDaWlM/Pd02Im/bSZMYfe3bn3Pc99v8PlfqKqpFP/k08FObHpwyqyE6UK\
+qASKFMZF5ZWIvhS7aqjFVx5Z2iupwIGRcDXY0wongOK0Jyc0JcqFycLpa6fq6mIpwYOPxjdhTQ9C\
+m6vxKxBQIWSQj1Z1tQheFC9Q4fKFBXPEf6BifBH49sPQGREuA2vnrcpFp9S5dKymJpoqamA02KxW\
+BoBVCRihn/mevcfrt38318fGcgdHgn0iXF0EBcTIq3RQAL+36g7WNAMxABUqC2adPkDMhpnCXpAT\
+Se+3dJB0avVV3BeRgYU0tAQeBQ8YETHJpY8i6l8pGEDRK+7aqniNxpwuYFZF71nHfM4GXOJMPAUc\
+19J+03qw+r2Je2rzJXYuGyiAz+eLk7g9AAjUGoCWg9vfNnl3rXi+fzQ0+qIYKHUtvTHpzCtR1OaX\
+uWtVfZ6TLez2aLgea7tEif3K95wsmOMZsAdAjRnKOrGoUy1wBKFtza94CTCZzHujrWHHg4xgq9rY\
+/zhU+W9HaQDodnJtJ0DGUQh0eBw6BkdCHxzr1Bty1im2DMAYqZpHesw+69gQaIg58pYFA5rgs2WG\
+1ZEiM3fXILv/MqneNEaSlacb6FwmsbSDfkI5FC2acpgpXCbHgjInFqL+hsphYBhgcDR8lHh8IwDG\
+NAHnE5GlFXUmAPLwvIG/3uPXPaiedaGffFkz3eh+wBe8wXZUegGM1W0tvqp37v3Ft0J165L+zXk/\
+1nsyflUaLRpFiZ04GqF8fpARmG33lc+majTCC6vcEiVmcmVq6X7Kf97/0G9s/ATGOq0+gAAAAABJ\
+RU5ErkJggg==\
+")}\
 #pp-config{display:none;line-height:1.1em}\
 #pp-config ul{list-style-type:none}\
 header #pp-config{margin:0px auto 4px;width:970px}\
