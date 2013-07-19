@@ -22,7 +22,8 @@ class Test_PageCheck(TestCase):
     '/cate_r18.php',
     '/new_illust_r18.php',
     '/user_event.php?type=r18',
-    '/questionnaire_illust.php'
+    '/questionnaire_illust.php',
+    '/search_user.php'
     )
 
   def test_pages(self):

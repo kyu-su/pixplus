@@ -1691,23 +1691,32 @@
     },
 
     create: function(link, allow_types, cb_onshow) {
-      var illust, images = _.qa('img', link);
+      var illust, images = _.qa('img,*[data-filter="lazy-image"]', link).concat([link]);
 
       for(var i = 0; i < images.length; ++i) {
-        var p = this.parse_image_url(images[i].src, allow_types);
-        if (!p && images[i].hasAttribute('data-src')) {
-          // lazy load support
-          p = this.parse_image_url(images[i].dataset.src, allow_types);
+        var img = images[i], src;
+
+        if (img.dataset.filter === 'lazy-image') {
+          src = img.dataset.src;
+        } else if (/^img$/i.test(img.tagName)) {
+          src = img.src;
+        } else {
+          continue;
         }
+
+        var p = this.parse_image_url(src, allow_types);
+
         if (!p) {
           continue;
         }
+
+        // if multiple thumbails found...
         if (illust) {
           return null;
         }
 
         illust = p;
-        illust.image_thumb = images[i];
+        illust.image_thumb = img;
       }
 
       if (!illust) {
@@ -2891,7 +2900,7 @@
         _.illust.load(illust);
       }
 
-      _.lazy_scroll(illust.image_thumb);
+      _.lazy_scroll(illust.image_thumb || illust.link);
 
       // On Opera 12.10+, this will breaks down <a href> path resolution. Looks like a bug...
       if (!w.opera && _.conf.popup.mark_visited && illust.link && w.history.replaceState) {
@@ -6106,6 +6115,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "changes_i18n": {
         "en": [
           "[Add] Add \"Mark link as visited\" option.",
+          "[Add] Support \"Suggested Users\" page.",
           "[Fix] ESC key is not working.",
           "[Fix] Shift+V key (open manga thumbnail page) is not working.",
           "[Fix] Image response support.",
