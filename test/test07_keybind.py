@@ -574,11 +574,13 @@ class Test_KeyBind(TestCase):
   def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height):
     self.find_illust(self.check_size, fit_width, overflow_v, overflow_h, min_width, min_height)
 
+    strict_check_with_fit_short = min_width or min_height or (overflow_v and overflow_h)
+
     data = self.popup_get_illust_data()
     illust_id = data['id']
     size = data['size']
     width, height = size['width'], size['height']
-    ratio = int(max(width, height) * 10 / min(width, height)) / 10
+    ratio = int(max(width, height) * 10 / min(width, height)) / 10.
 
 
     self.set_conf('popup.fit_short_threshold', ratio + 0.1)
@@ -588,7 +590,7 @@ class Test_KeyBind(TestCase):
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
     time.sleep(1)
-    self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
+    self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
     if overflow_v and overflow_h:
       self.send_keys('w')
       time.sleep(1)
@@ -603,7 +605,7 @@ class Test_KeyBind(TestCase):
     self.open_popup(illust_id)
     self.popup_wait_big_image()
 
-    self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
+    self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
     if overflow_v and overflow_h:
       self.send_keys('w')
       time.sleep(1)
