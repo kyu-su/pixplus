@@ -1799,7 +1799,7 @@
     parse_medium_html: function(illust, html) {
       var root = _.fastxml.parse(html), re;
 
-      var error = _.fastxml.q(root, '.error strong');
+      var error = _.fastxml.q(root, '.one_column_body .errorArea h2');
       if (error) {
         illust.error = _.fastxml.text(error);
         return false;
@@ -2816,10 +2816,7 @@
         return;
       }
 
-      var msg = illust.error || 'Unknown error';
-      _.error(msg);
-      this.dom.image_layout.textContent = msg;
-      this.status_error();
+      this.status_error(illust.error || 'Unknown error');
       this.adjust();
     },
 
@@ -2833,7 +2830,7 @@
       }
     },
 
-    status_loading: function(message) {
+    status_loading: function() {
       this.dom.root.classList.add('pp-loading');
       this.dom.root.classList.remove('pp-error');
       this.set_status_text('Loading');
@@ -2849,7 +2846,9 @@
       this.dom.root.classList.remove('pp-loading');
       this.dom.root.classList.add('pp-error');
       this.set_status_text('Error');
-      _.error(message);
+      if (message) {
+        _.error(message);
+      }
     },
 
     show: function(illust) {

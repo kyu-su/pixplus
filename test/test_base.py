@@ -38,7 +38,7 @@ class TestCase(unittest.TestCase):
     url = 'http://www.pixiv.net%s' % path
     self.b.open(url)
 
-    if self.qa('.error strong'):
+    if self.qa('.one_column_body > .errorArea'):
       self.reload()
       pass
 
