@@ -919,9 +919,11 @@
         var desc = row.insertCell(-1);
         var control, control_propname;
 
+        var input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-');
+
         if (type === 'boolean') {
           var label = _.e('label', null, desc);
-          control = _.e('input', {type: 'checkbox'}, label);
+          control = _.e('input', {type: 'checkbox', id: input_id}, label);
           control_propname = 'checked';
           label.appendChild(d.createTextNode(info.desc || info));
           desc.setAttribute('colspan', '2');
@@ -929,13 +931,13 @@
           var value = row.insertCell(-1);
           desc.textContent = info.desc || info;
           if (info.hint) {
-            control = _.e('select', {}, value);
+            control = _.e('select', {id: input_id}, value);
             info.hint.forEach(function(hint, idx) {
               var ovalue = hint.value || idx;
               var opt = _.e('option', {text: hint.desc || hint, value: ovalue}, control);
             });
           } else {
-            control = _.e('input', null, value);
+            control = _.e('input', {id: input_id}, value);
           }
           control_propname = 'value';
         }
@@ -950,7 +952,7 @@
         });
 
         _.onclick(
-          _.e('button', {'text': that.lng.pref['default']}, row.insertCell(-1)),
+          _.e('button', {text: that.lng.pref['default'], id: input_id + '-default'}, row.insertCell(-1)),
           function() {
             _.conf[section.name][item.key] = item.value;
             control[control_propname] = item.value;
@@ -1267,7 +1269,8 @@
 
       var that = this;
       var dom = this.dom;
-      var label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab'}, dom.tabbar);
+      var label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab',
+                                id: 'pp-config-tab-' + name}, dom.tabbar);
       var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
 
       (this['create_tab_content_' + name] || this.create_tab_content).call(this, content, create_args);

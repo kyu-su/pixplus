@@ -21,6 +21,7 @@ ADDONS = {
 class Firefox(Browser):
   name = 'firefox'
   capname = 'FIREFOX'
+  extension_mode = False
 
   def prepare_caps(self, caps):
     self.user_prefs = {}
@@ -97,7 +98,12 @@ class Firefox(Browser):
       pass
     z.close()
 
-    return base64.b64encode(fp.getvalue()).encode('utf-8')
+    data = base64.b64encode(fp.getvalue())
+    try:
+      data = str(data, 'ascii')
+    except TypeError:
+      pass
+    return data
 
   pass
 

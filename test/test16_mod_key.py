@@ -59,7 +59,7 @@ class Test_ModKey(TestCase):
     ] + [(c, 'Shift+' + c.lower()) for c in '!"#$%&()*:<>?@^_{}~ABCDEFGHIJKLMNOPQRSTUVWXYZ'] + [
     (c, c) for c in '-\'./;=[]\\`abcdefghijklmnopqrstuvwxyz0123456789']
 
-  def test_modkey1(self):
+  def test_mod_key1(self):
     self.b.open('file://%s/key_test.html' % self.testdir)
     textarea = self.q('textarea')
 
