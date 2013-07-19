@@ -49,12 +49,12 @@ class Test_FloatTagList(TestCase):
       margin_top = 0
       pass
 
-    self.assertEquals(self.geom(element)[1], offset + margin_top)
+    self.assertEqual(self.geom(element)[1], offset + margin_top)
 
     self.js('window.scrollBy(0, 10)')
     time.sleep(1)
 
-    self.assertEquals(self.geom(element)[1], offset * 2 + margin_top)
+    self.assertEqual(self.geom(element)[1], offset * 2 + margin_top)
 
     self.js('window.scrollTo(0, 0)')
     time.sleep(1)
@@ -72,7 +72,7 @@ class Test_FloatTagList(TestCase):
 
     self.open('/search.php?s_mode=s_tag&word=pixiv')
     headers = self.qa('#pp-search-header > *')
-    self.assertEquals(len(headers), 3)
+    self.assertEqual(len(headers), 3)
     self.assertTrue(self.has_class(headers[0], 'column-label'))
     self.assertTrue(self.has_class(headers[1], 'column-menu'))
     self.assertTrue(self.has_class(headers[2], 'column-order-menu'))

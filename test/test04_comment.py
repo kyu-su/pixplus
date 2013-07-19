@@ -35,7 +35,7 @@ class Test_Comment(TestCase):
   def check_toggle_comment_form(self, visible):
     popup = self.open_popup()
 
-    self.assertEquals(self.get_conf('popup.show_comment_form'), visible)
+    self.assertEqual(self.get_conf('popup.show_comment_form'), visible)
 
     self.js('pixplus.popup.comment.start()')
     self.popup_wait_load()
@@ -44,14 +44,14 @@ class Test_Comment(TestCase):
     form = self.q('#pp-popup-comment-form')
 
     self.assertTrue(comment.is_displayed())
-    self.assertEquals(form.is_displayed(), visible)
+    self.assertEqual(form.is_displayed(), visible)
 
     ac = self.ac()
     ac.move_to_element_with_offset(comment, 1, 30).perform()
     ac.click_and_hold().release().perform()
 
     self.assertTrue(comment.is_displayed())
-    self.assertEquals(form.is_displayed(), not visible)
+    self.assertEqual(form.is_displayed(), not visible)
     pass
 
   def test_comment2(self):

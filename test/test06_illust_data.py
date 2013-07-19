@@ -116,21 +116,21 @@ class Test_IllustData(TestCase):
     lang = Select(self.q('select[name="user_language"]'))
 
     lang_names = ['ja', 'fr', 'ko', 'ru', 'th', 'zh', 'zh_tw', 'es', 'en']
-    self.assertEquals(set([o.get_attribute('value') for o in lang.options]), set(lang_names))
+    self.assertEqual(set([o.get_attribute('value') for o in lang.options]), set(lang_names))
 
     for lang_name in lang_names:
       lang = Select(self.q('select[name="user_language"]'))
       lang.select_by_value(lang_name)
       self.q('form[action="setting_user.php"]').submit()
       self.wait_page_load()
-      self.assertEquals(self.q('select[name="user_language"]').get_attribute('value'), lang_name)
+      self.assertEqual(self.q('select[name="user_language"]').get_attribute('value'), lang_name)
 
       for data in self.illust_list:
         self.open_popup(data['id'])
 
         illust_data = self.popup_get_illust_data()
         for key, value in data.items():
-          self.assertEquals(illust_data[key], value)
+          self.assertEqual(illust_data[key], value)
           pass
         pass
       pass

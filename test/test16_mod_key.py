@@ -71,7 +71,7 @@ class Test_ModKey(TestCase):
       self.send_keys(key)
       keys = textarea.get_attribute('value').strip().split('\n')
       keys = [l.split(' ', 1)[0].split('=', 1)[1] for l in keys]
-      self.assertEquals(keys[-1], name)
+      self.assertEqual(keys[-1], name)
       pass
     pass
 

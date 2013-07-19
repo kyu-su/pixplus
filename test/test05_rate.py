@@ -33,7 +33,7 @@ class Test_Rate(TestCase):
     self.popup_reload()
 
     self.assertTrue(self.qa('#pp-popup-rating .score .rating.rated'))
-    self.assertEquals(self.popup_get_illust_data('rated'), True)
+    self.assertEqual(self.popup_get_illust_data('rated'), True)
     pass
 
   def test_rate(self):

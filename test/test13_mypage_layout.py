@@ -28,8 +28,8 @@ class Test_Mypage(TestCase):
 
   def check_pixiv_jsobj(self, layout):
     order, visible = tuple(self.js('return [pixiv.mypage.order, pixiv.mypage.visible]'))
-    self.assertEquals(order, list(layout.lower()))
-    self.assertEquals(visible, dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))
+    self.assertEqual(order, list(layout.lower()))
+    self.assertEqual(visible, dict(zip(layout.lower(), map(lambda c: c.upper() == c, layout))))
     pass
 
   def check_update(self, layout):
@@ -60,7 +60,7 @@ class Test_Mypage(TestCase):
     self.check_update('TeBmN')
     self.check_update('bEtNm')
 
-    self.assertEquals(self.get_layout_history(), ['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
+    self.assertEqual(self.get_layout_history(), ['bEtNm', 'TeBmN', 'MBETN', 'ntebm', 'NTEBM'])
     pass
 
   def test_layout2(self):
@@ -77,7 +77,7 @@ class Test_Mypage(TestCase):
     else:
       self.ac().move_to_element(btn).perform()
       self.assertTrue(self.q('#ui-tooltip-container').is_displayed())
-      self.assertEquals(self.q('#ui-tooltip-container p').text, btn.get_attribute('data-tooltip'))
+      self.assertEqual(self.q('#ui-tooltip-container p').text, btn.get_attribute('data-tooltip'))
       pass
 
     btn.click()
@@ -85,8 +85,8 @@ class Test_Mypage(TestCase):
 
     history = self.qa('#pp-layout-history li')
     times_s = [time.strftime('%Y/%m/%d', time.localtime(t / 1000)).replace('/0', '/') for t in times]
-    self.assertEquals([e.get_attribute('data-pp-layout') for e in history], layouts)
-    self.assertEquals([e.text for e in history], times_s)
+    self.assertEqual([e.get_attribute('data-pp-layout') for e in history], layouts)
+    self.assertEqual([e.text for e in history], times_s)
 
     if self.b.name == 'safari':
       warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
@@ -95,7 +95,7 @@ class Test_Mypage(TestCase):
         self.ac().move_to_element(item).perform()
 
         layout = ''.join(map(lambda e: e.get_attribute('data-pp-key'), self.qa('#pp-layout-preview li')))
-        self.assertEquals(item.get_attribute('data-pp-layout'), layout)
+        self.assertEqual(item.get_attribute('data-pp-layout'), layout)
         pass
       pass
     pass
@@ -105,11 +105,11 @@ class Test_Mypage(TestCase):
 
     self.set_layout_cookie('TeBmN')
     self.open('/mypage.php')
-    self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
+    self.assertEqual(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
     self.set_layout_cookie('ntebm')
     self.open('/mypage.php')
-    self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
+    self.assertEqual(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
     pass
 
   def test_layout4(self):
@@ -123,7 +123,7 @@ class Test_Mypage(TestCase):
     self.wait_page_load()
 
     self.check_pixiv_jsobj('TeBmN')
-    self.assertEquals(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
+    self.assertEqual(self.get_layout_history(), ['TeBmN', 'bEtNm', 'MBETN', 'ntebm', 'NTEBM'])
 
     self.q('.pp-layout-history').click()
     self.q('#pp-layout-history li[data-pp-layout="ntebm"]').click()
@@ -131,7 +131,7 @@ class Test_Mypage(TestCase):
     self.wait_page_load()
 
     self.check_pixiv_jsobj('ntebm')
-    self.assertEquals(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
+    self.assertEqual(self.get_layout_history(), ['ntebm', 'TeBmN', 'bEtNm', 'MBETN', 'NTEBM'])
     pass
 
   pass

@@ -22,7 +22,7 @@ class Test_AdvancedSearch(TestCase):
 
     radio = self.get_radio('size')
     value = '%sx%s-%sx%s' % tuple(map(lambda a: '' if a is None else str(a), [wlt, hlt, wgt, hgt]))
-    self.assertEquals(radio.get_attribute('value'), value)
+    self.assertEqual(radio.get_attribute('value'), value)
     pass
 
   def check_size(self, wlt, hlt, wgt, hgt):
@@ -39,9 +39,9 @@ class Test_AdvancedSearch(TestCase):
 
     for name in 'wlt', 'hlt', 'wgt', 'hgt':
       value = locals()[name]
-      self.assertEquals(name in query, value is not None)
+      self.assertEqual(name in query, value is not None)
       if value is not None:
-        self.assertEquals(query[name], str(value))
+        self.assertEqual(query[name], str(value))
         pass
       pass
     pass
@@ -62,12 +62,12 @@ class Test_AdvancedSearch(TestCase):
 
     self.ac().click_and_hold(knob or slider).move_by_offset(-sw, 0).release().perform()
 
-    self.assertEquals(text.get_attribute('value'), '-1.5')
-    self.assertEquals(self.get_radio('ratio').get_attribute('value'), '-1.5')
+    self.assertEqual(text.get_attribute('value'), '-1.5')
+    self.assertEqual(self.get_radio('ratio').get_attribute('value'), '-1.5')
     if knob:
       kx, ky, kw, kh = self.geom(knob)
-      self.assertEquals(kx, sx)
-      self.assertEquals(ky, sy)
+      self.assertEqual(kx, sx)
+      self.assertEqual(ky, sy)
       pass
 
     ac = self.ac()
@@ -78,12 +78,12 @@ class Test_AdvancedSearch(TestCase):
       pass
     ac.move_by_offset(sw * 2, 0).release().perform()
 
-    self.assertEquals(text.get_attribute('value'), '1.5')
-    self.assertEquals(self.get_radio('ratio').get_attribute('value'), '1.5')
+    self.assertEqual(text.get_attribute('value'), '1.5')
+    self.assertEqual(self.get_radio('ratio').get_attribute('value'), '1.5')
     if knob:
       kx, ky, kw, kh = self.geom(knob)
-      self.assertEquals(kx, sx + sw - kw)
-      self.assertEquals(ky, sy)
+      self.assertEqual(kx, sx + sw - kw)
+      self.assertEqual(ky, sy)
       pass
     pass
 
@@ -102,13 +102,13 @@ class Test_AdvancedSearch(TestCase):
 
     text = self.q('#pp-search-ratio-custom-text')
 
-    self.assertEquals(slider.get_attribute('min'), '-1.5')
-    self.assertEquals(slider.get_attribute('max'), '1.5')
+    self.assertEqual(slider.get_attribute('min'), '-1.5')
+    self.assertEqual(slider.get_attribute('max'), '1.5')
     self.check_slider(slider, None, text)
 
     text.clear()
     text.send_keys('123')
-    self.assertEquals(self.get_radio('ratio').get_attribute('value'), '123')
+    self.assertEqual(self.get_radio('ratio').get_attribute('value'), '123')
     pass
 
   def test_ratio_debug(self):
@@ -121,23 +121,23 @@ class Test_AdvancedSearch(TestCase):
 
     slider = self.q('#pp-search-ratio-custom-slider.pp-slider')
     sx, sy, sw, sh = self.geom(slider)
-    self.assertEquals(sw, 168)
-    self.assertEquals(sh, 16)
+    self.assertEqual(sw, 168)
+    self.assertEqual(sh, 16)
 
     rx, ry, rw, rh = self.geom(self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-rail'))
-    self.assertEquals(rw, 160)
-    self.assertEquals(rh, 2)
-    self.assertEquals(rx - sx, 4)
-    self.assertEquals(ry - sy, 7)
-    self.assertEquals((sx + sw) - (rx + rw), 4)
-    self.assertEquals((sy + sh) - (ry + rh), 7)
+    self.assertEqual(rw, 160)
+    self.assertEqual(rh, 2)
+    self.assertEqual(rx - sx, 4)
+    self.assertEqual(ry - sy, 7)
+    self.assertEqual((sx + sw) - (rx + rw), 4)
+    self.assertEqual((sy + sh) - (ry + rh), 7)
 
     knob = self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-knob')
     kx, ky, kw, kh = self.geom(knob)
-    self.assertEquals(kx - rx, (rw - kw) / 2)
-    self.assertEquals(ky, sy)
-    self.assertEquals(kw, 8)
-    self.assertEquals(kh, 16)
+    self.assertEqual(kx - rx, (rw - kw) / 2)
+    self.assertEqual(ky, sy)
+    self.assertEqual(kw, 8)
+    self.assertEqual(kh, 16)
 
     text = self.q('#pp-search-ratio-custom-text')
     self.check_slider(slider, knob, text)

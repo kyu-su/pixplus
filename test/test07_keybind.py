@@ -14,7 +14,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_id(self, idx):
-    self.assertEquals(self.popup_get_illust_data('id'), self.illust_id_list[idx])
+    self.assertEqual(self.popup_get_illust_data('id'), self.illust_id_list[idx])
     pass
 
   def check_closed(self):
@@ -266,7 +266,7 @@ class Test_KeyBind(TestCase):
       time.sleep(1)
       pass
 
-    self.assertEquals(opened, url)
+    self.assertEqual(opened, url)
     pass
 
   def test_open(self):
@@ -380,12 +380,12 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
 
     self.send_keys(Keys.SPACE, input_tag)
-    self.assertEquals(input_tag.get_attribute('value').strip(), tags[1].get_attribute('data-tag'))
+    self.assertEqual(input_tag.get_attribute('value').strip(), tags[1].get_attribute('data-tag'))
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertTrue(self.has_class(tags[1], 'selected'))
 
     self.send_keys(Keys.SPACE, input_tag)
-    self.assertEquals(input_tag.get_attribute('value').strip(), '')
+    self.assertEqual(input_tag.get_attribute('value').strip(), '')
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
     self.assertFalse(self.has_class(tags[1], 'selected'))
 
@@ -454,19 +454,19 @@ class Test_KeyBind(TestCase):
 
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
-      self.assertEquals(active(), items[i])
+      self.assertEqual(active(), items[i])
       pass
     self.send_keys(Keys.DOWN)
-    self.assertEquals(active(), items[0])
+    self.assertEqual(active(), items[0])
 
     self.blur()
 
     for i in range(len(items) - 1, -1, -1):
       self.send_keys(Keys.UP)
-      self.assertEquals(active(), items[i])
+      self.assertEqual(active(), items[i])
       pass
     self.send_keys(Keys.UP)
-    self.assertEquals(active(), items[-1])
+    self.assertEqual(active(), items[-1])
 
     self.blur()
 
@@ -478,8 +478,8 @@ class Test_KeyBind(TestCase):
     for i in range(answer_idx + 1):
       self.send_keys(Keys.DOWN)
       pass
-    self.assertEquals(active(), items[answer_idx])
-    self.assertEquals(items[answer_idx][0], str(answer_idx + 1))
+    self.assertEqual(active(), items[answer_idx])
+    self.assertEqual(items[answer_idx][0], str(answer_idx + 1))
     answer = items[answer_idx][1]
 
     self.send_keys(Keys.SPACE)
@@ -553,20 +553,20 @@ class Test_KeyBind(TestCase):
       })(pixplus.popup.dom.image_scroller, pixplus.popup.dom.image_layout);
     ''')
 
-    self.assertEquals(sh > ch, vertical)
-    self.assertEquals(sw > cw, horizontal)
+    self.assertEqual(sh > ch, vertical)
+    self.assertEqual(sw > cw, horizontal)
 
     if not vertical:
-      self.assertEquals(ch, sh)
+      self.assertEqual(ch, sh)
       if strict:
-        self.assertEquals(ch, lh)
+        self.assertEqual(ch, lh)
         pass
       pass
 
     if not horizontal:
-      self.assertEquals(cw, sw)
+      self.assertEqual(cw, sw)
       if strict:
-        self.assertEquals(cw, lw)
+        self.assertEqual(cw, lw)
         pass
       pass
     pass
@@ -664,8 +664,8 @@ class Test_KeyBind(TestCase):
       var s = pixplus.popup.dom.image_scroller;
       return [s.scrollTop, s.scrollLeft];
     ''')
-    self.assertEquals(t, top)
-    self.assertEquals(l, left)
+    self.assertEqual(t, top)
+    self.assertEqual(l, left)
     pass
 
   def test_scroll(self):
@@ -748,8 +748,8 @@ class Test_KeyBind(TestCase):
       var c = pixplus.popup.dom.caption_wrapper;
       return [c.scrollTop, c.scrollLeft];
     ''')
-    self.assertEquals(t, top)
-    self.assertEquals(l, left)
+    self.assertEqual(t, top)
+    self.assertEqual(l, left)
     pass
 
   def test_caption_scroll(self):

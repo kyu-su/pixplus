@@ -19,13 +19,13 @@ class Test_Jumpphp(TestCase):
     link = self.find_illust(lambda: self.xa('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]'))
     link = link[0]
     self.popup_show_caption()
-    self.assertEquals(link.get_attribute('href'), 'http://www.pixiv.net/jump.php?' + util.quote(link.text, ''))
+    self.assertEqual(link.get_attribute('href'), 'http://www.pixiv.net/jump.php?' + util.quote(link.text, ''))
 
     self.set_conf('general.redirect_jump_page', 2)
     self.popup_reload()
 
     link = self.x('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]')
-    self.assertEquals(link.get_attribute('href'), link.text)
+    self.assertEqual(link.get_attribute('href'), link.text)
     pass
 
   pass

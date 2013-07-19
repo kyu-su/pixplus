@@ -23,11 +23,11 @@ class Test_Manga(TestCase):
     self.popup_wait_load()
     manga = self.safe_get_jsobj('pixplus.popup.illust.manga')
 
-    self.assertEquals(manga['page_count'], len(images))
-    self.assertEquals(len(manga['pages']), len(pages))
+    self.assertEqual(manga['page_count'], len(images))
+    self.assertEqual(len(manga['pages']), len(pages))
 
     for page in range(len(pages)):
-      self.assertEquals(manga['pages'][page]['image_urls'], [images[p - 1] for p in pages[page]])
+      self.assertEqual(manga['pages'][page]['image_urls'], [images[p - 1] for p in pages[page]])
       pass
 
     for page in range(len(pages)):
@@ -43,19 +43,19 @@ class Test_Manga(TestCase):
       self.assertTrue(sx + sw >= lx + lw)
       self.assertTrue(sy + sh >= ly + lh)
 
-      self.assertEquals(lx - sx, (sw - lw) / 2)
-      self.assertEquals(ly - sy, (sh - lh) / 2)
+      self.assertEqual(lx - sx, (sw - lw) / 2)
+      self.assertEqual(ly - sy, (sh - lh) / 2)
 
       images = self.qa('#pp-popup-image-layout img')
 
-      self.assertEquals([i.get_attribute('src') for i in images], manga['pages'][page]['image_urls'])
+      self.assertEqual([i.get_attribute('src') for i in images], manga['pages'][page]['image_urls'])
 
       x = lx
       for img in images:
         ix, iy, iw, ih = self.geom(img)
         self.assertTrue(ih <= lh)
-        self.assertEquals(x, ix)
-        self.assertEquals(iy - ly, (lh - ih) / 2)
+        self.assertEqual(x, ix)
+        self.assertEqual(iy - ly, (lh - ih) / 2)
         x += iw
         pass
       pass
@@ -64,8 +64,8 @@ class Test_Manga(TestCase):
   def test_manga(self):
     self.open('/member_illust.php?mode=manga&illust_id=6209105')
 
-    self.assertEquals(self.js('return pixiv.context.pages'), [[1], [2], [3]])
-    self.assertEquals(self.js('return pixiv.context.images'),
+    self.assertEqual(self.js('return pixiv.context.pages'), [[1], [2], [3]])
+    self.assertEqual(self.js('return pixiv.context.images'),
                       ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',
                        'http://i1.pixiv.net/img01/img/pixiv/6209105_p1.jpg',
                        'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
