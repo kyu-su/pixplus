@@ -58,6 +58,8 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def update_change_steps(self, section, item, conf_key, default, current, input_e, default_btn, steps):
+    self.set_conf(conf_key, default)
+
     if isinstance(default, bool):
       values = [not default]
     elif input_e.tag_name.lower() == 'select':
@@ -130,7 +132,10 @@ class Test_ModConfigUI(TestCase):
 
   def check_reset_default(self, section, item, conf_key, default, current, input_e, default_btn):
     if isinstance(default, bool):
-      input_e.click()
+      if current == default:
+        input_e.click()
+        pass
+      pass
     elif input_e.tag_name.lower() == 'select':
       sel = Select(input_e)
       values = [default.__class__(o.get_attribute('value')) for o in sel.options]
