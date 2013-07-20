@@ -5843,7 +5843,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           rate_confirm: 'Show confirmation dialog when rating',
           disable_effect: 'Disable UI animation',
           fast_user_bookmark: {
-            desc: 'Add favorite user by one-click',
+            desc: 'Follow user by one-click',
             hint: ['Disable', 'Enable(public)', 'Enable(private)']
           },
           redirect_jump_page: {
@@ -5858,7 +5858,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           caption_height: 'Caption height(ratio)',
           caption_minheight: 'Caption minimum height(px)',
           caption_opacity: 'Caption opacity',
-          remove_pixpedia: 'Remove pixiv encyclopedia(pixpedia) icon',
+          remove_pixpedia: 'Remove pixiv encyclopedia icon',
           remove_pixiv_comic: 'Remove pixiv comic icon',
           rate_key: 'Enable rate keys',
           font_size: 'Font size(e.g. 10px)',
@@ -5873,7 +5873,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           },
           reverse_regexp: 'Regular expression for "Reverse..." setting.',
           overlay_control: 'Click area width(0:Disable/<1:Ratio/>1:Pixel)',
-          scroll_height: 'Scroll step for caption',
+          scroll_height: 'Scroll step',
           author_status_icon: 'Show icon on profile image',
           show_comment_form: 'Show comment posting form',
           mouse_wheel: {
@@ -5887,9 +5887,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
         key: {
           popup_prev: 'Move to previous illust',
-          popup_prev_direction: 'Move to previous illust(ignore conf.popup.reverse)',
+          popup_prev_direction: 'Move to previous illust(ignore "reverse" setting)',
           popup_next: 'Move to next illust',
-          popup_next_direction: 'Move to next illust(ignore conf.popup.reverse)',
+          popup_next_direction: 'Move to next illust(ignore "reverse" setting)',
           popup_first: 'Move to first illust',
           popup_last: 'Move to last illust',
           popup_close: 'Close',
@@ -6003,7 +6003,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           rate_confirm: '\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b',
           disable_effect: '\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b',
           fast_user_bookmark: {
-            desc: '\u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046',
+            desc: '\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u30e6\u30fc\u30b6\u30fc\u3092\u30d5\u30a9\u30ed\u30fc\u3059\u308b',
             hint: ['\u7121\u52b9', '\u6709\u52b9(\u516c\u958b)', '\u6709\u52b9(\u975e\u516c\u958b)']
           },
           redirect_jump_page: {
@@ -6018,7 +6018,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           caption_height: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055(\u7387)',
           caption_minheight: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u306e\u6700\u5c0f\u5024(px)',
           caption_opacity: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6',
-          remove_pixpedia: 'pixiv\u767e\u79d1\u4e8b\u5178(pixpedia)\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
+          remove_pixpedia: 'pixiv\u767e\u79d1\u4e8b\u5178\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
           remove_pixiv_comic: 'pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
           rate_key: '\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b',
           font_size: '\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(\u4f8b: 10px)',
@@ -6033,7 +6033,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           },
           reverse_regexp: '"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
           overlay_control: '\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)',
-          scroll_height: '\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u9ad8\u3055',
+          scroll_height: '\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b',
           show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b',
           mouse_wheel: {
@@ -6047,9 +6047,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
         key: {
           popup_prev: '\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
-          popup_prev_direction: '\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)',
+          popup_prev_direction: '\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("\u53cd\u5bfe\u306b\u3059\u308b"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)',
           popup_next: '\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
-          popup_next_direction: '\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(conf.popup.reverse\u306e\u5f71\u97ff\u3092\u53d7\u3051\u306a\u3044)',
+          popup_next_direction: '\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5("\u53cd\u5bfe\u306b\u3059\u308b"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)',
           popup_first: '\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
           popup_last: '\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5',
           popup_close: '\u9589\u3058\u308b',
