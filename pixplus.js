@@ -845,34 +845,67 @@
     }
   };
 
+  _.modal = {
+    begin: function(dialog, onclose) {
+      if (dialog === this.dialog) {
+        return;
+      }
+
+      this.end();
+
+      this.dialog = dialog;
+      this.onclose = onclose;
+
+      var that = this;
+
+      g.setTimeout(function() {
+        that.conn_key = _.key.listen(d, function(key) {
+          if (key === 'Escape') {
+            that.end();
+          }
+          try {
+            w.pixiv.modal.close();
+          } catch(ex) { }
+        });
+        that.conn_click = _.onclick(d, function(ev) {
+          if (!that.dialog.contains(ev.target)) {
+            that.end(that.dialog);
+          }
+        });
+      });
+    },
+
+    end: function() {
+      if (this.onclose) {
+        this.onclose(this.dialog);
+      }
+      this.onclose = null;
+      this.dialog = null;
+      if (this.conn_key) {
+        this.conn_key.disconnect();
+        this.conn_key = null;
+      }
+      if (this.conn_click) {
+        this.conn_click.disconnect();
+        this.conn_click = null;
+      }
+    }
+  };
+
   _.configui = {
     dom: { },
-    shown: false,
     lng: null,
     container: null,
-    popup_mode: false,
+    toggle_btn: null,
 
-    init: function(container, popup_mode) {
+    init: function(container, toggle_btn) {
       if (!container) {
         return;
       }
 
       this.lng = _.lng;
       this.container = container;
-      this.popup_mode = !!popup_mode;
-
-      if (this.popup_mode) {
-        var that = this;
-        var li = _.e('li', null, container);
-        this.dom.toggle_btn = _.e('span', {id: 'pp-config-btn'}, li);
-        _.onclick(this.dom.toggle_btn, function() {
-          that.toggle();
-          try {
-            w.pixiv.modal.close();
-          } catch(ex) { }
-        });
-        this.container = li;
-      }
+      this.toggle_btn = toggle_btn;
     },
 
     create_tab_content: function(root, section) {
@@ -1180,7 +1213,6 @@
           that.lng = _.i18n[name];
           that.dom.root.parentNode.removeChild(that.dom.root);
           that.dom = { };
-          that.shown = false;
           that.show();
         });
       });
@@ -1289,16 +1321,6 @@
       dom.tabbar  = _.e('div', {id: 'pp-config-tabbar'});
       dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
-      if (this.popup_mode) {
-        _.onclick(
-          _.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar),
-          function() {
-            that.hide();
-            return true;
-          }
-        );
-      }
-
       _.conf.__schema.forEach(function(section) {
         that.create_tab(section.name, section);
       });
@@ -1326,25 +1348,27 @@
       this.dom.lasttab = tab;
     },
 
+    is_active: function() {
+      return !!this.dom.root && this.dom.root.classList.contains('pp-show');
+    },
+
     show: function() {
       this.create();
       this.dom.root.classList.add('pp-show');
-      this.shown = true;
-      if (this.dom.toggle_btn) {
-        this.dom.toggle_btn.classList.add('pp-active');
+      if (this.toggle_btn) {
+        this.toggle_btn.classList.add('pp-active');
       }
     },
 
     hide: function() {
       this.dom.root.classList.remove('pp-show');
-      this.shown = false;
-      if (this.dom.toggle_btn) {
-        this.dom.toggle_btn.classList.remove('pp-active');
+      if (this.toggle_btn) {
+        this.toggle_btn.classList.remove('pp-active');
       }
     },
 
     toggle: function() {
-      if (this.shown) {
+      if (this.is_active()) {
         this.hide();
       } else {
         this.show();
@@ -4780,7 +4804,7 @@
         var that = this;
 
         this.dom = {};
-        this.dom.root = _.e('div', {id: 'pp-layout-history-manager'});
+        this.dom.root = _.e('div', {id: 'pp-layout-history-manager', cls: 'pp-modal'});
         this.dom.header = _.e('header', null, this.dom.root);
         this.dom.close_btn = _.e('span', {
           id: 'pp-layout-history-manager-close',
@@ -4790,9 +4814,7 @@
         this.dom.error = _.e('p', {cls: 'pp-error-message'}, this.dom.root);
         this.dom.table = _.e('table', null, this.dom.root);
 
-        _.onclick(this.dom.close_btn, function() {
-          that.hide();
-        });
+        _.onclick(this.dom.close_btn, _.modal.end.bind(_.modal));
         _.e('h2', {text: _.lng.mypage_layout_history}, this.dom.header);
 
         var row = this.dom.table.insertRow(-1);
@@ -4902,27 +4924,12 @@
 
         this.centerize();
 
-        if (this.conn) {
-          this.conn.disconnect();
-        }
-        var that = this;
-        this.conn = _.key.listen(d, function(key, ev, connection) {
-          if (!that.dom.root.parentNode) {
-            return;
-          }
-          if (key === 'Escape') {
-            that.hide();
-          }
-        });
+        _.modal.begin(this.dom.root, this.hide.bind(this));
       },
 
       hide: function() {
         if (this.dom && this.dom.root.parentNode) {
           this.dom.root.parentNode.removeChild(this.dom.root);
-        }
-        if (this.conn) {
-          this.conn.disconnect();
-          this.conn = null;
         }
       }
     },
@@ -5355,7 +5362,20 @@
 
     _.redirect_jump_page();
 
-    _.configui.init(_.q('body>header .layout-wrapper>.notifications'), true);
+    (function(menu) {
+      if (!menu) {
+        return;
+      }
+
+      var li  = _.e('li', null, menu),
+          btn = _.e('span', {id: 'pp-config-btn'}, li);
+      _.onclick(btn, function() {
+        _.configui.show();
+        _.modal.begin(_.configui.dom.root, _.configui.hide.bind(_.configui));
+      });
+
+      _.configui.init(li, btn);
+    })(_.q('body>header .layout-wrapper>.notifications'));
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
