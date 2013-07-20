@@ -6,6 +6,7 @@ PYTHON                          = python
 
 LICENSE                         = LICENSE.TXT
 ICON_SVG                        = pixplus.svg
+ICON_SMALL_SVG                  = pixplus_small.svg
 SRC_USERJS                      = pixplus.js
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
@@ -36,8 +37,14 @@ SAFARIEXTZ                      = $(DIST_DIR)/pixplus.safariextz
 LIB_JS                          = $(BUILD_DIR)/lib.js
 DATA_JS                         = $(BUILD_DIR)/data.js
 CONFIG_JSON                     = $(BUILD_DIR)/config.json
-ICON_SIZE                       = 16 32 48 64 128
-ICON_FILES                      = $(ICON_SIZE:%=$(BUILD_DIR_ICON)/%.png)
+ICON_SIZE_SMALL                 = 16 22 24
+ICON_SIZE_BIG                   = 32 48 64 128
+ICON_SIZE                       = $(ICON_SIZE_SMALL) $(ICON_SIZE_BIG)
+ICON_FILES_SMALL                = $(ICON_SIZE_SMALL:%=$(BUILD_DIR_ICON)/%.png)
+ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
+ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
+ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
+ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn_b64.txt
 DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)
 DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
 DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
@@ -85,7 +92,7 @@ ifeq ($(BUILD_SAFARIEXTZ),yes)
 ALL_TARGETS                    += $(SAFARIEXTZ)
 endif
 
-all: $(ALL_TARGETS) feeds
+all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) feeds
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
@@ -158,11 +165,25 @@ $(CHANGELOG_JSON): $(SRC_USERJS)
 	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) >> $@
 	@echo ']}' >> $@
 
-$(ICON_FILES): $(ICON_SVG)
+$(ICON_FILES_SMALL): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cp $< $@
 	@$(RSVG_CONVERT) $< -w $(basename $(notdir $@)) -o $@
+
+$(ICON_FILES_BIG): $(ICON_SVG)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@$(RSVG_CONVERT) $< -w $(basename $(notdir $@)) -o $@
+
+$(ICON_CONFIG_BTN): $(ICON_SMALL_SVG)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@cat $< | sed 's/#0096db/#adc1d8/' | $(RSVG_CONVERT) /dev/stdin -w 22 -o $@
+
+$(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@echo -n 'data:image/png;base64,' > $@
+	@base64 $< | tr -d '\r\n' >> $@
 
 # ================ Opera ================
 

@@ -849,21 +849,29 @@
     dom: { },
     shown: false,
     lng: null,
-    root: null,
-    menu: null,
+    container: null,
+    popup_mode: false,
 
-    init: function(root, menu) {
-      if (!root) {
+    init: function(container, popup_mode) {
+      if (!container) {
         return;
       }
 
       this.lng = _.lng;
-      this.root = root;
-      this.menu = menu;
+      this.container = container;
+      this.popup_mode = !!popup_mode;
 
-      if (menu) {
-        var btn = _.e('li', {id: 'pp-config-btn', cls: 'notification-button'}, menu);
-        _.onclick(btn, this.toggle.bind(this));
+      if (this.popup_mode) {
+        var that = this;
+        var li = _.e('li', null, container);
+        this.dom.toggle_btn = _.e('span', {id: 'pp-config-btn'}, li);
+        _.onclick(this.dom.toggle_btn, function() {
+          that.toggle();
+          try {
+            w.pixiv.modal.close();
+          } catch(ex) { }
+        });
+        this.container = li;
       }
     },
 
@@ -1277,11 +1285,11 @@
         return;
       }
 
-      dom.root    = _.e('div', {id: 'pp-config'}, this.root);
+      dom.root    = _.e('div', {id: 'pp-config'}, this.container);
       dom.tabbar  = _.e('div', {id: 'pp-config-tabbar'});
       dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
-      if (this.menu) {
+      if (this.popup_mode) {
         _.onclick(
           _.e('label', {id: 'pp-config-close-button', text: '\u00d7'}, dom.tabbar),
           function() {
@@ -1322,11 +1330,17 @@
       this.create();
       this.dom.root.classList.add('pp-show');
       this.shown = true;
+      if (this.dom.toggle_btn) {
+        this.dom.toggle_btn.classList.add('pp-active');
+      }
     },
 
     hide: function() {
       this.dom.root.classList.remove('pp-show');
       this.shown = false;
+      if (this.dom.toggle_btn) {
+        this.dom.toggle_btn.classList.remove('pp-active');
+      }
     },
 
     toggle: function() {
@@ -5341,7 +5355,7 @@
 
     _.redirect_jump_page();
 
-    _.configui.init(_.q('body>header'), _.q('body>header .layout-wrapper>.notifications'));
+    _.configui.init(_.q('body>header .layout-wrapper>.notifications'), true);
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
@@ -5579,37 +5593,44 @@ border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}\
 \
 /* config ui */\
 #pp-config-btn{border-radius:5px;margin-left:2px;cursor:pointer;\
-background-image:url("data:image/png;base64,\
-iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\
-AAAEwgAABMIBvM+QGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKiSURB\
-VDiNrZVNSJRRFIafc0dNSyktwxaVQeZPBpGQQWMOrQqFHLNVEEJQtmjhKoRWFbQVoYI2YpsIzdkk\
-tSghM6KFEUQ50xT0BxJmDaWlM/Pd02Im/bSZMYfe3bn3Pc99v8PlfqKqpFP/k08FObHpwyqyE6UK\
-qASKFMZF5ZWIvhS7aqjFVx5Z2iupwIGRcDXY0wongOK0Jyc0JcqFycLpa6fq6mIpwYOPxjdhTQ9C\
-m6vxKxBQIWSQj1Z1tQheFC9Q4fKFBXPEf6BifBH49sPQGREuA2vnrcpFp9S5dKymJpoqamA02KxW\
-BoBVCRihn/mevcfrt38318fGcgdHgn0iXF0EBcTIq3RQAL+36g7WNAMxABUqC2adPkDMhpnCXpAT\
-Se+3dJB0avVV3BeRgYU0tAQeBQ8YETHJpY8i6l8pGEDRK+7aqniNxpwuYFZF71nHfM4GXOJMPAUc\
-19J+03qw+r2Je2rzJXYuGyiAz+eLk7g9AAjUGoCWg9vfNnl3rXi+fzQ0+qIYKHUtvTHpzCtR1OaX\
-uWtVfZ6TLez2aLgea7tEif3K95wsmOMZsAdAjRnKOrGoUy1wBKFtza94CTCZzHujrWHHg4xgq9rY\
-/zhU+W9HaQDodnJtJ0DGUQh0eBw6BkdCHxzr1Bty1im2DMAYqZpHesw+69gQaIg58pYFA5rgs2WG\
-1ZEiM3fXILv/MqneNEaSlacb6FwmsbSDfkI5FC2acpgpXCbHgjInFqL+hsphYBhgcDR8lHh8IwDG\
-NAHnE5GlFXUmAPLwvIG/3uPXPaiedaGffFkz3eh+wBe8wXZUegGM1W0tvqp37v3Ft0J165L+zXk/\
-1nsyflUaLRpFiZ04GqF8fpARmG33lc+majTCC6vcEiVmcmVq6X7Kf97/0G9s/ATGOq0+gAAAAABJ\
-RU5ErkJggg==\
-")}\
+display:inline-block;padding:24px 0px 0px 34px;vertical-align:top;\
+border:3px solid #f2f4f6;\
+background:#f2f4f6 url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/wD/AP+gvaeTAAACXklE\
+QVQ4jbWUz0tUURTHP+c+0aQWWljmNpxmspJo0UabmUUEVqYzwxAt+gfatCkiAoWIaNvGXZibwmZC\
+oU20eE0pbopIqRnNjKgkQewXCVb3nRa+kRlxHB3orM75nns/fO+57134TyHrNYdHck3Wo1OVCHAI\
+2A44CD9EmfbAFWPuxtsDMxsCp55mj4vKJSACmDLmLJCynr2QjLZ8WRM8OJLb61j6gGiBPIPIPVVG\
+HePNqaXaMzSJSgxIANX+unlR7YxFQmMrYNd1qxZM41WQy0DNClLlfCwc6BMRXcvqUCZ7wCIpIOBL\
+39SxbYm2ltdm4NGrrQumcQikpwgKYORDKShAVzg0IUZPAb98qU6sc8d13SqzbUvNMMgJv/G5FKRU\
+xNpDU6jcKpAOLzi7u4wKswCCvkGle7NgAHG8/iJBOWOwzhVgUVXSqvysBNzdFnwLLBZI+0w82vzJ\
+wv7aRed6JVAA/x7mCqQdBiAZDr7v6GheqhQMIEqqoPxYVSkoncn2+l+SRcxpQVOqehEAlYlyf9V6\
+Hhv8xFH1dlk1f/IdY+ir2PHqSISbXwLy8Nl4/cn2g1/LgL2jg4/fjSSP7fkOkM5M9gBNAILXpv6L\
+IHAunZk8ArCk3hjQX/RWpNzJoBjNrqYj9Nod9qYz72zkgsfj4WBruRn/BYygdRsAFkW5GcfVY9YT\
+U5tsCf1+8CSXVNH65ZacBcLLuQ4AowCex1R5sBibiAae58tYJHg/n6czudY8WJFMIhy8Xbi1aBQi\
+eq2wVvVulDlRySh2LDQUl7Kz1EYRJlR5sbzOTFdqYNPxD/4mzdyqngK/AAAAAElFTkSuQmCC\
+") no-repeat 6px 1px;}\
+#pp-config-btn:hover{background-color:#ddeaf6;border-color:#ddeaf6;}\
+#pp-config-btn.pp-active{position:relative;z-index:10001;background-color:#fff;\
+padding-top:27px;border-color:#becad8;border-bottom:none;border-radius:5px 5px 0px 0px}\
+\
 #pp-config{display:none;line-height:1.1em}\
+#pp-config input,#pp-config button,#pp-config select{white-space:nowrap;\
+border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3em}\
+#pp-config input[type="checkbox"]{padding:1px}\
+#pp-config button{background-color:#f2f4f6}\
+#pp-config button:hover{background-color:#ddeaf6}\
+#pp-config button:active{background-color:#becad8}\
 #pp-config ul{list-style-type:none}\
-header #pp-config{margin:0px auto 4px;width:970px}\
 #pp-config.pp-show{display:block}\
-#pp-config-tabbar{margin-bottom:-1px}\
+#pp-config-tabbar{border-bottom:2px solid #becad8}\
 #pp-config-tabbar label{cursor:pointer}\
-#pp-config-close-button{padding:0.2em}\
-#pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.2em 0.4em;margin:1px 1px 0px 1px}\
-#pp-config-tabbar .pp-config-tab.pp-active{\
-margin:0px;border:solid #aaa;border-width:1px 1px 0px 1px;background-color:#fff}\
-#pp-config-content-wrapper{border:1px solid #aaa;background-color:#fff;padding:0.2em}\
-header #pp-config-content-wrapper{height:600px;overflow-y:auto}\
+#pp-config-close-button{padding:0.4em}\
+#pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
+#pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
+#pp-config-content-wrapper{padding:0.2em}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
+.pp-config-content tr:nth-child(even) td{background-color:#f2f4f6}\
 .pp-config-content dt{font-weight:bold}\
 .pp-config-content dd{margin-left:1em}\
 .pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}\
@@ -5630,6 +5651,9 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 #pp-config-escaper{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}\
 #pp-config-escaper input{display:block;width:100%;box-sizing:border-box}\
 #pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}\
+\
+#pp-config-btn~#pp-config{position:absolute;z-index:10000;top:27px;left:-400px;width:800px;\
+background-color:#fff;border:3px solid #becad8;border-radius:10px}\
 \
 /* key editor */\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
