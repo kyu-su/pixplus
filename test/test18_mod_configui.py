@@ -62,9 +62,6 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def test_default(self):
-    if self.b.extension_mode:
-      self.skipTest('This test is not works with extension version')
-      return
     conf = self.prepare()
     self.each_item(self.check_default)
     pass
@@ -98,9 +95,6 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def test_change(self):
-    if self.b.extension_mode:
-      self.skipTest('This test is not works with extension version')
-      return
     conf = self.prepare()
     steps = []
     self.each_item(self.update_change_steps, steps)
@@ -165,9 +159,6 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def test_reset_default(self):
-    if self.b.extension_mode:
-      self.skipTest('This test is not works with extension version')
-      return
     conf = self.prepare()
     self.each_item(self.check_reset_default)
     pass

@@ -16,10 +16,8 @@ class Opera(Browser):
     self.extensions = []
     if self.args.opera_mode == 'userjs':
       self.userjs.append(os.path.join(self.rootdir, 'pixplus.js'))
-      self.extension_mode = False
     elif self.args.opera_mode == 'oex':
       self.extensions.append(os.path.join(self.bindir, 'pixplus.oex'))
-      extension_mode = True
     else:
       raise ValueError('Invalid mode')
 

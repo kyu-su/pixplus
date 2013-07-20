@@ -23,7 +23,6 @@ class Browser:
   name = None
   capname = None
   supports_alert = True
-  extension_mode = True
 
   def __init__(self):
     self.driver = None

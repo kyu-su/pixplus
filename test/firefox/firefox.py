@@ -21,7 +21,6 @@ ADDONS = {
 class Firefox(Browser):
   name = 'firefox'
   capname = 'FIREFOX'
-  extension_mode = False
 
   def prepare_caps(self, caps):
     self.user_prefs = {}

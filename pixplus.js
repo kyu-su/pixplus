@@ -852,7 +852,7 @@
     root: null,
     menu: null,
 
-    init: function(root, menu, extension_data) {
+    init: function(root, menu) {
       if (!root) {
         return;
       }
@@ -861,21 +861,9 @@
       this.root = root;
       this.menu = menu;
 
-      var that = this;
       if (menu) {
         var btn = _.e('li', {id: 'pp-config-btn', cls: 'notification-button'}, menu);
-        _.onclick(btn, function() {
-          if (extension_data) {
-            if (extension_data.open_options) {
-              extension_data.open_options();
-            } else if (extension_data.base_uri) {
-              _.open(extension_data.base_uri + 'options.html');
-            }
-          } else {
-            that.toggle();
-          }
-          return true;
-        });
+        _.onclick(btn, this.toggle.bind(this));
       }
     },
 
@@ -5353,7 +5341,7 @@
 
     _.redirect_jump_page();
 
-    _.configui.init(_.q('body>header'), _.q('body>header .layout-wrapper>.notifications'), _extension_data);
+    _.configui.init(_.q('body>header'), _.q('body>header .layout-wrapper>.notifications'));
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
