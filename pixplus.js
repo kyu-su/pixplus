@@ -846,7 +846,27 @@
   };
 
   _.modal = {
-    begin: function(dialog, onclose) {
+    centerize: function() {
+      if (!this.options.centerize) {
+        return;
+      }
+
+      var de  = d.documentElement,
+          off = (this.dialog.offsetParent || de).getBoundingClientRect(),
+          x, y;
+
+      x = (de.clientWidth  - this.dialog.offsetWidth)  / 2 - off.left;
+      y = (de.clientHeight - this.dialog.offsetHeight) / 2 - off.top;
+
+      if (/^(?:both|horizontal)$/i.test(this.options.centerize)) {
+        this.dialog.style.left = g.Math.floor(x) + 'px';
+      }
+      if (/^(?:both|vertical)$/i.test(this.options.centerize)) {
+        this.dialog.style.top  = g.Math.floor(y) + 'px';
+      }
+    },
+
+    begin: function(dialog, options) {
       if (dialog === this.dialog) {
         return;
       }
@@ -854,7 +874,9 @@
       this.end();
 
       this.dialog = dialog;
-      this.onclose = onclose;
+      this.options = options || { };
+
+      this.centerize();
 
       var that = this;
 
@@ -867,28 +889,34 @@
             w.pixiv.modal.close();
           } catch(ex) { }
         });
+
         that.conn_click = _.onclick(d, function(ev) {
           if (!that.dialog.contains(ev.target)) {
             that.end(that.dialog);
           }
         });
-      });
+
+        if (that.options.centerize) {
+          that.conn_resize = _.listen(w, 'resize', that.centerize.bind(that), {async: true});
+        }
+      }, 0);
     },
 
     end: function() {
-      if (this.onclose) {
-        this.onclose(this.dialog);
+      if (this.options && this.options.onclose) {
+        this.options.onclose(this.dialog);
       }
-      this.onclose = null;
+
+      this.options = null;
       this.dialog = null;
-      if (this.conn_key) {
-        this.conn_key.disconnect();
-        this.conn_key = null;
-      }
-      if (this.conn_click) {
-        this.conn_click.disconnect();
-        this.conn_click = null;
-      }
+
+      var that = this;
+      ['key', 'click', 'resize'].forEach(function(name) {
+        if (that['conn_' + name]) {
+          that['conn_' + name].disconnect();
+          that['conn_' + name] = null;
+        }
+      });
     }
   };
 
@@ -4822,13 +4850,6 @@
         this.dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
 
         _.e('p', {text: _.lng.mypage_layout_history_help}, this.dom.root);
-
-        _.listen(w, 'resize', function() {
-          if (!that.dom.root.parentNode) {
-            return;
-          }
-          that.centerize();
-        }, {async: true});
       },
 
       preview: function(layout) {
@@ -4909,12 +4930,6 @@
         });
       },
 
-      centerize: function() {
-        var de  = d.documentElement;
-        this.dom.root.style.left = g.Math.floor((de.clientWidth  - this.dom.root.offsetWidth)  / 2) + 'px';
-        this.dom.root.style.top  = g.Math.floor((de.clientHeight - this.dom.root.offsetHeight) / 2) + 'px';
-      },
-
       show: function() {
         this.refresh();
 
@@ -4922,9 +4937,10 @@
           d.body.appendChild(this.dom.root);
         }
 
-        this.centerize();
-
-        _.modal.begin(this.dom.root, this.hide.bind(this));
+        _.modal.begin(this.dom.root, {
+          onclose: this.hide.bind(this),
+          centerize: 'both'
+        });
       },
 
       hide: function() {
@@ -5371,7 +5387,10 @@
           btn = _.e('span', {id: 'pp-config-btn'}, li);
       _.onclick(btn, function() {
         _.configui.show();
-        _.modal.begin(_.configui.dom.root, _.configui.hide.bind(_.configui));
+        _.modal.begin(_.configui.dom.root, {
+          onclose: _.configui.hide.bind(_.configui),
+          centerize: 'horizontal'
+        });
       });
 
       _.configui.init(li, btn);
