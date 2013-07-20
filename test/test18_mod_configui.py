@@ -57,15 +57,6 @@ class Test_ModConfigUI(TestCase):
       pass
     pass
 
-  def check_default(self, section, item, conf_key, default, current, input_e, default_btn):
-    self.assertEqual(current, default)
-    pass
-
-  def test_default(self):
-    conf = self.prepare()
-    self.each_item(self.check_default)
-    pass
-
   def update_change_steps(self, section, item, conf_key, default, current, input_e, default_btn, steps):
     if isinstance(default, bool):
       values = [not default]
