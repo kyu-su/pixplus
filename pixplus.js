@@ -5665,6 +5665,7 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config-tabbar label{cursor:pointer}\
 #pp-config-close-button{padding:0.4em}\
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
+#pp-config-tabbar .pp-config-tab:hover{background-color:#ddeaf6}\
 #pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
 #pp-config-content-wrapper{padding:0.2em}\
 .pp-config-content{display:none}\
