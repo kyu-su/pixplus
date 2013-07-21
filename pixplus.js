@@ -963,6 +963,376 @@
   };
 
   _.configui = {
+    tabs: {
+      __default: function(root, section, lang) {
+        var table = _.e('table', null, root), subsection;
+
+        section.items.forEach(function(item) {
+          if (!_.conf.general.debug && item.hidden) {
+            return;
+          }
+
+          if (item.subsection && item.subsection !== subsection) {
+            _.e('div', {text: lang.pref[section.name + '_' + item.subsection]},
+                _.e('td', {colspan: 3}, _.e('tr', {cls: 'pp-config-subsection-title'}, table)));
+            subsection = item.subsection;
+          }
+
+          var type = typeof(item.value),
+              info = lang.conf[section.name][item.key] || '[Error]',
+              row  = _.e('tr', null, table),
+              desc = _.e('td', null, row),
+              input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-'),
+              control, control_propname;
+          if (info === '[Error]') {
+            alert(item.key);
+          }
+
+          if (type === 'boolean') {
+            var label = _.e('label', null, desc);
+            control = _.e('input', {type: 'checkbox', id: input_id}, label);
+            control_propname = 'checked';
+            label.appendChild(d.createTextNode(info.desc || info));
+            desc.setAttribute('colspan', '2');
+          } else {
+            var value = _.e('td', null, row);
+            desc.textContent = info.desc || info;
+            if (info.hint) {
+              control = _.e('select', {id: input_id}, value);
+              info.hint.forEach(function(hint, idx) {
+                var ovalue = hint.value || idx;
+                var opt = _.e('option', {text: hint.desc || hint, value: ovalue}, control);
+              });
+            } else {
+              control = _.e('input', {id: input_id}, value);
+            }
+            control_propname = 'value';
+          }
+
+          control[control_propname] = _.conf[section.name][item.key];
+          _.listen(control, ['change', 'input'], function() {
+            var value = control[control_propname];
+            if (typeof(item.value) === 'number') {
+              value = g.parseFloat(value);
+            }
+            _.conf[section.name][item.key] = value;
+          });
+
+          _.onclick(
+            _.e('button', {text: lang.pref['default'], id: input_id + '-default'}, row.insertCell(-1)),
+            function() {
+              _.conf[section.name][item.key] = item.value;
+              control[control_propname] = item.value;
+            }
+          );
+        });
+      },
+
+      key: function(root, section, lang) {
+        this.__default(root, section, lang);
+
+        var that = this, active_input, editor_wrapper;
+
+        var close = function() {
+          if (editor_wrapper) {
+            editor_wrapper.parentNode.removeChild(editor_wrapper);
+            editor_wrapper = null;
+          }
+          if (active_input) {
+            active_input.classList.remove('pp-active');
+          }
+        };
+
+        var open = function(input) {
+          close();
+
+          input.classList.add('pp-active');
+          active_input = input;
+
+          editor_wrapper = _.e('div', {cls: 'pp-config-key-editor-wrapper'}, null);
+          input.parentNode.insertBefore(editor_wrapper, input);
+
+          var editor = _.e('div', {cls: 'pp-config-key-editor'}, editor_wrapper);
+          var list = _.e('ul', null, editor);
+
+          var reset = function() {
+            _.clear(list);
+            if (input.value) {
+              input.value.split(',').forEach(add);
+            }
+          };
+
+          var add = function(key) {
+            var li = _.e('li', null, list);
+            _.onclick(_.e('button', {text: '\u00d7'}, li), function() {
+              list.removeChild(li);
+              apply();
+            });
+            _.e('label', {text: key}, li);
+          };
+
+          var apply = function() {
+            var keys = [];
+            _.qa('li label', list).forEach(function(key) {
+              keys.push(key.textContent);
+            });
+            input.value = keys.join(',');
+            input.focus();
+
+            var ev = d.createEvent('Event');
+            ev.initEvent('input', true, true);
+            input.dispatchEvent(ev);
+          };
+
+          reset();
+
+          var toolbar = _.e('div', {cls: 'pp-config-key-editor-toolbar'}, editor);
+          var add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, toolbar);
+          _.key.listen(add_input, function(key) {
+            add_input.value = key;
+            return true;
+          });
+
+          var btn_add = _.e('button', {text: lang.pref.add, cls: 'pp-config-key-editor-add'}, toolbar),
+              btn_close = _.e('button', {text: lang.pref.close, cls: 'pp-config-key-editor-close'}, toolbar);
+          _.onclick(btn_add, function() {
+            add(add_input.value);
+            add_input.value = '';
+            apply();
+          });
+          _.onclick(btn_close, close);
+        };
+
+        _.listen(root, ['click', 'focus'], function(ev) {
+          if (/^input$/i.test(ev.target.tagName) && !(editor_wrapper && editor_wrapper.contains(ev.target))) {
+            open(ev.target);
+            _.modal.begin(editor_wrapper, {onclose: close, stack: true, members: [ev.target]});
+          }
+        }, {capture: true});
+      },
+
+      bookmark: function(root, section, lang) {
+        _.e('div', {text: lang.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
+
+        var tag_order_textarea = _.e('textarea', null, root);
+        tag_order_textarea.value = _.conf.bookmark.tag_order.map(function(a) {
+          return a.map(function(tag) {
+            return tag || '*';
+          }).join('\n');
+        }).join('\n-\n');
+
+        _.listen(tag_order_textarea, 'input', function() {
+          var tag_order = [[]];
+          tag_order_textarea.value.split(/[\r\n]+/).forEach(function(line) {
+            if (!line) {
+              return;
+            }
+            if (line === '-') {
+              tag_order.push([]);
+            } else {
+              tag_order[tag_order.length - 1].push(line === '*' ? null : line);
+            }
+          });
+          _.conf.bookmark.tag_order = tag_order;
+        });
+
+
+        _.e('div', {text: lang.conf.bookmark.tag_aliases}, root);
+
+        var tag_alias_table = _.e('table', {id: 'pp-config-bookmark-tag-aliases'}, root);
+        _.onclick(_.e('button', {text: lang.pref.add}, root), function() {
+          add_row();
+        });
+
+        function save() {
+          var aliases = { };
+          g.Array.prototype.forEach.call(tag_alias_table.rows, function(row) {
+            var inputs = _.qa('input', row);
+            if (inputs.length === 2 && inputs[0].value) {
+              aliases[inputs[0].value] = inputs[1].value.split(/\s+/);
+            }
+          });
+          _.conf.bookmark.tag_aliases = aliases;
+        }
+
+        function add_row(tag, list) {
+          var row = tag_alias_table.insertRow(-1);
+          _.onclick(_.e('button', {text: '\u00d7'}, row.insertCell(-1)), function() {
+            row.parentNode.removeChild(row);
+            save();
+          });
+
+          var i_tag = _.e('input', {value: tag || ''}, row.insertCell(-1)),
+              i_atags = _.e('input', {value: list ? list.join(' ') : ''}, row.insertCell(-1));
+          _.listen(i_tag, 'input', save);
+          _.listen(i_atags, 'input', save);
+        }
+
+        var aliases = _.conf.bookmark.tag_aliases;
+        for(var key in aliases) {
+          add_row(key, aliases[key]);
+        }
+      },
+
+      importexport: function(root, section, lang) {
+        var toolbar  = _.e('div', {id: 'pp-config-importexport-toolbar'}, root);
+        var textarea = _.e('textarea', null, root);
+
+        _.onclick(_.e('button', {text: lang.pref['export']}, toolbar), function() {
+          textarea.value = JSON.stringify(_.conf.__export(''), null, 2);
+        });
+
+        _.onclick(_.e('button', {text: lang.pref['import']}, toolbar), function() {
+          var data;
+          try {
+            data = JSON.parse(textarea.value);
+          } catch(ex) {
+            g.alert(ex);
+            return;
+          }
+          _.conf.__import(data);
+        });
+      },
+
+      about: function(root, section, lang) {
+        var urls = [
+          'http://crckyl.ath.cx/pixplus/',
+          'http://crckyl.ath.cx/cgit/pixplus.git/',
+          'http://my.opera.com/crckyl/',
+          'http://twitter.com/crckyl'
+        ];
+        var dl = _.e('dl', null, root);
+        [
+          [lang.pref.about_name, 'pixplus'],
+          [lang.pref.about_version, _.version() + ' - ' + _.release_date()],
+          [lang.pref.about_web, function(dd) {
+            var ul = _.e('ul', null, dd);
+            urls.forEach(function(url) {
+              _.e('a', {href: url, text: url}, _.e('li', null, ul));
+            });
+          }],
+          [lang.pref.about_email,
+           _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
+          [lang.pref.about_license, 'The MIT License']
+        ].forEach(function(p) {
+          var label = p[0], content = p[1];
+          _.e('dt', {text: label}, dl);
+          var dd = _.e('dd', null, dl);
+          if (content.nodeName) {
+            dd.appendChild(content);
+          } else if (content.call) {
+            content(dd);
+          } else {
+            dd.textContent = content;
+          }
+        });
+      },
+
+      changelog: function(root, section, lang) {
+        var dl = _.e('dl', null, root);
+        _.changelog.forEach(function(release) {
+          var dt = _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+          if (release.releasenote) {
+            dt.textContent += ' ';
+            _.e('a', {href: release.releasenote, text: lang.pref.releasenote}, dt);
+          }
+
+          var ul = _.e('ul', null, _.e('dd', null, dl));
+          (
+            release.changes_i18n
+              ? (release.changes_i18n[lang.__name__] || release.changes_i18n.en)
+              : release.changes
+          ).forEach(function(change) {
+            _.e('li', {text: change}, ul);
+          });
+        });
+      },
+
+      debug: function(root, section, lang) {
+        var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
+        ['en', 'ja'].forEach(function(name) {
+          _.onclick(_.e('button', {text: name}, langbar), function() {
+            _.configui.lng = _.i18n[name];
+            _.configui.dom.root.parentNode.removeChild(_.configui.dom.root);
+            _.configui.dom = { };
+            _.configui.show();
+          });
+        });
+
+        var escaper = _.e('div', {id: 'pp-config-escaper'}, root), escaper_e;
+        _.listen(_.e('input', null, escaper), 'input', function(ev) {
+          escaper_e.value = ev.target.value.split('').map(function(c) {
+            var b = c.charCodeAt(0);
+
+            if (b >= 0x20 && b <= 0x7e) {
+              return c;
+            }
+
+            c = b.toString(16);
+            while(c.length < 4) {
+              c = '0' + c;
+            }
+            return '\\u' + c;
+          }).join('');
+        });
+        escaper_e = _.e('input', null, escaper);
+
+        var input_line = _.e('div', null, root);
+        var input      = _.e('input', null, input_line);
+        var cancel_l   = _.e('label', null, input_line);
+        var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
+        var console_l  = _.e('label', null, input_line);
+        var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
+        var logger     = _.e('table', {css: 'margin-top:4px;border:1px solid #aaa'}, root);
+
+        cancel_l.appendChild(d.createTextNode('Cancel'));
+        console_l.appendChild(d.createTextNode('Console'));
+
+        var log_attrs  = [
+          'type',
+          'keyCode',
+          'charCode',
+          'key',
+          'char',
+          'keyIdentifier',
+          'which',
+          'eventPhase',
+          'detail',
+          'timeStamp'
+        ];
+
+        function clear() {
+          input.value = '';
+          logger.innerHTML = '';
+          var row = logger.insertRow(0);
+          row.insertCell(-1).textContent = 'Key';
+          log_attrs.forEach(function(attr) {
+            row.insertCell(-1).textContent = attr;
+          });
+        }
+
+        function log(ev) {
+          var row = logger.insertRow(1);
+          var key = _.key.parse_event(ev) || 'None';
+          row.insertCell(-1).textContent = key;
+          log_attrs.forEach(function(attr) {
+            row.insertCell(-1).textContent = ev[attr];
+          });
+          if (cancel.checked && key) {
+            ev.preventDefault();
+          }
+          if (console.checked) {
+            _.debug(ev);
+          }
+        }
+
+        clear();
+        _.onclick(_.e('button', {text: 'Clear', css: 'margin-left:4px;'}, input_line), clear);
+        input.addEventListener('keydown', log, false);
+        input.addEventListener('keypress', log, false);
+      }
+    },
+
     dom: { },
     lng: null,
     container: null,
@@ -978,407 +1348,18 @@
       this.toggle_btn = toggle_btn;
     },
 
-    create_tab_content: function(root, section) {
-      var table = _.e('table', null, root);
-      var lang_conf = this.lng.conf, last_mode;
-
-      var that = this;
-      section.items.forEach(function(item) {
-        if (!_.conf.general.debug && item.hidden) {
-          return;
-        }
-
-        var type = typeof(item.value);
-        var info = lang_conf[section.name][item.key] || '[Error]';
-
-        // key tab
-        if (section.name === 'key') {
-          var mode = item.mode || item.end_mode;
-          if (mode && mode !== last_mode) {
-            var mode_line = table.insertRow(-1).insertCell(-1);
-            mode_line.className = 'pp-config-key-modeline';
-            mode_line.setAttribute('colspan', '3');
-            mode_line.textContent = lang_conf.mode[mode];
-            last_mode = mode;
-          }
-          if (item.start_mode) {
-            info = lang_conf.key.mode_start.replace(
-              '$mode',
-              lang_conf.mode[item.start_mode]
-            );
-          } else if (item.end_mode) {
-            info = lang_conf.key.mode_end.replace(
-              '$mode',
-              lang_conf.mode[item.end_mode]
-            );
-          }
-        }
-
-        var row  = table.insertRow(-1);
-        var desc = row.insertCell(-1);
-        var control, control_propname;
-
-        var input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-');
-
-        if (type === 'boolean') {
-          var label = _.e('label', null, desc);
-          control = _.e('input', {type: 'checkbox', id: input_id}, label);
-          control_propname = 'checked';
-          label.appendChild(d.createTextNode(info.desc || info));
-          desc.setAttribute('colspan', '2');
-        } else {
-          var value = row.insertCell(-1);
-          desc.textContent = info.desc || info;
-          if (info.hint) {
-            control = _.e('select', {id: input_id}, value);
-            info.hint.forEach(function(hint, idx) {
-              var ovalue = hint.value || idx;
-              var opt = _.e('option', {text: hint.desc || hint, value: ovalue}, control);
-            });
-          } else {
-            control = _.e('input', {id: input_id}, value);
-          }
-          control_propname = 'value';
-        }
-
-        control[control_propname] = _.conf[section.name][item.key];
-        _.listen(control, ['change', 'input'], function() {
-          var value = control[control_propname];
-          if (typeof(item.value) === 'number') {
-            value = g.parseFloat(value);
-          }
-          _.conf[section.name][item.key] = value;
-        });
-
-        _.onclick(
-          _.e('button', {text: that.lng.pref['default'], id: input_id + '-default'}, row.insertCell(-1)),
-          function() {
-            _.conf[section.name][item.key] = item.value;
-            control[control_propname] = item.value;
-          }
-        );
-      });
-    },
-
-    create_tab_content_key: function(root, section) {
-      this.create_tab_content(root, section);
-
-      var that = this;
-      var active_input, editor_wrapper;
-
-      function close_editor() {
-        if (editor_wrapper) {
-          editor_wrapper.parentNode.removeChild(editor_wrapper);
-          editor_wrapper = null;
-        }
-        if (active_input) {
-          active_input.classList.remove('pp-active');
-        }
-      }
-
-      function open_editor(input) {
-        close_editor();
-
-        input.classList.add('pp-active');
-        active_input = input;
-
-        editor_wrapper = _.e('div', {cls: 'pp-config-key-editor-wrapper'}, null);
-        input.parentNode.insertBefore(editor_wrapper, input);
-
-        var editor = _.e('div', {cls: 'pp-config-key-editor'}, editor_wrapper);
-        var list = _.e('ul', null, editor);
-
-        function reset() {
-          _.clear(list);
-          if (input.value) {
-            input.value.split(',').forEach(add);
-          }
-        }
-
-        function add(key) {
-          var li = _.e('li', null, list);
-          _.onclick(_.e('button', {text: '\u00d7'}, li), function() {
-            list.removeChild(li);
-            apply();
-          });
-          _.e('label', {text: key}, li);
-        }
-
-        function apply() {
-          var keys = [];
-          _.qa('li label', list).forEach(function(key) {
-            keys.push(key.textContent);
-          });
-          input.value = keys.join(',');
-          input.focus();
-
-          var ev = d.createEvent('Event');
-          ev.initEvent('input', true, true);
-          input.dispatchEvent(ev);
-        }
-
-        reset();
-
-        var toolbar = _.e('div', {cls: 'pp-config-key-editor-toolbar'}, editor);
-        var add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, toolbar);
-        _.key.listen(add_input, function(key) {
-          add_input.value = key;
-          return true;
-        });
-
-        var btn_add = _.e('button', {text: that.lng.pref.add, cls: 'pp-config-key-editor-add'}, toolbar),
-            btn_close = _.e('button', {text: that.lng.pref.close, cls: 'pp-config-key-editor-close'}, toolbar);
-        _.onclick(btn_add, function() {
-          add(add_input.value);
-          add_input.value = '';
-          apply();
-        });
-        _.onclick(btn_close, close_editor);
-      }
-
-      _.listen(root, ['click', 'focus'], function(ev) {
-        if (/^input$/i.test(ev.target.tagName) && !(editor_wrapper && editor_wrapper.contains(ev.target))) {
-          open_editor(ev.target);
-          _.modal.begin(editor_wrapper, {onclose: close_editor, stack: true, members: [ev.target]});
-        }
-      }, {capture: true});
-    },
-
-    create_tab_content_bookmark: function(root, section) {
-      _.e('div', {text: this.lng.conf.bookmark.tag_order, css: 'white-space:pre'}, root);
-
-      var tag_order_textarea = _.e('textarea', null, root);
-      tag_order_textarea.value = _.conf.bookmark.tag_order.map(function(a) {
-        return a.map(function(tag) {
-          return tag || '*';
-        }).join('\n');
-      }).join('\n-\n');
-
-      _.listen(tag_order_textarea, 'input', function() {
-        var tag_order = [[]];
-        tag_order_textarea.value.split(/[\r\n]+/).forEach(function(line) {
-          if (!line) {
-            return;
-          }
-          if (line === '-') {
-            tag_order.push([]);
-          } else {
-            tag_order[tag_order.length - 1].push(line === '*' ? null : line);
-          }
-        });
-        _.conf.bookmark.tag_order = tag_order;
-      });
-
-
-      _.e('div', {text: this.lng.conf.bookmark.tag_aliases}, root);
-
-      var tag_alias_table = _.e('table', {id: 'pp-config-bookmark-tag-aliases'}, root);
-      _.onclick(_.e('button', {text: this.lng.pref.add}, root), function() {
-        add_row();
-      });
-
-      function save() {
-        var aliases = { };
-        g.Array.prototype.forEach.call(tag_alias_table.rows, function(row) {
-          var inputs = _.qa('input', row);
-          if (inputs.length === 2 && inputs[0].value) {
-            aliases[inputs[0].value] = inputs[1].value.split(/\s+/);
-          }
-        });
-        _.conf.bookmark.tag_aliases = aliases;
-      }
-
-      function add_row(tag, list) {
-        var row = tag_alias_table.insertRow(-1);
-        _.onclick(_.e('button', {text: '\u00d7'}, row.insertCell(-1)), function() {
-          row.parentNode.removeChild(row);
-          save();
-        });
-
-        var i_tag = _.e('input', {value: tag || ''}, row.insertCell(-1)),
-            i_atags = _.e('input', {value: list ? list.join(' ') : ''}, row.insertCell(-1));
-        _.listen(i_tag, 'input', save);
-        _.listen(i_atags, 'input', save);
-      }
-
-      var aliases = _.conf.bookmark.tag_aliases;
-      for(var key in aliases) {
-        add_row(key, aliases[key]);
-      }
-    },
-
-    create_tab_content_importexport: function(root) {
-      var toolbar  = _.e('div', {id: 'pp-config-importexport-toolbar'}, root);
-      var textarea = _.e('textarea', null, root);
-
-      _.onclick(_.e('button', {text: this.lng.pref['export']}, toolbar), function() {
-        textarea.value = JSON.stringify(_.conf.__export(''), null, 2);
-      });
-
-      _.onclick(_.e('button', {text: this.lng.pref['import']}, toolbar), function() {
-        var data;
-        try {
-          data = JSON.parse(textarea.value);
-        } catch(ex) {
-          g.alert(ex);
-          return;
-        }
-        _.conf.__import(data);
-      });
-    },
-
-    create_tab_content_about: function(root) {
-      var urls = [
-        'http://crckyl.ath.cx/pixplus/',
-        'http://crckyl.ath.cx/cgit/pixplus.git/',
-        'http://my.opera.com/crckyl/',
-        'http://twitter.com/crckyl'
-      ];
-      var dl = _.e('dl', null, root);
-      [
-        [this.lng.pref.about_name, 'pixplus'],
-        [this.lng.pref.about_version, _.version() + ' - ' + _.release_date()],
-        [this.lng.pref.about_web, function(dd) {
-          var ul = _.e('ul', null, dd);
-          urls.forEach(function(url) {
-            _.e('a', {href: url, text: url}, _.e('li', null, ul));
-          });
-        }],
-        [this.lng.pref.about_email,
-         _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
-        [this.lng.pref.about_license, 'The MIT License']
-      ].forEach(function(p) {
-        var label = p[0], content = p[1];
-        _.e('dt', {text: label}, dl);
-        var dd = _.e('dd', null, dl);
-        if (content.nodeName) {
-          dd.appendChild(content);
-        } else if (content.call) {
-          content(dd);
-        } else {
-          dd.textContent = content;
-        }
-      });
-    },
-
-    create_tab_content_changelog: function(root) {
-      var that = this;
-      var dl = _.e('dl', null, root);
-      _.changelog.forEach(function(release) {
-        var dt = _.e('dt', {text: release.version + ' - ' + release.date}, dl);
-        if (release.releasenote) {
-          dt.textContent += ' ';
-          _.e('a', {href: release.releasenote, text: that.lng.pref.releasenote}, dt);
-        }
-
-        var ul = _.e('ul', null, _.e('dd', null, dl));
-        (
-          release.changes_i18n
-            ? (release.changes_i18n[that.lng.__name__] || release.changes_i18n.en)
-            : release.changes
-        ).forEach(function(change) {
-          _.e('li', {text: change}, ul);
-        });
-      });
-    },
-
-    create_tab_content_debug: function(root) {
-      var that = this;
-      var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
-      ['en', 'ja'].forEach(function(name) {
-        _.onclick(_.e('button', {text: name}, langbar), function() {
-          that.lng = _.i18n[name];
-          that.dom.root.parentNode.removeChild(that.dom.root);
-          that.dom = { };
-          that.show();
-        });
-      });
-
-      var escaper = _.e('div', {id: 'pp-config-escaper'}, root), escaper_e;
-      _.listen(_.e('input', null, escaper), 'input', function(ev) {
-        escaper_e.value = ev.target.value.split('').map(function(c) {
-          var b = c.charCodeAt(0);
-
-          if (b >= 0x20 && b <= 0x7e) {
-            return c;
-          }
-
-          c = b.toString(16);
-          while(c.length < 4) {
-            c = '0' + c;
-          }
-          return '\\u' + c;
-        }).join('');
-      });
-      escaper_e = _.e('input', null, escaper);
-
-      var input_line = _.e('div', null, root);
-      var input      = _.e('input', null, input_line);
-      var cancel_l   = _.e('label', null, input_line);
-      var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
-      var console_l  = _.e('label', null, input_line);
-      var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
-      var logger     = _.e('table', {css: 'margin-top:4px;border:1px solid #aaa'}, root);
-
-      cancel_l.appendChild(d.createTextNode('Cancel'));
-      console_l.appendChild(d.createTextNode('Console'));
-
-      var log_attrs  = [
-        'type',
-        'keyCode',
-        'charCode',
-        'key',
-        'char',
-        'keyIdentifier',
-        'which',
-        'eventPhase',
-        'detail',
-        'timeStamp'
-      ];
-
-      function clear() {
-        input.value = '';
-        logger.innerHTML = '';
-        var row = logger.insertRow(0);
-        row.insertCell(-1).textContent = 'Key';
-        log_attrs.forEach(function(attr) {
-          row.insertCell(-1).textContent = attr;
-        });
-      }
-
-      function log(ev) {
-        var row = logger.insertRow(1);
-        var key = _.key.parse_event(ev) || 'None';
-        row.insertCell(-1).textContent = key;
-        log_attrs.forEach(function(attr) {
-          row.insertCell(-1).textContent = ev[attr];
-        });
-        if (cancel.checked && key) {
-          ev.preventDefault();
-        }
-        if (console.checked) {
-          _.debug(ev);
-        }
-      }
-
-      clear();
-      _.onclick(_.e('button', {text: 'Clear', css: 'margin-left:4px;'}, input_line), clear);
-      input.addEventListener('keydown', log, false);
-      input.addEventListener('keypress', log, false);
-    },
-
     create_tab: function(name, create_args) {
       if (name === 'mypage') {
         return;
       }
 
-      var that = this;
-      var dom = this.dom;
-      var label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab',
-                                id: 'pp-config-tab-' + name}, dom.tabbar);
-      var content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
+      var that = this, dom = this.dom, label, content;
 
-      (this['create_tab_content_' + name] || this.create_tab_content).call(this, content, create_args);
+      label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab',
+                            id: 'pp-config-tab-' + name}, dom.tabbar);
+      content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
+
+      (this.tabs[name] || this.tabs.__default).call(this.tabs, content, create_args, this.lng);
       dom.content.appendChild(content);
       dom[name] = {label: label, content: content};
       _.onclick(label, function() {
@@ -1388,8 +1369,7 @@
     },
 
     create: function() {
-      var that = this;
-      var dom = this.dom;
+      var that = this, dom = this.dom;
       if (dom.created) {
         return;
       }
@@ -5727,12 +5707,13 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config-content-wrapper{padding:6px}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
-.pp-config-content tr:nth-child(even) td{background-color:#f2f4f6}\
+.pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}\
 .pp-config-content dt{font-weight:bold}\
 .pp-config-content dd{margin-left:1em}\
 .pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}\
-#pp-config-key-content td:not(.pp-config-key-modeline):first-child{padding-left:1em}\
-.pp-config-key-modeline{font-weight:bold}\
+.pp-config-content .pp-config-subsection-title div{font-weight:bold;\
+border-bottom:1px solid #becad8;border-left:0.8em solid #becad8;\
+margin-top:1.6em;margin-bottom:0.4em;padding:0.3em 0.2em}\
 #pp-config-bookmark-content textarea{width:100%;height:20em;\
 box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;margin-bottom:1em}\
 #pp-config-bookmark-tag-aliases{width:100%}\
@@ -5848,7 +5829,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     ]},
 
     {"name": "key", "items": [
-      {"key": "popup_prev", "value": "Backspace,a", "mode": "normal"},
+      {"key": "popup_prev", "value": "Backspace,a"},
       {"key": "popup_prev_direction", "value": "Left"},
       {"key": "popup_next", "value": "Space"},
       {"key": "popup_next_direction", "value": "Right"},
@@ -5888,19 +5869,19 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "popup_rate08", "value": "Shift+3,Shift+#"},
       {"key": "popup_rate09", "value": "Shift+2,Shift+\""},
       {"key": "popup_rate10", "value": "Shift+1,Shift+!"},
-      {"key": "popup_bookmark_start", "value": "b", "start_mode": "bookmark"},
-      {"key": "popup_manga_start", "value": "v", "start_mode": "manga"},
-      {"key": "popup_qrate_start", "value": "d", "start_mode": "question"},
-      {"key": "popup_tag_edit_start", "value": "", "start_mode": "tagedit"},
-      {"key": "popup_bookmark_submit", "value": "Enter,Space", "mode": "bookmark"},
-      {"key": "popup_bookmark_end", "value": "Escape", "end_mode": "bookmark"},
-      {"key": "popup_manga_open_page", "value": "Shift+f", "mode": "manga"},
-      {"key": "popup_manga_end", "value": "v,Escape", "end_mode": "manga"},
-      {"key": "popup_qrate_select_prev", "value": "Up", "mode": "question"},
-      {"key": "popup_qrate_select_next", "value": "Down", "mode": "question"},
-      {"key": "popup_qrate_submit", "value": "Enter,Space", "mode": "question"},
-      {"key": "popup_qrate_end", "value": "Escape,d", "end_mode": "question"},
-      {"key": "popup_tag_edit_end", "value": "Escape", "end_mode": "tagedit"}
+      {"key": "popup_bookmark_start", "value": "b", "subsection": "bookmark"},
+      {"key": "popup_bookmark_submit", "value": "Enter,Space", "subsection": "bookmark"},
+      {"key": "popup_bookmark_end", "value": "Escape", "subsection": "bookmark"},
+      {"key": "popup_manga_start", "value": "v", "subsection": "manga"},
+      {"key": "popup_manga_open_page", "value": "Shift+f", "subsection": "manga"},
+      {"key": "popup_manga_end", "value": "v,Escape", "subsection": "manga"},
+      {"key": "popup_qrate_start", "value": "d", "subsection": "question"},
+      {"key": "popup_qrate_select_prev", "value": "Up", "subsection": "question"},
+      {"key": "popup_qrate_select_next", "value": "Down", "subsection": "question"},
+      {"key": "popup_qrate_submit", "value": "Enter,Space", "subsection": "question"},
+      {"key": "popup_qrate_end", "value": "Escape,d", "subsection": "question"},
+      {"key": "popup_tag_edit_start", "value": "", "subsection": "tagedit"},
+      {"key": "popup_tag_edit_end", "value": "Escape", "subsection": "tagedit"}
     ]},
 
     {"name": "bookmark", "items": [
@@ -5915,25 +5896,29 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       __name__: 'en',
 
       pref: {
-        general: 'General',
-        popup: 'Popup',
-        key: 'Key',
-        bookmark: 'Tags',
-        importexport: 'Import/Export',
-        'export': 'Export',
-        'import': 'Import',
-        about: 'About',
-        about_name: 'Name',
+        general:       'General',
+        popup:         'Popup',
+        key:           'Key',
+        key_bookmark:  'Bookmark mode',
+        key_manga:     'Manga mode',
+        key_question:  'Questionnaire mode',
+        key_question:  'Tag edit mode',
+        bookmark:      'Tags',
+        importexport:  'Import/Export',
+        'export':      'Export',
+        'import':      'Import',
+        about:         'About',
+        about_name:    'Name',
         about_version: 'Version',
-        about_web: 'Web page',
-        about_email: 'Mail',
+        about_web:     'Web page',
+        about_email:   'Mail',
         about_license: 'License',
-        changelog: 'Changelog',
-        releasenote: 'Release note',
-        debug: 'Debug',
-        'default': 'Default',
-        add: 'Add',
-        close: 'Close'
+        changelog:     'Changelog',
+        releasenote:   'Release note',
+        debug:         'Debug',
+        'default':     'Default',
+        add:           'Add',
+        close:         'Close'
       },
 
       conf: {
@@ -6030,21 +6015,19 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           popup_rate08: 'Rate(8pt)',
           popup_rate09: 'Rate(9pt)',
           popup_rate10: 'Rate(10pt)',
+          popup_bookmark_start: 'Start bookmark mode',
           popup_bookmark_submit: 'Send',
+          popup_bookmark_end: 'End bookmark mode',
+          popup_manga_start: 'Start manga mode',
           popup_manga_open_page: 'Open manga page',
+          popup_manga_end: 'End manga mode',
+          popup_qrate_start: 'Start questionnaire mode',
           popup_qrate_select_prev: 'Select previous item',
           popup_qrate_select_next: 'Select next item',
           popup_qrate_submit: 'Send',
-          mode_start: 'Start $mode',
-          mode_end: 'End $mode'
-        },
-
-        mode: {
-          normal: 'Normal',
-          bookmark: 'Bookmark mode',
-          manga: 'Manga mode',
-          question: 'Questionnaire mode',
-          tagedit: 'Tag edit mode'
+          popup_qrate_end: 'End questionnaire mode',
+          popup_tag_edit_start: 'Start tag edit mode',
+          popup_tag_edit_end: 'End tag edit mode'
         },
 
         bookmark: {
@@ -6075,25 +6058,29 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       __name__: 'ja',
 
       pref: {
-        general: '\u5168\u822c',
-        popup: '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7',
-        key: '\u30ad\u30fc',
-        bookmark: '\u30bf\u30b0',
-        importexport: '\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
-        'export': '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
-        'import': '\u30a4\u30f3\u30dd\u30fc\u30c8',
-        about: '\u60c5\u5831',
-        about_name: '\u540d\u524d',
+        general:       '\u5168\u822c',
+        popup:         '\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7',
+        key:           '\u30ad\u30fc',
+        key_bookmark:  '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9',
+        key_manga:     '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9',
+        key_question:  '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9',
+        key_tagedit:   '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9',
+        bookmark:      '\u30bf\u30b0',
+        importexport:  '\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
+        'export':      '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
+        'import':      '\u30a4\u30f3\u30dd\u30fc\u30c8',
+        about:         '\u60c5\u5831',
+        about_name:    '\u540d\u524d',
         about_version: '\u30d0\u30fc\u30b8\u30e7\u30f3',
-        about_web: '\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8',
-        about_email: '\u30e1\u30fc\u30eb',
+        about_web:     '\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8',
+        about_email:   '\u30e1\u30fc\u30eb',
         about_license: '\u30e9\u30a4\u30bb\u30f3\u30b9',
-        changelog: '\u66f4\u65b0\u5c65\u6b74',
-        releasenote: '\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8',
-        debug: '\u30c7\u30d0\u30c3\u30b0',
-        'default': '\u30c7\u30d5\u30a9\u30eb\u30c8',
-        add: '\u8ffd\u52a0',
-        close: '\u9589\u3058\u308b'
+        changelog:     '\u66f4\u65b0\u5c65\u6b74',
+        releasenote:   '\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8',
+        debug:         '\u30c7\u30d0\u30c3\u30b0',
+        'default':     '\u30c7\u30d5\u30a9\u30eb\u30c8',
+        add:           '\u8ffd\u52a0',
+        close:         '\u9589\u3058\u308b'
       },
 
       conf: {
@@ -6190,21 +6177,19 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           popup_rate08: '\u8a55\u4fa1\u3059\u308b(8\u70b9)',
           popup_rate09: '\u8a55\u4fa1\u3059\u308b(9\u70b9)',
           popup_rate10: '\u8a55\u4fa1\u3059\u308b(10\u70b9)',
+          popup_bookmark_start: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb',
           popup_bookmark_submit: '\u9001\u4fe1',
+          popup_bookmark_end: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86',
+          popup_manga_start: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb',
           popup_manga_open_page: '\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002',
+          popup_manga_end: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u7d42\u4e86',
+          popup_qrate_start: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb',
           popup_qrate_select_prev: '\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
           popup_qrate_select_next: '\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e',
           popup_qrate_submit: '\u9001\u4fe1',
-          mode_start: '$mode\u958b\u59cb',
-          mode_end: '$mode\u7d42\u4e86'
-        },
-
-        mode: {
-          normal: '\u901a\u5e38',
-          bookmark: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9',
-          manga: '\u30de\u30f3\u30ac\u30e2\u30fc\u30c9',
-          question: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9',
-          tagedit: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9'
+          popup_qrate_end: '\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u7d42\u4e86',
+          popup_tag_edit_start: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb',
+          popup_tag_edit_end: '\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86'
         },
 
         bookmark: {
