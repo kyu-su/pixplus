@@ -5614,9 +5614,10 @@ border:0px;box-shadow:none;background:none}\
 \
 .pp-tag-select{outline:2px solid #0f0}\
 .pp-tag-link{outline:2px solid #f00}\
-.pp-tag-associate-button{display:none;background-color:#eee;\
+.pp-tag-associate-button{display:none;background-color:#eee;margin-right:0.2em;\
 border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}\
-.pp-tag-associate-button.pp-active{background-color:#ddd}\
+.pp-tag-associate-button.pp-active{background-color:#aaa}\
+.pp-tag-associate-button:hover{background-color:#ddd}\
 .pp-associate-tag .tag-container .list-items .tag{display:none}\
 .pp-associate-tag .pp-tag-associate-button{display:inline}\
 \
