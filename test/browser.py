@@ -118,6 +118,14 @@ class Browser:
       return [rect.left, rect.top, rect.width, rect.height];
     ''', element)))
 
+  def screen_size(self):
+    sw, sh = self.js('''
+      return [document.documentElement.clientWidth,
+              document.documentElement.clientHeight];
+    ''')
+    return sw, sh
+
+
   def set_cookie(self, name, value, domain, path):
     expires = ''
     if value is None:

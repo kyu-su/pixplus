@@ -530,10 +530,7 @@ class Test_KeyBind(TestCase):
     if min_height is not None and ih < min_height:
       return False
 
-    sw, sh = self.js('''
-      return [document.documentElement.clientWidth,
-              document.documentElement.clientHeight];
-    ''')
+    sw, sh = self.screen_size()
 
     if (ih > sh) != overflow_v:
       return False
