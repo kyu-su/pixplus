@@ -3,3 +3,5 @@
 * conf.bookmark.tag_order
 * conf.bookmark.tag_aliases
 * pixplus.modal module
+* tag reorder
+* tag association
