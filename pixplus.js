@@ -851,70 +851,107 @@
   };
 
   _.modal = {
+    suspend: false,
+    dialog: null,
+
     centerize: function() {
-      if (!this.options.centerize) {
-        return;
-      }
+      var dlg = this.dialog;
+      while(dlg) {
+        var options = this.dialog.options,
+            container = this.dialog.container;
 
-      var de  = d.documentElement,
-          off = (this.dialog.offsetParent || de).getBoundingClientRect(),
-          x, y;
+        var de   = d.documentElement,
+            off  = container.offsetParent || de,
+            rect = off.getBoundingClientRect(),
+            x, y;
 
-      x = (de.clientWidth  - this.dialog.offsetWidth)  / 2 - off.left;
-      y = (de.clientHeight - this.dialog.offsetHeight) / 2 - off.top;
+        x = (de.clientWidth  - container.offsetWidth)  / 2 - rect.left - off.scrollLeft;
+        y = (de.clientHeight - container.offsetHeight) / 2 - rect.top  - off.scrollTop;
 
-      if (/^(?:both|horizontal)$/i.test(this.options.centerize)) {
-        this.dialog.style.left = g.Math.floor(x) + 'px';
-      }
-      if (/^(?:both|vertical)$/i.test(this.options.centerize)) {
-        this.dialog.style.top  = g.Math.floor(y) + 'px';
+        if (/^(?:both|horizontal)$/i.test(options.centerize)) {
+          container.style.left = g.Math.floor(x) + 'px';
+        }
+        if (/^(?:both|vertical)$/i.test(options.centerize)) {
+          container.style.top  = g.Math.floor(y) + 'px';
+        }
+
+        dlg = dlg.parent;
       }
     },
 
-    begin: function(dialog, options) {
-      if (dialog === this.dialog) {
+    begin: function(container, options) {
+      if (this.dialog && container === this.dialog.container) {
         return;
       }
 
-      this.end();
+      if (!options.stack) {
+        this.end(true);
+      }
 
-      this.dialog = dialog;
-      this.options = options || { };
+      this.dialog = {
+        parent: this.dialog,
+        container: container,
+        options: options || { }
+      };
 
       this.centerize();
+      this.init_events();
 
       var that = this;
-
+      this.suspend = true;
       g.setTimeout(function() {
-        that.conn_key = _.key.listen(d, function(key) {
-          if (key === 'Escape') {
-            that.end();
-          }
-          try {
-            w.pixiv.modal.close();
-          } catch(ex) { }
-        });
-
-        that.conn_click = _.onclick(d, function(ev) {
-          if (!that.dialog.contains(ev.target)) {
-            that.end(that.dialog);
-          }
-        });
-
-        if (that.options.centerize) {
-          that.conn_resize = _.listen(w, 'resize', that.centerize.bind(that), {async: true});
-        }
-      }, 0);
+        that.suspend = false;
+      }, 100);
     },
 
-    end: function() {
-      if (this.options && this.options.onclose) {
-        this.options.onclose(this.dialog);
+    end: function(close_all) {
+      while(this.dialog) {
+        if (this.dialog.options && this.dialog.options.onclose) {
+          this.dialog.options.onclose(this.dialog.container);
+        }
+        this.dialog = this.dialog.parent;
+        if (!close_all) {
+          break;
+        }
+      }
+      if (!this.dialog) {
+        this.uninit_events();
+      }
+    },
+
+    init_events: function() {
+      var that = this;
+      if (!this.conn_key) {
+        this.conn_key = _.key.listen(d, function(key) {
+          if (!that.suspend && key === 'Escape') {
+            that.end();
+          }
+        });
       }
 
-      this.options = null;
-      this.dialog = null;
+      if (!this.conn_click) {
+        this.conn_click = _.onclick(d, function(ev) {
+          if (that.suspend || !d.body.contains(ev.target)) {
+            return;
+          }
 
+          var members = [that.dialog.container].concat(that.dialog.options.members || []);
+          for(var i = 0; i < members.length; ++i) {
+            if (ev.target === members[i] || members[i].contains(ev.target)) {
+              return;
+            }
+          }
+
+          that.end();
+        });
+      }
+
+      if (!this.conn_resize) {
+        this.conn_resize = _.listen(w, 'resize', this.centerize.bind(this), {async: true});
+      }
+    },
+
+    uninit_events: function() {
       var that = this;
       ['key', 'click', 'resize'].forEach(function(name) {
         if (that['conn_' + name]) {
@@ -1027,22 +1064,29 @@
       this.create_tab_content(root, section);
 
       var that = this;
-      var editor_row;
+      var active_input, editor_wrapper;
 
-      function close_editor(row, input) {
-        if (editor_row) {
-          editor_row.parentNode.removeChild(editor_row);
-          editor_row = null;
+      function close_editor() {
+        if (editor_wrapper) {
+          editor_wrapper.parentNode.removeChild(editor_wrapper);
+          editor_wrapper = null;
+        }
+        if (active_input) {
+          active_input.classList.remove('pp-active');
         }
       }
 
-      function open_editor(row, input) {
+      function open_editor(input) {
         close_editor();
-        editor_row = _.e('tr');
 
-        var cell = _.e('td', {cls: 'pp-config-key-editor', 'colspan': '3'}, editor_row);
-        var root = _.e('div', null, cell);
-        var list = _.e('ul', null, root);
+        input.classList.add('pp-active');
+        active_input = input;
+
+        editor_wrapper = _.e('div', {cls: 'pp-config-key-editor-wrapper'}, null);
+        input.parentNode.insertBefore(editor_wrapper, input);
+
+        var editor = _.e('div', {cls: 'pp-config-key-editor'}, editor_wrapper);
+        var list = _.e('ul', null, editor);
 
         function reset() {
           _.clear(list);
@@ -1066,6 +1110,7 @@
             keys.push(key.textContent);
           });
           input.value = keys.join(',');
+          input.focus();
 
           var ev = d.createEvent('Event');
           ev.initEvent('input', true, true);
@@ -1074,30 +1119,29 @@
 
         reset();
 
-        var add_line = _.e('div', {cls: 'pp-config-key-editor-add-line'}, root);
-        var add_input = _.e('input', {'placeholder': 'Grab key'}, add_line);
+        var toolbar = _.e('div', {cls: 'pp-config-key-editor-toolbar'}, editor);
+        var add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, toolbar);
         _.key.listen(add_input, function(key) {
           add_input.value = key;
           return true;
         });
-        _.onclick(_.e('button', {text: that.lng.pref.add}, add_line), function() {
+
+        var btn_add = _.e('button', {text: that.lng.pref.add, cls: 'pp-config-key-editor-add'}, toolbar),
+            btn_close = _.e('button', {text: that.lng.pref.close, cls: 'pp-config-key-editor-close'}, toolbar);
+        _.onclick(btn_add, function() {
           add(add_input.value);
           add_input.value = '';
           apply();
         });
-        _.onclick(_.e('button', {text: that.lng.pref.close}, add_line), close_editor);
-
-        row.parentNode.insertBefore(editor_row, row.nextSibling);
+        _.onclick(btn_close, close_editor);
       }
 
-      _.qa('tr', root).forEach(function(row) {
-        var input = _.q('input', row);
-        if (input) {
-          _.listen(input, 'focus', function() {
-            open_editor(row, input);
-          });
+      _.listen(root, ['click', 'focus'], function(ev) {
+        if (/^input$/i.test(ev.target.tagName) && !(editor_wrapper && editor_wrapper.contains(ev.target))) {
+          open_editor(ev.target);
+          _.modal.begin(editor_wrapper, {onclose: close_editor, stack: true, members: [ev.target]});
         }
-      });
+      }, {capture: true});
     },
 
     create_tab_content_bookmark: function(root, section) {
@@ -5710,9 +5754,13 @@ margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
 border-right:none;border-bottom:none}\
 \
 /* key editor */\
+#pp-config-key-content input.pp-active{background-color:#ffc}\
+.pp-config-key-editor-wrapper{position:relative}\
+.pp-config-key-editor{position:absolute;right:100%;top:0px;z-index:10002;\
+background-color:#fff;border:2px solid #becad8;border-radius:6px;padding:3px}\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
-.pp-config-key-editor-add-line{margin-top:0.2em}\
-.pp-config-key-editor-add-line button{margin-left:0.2em}\
+.pp-config-key-editor-toolbar{margin-top:0.2em}\
+.pp-config-key-editor-toolbar button{margin-left:0.2em}\
 \
 /* floater */\
 .pp-float{position:fixed;top:0px;z-index:90}\
