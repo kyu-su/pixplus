@@ -1198,13 +1198,15 @@
         var urls = [
           'http://crckyl.ath.cx/pixplus/',
           'http://crckyl.ath.cx/cgit/pixplus.git/',
+          'https://github.com/crckyl/pixplus',
           'http://my.opera.com/crckyl/',
           'http://twitter.com/crckyl'
         ];
-        var dl = _.e('dl', null, root);
+
+        _.e('p', {text: 'pixplus ' + _.version() + ' - ' + _.release_date()}, root);
+
+        var info = _.e('dl', null, root);
         [
-          [lang.pref.about_name, 'pixplus'],
-          [lang.pref.about_version, _.version() + ' - ' + _.release_date()],
           [lang.pref.about_web, function(dd) {
             var ul = _.e('ul', null, dd);
             urls.forEach(function(url) {
@@ -1216,8 +1218,8 @@
           [lang.pref.about_license, 'The MIT License']
         ].forEach(function(p) {
           var label = p[0], content = p[1];
-          _.e('dt', {text: label}, dl);
-          var dd = _.e('dd', null, dl);
+          _.e('dt', {text: label}, info);
+          var dd = _.e('dd', null, info);
           if (content.nodeName) {
             dd.appendChild(content);
           } else if (content.call) {
@@ -1226,23 +1228,24 @@
             dd.textContent = content;
           }
         });
-      },
 
-      changelog: function(root, section, lang) {
-        var dl = _.e('dl', null, root);
+        var changelog = _.e('dl', null, root);
         _.changelog.forEach(function(release) {
-          var dt = _.e('dt', {text: release.version + ' - ' + release.date}, dl);
+          var dt = _.e('dt', {text: release.version + ' - ' + release.date}, changelog);
           if (release.releasenote) {
             dt.textContent += ' ';
             _.e('a', {href: release.releasenote, text: lang.pref.releasenote}, dt);
           }
 
-          var ul = _.e('ul', null, _.e('dd', null, dl));
-          (
-            release.changes_i18n
-              ? (release.changes_i18n[lang.__name__] || release.changes_i18n.en)
-              : release.changes
-          ).forEach(function(change) {
+          var ul = _.e('ul', null, _.e('dd', null, changelog));
+
+          var changes;
+          if (release.changes_i18n) {
+            changes = release.changes_i18n[lang.__name__] || release.changes_i18n.en;
+          } else {
+            changes = release.changes;
+          }
+          changes.forEach(function(change) {
             _.e('li', {text: change}, ul);
           });
         });
@@ -1381,7 +1384,7 @@
       _.conf.__schema.forEach(function(section) {
         that.create_tab(section.name, section);
       });
-      ['importexport', 'about', 'changelog'].forEach(this.create_tab.bind(this));
+      ['importexport', 'about'].forEach(this.create_tab.bind(this));
       if (_.conf.general.debug) {
         that.create_tab('debug');
       }
@@ -5708,7 +5711,8 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
 .pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}\
-.pp-config-content dt{font-weight:bold}\
+.pp-config-content dl{margin-top:1.2em}\
+.pp-config-content dt{margin-top:0.4em}\
 .pp-config-content dd{margin-left:1em}\
 .pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}\
 .pp-config-content .pp-config-subsection-title div{font-weight:bold;\
@@ -5908,9 +5912,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         'export':      'Export',
         'import':      'Import',
         about:         'About',
-        about_name:    'Name',
-        about_version: 'Version',
-        about_web:     'Web page',
+        about_web:     'Web',
         about_email:   'Mail',
         about_license: 'License',
         changelog:     'Changelog',
@@ -6070,8 +6072,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         'export':      '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8',
         'import':      '\u30a4\u30f3\u30dd\u30fc\u30c8',
         about:         '\u60c5\u5831',
-        about_name:    '\u540d\u524d',
-        about_version: '\u30d0\u30fc\u30b8\u30e7\u30f3',
         about_web:     '\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8',
         about_email:   '\u30e1\u30fc\u30eb',
         about_license: '\u30e9\u30a4\u30bb\u30f3\u30b9',
