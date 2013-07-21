@@ -2981,6 +2981,8 @@
         return;
       }
 
+      _.modal.end(true);
+
       if (this.bookmark.active) {
         this.bookmark.end();
       }
