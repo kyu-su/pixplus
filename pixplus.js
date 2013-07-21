@@ -5660,6 +5660,7 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config button:hover{background-color:#ddeaf6}\
 #pp-config button:active{background-color:#becad8}\
 #pp-config ul{list-style-type:none}\
+#pp-config li{display:block}\
 #pp-config.pp-show{display:block}\
 #pp-config-tabbar{border-bottom:2px solid #becad8}\
 #pp-config-tabbar label{cursor:pointer}\
@@ -5667,7 +5668,7 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
 #pp-config-tabbar .pp-config-tab:hover{background-color:#ddeaf6}\
 #pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
-#pp-config-content-wrapper{padding:0.2em}\
+#pp-config-content-wrapper{padding:6px}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
 .pp-config-content tr:nth-child(even) td{background-color:#f2f4f6}\
@@ -5694,6 +5695,9 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 \
 #pp-config-btn~#pp-config{position:absolute;z-index:10000;top:27px;left:-400px;width:800px;\
 background-color:#fff;border:3px solid #becad8;border-radius:10px}\
+#pp-config-btn~#pp-config .pp-config-tab:first-child:hover{\
+margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
+border-right:none;border-bottom:none}\
 \
 /* key editor */\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
