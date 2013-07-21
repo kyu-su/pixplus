@@ -735,22 +735,23 @@
       var that = this, suspend = null;
       return _.listen(context, ['keydown', 'keypress'], function(ev, connection) {
         var key = that.parse_event(ev);
-        if (suspend === key && ev.type === 'keypress') {
+        if (!key) {
           return false;
         }
 
-        if (key) {
-          _.debug('keyevent type=' + ev.type + ' key=' + key);
-          var res = !!listener(key, ev, connection);
-          if (res) {
-            _.debug('  canceled');
-            if (ev.type === 'keydown') {
-              suspend = key;
-            }
-          }
-          return res;
+        if (suspend === key && ev.type === 'keypress') {
+          return true;
         }
-        return false;
+
+        _.debug('keyevent type=' + ev.type + ' key=' + key);
+        var res = !!listener(key, ev, connection);
+        if (res) {
+          _.debug('  canceled');
+        }
+        if (ev.type === 'keydown') {
+          suspend = key;
+        }
+        return res;
       }, options);
     },
 
