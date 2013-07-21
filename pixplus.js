@@ -372,7 +372,11 @@
     if (g.console) {
       _[name] = function(msg) {
         if (name !== 'debug' || _.conf.general.debug) {
-          g.console[name]('pixplus: [' + name + '] ' + msg);
+          if (typeof(msg) === 'object') {
+            g.console[name]('pixplus: [' + name + '] ' + msg, msg);
+          } else {
+            g.console[name]('pixplus: [' + name + '] ' + msg);
+          }
         }
       };
     } else {
@@ -1307,8 +1311,8 @@
         if (cancel.checked && key) {
           ev.preventDefault();
         }
-        if (console.checked && g.console) {
-          g.console.log(ev);
+        if (console.checked) {
+          _.debug(ev);
         }
       }
 
