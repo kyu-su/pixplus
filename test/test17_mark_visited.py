@@ -1,7 +1,3 @@
-import time
-import PIL
-import base64
-
 import util
 from test_base import TestCase
 

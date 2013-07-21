@@ -1,5 +1,3 @@
-import time
-
 from test_base import TestCase
 
 class Test_Manga(TestCase):

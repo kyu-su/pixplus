@@ -1,5 +1,4 @@
 import util
-
 from test_base import TestCase
 
 class Test_Jumpphp(TestCase):
