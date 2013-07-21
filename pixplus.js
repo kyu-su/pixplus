@@ -2690,6 +2690,10 @@
 
       this.resize_mode = this.FIT_LONG;
 
+      this.clear_submod();
+    },
+
+    clear_submod: function() {
       this.bookmark.clear();
       this.manga.clear();
       this.question.clear();
@@ -2732,7 +2736,7 @@
         }
       }
 
-      // this.clear();
+      this.clear_submod();
       dom.button_manga.classList.add('pp-hide');
       dom.button_response.classList.add('pp-hide');
       dom.author_status.classList.add('pp-hide');
