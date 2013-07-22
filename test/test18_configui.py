@@ -9,6 +9,9 @@ from test_base import TestCase
 
 class Test_ModConfigUI(TestCase):
 
+  # TODO: bookmark.tag_order
+  # TODO: bookmark.tag_aliases
+
   def setUp(self):
     TestCase.setUp(self)
     self.conf_schema = util.read_json(os.path.join(self.rootdir, 'temp', 'config.json'))['data']
@@ -26,12 +29,6 @@ class Test_ModConfigUI(TestCase):
   def prepare(self):
     self.open('/')
     self.q('#pp-config-btn').click()
-    config = self.q('#pp-config')
-    x, y, w, h = self.geom(config)
-    self.assertEqual(y, 105)
-    sw, sh = self.screen_size()
-    self.assertEqual(w, 806)
-    self.assertEqual(x, int((sw - w) / 2))
     self.current_section = None
     pass
 
@@ -44,7 +41,13 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def get_input(self, section, item, suffix = ''):
-    input_id = 'pp-config-%s-%s%s' % (section['name'], item['key'].replace('_', '-'), suffix)
+    if isinstance(section, dict):
+      section = section['name']
+      pass
+    if isinstance(item, dict):
+      item = item['key']
+      pass
+    input_id = 'pp-config-%s-%s%s' % (section, item.replace('_', '-'), suffix)
     return self.q('#%s' % input_id)
 
   def each_item(self, callback, *args):
@@ -190,9 +193,8 @@ class Test_ModConfigUI(TestCase):
   def test_key_editor(self):
     conf = self.prepare()
     section = self.conf_map['key']
-    item = self.conf_map['key', 'popup_prev']
     self.activate_section(section)
-    input_e = self.get_input(section, item)
+    input_e = self.get_input('key', 'popup_prev')
     initial_keys = input_e.get_attribute('value').split(',')
 
     self.js('arguments[0].focus()', input_e)
@@ -226,7 +228,114 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.qa('.pp-config-key-editor'))
     pass
 
-  # TODO: bookmark.tag_order
-  # TODO: bookmark.tag_aliases
+  def check_modal_position_size(self, dialog, left, top, width, height):
+    self.assertTrue(dialog.is_displayed())
+    sw, sh = self.screen_size()
+    x, y, w, h = self.geom(dialog)
+
+    self.assertTrue(w <= sw, h <= sh)
+    self.assertTrue(width[0] <= w <= width[1])
+    self.assertTrue(height[0] <= h <= height[1])
+
+    if left is None:
+      self.assertEqual(x, int((sw - w) / 2))
+    else:
+      self.assertTrue(left[0] <= x <= left[1])
+      pass
+
+    if top is None:
+      self.assertEqual(y, int((sh - h) / 2))
+    else:
+      self.assertTrue(top[0] <= y <= top[1])
+      pass
+    pass
+
+  def check_keyeditor_position_size(self, input_e):
+    editor = self.qa('.pp-config-key-editor')
+    self.assertEqual(len(editor), 1)
+    editor = editor[0]
+    self.assertTrue(editor.is_displayed())
+
+    ix, iy, iw, ih = self.geom(input_e)
+    ex, ey, ew, eh = self.geom(editor)
+    self.assertTrue(100 < ew < 400)
+    self.assertTrue(50 < eh < 200)
+    self.assertTrue(0 <= ix - (ex + ew) <= 4)
+    pass
+
+  def test_modal(self):
+    self.prepare()
+    self.check_modal_position_size(self.q('#pp-config'), None, (105, 105), (806, 806), (100, 300))
+
+    self.auto_click('.pp-layout-history')
+    self.assertFalse(self.q('#pp-config').is_displayed())
+    self.check_modal_position_size(self.q('#pp-layout-history-manager'), None, None, (400, 600), (300, 400))
+
+    self.auto_click('#pp-config-btn')
+    self.assertTrue(self.q('#pp-config').is_displayed())
+    self.assertFalse(self.qa('#pp-layout-history-manager'))
+    self.current_section = None
+
+    self.activate_section(self.conf_map['key'])
+
+    input_e = self.get_input('key', 'popup_first')
+    input_e.click()
+    self.check_keyeditor_position_size(input_e)
+
+    input_e = self.get_input('key', 'popup_close')
+    input_e.click()
+    self.check_keyeditor_position_size(input_e)
+
+    self.js('document.activeElement.blur()')
+
+    input_e = self.get_input('key', 'popup_caption_scroll_down')
+    self.js('arguments[0].focus()', input_e)
+    self.check_keyeditor_position_size(input_e)
+
+    input_e = self.get_input('key', 'popup_comment_toggle')
+    self.js('arguments[0].focus()', input_e)
+    self.check_keyeditor_position_size(input_e)
+
+    time.sleep(1)
+    self.q('form[action*="search.php"]').click()
+    self.assertFalse(self.qa('.pp-config-key-editor'))
+    self.assertTrue(self.q('#pp-config').is_displayed())
+
+    self.q('form[action*="search.php"]').click()
+    self.assertFalse(self.qa('.pp-config-key-editor'))
+    self.assertFalse(self.q('#pp-config').is_displayed())
+
+    self.auto_click('#pp-config-btn')
+    self.assertTrue(self.q('#pp-config').is_displayed())
+
+    input_e = self.get_input('key', 'popup_prev')
+    input_e.click()
+    self.check_keyeditor_position_size(input_e)
+
+    time.sleep(1)
+    self.send_keys(Keys.ESCAPE, self.q('body'))
+    self.assertFalse(self.qa('.pp-config-key-editor'))
+    self.assertTrue(self.q('#pp-config').is_displayed())
+
+    self.send_keys(Keys.ESCAPE, self.q('body'))
+    self.assertFalse(self.qa('.pp-config-key-editor'))
+    self.assertFalse(self.q('#pp-config').is_displayed())
+
+    self.auto_click('#pp-config-btn')
+    self.assertTrue(self.q('#pp-config').is_displayed())
+
+    time.sleep(1)
+    self.q('form[action*="search.php"]').click()
+    self.assertFalse(self.q('#pp-config').is_displayed())
+
+    self.auto_click('.pp-layout-history')
+    self.assertFalse(self.q('#pp-config').is_displayed())
+    self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
+
+    time.sleep(1)
+    self.send_keys(Keys.ESCAPE, self.q('body'))
+    self.assertFalse(self.q('#pp-config').is_displayed())
+    self.assertFalse(self.qa('#pp-layout-history-manager'))
+    pass
 
   pass

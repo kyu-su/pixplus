@@ -2,6 +2,8 @@ import unittest
 import time
 import json
 
+from selenium.webdriver.common.keys import Keys
+
 class TestCase(unittest.TestCase):
   run_in_pixiv = True
   repeatable = True
@@ -245,5 +247,22 @@ class TestCase(unittest.TestCase):
       self.popup_wait_load()
       pass
     pass
+
+  def auto_click(self, query):
+    clickable = self.js('''
+      var list = document.querySelectorAll(%s);
+      for(var i = 0; i < list.length; ++i) {
+        var rect = list[i].getClientRects()[0],
+            elem = document.elementFromPoint((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
+        if (elem === list[i] || list[i].contains(elem)) {
+          return list[i];
+        }
+      }
+      return null;
+    ''' % json.dumps(query))
+    if clickable:
+      clickable.click()
+      return clickable
+    raise RuntimeError('There\'s no clickable element for "%s"' % query)
 
   pass
