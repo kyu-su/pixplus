@@ -747,9 +747,9 @@
         var res = !!listener(key, ev, connection);
         if (res) {
           _.debug('  canceled');
-        }
-        if (ev.type === 'keydown') {
-          suspend = key;
+          if (ev.type === 'keydown') {
+            suspend = key;
+          }
         }
         return res;
       }, options);
