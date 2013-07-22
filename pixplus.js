@@ -884,9 +884,9 @@
         return;
       }
 
-      if (!options.stack) {
-        this.end(true);
-      }
+      this.end(options.parent);
+
+      _.debug('Begin modal');
 
       this.dialog = {
         parent: this.dialog,
@@ -904,18 +904,20 @@
       }, 100);
     },
 
-    end: function(close_all) {
-      while(this.dialog) {
-        if (this.dialog.options && this.dialog.options.onclose) {
-          this.dialog.options.onclose(this.dialog.container);
-        }
-        this.dialog = this.dialog.parent;
-        if (!close_all) {
-          break;
-        }
+    close: function() {
+      _.debug('End modal');
+      if (this.dialog.options && this.dialog.options.onclose) {
+        this.dialog.options.onclose(this.dialog.container);
       }
+      this.dialog = this.dialog.parent;
       if (!this.dialog) {
         this.uninit_events();
+      }
+    },
+
+    end: function(target) {
+      while(this.dialog && this.dialog.container !== target) {
+        this.close();
       }
     },
 
@@ -924,8 +926,10 @@
       if (!this.conn_key) {
         this.conn_key = _.key.listen(d, function(key) {
           if (!that.suspend && key === 'Escape') {
-            that.end();
+            that.close();
+            return true;
           }
+          return false;
         });
       }
 
@@ -942,7 +946,7 @@
             }
           }
 
-          that.end();
+          that.close();
         });
       }
 
@@ -1033,13 +1037,17 @@
 
         var that = this, active_input, editor_wrapper;
 
-        var close = function() {
+        var close = function(wrapper) {
+          if (wrapper && wrapper !== editor_wrapper) {
+            return;
+          }
           if (editor_wrapper) {
             editor_wrapper.parentNode.removeChild(editor_wrapper);
             editor_wrapper = null;
           }
           if (active_input) {
             active_input.classList.remove('pp-active');
+            active_input = null;
           }
         };
 
@@ -1100,13 +1108,22 @@
             add_input.value = '';
             apply();
           });
-          _.onclick(btn_close, close);
+          _.onclick(btn_close, function() {
+            close();
+          });
         };
 
         _.listen(root, ['click', 'focus'], function(ev) {
-          if (/^input$/i.test(ev.target.tagName) && !(editor_wrapper && editor_wrapper.contains(ev.target))) {
+          if (/^input$/i.test(ev.target.tagName) &&
+              ev.target !== active_input &&
+              !(editor_wrapper && editor_wrapper.contains(ev.target))) {
             open(ev.target);
-            _.modal.begin(editor_wrapper, {onclose: close, stack: true, members: [ev.target]});
+            _.debug('hoge');
+            _.modal.begin(editor_wrapper, {
+              onclose: close,
+              parent: _.configui.dom.root,
+              members: [ev.target]
+            });
           }
         }, {capture: true});
       },
@@ -2964,7 +2981,7 @@
         return;
       }
 
-      _.modal.end(true);
+      _.modal.end();
 
       if (this.bookmark.active) {
         this.bookmark.end();
