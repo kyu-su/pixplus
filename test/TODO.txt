@@ -1,6 +1,3 @@
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
-* conf.bookmark.tag_order
-* conf.bookmark.tag_aliases
-* tag reorder
 * tag association
