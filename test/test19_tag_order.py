@@ -31,8 +31,7 @@ class Test_TagOrder(TestCase):
 
     if cloud:
       self.open_popup()
-      self.js('pixplus.popup.bookmark.start()')
-      self.popup_wait_load()
+      self.start_bookmark()
 
       uls = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container ul')[:-1]
       self.assertEqual([self.ul_to_tags(ul, True) for ul in uls], tags)

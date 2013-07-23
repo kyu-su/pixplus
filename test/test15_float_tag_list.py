@@ -18,8 +18,7 @@ class Test_FloatTagList(TestCase):
       lambda: not self.has_class(bookmark_btn, 'pp-active')
       )
 
-    self.js('pixplus.popup.bookmark.start()')
-    self.popup_wait_load()
+    self.start_bookmark()
 
     q = '#pp-popup-bookmark-wrapper input[type="radio"][name="restrict"][value="%d"]:checked'
     self.assertTrue(self.qa(q % (1 if hide else 0)))

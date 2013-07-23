@@ -265,4 +265,9 @@ class TestCase(unittest.TestCase):
       return clickable
     raise RuntimeError('There\'s no clickable element for "%s"' % query)
 
+  def start_bookmark(self):
+    self.js('pixplus.popup.bookmark.start()')
+    self.popup_wait_load()
+    pass
+
   pass

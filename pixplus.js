@@ -4543,7 +4543,8 @@
       }
 
       var starter = _.e('button', {text: _.lng.associate_tags,
-                                   cls: 'btn_type03', css: 'float:right'});
+                                   cls: 'pp-tag-association-toggle btn_type03',
+                                   css: 'float:right'});
       first_tag_list.insertBefore(starter, first_tag_list.firstChild);
 
       var associate = function(tag1, tag2) {
@@ -4597,7 +4598,7 @@
         grp[1].forEach(function(tag) {
           var tag_t  = tag.dataset.tag,
               button = _.e('button', {cls: 'pp-tag-associate-button',
-                                      text: tag_t, 'data-tag': tag_t});
+                                      text: tag_t, 'data-pp-tag': tag_t});
           tag.parentNode.insertBefore(button, tag.nextSibling);
           _.onclick(button, function() {
             select(tag, button);
