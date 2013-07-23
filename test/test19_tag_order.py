@@ -3,12 +3,19 @@ from test_base import TestCase
 
 class Test_TagOrder(TestCase):
 
-  def ul_to_tags(self, ul):
+  def ul_to_tags(self, ul, bookmarkform = False):
     tags = []
-    for link in ul.find_elements_by_css_selector('li a'):
-      p = util.urlparse(link.get_attribute('href'))
-      q = dict(util.parse_qsl(p.query))
-      tags.append(q.get('tag'))
+    if bookmarkform:
+      for tag in ul.find_elements_by_css_selector('li .tag'):
+        tags.append(tag.get_attribute('data-tag'))
+        pass
+      pass
+    else:
+      for link in ul.find_elements_by_css_selector('li a'):
+        p = util.urlparse(link.get_attribute('href'))
+        q = dict(util.parse_qsl(p.query))
+        tags.append(q.get('tag'))
+        pass
       pass
     return tags
 
@@ -21,6 +28,15 @@ class Test_TagOrder(TestCase):
       self.assertEqual(self.has_class(ul, 'tagCloud'), cloud)
       pass
     self.assertEqual([self.ul_to_tags(ul) for ul in uls], tags)
+
+    if cloud:
+      self.open_popup()
+      self.js('pixplus.popup.bookmark.start()')
+      self.popup_wait_load()
+
+      uls = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container ul')[:-1]
+      self.assertEqual([self.ul_to_tags(ul, True) for ul in uls], tags)
+      pass
     pass
 
   def test_tag_order(self):
