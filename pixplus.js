@@ -986,6 +986,7 @@
               info = lang.conf[section.name][item.key] || '[Error]',
               row  = _.e('tr', null, table),
               desc = _.e('td', null, row),
+              value = _.e('td', null, row),
               input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-'),
               control, control_propname;
           if (info === '[Error]') {
@@ -997,9 +998,7 @@
             control = _.e('input', {type: 'checkbox', id: input_id}, label);
             control_propname = 'checked';
             label.appendChild(d.createTextNode(info.desc || info));
-            desc.setAttribute('colspan', '2');
           } else {
-            var value = _.e('td', null, row);
             desc.textContent = info.desc || info;
             if (info.hint) {
               control = _.e('select', {id: input_id}, value);
@@ -5709,15 +5708,19 @@ eq2wVvVulDlRySh2LDQUl7Kz1EYRJlR5sbzOTFdqYNPxD/4mzdyqngK/AAAAAElFTkSuQmCC\
 #pp-config-btn.pp-active{position:relative;z-index:10001;background-color:#fff;\
 padding-top:27px;border-color:#becad8;border-bottom:none;border-radius:5px 5px 0px 0px}\
 \
-#pp-config{display:none;line-height:1.1em}\
-#pp-config input,#pp-config button,#pp-config select{white-space:nowrap;\
+#pp-config{display:none;line-height:1.2em}\
+#pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
 border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3em}\
+#pp-config button{white-space:nowrap}\
 #pp-config input[type="checkbox"]{padding:1px}\
 #pp-config button{background-color:#f2f4f6}\
 #pp-config button:hover{background-color:#ddeaf6}\
 #pp-config button:active{background-color:#becad8}\
 #pp-config ul{list-style-type:none}\
 #pp-config li{display:block}\
+#pp-config table{border-collapse:collapse;border-spacing:0px}\
+#pp-config table td{padding:0px 0.2em}\
+#pp-config label{cursor:pointer}\
 #pp-config.pp-show{display:block}\
 #pp-config-tabbar{border-bottom:2px solid #becad8}\
 #pp-config-tabbar label{cursor:pointer}\
