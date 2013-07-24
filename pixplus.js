@@ -5816,13 +5816,13 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   _.conf.__schema = [
     // __CONFIG_BEGIN__
     {"name": "general", "items": [
-      {"key": "debug", "value": false},
       {"key": "bookmark_hide", "value": false},
       {"key": "float_tag_list", "value": 1},
       {"key": "rate_confirm", "value": true},
       {"key": "disable_effect", "value": false},
       {"key": "fast_user_bookmark", "value": 0},
-      {"key": "redirect_jump_page", "value": 1}
+      {"key": "redirect_jump_page", "value": 1},
+      {"key": "debug", "value": false}
     ]},
 
     {"name": "popup", "items": [
