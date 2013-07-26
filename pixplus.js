@@ -2457,6 +2457,10 @@
       }
       this.aspect_ratio = aspect_ratio;
 
+      if (update_resize_mode) {
+        this.resize_mode = this.FIT_LONG;
+      }
+
       if (total_width > max_width || total_height > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
           if (aspect_ratio >= _.conf.popup.fit_short_threshold) {
@@ -2735,8 +2739,6 @@
       );
 
       this.images = [];
-
-      this.resize_mode = this.FIT_LONG;
 
       this.clear_submod();
     },
