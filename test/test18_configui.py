@@ -184,8 +184,8 @@ class Test_ModConfigUI(TestCase):
     pass
 
   def check_key_editor_grab(self, keys, value):
+    self.js('document.querySelector(".pp-config-key-editor-grab").focus()')
     grab = self.q('.pp-config-key-editor-grab')
-    self.js('arguments[0].focus()', grab)
     self.send_keys(keys, grab)
     self.assertEqual(grab.get_attribute('value'), value)
     pass
