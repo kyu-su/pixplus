@@ -64,9 +64,9 @@ class Test_Manga(TestCase):
 
     self.assertEqual(self.js('return pixiv.context.pages'), [[1], [2], [3]])
     self.assertEqual(self.js('return pixiv.context.images'),
-                      ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',
-                       'http://i1.pixiv.net/img01/img/pixiv/6209105_p1.jpg',
-                       'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
+                     ['http://i1.pixiv.net/img01/img/pixiv/6209105_p0.jpg',
+                      'http://i1.pixiv.net/img01/img/pixiv/6209105_p1.jpg',
+                      'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
 
 
     self.open_test_user()
@@ -81,8 +81,13 @@ class Test_Manga(TestCase):
     for iid in ids:
       self.open_popup(iid)
       data = self.popup_get_illust_data()
+      btn = self.q('#pp-popup-button-manga')
       if data['manga']['available']:
+        self.assertTrue(btn.is_displayed())
+        self.assertEqual(btn.text, '[M:0/%d]' % data['manga']['page_count'])
         manga_ids.append(iid)
+      else:
+        self.assertFalse(btn.is_displayed())
         pass
       pass
 

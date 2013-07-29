@@ -1,6 +1,4 @@
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
-* tag association
 * resize mode indicator
-* manga mode indicator
 * image response indicator
