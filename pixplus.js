@@ -969,7 +969,7 @@
   _.configui = {
     tabs: {
       __default: function(root, section, lang) {
-        var table = _.e('table', null, root), subsection;
+        var tbody = _.e('tbody', null, _.e('table', null, root)), subsection;
 
         section.items.forEach(function(item) {
           if (!_.conf.general.debug && item.hidden) {
@@ -978,13 +978,13 @@
 
           if (item.subsection && item.subsection !== subsection) {
             _.e('div', {text: lang.pref[section.name + '_' + item.subsection]},
-                _.e('td', {colspan: 3}, _.e('tr', {cls: 'pp-config-subsection-title'}, table)));
+                _.e('td', {colspan: 3}, _.e('tr', {cls: 'pp-config-subsection-title'}, tbody)));
             subsection = item.subsection;
           }
 
           var type = typeof(item.value),
               info = lang.conf[section.name][item.key] || '[Error]',
-              row  = _.e('tr', null, table),
+              row  = _.e('tr', null, tbody),
               desc = _.e('td', null, row),
               value = _.e('td', null, row),
               input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-'),
