@@ -300,9 +300,18 @@ class Test_KeyBind(TestCase):
     self.open('/')
     self.handle_open()
 
+    # 【企画】ピクシブたんを描こう！
     self.open_popup(1580459)
-    btn = self.q('#pp-popup-button-response:not(.pp-active)')
-    self.assertTrue(btn.is_displayed())
+    self.assertTrue(self.q('#pp-popup-button-response:not(.pp-active)').is_displayed())
+
+    # -続- チョビマンガ
+    self.open_popup(17242686)
+    self.assertFalse(self.q('#pp-popup-button-response').is_displayed())
+
+    # 【企画】ピクシブたんを描こう！
+    self.open_popup(1580459)
+    self.assertTrue(self.q('#pp-popup-button-response:not(.pp-active)').is_displayed())
+
     self.send_keys('R')
     self.poll_open('/response.php?illust_id=1580459')
 
@@ -310,8 +319,7 @@ class Test_KeyBind(TestCase):
     self.handle_open()
 
     self.open_popup(idx = 2)
-    btn = self.q('#pp-popup-button-response.pp-active')
-    self.assertTrue(btn.is_displayed())
+    self.assertTrue(self.q('#pp-popup-button-response.pp-active').is_displayed())
     self.send_keys('R')
     self.poll_open('/member_illust.php?mode=medium&illust_id=1580459')
     pass
