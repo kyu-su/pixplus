@@ -1,3 +1,2 @@
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
-* resize mode indicator

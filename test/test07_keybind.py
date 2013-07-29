@@ -526,6 +526,8 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_size(self, fit_width, overflow_v, overflow_h, min_width, min_height):
+    self.assertFalse(self.q('#pp-popup-button-resize-mode').is_displayed())
+
     data = self.popup_get_illust_data()
     size = data['size']
     if size is None:
@@ -551,6 +553,19 @@ class Test_KeyBind(TestCase):
     return True
 
   def check_scrollbar(self, vertical, horizontal, strict):
+    btn = self.q('#pp-popup-button-resize-mode')
+    if vertical or horizontal:
+      self.assertTrue(btn.is_displayed())
+      if vertical and horizontal:
+        self.assertEqual(btn.text, '[O]')
+      else:
+        self.assertEqual(btn.text, '[S]')
+        pass
+      pass
+    else:
+      self.assertFalse(btn.is_displayed())
+      pass
+
     cw, ch, sw, sh, lw, lh = self.js('''
       return (function(s, l) {
         return [s.clientWidth, s.clientHeight, s.scrollWidth, s.scrollHeight,
@@ -577,6 +592,7 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height):
+    self.set_conf('popup.fit_short_threshold', 0)
     self.find_illust(self.check_size, fit_width, overflow_v, overflow_h, min_width, min_height)
 
     strict_check_with_fit_short = min_width or min_height or (overflow_v and overflow_h)
