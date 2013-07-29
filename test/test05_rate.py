@@ -25,7 +25,7 @@ class Test_Rate(TestCase):
       self.alert_accept()
       pass
 
-    rate = self.q('.rate', rating)
+    rate = self.q('#pp-popup-rating .score .rating .rate')
     self.assertEqual(rate.size['width'], width)
 
     self.assertTrue(self.qa('#pp-popup-rating .score .rating.rated'))
