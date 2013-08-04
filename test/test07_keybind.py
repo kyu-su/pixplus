@@ -40,9 +40,9 @@ class Test_KeyBind(TestCase):
     self.check_id(0)
     self.send_keys(Keys.SPACE)
     self.check_id(1)
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.check_id(0)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_id(1)
     self.send_keys(Keys.BACK_SPACE)
     self.check_id(0)
@@ -60,11 +60,11 @@ class Test_KeyBind(TestCase):
 
     self.open_popup()
     self.check_id(0)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_id(1)
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.check_id(0)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_id(1)
     self.send_keys(Keys.SPACE)
     self.check_id(0)
@@ -84,7 +84,7 @@ class Test_KeyBind(TestCase):
     self.set_conf('popup.auto_manga', 1)
     self.prepare()
 
-    self.find_illust(lambda: self.popup_get_illust_data('manga')['available'])
+    self.find_illust(lambda i: i > 0 and self.popup_get_illust_data('manga')['available'])
     illust_id = self.popup_get_illust_data('id')
     illust_idx = self.illust_id_list.index(illust_id)
 
@@ -97,7 +97,7 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
     self.js('pixplus.popup.illust.manga.viewed=false')
@@ -108,13 +108,13 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
     self.js('pixplus.popup.illust.manga.viewed=false')
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx - 1)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
     pass
@@ -125,7 +125,7 @@ class Test_KeyBind(TestCase):
     self.set_conf('popup.auto_manga', 1)
     self.prepare()
 
-    self.find_illust(lambda: self.popup_get_illust_data('manga')['available'])
+    self.find_illust(lambda i: i > 0 and self.popup_get_illust_data('manga')['available'])
     illust_id = self.popup_get_illust_data('id')
     illust_idx = self.illust_id_list.index(illust_id)
 
@@ -138,7 +138,7 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx - 1)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
     self.js('pixplus.popup.illust.manga.viewed=false')
@@ -149,13 +149,13 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
     self.js('pixplus.popup.illust.manga.viewed=false')
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx - 1)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
     pass
@@ -380,10 +380,10 @@ class Test_KeyBind(TestCase):
 
     input_tag.clear()
 
-    self.send_keys(Keys.ARROW_DOWN, input_tag)
+    self.send_keys(Keys.DOWN, input_tag)
     self.assertTrue(self.has_class(tags[0], 'pp-tag-select'))
 
-    self.send_keys(Keys.ARROW_RIGHT, input_tag)
+    self.send_keys(Keys.RIGHT, input_tag)
     self.assertFalse(self.has_class(tags[0], 'pp-tag-select'))
     self.assertTrue(self.has_class(tags[1], 'pp-tag-select'))
 
@@ -423,7 +423,7 @@ class Test_KeyBind(TestCase):
     self.unbookmark()
     pass
 
-  def check_has_question(self):
+  def check_has_question(self, idx):
     question = self.qa('#pp-popup-rating .questionnaire')
     if not question:
       return None
@@ -525,7 +525,7 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
     pass
 
-  def check_size(self, fit_width, overflow_v, overflow_h, min_width, min_height):
+  def check_size(self, idx, fit_width, overflow_v, overflow_h, min_width, min_height):
     self.assertFalse(self.q('#pp-popup-button-resize-mode').is_displayed())
 
     data = self.popup_get_illust_data()
@@ -670,7 +670,7 @@ class Test_KeyBind(TestCase):
     self.check_resize_mode(False,  True,  True, None, None, True)
     pass
 
-  def check_scrollable(self, vertical, horizontal):
+  def check_scrollable(self, idx, vertical, horizontal):
     self.popup_wait_big_image()
     self.js('''
       pixplus.popup.resize_mode = pixplus.popup.ORIGINAL;
@@ -715,29 +715,29 @@ class Test_KeyBind(TestCase):
     cw, ch, sw, sh = self.find_illust(self.check_scrollable, 100, 100)
 
     self.check_scroll_pos(0, 0)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_scroll_pos(32, 0)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_scroll_pos(64, 0)
-    self.send_keys(Keys.ARROW_UP)
+    self.send_keys(Keys.UP)
     self.check_scroll_pos(32, 0)
     self.set_conf('popup.scroll_height', 16)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_scroll_pos(48, 0)
-    self.send_keys(Keys.ARROW_UP)
+    self.send_keys(Keys.UP)
     self.check_scroll_pos(32, 0)
 
     self.check_scroll_pos(32, 0)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_scroll_pos(32, 16)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_scroll_pos(32, 32)
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.check_scroll_pos(32, 16)
     self.set_conf('popup.scroll_height', 32)
-    self.send_keys(Keys.ARROW_RIGHT)
+    self.send_keys(Keys.RIGHT)
     self.check_scroll_pos(32, 48)
-    self.send_keys(Keys.ARROW_LEFT)
+    self.send_keys(Keys.LEFT)
     self.check_scroll_pos(32, 16)
 
     self.send_keys(Keys.END)
@@ -774,7 +774,7 @@ class Test_KeyBind(TestCase):
     self.check_scroll_pos(0, pagedown * 2 + pageup)
     pass
 
-  def check_caption_scrollable(self):
+  def check_caption_scrollable(self, idx):
     self.popup_show_caption()
     cw, ch, sw, sh, cap_ch, cap_sh = self.js('''
       var s = pixplus.popup.dom.image_scroller,
@@ -797,16 +797,16 @@ class Test_KeyBind(TestCase):
     self.open_test_user()
     self.find_illust(self.check_caption_scrollable)
     self.check_caption_scroll_pos(0, 0)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_caption_scroll_pos(32, 0)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_caption_scroll_pos(64, 0)
-    self.send_keys(Keys.ARROW_UP)
+    self.send_keys(Keys.UP)
     self.check_caption_scroll_pos(32, 0)
     self.set_conf('popup.scroll_height', 16)
-    self.send_keys(Keys.ARROW_DOWN)
+    self.send_keys(Keys.DOWN)
     self.check_caption_scroll_pos(48, 0)
-    self.send_keys(Keys.ARROW_UP)
+    self.send_keys(Keys.UP)
     self.check_caption_scroll_pos(32, 0)
     pass
 

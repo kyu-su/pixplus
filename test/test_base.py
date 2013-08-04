@@ -113,12 +113,14 @@ class TestCase(unittest.TestCase):
 
   def find_illust(self, callback, *args):
     popup = self.open_popup()
+    idx = 0
     while True:
-      r = callback(*args)
+      r = callback(idx, *args)
       if r:
         return r
       self.popup_next()
       self.assertTrue(self.qa('#pp-popup'))
+      idx += 1
       pass
     pass
 

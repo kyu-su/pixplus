@@ -19,10 +19,10 @@ d = WebDriver(
 d.get('file://%s/key_test.html' % os.path.abspath(os.path.dirname(__file__)))
 
 keys = [
-  Keys.ARROW_LEFT,
-  Keys.ARROW_UP,
-  Keys.ARROW_RIGHT,
-  Keys.ARROW_DOWN,
+  Keys.LEFT,
+  Keys.UP,
+  Keys.RIGHT,
+  Keys.DOWN,
   Keys.SPACE,
   Keys.ENTER,
   Keys.ESCAPE,

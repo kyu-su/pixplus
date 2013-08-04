@@ -15,7 +15,7 @@ class Test_Jumpphp(TestCase):
     self.wait_until(lambda d: self.url == 'http://example.com/')
 
     self.open_test_user()
-    link = self.find_illust(lambda: self.xa('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]'))
+    link = self.find_illust(lambda i: self.xa('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]'))
     link = link[0]
     self.popup_show_caption()
     self.assertEqual(link.get_attribute('href'), 'http://www.pixiv.net/jump.php?' + util.quote(link.text, ''))

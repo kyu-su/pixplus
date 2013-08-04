@@ -6,7 +6,7 @@ class Test_Rate(TestCase):
   repeatable = False
 
   def check(self, confirm):
-    self.find_illust(lambda: not self.popup_get_illust_data('rated'))
+    self.find_illust(lambda i: not self.popup_get_illust_data('rated'))
 
     self.popup_show_caption()
     time.sleep(1)
