@@ -12,7 +12,7 @@ class Test_Jumpphp(TestCase):
     self.open('/')
     self.set_conf('general.redirect_jump_page', 1)
     self.js('location.href="/jump.php?http%3a%2f%2fexample%2ecom%2f"')
-    self.wait_until(lambda d: self.url == 'http://example.iana.org/')
+    self.wait_until(lambda d: self.url == 'http://example.com/')
 
     self.open_test_user()
     link = self.find_illust(lambda: self.xa('//*[@id="pp-popup-caption"]/a[starts-with(text(), "http://")]'))
