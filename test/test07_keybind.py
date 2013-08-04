@@ -591,7 +591,7 @@ class Test_KeyBind(TestCase):
       pass
     pass
 
-  def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height):
+  def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height, big_image):
     self.set_conf('popup.fit_short_threshold', 0)
     self.find_illust(self.check_size, fit_width, overflow_v, overflow_h, min_width, min_height)
 
@@ -606,6 +606,11 @@ class Test_KeyBind(TestCase):
 
     self.set_conf('popup.fit_short_threshold', ratio + 0.1)
     self.open_popup(illust_id)
+
+    if not big_image:
+      self.send_keys('w')
+      self.popup_wait_load()
+      pass
     self.popup_wait_big_image()
 
     self.check_scrollbar(False, False, False)
@@ -624,6 +629,10 @@ class Test_KeyBind(TestCase):
 
     self.set_conf('popup.fit_short_threshold', ratio)
     self.open_popup(illust_id)
+    if not big_image:
+      self.send_keys('w')
+      self.popup_wait_load()
+      pass
     self.popup_wait_big_image()
 
     self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
@@ -642,14 +651,23 @@ class Test_KeyBind(TestCase):
 
   def test_resize_mode(self):
     self.open_test_user()
+    self.set_conf('popup.big_image', False)
+
+    self.check_resize_mode( True,  True, False, None, None, False)
+    self.check_resize_mode(False, False,  True, None, None, False)
+    self.check_resize_mode( True,  True, False,  490, None, False)
+    self.check_resize_mode(False, False,  True, None,  370, False)
+    self.check_resize_mode( True,  True,  True, None, None, False)
+    self.check_resize_mode(False,  True,  True, None, None, False)
+
     self.set_conf('popup.big_image', True)
 
-    self.check_resize_mode(True, True, False, None, None)
-    self.check_resize_mode(False, False, True, None, None)
-    self.check_resize_mode(True, True, False, 490, None)
-    self.check_resize_mode(False, False, True, None, 370)
-    self.check_resize_mode(True, True, True, None, None)
-    self.check_resize_mode(False, True, True, None, None)
+    self.check_resize_mode( True,  True, False, None, None, True)
+    self.check_resize_mode(False, False,  True, None, None, True)
+    self.check_resize_mode( True,  True, False,  490, None, True)
+    self.check_resize_mode(False, False,  True, None,  370, True)
+    self.check_resize_mode( True,  True,  True, None, None, True)
+    self.check_resize_mode(False,  True,  True, None, None, True)
     pass
 
   def check_scrollable(self, vertical, horizontal):

@@ -2059,8 +2059,12 @@
       return true;
     },
 
-    load: function(illust) {
-      if (illust.loaded) {
+    load: function(illust, load_big_image) {
+      if (!load_big_image) {
+        load_big_image = _.conf.popup.big_image;
+      }
+
+      if (illust.loaded && (!load_big_image || illust.image_big)) {
         _.popup.onload(illust);
         return;
       }
@@ -2123,7 +2127,7 @@
 
       var start_images = function() {
         image_medium = load_image('medium', illust.image_url_medium, 'big');
-        if (_.conf.popup.big_image) {
+        if (load_big_image) {
           image_big = load_image('big', illust.image_url_big, 'medium');
         } else {
           statuses.big = -1;
@@ -2149,15 +2153,15 @@
             _.popup.onload(illust);
           }
 
-          if (statuses.medium <= 1 && statuses.big <= 1
-              && image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
+          if (statuses.medium <= 1 && statuses.big <= 1 &&
+              image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
             _.log('reloading medium image with new url');
             statuses.medium = 1;
             image_medium.src = illust.image_url_medium;
           }
 
-          if (_.conf.popup.big_image && statuses.big <= 1
-              && image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
+          if (load_big_image && statuses.big <= 1 &&
+              image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
             _.log('reloading big image with new url');
             statuses.big = 1;
             image_big.src = illust.image_url_big;
@@ -2923,11 +2927,7 @@
       this.dom.header.classList.remove('pp-hide');
 
       this.status_complete();
-      if ((_.conf.popup.big_image && illust.image_big) || !illust.image_medium) {
-        this.set_images([illust.image_big]);
-      } else {
-        this.set_images([illust.image_medium]);
-      }
+      this.set_images([illust.image_big || illust.image_medium]);
     },
 
     onerror: function(illust) {
@@ -3872,6 +3872,12 @@
         }
         newval = modes[next];
       }
+
+      if (!_.popup.illust.image_big) {
+        _.illust.load(_.popup.illust, true);
+        _.popup.status_loading();
+      }
+
       if (newval !== _.popup.resize_mode) {
         _.popup.resize_mode = newval;
         _.popup.adjust();
@@ -6260,6 +6266,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         "en": [
           "[Add] Add \"Mark link as visited\" option.",
           "[Add] Support \"Suggested Users\" page.",
+          "[Change] Try to load big image by \"w\" key if \"original size image\" option is disabled.",
           "[Fix] ESC key is not working.",
           "[Fix] Shift+V key (open manga thumbnail page) is not working.",
           "[Fix] Image response support.",

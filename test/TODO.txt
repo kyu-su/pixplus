@@ -1,2 +1,3 @@
 * conf.popup.mouse_wheel
 * conf.popup.mouse_wheel_delta
+* load big image by w key
