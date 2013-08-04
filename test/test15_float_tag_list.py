@@ -4,36 +4,18 @@ from test_base import TestCase
 
 class Test_FloatTagList(TestCase):
 
-  def check(self, hide):
-    self.open_popup()
-
-    bookmark_btn = self.q('#pp-popup-button-bookmark')
-    if self.has_class(bookmark_btn, 'pp-active'):
-      self.unbookmark()
-      self.open_popup()
-      bookmark_btn = self.q('#pp-popup-button-bookmark')
-      pass
-
-    self.popup_poll_reload(
-      lambda: not self.has_class(bookmark_btn, 'pp-active')
-      )
-
-    self.start_bookmark()
-
-    q = '#pp-popup-bookmark-wrapper input[type="radio"][name="restrict"][value="%d"]:checked'
-    self.assertTrue(self.qa(q % (1 if hide else 0)))
-
-    form = self.q('#pp-popup-bookmark-wrapper form[action*="bookmark_add.php"]')
-    form.submit()
-    self.popup_wait_load()
-
-    self.popup_poll_reload(lambda: self.has_class(bookmark_btn, 'pp-active'))
-
-    self.unbookmark()
-    pass
-
   def check(self, element, on, margin_top = 0):
-    self.js('document.body.style.paddingBottom="100%"')
+    self.js('''
+      document.body.style.paddingBottom="100%";
+      var n = document.evaluate('//*[@class="ui-layout-west"]/*[@class="area_new" and *[@class="area_title"]/*[contains(@class,"sprites-premium")]]',
+                                document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (n) {
+        n.parentNode.removeChild(n);
+      }
+      pixplus.Floater.update_height();
+    ''')
+
+    time.sleep(1)
 
     self.assertFalse(self.has_class(element, 'pp-float'))
 
