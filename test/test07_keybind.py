@@ -671,6 +671,9 @@ class Test_KeyBind(TestCase):
     pass
 
   def check_scrollable(self, idx, vertical, horizontal):
+    if self.popup_get_illust_data('manga')['available']:
+      return False
+
     self.popup_wait_big_image()
     self.js('''
       pixplus.popup.resize_mode = pixplus.popup.ORIGINAL;
