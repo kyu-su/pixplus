@@ -22,6 +22,8 @@ class Test_Manga(TestCase):
     images = self.js('return pixiv.context.images')
     page_count = len(images)
 
+    self.page_patterns.add(','.join(map(lambda p: '-'.join(map(str, p)), pages)))
+
     self.open_popup(illust_id)
     self.check_indicator([0], page_count)
 
@@ -69,6 +71,8 @@ class Test_Manga(TestCase):
     pass
 
   def test_manga(self):
+    self.page_patterns = set()
+
     self.open('/member_illust.php?mode=manga&illust_id=6209105')
 
     self.assertEqual(self.js('return pixiv.context.pages'), [[1], [2], [3]])
@@ -105,6 +109,14 @@ class Test_Manga(TestCase):
     for iid in manga_ids:
       self.check(iid)
       pass
+
+    required_page_patterns = set([
+        '1,2-3,4',
+        '1,3-2,4',
+        '1-2,3-4',
+        '2-1,4-3'
+        ])
+    self.assertTrue(required_page_patterns.issubset(self.page_patterns))
     pass
 
   pass
