@@ -9,13 +9,21 @@ class Test_Manga(TestCase):
       return pos['x'], pos['y'], size['width'], size['height']
     return self.geom(element)
 
+  def check_indicator(self, pages, page_count):
+    btn = self.q('#pp-popup-button-manga')
+    self.assertTrue(btn.is_displayed())
+    self.assertEqual(btn.text, '[M:%s/%d]' % ('-'.join(map(str, sorted(pages))), page_count))
+    pass
+
   def check(self, illust_id):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
 
     pages = self.js('return pixiv.context.pages')
     images = self.js('return pixiv.context.images')
+    page_count = len(images)
 
     self.open_popup(illust_id)
+    self.check_indicator([0], page_count)
 
     self.js('pixplus.popup.manga.start()')
     self.popup_wait_load()
@@ -31,6 +39,7 @@ class Test_Manga(TestCase):
     for page in range(len(pages)):
       self.js('pixplus.popup.manga.show(%d)' % page)
       self.popup_wait_load()
+      self.check_indicator(pages[page], page_count)
 
       sx, sy, sw, sh = self.geom2(self.q('#pp-popup-image-scroller'))
       lx, ly, lw, lh = self.geom2(self.q('#pp-popup-image-layout'))
