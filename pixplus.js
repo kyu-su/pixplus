@@ -3850,11 +3850,11 @@
     },
 
     illust_page_up: function() {
-      return this.scroll(_.popup.dom.image_scroller, 2, -0.8);
+      return this.scroll(_.popup.dom.image_scroller, 2, -_.conf.popup.scroll_height_page);
     },
 
     illust_page_down: function() {
-      return this.scroll(_.popup.dom.image_scroller, 2, 0.8);
+      return this.scroll(_.popup.dom.image_scroller, 2, _.conf.popup.scroll_height_page);
     },
 
     switch_resize_mode: function() {
@@ -5849,6 +5849,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php"},
       {"key": "overlay_control", "value": 0.3},
       {"key": "scroll_height", "value": 32},
+      {"key": "scroll_height_page", "value": 0.8},
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": true},
       {"key": "mouse_wheel", "value": 2},
@@ -5993,7 +5994,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           },
           reverse_regexp: 'Regular expression for "Reverse..." setting.',
           overlay_control: 'Click area width(0:Disable/<1:Ratio/>1:Pixel)',
-          scroll_height: 'Scroll step',
+          scroll_height: 'Scroll step(px)',
+          scroll_height_page: 'Scroll step for PageUp/PageDown',
           author_status_icon: 'Show icon on profile image',
           show_comment_form: 'Show comment posting form',
           mouse_wheel: {
@@ -6153,7 +6155,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           },
           reverse_regexp: '"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
           overlay_control: '\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)',
-          scroll_height: '\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
+          scroll_height: '\u30b9\u30af\u30ed\u30fc\u30eb\u5e45(px)',
+          scroll_height_page: 'PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b',
           show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b',
           mouse_wheel: {
@@ -6265,6 +6268,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "changes_i18n": {
         "en": [
           "[Add] Add \"Mark link as visited\" option.",
+          "[Add] Add \"Scroll step for PageUp/PageDown\" option.",
           "[Add] Support \"Suggested Users\" page.",
           "[Change] Try to load big image by \"w\" key if \"original size image\" option is disabled.",
           "[Fix] ESC key is not working.",
