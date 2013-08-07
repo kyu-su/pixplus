@@ -12,6 +12,42 @@
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
   <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.8.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.8.0</id>
+    <updated>2013-08-07T00:00:00+09:00</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.8.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplus 1.8.0</h1>
+      <ul>
+        <li>[追加] 「リンクを訪問済みにする」オプションを追加。</li>
+        <li>[追加] 「PageUp/PageDownのスクロール幅」オプションを追加。</li>
+        <li>[追加] 「おすすめユーザー」ページに対応。</li>
+        <li>[変更] 「原寸の画像を表示する」オプションが無効になっているとき、"w"キーで原寸の画像に切り替えるように変更。</li>
+        <li>[修正] ESCキーが動作していなかった不具合を修正。</li>
+        <li>[修正] Shift+Vキー(マンガサムネイルページを開く)が動作していなかった不具合を修正。</li>
+        <li>[修正] イメージレスポンスの処理を修正。</li>
+        <li>[修正] アクセス制限が設定されているイラストを開けない不具合を修正。</li>
+        <li>[修正][Firefox] Firefox23でキー操作できない不具合を修正。</li>
+      </ul>
+      <ul>
+        <li>[Add] Add "Mark link as visited" option.</li>
+        <li>[Add] Add "Scroll step for PageUp/PageDown" option.</li>
+        <li>[Add] Support "Suggested Users" page.</li>
+        <li>[Change] Try to load big image by "w" key if "original size image" option is disabled.</li>
+        <li>[Fix] ESC key is not working.</li>
+        <li>[Fix] Shift+V key (open manga thumbnail page) is not working.</li>
+        <li>[Fix] Image response support.</li>
+        <li>[Fix] Can't view access restricted illust.</li>
+        <li>[Fix][Firefox] Some keys are not working on Firefox23</li>
+      </ul>
+    ]]></content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
     <title type="text">pixplus 1.7.1</title>
     <id>http://crckyl.ath.cx/pixplus/archive/1.7.1</id>
     <updated>2013-06-26T00:00:00+09:00</updated>
