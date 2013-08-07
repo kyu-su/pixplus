@@ -300,15 +300,12 @@ class Test_KeyBind(TestCase):
     self.open('/')
     self.handle_open()
 
-    # 【企画】ピクシブたんを描こう！
     self.open_popup(1580459)
     self.assertTrue(self.q('#pp-popup-button-response:not(.pp-active)').is_displayed())
 
-    # -続- チョビマンガ
     self.open_popup(17242686)
     self.assertFalse(self.q('#pp-popup-button-response').is_displayed())
 
-    # 【企画】ピクシブたんを描こう！
     self.open_popup(1580459)
     self.assertTrue(self.q('#pp-popup-button-response:not(.pp-active)').is_displayed())
 

@@ -43,7 +43,7 @@ def gen_atom(changelog):
       changes += gen_changes(item.get('changes'))
       pass
 
-    print('''
+    entry = '''
   <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
     <title type="text">pixplus %(ver)s</title>
     <id>http://crckyl.ath.cx/pixplus/archive/%(ver)s</id>
@@ -61,7 +61,9 @@ def gen_atom(changelog):
   </entry>
 '''.strip('\n') % {'ver': version,
                    'date': date.replace('/', '-'),
-                   'changes': '\n      '.join(changes)})
+                   'changes': '\n      '.join(changes)}
+
+    print(entry.encode('utf-8'))
     pass
 
   print('</feed>')
