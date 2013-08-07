@@ -665,45 +665,48 @@
     decode_map: { },
 
     parse_event: function(ev) {
-      var keys = [], key;
+      var keys = [], key, chr = ev['char'];
 
-      if (ev.key) {
-        if (ev.char.length === 1 && ev.char === ev.key) {
-          if (ev.char.charCodeAt(0) > 0x20) {
-            key = ev.char.toLowerCase();
-          } else if (ev.keyCode > 0x20 && ev.keyCode < 0x7f) {
-            key = g.String.fromCharCode(ev.keyCode).toLowerCase();
-          }
-        } else {
-          key = ev.key;
-        }
+      // if (ev.key &&
+      //     ev.key !== 'MozPrintableKey' // Firefox 23 workaround
+      //    ) {
+      //   if (chr && chr.length === 1 && chr === ev.key) {
+      //     if (chr.charCodeAt(0) > 0x20) {
+      //       key = chr.toLowerCase();
+      //     } else if (ev.keyCode > 0x20 && ev.keyCode < 0x7f) {
+      //       key = g.String.fromCharCode(ev.keyCode).toLowerCase();
+      //     }
+      //   } else {
+      //     key = ev.key;
+      //   }
 
-        if (key) {
-          keys.push(this.encode_map[key] || key);
-        }
+      //   if (key) {
+      //     keys.push(this.encode_map[key] || key);
+      //   }
 
-      } else if (ev.keyIdentifier) {
-        if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
-          c = g.parseInt(ev.keyIdentifier.substring(2), 16);
-          if (c <= 0) {
-            // error
-          } else if (c <= 0x20) {
-            key = this.code_map[c] || ('_c' + String(c));
-          } else if (c < 0x7f) {
-            key = g.String.fromCharCode(c).toLowerCase();
-          } else if (c === 0x7f) {
-            key = 'Delete';
-          } else {
-            // not in ascii
-          }
-        } else {
-          key = ev.keyIdentifier;
-        }
-        if (key) {
-          keys.push(this.encode_map[key] || key);
-        }
+      // } else if (ev.keyIdentifier) {
+      //   if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
+      //     c = g.parseInt(ev.keyIdentifier.substring(2), 16);
+      //     if (c <= 0) {
+      //       // error
+      //     } else if (c <= 0x20) {
+      //       key = this.code_map[c] || ('_c' + String(c));
+      //     } else if (c < 0x7f) {
+      //       key = g.String.fromCharCode(c).toLowerCase();
+      //     } else if (c === 0x7f) {
+      //       key = 'Delete';
+      //     } else {
+      //       // not in ascii
+      //     }
+      //   } else {
+      //     key = ev.keyIdentifier;
+      //   }
+      //   if (key) {
+      //     keys.push(this.encode_map[key] || key);
+      //   }
 
-      } else {
+      // } else
+      {
         var k = ev.keyCode, c = ev.charCode;
         if (c >= 0x20 && c < 0x7f) {
           key = g.String.fromCharCode(c).toLowerCase();
@@ -6274,7 +6277,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           "[Fix] ESC key is not working.",
           "[Fix] Shift+V key (open manga thumbnail page) is not working.",
           "[Fix] Image response support.",
-          "[Fix] Can't view access restricted illust."
+          "[Fix] Can't view access restricted illust.",
+          "[Fix][Firefox] Some keys are not working on Firefox23"
         ]
       }
     },
