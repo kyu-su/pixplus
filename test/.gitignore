@@ -2,6 +2,4 @@
 *.log
 config.json
 cookie.json
-selenium-*.jar
-selenium
 profile
