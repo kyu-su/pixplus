@@ -272,4 +272,8 @@ class TestCase(unittest.TestCase):
     self.popup_wait_load()
     pass
 
+  def end_bookmark(self):
+    self.js('pixplus.popup.bookmark.end()')
+    pass
+
   pass

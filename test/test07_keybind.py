@@ -353,25 +353,7 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.q('#pp-popup-button-manga:not(.pp-active)').is_displayed())
     pass
 
-  def test_bookmark(self):
-    self.open_test_user()
-
-    self.open_popup()
-    bookmark_btn = self.q('#pp-popup-button-bookmark')
-    if self.has_class(bookmark_btn, 'pp-active'):
-      self.unbookmark()
-      self.open_popup()
-      bookmark_btn = self.q('#pp-popup-button-bookmark')
-      pass
-
-    self.assertFalse(self.has_class(bookmark_btn, 'pp-active'))
-
-    self.send_keys('b')
-    self.assertTrue(self.qa('#pp-popup.pp-bookmark-mode'))
-    self.assertTrue(self.q('#pp-popup-bookmark-wrapper').is_displayed())
-
-    ####
-
+  def check_bookmark_tag_selection(self):
     input_tag = self.q('#pp-popup-bookmark-wrapper #input_tag')
     tags = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container .tag')
 
@@ -396,8 +378,26 @@ class Test_KeyBind(TestCase):
 
     self.send_keys(Keys.ESCAPE, input_tag)
     self.assertFalse(self.has_class(tags[1], 'pp-tag-select'))
+    pass
 
-    ####
+  def test_bookmark(self):
+    self.open_test_user()
+
+    self.open_popup()
+    bookmark_btn = self.q('#pp-popup-button-bookmark')
+    if self.has_class(bookmark_btn, 'pp-active'):
+      self.unbookmark()
+      self.open_popup()
+      bookmark_btn = self.q('#pp-popup-button-bookmark')
+      pass
+
+    self.assertFalse(self.has_class(bookmark_btn, 'pp-active'))
+
+    self.send_keys('b')
+    self.assertTrue(self.qa('#pp-popup.pp-bookmark-mode'))
+    self.assertTrue(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    self.check_bookmark_tag_selection()
 
     self.blur()
 
@@ -408,6 +408,8 @@ class Test_KeyBind(TestCase):
     self.send_keys('b')
     self.assertTrue(self.qa('#pp-popup.pp-bookmark-mode'))
     self.assertTrue(self.q('#pp-popup-bookmark-wrapper').is_displayed())
+
+    self.check_bookmark_tag_selection()
 
     self.blur()
 

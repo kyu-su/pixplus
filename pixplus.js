@@ -3110,6 +3110,19 @@
   _.popup.bookmark = {
     active: false,
 
+    init: function() {
+      if (this.initialized) {
+        return;
+      }
+      this.initialized = true;
+
+      _.onclick(_.popup.dom.bookmark_wrapper, function(ev) {
+        if (ev.target.classList.contains('tag')) {
+          w.pixiv.tag.toggle(ev.target.dataset.tag);
+        }
+      });
+    },
+
     clear: function() {
       _.clear(_.popup.dom.bookmark_wrapper);
       _.popup.dom.root.classList.remove('pp-bookmark-mode');
@@ -3127,6 +3140,8 @@
       if (illust !== _.popup.illust || !this.active) {
         return;
       }
+
+      this.init();
 
       var root = _.fastxml.parse(html),
           body = _.fastxml.q(root, '.layout-body');
@@ -3157,12 +3172,6 @@
         w.pixiv.bookmarkTag.tagContainer.removeClass('loading-indicator');
 
       })(/>pixiv\.context\.tags\s*=\s*\'([^\']+)';/.exec(html));
-
-      _.onclick(wrapper, function(ev) {
-        if (ev.target.classList.contains('tag')) {
-          w.pixiv.tag.toggle(ev.target.dataset.tag);
-        }
-      });
 
       var that = this;
 
@@ -4374,7 +4383,9 @@
       });
 
       this.dom.input_tag.value = tags_value.join(' ');
-      w.pixiv.tag.update();
+      try {
+        w.pixiv.tag.update();
+      } catch(ex) {}
     },
 
     setup_tag_order: function() {
@@ -4513,7 +4524,16 @@
       }
 
       if (key === 'Space') {
-        _.send_click(this.sel.tag);
+        var tags = this.dom.input_tag.value.split(/\s+/),
+            tag  = this.sel.tag.dataset.tag;
+        if (tags.indexOf(tag) >= 0) {
+          tags = tags.filter(function(t) {
+            return t !== tag;
+          });
+        } else {
+          tags.push(tag);
+        }
+        this.dom.input_tag.value = tags.join(' ');
         return true;
 
       } else if (key === 'Escape') {
@@ -6270,6 +6290,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Fix] Fix tag selection in bookmark mode."
         ]
       }
     },

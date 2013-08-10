@@ -4,6 +4,19 @@ from test_base import TestCase
 
 class Test_Bookmark(TestCase):
 
+  def check_tag_selection(self):
+    input_tag = self.q('#pp-popup-bookmark-wrapper #input_tag')
+    tags = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container .tag')
+
+    input_tag.clear()
+
+    tags[0].click()
+    self.assertEqual(input_tag.get_attribute('value').strip(), tags[0].get_attribute('data-tag'))
+
+    tags[0].click()
+    self.assertEqual(input_tag.get_attribute('value').strip(), '')
+    pass
+
   def check(self, hide):
     self.open_popup()
 
@@ -19,6 +32,10 @@ class Test_Bookmark(TestCase):
       )
 
     self.start_bookmark()
+    self.check_tag_selection()
+    self.end_bookmark()
+    self.start_bookmark()
+    self.check_tag_selection()
 
     q = '#pp-popup-bookmark-wrapper input[type="radio"][name="restrict"][value="%d"]:checked'
     self.assertTrue(self.qa(q % (1 if hide else 0)))
