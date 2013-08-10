@@ -55,6 +55,10 @@ class Test_Comment(TestCase):
     pass
 
   def test_comment2(self):
+    if self.b.name == 'safari':
+      self.skipTest('safaridriver is currently not supports move_to_*')
+      return
+
     self.open_test_user()
     self.check_toggle_comment_form(True)
     time.sleep(1)

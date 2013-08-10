@@ -60,6 +60,10 @@ class Test_ModKey(TestCase):
     (c, c) for c in '-\'./;=[]\\`abcdefghijklmnopqrstuvwxyz0123456789']
 
   def test_mod_key1(self):
+    if self.b.name == 'safari':
+      self.skipTest('safaridriver is currently not supports file:/// uri')
+      return
+
     self.b.open('file://%s/key_test.html' % self.testdir)
     textarea = self.q('textarea')
 
