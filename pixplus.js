@@ -2129,9 +2129,19 @@
       };
 
       var start_images = function() {
-        image_medium = load_image('medium', illust.image_url_medium, 'big');
+        var send_loaded = false;
+        if (illust.image_medium) {
+          statuses.medium = 2;
+        } else {
+          image_medium = load_image('medium', illust.image_url_medium, 'big');
+        }
+
         if (load_big_image) {
-          image_big = load_image('big', illust.image_url_big, 'medium');
+          if (illust.image_big) {
+            statuses.big = 2;
+          } else {
+            image_big = load_image('big', illust.image_url_big, 'medium');
+          }
         } else {
           statuses.big = -1;
         }
@@ -2221,7 +2231,8 @@
           pages.push({
             image_urls: urls,
             image_urls_big: urls_big,
-            images: []
+            images: [],
+            images_big: []
           });
         }
       });
@@ -2235,7 +2246,7 @@
       return true;
     },
 
-    load_manga_page: function(illust, page) {
+    load_manga_page: function(illust, page, load_big_image) {
       var that = this;
 
       if (!illust.manga.pages) {
@@ -2256,10 +2267,13 @@
         return;
       }
 
-      var big = _.conf.popup.big_image,
-          page_data = illust.manga.pages[page],
-          urls = big ? page_data.image_urls_big : page_data.image_urls,
-          images = page_data.images;
+      if (!load_big_image) {
+        load_big_image = _.conf.popup.big_image;
+      }
+
+      var page_data = illust.manga.pages[page],
+          urls = load_big_image ? page_data.image_urls_big : page_data.image_urls,
+          images = load_big_image ? page_data.images_big : page_data.images;
 
       var error_sent = false;
       var send_error = function() {
@@ -2272,7 +2286,7 @@
       var load_count = 0;
       var onload = function() {
         if (!error_sent && ++load_count === urls.length) {
-          _.popup.manga.onload(illust, page, images);
+          _.popup.manga.onload(illust, page);
         }
       };
 
@@ -2290,8 +2304,7 @@
         };
 
         img.onerror = function() {
-          if (big) {
-            big = false;
+          if (load_big_image) {
             img.src = page_data.image_urls[idx];
             _.warn('Big image for manga loading failed. Falling back to default image.');
           } else {
@@ -2321,14 +2334,16 @@
     images: [],
     saved_context: null,
 
-    FIT_LONG:  0,
-    FIT_SHORT: 1,
-    ORIGINAL:  2,
+    RM_AUTO:      -1,
+    RM_FIT_LONG:   0,
+    RM_FIT_SHORT:  1,
+    RM_ORIGINAL:   2,
 
     scrollbar_width:  0,
     scrollbar_height: 0,
 
-    resize_mode: 0, // FIT_LONG
+    resize_mode:      -1,
+    resize_mode_next: -1,
 
     create: function() {
       var dom = this.dom;
@@ -2427,7 +2442,7 @@
       }, 0);
     },
 
-    layout_images: function(max_width, max_height, update_resize_mode) {
+    layout_images: function(max_width, max_height) {
       var that = this;
 
       var natural_sizes, dom = this.dom;
@@ -2457,7 +2472,9 @@
 
       var scale = 1,
           update_scale = false,
-          aspect_ratio = total_width / total_height;
+          aspect_ratio = total_width / total_height,
+          resize_mode = this.resize_mode,
+          update_resize_mode = (resize_mode === this.RM_AUTO);
 
       if (aspect_ratio < 1) {
         aspect_ratio = 1 / aspect_ratio;
@@ -2465,38 +2482,48 @@
       this.aspect_ratio = aspect_ratio;
 
       if (update_resize_mode) {
-        this.resize_mode = this.FIT_LONG;
+        resize_mode = this.RM_FIT_LONG;
       }
 
+      this.resize_mode_next = this.RM_FIT_LONG;
       if (total_width > max_width || total_height > max_height) {
         if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
           if (aspect_ratio >= _.conf.popup.fit_short_threshold) {
-            this.resize_mode = this.FIT_SHORT;
+            resize_mode = this.RM_FIT_SHORT;
           } else {
-            this.resize_mode = this.FIT_LONG;
+            resize_mode = this.RM_FIT_LONG;
+          }
+        }
+        if (resize_mode === this.RM_FIT_LONG) {
+          this.resize_mode_next = this.RM_FIT_SHORT;
+        } else if (resize_mode === this.RM_FIT_SHORT) {
+          if (total_width > max_width && total_height > max_height) {
+            this.resize_mode_next = this.RM_ORIGINAL;
           }
         }
         update_scale = true;
+      } else {
+        resize_mode = this.RM_FIT_LONG;
       }
 
       // update resize mode indicator
 
-      dom.resize_mode.textContent = '[' + 'LSO'[this.resize_mode] + ']';
-      if (this.resize_mode === this.FIT_LONG) {
+      dom.resize_mode.textContent = '[' + 'LSO'[resize_mode] + ']';
+      if (resize_mode === this.RM_FIT_LONG) {
         dom.resize_mode.classList.add('pp-hide');
       } else {
         dom.resize_mode.classList.remove('pp-hide');
       }
 
       if (update_scale) {
-        if (this.resize_mode === this.FIT_LONG) {
+        if (resize_mode === this.RM_FIT_LONG) {
           scale = g.Math.min(max_width / total_width, max_height / total_height, 1);
 
         } else {
           var scroll_x = false, scroll_y = false;
           this.update_scrollbar_size();
 
-          if (this.resize_mode === this.FIT_SHORT) {
+          if (resize_mode === this.RM_FIT_SHORT) {
             var sw = max_width / total_width,
                 sh = max_height / total_height;
 
@@ -2607,7 +2634,7 @@
       icon.style.top    = top  + 'px';
     },
 
-    adjust: function(update_resize_mode) {
+    adjust: function() {
       if (!this.running) {
         return;
       }
@@ -2624,7 +2651,7 @@
       } else {
         dom.image_layout.style.margin = '0px';
 
-        this.layout_images(max_size[0], max_size[1], update_resize_mode);
+        this.layout_images(max_size[0], max_size[1]);
 
         var mh = dom.image_scroller.clientWidth  - dom.image_layout.offsetWidth,
             mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
@@ -2761,7 +2788,7 @@
     set_images: function(images) {
       var dom = this.dom;
       this.images = images;
-      this.adjust(true);
+      this.adjust();
       if (dom.image_layout.childElementCount === images.length) {
         this.images.forEach(function(img, idx) {
           dom.image_layout.replaceChild(img, dom.image_layout.children[idx]);
@@ -2798,7 +2825,6 @@
       dom.button_response.classList.add('pp-hide');
       dom.author_status.classList.add('pp-hide');
       dom.author_image.classList.add('pp-hide');
-      this.resize_mode = this.FIT_LONG;
 
       dom.title_link.innerHTML = illust.title;
       dom.title_link.href = illust.url_medium;
@@ -3006,6 +3032,7 @@
       }
       _.popup.key.activate();
 
+      this.resize_mode = this.RM_AUTO;
       if (illust.loaded) {
         this.status_complete();
         this.onload(illust);
@@ -3264,7 +3291,7 @@
       this.update_button();
     },
 
-    onload: function(illust, page, images) {
+    onload: function(illust, page) {
       if (illust !== _.popup.illust || !this.active || page !== this.page) {
         return;
       }
@@ -3280,9 +3307,11 @@
 
       this.update_button();
 
+      var page_data = illust.manga.pages[page];
+
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.status_complete();
-      _.popup.set_images(images);
+      _.popup.set_images(page_data.images_big.length ? page_data.images_big : page_data.images);
     },
 
     onerror: function(illust, page) {
@@ -3332,6 +3361,7 @@
       this.active = true;
       this.page = page;
       this.update_button();
+      _.popup.resize_mode = _.popup.RM_AUTO;
       illust.manga.viewed = true;
       _.popup.status_loading();
       _.illust.load_manga_page(illust, this.page);
@@ -3870,32 +3900,28 @@
     },
 
     switch_resize_mode: function() {
-      var newval;
-      if (_.popup.scale >= 1) {
-        newval = _.popup.FIT_LONG;
-      } else {
-        var modes = ['FIT_LONG', 'FIT_SHORT', 'ORIGINAL'].map(function(name) {
-          return _.popup[name];
-        });
+      _.popup.resize_mode = _.popup.resize_mode_next;
+      _.popup.adjust();
 
-        var next = modes.indexOf(_.popup.resize_mode) + 1;
-        if (next < 0 || next >= modes.length) {
-          next = 0;
+      if (_.popup.manga.active) {
+        var page_data = _.popup.illust.manga.pages[_.popup.manga.page];
+        if (page_data.images_big.length === 0) {
+          if (_.popup.resize_mode === _.popup.RM_FIT_LONG) {
+            _.popup.resize_mode = _.popup.RM_AUTO;
+          }
+          _.popup.status_loading();
+          _.illust.load_manga_page(_.popup.illust, _.popup.manga.page, true);
         }
-        newval = modes[next];
+      } else {
+        if (!_.popup.illust.image_big) {
+          if (_.popup.resize_mode === _.popup.RM_FIT_LONG) {
+            _.popup.resize_mode = _.popup.RM_AUTO;
+          }
+          _.popup.status_loading();
+          _.illust.load(_.popup.illust, true);
+        }
       }
-
-      if (!_.popup.illust.image_big) {
-        _.illust.load(_.popup.illust, true);
-        _.popup.status_loading();
-      }
-
-      if (newval !== _.popup.resize_mode) {
-        _.popup.resize_mode = newval;
-        _.popup.adjust();
-        return true;
-      }
-      return false;
+      return true;
     },
 
     close: function() {
@@ -6290,7 +6316,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] Fix tag selection in bookmark mode."
+          "[Fix] Fix tag selection in bookmark mode.",
+          "[Fix] Fix \"w\" key reloads illust when in manga mode."
         ]
       }
     },
@@ -6310,7 +6337,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           "[Fix] Shift+V key (open manga thumbnail page) is not working.",
           "[Fix] Image response support.",
           "[Fix] Can't view access restricted illust.",
-          "[Fix][Firefox] Some keys are not working on Firefox23"
+          "[Fix][Firefox] Some keys are not working on Firefox23."
         ],
         "ja": [
           "[\u8ffd\u52a0] \u300c\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002",

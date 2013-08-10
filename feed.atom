@@ -43,7 +43,7 @@
         <li>[Fix] Shift+V key (open manga thumbnail page) is not working.</li>
         <li>[Fix] Image response support.</li>
         <li>[Fix] Can't view access restricted illust.</li>
-        <li>[Fix][Firefox] Some keys are not working on Firefox23</li>
+        <li>[Fix][Firefox] Some keys are not working on Firefox23.</li>
       </ul>
     ]]></content>
   </entry>

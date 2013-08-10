@@ -524,15 +524,25 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
     pass
 
-  def check_size(self, idx, fit_width, overflow_v, overflow_h, min_width, min_height):
+  def get_layout_size(self):
+    self.send_keys('w')
+    self.popup_wait_big_image()
+    width, height = self.js('''
+      pixplus.popup.resize_mode = pixplus.popup.RM_ORIGINAL;
+      pixplus.popup.adjust();
+
+      var elem = document.getElementById('pp-popup-image-layout');
+      return [elem.clientWidth, elem.clientHeight];
+    ''')
+    return width, height
+
+  def check_size(self, idx, fit_width, overflow, min_size):
+    overflow_v, overflow_h = overflow
+    min_width, min_height = min_size
+
     self.assertFalse(self.q('#pp-popup-button-resize-mode').is_displayed())
 
-    data = self.popup_get_illust_data()
-    size = data['size']
-    if size is None:
-      return False
-
-    iw, ih = size['width'], size['height']
+    iw, ih = self.get_layout_size()
 
     if min_width is not None and iw < min_width:
       return False
@@ -590,31 +600,50 @@ class Test_KeyBind(TestCase):
       pass
     pass
 
-  def check_resize_mode(self, fit_width, overflow_v, overflow_h, min_width, min_height, big_image):
-    self.set_conf('popup.fit_short_threshold', 0)
-    self.find_illust(self.check_size, fit_width, overflow_v, overflow_h, min_width, min_height)
+  def check_resize_mode_real(self, fit_width, overflow, min_size, big_image):
+    overflow_v, overflow_h = overflow
+    min_width, min_height = min_size
 
     strict_check_with_fit_short = min_width or min_height or (overflow_v and overflow_h)
 
-    data = self.popup_get_illust_data()
-    illust_id = data['id']
-    size = data['size']
-    width, height = size['width'], size['height']
-    ratio = int(max(width, height) * 10 / min(width, height)) / 10.
+    illust_id = self.popup_get_illust_data('id')
+    is_manga = self.js('return pixplus.popup.manga.active')
+    manga_page = self.js('return pixplus.popup.manga.page')
+
+    width, height = self.get_layout_size()
+    ratio = max(width, height) / min(width, height)
 
 
     self.set_conf('popup.fit_short_threshold', ratio + 0.1)
     self.open_popup(illust_id)
-
-    if not big_image:
-      self.send_keys('w')
+    if is_manga:
+      self.js('pixplus.popup.manga.show(%d)' % manga_page)
       self.popup_wait_load()
       pass
-    self.popup_wait_big_image()
 
-    self.check_scrollbar(False, False, False)
-    self.send_keys('w')
-    time.sleep(1)
+    if big_image:
+      # RM_AUTO (RM_FIT_LONG)
+      self.popup_wait_big_image()
+      self.check_scrollbar(False, False, False)
+      self.send_keys('w')
+      time.sleep(1)
+    else:
+      scale = self.js('return pixplus.popup.scale')
+      self.send_keys('w')
+      self.popup_wait_load()
+      self.popup_wait_big_image()
+
+      if scale < 1:
+        # RM_FIT_SHORT
+        pass
+      else:
+        # RM_AUTO (RM_FIT_LONG)
+        self.check_scrollbar(False, False, False)
+        self.send_keys('w')
+        time.sleep(1)
+        pass
+      pass
+
     self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
     if overflow_v and overflow_h:
       self.send_keys('w')
@@ -625,48 +654,86 @@ class Test_KeyBind(TestCase):
     time.sleep(1)
     self.check_scrollbar(False, False, False)
 
-
-    self.set_conf('popup.fit_short_threshold', ratio)
+    self.set_conf('popup.fit_short_threshold', ratio - 0.1)
     self.open_popup(illust_id)
-    if not big_image:
-      self.send_keys('w')
+    if is_manga:
+      self.js('pixplus.popup.manga.show(%d)' % manga_page)
       self.popup_wait_load()
       pass
-    self.popup_wait_big_image()
 
-    self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
-    if overflow_v and overflow_h:
+    if big_image:
+      # RM_AUTO (RM_FIT_SHORT)
+      self.popup_wait_big_image()
+      self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
       self.send_keys('w')
       time.sleep(1)
-      self.check_scrollbar(True, True, True)
+    else:
+      scale = self.js('return pixplus.popup.scale')
+      self.send_keys('w')
+      self.popup_wait_load()
+      self.popup_wait_big_image()
+
+      if scale < 1:
+        # RM_ORIGINAL
+        pass
+      else:
+        # RM_AUTO (RM_FIT_SHORT)
+        self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
+        self.send_keys('w')
+        time.sleep(1)
+        pass
       pass
-    self.send_keys('w')
-    time.sleep(1)
+
+    if overflow_v and overflow_h:
+      self.check_scrollbar(True, True, True)
+      self.send_keys('w')
+      time.sleep(1)
+      pass
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
     time.sleep(1)
     self.check_scrollbar(fit_width, not fit_width, overflow_v and overflow_h)
     pass
 
+  def check_resize_mode(self, fit_width, overflow, min_size, big_image):
+    self.set_conf('popup.fit_short_threshold', 0)
+    self.find_illust(self.check_size, fit_width, overflow, min_size)
+    self.check_resize_mode_real(fit_width, overflow, min_size, big_image)
+    pass
+
   def test_resize_mode(self):
     self.open_test_user()
     self.set_conf('popup.big_image', False)
 
-    self.check_resize_mode( True,  True, False, None, None, False)
-    self.check_resize_mode(False, False,  True, None, None, False)
-    self.check_resize_mode( True,  True, False,  490, None, False)
-    self.check_resize_mode(False, False,  True, None,  370, False)
-    self.check_resize_mode( True,  True,  True, None, None, False)
-    self.check_resize_mode(False,  True,  True, None, None, False)
+    self.check_resize_mode( True, ( True, False), (None, None), big_image = False)
+    self.check_resize_mode(False, (False,  True), (None, None), big_image = False)
+    self.check_resize_mode( True, ( True, False), ( 490, None), big_image = False)
+    self.check_resize_mode(False, (False,  True), (None,  370), big_image = False)
+    self.check_resize_mode( True, ( True,  True), (None, None), big_image = False)
+    self.check_resize_mode(False, ( True,  True), (None, None), big_image = False)
 
     self.set_conf('popup.big_image', True)
 
-    self.check_resize_mode( True,  True, False, None, None, True)
-    self.check_resize_mode(False, False,  True, None, None, True)
-    self.check_resize_mode( True,  True, False,  490, None, True)
-    self.check_resize_mode(False, False,  True, None,  370, True)
-    self.check_resize_mode( True,  True,  True, None, None, True)
-    self.check_resize_mode(False,  True,  True, None, None, True)
+    self.check_resize_mode( True, ( True, False), (None, None), big_image = True)
+    self.check_resize_mode(False, (False,  True), (None, None), big_image = True)
+    self.check_resize_mode( True, ( True, False), ( 490, None), big_image = True)
+    self.check_resize_mode(False, (False,  True), (None,  370), big_image = True)
+    self.check_resize_mode( True, ( True,  True), (None, None), big_image = True)
+    self.check_resize_mode(False, ( True,  True), (None, None), big_image = True)
+    pass
+
+  def check_resize_mode_manga(self, fit_width, overflow, min_size, big_image):
+    self.set_conf('popup.fit_short_threshold', 0)
+    self.find_manga_page(self.check_size, fit_width, overflow, min_size)
+    self.check_resize_mode_real(fit_width, overflow, min_size, big_image)
+    pass
+
+  def test_resize_mode_manga(self):
+    self.open_test_user()
+    self.set_conf('popup.big_image', False)
+    self.check_resize_mode_manga(False, (True, True), (None, None), big_image = False)
+    self.set_conf('popup.big_image', True)
+    self.check_resize_mode_manga(False, (True, True), (None, None), big_image = True)
     pass
 
   def check_scrollable(self, idx, vertical, horizontal):
@@ -675,7 +742,7 @@ class Test_KeyBind(TestCase):
 
     self.popup_wait_big_image()
     self.js('''
-      pixplus.popup.resize_mode = pixplus.popup.ORIGINAL;
+      pixplus.popup.resize_mode = pixplus.popup.RM_ORIGINAL;
       pixplus.popup.adjust();
     ''')
 

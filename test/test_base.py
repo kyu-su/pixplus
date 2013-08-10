@@ -78,7 +78,19 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_wait_big_image(self):
-    self.wait_until(lambda d: self.js('return pixplus.popup.images[0]===pixplus.popup.illust.image_big'))
+    self.wait_until(lambda d: self.js('''
+      var illust = pixplus.popup.illust,
+          images = pixplus.popup.images;
+      if (pixplus.popup.manga.active) {
+        var page = illust.manga.pages[pixplus.popup.manga.page];
+        return (images.length === page.images_big.length &&
+                images.reduce(function(a, b, i) {
+                  return a && b === page.images_big[i];
+                }, true));
+      } else {
+        return images.length === 1 && images[0] === illust.image_big;
+      }
+    '''))
     pass
 
   def popup_show_caption(self):
@@ -91,12 +103,12 @@ class TestCase(unittest.TestCase):
     pass
 
   def popup_prev(self):
-    self.js('pixplus.popup.input.prev_direction()')
+    self.js('pixplus.popup.show(pixplus.popup.illust.prev)')
     self.popup_wait_load()
     pass
 
   def popup_next(self):
-    self.js('pixplus.popup.input.next_direction()')
+    self.js('pixplus.popup.show(pixplus.popup.illust.next)')
     self.popup_wait_load()
     pass
 
@@ -115,12 +127,43 @@ class TestCase(unittest.TestCase):
     popup = self.open_popup()
     idx = 0
     while True:
-      r = callback(idx, *args)
-      if r:
-        return r
-      self.popup_next()
       self.assertTrue(self.qa('#pp-popup'))
+
+      manga = self.popup_get_illust_data('manga')
+      if not manga['available']:
+        r = callback(idx, *args)
+        if r:
+          return r
+        pass
+
+      self.popup_next()
       idx += 1
+      pass
+    pass
+
+  def find_manga_page(self, callback, *args):
+    popup = self.open_popup()
+    while True:
+      self.assertTrue(self.qa('#pp-popup'))
+
+      manga = self.popup_get_illust_data('manga')
+      if not manga['available']:
+        self.popup_next()
+        continue
+
+      self.js('pixplus.popup.manga.start()')
+      self.popup_wait_load()
+
+      manga = self.popup_get_illust_data('manga')
+      for page in range(len(manga['pages'])):
+        self.js('pixplus.popup.manga.show(%d)' % page)
+        self.popup_wait_load()
+        r = callback(page, *args)
+        if r:
+          return r
+        pass
+
+      self.popup_next()
       pass
     pass
 
