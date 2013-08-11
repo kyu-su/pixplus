@@ -24,8 +24,9 @@ BUILD_DIR_OEX                   = $(BUILD_DIR)/oex
 BUILD_DIR_CRX                   = $(BUILD_DIR)/crx
 BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
 
-FEED_ATOM                       = feed.atom
 CHANGELOG_JSON                  = changelog.json
+CHANGELOG_MD                    = changelog.md
+RELEASE_ATOM                    = release.atom
 
 DIST_DIR                        = $(CURDIR)/bin
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
@@ -92,7 +93,7 @@ ifeq ($(BUILD_SAFARIEXTZ),yes)
 ALL_TARGETS                    += $(SAFARIEXTZ)
 endif
 
-all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) feeds
+all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) changelog
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
@@ -103,21 +104,32 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
-clean: clean-feeds
+clean: clean-changelog
 	@echo 'Cleaning'
 	@rm -rf $(BUILD_DIR) $(DIST_DIR)
 
-# ================ Feeds ================
+# ================ Changelog ================
 
-$(FEED_ATOM): $(CHANGELOG_JSON)
+$(CHANGELOG_JSON): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@$(PYTHON) feed_atom.py < $< > $@
+	@echo '[' > $@
+	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) >> $@
+	@echo ']' >> $@
+
+$(CHANGELOG_MD): $(CHANGELOG_JSON)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@$(PYTHON) changelog.py markdown < $< > $@
 	@echo
 
-feeds: $(FEED_ATOM)
+$(RELEASE_ATOM): $(CHANGELOG_JSON)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@$(PYTHON) changelog.py atom < $< > $@
+	@echo
 
-clean-feeds:
-	@rm -f $(FEED_ATOM)
+changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
+
+clean-changelog:
+	@rm -f $(CHANGELOG_MD) $(RELEASE_ATOM)
 
 # ================ Opera UserJS ================
 
@@ -157,12 +169,6 @@ $(CONFIG_JSON): $(SRC_USERJS)
 	@mkdir -p $(dir $@)
 	@echo '{"comment": "this file was automatically generated from $<", "data": [' > $@
 	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	@echo ']}' >> $@
-
-$(CHANGELOG_JSON): $(SRC_USERJS)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@echo '{"comment": "this file was automatically generated from $<", "data": [' > $@
-	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) >> $@
 	@echo ']}' >> $@
 
 $(ICON_FILES_SMALL): $(ICON_SMALL_SVG)
