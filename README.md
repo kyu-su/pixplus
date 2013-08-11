@@ -14,6 +14,10 @@ Browser extension for pixiv.
 * Firefox / Firefox ESR (Greasemonkey)
 * Safari (safariextz)
 
+## License
+
+The MIT License
+
 ## Requirements to build
 
 * make (GNU Make)
