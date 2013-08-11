@@ -174,6 +174,39 @@ class Test_KeyBind(TestCase):
     self.check_closed()
     pass
 
+  def check_caption(self, status):
+    title = self.q('#pp-popup-title')
+    header = self.q('#pp-popup-header')
+
+    cls_show = False
+    cls_hide = False
+    visible = False
+    visible_hover = False
+
+    if status == 'hidden':
+      cls_hide = True
+    elif status == 'visible':
+      cls_show = True
+      visible = True
+      visible_hover = True
+    elif status == 'auto':
+      visible_hover = True
+    else:
+      raise ValueError()
+
+    self.assertEqual(self.has_class(header, 'pp-show'), cls_show)
+    self.assertEqual(self.has_class(header, 'pp-hide'), cls_hide)
+    self.ac().move_to_element(title).perform()
+    self.assertEqual(header.is_displayed(), visible)
+    self.ac().move_to_element(header).perform()
+    self.assertEqual(header.is_displayed(), visible_hover)
+    pass
+
+  def toggle_caption(self, elem):
+    self.ac().move_to_element(elem).perform()
+    self.send_keys('c')
+    pass
+
   def test_header(self):
     if self.b.name == 'safari':
       self.skipTest('safaridriver is currently not supports move_to_*')
@@ -187,49 +220,46 @@ class Test_KeyBind(TestCase):
     title = self.q('#pp-popup-title')
     header = self.q('#pp-popup-header')
 
-    self.ac().move_to_element(title).perform()
+    self.check_caption('auto')
 
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertFalse(header.is_displayed())
-    self.send_keys('c')
-    self.assertTrue(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertTrue(header.is_displayed())
-    self.send_keys('c')
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertFalse(header.is_displayed())
+    self.toggle_caption(title)
+    self.check_caption('visible')
 
-    self.ac().move_to_element(header).perform()
+    self.toggle_caption(title)
+    self.check_caption('auto')
 
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertTrue(header.is_displayed())
-    self.send_keys('c')
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertTrue(self.has_class(header, 'pp-hide'))
-    self.assertFalse(header.is_displayed())
-    self.send_keys('c')
-    self.assertTrue(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertTrue(header.is_displayed())
+    self.toggle_caption(header)
+    self.check_caption('hidden')
 
-    self.ac().move_to_element(title).perform()
+    self.toggle_caption(title)
+    self.check_caption('visible')
 
-    self.assertTrue(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertTrue(header.is_displayed())
-    self.send_keys('c')
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertFalse(header.is_displayed())
+    self.toggle_caption(title)
+    self.check_caption('auto')
 
-    self.ac().move_to_element(header).perform()
+    self.toggle_caption(header)
+    self.check_caption('hidden')
 
-    self.assertFalse(self.has_class(header, 'pp-show'))
-    self.assertFalse(self.has_class(header, 'pp-hide'))
-    self.assertTrue(header.is_displayed())
+    self.toggle_caption(header)
+    self.check_caption('visible')
+
+    self.toggle_caption(title)
+    self.check_caption('auto')
+
+    self.toggle_caption(title)
+    self.check_caption('visible')
+
+
+    self.send_keys(Keys.RIGHT)
+    self.check_id(1)
+    self.check_caption('visible')
+
+    self.toggle_caption(header)
+    self.check_caption('hidden')
+
+    self.send_keys(Keys.LEFT)
+    self.check_id(0)
+    self.check_caption('hidden')
 
 
     comment = self.q('#pp-popup-comment')

@@ -2361,7 +2361,7 @@
       dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
       dom.title_link        = _.e('a', null, dom.title);
       dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
-      dom.header            = _.e('div', {id: 'pp-popup-header', cls: 'pp-hide'}, dom.root);
+      dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.root);
       dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
@@ -2953,8 +2953,6 @@
         _.error(ex);
       }
 
-      this.dom.header.classList.remove('pp-hide');
-
       this.status_complete();
       this.set_images([illust.image_big || illust.image_medium]);
     },
@@ -3071,7 +3069,8 @@
         dom.root.parentNode.removeChild(dom.root);
       }
       this.clear();
-      this.dom.header.classList.add('pp-hide');
+      this.dom.header.classList.remove('pp-hide');
+      this.dom.header.classList.remove('pp-show');
       this.running = false;
     },
 
