@@ -18,6 +18,10 @@ Browser extension for pixiv.
 
 The MIT License
 
+## Version history
+
+[changelog.md](changelog.md)
+
 ## Requirements to build
 
 * make (GNU Make)
