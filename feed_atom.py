@@ -59,11 +59,19 @@ def gen_atom(changelog):
       %(changes)s
     ]]></content>
   </entry>
-'''.strip('\n') % {'ver': version,
-                   'date': date.replace('/', '-'),
-                   'changes': '\n      '.join(changes)}
+'''
 
-    print(entry.encode('utf-8'))
+    entry = entry.strip('\n') % {
+      'ver': version,
+      'date': date.replace('/', '-'),
+      'changes': '\n      '.join(changes)
+      }
+
+    try:
+      print(entry)
+    except UnicodeEncodeError:
+      print(entry.encode('utf-8'))
+      pass
     pass
 
   print('</feed>')
