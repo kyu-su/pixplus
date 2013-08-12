@@ -3627,10 +3627,21 @@
       if (illust !== _.popup.illust || !this.active) {
         return;
       }
+
+      var that = this;
       _.clear(_.popup.dom.tagedit_wrapper);
 
       var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
       c.innerHTML = html;
+
+      var endbtn = _.q('input[onclick="endTagEdit()"]', c);
+      if (endbtn) {
+        endbtn.onclick = '';
+        endbtn.setAttribute('onclick', '');
+        _.onclick(endbtn, function() {
+          that.end();
+        });
+      }
 
       var table = _.q('table', c);
       if (table) {
