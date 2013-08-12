@@ -129,12 +129,9 @@ class TestCase(unittest.TestCase):
     while True:
       self.assertTrue(self.qa('#pp-popup'))
 
-      manga = self.popup_get_illust_data('manga')
-      if not manga['available']:
-        r = callback(idx, *args)
-        if r:
-          return r
-        pass
+      r = callback(idx, *args)
+      if r:
+        return r
 
       self.popup_next()
       idx += 1

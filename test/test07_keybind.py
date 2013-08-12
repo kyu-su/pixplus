@@ -570,6 +570,11 @@ class Test_KeyBind(TestCase):
     overflow_v, overflow_h = overflow
     min_width, min_height = min_size
 
+    if self.popup_get_illust_data('manga')['available']:
+      if not self.js('return pixplus.popup.manga.active'):
+        return False
+      pass
+
     self.assertFalse(self.q('#pp-popup-button-resize-mode').is_displayed())
 
     iw, ih = self.get_layout_size()
