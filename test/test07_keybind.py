@@ -202,8 +202,8 @@ class Test_KeyBind(TestCase):
     self.assertEqual(header.is_displayed(), visible_hover)
     pass
 
-  def toggle_caption(self, elem):
-    self.ac().move_to_element(elem).perform()
+  def toggle_caption(self, query):
+    self.ac().move_to_element(self.q(query)).perform()
     self.send_keys('c')
     pass
 
@@ -217,36 +217,33 @@ class Test_KeyBind(TestCase):
     self.open_popup()
     self.check_id(0)
 
-    title = self.q('#pp-popup-title')
-    header = self.q('#pp-popup-header')
-
     self.check_caption('auto')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('visible')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('auto')
 
-    self.toggle_caption(header)
+    self.toggle_caption('#pp-popup-header')
     self.check_caption('hidden')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('visible')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('auto')
 
-    self.toggle_caption(header)
+    self.toggle_caption('#pp-popup-header')
     self.check_caption('hidden')
 
-    self.toggle_caption(header)
+    self.toggle_caption('#pp-popup-header')
     self.check_caption('visible')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('auto')
 
-    self.toggle_caption(title)
+    self.toggle_caption('#pp-popup-title')
     self.check_caption('visible')
 
 
@@ -254,7 +251,7 @@ class Test_KeyBind(TestCase):
     self.check_id(1)
     self.check_caption('visible')
 
-    self.toggle_caption(header)
+    self.toggle_caption('#pp-popup-header')
     self.check_caption('hidden')
 
     self.send_keys(Keys.LEFT)
@@ -265,10 +262,10 @@ class Test_KeyBind(TestCase):
     comment = self.q('#pp-popup-comment')
     self.assertFalse(comment.is_displayed())
     self.send_keys('C')
-    self.assertTrue(self.has_class(header, 'pp-show'))
+    self.assertTrue(self.qa('#pp-popup-header.pp-show'))
     self.assertTrue(comment.is_displayed())
     self.send_keys('C')
-    self.assertTrue(self.has_class(header, 'pp-show'))
+    self.assertTrue(self.qa('#pp-popup-header.pp-show'))
     self.assertFalse(comment.is_displayed())
     pass
 
