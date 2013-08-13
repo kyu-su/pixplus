@@ -6328,6 +6328,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         "en": [
           "[Fix] Fix tag selection in bookmark mode.",
           "[Fix] Fix \"w\" key reloads illust when in manga mode."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\"w\"\u30ad\u30fc\u304c\u4e0a\u624b\u304f\u52d5\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
