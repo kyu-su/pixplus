@@ -6320,10 +6320,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
     {
-      "date": "2013/xx/xx",
+      "date": "2013/08/14",
       "version": "1.8.1",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2013/08/14/pixplus-1-8-1",
       "changes_i18n": {
         "en": [
           "[Fix] Fix tag selection in bookmark mode.",
@@ -6336,7 +6337,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/08/07",
       "version": "1.8.0",

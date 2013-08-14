@@ -1,6 +1,18 @@
 pixplus version history
 =======================
 
+## [1.8.1 - 2013/08/14](http://my.opera.com/crckyl/blog/2013/08/14/pixplus-1-8-1)
+
+### 変更点
+
+* [修正] ブックマークモードでタグを選択できない場合があるバグを修正。
+* [修正] マンガモードで"w"キーが上手く動かないバグを修正。
+
+### Changes
+
+* [Fix] Fix tag selection in bookmark mode.
+* [Fix] Fix "w" key reloads illust when in manga mode.
+
 ## [1.8.0 - 2013/08/07](http://my.opera.com/crckyl/blog/2013/08/06/pixplus-1-8-0)
 
 ### 変更点

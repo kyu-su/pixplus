@@ -12,6 +12,28 @@
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
   <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.8.1</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.8.1</id>
+    <updated>2013/08/14T00:00:00+09:00</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.8.1" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@myopera.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplus 1.8.1</h1>
+      <ul>
+        <li>[修正] ブックマークモードでタグを選択できない場合があるバグを修正。</li>
+        <li>[修正] マンガモードで"w"キーが上手く動かないバグを修正。</li>
+      </ul>
+      <ul>
+        <li>[Fix] Fix tag selection in bookmark mode.</li>
+        <li>[Fix] Fix "w" key reloads illust when in manga mode.</li>
+      </ul>
+    ]]></content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
     <title type="text">pixplus 1.8.0</title>
     <id>http://crckyl.ath.cx/pixplus/archive/1.8.0</id>
     <updated>2013/08/07T00:00:00+09:00</updated>
