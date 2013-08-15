@@ -70,8 +70,6 @@ class Test_TagEdit(TestCase):
       self.alert_accept()
       pass
 
-    self.wait_until(lambda driver: not self.qa('#tag%d' % tagid) or self.q('#tag%d' % tagid).text != tag)
-
     self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
 

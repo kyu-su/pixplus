@@ -40,7 +40,7 @@ class Test_ModConfigUI(TestCase):
       pass
     pass
 
-  def get_input(self, section, item, suffix = ''):
+  def input_query(self, section, item, suffix = ''):
     if isinstance(section, dict):
       section = section['name']
       pass
@@ -48,7 +48,10 @@ class Test_ModConfigUI(TestCase):
       item = item['key']
       pass
     input_id = 'pp-config-%s-%s%s' % (section, item.replace('_', '-'), suffix)
-    return self.q('#%s' % input_id)
+    return '#' + input_id
+
+  def get_input(self, section, item, suffix = ''):
+    return self.q(self.input_query(section, item, suffix = ''))
 
   def each_item(self, callback, *args):
     for section in self.conf_schema:
@@ -59,7 +62,6 @@ class Test_ModConfigUI(TestCase):
       for item in section['items']:
         default = item['value']
         input_e = self.get_input(section, item)
-        default_btn = self.get_input(section, item, '-default')
 
         conf_key = '%s.%s' % (section['name'], item['key'])
         current = self.get_conf(conf_key)
@@ -70,13 +72,13 @@ class Test_ModConfigUI(TestCase):
           self.assertEqual(input_e.get_attribute('value'), str(current))
           pass
 
-        callback(section, item, conf_key, default, current, input_e, default_btn, *args)
+        callback(section, item, conf_key, default, current, input_e, *args)
         pass
 
       pass
     pass
 
-  def update_change_steps(self, section, item, conf_key, default, current, input_e, default_btn, steps):
+  def update_change_steps(self, section, item, conf_key, default, current, input_e, steps):
     self.set_conf(conf_key, default)
 
     if isinstance(default, bool):
@@ -149,7 +151,7 @@ class Test_ModConfigUI(TestCase):
       pass
     pass
 
-  def check_reset_default(self, section, item, conf_key, default, current, input_e, default_btn):
+  def check_reset_default(self, section, item, conf_key, default, current, input_e):
     if isinstance(default, bool):
       if current == default:
         input_e.click()
@@ -169,7 +171,7 @@ class Test_ModConfigUI(TestCase):
       pass
 
     self.assertNotEqual(self.get_conf(conf_key), default)
-    default_btn.click()
+    self.auto_click(self.input_query(section, item, '-default'))
     self.assertEqual(self.get_conf(conf_key), default)
     pass
 
@@ -194,10 +196,11 @@ class Test_ModConfigUI(TestCase):
     conf = self.prepare()
     section = self.conf_map['key']
     self.activate_section(section)
-    input_e = self.get_input('key', 'popup_prev')
+    input_query = self.input_query('key', 'popup_prev')
+    input_e = self.q(input_query)
     initial_keys = input_e.get_attribute('value').split(',')
 
-    self.js('arguments[0].focus()', input_e)
+    self.js('document.querySelector("%s").focus()' % input_query)
     time.sleep(1)
 
     editor = self.q('.pp-config-key-editor')
@@ -288,13 +291,13 @@ class Test_ModConfigUI(TestCase):
 
     self.js('document.activeElement.blur()')
 
-    input_e = self.get_input('key', 'popup_caption_scroll_down')
-    self.js('arguments[0].focus()', input_e)
-    self.check_keyeditor_position_size(input_e)
+    input_query = self.input_query('key', 'popup_caption_scroll_down')
+    self.js('document.querySelector("%s").focus()' % input_query)
+    self.check_keyeditor_position_size(self.q(input_query))
 
-    input_e = self.get_input('key', 'popup_comment_toggle')
-    self.js('arguments[0].focus()', input_e)
-    self.check_keyeditor_position_size(input_e)
+    input_query = self.input_query('key', 'popup_comment_toggle')
+    self.js('document.querySelector("%s").focus()' % input_query)
+    self.check_keyeditor_position_size(self.q(input_query))
 
     time.sleep(1)
     self.q('form[action*="search.php"]').click()
