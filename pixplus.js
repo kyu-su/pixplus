@@ -3634,15 +3634,6 @@
       var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
       c.innerHTML = html;
 
-      var endbtn = _.q('input[onclick="endTagEdit()"]', c);
-      if (endbtn) {
-        endbtn.onclick = '';
-        endbtn.setAttribute('onclick', '');
-        _.onclick(endbtn, function() {
-          that.end();
-        });
-      }
-
       var table = _.q('table', c);
       if (table) {
         var tw = _.e('div', {id: 'pp-popup-tagedit-table-wrapper'});
@@ -4345,7 +4336,7 @@
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
         var endbtn = ev.target;
-        if (/^input$/i.test(endbtn) && /endTagEdit/.test(endbtn.getAttribute('onclick'))) {
+        if (/^input$/i.test(endbtn.tagName) && /endTagEdit/.test(endbtn.getAttribute('onclick'))) {
           _.popup.tagedit.end();
           return true;
         }
