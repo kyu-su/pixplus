@@ -643,7 +643,7 @@ class Test_KeyBind(TestCase):
     manga_page = self.js('return pixplus.popup.manga.page')
 
     width, height = self.get_layout_size()
-    ratio = max(width, height) / min(width, height)
+    ratio = max(width, height) / float(min(width, height))
 
 
     self.set_conf('popup.fit_short_threshold', ratio + 0.1)
@@ -658,7 +658,6 @@ class Test_KeyBind(TestCase):
       self.popup_wait_big_image()
       self.check_scrollbar(False, False, False)
       self.send_keys('w')
-      time.sleep(1)
     else:
       scale = self.js('return pixplus.popup.scale')
       self.send_keys('w')
@@ -672,9 +671,10 @@ class Test_KeyBind(TestCase):
         # RM_AUTO (RM_FIT_LONG)
         self.check_scrollbar(False, False, False)
         self.send_keys('w')
-        time.sleep(1)
         pass
       pass
+
+    time.sleep(1)
 
     self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
     if overflow_v and overflow_h:
@@ -698,7 +698,6 @@ class Test_KeyBind(TestCase):
       self.popup_wait_big_image()
       self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
       self.send_keys('w')
-      time.sleep(1)
     else:
       scale = self.js('return pixplus.popup.scale')
       self.send_keys('w')
@@ -712,9 +711,10 @@ class Test_KeyBind(TestCase):
         # RM_AUTO (RM_FIT_SHORT)
         self.check_scrollbar(fit_width, not fit_width, strict_check_with_fit_short)
         self.send_keys('w')
-        time.sleep(1)
         pass
       pass
+
+    time.sleep(1)
 
     if overflow_v and overflow_h:
       self.check_scrollbar(True, True, True)
