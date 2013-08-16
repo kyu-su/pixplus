@@ -1,6 +1,9 @@
+import os
 import unittest
 import time
 import json
+
+import util
 
 from selenium.webdriver.common.keys import Keys
 
@@ -12,7 +15,6 @@ class TestCase(unittest.TestCase):
     unittest.TestCase.__init__(self, testname)
     self.b = browser
     self.config = config
-    self.changed_conf = {}
     pass
 
   @classmethod
@@ -28,11 +30,24 @@ class TestCase(unittest.TestCase):
     if self.args.repeatable and not self.repeatable:
       self.skipTest('%s is not repeatable' % self.__class__.__name__)
       pass
+
+    if self.run_in_pixiv:
+      conf = util.read_json(os.path.join(self.rootdir, 'temp', 'config.json'))
+
+      if not self.url.startswith('http://www.pixiv.net/'):
+        self.open('/')
+        pass
+
+      for section in conf:
+        for item in section['items']:
+          self.set_conf('%s.%s' % (section['name'], item['key']), item['value'])
+          pass
+        pass
+      pass
     pass
 
   def tearDown(self):
     self.wait_page_load()
-    self.reset_conf()
     time.sleep(1)
     pass
 
@@ -219,17 +234,6 @@ class TestCase(unittest.TestCase):
   def set_conf(self, key, value):
     old = self.get_conf(key)
     self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
-    if key not in self.changed_conf:
-      self.changed_conf[key] = old
-      pass
-    pass
-
-  def reset_conf(self):
-    for key, value in self.changed_conf.items():
-      self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
-      pass
-    self.changed_conf = {}
-    self.reload()
     pass
 
   def safe_get_jsobj(self, name):

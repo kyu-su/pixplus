@@ -14,7 +14,7 @@ class Test_ModConfigUI(TestCase):
 
   def setUp(self):
     TestCase.setUp(self)
-    self.conf_schema = util.read_json(os.path.join(self.rootdir, 'temp', 'config.json'))['data']
+    self.conf_schema = util.read_json(os.path.join(self.rootdir, 'temp', 'config.json'))
 
     self.conf_map = {}
     for section in self.conf_schema:
