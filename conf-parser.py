@@ -64,4 +64,4 @@ def print_conf(conf):
     pass
   pass
 
-print_conf(json.loads(sys.stdin.read())['data'])
+print_conf(json.loads(sys.stdin.read()))

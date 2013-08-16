@@ -167,9 +167,9 @@ $(DATA_JS): $(SRC_USERJS)
 $(CONFIG_JSON): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@echo '{"comment": "this file was automatically generated from $<", "data": [' > $@
+	@echo '[' > $@
 	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	@echo ']}' >> $@
+	@echo ']' >> $@
 
 $(ICON_FILES_SMALL): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
