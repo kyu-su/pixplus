@@ -1120,7 +1120,6 @@
               ev.target !== active_input &&
               !(editor_wrapper && editor_wrapper.contains(ev.target))) {
             open(ev.target);
-            _.debug('hoge');
             _.modal.begin(editor_wrapper, {
               onclose: close,
               parent: _.configui.dom.root,
@@ -5498,13 +5497,28 @@
 
       var li  = _.e('li', null, menu),
           btn = _.e('span', {id: 'pp-config-btn'}, li);
-      _.onclick(btn, function() {
+
+      var show = function() {
         _.configui.show();
         _.modal.begin(_.configui.dom.root, {
           onclose: _.configui.hide.bind(_.configui),
           centerize: 'horizontal'
         });
-      });
+      };
+
+      _.onclick(btn, show);
+
+      var link_list = _.q('header.header nav.link-list ul');
+
+      if (link_list) {
+        var li2 = _.e('li'),
+            btn2 = _.e('a', {href: '#', text: 'pixplus', id: 'pp-config-btn2'}, li2);
+        link_list.insertBefore(li2, link_list.firstChild);
+        _.onclick(btn2, function(ev) {
+          show();
+          ev.preventDefault(); // do not stop propagation
+        });
+      }
 
       _.configui.init(li, btn);
     })(_.q('body>header .layout-wrapper>.notifications'));
