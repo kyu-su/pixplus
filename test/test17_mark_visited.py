@@ -30,9 +30,15 @@ class Test_MarkVisited(TestCase):
     try:
       self.assertTrue(img.tobytes() == color * (w * h))
     except:
-      fp = open('test17_mark_visited_image.dat', 'wb')
-      fp.write(img.tobytes())
-      fp.close()
+      img.save('test17_mark_visited_image_1.png')
+
+      from PIL import ImageDraw
+      img = self.screenshot()
+      img.save('test17_mark_visited_image_2.png')
+      draw = ImageDraw.Draw(img)
+      points = [(20,40), (25,60), (40,80), (60,75), (80,95), (85,20), (50,40)]
+      draw.polygon([(x, y), (x, y + h), (x + w, y + h), (x + w, y)], outline='rgb(0,255,0)')
+      img.save('test17_mark_visited_image_3.png')
       raise
     pass
 
