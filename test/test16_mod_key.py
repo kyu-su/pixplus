@@ -68,14 +68,23 @@ class Test_ModKey(TestCase):
     textarea = self.q('textarea')
 
     for key, name in self.keys:
-      if self.b.name == 'opera' and key in (Keys.MULTIPLY, Keys.ADD, Keys.SEPARATOR,
-                                            Keys.SUBTRACT, Keys.DECIMAL, Keys.DIVIDE):
-        continue
+      if self.b.name == 'opera':
+        if key in (Keys.MULTIPLY, Keys.ADD, Keys.SEPARATOR,
+                   Keys.SUBTRACT, Keys.DECIMAL, Keys.DIVIDE):
+          continue
+        pass
+
       textarea.clear()
       self.send_keys(key)
       keys = textarea.get_attribute('value').strip().split('\n')
       keys = [l.split(' ', 1)[0].split('=', 1)[1] for l in keys]
       self.assertEqual(keys[-1], name)
+
+      # chromium workaround
+      if key in (Keys.SHIFT, Keys.CONTROL, Keys.ALT):
+        self.ac().key_up(key).perform()
+        pass
+
       pass
     pass
 
