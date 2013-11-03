@@ -183,6 +183,8 @@ class Test_IllustData(TestCase):
           o[idx] = convert(value)
           pass
         pass
+      elif isinstance(o, set):
+        return set(convert(list(o)))
       return o
 
     cls.illust_list = convert(cls.illust_list)
