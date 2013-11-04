@@ -1232,7 +1232,7 @@
             });
           }],
           [lang.pref.about_email,
-           _.e('a', {text: 'crckyl@myopera.com', href: 'mailto:crckyl@myopera.com'})],
+           _.e('a', {text: 'crckyl@gmail.com', href: 'mailto:crckyl@gmail.com'})],
           [lang.pref.about_license, 'The MIT License']
         ].forEach(function(p) {
           var label = p[0], content = p[1];

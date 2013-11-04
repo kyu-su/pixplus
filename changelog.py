@@ -27,7 +27,7 @@ def atom(changelog):
   <author>
     <name>wowo</name>
     <uri>http://crckyl.ath.cx/</uri>
-    <email>crckyl@myopera.com</email>
+    <email>crckyl@gmail.com</email>
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
 '''.strip('\n'))
@@ -50,7 +50,7 @@ def atom(changelog):
     <author>
       <name>wowo</name>
       <uri>http://crckyl.ath.cx/</uri>
-      <email>crckyl@myopera.com</email>
+      <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
       <h1>pixplus %(ver)s</h1>
