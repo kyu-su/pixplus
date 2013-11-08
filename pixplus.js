@@ -1797,12 +1797,12 @@
     },
 
     create: function(link, allow_types, cb_onshow) {
-      var illust, images = _.qa('img,*[data-filter="lazy-image"]', link).concat([link]);
+      var illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
 
       for(var i = 0; i < images.length; ++i) {
         var img = images[i], src;
 
-        if (img.dataset.filter === 'lazy-image') {
+        if (/(?:^|\s)lazy-image(?:\s|$)/.test(img.dataset.filter)) {
           src = img.dataset.src;
         } else if (/^img$/i.test(img.tagName)) {
           src = img.src;
@@ -6325,6 +6325,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    {
+      "date": "2013/11/xx",
+      "version": "1.8.2",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix ranking page support."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
     {
       "date": "2013/08/14",
