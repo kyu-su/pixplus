@@ -5927,9 +5927,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     ]},
 
     {"name": "key", "items": [
-      {"key": "popup_prev", "value": "Backspace,a"},
+      {"key": "popup_prev", "value": "Backspace,a,k"},
       {"key": "popup_prev_direction", "value": "Left"},
-      {"key": "popup_next", "value": "Space"},
+      {"key": "popup_next", "value": "Space,j"},
       {"key": "popup_next_direction", "value": "Right"},
       {"key": "popup_first", "value": "Home"},
       {"key": "popup_last", "value": "End"},
@@ -5947,8 +5947,8 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "popup_illust_page_up", "value": "PageUp"},
       {"key": "popup_illust_page_down", "value": "PageDown"},
       {"key": "popup_switch_resize_mode", "value": "w"},
-      {"key": "popup_open", "value": "Shift+f"},
-      {"key": "popup_open_big", "value": "f"},
+      {"key": "popup_open", "value": "Shift+f,Shift+o"},
+      {"key": "popup_open_big", "value": "f,o"},
       {"key": "popup_open_profile", "value": "e"},
       {"key": "popup_open_illust", "value": "r"},
       {"key": "popup_open_bookmark", "value": "t"},
