@@ -2040,22 +2040,8 @@
         return false;
       });
 
-
-      var comment_form_data = _.fastxml.qa(root, '.worksOption form input');
-      if (comment_form_data.length > 0) {
-        illust.comment_form_data = { };
-        comment_form_data.forEach(function(input) {
-          var name = input.attrs.name, value = input.attrs.value;
-          if (name && value) {
-            illust.comment_form_data[name] = value;
-          }
-        });
-      }
-
-      var comment_no_comment = _.fastxml.q(root, '.comment-no-comment');
-      if (comment_no_comment) {
-        illust.err_no_comment = _.fastxml.text(comment_no_comment);
-      }
+      var comment = _.fastxml.q(root, '#one_comment .worksOption');
+      illust.comment = _.fastxml.inner_html(comment) || 'Error';
 
       _.illust.update_urls(illust);
       return true;
@@ -2365,9 +2351,6 @@
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
-      dom.comment_form      = _.e('div', {id: 'pp-popup-comment-form'}, dom.comment);
-      dom.comment_history   = _.e('div', {id: 'pp-popup-comment-history', cls: 'comment-area'}, dom.comment);
-      dom.comment_err_empty = _.e('div', {cls: 'comment-no-comment pp-hide'}, dom.comment);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
       dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
@@ -2392,12 +2375,6 @@
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
-
-      if (!_.conf.popup.show_comment_form) {
-        dom.comment_form.classList.add('pp-hide');
-      }
-
-      dom.comment_err_empty.textContent = 'Sorry, comments could not be found';
 
       this.input.init();
 
@@ -2855,10 +2832,6 @@
       _.modify_caption(dom.caption, illust);
       _.redirect_jump_page(dom.caption);
 
-      if (illust.err_no_comment) {
-        dom.comment_err_empty.textContent = illust.err_no_comment;
-      }
-
       dom.taglist.innerHTML = illust.taglist;
       _.onclick(
         _.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist),
@@ -2933,6 +2906,11 @@
       } else {
         dom.image_layout.href = illust.image_url_big;
       }
+
+      dom.comment.innerHTML = illust.comment;
+      _.qa('img[data-src]', dom.comment).forEach(function(img) {
+        img.src = img.dataset.src;
+      });
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -3020,7 +2998,8 @@
       var dom = this.dom;
       this.create();
       dom.root.style.fontSize = _.conf.popup.font_size;
-      dom.header.style.opacity = _.conf.popup.caption_opacity;
+      // dom.header.style.opacity = _.conf.popup.caption_opacity;
+      dom.header.style.backgroundColor = 'rgba(255,255,255,' + _.conf.popup.caption_opacity + ')';
 
       this.illust = illust;
       this.running = true;
@@ -3475,7 +3454,6 @@
 
     clear: function() {
       _.popup.dom.root.classList.remove('pp-comment-mode');
-      _.clear(_.popup.dom.comment_form, _.popup.dom.comment_history);
       this.active = false;
     },
 
@@ -3483,99 +3461,11 @@
       _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
     },
 
-    onload: function(illust, html) {
-      if (illust !== _.popup.illust || !this.active) {
-        return;
-      }
-      _.popup.dom.comment_history.innerHTML = '<ul>' + html + '</ul>';
-      _.popup.dom.comment_err_empty.classList[html ? 'add' : 'remove']('pp-hide');
-      _.popup.status_complete();
-      _.popup.adjust();
-      this.scroll();
-    },
-
-    onerror: function(illust, message) {
-      if (illust !== _.popup.illust || !this.active) {
-        return;
-      }
-      _.popup.dom.comment_history.textContent = message || 'Error';
-      _.popup.status_error();
-    },
-
-    reload: function() {
-      var illust = _.popup.illust;
-      if (!illust.author_id) {
-        this.onerror(illust, 'Author id not specified');
-        return;
-      }
-
-      var that = this;
-      try {
-        w.pixiv.api.post('/rpc_comment_history.php', {
-          i_id: illust.id,
-          u_id: illust.author_id
-        }, {
-          ajaxSettings: {dataType: 'text'}
-        }).done(function(data) {
-          try {
-            var obj  = g.JSON.parse(data),
-                html = obj.data.html_array.join('');
-            that.onload(illust, html);
-          } catch(ex) {
-            that.onerror(illust, g.String(ex));
-          }
-        }).fail(function(data) {
-          that.onerror(illust, data);
-        });
-      } catch(ex) {
-        this.onerror(illust);
-        return;
-      }
-
-      _.popup.dom.comment_history.textContent = 'Loading';
-      _.popup.status_loading();
-    },
-
-    setup_form: function() {
-      var data = _.popup.illust.comment_form_data;
-      _.clear(_.popup.dom.comment_form);
-      if (!data) {
-        return;
-      }
-
-      var that = this;
-
-      var form  = _.e('form', {action: '/member_illust.php', method: 'POST'}, _.popup.dom.comment_form);
-      var input = _.e('input', {name: 'comment'}, form);
-
-      for(var name in data) {
-        if (name === 'submit' || name === 'comment') {
-          continue;
-        }
-        _.e('input', {type: 'hidden', name: name, value: data[name]}, form);
-      }
-
-      _.listen(form, 'submit', function() {
-        _.xhr.post(form, function() {
-          that.setup_form();
-          that.reload();
-        }, function() {
-          g.alert('Error!');
-        });
-        input.setAttribute('disabled', '');
-        return true;
-      });
-    },
-
     start: function() {
       if (this.active) {
         return;
       }
       this.active = true;
-      this.setup_form();
-      if (_.popup.dom.comment_history.childNodes.length < 1) {
-        this.reload();
-      }
       _.popup.dom.root.classList.add('pp-comment-mode');
       _.popup.show_caption();
       _.popup.adjust();
@@ -4324,13 +4214,6 @@
           ev.stopPropagation();
         }
         return false;
-      });
-
-      _.onclick(dom.comment_wrapper, function(ev) {
-        if (/^(?:pp-popup-comment-wrapper|pp-popup-comment)$/.test(ev.target.id)) {
-          dom.comment_form.classList.toggle('pp-hide');
-          _.conf.popup.show_comment_form = !dom.comment_form.classList.contains('pp-hide');
-        }
       });
 
       _.onclick(dom.tagedit_wrapper, function(ev) {
@@ -5672,9 +5555,23 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}\
 .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}\
 #pp-popup-caption-wrapper{overflow-y:auto}\
-#pp-popup-comment{display:none;border-left:3px solid #ccc;margin-left:0.6em;padding-left:0.3em}\
+#pp-popup-comment{display:none;margin-top:1em}\
 #pp-popup.pp-comment-mode #pp-popup-comment{display:block}\
-#pp-popup-comment-form input{width:80%}\
+#pp-popup-comment ._comment-item .comment{margin:0em}\
+#pp-popup-comment ._comment-item+._comment-item .comment{margin-top:1em}\
+#pp-popup-comment ._comment-item .user-icon-container{top:0px}\
+#pp-popup-comment .comment.header{padding:0px}\
+#pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em}\
+#pp-popup-comment .comment.header::before{display:none}\
+#pp-popup-comment .comment.header::after{display:none}\
+#pp-popup-comment ._comment-items ._no-item{\
+margin:0px;color:inherit;background-color:transparent;text-align:left}\
+\
+\
+#pp-popup-comment>._comment-item:first-child{display:none}\
+#pp-popup-comment .more-comment{display:none}\
+\
+\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
