@@ -2911,6 +2911,9 @@
       _.qa('img[data-src]', dom.comment).forEach(function(img) {
         img.src = img.dataset.src;
       });
+      _.onclick(_.q('.more-comment', dom.comment), function(ev) {
+        w.pixiv.comment.more(ev);
+      });
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -5558,7 +5561,7 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-comment{display:none;margin-top:1em}\
 #pp-popup.pp-comment-mode #pp-popup-comment{display:block}\
 #pp-popup-comment ._comment-item .comment{margin:0em}\
-#pp-popup-comment ._comment-item+._comment-item .comment{margin-top:1em}\
+#pp-popup-comment ._comment-item~._comment-item .comment{margin-top:1em}\
 #pp-popup-comment ._comment-item .user-icon-container{top:0px}\
 #pp-popup-comment .comment.header{padding:0px}\
 #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em}\
@@ -5569,7 +5572,6 @@ margin:0px;color:inherit;background-color:transparent;text-align:left}\
 \
 \
 #pp-popup-comment>._comment-item:first-child{display:none}\
-#pp-popup-comment .more-comment{display:none}\
 \
 \
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
