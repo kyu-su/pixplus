@@ -149,6 +149,10 @@
     listen: function(targets, events, listener, options) {
       var throttling_timer;
 
+      if (!targets) {
+        return;
+      }
+
       if (!options) {
         options = {};
       }
@@ -2350,6 +2354,7 @@
       dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
+      dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn'}, dom.comment_wrapper);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -2375,6 +2380,9 @@
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
+
+      // TODO: i18n
+      dom.comment_form_btn.textContent = 'Post comment...';
 
       this.input.init();
 
@@ -2919,9 +2927,19 @@
         w.pixiv.context.illustId = illust.id;
         w.pixiv.context.userId = illust.author_id;
         w.pixiv.context.rated = illust.rated;
+      } catch(ex) {
+        _.error(ex);
+      }
+
+      try {
         if (illust.rating && !illust.rated) {
           w.pixiv.rating.setup();
         }
+      } catch(ex) {
+        _.error(ex);
+      }
+
+      try {
         if (illust.question) {
           w.pixiv.context.hasQuestionnaire = true;
           w.pixiv.context.answered = illust.answered;
@@ -2929,6 +2947,12 @@
         } else {
           w.pixiv.context.hasQuestionnaire = false;
         }
+      } catch(ex) {
+        _.error(ex);
+      }
+
+      try {
+        w.pixiv.comment.setup();
       } catch(ex) {
         _.error(ex);
       }
@@ -3001,7 +3025,6 @@
       var dom = this.dom;
       this.create();
       dom.root.style.fontSize = _.conf.popup.font_size;
-      // dom.header.style.opacity = _.conf.popup.caption_opacity;
       dom.header.style.backgroundColor = 'rgba(255,255,255,' + _.conf.popup.caption_opacity + ')';
 
       this.illust = illust;
@@ -3456,7 +3479,9 @@
     active: false,
 
     clear: function() {
+      var show_form = _.conf.popup.show_comment_form;
       _.popup.dom.root.classList.remove('pp-comment-mode');
+      _.popup.dom.root.classList[show_form ? 'add' : 'remove']('pp-show-comment-form');
       this.active = false;
     },
 
@@ -4167,6 +4192,7 @@
           _.popup.input[action]();
           _.popup.input.wheel_delta = 0;
         }
+
         return true;
       });
 
@@ -4226,6 +4252,10 @@
           return true;
         }
         return false;
+      });
+
+      _.onclick(dom.comment_form_btn, function() {
+        dom.root.classList.toggle('pp-show-comment-form');
       });
     }
   };
@@ -5558,22 +5588,21 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}\
 .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}\
 #pp-popup-caption-wrapper{overflow-y:auto}\
-#pp-popup-comment{display:none;margin-top:1em}\
-#pp-popup.pp-comment-mode #pp-popup-comment{display:block}\
+#pp-popup-comment{margin-top:1em}\
+#pp-popup:not(.pp-comment-mode) #pp-popup-comment-wrapper{display:none}\
+#pp-popup.pp-show-comment-form #pp-popup-comment-form-btn{display:none}\
+#pp-popup-comment-form-btn{padding:0.2em 0.6em;border:1px solid #aaa;\
+color:#444;background-color:#fff;border-radius:0.4em;margin:0.4em 1.6em}\
+#pp-popup-comment-form-btn:hover{background-color:#eee}\
+#pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}\
 #pp-popup-comment ._comment-item .comment{margin:0em}\
 #pp-popup-comment ._comment-item~._comment-item .comment{margin-top:1em}\
 #pp-popup-comment ._comment-item .user-icon-container{top:0px}\
-#pp-popup-comment .comment.header{padding:0px}\
-#pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em}\
+#pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}\
 #pp-popup-comment .comment.header::before{display:none}\
 #pp-popup-comment .comment.header::after{display:none}\
 #pp-popup-comment ._comment-items ._no-item{\
 margin:0px;color:inherit;background-color:transparent;text-align:left}\
-\
-\
-#pp-popup-comment>._comment-item:first-child{display:none}\
-\
-\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
@@ -5814,7 +5843,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "scroll_height", "value": 32},
       {"key": "scroll_height_page", "value": 0.8},
       {"key": "author_status_icon", "value": true},
-      {"key": "show_comment_form", "value": true},
+      {"key": "show_comment_form", "value": false},
       {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1},
       {"key": "fit_short_threshold", "value": 4},
@@ -5960,7 +5989,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           scroll_height: 'Scroll step(px)',
           scroll_height_page: 'Scroll step for PageUp/PageDown',
           author_status_icon: 'Show icon on profile image',
-          show_comment_form: 'Show comment posting form',
+          show_comment_form: 'Show comment form by default',
           mouse_wheel: {
             desc: 'Mouse wheel operation',
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
@@ -6121,7 +6150,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           scroll_height: '\u30b9\u30af\u30ed\u30fc\u30eb\u5e45(px)',
           scroll_height_page: 'PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b',
-          show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u8868\u793a\u3059\u308b',
+          show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u3067\u8868\u793a\u3059\u308b',
           mouse_wheel: {
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
