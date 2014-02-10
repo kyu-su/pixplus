@@ -923,8 +923,12 @@
     },
 
     end: function(target) {
-      while(this.dialog && this.dialog.container !== target) {
+      while(this.dialog) {
+        var end = this.dialog.container === target;
         this.close();
+        if (end) {
+          break;
+        }
       }
     },
 
@@ -970,6 +974,99 @@
           that['conn_' + name] = null;
         }
       });
+    }
+  };
+
+  _.PopupMenu = function(parent, button) {
+    this.dom = { };
+    this.dom.root = _.e('div', {cls: 'pp-popup-menu'}, parent);
+    this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
+    this.button = button;
+
+    var that = this;
+    _.onclick(button, function() {
+      that.show();
+    });
+  };
+
+  _.PopupMenu.prototype = {
+    add: function(name, text, options) {
+      if (!options) {
+        options = { };
+      }
+
+      var that = this;
+
+      var li = _.e('li', {cls: 'pp-popup-menu-item', 'data-name': name}, this.dom.list);
+      var label = _.e('label', null, li);
+
+      if (options.type === 'checkbox') {
+        var check = _.e('input', {type: 'checkbox'}, label);
+
+        label.appendChild(d.createTextNode(text));
+        if (options.checked) {
+          check.checked = true;
+        }
+
+        _.listen(check, 'change', function(ev) {
+          if (options.callback) {
+            options.callback(name, check.checked);
+          }
+          that.close();
+        });
+
+      } else {
+        label.textContent = text;
+
+        _.onclick(li, function(ev) {
+          if (options.callback) {
+            options.callback(name);
+          }
+          that.close();
+        });
+      }
+    },
+
+    addConfItem: function(section, item, callback) {
+      var options = { };
+      var value = _.conf[section][item];
+
+      if (typeof(value) === 'boolean') {
+        options.type = 'checkbox';
+        options.checked = value;
+        options.callback = function(name, checked) {
+          _.conf[section][item] = checked;
+          if (callback) {
+            callback(checked);
+          }
+        };
+
+
+      } else {
+        return;
+      }
+
+      this.add(section + '_' + item, _.lng.conf[section][item], options);
+    },
+
+    show: function() {
+      var that = this;
+      this.dom.root.classList.add('pp-show');
+      _.modal.begin(this.dom.root, {
+        onclose: function() {
+          that.dom.root.classList.remove('pp-show');
+          if (that.button) {
+            that.button.classList.remove('pp-active');
+          }
+        }
+      });
+      if (this.button) {
+        this.button.classList.add('pp-active');
+      }
+    },
+
+    close: function() {
+      _.modal.end(this.dom.root);
     }
   };
 
@@ -2335,6 +2432,7 @@
     resize_mode_next: -1,
 
     create: function() {
+      var that = this;
       var dom = this.dom;
       if (dom.created) {
         return;
@@ -2355,7 +2453,8 @@
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
       dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_wrapper);
-      dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_wrapper);
+      dom.comment_conf      = _.e('span', {id: 'pp-popup-comment-config-btn-wrapper'}, dom.comment_wrapper);
+      dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_conf);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -2382,9 +2481,15 @@
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
+      this.comment_conf_menu = new _.PopupMenu(dom.comment_conf, dom.comment_conf_btn);
+      this.comment_conf_menu.addConfItem('popup', 'show_comment_form', function(checked) {
+        if (checked) {
+          that.comment.show_form();
+        }
+      });
+
       this.input.init();
 
-      var that = this;
       _.listen(w, 'resize', function() {
         if (that.running) {
           that.adjust();
@@ -3487,6 +3592,23 @@
       _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
     },
 
+    show_form: function() {
+      if (_.popup.dom.root.classList.add('pp-show-comment-form')) {
+        var textarea = _.q('form textarea[name="comment"]', _.popup.dom.comment);
+        if (textarea) {
+          textarea.focus();
+        }
+      }
+    },
+
+    hide_form: function() {
+      _.popup.dom.root.classList.remove('pp-show-comment-form');
+    },
+
+    toggle_form: function() {
+      _.popup.dom.root.classList.toggle('pp-show-comment-form');
+    },
+
     start: function() {
       if (this.active) {
         return;
@@ -4254,12 +4376,7 @@
       });
 
       _.onclick(dom.comment_form_btn, function() {
-        if (dom.root.classList.toggle('pp-show-comment-form')) {
-          var textarea = _.q('form textarea[name="comment"]', _.popup.dom.comment);
-          if (textarea) {
-            textarea.focus();
-          }
-        }
+        _.popup.comment.toggle_form();
       });
     }
   };
@@ -5578,6 +5695,12 @@ width:6px;height:14px;margin:-7px -4px}\
 .pp-slider.pp-debug{outline:1px solid rgba(255,0,0,0.5)}\
 .pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}\
 .pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}\
+.pp-popup-menu{position:absolute;background-color:#fff;border:1px solid #aaa;\
+border-radius:3px;padding:3px 0px;z-index:30000}\
+.pp-popup-menu:not(.pp-show){display:none}\
+.pp-popup-menu-item:hover{background-color:#ddd}\
+.pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
+.pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa}\
 \
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
@@ -5597,8 +5720,8 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 .pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;\
 padding:14px;background-repeat:no-repeat;background-position:center}\
 .pp-popup-comment-btn:hover{border-color:#000}\
-.pp-popup-comment-btn:focus:not(:hover){border:1px dashed #000;}\
-.pp-popup-comment-btn:active{opacity:0.4}\
+.pp-popup-comment-btn:focus:not(:hover):not(:active):not(.pp-active){border:1px dashed #000;}\
+.pp-popup-comment-btn:active,.pp-popup-comment-btn.pp-active{opacity:0.4;border-color:#000}\
 #pp-popup-comment-form-btn{background-image:url("data:image/png;base64,\
 iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA7ElE\
 QVRIid3UO0pDQRQG4E8UcQkSECzdgfhIIkYEwccKbFxJCht34B6sLdQN2FhZuAbBwiI3CgqxuFMM\
@@ -5616,7 +5739,8 @@ f7BWUQT6n+c7JqJ4mPhCrTj9sdstdJaKF8c0xUZIyk1TkxH/MIr450i8bWQHJiOLL2kfxfTnOxLG\
 cRR805+atoMcmEzhUt218oR3uMW09sPsYS8povqC7OAqipuMeBfzmXdVnezga7IXC3UxVyhgqMk1\
 9pO99zgL4suZnGqTafwNpEP9bn7iBseYLRRWZbKFB9zjVyDNyF+IOcRDsT3YHIsIm/iHi1D1c9Ak\
 zzeA/9UUrxx8HheFAAAAAElFTkSuQmCC")}\
-#pp-popup-comment-config-btn{background-image:url("data:image/png;base64,\
+#pp-popup-comment-config-btn-wrapper{display:inline-block}\
+#pp-popup-comment-config-btn{display:block;background-image:url("data:image/png;base64,\
 iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA90lE\
 QVRIidWVXQqCQBSFP63FRLWCEiJoBdkSfKjNGEG2iGw/YUsJsx4cwWRm7ozggwcG5M6558x1fi6M\
 HYEH99snNzTEJ0DkYR6pHCdMgQdQAUdgCZypK2iPFJgDJ8XNVa4onneEPhpx09xdMlkDpUVQGiWw\
