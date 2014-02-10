@@ -2354,7 +2354,8 @@
       dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
-      dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn'}, dom.comment_wrapper);
+      dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_wrapper);
+      dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_wrapper);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -2380,9 +2381,6 @@
       dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
-
-      // TODO: i18n
-      dom.comment_form_btn.textContent = 'Post comment...';
 
       this.input.init();
 
@@ -5588,15 +5586,28 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}\
 .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}\
 #pp-popup-caption-wrapper{overflow-y:auto}\
-#pp-popup-comment{margin-top:1em}\
+#pp-popup-comment{margin-top:0.4em}\
 #pp-popup:not(.pp-comment-mode) #pp-popup-comment-wrapper{display:none}\
-#pp-popup.pp-show-comment-form #pp-popup-comment-form-btn{display:none}\
-#pp-popup-comment-form-btn{padding:0.2em 0.6em;border:1px solid #aaa;\
-color:#444;background-color:#fff;border-radius:0.4em;margin:0.4em 1.6em}\
-#pp-popup-comment-form-btn:hover{background-color:#eee}\
+.pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;\
+padding:14px;background-repeat:no-repeat;background-position:center}\
+.pp-popup-comment-btn:hover{border-color:#000}\
+.pp-popup-comment-btn:active{opacity:0.4}\
+#pp-popup-comment-form-btn{background-image:url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA7ElE\
+QVRIid3UO0pDQRQG4E8UcQkSECzdgfhIIkYEwccKbFxJCht34B6sLdQN2FhZuAbBwiI3CgqxuFMM\
+Qbk5ublFPDAwc2C+fxiGYQ6qi06T+CCN9qzxYxQYpTHAQVN4HtKri5/8gc8kZL8Cz0N2ongvbazC\
+R/jAYQQ/xXBCfIjducVD994oftYk3gnghfLphuoGdxOePIwv4x2r6FecfDuKwx6esvVvIVPjcIXL\
+sV4eUmBrWhxecD3WW8NtwrtRcCmbt7CODazgFUepf6/8ix6jAXld4AufeFZezSYW66AL2fwc33jA\
+Wx30f9UPLzudHbC4MwgAAAAASUVORK5CYII=")}\
+#pp-popup-comment-config-btn{background-image:url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA90lE\
+QVRIidWVXQqCQBSFP63FRLWCEiJoBdkSfKjNGEG2iGw/YUsJsx4cwWRm7ozggwcG5M6558x1fi6M\
+HYEH99snNzTEJ0DkYR6pHCdMgQdQAUdgCZypK2iPFJgDJ8XNVa4onneEPhpx09xdMlkDpUVQGiWw\
+kqo4CKu2VRN3xXSbXOB3utp4uhgkBoMX9Qpj9a3TSmzutvILg6Etx8tgp+HvXAxMF62LShPz3qfB\
+f1GDi8UkUqMwcFKXShb0vwezrphuDzaGuIQQ2EqkwZ+KAMj4L1t67NrzVxxOVwDcgDewR36uY8XN\
+XMQb6BqO7RgaG87gLXP8+AEgA7cl2q1/KQAAAABJRU5ErkJggg==")}\
 #pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}\
-#pp-popup-comment ._comment-item .comment{margin:0em}\
-#pp-popup-comment ._comment-item~._comment-item .comment{margin-top:1em}\
+#pp-popup-comment ._comment-item .comment{margin-bottom:1em}\
 #pp-popup-comment ._comment-item .user-icon-container{top:0px}\
 #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}\
 #pp-popup-comment .comment.header::before{display:none}\
