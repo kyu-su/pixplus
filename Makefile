@@ -46,6 +46,9 @@ ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
 ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
 ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn_b64.txt
+B64_ICONS                       = pencil cogwheel
+B64_ICON_FILES_PNG              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.png)
+B64_ICON_FILES_TXT              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.txt)
 DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)
 DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
 DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
@@ -93,7 +96,7 @@ ifeq ($(BUILD_SAFARIEXTZ),yes)
 ALL_TARGETS                    += $(SAFARIEXTZ)
 endif
 
-all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) changelog
+all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT) changelog
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
@@ -188,6 +191,18 @@ $(ICON_CONFIG_BTN): $(ICON_SMALL_SVG)
 
 $(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo -n 'data:image/png;base64,' > $@
+	@base64 $< | tr -d '\r\n' >> $@
+
+$(B64_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: %.svg
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@$(RSVG_CONVERT) $< -o $@
+
+$(B64_ICON_FILES_TXT): %.txt: %.png
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
 	@echo -n 'data:image/png;base64,' > $@
 	@base64 $< | tr -d '\r\n' >> $@
 
