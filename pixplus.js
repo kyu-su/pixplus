@@ -350,7 +350,7 @@
     },
 
     key_enabled: function(ev) {
-      return !(/^textarea$/i.test(ev.target.nodeName) ||
+      return !(/^(?:textarea|button)$/i.test(ev.target.nodeName) ||
                (/^input$/i.test(ev.target.nodeName) &&
                 (!ev.target.type ||
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
@@ -3496,6 +3496,7 @@
       _.popup.show_caption();
       _.popup.adjust();
       this.scroll();
+      // _.popup.dom.comment_form_btn.focus();
     },
 
     end: function() {
@@ -4253,7 +4254,12 @@
       });
 
       _.onclick(dom.comment_form_btn, function() {
-        dom.root.classList.toggle('pp-show-comment-form');
+        if (dom.root.classList.toggle('pp-show-comment-form')) {
+          var textarea = _.q('form textarea[name="comment"]', _.popup.dom.comment);
+          if (textarea) {
+            textarea.focus();
+          }
+        }
       });
     }
   };
@@ -5591,6 +5597,7 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 .pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;\
 padding:14px;background-repeat:no-repeat;background-position:center}\
 .pp-popup-comment-btn:hover{border-color:#000}\
+.pp-popup-comment-btn:focus:not(:hover){border:1px dashed #000;}\
 .pp-popup-comment-btn:active{opacity:0.4}\
 #pp-popup-comment-form-btn{background-image:url("data:image/png;base64,\
 iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA7ElE\
