@@ -46,7 +46,7 @@ ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
 ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
 ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn_b64.txt
-B64_ICONS                       = pencil cogwheel
+B64_ICONS                       = pencil pencil_off cogwheel
 B64_ICON_FILES_PNG              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.png)
 B64_ICON_FILES_TXT              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.txt)
 DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)

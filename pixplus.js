@@ -5599,6 +5599,16 @@ Qbk5ublFPDAwc2C+fxiGYQ6qi06T+CCN9qzxYxQYpTHAQVN4HtKri5/8gc8kZL8Cz0N2ongvbazC\
 R/jAYQQ/xXBCfIjducVD994oftYk3gnghfLphuoGdxOePIwv4x2r6FecfDuKwx6esvVvIVPjcIXL\
 sV4eUmBrWhxecD3WW8NtwrtRcCmbt7CODazgFUepf6/8ix6jAXld4AufeFZezSYW66AL2fwc33jA\
 Wx30f9UPLzudHbC4MwgAAAAASUVORK5CYII=")}\
+#pp-popup.pp-show-comment-form #pp-popup-comment-form-btn{\
+background-image:url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABXElE\
+QVRIid3UPU4cQRAF4A9hkcAJkHwOfszPCkNm8AlIuITTCRxASoDIgIQAEzghQCSWiEnsgMg3QCJh\
+bSQs1sH2olarp7cXkcCTWqPqefVe1XRN8wqwjKVa8pewRhG/C2txGLlBL6ymQvwTulHOHVZLCdsR\
+uafcSSoem3wsmTRJQpPhrLeIv4jJMPHYZAXGMwY/MIZOiDshHscpJkvVBTziBL9LpPhMznFQUXkP\
+f7BWUQT6n+c7JqJ4mPhCrTj9sdstdJaKF8c0xUZIyk1TkxH/MIr450i8bWQHJiOLL2kfxfTnOxLG\
+cRR805+atoMcmEzhUt218oR3uMW09sPsYS8povqC7OAqipuMeBfzmXdVnezga7IXC3UxVyhgqMk1\
+9pO99zgL4suZnGqTafwNpEP9bn7iBseYLRRWZbKFB9zjVyDNyF+IOcRDsT3YHIsIm/iHi1D1c9Ak\
+zzeA/9UUrxx8HheFAAAAAElFTkSuQmCC")}\
 #pp-popup-comment-config-btn{background-image:url("data:image/png;base64,\
 iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA90lE\
 QVRIidWVXQqCQBSFP63FRLWCEiJoBdkSfKjNGEG2iGw/YUsJsx4cwWRm7ozggwcG5M6558x1fi6M\
