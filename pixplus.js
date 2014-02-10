@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.8.1
+// @version     1.9.0
 // @license     The MIT License
 // @description pixivをほげる。
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
@@ -5700,7 +5700,7 @@ border-radius:3px;padding:3px 0px;z-index:30000}\
 .pp-popup-menu:not(.pp-show){display:none}\
 .pp-popup-menu-item:hover{background-color:#ddd}\
 .pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
-.pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa}\
+.pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa;cursor:pointer}\
 \
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
@@ -6406,15 +6406,17 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
   _.changelog = [
     {
-      "date": "2013/11/xx",
-      "version": "1.8.2",
+      "date": "2014/02/xx",
+      "version": "1.9.0",
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] Fix ranking page support."
+          "[Fix] Fix ranking page support.",
+          "[Fix] Support new comment UI."
         ],
         "ja": [
-          "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002"
+          "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
         ]
       }
     },
