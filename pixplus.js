@@ -1275,9 +1275,8 @@
       about: function(root, section, lang) {
         var urls = [
           'http://crckyl.ath.cx/pixplus/',
-          'http://crckyl.ath.cx/cgit/pixplus.git/',
           'https://github.com/crckyl/pixplus',
-          'http://my.opera.com/crckyl/',
+          'http://crckyl.ath.cx/cgit/pixplus.git/',
           'http://twitter.com/crckyl'
         ];
 
@@ -6368,11 +6367,13 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "changes_i18n": {
         "en": [
           "[Fix] Fix ranking page support.",
-          "[Fix] Support new comment UI."
+          "[Fix] Support new comment UI.",
+          "[Fix] Configuration button doesn't appears."
         ],
         "ja": [
           "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002",
-          "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
+          "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002",
+          "[\u4fee\u6b63] \u8a2d\u5b9a\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
