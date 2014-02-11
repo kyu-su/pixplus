@@ -45,7 +45,7 @@ ICON_FILES_SMALL                = $(ICON_SIZE_SMALL:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
 ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
-ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn_b64.txt
+ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn.txt
 B64_ICONS                       = pencil pencil_off cogwheel
 B64_ICON_FILES_PNG              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.png)
 B64_ICON_FILES_TXT              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.txt)
@@ -96,11 +96,20 @@ ifeq ($(BUILD_SAFARIEXTZ),yes)
 ALL_TARGETS                    += $(SAFARIEXTZ)
 endif
 
-all: $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT) changelog
+all: info $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT) changelog
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
 	@echo '$(notdir $(SAFARIEXTZ)): $(BUILD_SAFARIEXTZ)'
+
+info:
+	@echo 'Version: $(VERSION)'
+	@echo 'Description: $(DESCRIPTION)'
+	@echo 'Website: $(WEBSITE)'
+	@echo
+
+subst:
+	@>$(SRC_USERJS).new python subst.py <$(SRC_USERJS) && mv $(SRC_USERJS).new $(SRC_USERJS)
 
 deps: $(XAR)
 
