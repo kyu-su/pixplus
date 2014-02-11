@@ -150,7 +150,7 @@
       var throttling_timer;
 
       if (!targets) {
-        return;
+        return null;
       }
 
       if (!options) {
