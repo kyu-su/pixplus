@@ -2411,8 +2411,9 @@
       dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
       dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
-      dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_wrapper);
-      dom.comment_conf      = _.e('span', {id: 'pp-popup-comment-config-btn-wrapper'}, dom.comment_wrapper);
+      dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
+      dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
+      dom.comment_conf      = _.e('span', {id: 'pp-popup-comment-config-btn-wrapper'}, dom.comment_toolbar);
       dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_conf);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
@@ -5673,8 +5674,8 @@ background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}\
 .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}\
 #pp-popup-caption-wrapper{overflow-y:auto}\
-#pp-popup-comment{margin-top:0.4em}\
 #pp-popup:not(.pp-comment-mode) #pp-popup-comment-wrapper{display:none}\
+#pp-popup-comment-toolbar{margin:0.4em 1em 0px 1em}\
 .pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;\
 padding:14px;background-repeat:no-repeat;background-position:center}\
 .pp-popup-comment-btn:hover{border-color:#000}\
@@ -5716,7 +5717,8 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 #pp-popup-comment .comment.header::before{display:none}\
 #pp-popup-comment .comment.header::after{display:none}\
 #pp-popup-comment ._comment-items ._no-item{\
-margin:0px;color:inherit;background-color:transparent;text-align:left}\
+margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
+#pp-popup-comment .worksImageresponse{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
