@@ -196,7 +196,7 @@ $(ICON_FILES_BIG): $(ICON_SVG)
 $(ICON_CONFIG_BTN): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cat $< | sed 's/#0096db/#adc1d8/' | $(RSVG_CONVERT) /dev/stdin -w 22 -o $@
+	@cat $< | sed 's/#0096db/#b8e1f7/' | $(RSVG_CONVERT) /dev/stdin -w 22 -o $@
 
 $(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
