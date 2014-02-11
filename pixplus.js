@@ -671,53 +671,12 @@
     parse_event: function(ev) {
       var keys = [], key, chr = ev['char'];
 
-      // if (ev.key &&
-      //     ev.key !== 'MozPrintableKey' // Firefox 23 workaround
-      //    ) {
-      //   if (chr && chr.length === 1 && chr === ev.key) {
-      //     if (chr.charCodeAt(0) > 0x20) {
-      //       key = chr.toLowerCase();
-      //     } else if (ev.keyCode > 0x20 && ev.keyCode < 0x7f) {
-      //       key = g.String.fromCharCode(ev.keyCode).toLowerCase();
-      //     }
-      //   } else {
-      //     key = ev.key;
-      //   }
-
-      //   if (key) {
-      //     keys.push(this.encode_map[key] || key);
-      //   }
-
-      // } else if (ev.keyIdentifier) {
-      //   if (ev.keyIdentifier.lastIndexOf('U+', 0) === 0) {
-      //     c = g.parseInt(ev.keyIdentifier.substring(2), 16);
-      //     if (c <= 0) {
-      //       // error
-      //     } else if (c <= 0x20) {
-      //       key = this.code_map[c] || ('_c' + String(c));
-      //     } else if (c < 0x7f) {
-      //       key = g.String.fromCharCode(c).toLowerCase();
-      //     } else if (c === 0x7f) {
-      //       key = 'Delete';
-      //     } else {
-      //       // not in ascii
-      //     }
-      //   } else {
-      //     key = ev.keyIdentifier;
-      //   }
-      //   if (key) {
-      //     keys.push(this.encode_map[key] || key);
-      //   }
-
-      // } else
-      {
-        var k = ev.keyCode, c = ev.charCode;
-        if (c >= 0x20 && c < 0x7f) {
-          key = g.String.fromCharCode(c).toLowerCase();
-          keys.push(this.encode_map[key] || key);
-        } else if (this.code_map[k]) {
-          keys.push(this.code_map[k]);
-        }
+      var k = ev.keyCode, c = ev.charCode;
+      if (c >= 0x20 && c < 0x7f) {
+        key = g.String.fromCharCode(c).toLowerCase();
+        keys.push(this.encode_map[key] || key);
+      } else if (this.code_map[k]) {
+        keys.push(this.code_map[k]);
       }
 
       if (keys.length < 1) {
@@ -3618,7 +3577,6 @@
       _.popup.show_caption();
       _.popup.adjust();
       this.scroll();
-      // _.popup.dom.comment_form_btn.focus();
     },
 
     end: function() {
@@ -5741,12 +5699,12 @@ cRR805+atoMcmEzhUt218oR3uMW09sPsYS8povqC7OAqipuMeBfzmXdVnezga7IXC3UxVyhgqMk1\
 zzeA/9UUrxx8HheFAAAAAElFTkSuQmCC")}\
 #pp-popup-comment-config-btn-wrapper{display:inline-block}\
 #pp-popup-comment-config-btn{display:block;background-image:url("data:image/png;base64,\
-iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA90lE\
-QVRIidWVXQqCQBSFP63FRLWCEiJoBdkSfKjNGEG2iGw/YUsJsx4cwWRm7ozggwcG5M6558x1fi6M\
-HYEH99snNzTEJ0DkYR6pHCdMgQdQAUdgCZypK2iPFJgDJ8XNVa4onneEPhpx09xdMlkDpUVQGiWw\
-kqo4CKu2VRN3xXSbXOB3utp4uhgkBoMX9Qpj9a3TSmzutvILg6Etx8tgp+HvXAxMF62LShPz3qfB\
-f1GDi8UkUqMwcFKXShb0vwezrphuDzaGuIQQ2EqkwZ+KAMj4L1t67NrzVxxOVwDcgDewR36uY8XN\
-XMQb6BqO7RgaG87gLXP8+AEgA7cl2q1/KQAAAABJRU5ErkJggg==")}\
+iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAA8ElE\
+QVRIidWVzQ3CMAyFvwBbcGAP6ARIFYgiGAHYhzIEZZUi9igToCpwaCJVVX6LeuiTfImen+3YcWDs\
+EBHcbx/fieV8CiQRwRPlE4QZ8AAkcAa2wJOmgraVQApcFLdQvl7xwiAWandfkBVQ/xGgBpa+Kvaq\
+5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk+DX5GG\
+q8mpsl5N1th4MnPZuitm6sE8JAsLFj7C4KtCAHnLIWRltDlXAqZLADeaZ7/Dv64zxc1DxDVMH45r\
+DK0fzuBf5vjxA4xDxUUbDZuFAAAAAElFTkSuQmCC")}\
 #pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}\
 #pp-popup-comment ._comment-item .comment{margin-bottom:1em}\
 #pp-popup-comment ._comment-item .user-icon-container{top:0px}\
