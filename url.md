@@ -6,6 +6,8 @@ Image URL
 * `http://i1.pixiv.net/img9/img/username/99999999_m.jpg`
 * `http://i2.pixiv.net/img-inf/img/2013/01/23/01/23/45/99999999-01234567890123456789abcdefabcdef_s.jpg?8888888888`
     * Thumbnail (2013~)
+* `http://i2.pixiv.net/img114/group/176mw/username/99999999_m.jpg`
+    * **/group/?id=11313**
 
 ## Description
 
@@ -51,6 +53,8 @@ Image URL
 * ?8888888888
     * Added after resubmitted.
     * Unix time.
+* /176mw/
+    * 176x (fit width)
 
 Search URL
 ===========
