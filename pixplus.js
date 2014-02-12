@@ -2773,7 +2773,7 @@
             img = that.images[idx],
             re;
 
-        if (img.offsetWidth !== size.width) {
+        if (img && img.offsetWidth !== size.width) {
           more_info.push((g.Math.floor(img.offsetWidth * 100 / size.width) / 100) + 'x');
         }
 
@@ -2781,7 +2781,7 @@
           more_info.push('ar:' + (g.Math.floor(_.calculate_ratio(size.width, size.height) * 100) / 100));
         }
 
-        if ((re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
+        if (img && (re = /\.(\w+)(?:\?|$)/.exec(img.src))) {
           more_info.push(re[1]);
         }
 
