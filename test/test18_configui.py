@@ -268,7 +268,7 @@ class Test_ModConfigUI(TestCase):
 
   def test_modal(self):
     self.prepare()
-    self.check_modal_position_size(self.q('#pp-config'), None, (105, 105), (806, 806), (100, 300))
+    self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (100, 100), (902, 902), (100, 300))
 
     self.auto_click('.pp-layout-history')
     self.assertFalse(self.q('#pp-config').is_displayed())
