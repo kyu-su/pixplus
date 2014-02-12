@@ -5509,7 +5509,8 @@
 
       if (list) {
         var li = _.e('li', {id: 'pp-config-btn-wrapper'}, list);
-        button = _.e('i', {id: 'pp-config-btn', cls: '_icon'}, _.e('a', {href: '#pp-config'}, li));
+        button = _.e('a', {href: '#pp-config'}, li);
+        _.e('i', {id: 'pp-config-btn', cls: '_icon'}, button);
       }
 
       var show = function(ev) {
@@ -5673,8 +5674,9 @@ border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}\
 .pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
 .pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa;cursor:pointer}\
 .pp-dialog{position:absolute;z-index:10000;background-color:#fff;\
-border:3px solid #becad8;border-radius:10px;box-shadow:0px 0px 0.6em 0.4em rgba(0,0,0,0.4)}\
-.pp-dialog-title{background-color:#becad8;padding:0.2em 0.4em;text-align:center;font-weight:bold}\
+border:1px solid #d6dee5;border-radius:5px}\
+.pp-dialog-title{background-color:#d6dee5;border-radius:3px 3px 0px 0px;\
+padding:0.2em 0.4em;text-align:center;font-weight:bold}\
 \
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
@@ -5839,9 +5841,7 @@ rWqbA+X6MaM4zy2mscLVXAqu03/AbcrbOFCmQAAAAASUVORK5CYII=\
 \
 #pp-config-pixiv{top:100px;width:900px}\
 #pp-config-pixiv:not(.pp-show){display:none}\
-#pp-config-pixiv #pp-config .pp-config-tab:first-child:hover{\
-margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
-border-right:none;border-bottom:none}\
+#pp-config-pixiv #pp-config .pp-config-tab:first-child{border-top-left-radius:3px}\
 \
 #pp-config{line-height:1.2em}\
 #pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
@@ -5856,12 +5856,12 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config table{border-collapse:collapse;border-spacing:0px}\
 #pp-config table td{padding:0px 0.2em}\
 #pp-config label{cursor:pointer}\
-#pp-config-tabbar{border-bottom:2px solid #becad8}\
+#pp-config-tabbar{border-bottom:2px solid #d6dee5}\
 #pp-config-tabbar label{cursor:pointer}\
 #pp-config-close-button{padding:0.4em}\
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
-#pp-config-tabbar .pp-config-tab:hover{background-color:#ddeaf6}\
-#pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
+#pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}\
+#pp-config-tabbar .pp-config-tab.pp-active{background-color:#d6dee5}\
 #pp-config-content-wrapper{padding:6px}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
@@ -5915,7 +5915,7 @@ AAAAAMAAwAAAMdSLHc2jBKKMYM1co8umac9y3Z0kWVOULnBT0TkQAAOw==) !important}\
 #pp-layout-history-manager header span{float:right}\
 #pp-layout-history{margin:0.2em}\
 #pp-layout-history li{cursor:pointer;padding:0px 0.3em}\
-#pp-layout-history li.pp-active{background-color:#ddd}\
+#pp-layout-history li.pp-active{background-color:#d6dee5}\
 #pp-layout-preview{min-width:400px;min-height:300px}\
 #pp-layout-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}\
 #pp-layout-preview li.pp-open{font-weight:bold;color:#444}\
