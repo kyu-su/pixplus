@@ -308,6 +308,9 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.qa('.pp-config-key-editor'))
     self.assertFalse(self.q('#pp-config').is_displayed())
 
+    self.blur()
+    time.sleep(3)
+
     self.auto_click('#pp-config-btn')
     self.assertTrue(self.q('#pp-config').is_displayed())
 

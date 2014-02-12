@@ -320,4 +320,8 @@ class TestCase(unittest.TestCase):
     self.js('pixplus.popup.bookmark.end()')
     pass
 
+  def blur(self):
+    self.js('document.activeElement && document.activeElement.blur()')
+    pass
+
   pass

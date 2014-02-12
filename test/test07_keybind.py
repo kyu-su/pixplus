@@ -21,10 +21,6 @@ class Test_KeyBind(TestCase):
     self.assertFalse(self.qa('#pp-popup'))
     pass
 
-  def blur(self):
-    self.js('document.activeElement.blur()')
-    pass
-
   def test_move1(self):
     self.set_conf('popup.fit_short_threshold', 0)
     self.set_conf('popup.reverse', 0)
