@@ -108,7 +108,7 @@ class Browser:
     return self.driver.execute_script(script, *args)
 
   def geom(self, element):
-    return tuple(map(int, self.js('''
+    return tuple(map(round, self.js('''
       var elem = arguments[0];
       var rect = elem.getBoundingClientRect();
       return [rect.left, rect.top, rect.width, rect.height];
