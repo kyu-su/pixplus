@@ -934,15 +934,15 @@
     }
   };
 
-  _.PopupMenu = function(parent, button) {
+  _.PopupMenu = function(button) {
     this.dom = { };
-    this.dom.root = _.e('div', {cls: 'pp-popup-menu'}, parent);
+    this.dom.root = _.e('div', {cls: 'pp-popup-menu'});
     this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
     this.button = button;
 
     var that = this;
     _.onclick(button, function() {
-      that.show();
+      that.open(button);
     });
   };
 
@@ -1006,24 +1006,43 @@
       this.add(section + '_' + item, _.lng.conf[section][item], options);
     },
 
-    show: function() {
+    open: function(button) {
       var that = this;
-      this.dom.root.classList.add('pp-show');
-      _.modal.begin(this.dom.root, {
+
+      if (this.dom.root.parentNode) {
+        return;
+      }
+
+      d.body.appendChild(this.dom.root);
+
+      var options = {
         onclose: function() {
-          that.dom.root.classList.remove('pp-show');
           if (that.button) {
+            that.dom.root.parentNode.removeChild(that.dom.root);
             that.button.classList.remove('pp-active');
           }
         }
-      });
+      };
+
+      if (button) {
+        var rect = button.getBoundingClientRect();
+        this.dom.root.style.top = rect.bottom + 'px';
+        this.dom.root.style.left = rect.left + 'px';
+      } else {
+        options.centerize = 'both';
+      }
+
+      _.modal.begin(this.dom.root, options);
+
       if (this.button) {
         this.button.classList.add('pp-active');
       }
     },
 
     close: function() {
-      _.modal.end(this.dom.root);
+      if (this.dom.root.parentNode) {
+        _.modal.end(this.dom.root);
+      }
     }
   };
 
@@ -2410,8 +2429,7 @@
       dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
       dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
       dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
-      dom.comment_conf      = _.e('span', {id: 'pp-popup-comment-config-btn-wrapper'}, dom.comment_toolbar);
-      dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_conf);
+      dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
       dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
       dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
       dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -2438,7 +2456,7 @@
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
-      this.comment_conf_menu = new _.PopupMenu(dom.comment_conf, dom.comment_conf_btn);
+      this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
       this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
         if (checked) {
           that.comment.show_form();
@@ -3563,6 +3581,7 @@
       _.qa('._comment-item > .comment > .stamp-container', _.popup.dom.comment).forEach(function(stamp) {
         stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
       });
+      _.popup.adjust();
     },
 
     scroll: function() {
@@ -5667,9 +5686,8 @@ width:6px;height:14px;margin:-7px -4px}\
 .pp-slider.pp-debug{outline:1px solid rgba(255,0,0,0.5)}\
 .pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}\
 .pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}\
-.pp-popup-menu{position:absolute;background-color:#fff;border:1px solid #aaa;\
+.pp-popup-menu{position:fixed;background-color:#fff;border:1px solid #aaa;\
 border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}\
-.pp-popup-menu:not(.pp-show){display:none}\
 .pp-popup-menu-item:hover{background-color:#ddd}\
 .pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
 .pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa;cursor:pointer}\
@@ -5717,8 +5735,7 @@ LGcRR805+atoMcmEzhUt218oR3uMW09sPsYS8povqC7OAqipuMeBfzmXdVnezga7IXC3UxVyhgqMk19p
 O99zgL4suZnGqTafwNpEP9bn7iBseYLRRWZbKFB9zjVyDNyF+IOcRDsT3YHIsIm/iHi1D1c9AkzzeA/9\
 UUrxx8HheFAAAAAElFTkSuQmCC\
 ")/* __SUBST_FILE_CSS_END__ */}\
-#pp-popup-comment-config-btn-wrapper{display:inline-block;position:relative}\
-#pp-popup-comment-config-btn{display:block;\
+#pp-popup-comment-config-btn{\
 /* __SUBST_FILE_CSS__(temp/icons/cogwheel.txt) */background-image:url("\
 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/w\
 D/AP+gvaeTAAAA8ElEQVRIidWVzQ3CMAyFvwBbcGAP6ARIFYgiGAHYhzIEZZUi9igToCpwaCJVVX6Leu\
