@@ -1798,6 +1798,24 @@
       return nodes;
     },
 
+    remove_selector: function(root, selector) {
+      var that = this;
+      this.qa(root, selector).forEach(function(node) {
+        that.remove_from_parent(node);
+      });
+    },
+
+    remove_from_parent: function(node) {
+      if (!node || !node.parent) {
+        return;
+      }
+
+      var idx = node.parent.children.indexOf(node);
+      if (idx >= 0) {
+        node.parent.children.splice(idx, 1);
+      }
+    },
+
     html: function(node, all) {
       if (!node || (!all && this.ignore_elements.test(node.tag))) {
         return '';
@@ -2150,6 +2168,7 @@
       });
 
       var comment = _.fastxml.q(root, '#one_comment .worksOption');
+      _.fastxml.remove_selector(comment, '.worksImageresponse');
       illust.comment = _.fastxml.inner_html(comment) || 'Error';
 
       _.illust.update_urls(illust);
@@ -5783,7 +5802,6 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 #pp-popup-comment .comment.header::after{display:none}\
 #pp-popup-comment ._comment-items ._no-item{\
 margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
-#pp-popup-comment .worksImageresponse{display:none}\
 #pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
