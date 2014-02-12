@@ -665,6 +665,10 @@
     name_map: { },
     encode_map: {Spacebar: 'Space', Esc: 'Escape'},
     decode_map: { },
+    global: {
+      connection: null,
+      handlers: []
+    },
 
     parse_event: function(ev) {
       var keys = [], key, chr = ev['char'];
@@ -717,6 +721,41 @@
         }
         return res;
       }, options);
+    },
+
+    listen_global: function(listener) {
+      var that = this;
+
+      if (!this.global.connection) {
+        _.debug('key.listen_global: begin');
+
+        this.global.connection = this.listen(d, function() {
+          for(var i = 0; i < that.global.handlers.length; ++i) {
+            var ret = that.global.handlers[i].apply(this, arguments);
+            if (ret) {
+              return ret;
+            }
+          }
+          return false;
+        });
+      }
+
+      this.global.handlers.unshift(listener);
+
+      return {
+        disconnect: function() {
+          var idx = that.global.handlers.indexOf(listener);
+          if (idx >= 0) {
+            that.global.handlers.splice(idx, 1);
+          }
+          if (that.global.handlers.length === 0) {
+            that.global.connection.disconnect();
+            that.global.connection = null;
+
+            _.debug('key.listen_global: end');
+          }
+        }
+      };
     },
 
     init: function() {
@@ -892,7 +931,7 @@
     init_events: function() {
       var that = this;
       if (!this.conn_key) {
-        this.conn_key = _.key.listen(d, function(key) {
+        this.conn_key = _.key.listen_global(function(key) {
           if (!that.suspend && key === 'Escape') {
             that.close();
             return true;
@@ -4230,7 +4269,7 @@
 
       var that = this;
 
-      this.conn = _.key.listen(d, function(key, ev, connection) {
+      this.conn = _.key.listen_global(function(key, ev, connection) {
         if (!_.popup.running || !_.key_enabled(ev)) {
           return false;
         }
