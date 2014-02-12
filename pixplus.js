@@ -863,13 +863,10 @@
         var options = this.dialog.options,
             container = this.dialog.container;
 
-        var de   = d.documentElement,
-            off  = container.offsetParent || de,
-            rect = off.getBoundingClientRect(),
-            x, y;
+        var de = d.documentElement, x, y;
 
-        x = (de.clientWidth  - container.offsetWidth)  / 2 - rect.left - off.scrollLeft;
-        y = (de.clientHeight - container.offsetHeight) / 2 - rect.top  - off.scrollTop;
+        x = (de.clientWidth  - container.offsetWidth)  / 2;
+        y = (de.clientHeight - container.offsetHeight) / 2;
 
         if (/^(?:both|horizontal)$/i.test(options.centerize)) {
           container.style.left = g.Math.floor(x) + 'px';
