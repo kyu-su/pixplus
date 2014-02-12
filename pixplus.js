@@ -3057,6 +3057,9 @@
       _.onclick(_.q('.more-comment', dom.comment), function(ev) {
         w.pixiv.comment.more(ev);
       });
+      _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
+        form.setAttribute('action', '/member_illust.php');
+      });
 
       try {
         w.pixiv.context.illustId = illust.id;
