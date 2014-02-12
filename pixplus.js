@@ -350,7 +350,7 @@
     },
 
     key_enabled: function(ev) {
-      return !(/^(?:textarea|button)$/i.test(ev.target.nodeName) ||
+      return !(/^textarea$/i.test(ev.target.nodeName) ||
                (/^input$/i.test(ev.target.nodeName) &&
                 (!ev.target.type ||
                  /^(?:text|search|tel|url|email|password|number)$/i.test(ev.target.type))));
