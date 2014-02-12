@@ -1550,6 +1550,9 @@
       this.container.classList.add('pp-show');
       if (this.toggle_btn) {
         this.toggle_btn.classList.add('pp-active');
+
+        var el = this.dom.content, de = d.documentElement;
+        el.style.height = g.Math.floor((de.clientHeight - el.getBoundingClientRect().top) * 0.7) + 'px';
       }
     },
 
@@ -5914,13 +5917,20 @@ rWqbA+X6MaM4zy2mscLVXAqu03/AbcrbOFCmQAAAAASUVORK5CYII=\
 ") no-repeat center/* __SUBST_FILE_CSS_END__ */}\
 ._type-slim-header ._header .search-container{margin-right:-28px}\
 \
-#pp-config-pixiv{top:100px;width:900px}\
+#pp-config-pixiv{position:fixed;top:50px;width:900px}\
 #pp-config-pixiv:not(.pp-show){display:none}\
 #pp-config-pixiv #pp-config .pp-config-tab:first-child{border-top-left-radius:3px}\
+#pp-config-pixiv::before{content:"";display:block;width:0px;height:0px;\
+border:8px solid transparent;border-bottom-color:#d6dee5;border-top-width:0px;\
+position:absolute;left:296px;top:-8px}\
+#pp-config-pixiv::after{content:"";display:block;width:0px;height:0px;\
+border:7px solid transparent;border-bottom-color:#fff;border-top-width:0px;\
+position:absolute;left:297px;top:-6px}\
+#pp-config-pixiv #pp-config-content-wrapper{overflow-y:auto;box-sizing:border-box}\
 \
 #pp-config{line-height:1.2em}\
 #pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
-border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3em}\
+border:1px solid #becad8;border-radius:2px;margin:0.2em 0px;padding:0.1em 0.3em}\
 #pp-config button{white-space:nowrap}\
 #pp-config input[type="checkbox"]{padding:1px}\
 #pp-config button{background-color:#f2f4f6}\
@@ -5937,7 +5947,7 @@ border:1px solid #becad8;border-radius:2px;margin:0.1em 0.2em;padding:0.1em 0.3e
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
 #pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}\
 #pp-config-tabbar .pp-config-tab.pp-active{background-color:#d6dee5}\
-#pp-config-content-wrapper{padding:6px}\
+#pp-config-content-wrapper{padding:0.4em}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
 .pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}\
