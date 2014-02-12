@@ -85,11 +85,15 @@ class Browser:
   def ac(self):
     return ActionChains(self.driver)
 
-  def q(self, selector):
-    return self.driver.find_element_by_css_selector(selector)
+  def q(self, selector, context = None):
+    if context is None:
+      return self.driver.find_element_by_css_selector(selector)
+    return context.find_element_by_css_selector(selector)
 
-  def qa(self, selector):
-    return self.driver.find_elements_by_css_selector(selector)
+  def qa(self, selector, context = None):
+    if context is None:
+      return self.driver.find_elements_by_css_selector(selector)
+    return context.find_elements_by_css_selector(selector)
 
   def x(self, xpath):
     return self.driver.find_element_by_xpath(xpath)

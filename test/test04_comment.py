@@ -3,70 +3,238 @@ import time
 from test_base import TestCase
 
 class Test_Comment(TestCase):
+  form_selector = '#pp-popup-comment form._comment-form[action="/member_illust.php"]'
 
-  def test_comment(self):
-    self.open_test_user()
-    popup = self.open_popup()
-
+  def start_comment(self):
     self.js('pixplus.popup.comment.start()')
     self.popup_wait_load()
+    pass
 
-    form_query = '#pp-popup-comment-form form[action="/member_illust.php"]'
-    form = self.q(form_query)
-    comment = self.q(form_query + ' input[name="comment"]')
+  def delete(self, comment):
+    dellink = self.q('.delete-comment', comment)
+    self.ac().move_to_element(comment).perform()
+    dellink.click()
+    self.alert_accept()
+    time.sleep(1)
+    pass
 
-    message = 'c%d' % time.time()
+  def delete_all(self):
+    self.open_test_user()
+    self.b.open(self.js('return pixplus.illust.list[0].link.href'))
+
+    end = False
+    while not end:
+      end = True
+
+      for comment in self.qa('._comment-item'):
+        if self.qa('.delete-comment', comment):
+          end = False
+          self.delete(comment)
+          pass
+        pass
+
+      self.reload()
+      pass
+
+    self.assertFalse(self.qa('.delete-comment'))
+    pass
+
+  def test_write(self):
+    self.delete_all()
+
+    self.open_test_user()
+    self.set_conf('popup.show_comment_form', True)
+    self.open_popup()
+    self.start_comment()
+
+    comment = self.q(self.form_selector + ' textarea[name="comment"]')
+
+    message = '__hoge__c_%d' % time.time()
     comment.send_keys(message)
-    form.submit()
+    self.q(self.form_selector + ' .submit-button').click()
 
-    self.wait_until(lambda driver: self.qa(form_query + ' input[name="comment"]:not([disabled])'))
+    xpath = '//*[@id="pp-popup-comment"]//div[contains(concat(" ", @class, " "), " _comment-item ") and .//text()[contains(.,"%s")]]' % message
+    self.wait_until(lambda driver: self.xa(xpath))
 
-    xpath = '//*[@id="pp-popup-comment-history"]//li[text()[contains(.,"%s")]]' % message
     for i in range(10):
+      self.js('pixplus.popup.reload()')
+      self.popup_wait_load()
       if self.xa(xpath):
         break
       time.sleep(1)
-      self.js('pixplus.popup.comment.reload()')
-      self.popup.wait_load()
       pass
-    self.assertTrue(self.xa(xpath))
+
+    self.start_comment()
+    self.delete(self.x(xpath))
+    self.js('pixplus.popup.reload()')
+    self.popup_wait_load()
+    self.assertFalse(self.xa(xpath))
+    self.assertFalse(self.qa('._comment-item .delete-comment'))
     pass
 
-  def check_toggle_comment_form(self, visible):
-    popup = self.open_popup()
+  def make_stamp_xpath(self, num):
+    return '\
+//*[@id="pp-popup-comment"]//div[\
+  contains(concat(" ", @class, " "), " _comment-item ")\
+  and .//*[contains(concat(" ", @class, " "), " stamp-container ")]\
+         //img[contains(@src, "/stamps/%d_s.jpg")]]' % num
 
+  def write_stamp(self, cat, num):
+    xpath = self.make_stamp_xpath(num)
+    self.assertFalse(self.xa(xpath))
+    self.q(self.form_selector + ' > .tabs .tab-stamp').click()
+    self.q(self.form_selector + ' .stamp-type-list .ui-tab[data-target="stamp-%d"]' % cat).click()
+    self.q(self.form_selector + ' .stamp-list.stamp-%d .stamp[data-id="%d"]' % (cat, num)).click()
+    self.wait_until(lambda driver: self.xa(xpath))
+    pass
+
+  def test_write_stamp(self):
+    self.delete_all()
+
+    self.open_test_user()
+    self.set_conf('popup.show_comment_form', True)
+    self.open_popup()
+    self.start_comment()
+
+    xpath = self.make_stamp_xpath(408)
+    self.write_stamp(1, 408)
+
+    for i in range(10):
+      self.js('pixplus.popup.reload()')
+      self.popup_wait_load()
+      if self.xa(xpath):
+        break
+      time.sleep(1)
+      pass
+
+    self.start_comment()
+    self.delete(self.x(xpath))
+    self.js('pixplus.popup.reload()')
+    self.popup_wait_load()
+    self.assertFalse(self.xa(xpath))
+    self.assertFalse(self.qa('._comment-item .delete-comment'))
+    pass
+
+  def check_toggle_form(self, visible):
     self.assertEqual(self.get_conf('popup.show_comment_form'), visible)
 
-    self.js('pixplus.popup.comment.start()')
-    self.popup_wait_load()
+    self.open_popup()
+    self.start_comment()
 
     comment = self.q('#pp-popup-comment')
-    form = self.q('#pp-popup-comment-form')
+    form = self.q(self.form_selector)
 
     self.assertTrue(comment.is_displayed())
     self.assertEqual(form.is_displayed(), visible)
 
-    ac = self.ac()
-    ac.move_to_element_with_offset(comment, 1, 30).perform()
-    ac.click_and_hold().release().perform()
+    self.q('#pp-popup-comment-form-btn').click()
+
+    self.assertEqual(self.get_conf('popup.show_comment_form'), visible)
 
     self.assertTrue(comment.is_displayed())
     self.assertEqual(form.is_displayed(), not visible)
     pass
 
-  def test_comment2(self):
+  def test_toggle_form(self):
     if self.b.name == 'safari':
       self.skipTest('safaridriver is currently not supports move_to_*')
       return
 
     self.open_test_user()
-    self.check_toggle_comment_form(True)
-    time.sleep(1)
+    self.set_conf('popup.show_comment_form', False)
+    self.check_toggle_form(False)
+
     self.reload()
-    self.check_toggle_comment_form(False)
+    self.set_conf('popup.show_comment_form', True)
+    self.check_toggle_form(True)
+    pass
+
+  def test_cogwheel(self):
+    self.delete_all()
+
+    self.open_test_user()
+    self.set_conf('popup.show_comment_form', True)
+    self.open_popup()
+    self.start_comment()
+
+    stamp_xpath = self.make_stamp_xpath(209)
+    self.write_stamp(2, 209)
+    self.assertTrue(self.x(stamp_xpath).is_displayed())
+
+    self.open_test_user()
+    self.set_conf('popup.show_comment_form', False)
+    self.set_conf('popup.hide_stamp_comments', False)
+    self.open_popup()
+    self.start_comment()
+
+    self.assertTrue(self.x(stamp_xpath).is_displayed())
+
+    btn = self.q('#pp-popup-comment-config-btn')
+    x, y, w, h = self.geom(btn)
+    btn.click()
     time.sleep(1)
-    self.reload()
-    self.check_toggle_comment_form(True)
+
+    menu = self.q('.pp-popup-menu')
+    self.assertTrue(menu.is_displayed())
+    self.assertEqual(self.geom(menu)[:2], (x, y + h))
+
+    sel_show_comment_form = '.pp-popup-menu-item[data-name="popup_show_comment_form"] input[type="checkbox"]'
+    sel_hide_stamp_comments = '.pp-popup-menu-item[data-name="popup_hide_stamp_comments"] input[type="checkbox"]'
+
+    self.assertFalse(self.q(self.form_selector).is_displayed())
+    self.assertFalse(self.q(sel_show_comment_form).is_selected())
+    self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
+
+    self.q(sel_show_comment_form).click()
+    time.sleep(1)
+    self.assertTrue(self.q(self.form_selector).is_displayed())
+    self.assertEqual(self.get_conf('popup.show_comment_form'), True)
+    self.assertEqual(self.get_conf('popup.hide_stamp_comments'), False)
+    self.assertFalse(self.qa('.pp-popup-menu'))
+    self.assertTrue(self.x(stamp_xpath).is_displayed())
+
+    btn.click()
+    time.sleep(1)
+    self.assertTrue(self.q(sel_show_comment_form).is_selected())
+    self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
+
+    self.q(sel_hide_stamp_comments).click()
+    time.sleep(1)
+    self.assertEqual(self.get_conf('popup.show_comment_form'), True)
+    self.assertEqual(self.get_conf('popup.hide_stamp_comments'), True)
+    self.assertFalse(self.qa('.pp-popup-menu'))
+    self.assertFalse(self.x(stamp_xpath).is_displayed())
+
+    btn.click()
+    time.sleep(1)
+    self.assertTrue(self.q(sel_show_comment_form).is_selected())
+    self.assertTrue(self.q(sel_hide_stamp_comments).is_selected())
+
+    self.q(sel_show_comment_form).click()
+    time.sleep(1)
+    self.assertTrue(self.q(self.form_selector).is_displayed())
+    self.assertEqual(self.get_conf('popup.show_comment_form'), False)
+    self.assertEqual(self.get_conf('popup.hide_stamp_comments'), True)
+    self.assertFalse(self.qa('.pp-popup-menu'))
+    self.assertFalse(self.x(stamp_xpath).is_displayed())
+
+    btn.click()
+    time.sleep(1)
+    self.assertFalse(self.q(sel_show_comment_form).is_selected())
+    self.assertTrue(self.q(sel_hide_stamp_comments).is_selected())
+
+    self.q(sel_hide_stamp_comments).click()
+    time.sleep(1)
+    self.assertTrue(self.q(self.form_selector).is_displayed())
+    self.assertEqual(self.get_conf('popup.show_comment_form'), False)
+    self.assertEqual(self.get_conf('popup.hide_stamp_comments'), False)
+    self.assertFalse(self.qa('.pp-popup-menu'))
+    self.assertTrue(self.x(stamp_xpath).is_displayed())
+
+    btn.click()
+    time.sleep(1)
+    self.assertFalse(self.q(sel_show_comment_form).is_selected())
+    self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
     pass
 
   pass
