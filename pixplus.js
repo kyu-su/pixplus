@@ -4906,7 +4906,8 @@
       this.disable_float_temp = false;
       if (this.cont) {
         var de = d.documentElement;
-        var mh = de.clientHeight - (this.wrap.offsetHeight - this.cont.offsetHeight);
+        var top = this.wrap.getBoundingClientRect().top;
+        var mh = de.clientHeight - top - (this.wrap.offsetHeight - this.cont.offsetHeight);
         this.ignore_elements.forEach(function(elem) {
           mh += elem.offsetHeight;
         });
@@ -4915,9 +4916,6 @@
           this.unfloat();
           this.cont.style.maxHeight = 'none';
           return;
-        }
-        if (!this.floating) {
-          mh -= this.wrap.getBoundingClientRect().top;
         }
         this.cont.style.maxHeight = mh + 'px';
       }
@@ -5404,7 +5402,7 @@
           that[name](query, ul, li, radio, inputs);
         });
 
-        var nav = _.qa('.column-label,.column-menu,.column-menu+.column-order-menu');
+        var nav = _.qa('.column-label,.column-menu,.column-menu+.column-order-menu,.column-menu+aside+.column-order-menu');
         if (nav.length > 0) {
           _.Floater.auto_run(function() {
             var wrapper = _.e('div', {id: 'pp-search-header'});
@@ -5955,7 +5953,7 @@ background-color:#fff;border:2px solid #becad8;border-radius:6px;padding:3px}\
 .pp-config-key-editor-toolbar button{margin-left:0.2em}\
 \
 /* floater */\
-.pp-float{position:fixed;top:0px;z-index:90}\
+.pp-float{position:fixed;top:60px;z-index:90}\
 .column-action-menu.pp-float:not(:hover){opacity:0.6;}\
 #pp-search-header{background-color:#fff}\
 #pp-search-header.pp-float:not(:hover){opacity:0.6}\
