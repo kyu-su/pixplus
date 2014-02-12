@@ -986,7 +986,7 @@
       }
     },
 
-    addConfItem: function(section, item, callback) {
+    add_conf_item: function(section, item, callback) {
       var options = { };
       var value = _.conf[section][item];
 
@@ -2441,10 +2441,13 @@
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
       this.comment_conf_menu = new _.PopupMenu(dom.comment_conf, dom.comment_conf_btn);
-      this.comment_conf_menu.addConfItem('popup', 'show_comment_form', function(checked) {
+      this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
         if (checked) {
           that.comment.show_form();
         }
+      });
+      this.comment_conf_menu.add_conf_item('popup', 'hide_stamp_comments', function(checked) {
+        that.comment.update_hide_stamp_comments();
       });
 
       this.input.init();
@@ -2983,6 +2986,9 @@
       });
       _.onclick(_.q('.more-comment', dom.comment), function(ev) {
         w.pixiv.comment.more(ev);
+      });
+      _.qa('._comment-item > .comment > .stamp-container', dom.comment).forEach(function(stamp) {
+        stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
       });
 
       try {
@@ -3544,7 +3550,16 @@
       var show_form = _.conf.popup.show_comment_form;
       _.popup.dom.root.classList.remove('pp-comment-mode');
       _.popup.dom.root.classList[show_form ? 'add' : 'remove']('pp-show-comment-form');
+
+      this.update_hide_stamp_comments();
+
       this.active = false;
+    },
+
+    update_hide_stamp_comments: function() {
+      var hide_stamps = _.conf.popup.hide_stamp_comments;
+      _.popup.dom.root.classList[hide_stamps ? 'add' : 'remove']('pp-hide-stamp-comments');
+      _.popup.adjust();
     },
 
     scroll: function() {
@@ -5716,6 +5731,7 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 #pp-popup-comment ._comment-items ._no-item{\
 margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
 #pp-popup-comment .worksImageresponse{display:none}\
+#pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
@@ -5949,6 +5965,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "scroll_height_page", "value": 0.8},
       {"key": "author_status_icon", "value": true},
       {"key": "show_comment_form", "value": false},
+      {"key": "hide_stamp_comments", "value": false},
       {"key": "mouse_wheel", "value": 2},
       {"key": "mouse_wheel_delta", "value": 1},
       {"key": "fit_short_threshold", "value": 4},
@@ -6095,6 +6112,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           scroll_height_page: 'Scroll step for PageUp/PageDown',
           author_status_icon: 'Show icon on profile image',
           show_comment_form: 'Show comment form by default',
+          hide_stamp_comments: 'Hide stamp comments',
           mouse_wheel: {
             desc: 'Mouse wheel operation',
             hint: ['Do nothing', 'Move to prev/next illust', 'Move to prev/next illust(respect "reverse" setting)']
@@ -6256,6 +6274,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           scroll_height_page: 'PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b',
           show_comment_form: '\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u3067\u8868\u793a\u3059\u308b',
+          hide_stamp_comments: '\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b',
           mouse_wheel: {
             desc: '\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c',
             hint: ['\u4f55\u3082\u3057\u306a\u3044', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5', '\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)']
@@ -6364,11 +6383,13 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Add] Add \"Hide stamp comments\" option.",
           "[Fix] Fix ranking page support.",
           "[Fix] Support new comment UI.",
           "[Fix] Configuration button doesn't appears."
         ],
         "ja": [
+          "[\u8ffd\u52a0] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002",
           "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002",
           "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002",
           "[\u4fee\u6b63] \u8a2d\u5b9a\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
