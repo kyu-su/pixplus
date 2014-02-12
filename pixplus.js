@@ -1486,19 +1486,19 @@
     },
 
     is_active: function() {
-      return !!this.dom.root && this.dom.root.classList.contains('pp-show');
+      return !!this.dom.root && this.container.classList.contains('pp-show');
     },
 
     show: function() {
       this.create();
-      this.dom.root.classList.add('pp-show');
+      this.container.classList.add('pp-show');
       if (this.toggle_btn) {
         this.toggle_btn.classList.add('pp-active');
       }
     },
 
     hide: function() {
-      this.dom.root.classList.remove('pp-show');
+      this.container.classList.remove('pp-show');
       if (this.toggle_btn) {
         this.toggle_btn.classList.remove('pp-active');
       }
@@ -4939,8 +4939,8 @@
         var that = this;
 
         this.dom = {};
-        this.dom.root = _.e('div', {id: 'pp-layout-history-manager', cls: 'pp-modal'});
-        this.dom.header = _.e('header', null, this.dom.root);
+        this.dom.root = _.e('div', {id: 'pp-layout-history-manager', cls: 'pp-dialog'});
+        this.dom.header = _.e('header', {cls: 'pp-dialog-title'}, this.dom.root);
         this.dom.close_btn = _.e('span', {
           id: 'pp-layout-history-manager-close',
           text: '\u00d7',
@@ -5486,7 +5486,7 @@
     _.redirect_jump_page();
 
     (function(list) {
-      var wrapper = _.e('div', {id: 'pp-config-pixiv'}, d.body);
+      var wrapper = _.e('div', {id: 'pp-config-pixiv', cls: 'pp-dialog'}, d.body);
       var button;
 
       if (list) {
@@ -5496,7 +5496,7 @@
 
       var show = function(ev) {
         _.configui.show();
-        _.modal.begin(_.configui.dom.root, {
+        _.modal.begin(_.configui.container, {
           onclose: _.configui.hide.bind(_.configui),
           centerize: 'horizontal'
         });
@@ -5654,6 +5654,9 @@ border-radius:3px;padding:3px 0px;z-index:30000}\
 .pp-popup-menu-item:hover{background-color:#ddd}\
 .pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
 .pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa;cursor:pointer}\
+.pp-dialog{position:absolute;z-index:10000;background-color:#fff;\
+border:3px solid #becad8;border-radius:10px;box-shadow:0px 0px 0.6em 0.4em rgba(0,0,0,0.4)}\
+.pp-dialog-title{background-color:#becad8;padding:0.2em 0.4em;text-align:center;font-weight:bold}\
 \
 /* popup */\
 #pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}\
@@ -5815,9 +5818,8 @@ rWqbA+X6MaM4zy2mscLVXAqu03/AbcrbOFCmQAAAAASUVORK5CYII=\
 ") no-repeat center/* __SUBST_FILE_CSS_END__ */}\
 ._type-slim-header ._header .search-container{margin-right:-28px}\
 \
-#pp-config-pixiv #pp-config:not(.pp-show){display:none}\
-#pp-config-pixiv #pp-config{position:absolute;z-index:10000;top:100px;width:900px;\
-background-color:#fff;border:3px solid #becad8;border-radius:10px}\
+#pp-config-pixiv{top:100px;width:900px}\
+#pp-config-pixiv:not(.pp-show){display:none}\
 #pp-config-pixiv #pp-config .pp-config-tab:first-child:hover{\
 margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
 border-right:none;border-bottom:none}\
@@ -5887,14 +5889,10 @@ background-color:#fff;border:2px solid #becad8;border-radius:6px;padding:3px}\
 #page-mypage #item-container header .action .pp-layout-history{background-image:url(\
 data:image/gif;base64,R0lGODlhDAAMAMIAAP///////+Tk5Hl5ef///////////////yH5BAEKAAQALA\
 AAAAAMAAwAAAMdSLHc2jBKKMYM1co8umac9y3Z0kWVOULnBT0TkQAAOw==) !important}\
-#pp-layout-history-manager{position:fixed;border:1px solid #aaa;\
-background-color:#fff;box-shadow:0px 0px 0.6em 0.4em rgba(0,0,0,0.4)}\
 #pp-layout-history-manager .pp-error-message{display:none}\
 #pp-layout-history-manager.pp-error .pp-error-message{display:block}\
 #pp-layout-history-manager.pp-error table{display:none}\
 #pp-layout-history-manager table td{vertical-align:top}\
-#pp-layout-history-manager header{border-bottom:1px solid #aaa;padding:0.1em 0.2em;\
-text-align:center;background-color:#eee}\
 #pp-layout-history-manager header span{float:right}\
 #pp-layout-history{margin:0.2em}\
 #pp-layout-history li{cursor:pointer;padding:0px 0.3em}\
