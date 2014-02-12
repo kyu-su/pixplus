@@ -902,6 +902,7 @@
 
       var that = this;
       this.suspend = true;
+
       g.setTimeout(function() {
         that.suspend = false;
       }, 100);
@@ -919,12 +920,8 @@
     },
 
     end: function(target) {
-      while(this.dialog) {
-        var end = this.dialog.container === target;
+      while(this.dialog && this.dialog.container !== target) {
         this.close();
-        if (end) {
-          break;
-        }
       }
     },
 
@@ -1238,7 +1235,7 @@
             open(ev.target);
             _.modal.begin(editor_wrapper, {
               onclose: close,
-              parent: _.configui.dom.root,
+              parent: _.configui.container,
               members: [ev.target]
             });
           }
