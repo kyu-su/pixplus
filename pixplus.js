@@ -149,15 +149,13 @@
     listen: function(targets, events, listener, options) {
       var throttling_timer;
 
-      if (!targets) {
-        return null;
-      }
-
       if (!options) {
         options = {};
       }
 
-      if (!g.Array.isArray(targets)) {
+      if (!targets) {
+        targets = [];
+      } else if (!g.Array.isArray(targets)) {
         targets = [targets];
       }
 
@@ -2450,6 +2448,8 @@
         that.comment.update_hide_stamp_comments();
       });
 
+      _.listen(dom.comment, 'DOMNodeInserted', this.comment.update.bind(this.comment), {async: true});
+
       this.input.init();
 
       _.listen(w, 'resize', function() {
@@ -2986,9 +2986,6 @@
       });
       _.onclick(_.q('.more-comment', dom.comment), function(ev) {
         w.pixiv.comment.more(ev);
-      });
-      _.qa('._comment-item > .comment > .stamp-container', dom.comment).forEach(function(stamp) {
-        stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
       });
 
       try {
@@ -3560,6 +3557,12 @@
       var hide_stamps = _.conf.popup.hide_stamp_comments;
       _.popup.dom.root.classList[hide_stamps ? 'add' : 'remove']('pp-hide-stamp-comments');
       _.popup.adjust();
+    },
+
+    update: function() {
+      _.qa('._comment-item > .comment > .stamp-container', _.popup.dom.comment).forEach(function(stamp) {
+        stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
+      });
     },
 
     scroll: function() {
@@ -5664,7 +5667,7 @@ width:6px;height:14px;margin:-7px -4px}\
 .pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}\
 .pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}\
 .pp-popup-menu{position:absolute;background-color:#fff;border:1px solid #aaa;\
-border-radius:3px;padding:3px 0px;z-index:30000}\
+border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}\
 .pp-popup-menu:not(.pp-show){display:none}\
 .pp-popup-menu-item:hover{background-color:#ddd}\
 .pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
@@ -5712,7 +5715,7 @@ LGcRR805+atoMcmEzhUt218oR3uMW09sPsYS8povqC7OAqipuMeBfzmXdVnezga7IXC3UxVyhgqMk19p
 O99zgL4suZnGqTafwNpEP9bn7iBseYLRRWZbKFB9zjVyDNyF+IOcRDsT3YHIsIm/iHi1D1c9AkzzeA/9\
 UUrxx8HheFAAAAAElFTkSuQmCC\
 ")/* __SUBST_FILE_CSS_END__ */}\
-#pp-popup-comment-config-btn-wrapper{display:inline-block}\
+#pp-popup-comment-config-btn-wrapper{display:inline-block;position:relative}\
 #pp-popup-comment-config-btn{display:block;\
 /* __SUBST_FILE_CSS__(temp/icons/cogwheel.txt) */background-image:url("\
 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/w\
