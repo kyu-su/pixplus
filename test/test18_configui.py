@@ -237,8 +237,8 @@ class Test_ModConfigUI(TestCase):
     x, y, w, h = self.geom(dialog)
 
     self.assertTrue(w <= sw, h <= sh)
-    self.assertTrue(width[0] <= w <= width[1])
-    self.assertTrue(height[0] <= h <= height[1])
+    self.assertTrue(width[0] <= w <= width[1], 'width: %d <= %d <= %d' % (width[0], w, width[1]))
+    self.assertTrue(height[0] <= h <= height[1], 'height: %d <= %d <= %d' % (height[0], h, height[1]))
 
     if left is None:
       self.assertEqual(x, int((sw - w) / 2))
@@ -268,10 +268,19 @@ class Test_ModConfigUI(TestCase):
 
   def test_modal(self):
     self.prepare()
-    self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (100, 100), (902, 902), (100, 300))
+
+    el = self.q('#pp-config-content-wrapper')
+    sw, sh = self.screen_size()
+    x, y, w, h = self.geom(el)
+    h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config-pixiv'))[1]) + 1
+    self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (50, 50), (902, 902), (h, h))
+
+    self.auto_click('.notification-container .popboard')
+    self.assertFalse(self.q('#pp-config').is_displayed())
+    self.assertTrue(self.q('#notification-popboard').is_displayed())
 
     self.auto_click('.pp-layout-history')
-    self.assertFalse(self.q('#pp-config').is_displayed())
+    self.assertFalse(self.q('#notification-popboard').is_displayed())
     self.check_modal_position_size(self.q('#pp-layout-history-manager'), None, None, (400, 600), (300, 400))
 
     self.auto_click('#pp-config-btn')
