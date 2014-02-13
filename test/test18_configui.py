@@ -275,7 +275,7 @@ class Test_ModConfigUI(TestCase):
     h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config-pixiv'))[1]) + 1
     self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (50, 50), (902, 902), (h, h))
 
-    self.auto_click('.notification-container .popboard')
+    self.auto_click('.notification-container .popboard ._icon')
     self.assertFalse(self.q('#pp-config').is_displayed())
     self.assertTrue(self.q('#notification-popboard').is_displayed())
 
