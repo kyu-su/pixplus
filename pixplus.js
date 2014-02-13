@@ -5561,7 +5561,7 @@
         update(g.parseFloat(query.ratio));
         slider.set_value(input.value = query.ratio || '0');
 
-        _.listen(slider, 'change', function() {
+        _.listen(slider, ['change', 'input'], function() {
           update(g.parseFloat(slider.value));
           input.value = slider.value;
           radio.checked = true;
