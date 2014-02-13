@@ -5926,7 +5926,8 @@ position:absolute;left:296px;top:-8px}\
 #pp-config-pixiv::after{content:"";display:block;width:0px;height:0px;\
 border:7px solid transparent;border-bottom-color:#fff;border-top-width:0px;\
 position:absolute;left:297px;top:-6px}\
-#pp-config-pixiv #pp-config-content-wrapper{overflow-y:auto;box-sizing:border-box}\
+#pp-config-pixiv #pp-config-content-wrapper{overflow-y:auto;\
+box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 \
 #pp-config{line-height:1.2em}\
 #pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
