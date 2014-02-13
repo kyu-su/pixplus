@@ -5156,7 +5156,7 @@
     setup_item_actions: function() {
       var that = this;
       _.qa('#item-container header .action').forEach(function(actions) {
-        var li = _.e('li', {cls: 'pp-layout-history ui-tooltip',
+        var li = _.e('li', {cls: 'pp-layout-history _ui-tooltip',
                             'data-tooltip': _.lng.mypage_layout_history});
         actions.insertBefore(li, actions.firstChild);
         _.onclick(li, that.history_manager.show.bind(that.history_manager));
@@ -5492,7 +5492,7 @@
           return _.e('input', {
             id: 'pp-search-size-custom-' + n,
             type: 'text',
-            cls: 'ui-tooltip',
+            cls: '_ui-tooltip',
             'data-tooltip': _.lng['search_' + n]
           }, li);
         });
