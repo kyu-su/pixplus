@@ -111,36 +111,4 @@ class Test_AdvancedSearch(TestCase):
     self.assertEqual(self.get_radio('ratio').get_attribute('value'), '123')
     pass
 
-  def test_ratio_debug(self):
-    self.set_conf('general.debug', True)
-    self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.q('.search-option').click()
-    time.sleep(1)
-    self.js('pixplus.lazy_scroll(arguments[0])', self.q('#pp-search-ratio-custom-slider'))
-    time.sleep(1)
-
-    slider = self.q('#pp-search-ratio-custom-slider.pp-slider')
-    sx, sy, sw, sh = self.geom(slider)
-    self.assertEqual(sw, 168)
-    self.assertEqual(sh, 16)
-
-    rx, ry, rw, rh = self.geom(self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-rail'))
-    self.assertEqual(rw, 160)
-    self.assertEqual(rh, 2)
-    self.assertEqual(rx - sx, 4)
-    self.assertEqual(ry - sy, 7)
-    self.assertEqual((sx + sw) - (rx + rw), 4)
-    self.assertEqual((sy + sh) - (ry + rh), 7)
-
-    knob = self.q('#pp-search-ratio-custom-slider.pp-slider .pp-slider-knob')
-    kx, ky, kw, kh = self.geom(knob)
-    self.assertEqual(kx - rx, (rw - kw) / 2)
-    self.assertEqual(ky, sy)
-    self.assertEqual(kw, 8)
-    self.assertEqual(kh, 16)
-
-    text = self.q('#pp-search-ratio-custom-text')
-    self.check_slider(slider, knob, text)
-    pass
-
   pass
