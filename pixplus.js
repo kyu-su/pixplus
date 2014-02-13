@@ -884,7 +884,9 @@
         return;
       }
 
-      this.end(options.parent);
+      while(this.dialog && this.dialog.container !== options.parent) {
+        this.close();
+      }
 
       _.debug('Begin modal');
 
@@ -917,8 +919,12 @@
     },
 
     end: function(target) {
-      while(this.dialog && this.dialog.container !== target) {
+      while(this.dialog) {
+        var end = this.dialog.container === target;
         this.close();
+        if (end) {
+          break;
+        }
       }
     },
 
