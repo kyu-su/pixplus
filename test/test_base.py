@@ -60,6 +60,7 @@ class TestCase(unittest.TestCase):
       pass
 
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
+    time.sleep(1)
     pass
 
   def wait_illust_list(self):
@@ -292,6 +293,8 @@ class TestCase(unittest.TestCase):
     if self.qa('#pp-popup'):
       self.popup_wait_load()
       pass
+
+    time.sleep(0.3)
     pass
 
   def auto_click(self, query):

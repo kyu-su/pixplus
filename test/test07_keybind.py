@@ -514,8 +514,6 @@ class Test_KeyBind(TestCase):
 
     self.send_keys(Keys.SPACE)
 
-    time.sleep(1)
-
     self.wait_until(lambda d: answer in self.q('#pp-popup-rating .questionnaire .status').text)
     self.assertFalse(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
     self.assertFalse(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
@@ -919,17 +917,23 @@ class Test_KeyBind(TestCase):
   def test_caption_scroll(self):
     self.open_test_user()
     self.find_illust(self.check_caption_scrollable)
+    time.sleep(1)
     self.check_caption_scroll_pos(0, 0)
     self.send_keys(Keys.DOWN)
+    time.sleep(1)
     self.check_caption_scroll_pos(32, 0)
     self.send_keys(Keys.DOWN)
+    time.sleep(1)
     self.check_caption_scroll_pos(64, 0)
     self.send_keys(Keys.UP)
+    time.sleep(1)
     self.check_caption_scroll_pos(32, 0)
     self.set_conf('popup.scroll_height', 16)
     self.send_keys(Keys.DOWN)
+    time.sleep(1)
     self.check_caption_scroll_pos(48, 0)
     self.send_keys(Keys.UP)
+    time.sleep(1)
     self.check_caption_scroll_pos(32, 0)
     pass
 
