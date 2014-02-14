@@ -5227,6 +5227,12 @@
           pixiv_mypage_update.apply(this, arguments);
           that.save_layout();
         };
+
+        var pixiv_mypage_parse = w.pixiv.mypage.parse;
+        w.pixiv.mypage.parse = function() {
+          pixiv_mypage_parse.apply(this, arguments);
+          that.save_layout();
+        };
       } catch(ex) {
         _.log('mypage error - ' + g.String(ex));
       }
@@ -5725,7 +5731,7 @@
     _.Floater.init();
     w.addEventListener('load', _.Floater.update_height.bind(_.Floater), false);
 
-    if (d.readyState === 'loading') {
+    if (/^(?:uninitialized|loading)$/.test(d.readyState)) {
       w.addEventListener('DOMContentLoaded', _.setup_ready, false);
     } else {
       _.setup_ready();
