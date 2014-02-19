@@ -3,7 +3,7 @@
 // @author      wowo
 // @version     1.9.0
 // @license     The MIT License
-// @description pixivをほげる。
+// @description hogehoge
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
 // @icon64      http://crckyl.ath.cx/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
