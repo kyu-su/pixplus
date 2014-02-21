@@ -6472,10 +6472,12 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
+
     {
-      "date": "2014/02/xx",
+      "date": "2014/02/21",
       "version": "1.9.0",
-      "releasenote": "",
+      "releasenote": "http://my.opera.com/crckyl/blog/2014/02/21/pixplus-1-9-0",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Hide stamp comments\" option.",
@@ -6492,7 +6494,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       }
     },
 
-    // __CHANGELOG_BEGIN__
     {
       "date": "2013/08/14",
       "version": "1.8.1",

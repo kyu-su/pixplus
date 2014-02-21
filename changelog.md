@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.9.0 - 2014/02/21](http://my.opera.com/crckyl/blog/2014/02/21/pixplus-1-9-0)
+
+### 変更点
+
+* [追加] 「スタンプのコメントを非表示にする」オプションを追加。
+* [修正] ランキングページのサポートを修正。
+* [修正] 新しいコメントUIをサポート。
+* [修正] 設定ボタンが表示されなくなっていた不具合を修正。
+
+### Changes
+
+* [Add] Add "Hide stamp comments" option.
+* [Fix] Fix ranking page support.
+* [Fix] Support new comment UI.
+* [Fix] Configuration button doesn't appears.
+
 ## [1.8.1 - 2013/08/14](http://my.opera.com/crckyl/blog/2013/08/14/pixplus-1-8-1)
 
 ### 変更点

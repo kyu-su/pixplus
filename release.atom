@@ -12,6 +12,32 @@
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
   <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+    <title type="text">pixplus 1.9.0</title>
+    <id>http://crckyl.ath.cx/pixplus/archive/1.9.0</id>
+    <updated>2014/02/21T00:00:00+09:00</updated>
+    <link href="http://crckyl.ath.cx/pixplus/archive/1.9.0" />
+    <author>
+      <name>wowo</name>
+      <uri>http://crckyl.ath.cx/</uri>
+      <email>crckyl@gmail.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplus 1.9.0</h1>
+      <ul>
+        <li>[追加] 「スタンプのコメントを非表示にする」オプションを追加。</li>
+        <li>[修正] ランキングページのサポートを修正。</li>
+        <li>[修正] 新しいコメントUIをサポート。</li>
+        <li>[修正] 設定ボタンが表示されなくなっていた不具合を修正。</li>
+      </ul>
+      <ul>
+        <li>[Add] Add "Hide stamp comments" option.</li>
+        <li>[Fix] Fix ranking page support.</li>
+        <li>[Fix] Support new comment UI.</li>
+        <li>[Fix] Configuration button doesn't appears.</li>
+      </ul>
+    ]]></content>
+  </entry>
+  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
     <title type="text">pixplus 1.8.1</title>
     <id>http://crckyl.ath.cx/pixplus/archive/1.8.1</id>
     <updated>2013/08/14T00:00:00+09:00</updated>
