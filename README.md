@@ -26,10 +26,10 @@ The MIT License
 
 * make (GNU Make)
 * rsvg-convert
-* python
+* python 2.7+ or 3.3+
 * zip (oex)
 * ruby (crx)
-* rubyzip (crx)
+* rubyzip 1.0.0+ (crx)
 * openssl (crx/safariextz)
 
 ## How to build
