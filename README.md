@@ -3,6 +3,8 @@ pixplus
 
 Browser extension for pixiv.
 
+Donate! => http://www.pixiv.net/premium.php
+
 ## Screenshot
 
 ![Popup](screenshot/mac_opera12_popup.png)
