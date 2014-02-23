@@ -56,18 +56,25 @@ check_gimp() {
 run_gimp() {
   size=${SIZE:-0}
   <<EOF "$GIMP" -ib - -b '(gimp-quit 0)'
-(let* ((image (car (file-svg-load RUN-NONINTERACTIVE
-                    "$SVG"
-                    "$SVG"
-                    90
-                    $size
-                    $size
-                    0
-                    )))
+(let* ((image (car (file-svg-load
+                      RUN-NONINTERACTIVE ; run-mode     INT32  The run mode { RUN-INTERACTIVE (0), RUN-NONINTERACTIVE (1) }
+                      "$SVG"             ; filename     STRING The name of the file to load
+                      "$SVG"             ; raw-filename STRING The name of the file to load
+                      90                 ; resolution   FLOAT  Resolution to use for rendering the SVG (defaults to 90 dpi)
+                      $size              ; width        INT32  Width (in pixels) to load the SVG in. (0 for original width, a negative width to specify a maximum width)
+                      $size              ; height       INT32  Height (in pixels) to load the SVG in. (0 for original height, a negative width to specify a maximum height)
+                      0                  ; paths        INT32  Whether to not import paths (0), import paths individually (1) or merge all imported paths (2)
+                      )))
        (drawable (car (gimp-image-get-active-layer image)))
        )
 
-  (gimp-file-save RUN-NONINTERACTIVE image drawable "$PNG" "$PNG")
+  (gimp-file-save
+     RUN-NONINTERACTIVE  ; run-mode     INT32    The run mode { RUN-INTERACTIVE (0), RUN-NONINTERACTIVE (1), RUN-WITH-LAST-VALS (2) }
+     image               ; image        IMAGE    Input image
+     drawable            ; drawable     DRAWABLE Drawable to save
+     "$PNG"              ; filename     STRING   The name of the file to save the image in
+     "$PNG"              ; raw-filename STRING   The name as entered by the user
+     )
   (gimp-image-delete image)
   (gimp-quit 0)
   )
