@@ -11,10 +11,11 @@ Donate! => http://www.pixiv.net/premium.php
 
 ## Supported browsers
 
-* Opera 12 (oex/UserJS)
-* Chrome / Chromium (crx/Greasemonkey)
-* Firefox / Beta / ESR (Greasemonkey/Scriptish)
+* GoogleChrome/Chromium (crx/Greasemonkey)
+* Firefox / ESR (Greasemonkey/Scriptish)
 * Safari (safariextz)
+* Opera 15+ (crx)
+* Opera 12 (oex/UserJS)
 
 ## License
 
@@ -24,7 +25,7 @@ The MIT License
 
 [changelog.md](changelog.md)
 
-## Requirements to build
+## Build requirements
 
 * make (GNU Make)
 * rsvg-convert or inkscape
