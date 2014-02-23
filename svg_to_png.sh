@@ -55,7 +55,7 @@ check_gimp() {
 
 run_gimp() {
   size=${SIZE:-0}
-  <<EOF cat | "$GIMP" -ib - -b '(gimp-quit 0)'
+  <<EOF "$GIMP" -ib - -b '(gimp-quit 0)'
 (let* ((image (car (file-svg-load RUN-NONINTERACTIVE
                     "$SVG"
                     "$SVG"
