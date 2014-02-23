@@ -1,6 +1,7 @@
 RSVG_CONVERT                    = rsvg-convert
 INKSCAPE                        = inkscape
-SVG_TO_PNG                      = ./svg_to_png.sh -rsvg-convert "$(RSVG_CONVERT)" -inkscape "$(INKSCAPE)"
+GIMP                            = gimp
+SVG_TO_PNG                      = ./svg_to_png.sh -rsvg-convert "$(RSVG_CONVERT)" -inkscape "$(INKSCAPE)" -gimp "$(GIMP)"
 SVG_TO_PNG_OK                   = $(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no)
 SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
@@ -48,6 +49,7 @@ ICON_SIZE                       = $(ICON_SIZE_SMALL) $(ICON_SIZE_BIG)
 ICON_FILES_SMALL                = $(ICON_SIZE_SMALL:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
+ICON_CONFIG_BTN_SVG             = $(BUILD_DIR_ICON)/config_btn.svg
 ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
 ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn.txt
 B64_ICONS                       = pencil pencil_off cogwheel
@@ -206,10 +208,15 @@ $(ICON_FILES_BIG): $(ICON_SVG)
 	@mkdir -p $(dir $@)
 	@$(SVG_TO_PNG) -svg $< -size $(basename $(notdir $@)) -png $@
 
-$(ICON_CONFIG_BTN): $(ICON_SMALL_SVG)
+$(ICON_CONFIG_BTN_SVG): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cat $< | sed 's/#0096db/#b8e1f7/' | $(SVG_TO_PNG) -svg /dev/stdin -size 22 -png $@
+	@cat $< | sed 's/#0096db/#b8e1f7/' > $@
+
+$(ICON_CONFIG_BTN): $(ICON_CONFIG_BTN_SVG)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@$(SVG_TO_PNG) -svg $< -size 22 -png $@
 
 $(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
