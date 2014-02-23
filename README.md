@@ -28,7 +28,7 @@ The MIT License
 ## Build requirements
 
 * make (GNU Make)
-* rsvg-convert or inkscape
+* rsvg-convert or Inkscape or GIMP
 * python 2.7+ or 3.3+
 * zip (oex)
 * ruby (crx)
