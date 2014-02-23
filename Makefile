@@ -122,7 +122,7 @@ info:
 	@echo
 
 subst:
-	@>$(SRC_USERJS).new python subst.py <$(SRC_USERJS) && mv $(SRC_USERJS).new $(SRC_USERJS)
+	@>$(SRC_USERJS).new $(PYTHON) subst.py <$(SRC_USERJS) && mv $(SRC_USERJS).new $(SRC_USERJS)
 
 deps: $(XAR)
 
