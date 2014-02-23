@@ -1,4 +1,8 @@
 RSVG_CONVERT                    = rsvg-convert
+INKSCAPE                        = inkscape
+SVG_TO_PNG                      = ./svg_to_png.sh -rsvg-convert "$(RSVG_CONVERT)" -inkscape "$(INKSCAPE)"
+SVG_TO_PNG_OK                   = $(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no)
+SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
 CRXMAKE                         = $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
@@ -84,19 +88,27 @@ SAFARIEXTZ_DIST_FILES           = $(DIST_FILES_ALL:%=$(BUILD_DIR_SAFARIEXTZ)/%) 
 
 ALL_TARGETS                     = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
+ifeq ($(SVG_TO_PNG_OK),yes)
+ALL_TARGETS += $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT)
+else
+BUILD_OEX=no
+BUILD_CRX=no
+BUILD_SAFARIEXTZ=no
+endif
+
 ifeq ($(BUILD_OEX),yes)
-ALL_TARGETS                    += $(OEX)
+ALL_TARGETS += $(OEX)
 endif
 
 ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS                    += $(CRX)
+ALL_TARGETS += $(CRX)
 endif
 
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-ALL_TARGETS                    += $(SAFARIEXTZ)
+ALL_TARGETS += $(SAFARIEXTZ)
 endif
 
-all: info $(ALL_TARGETS) $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT) changelog
+all: info $(ALL_TARGETS) changelog
 	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
@@ -106,6 +118,7 @@ info:
 	@echo 'Version: $(VERSION)'
 	@echo 'Description: $(DESCRIPTION)'
 	@echo 'Website: $(WEBSITE)'
+	@echo 'SVG rasterizer: $(SVG_TO_PNG_CMD)'
 	@echo
 
 subst:
@@ -186,17 +199,17 @@ $(CONFIG_JSON): $(SRC_USERJS)
 $(ICON_FILES_SMALL): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@$(RSVG_CONVERT) $< -w $(basename $(notdir $@)) -o $@
+	@$(SVG_TO_PNG) -svg $< -size $(basename $(notdir $@)) -png $@
 
 $(ICON_FILES_BIG): $(ICON_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@$(RSVG_CONVERT) $< -w $(basename $(notdir $@)) -o $@
+	@$(SVG_TO_PNG) -svg $< -size $(basename $(notdir $@)) -png $@
 
 $(ICON_CONFIG_BTN): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cat $< | sed 's/#0096db/#b8e1f7/' | $(RSVG_CONVERT) /dev/stdin -w 22 -o $@
+	@cat $< | sed 's/#0096db/#b8e1f7/' | $(SVG_TO_PNG) -svg /dev/stdin -size 22 -png $@
 
 $(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
@@ -207,7 +220,7 @@ $(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
 $(B64_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: %.svg
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@$(RSVG_CONVERT) $< -o $@
+	@$(SVG_TO_PNG) -svg $< -png $@
 
 $(B64_ICON_FILES_TXT): %.txt: %.png
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
