@@ -1,7 +1,7 @@
 pixplus version history
 =======================
 
-## [1.9.0 - 2014/02/21](http://my.opera.com/crckyl/blog/2014/02/21/pixplus-1-9-0)
+## [1.9.0 - 2014/02/21](http://crckyl.hatenablog.com/entry/2014/02/21/130255)
 
 ### 変更点
 
@@ -17,7 +17,7 @@ pixplus version history
 * [Fix] Support new comment UI.
 * [Fix] Configuration button doesn't appears.
 
-## [1.8.1 - 2013/08/14](http://my.opera.com/crckyl/blog/2013/08/14/pixplus-1-8-1)
+## [1.8.1 - 2013/08/14](http://crckyl.hatenablog.com/entry/2013/08/14/100851)
 
 ### 変更点
 
@@ -29,7 +29,7 @@ pixplus version history
 * [Fix] Fix tag selection in bookmark mode.
 * [Fix] Fix "w" key reloads illust when in manga mode.
 
-## [1.8.0 - 2013/08/07](http://my.opera.com/crckyl/blog/2013/08/06/pixplus-1-8-0)
+## [1.8.0 - 2013/08/07](http://crckyl.hatenablog.com/entry/2013/08/07/110857)
 
 ### 変更点
 
@@ -55,7 +55,7 @@ pixplus version history
 * [Fix] Can't view access restricted illust.
 * [Fix][Firefox] Some keys are not working on Firefox23.
 
-## [1.7.1 - 2013/06/26](http://my.opera.com/crckyl/blog/2013/06/26/pixplus-1-7-1-greasemonkey)
+## [1.7.1 - 2013/06/26](http://crckyl.hatenablog.com/entry/2013/06/26/120605)
 
 ### 変更点
 
@@ -65,7 +65,7 @@ pixplus version history
 
 * [Fix][Chrome] Greasemonkey version(.user.js) is not working on Chrome.
 
-## [1.7.0 - 2013/06/25](http://my.opera.com/crckyl/blog/2013/06/25/pixplus-1-7-0)
+## [1.7.0 - 2013/06/25](http://crckyl.hatenablog.com/entry/2013/06/25/110601)
 
 ### 変更点
 
@@ -85,7 +85,7 @@ pixplus version history
 * [Fix] Fix manga mode always reports error.
 * [Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17
 
-## [1.6.3 - 2013/05/26](http://my.opera.com/crckyl/blog/2013/05/25/pixplus-1-6-3)
+## [1.6.3 - 2013/05/26](http://crckyl.hatenablog.com/entry/2013/05/25/210523)
 
 ### 変更点
 
@@ -95,7 +95,7 @@ pixplus version history
 
 * [Fix] Support new bookmark page.
 
-## [1.6.2 - 2013/05/18](http://my.opera.com/crckyl/blog/2013/05/18/pixplus-1-6-2)
+## [1.6.2 - 2013/05/18](http://crckyl.hatenablog.com/entry/2013/05/18/070549)
 
 ### 変更点
 
@@ -109,7 +109,7 @@ pixplus version history
 * [Fix] Bookmark button is always inactive, even though it is bookmarked.
 * [Fix] Fix loading error on Firefox21
 
-## [1.6.1 - 2013/03/13](http://my.opera.com/crckyl/blog/2013/03/13/pixplus-1-6-1)
+## [1.6.1 - 2013/03/13](http://crckyl.hatenablog.com/entry/2013/03/13/100325)
 
 ### 変更点
 
@@ -121,7 +121,7 @@ pixplus version history
 * [Change] Change "Click area" design.
 * [Fix] Minor fix for pixiv's change.
 
-## [1.6.0 - 2013/02/23](http://my.opera.com/crckyl/blog/2013/02/23/pixplus-1-6-0)
+## [1.6.0 - 2013/02/23](http://crckyl.hatenablog.com/entry/2013/02/23/100201)
 
 ### 変更点
 
@@ -133,7 +133,7 @@ pixplus version history
 * [Add] Add resize mode settings and key bindings.
 * [Fix] Fix author does not shown properly in popup.
 
-## [1.5.0 - 2013/02/10](http://my.opera.com/crckyl/blog/2013/02/09/pixplus-1-5-0)
+## [1.5.0 - 2013/02/10](http://crckyl.hatenablog.com/entry/2013/02/09/210216)
 
 ### 変更点
 
@@ -145,7 +145,7 @@ pixplus version history
 * [Add] Add top-page layout history manager.
 * [Fix][Extension] Fix can't save settings in General section.
 
-## [1.4.0 - 2013/02/02](http://my.opera.com/crckyl/blog/2013/02/02/pixplus-1-4-0)
+## [1.4.0 - 2013/02/02](http://crckyl.hatenablog.com/entry/2013/02/02/120229)
 
 ### 変更点
 
@@ -161,7 +161,7 @@ pixplus version history
 * [Fix] Fix comment view in popup.
 * [Fix] Fix "Add favorite user by one-click" is not working.
 
-## [1.3.0 - 2012/12/16](http://my.opera.com/crckyl/blog/2012/12/16/pixplus-1-3-0)
+## [1.3.0 - 2012/12/16](http://crckyl.hatenablog.com/entry/2012/12/16/041240)
 
 ### 変更点
 
@@ -181,7 +181,7 @@ pixplus version history
 * [Fix] Fix tag edit mode is not working.
 * [Fix] Can not open preferences in UserJS/Greasemonkey version.
 
-## [1.2.2 - 2012/12/06](http://my.opera.com/crckyl/blog/2012/12/06/pixplus-1-2-2)
+## [1.2.2 - 2012/12/06](http://crckyl.hatenablog.com/entry/2012/12/06/101212)
 
 ### 変更点
 
@@ -197,7 +197,7 @@ pixplus version history
 * [Fix] Fix fail to load access-restricted illust.
 * [Fix] Fix broken tag list with no tags.
 
-## [1.2.1 - 2012/09/29](http://my.opera.com/crckyl/blog/2012/09/29/pixplus-1-2-1)
+## [1.2.1 - 2012/09/29](http://crckyl.hatenablog.com/entry/2012/09/29/050955)
 
 ### 変更点
 
@@ -207,7 +207,7 @@ pixplus version history
 
 * [Fix] Minor fix for pixiv's update.
 
-## [1.2.0 - 2012/08/27](http://my.opera.com/crckyl/blog/2012/08/27/pixplus-1-2-0)
+## [1.2.0 - 2012/08/27](http://crckyl.hatenablog.com/entry/2012/08/27/100841)
 
 ### 変更点
 
@@ -223,7 +223,7 @@ pixplus version history
 * [Fix] Improve auto-manga-mode feature.
 * [Fix] Support "new Staccfeed" page.
 
-## [1.1.1 - 2012/08/14](http://my.opera.com/crckyl/blog/2012/08/14/pixplus-1-1-1)
+## [1.1.1 - 2012/08/14](http://crckyl.hatenablog.com/entry/2012/08/14/070809)
 
 ### 変更点
 
@@ -243,7 +243,7 @@ pixplus version history
 * [Change] Change default value for some preferences.
 * [Fix][WebKit] Status field layout is broken while loading.
 
-## [1.1.0 - 2012/08/09](http://my.opera.com/crckyl/blog/2012/08/09/pixplus-1-1-0)
+## [1.1.0 - 2012/08/09](http://crckyl.hatenablog.com/entry/2012/08/09/100814)
 
 ### 変更点
 
@@ -269,7 +269,7 @@ pixplus version history
 * [Fix][Firefox] Can't send rating if "Show confirmation dialog when rating" option is on.
 * [Fix][Firefox] Popup don't works on ranking page.
 
-## [1.0.0 - 2012/08/08](http://my.opera.com/crckyl/blog/2012/08/08/pixplus-1-0-0)
+## [1.0.0 - 2012/08/08](http://crckyl.hatenablog.com/entry/2012/08/08/140851)
 
 ### 変更点
 
@@ -289,7 +289,7 @@ pixplus version history
 * [Remove] Remove zoom feature.
 * [Fix] Fix multilingual support.
 
-## [0.9.4 - 2012/08/05](http://my.opera.com/crckyl/blog/2012/08/05/pixplus-0-9-4)
+## [0.9.4 - 2012/08/05](http://crckyl.hatenablog.com/entry/2012/08/05/010838)
 
 ### 変更点
 
@@ -299,7 +299,7 @@ pixplus version history
 
 * [Fix] Rating feature don't works.
 
-## [0.9.3 - 2012/08/03](http://my.opera.com/crckyl/blog/2012/08/03/pixplus-0-9-3-2)
+## [0.9.3 - 2012/08/03](http://crckyl.hatenablog.com/entry/2012/08/03/120844)
 
 ### 変更点
 
@@ -309,7 +309,7 @@ pixplus version history
 
 * [Fix] Support pixiv's update.
 
-## [0.9.2 - 2012/06/29](http://my.opera.com/crckyl/blog/2012/06/29/pixplus-0-9-2)
+## [0.9.2 - 2012/06/29](http://crckyl.hatenablog.com/entry/2012/06/29/100651)
 
 ### 変更点
 
@@ -319,7 +319,7 @@ pixplus version history
 
 * [Fix] If conf.popup.big\_image=0, "S" key (conf.key.popup\_open\_big) opens medium image.
 
-## [0.9.1 - 2012/06/26](http://my.opera.com/crckyl/blog/2012/06/25/pixplus-0-9-1)
+## [0.9.1 - 2012/06/26](http://crckyl.hatenablog.com/entry/2012/06/25/210620)
 
 ### 変更点
 
@@ -331,7 +331,7 @@ pixplus version history
 * [Fix] Corresponds to pixiv's spec changes.
 * [Fix] In reposted illust, pixplus shows first version.
 
-## [0.9.0 - 2012/02/17](http://my.opera.com/crckyl/blog/2012/02/17/pixplus-0-9-0)
+## [0.9.0 - 2012/02/17](http://crckyl.hatenablog.com/entry/2012/02/17/100206)
 
 ### 変更点
 
@@ -343,23 +343,23 @@ pixplus version history
 * [New] Added a setting to change mouse wheel operation. (conf.popup.mouse\_wheel)
 * [Fix] External links in author comment were broken.
 
-## [0.8.3 - 2012/02/11](http://my.opera.com/crckyl/blog/2012/02/11/pixplus-0-8-3)
+## [0.8.3 - 2012/02/11](http://crckyl.hatenablog.com/entry/2012/02/11/150242)
 
 * 新着イラストページで上手く動作しなくなっていた不具合を修正。
 * スタックフィードで上手く動作しなくなっていた不具合を修正。
 * タグリストのフロート表示の動作を修正。
 
-## [0.8.2 - 2011/10/27](http://my.opera.com/crckyl/blog/2011/10/27/pixplus-0-8-2)
+## [0.8.2 - 2011/10/27](http://crckyl.hatenablog.com/entry/2011/10/27/111054)
 
 * アンケートに回答するとエラーダイアログが出るようになっていた不具合を修正。
 * トップページ(mypage.php)で上手く動作しなくなっていた不具合を修正。
 
-## [0.8.1 - 2011/09/17](http://my.opera.com/crckyl/blog/2011/09/17/pixplus-0-8-1)
+## [0.8.1 - 2011/09/17](http://crckyl.hatenablog.com/entry/2011/09/17/010931)
 
 * pixivの変更でアンケートなどの動作がおかしくなっていた不具合を修正。
 * conf.key.popup\_manga\_open\_pageのデフォルト値が変だったバグを修正。
 
-## [0.8.0 - 2011/09/03](http://my.opera.com/crckyl/blog/2011/09/03/pixplus-0-8-0)
+## [0.8.0 - 2011/09/03](http://crckyl.hatenablog.com/entry/2011/09/03/010924)
 
 * ブックマーク管理ページで、閲覧出来なくなったイラストに一括でチェックを入れる機能を追加。
 * コメントを投稿するとコメントフォームが消えてしまうバグを修正。
@@ -367,24 +367,24 @@ pixplus version history
 * 言語サポートを改善。
 * AutoPatchWork等のサポートを改善。
 
-## [0.7.0 - 2011/08/21](http://my.opera.com/crckyl/blog/2011/08/21/pixplus-0-7-0)
+## [0.7.0 - 2011/08/21](http://crckyl.hatenablog.com/entry/2011/08/21/110824)
 
 * ランキングページにおいてAutoPatchWorkなどで継ぎ足した二ページ目以降の画像が表示されないのを是正する機能を追加。
 * おすすめイラストをページの右側に表示する機能(conf.locate\_recommend\_right)を削除。
 * 地域ランキング(/ranking\_area.php)の新デザインに対応。
 
-## [0.6.3 - 2011/07/24](http://my.opera.com/crckyl/blog/2011/07/24/pixplus-0-6-3)
+## [0.6.3 - 2011/07/24](http://crckyl.hatenablog.com/entry/2011/07/24/100702)
 
 * スタックフィードでブックマークしようとするとエラーが出るバグを修正。
 * 「スライドモード」設定の時、マンガを閲覧出来ない不具合を修正。
 * ランキングで上手く動作しなくなっていた不具合を修正。
 
-## [0.6.2 - 2011/06/26](http://my.opera.com/crckyl/blog/2011/06/26/pixplus-0-6-2)
+## [0.6.2 - 2011/06/26](http://crckyl.hatenablog.com/entry/2011/06/26/010657)
 
 * 設定画面へのリンクが表示されなくなっていた不具合を修正。
 * イベントの特設ページ(e.g. /event\_starfestival2011.php)で動作していなかった不具合を修正。
 
-## [0.6.1 - 2011/05/21](http://my.opera.com/crckyl/blog/2011/05/21/pixplus-0-6-1)
+## [0.6.1 - 2011/05/21](http://crckyl.hatenablog.com/entry/2011/05/21/030509)
 
 * Opera10.1xで動作しなくなっていたバグを修正。
 * タグ検索(ex. /tags.php?tag=pixiv)で動作しなくなっていた不具合を修正。
@@ -393,7 +393,7 @@ pixplus version history
 * 新着ページで動作しなくなっていた不具合を修正。
 * conf.locate\_recommend\_rightが動作しなくなっていた不具合を修正。
 
-## [0.6.0 - 2011/05/13](http://my.opera.com/crckyl/blog/2011/05/13/pixplus-0-5-1)
+## [0.6.0 - 2011/05/13](http://crckyl.hatenablog.com/entry/2011/05/13/120515)
 
 * キーバインドのカスタマイズ機能を追加。
 * イラストページでブックマークの処理が動作していなかった不具合を修正。
@@ -405,7 +405,7 @@ pixplus version history
 * ブックマークフォームなどの動作が変になってた不具合を修正。
 * 検索ページで動かなくなっていた不具合を修正。
 
-## [0.5.1 - 2011/03/26](http://my.opera.com/crckyl/blog/2011/03/26/pixplus-0-5-1)
+## [0.5.1 - 2011/03/26](http://crckyl.hatenablog.com/entry/2011/03/26/010347)
 
 * おすすめイラストが非表示の時もconf.locate\_recommend\_rightが動作してしまうバグを修正。
 * conf.extageditを廃止してconf.bookmark\_formに変更。
@@ -414,7 +414,7 @@ pixplus version history
 * Firefox4でブックマーク編集画面でタグを選択できなくなっていたバグを修正。
 * ブックマーク済みのイラストでブックマークボタンが表示されなくなっていた不具合を修正。
 
-## [0.5.0 - 2011/02/15](http://my.opera.com/crckyl/blog/pixplus-0-5-0)
+## [0.5.0 - 2011/02/15](http://crckyl.hatenablog.com/entry/2011/02/15/110202)
 
 * conf.extensionを廃止。Opera拡張版のツールバーアイコンを削除。
 * Firefoxでコメント表示機能が動作していなかったバグを修正。
@@ -429,7 +429,7 @@ pixplus version history
 * conf.expand\_novelを削除。
 * 他ユーザーのブックマークページで動かなくなってたのを修正。
 
-## [0.4.0 - 2011/02/04](http://my.opera.com/crckyl/blog/2011/02/04/pixplus-0-4-0)
+## [0.4.0 - 2011/02/04](http://crckyl.hatenablog.com/entry/2011/02/04/130234)
 
 * pixivreaderと衝突するらしいので、excludeに追加。
 * 設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。
@@ -441,18 +441,18 @@ pixplus version history
 * 作品管理ページで動作しなくなっていた不具合を修正。
 * Chrome/SafariでAutoPatchWorkに対応。
 
-## [0.3.2 - 2011/01/15](http://my.opera.com/crckyl/blog/2011/01/14/pixplus-0-3-2)
+## [0.3.2 - 2011/01/15](http://crckyl.hatenablog.com/entry/2011/01/14/150150)
 
 * ブックマーク管理ページで上手く動作していなかった不具合を修正。
 
-## [0.3.1 - 2011/01/14](http://my.opera.com/crckyl/blog/2011/01/14/pixplus-0-3-1)
+## [0.3.1 - 2011/01/14](http://crckyl.hatenablog.com/entry/2011/01/14/090139)
 
 * Opera以外のブラウザにおいて一部のページで評価やコメント表示などの機能の動作が変だったバグを修正。
 * conf.popup.rate\_key=trueの時、Shiftキーなしで評価できていたバグを修正。
 * ChromeExtension/SafariExtension版で自動アップデートに対応。
 * OperaExtension版のオプションページで数値がNaNになる場合があるバグをたぶん修正。
 
-## [0.3.0 - 2010/12/26](http://my.opera.com/crckyl/blog/2010/12/26/pixplus-0-3-0)
+## [0.3.0 - 2010/12/26](http://crckyl.hatenablog.com/entry/2010/12/26/011246)
 
 * conf.fast\_user\_bookmark追加。
 * プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author\_status\_icon)追加。
@@ -467,7 +467,7 @@ pixplus version history
 * Extension版にツールバーボタンと設定画面を追加。conf.extension.\*追加。
 * タグの並べ替えを設定していない時、ブックマーク編集の動作がおかしかった不具合を修正。
 
-## [0.2.0 - 2010/12/01](http://my.opera.com/crckyl/blog/2010/12/01/pixplus-0-2-0)
+## [0.2.0 - 2010/12/01](http://crckyl.hatenablog.com/entry/2010/12/01/091212)
 
 * Extension版でアンケートに答えられなくなっていたバグを修正。
 * トップページのレイアウトをバックアップする機能追加。
@@ -476,7 +476,7 @@ pixplus version history
 * 画像を拡大/縮小するキーをo/iから+/-に変更。
 * dキー(前のイラストに戻る)をキーバインドに追加。
 
-## [0.1.2 - 2010/11/14](http://my.opera.com/crckyl/blog/2010/11/14/pixplus-0-1-2)
+## [0.1.2 - 2010/11/14](http://crckyl.hatenablog.com/entry/2010/11/14/141112)
 
 * 一部のページでアンケート結果を表示出来なくなっていた不具合を修正。
 * アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。
@@ -486,13 +486,13 @@ pixplus version history
 * マンガページ(mode=manga)で改ページ出来なくなっていた不具合を修正。
 * 評価出来なくなっていた不具合を修正。
 
-## [0.1.1 - 2010/11/02](http://my.opera.com/crckyl/blog/2010/11/02/pixplus-0-1-1)
+## [0.1.1 - 2010/11/02](http://crckyl.hatenablog.com/entry/2010/11/02/091131)
 
 * イベントページ(e.g. http://www.pixiv.net/event\_halloween2010.php)用の汎用コード追加。
 * conf.locate\_recommend\_rightが2の時、上手く動作しない場合があるバグを修正。
 * pixivの変更(評価、ランキング、etc)に対応。
 
-## [0.1.0 - 2010/10/27](http://my.opera.com/crckyl/blog/2010/10/27/pixplus-0-1-0)
+## [0.1.0 - 2010/10/27](http://crckyl.hatenablog.com/entry/2010/10/27/121045)
 
 * Opera11のExtensionに対応。
 * ブックマーク管理ページでレコメンドを右側に並べる機能が動作しなくなっていたのを修正。
