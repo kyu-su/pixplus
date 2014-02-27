@@ -3833,7 +3833,11 @@
         if (mode === 2) {
           var pattern = _.conf.popup[name + '_regexp'];
           if (pattern) {
-            value = (new g.RegExp(pattern)).test(w.location.href);
+            try {
+              value = (new g.RegExp(pattern)).test(w.location.href);
+            } catch(ex) {
+              value = false;
+            }
           } else {
             value = false;
           }
