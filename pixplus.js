@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.9.0
+// @version     1.9.1
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
@@ -6609,6 +6609,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    {
+      "date": "2014/xx/xx",
+      "version": "1.9.1",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Add] Add regular expression editor in preferences dialog."
+        ],
+        "ja": [
+          "[\u8ffd\u52a0] \u8a2d\u5b9a\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u6b63\u898f\u8868\u73fe\u30a8\u30c7\u30a3\u30bf\u3092\u8ffd\u52a0\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
 
     {
