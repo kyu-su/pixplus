@@ -1086,6 +1086,211 @@
   };
 
   _.configui = {
+    editor: {
+      targets: [],
+
+      regexp_paths: [
+        '/mypage.php',
+        '/new_illust.php',
+        '/bookmark_new_illust.php',
+        '/mypixiv_new_illust.php',
+        '/ranking.php?mode=daily',
+        '/ranking_area.php',
+        '/stacc/p/activity',
+        '/stacc/p/activity?mode=unify',
+        '/user_event.php',
+        '/bookmark.php',
+        '/bookmark.php?rest=hide',
+        '/bookmark.php?id=11',
+        '/member.php?id=11',
+        '/member_illust.php',
+        '/member_illust.php?id=11',
+        '/member_illust.php?mode=medium&illust_id=11437736',
+        '/response.php?illust_id=11437736',
+        '/tags.php?tag=pixiv',
+        '/search.php?s_mode=s_tag&word=pixiv',
+        '/cate_r18.php',
+        '/new_illust_r18.php',
+        '/user_event.php?type=r18',
+        '/questionnaire_illust.php',
+        '/search_user.php'
+      ],
+
+
+      init: function(root, lang) {
+        var that = this;
+
+        _.listen(root, ['click', 'focus'], function(ev) {
+          if (/^input$/i.test(ev.target.tagName) &&
+              ev.target !== that.current_target) {
+            that.open(root, ev.target, lang);
+          }
+        });
+      },
+
+      close: function() {
+        if (this.wrapper) {
+          this.wrapper.parentNode.removeChild(this.wrapper);
+          this.wrapper = null;
+        }
+        if (this.current_target) {
+          this.current_target.classList.remove('pp-active');
+          this.current_target = null;
+        }
+      },
+
+      open: function(root, input, lang) {
+        var type, args;
+
+        this.targets.forEach(function(item) {
+          if (item[0] === input) {
+            type = item[1];
+            args = item.slice(2);
+          }
+        });
+
+        if (!type) {
+          return;
+        }
+
+        var wrapper = _.e('div', {cls: 'pp-config-editor-wrapper'}, null);
+        input.parentNode.insertBefore(wrapper, input);
+
+        var editor = _.e('div', {cls: 'pp-dialog pp-config-editor pp-config-' + type + '-editor'}, wrapper);
+        var data = this[type].apply(this, [editor, input, lang].concat(args)) || {};
+
+        if (data.update) {
+          data.update(input.value);
+        }
+
+        if (data.input) {
+          _.listen(data.input, 'input', function() {
+            input.value = data.input.value;
+            if (data.update) {
+              data.update(input.value);
+            }
+          });
+
+          g.setTimeout(function() {
+            data.input.focus();
+          }, 0);
+        }
+
+        if (data.input || data.update) {
+          _.listen(input, 'input', function() {
+            if (data.input) {
+              data.input.value = input.value;
+            }
+            if (data.update) {
+              data.update(input.value);
+            }
+          });
+        }
+
+        _.modal.begin(editor, {
+          onclose: this.close.bind(this),
+          parent: _.configui.container,
+          members: [input]
+        });
+
+        this.wrapper = wrapper;
+        input.classList.add('pp-active');
+        this.current_target = input;
+      },
+
+      register: function() {
+        this.targets.push(g.Array.prototype.slice.call(arguments));
+      },
+
+      key: function(root, input, lang) {
+        var list = _.e('ul', null, root);
+
+        var reset = function() {
+          _.clear(list);
+          if (input.value) {
+            input.value.split(',').forEach(add);
+          }
+        };
+
+        var add = function(key) {
+          var li = _.e('li', null, list);
+          _.onclick(_.e('button', {text: '\u00d7'}, li), function() {
+            list.removeChild(li);
+            apply();
+          });
+          _.e('label', {text: key}, li);
+        };
+
+        var apply = function() {
+          var keys = [];
+          _.qa('li label', list).forEach(function(key) {
+            keys.push(key.textContent);
+          });
+          input.value = keys.join(',');
+          input.focus();
+
+          var ev = d.createEvent('Event');
+          ev.initEvent('input', true, true);
+          input.dispatchEvent(ev);
+        };
+
+        reset();
+
+        var toolbar = _.e('div', {cls: 'pp-config-key-editor-toolbar'}, root);
+        var add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, toolbar);
+        _.key.listen(add_input, function(key) {
+          add_input.value = key;
+          return true;
+        });
+
+        var btn_add = _.e('button', {text: lang.pref.add, cls: 'pp-config-key-editor-add'}, toolbar);
+        _.onclick(btn_add, function() {
+          add(add_input.value);
+          add_input.value = '';
+          apply();
+        });
+      },
+
+      regexp: function(root, input, lang, pagecheck) {
+        var textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, root);
+        textarea.value = input.value;
+
+        var ul = _.e('ul', null, root);
+        var status = _.e('li', {cls: 'pp-config-regexp-editor-status'}, ul);
+
+        var table = _.e('table', null, root);
+
+        this.regexp_paths.forEach(function(path) {
+          var row = table.insertRow(-1);
+          _.e('a', {href: path, text: path, target: '_blank'}, row.insertCell(-1));
+
+          var cell = row.insertCell(-1);
+          cell.className = 'pp-config-regexp-editor-status';
+          cell.setAttribute('data-path', path);
+        });
+
+        return {input: textarea, update: function(value) {
+          var valid = true;
+          try {
+            new g.RegExp(value);
+          } catch(ex) {
+            valid = false;
+          }
+
+          status.classList[valid ? 'add' : 'remove']('pp-yes');
+          status.classList[valid ? 'remove' : 'add']('pp-no');
+          status.textContent = valid ? 'Valid' : 'Invalid';
+
+          _.qa('*[data-path]', table).forEach(function(status) {
+            var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
+            status.classList[yes ? 'add' : 'remove']('pp-yes');
+            status.classList[yes ? 'remove' : 'add']('pp-no');
+            status.textContent = yes ? 'Yes' : 'No';
+          });
+        }};
+      }
+    },
+
     tabs: {
       __default: function(root, section, lang) {
         var tbody = _.e('tbody', null, _.e('table', null, root)), subsection;
@@ -1150,99 +1355,20 @@
         });
       },
 
+      popup: function(root, section, lang) {
+        this.__default(root, section, lang);
+
+        _.qa('input[id$="-regexp"]', root).forEach(function(input) {
+          _.configui.editor.register(input, 'regexp', true);
+        });
+      },
+
       key: function(root, section, lang) {
         this.__default(root, section, lang);
 
-        var that = this, active_input, editor_wrapper;
-
-        var close = function(wrapper) {
-          if (wrapper && wrapper !== editor_wrapper) {
-            return;
-          }
-          if (editor_wrapper) {
-            editor_wrapper.parentNode.removeChild(editor_wrapper);
-            editor_wrapper = null;
-          }
-          if (active_input) {
-            active_input.classList.remove('pp-active');
-            active_input = null;
-          }
-        };
-
-        var open = function(input) {
-          close();
-
-          input.classList.add('pp-active');
-          active_input = input;
-
-          editor_wrapper = _.e('div', {cls: 'pp-config-key-editor-wrapper'}, null);
-          input.parentNode.insertBefore(editor_wrapper, input);
-
-          var editor = _.e('div', {cls: 'pp-config-key-editor'}, editor_wrapper);
-          var list = _.e('ul', null, editor);
-
-          var reset = function() {
-            _.clear(list);
-            if (input.value) {
-              input.value.split(',').forEach(add);
-            }
-          };
-
-          var add = function(key) {
-            var li = _.e('li', null, list);
-            _.onclick(_.e('button', {text: '\u00d7'}, li), function() {
-              list.removeChild(li);
-              apply();
-            });
-            _.e('label', {text: key}, li);
-          };
-
-          var apply = function() {
-            var keys = [];
-            _.qa('li label', list).forEach(function(key) {
-              keys.push(key.textContent);
-            });
-            input.value = keys.join(',');
-            input.focus();
-
-            var ev = d.createEvent('Event');
-            ev.initEvent('input', true, true);
-            input.dispatchEvent(ev);
-          };
-
-          reset();
-
-          var toolbar = _.e('div', {cls: 'pp-config-key-editor-toolbar'}, editor);
-          var add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, toolbar);
-          _.key.listen(add_input, function(key) {
-            add_input.value = key;
-            return true;
-          });
-
-          var btn_add = _.e('button', {text: lang.pref.add, cls: 'pp-config-key-editor-add'}, toolbar),
-              btn_close = _.e('button', {text: lang.pref.close, cls: 'pp-config-key-editor-close'}, toolbar);
-          _.onclick(btn_add, function() {
-            add(add_input.value);
-            add_input.value = '';
-            apply();
-          });
-          _.onclick(btn_close, function() {
-            close();
-          });
-        };
-
-        _.listen(root, ['click', 'focus'], function(ev) {
-          if (/^input$/i.test(ev.target.tagName) &&
-              ev.target !== active_input &&
-              !(editor_wrapper && editor_wrapper.contains(ev.target))) {
-            open(ev.target);
-            _.modal.begin(editor_wrapper, {
-              onclose: close,
-              parent: _.configui.container,
-              members: [ev.target]
-            });
-          }
-        }, {capture: true});
+        _.qa('input', root).forEach(function(input) {
+          _.configui.editor.register(input, 'key');
+        });
       },
 
       bookmark: function(root, section, lang) {
@@ -1483,6 +1609,7 @@
       this.lng = _.lng;
       this.container = container;
       this.toggle_btn = toggle_btn;
+      this.editor.init(container, this.lng);
     },
 
     create_tab: function(name, create_args) {
@@ -5986,11 +6113,16 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 #pp-config-escaper input{display:block;width:100%;box-sizing:border-box}\
 #pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}\
 \
-/* key editor */\
-#pp-config-key-content input.pp-active{background-color:#ffc}\
-.pp-config-key-editor-wrapper{position:relative}\
-.pp-config-key-editor{position:absolute;right:100%;top:0px;z-index:10002;\
-background-color:#fff;border:2px solid #becad8;border-radius:6px;padding:3px}\
+/* editor */\
+#pp-config input.pp-active{background-color:#ffc}\
+.pp-config-editor-wrapper{position:relative}\
+.pp-config-editor{padding:0.4em;right:100%}\
+.pp-config-regexp-editor textarea{width:100%;height:10em;\
+box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
+.pp-config-regexp-editor-status{font-weight:bold}\
+.pp-config-regexp-editor-status.pp-yes{color:green}\
+.pp-config-regexp-editor-status.pp-no{color:red}\
+.pp-config-regexp-editor table{white-space:pre}\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
 .pp-config-key-editor-toolbar{margin-top:0.2em}\
 .pp-config-key-editor-toolbar button{margin-left:0.2em}\
