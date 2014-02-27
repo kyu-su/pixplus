@@ -1258,16 +1258,18 @@
         var ul = _.e('ul', null, root);
         var status = _.e('li', {cls: 'pp-config-regexp-editor-status'}, ul);
 
-        var table = _.e('table', null, root);
+        if (pagecheck) {
+          var table = _.e('table', null, root);
 
-        this.regexp_paths.forEach(function(path) {
-          var row = table.insertRow(-1);
-          _.e('a', {href: path, text: path, target: '_blank'}, row.insertCell(-1));
+          this.regexp_paths.forEach(function(path) {
+            var row = table.insertRow(-1);
+            _.e('a', {href: path, text: path, target: '_blank'}, row.insertCell(-1));
 
-          var cell = row.insertCell(-1);
-          cell.className = 'pp-config-regexp-editor-status';
-          cell.setAttribute('data-path', path);
-        });
+            var cell = row.insertCell(-1);
+            cell.className = 'pp-config-regexp-editor-status';
+            cell.setAttribute('data-path', path);
+          });
+        }
 
         return {input: textarea, update: function(value) {
           var valid = true;
@@ -1281,12 +1283,14 @@
           status.classList[valid ? 'remove' : 'add']('pp-no');
           status.textContent = valid ? 'Valid' : 'Invalid';
 
-          _.qa('*[data-path]', table).forEach(function(status) {
-            var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
-            status.classList[yes ? 'add' : 'remove']('pp-yes');
-            status.classList[yes ? 'remove' : 'add']('pp-no');
-            status.textContent = yes ? 'Yes' : 'No';
-          });
+          if (pagecheck) {
+            _.qa('*[data-path]', table).forEach(function(status) {
+              var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
+              status.classList[yes ? 'add' : 'remove']('pp-yes');
+              status.classList[yes ? 'remove' : 'add']('pp-no');
+              status.textContent = yes ? 'Yes' : 'No';
+            });
+          }
         }};
       }
     },
