@@ -1214,7 +1214,7 @@
 
         var add = function(key) {
           var li = _.e('li', null, list);
-          _.onclick(_.e('button', {text: '\u00d7'}, li), function() {
+          _.onclick(_.e('button', {text: '\u2715'}, li), function() {
             list.removeChild(li);
             apply();
           });
@@ -1281,14 +1281,14 @@
 
           status.classList[valid ? 'add' : 'remove']('pp-yes');
           status.classList[valid ? 'remove' : 'add']('pp-no');
-          status.textContent = valid ? 'Valid' : 'Invalid';
+          status.textContent = valid ? lang.pref.regex_valid : lang.pref.regex_invalid;
 
           if (pagecheck) {
             _.qa('*[data-path]', table).forEach(function(status) {
               var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
               status.classList[yes ? 'add' : 'remove']('pp-yes');
               status.classList[yes ? 'remove' : 'add']('pp-no');
-              status.textContent = yes ? 'Yes' : 'No';
+              status.textContent = yes ? '\u25cb' : '\u2715';
             });
           }
         }};
@@ -1421,7 +1421,7 @@
 
         function add_row(tag, list) {
           var row = tag_alias_table.insertRow(-1);
-          _.onclick(_.e('button', {text: '\u00d7'}, row.insertCell(-1)), function() {
+          _.onclick(_.e('button', {text: '\u2715'}, row.insertCell(-1)), function() {
             row.parentNode.removeChild(row);
             save();
           });
@@ -5178,7 +5178,7 @@
         this.dom.header = _.e('header', {cls: 'pp-dialog-title'}, this.dom.root);
         this.dom.close_btn = _.e('span', {
           id: 'pp-layout-history-manager-close',
-          text: '\u00d7',
+          text: '\u2715',
           css: 'cursor:pointer'
         }, this.dom.header);
         this.dom.error = _.e('p', {cls: 'pp-error-message'}, this.dom.root);
@@ -6300,7 +6300,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         debug:         'Debug',
         'default':     'Default',
         add:           'Add',
-        close:         'Close'
+        close:         'Close',
+        regex_valid:   'Valid',
+        regex_invalid: 'Invalid'
       },
 
       conf: {
@@ -6462,7 +6464,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         debug:         '\u30c7\u30d0\u30c3\u30b0',
         'default':     '\u30c7\u30d5\u30a9\u30eb\u30c8',
         add:           '\u8ffd\u52a0',
-        close:         '\u9589\u3058\u308b'
+        close:         '\u9589\u3058\u308b',
+        regex_valid:   '\u6709\u52b9',
+        regex_invalid: '\u4e0d\u6b63'
       },
 
       conf: {
