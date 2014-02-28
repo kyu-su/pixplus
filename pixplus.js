@@ -2102,6 +2102,11 @@
         next: null
       });
 
+      var query = _.illust.parse_illust_url(link.href);
+      if (query && query.uarea) {
+        illust.url_medium += '&uarea=' + query.uarea;
+      }
+
       illust.connection = _.onclick(illust.link, function() {
         _.popup.show(illust);
         if (cb_onshow) {
