@@ -279,11 +279,6 @@ class TestCase(unittest.TestCase):
     raise unittest.SkipTest(reason)
 
   def send_keys(self, keys, target = None):
-    if self.b.name == 'opera' and keys == Keys.ESCAPE:
-      # https://github.com/operasoftware/operadriver/issues/85
-      keys = '\x1b'
-      pass
-
     if target:
       target.send_keys(keys)
     else:

@@ -88,10 +88,6 @@ class Test_AdvancedSearch(TestCase):
     pass
 
   def test_ratio(self):
-    if self.b.name == 'opera':
-      self.skipTest('This test is currently not works on opera...')
-      return
-
     self.open('/search.php?s_mode=s_tag&word=pixiv')
     self.q('.search-option').click()
 

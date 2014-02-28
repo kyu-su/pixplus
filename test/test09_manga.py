@@ -2,13 +2,6 @@ from test_base import TestCase
 
 class Test_Manga(TestCase):
 
-  def geom2(self, element):
-    if self.b.name == 'opera':
-      pos = element.location
-      size = element.size
-      return pos['x'], pos['y'], size['width'], size['height']
-    return self.geom(element)
-
   def check_indicator(self, pages, page_count):
     btn = self.q('#pp-popup-button-manga')
     self.assertTrue(btn.is_displayed())
@@ -43,8 +36,8 @@ class Test_Manga(TestCase):
       self.popup_wait_load()
       self.check_indicator(pages[page], page_count)
 
-      sx, sy, sw, sh = self.geom2(self.q('#pp-popup-image-scroller'))
-      lx, ly, lw, lh = self.geom2(self.q('#pp-popup-image-layout'))
+      sx, sy, sw, sh = self.geom(self.q('#pp-popup-image-scroller'))
+      lx, ly, lw, lh = self.geom(self.q('#pp-popup-image-layout'))
 
       self.assertTrue(lx >= sx)
       self.assertTrue(ly >= sy)

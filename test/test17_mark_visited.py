@@ -43,10 +43,6 @@ class Test_MarkVisited(TestCase):
     pass
 
   def test_on(self):
-    if self.b.name == 'opera':
-      self.skipTest('Mark as visited feature is currently disabled on opera')
-      return
-
     self.open('/member_illust.php?id=11&p=9')
     self.inject_css()
 
@@ -57,10 +53,6 @@ class Test_MarkVisited(TestCase):
     pass
 
   def test_off(self):
-    if self.b.name == 'opera':
-      self.skipTest('Mark as visited feature is currently disabled on opera')
-      return
-
     self.open('/member_illust.php?id=11&p=10')
     self.set_conf('popup.mark_visited', False)
     self.inject_css()

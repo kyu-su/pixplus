@@ -68,12 +68,6 @@ class Test_ModKey(TestCase):
     textarea = self.q('textarea')
 
     for key, name in self.keys:
-      if self.b.name == 'opera':
-        if key in (Keys.MULTIPLY, Keys.ADD, Keys.SEPARATOR,
-                   Keys.SUBTRACT, Keys.DECIMAL, Keys.DIVIDE):
-          continue
-        pass
-
       textarea.clear()
       self.send_keys(key)
       keys = textarea.get_attribute('value').strip().split('\n')
