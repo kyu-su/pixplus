@@ -207,7 +207,9 @@ class Test_ModConfigUI(TestCase):
     self.assertTrue(editor.is_displayed())
     ix, iy, iw, ih = self.geom(input_e)
     ex, ey, ew, eh = self.geom(editor)
-    self.assertTrue(0 <= ix - (ex + ew) <= 4)
+    self.assertTrue((ix - 2) <= (ex + ew) <= (ix + 2),
+                    'input(x=%d,y=%d),editor(x=%d,y=%d,w=%d,h=%d) editor x+w should be at input x'
+                    % (ix, iy, ex, ey, ew, eh))
 
     self.check_key_editor_keys(initial_keys)
 
@@ -215,7 +217,7 @@ class Test_ModConfigUI(TestCase):
     self.check_key_editor_grab('abc', 'c')
     self.check_key_editor_grab('D', 'Shift+d')
     self.check_key_editor_grab('DEF', 'Shift+f')
-    self.check_key_editor_grab('!', 'Shift+!')
+    self.check_key_editor_grab('!', 'Shift+1')
     self.check_key_editor_grab(',', 'comma')
     self.check_key_editor_grab('+', 'Shift+plus')
     self.check_key_editor_grab('t', 't')
@@ -261,9 +263,11 @@ class Test_ModConfigUI(TestCase):
 
     ix, iy, iw, ih = self.geom(input_e)
     ex, ey, ew, eh = self.geom(editor)
-    self.assertTrue(100 < ew < 400)
-    self.assertTrue(50 < eh < 200)
-    self.assertTrue(0 <= ix - (ex + ew) <= 4)
+    self.assertTrue(100 < ew < 400, 'editor width: %d' % ew)
+    self.assertTrue(50 < eh < 200, 'editor height: %d' % eh)
+    self.assertTrue((ix - 2) <= (ex + ew) <= (ix + 2),
+                    'input(x=%d,y=%d),editor(x=%d,y=%d,w=%d,h=%d) editor x+w should be at input x'
+                    % (ix, iy, ex, ey, ew, eh))
     pass
 
   def test_modal(self):
