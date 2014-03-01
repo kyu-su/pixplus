@@ -217,7 +217,7 @@ class Test_ModConfigUI(TestCase):
     self.check_key_editor_grab('abc', 'c')
     self.check_key_editor_grab('D', 'Shift+d')
     self.check_key_editor_grab('DEF', 'Shift+f')
-    self.check_key_editor_grab('!', 'Shift+1')
+    self.check_key_editor_grab('!', 'Shift+!')
     self.check_key_editor_grab(',', 'comma')
     self.check_key_editor_grab('+', 'Shift+plus')
     self.check_key_editor_grab('t', 't')
