@@ -156,6 +156,22 @@ class Test_KeyBind(TestCase):
     self.check_id(illust_idx + 1)
     pass
 
+  def test_move5(self):
+    self.open('/member_illust.php?mode=medium&illust_id=40833644')
+
+    self.q('a[href*="mode=manga"] img').click()
+    self.popup_wait_load()
+
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.assertEqual(self.js('return pixplus.popup.manga.page'), 0)
+    self.send_keys(Keys.RIGHT)
+    time.sleep(3)
+    self.wait_page_load()
+    self.popup_wait_load()
+    self.assertTrue(self.js('return pixplus.popup.manga.active'))
+    self.assertEqual(self.js('return pixplus.popup.manga.page'), 1)
+    pass
+
   def test_close(self):
     self.prepare()
 
