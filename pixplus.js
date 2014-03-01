@@ -681,17 +681,17 @@
       var keys = [], key, chr = ev['char'];
 
       var k = ev.keyCode, c = ev.charCode;
-      if (ev.type === 'keypress' && c >= 0x20 && c < 0x7f) {
+      if (c >= 0x20 && c < 0x7f) {
         key = g.String.fromCharCode(c).toLowerCase();
       } else {
         key = this.keycode_map[k];
       }
 
-      keys.push(this.canonical_map[key] || key);
-
-      if (keys.length < 1) {
+      if (!key) {
         return null;
       }
+
+      keys.push(this.canonical_map[key] || key);
 
       [
         [ev.ctrlKey, 'Control'],
