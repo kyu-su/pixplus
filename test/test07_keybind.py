@@ -159,7 +159,7 @@ class Test_KeyBind(TestCase):
   def test_move5(self):
     self.open('/member_illust.php?mode=medium&illust_id=40833644')
 
-    self.q('a[href*="mode=manga"] img').click()
+    self.scroll_and_click(self.q('a[href*="mode=manga"] img')) # chromium workaround
     self.popup_wait_load()
 
     self.assertTrue(self.js('return pixplus.popup.manga.active'))

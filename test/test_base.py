@@ -292,6 +292,12 @@ class TestCase(unittest.TestCase):
     time.sleep(0.3)
     pass
 
+  # chromium workaround
+  def scroll_and_click(self, elem):
+    self.js('window.scrollTo(%(x)s, %(y)s)' % elem.location)
+    elem.click()
+    pass
+
   def auto_click(self, query):
     clickable = self.js('''
       var list = document.querySelectorAll(%s);
