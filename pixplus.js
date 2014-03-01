@@ -1132,14 +1132,19 @@
         }
       },
 
-      open: function(input, type) {
-        var args = g.Array.prototype.slice.call(arguments, 2);
+      open: function(input, type, lang) {
+        var args = g.Array.prototype.slice.call(arguments, 3);
 
         var wrapper = _.e('div', {cls: 'pp-config-editor-wrapper'}, null);
         input.parentNode.insertBefore(wrapper, input);
 
         var editor = _.e('div', {cls: 'pp-dialog pp-config-editor pp-config-' + type + '-editor'}, wrapper);
-        var data = this[type].apply(this, [editor, input].concat(args)) || {};
+
+        var close = function() {
+          _.modal.end(editor);
+        };
+
+        var data = this[type].apply(this, [editor, input, close, lang].concat(args)) || {};
 
         if (data.update) {
           data.update(input.value);
@@ -1187,7 +1192,7 @@
         });
       },
 
-      key: function(root, input, lang) {
+      key: function(root, input, close, lang) {
         var list = _.e('ul', null, root);
 
         var reset = function() {
@@ -1234,9 +1239,12 @@
           add_input.value = '';
           apply();
         });
+
+        var btn_close = _.e('button', {text: lang.pref.close, cls: 'pp-config-key-editor-close'}, toolbar);
+        _.onclick(btn_close, close);
       },
 
-      regexp: function(root, input, lang, pagecheck) {
+      regexp: function(root, input, close, lang, pagecheck) {
         var textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, root);
         textarea.value = input.value;
 
@@ -6118,7 +6126,7 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 .pp-config-regexp-editor table{white-space:pre}\
 .pp-config-key-editor ul button{padding:0px;margin-right:0.2em}\
 .pp-config-key-editor-toolbar{margin-top:0.2em}\
-.pp-config-key-editor-toolbar button{margin-left:0.2em}\
+#pp-config .pp-config-key-editor-toolbar button{margin-left:0.2em}\
 \
 /* floater */\
 .pp-float{position:fixed;top:60px;z-index:90}\
