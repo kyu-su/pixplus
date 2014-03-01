@@ -47,18 +47,9 @@ class Test_FloatTagList(TestCase):
 
     self.open('/bookmark.php?rest=hide')
     self.check(self.q('.ui-layout-west'), True)
-    self.check(self.q('.column-action-menu'), True, 1)
 
     self.open_test_user()
     self.check(self.q('.ui-layout-west'), True)
-
-    self.open('/search.php?s_mode=s_tag&word=pixiv')
-    headers = self.qa('#pp-search-header > *')
-    self.assertEqual(len(headers), 3)
-    self.assertTrue(self.has_class(headers[0], 'column-label'))
-    self.assertTrue(self.has_class(headers[1], 'column-menu'))
-    self.assertTrue(self.has_class(headers[2], 'column-order-menu'))
-    self.check(self.q('#pp-search-header'), True)
     pass
 
   def test_off(self):
@@ -66,13 +57,9 @@ class Test_FloatTagList(TestCase):
 
     self.open('/bookmark.php?rest=hide')
     self.check(self.q('.ui-layout-west'), False)
-    self.check(self.q('.column-action-menu'), False, 1)
 
     self.open_test_user()
     self.check(self.q('.ui-layout-west'), False)
-
-    self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.assertFalse(self.qa('#pp-search-header'))
     pass
 
   pass
