@@ -1094,8 +1094,6 @@
 
   _.configui = {
     editor: {
-      targets: [],
-
       regexp_paths: [
         '/mypage.php',
         '/new_illust.php',
@@ -1123,18 +1121,6 @@
         '/search_user.php'
       ],
 
-
-      init: function(root, lang) {
-        var that = this;
-
-        _.listen(root, ['click', 'focus'], function(ev) {
-          if (/^input$/i.test(ev.target.tagName) &&
-              ev.target !== that.current_target) {
-            that.open(root, ev.target, lang);
-          }
-        });
-      },
-
       close: function() {
         if (this.wrapper) {
           this.wrapper.parentNode.removeChild(this.wrapper);
@@ -1146,25 +1132,14 @@
         }
       },
 
-      open: function(root, input, lang) {
-        var type, args;
-
-        this.targets.forEach(function(item) {
-          if (item[0] === input) {
-            type = item[1];
-            args = item.slice(2);
-          }
-        });
-
-        if (!type) {
-          return;
-        }
+      open: function(input, type) {
+        var args = g.Array.prototype.slice.call(arguments, 2);
 
         var wrapper = _.e('div', {cls: 'pp-config-editor-wrapper'}, null);
         input.parentNode.insertBefore(wrapper, input);
 
         var editor = _.e('div', {cls: 'pp-dialog pp-config-editor pp-config-' + type + '-editor'}, wrapper);
-        var data = this[type].apply(this, [editor, input, lang].concat(args)) || {};
+        var data = this[type].apply(this, [editor, input].concat(args)) || {};
 
         if (data.update) {
           data.update(input.value);
@@ -1205,8 +1180,11 @@
         this.current_target = input;
       },
 
-      register: function() {
-        this.targets.push(g.Array.prototype.slice.call(arguments));
+      register: function(input) {
+        var that = this, args = g.Array.prototype.slice.call(arguments);
+        _.listen(input, 'focus', function(ev) {
+          that.open.apply(that, args);
+        });
       },
 
       key: function(root, input, lang) {
@@ -1370,7 +1348,7 @@
         this.__default(root, section, lang);
 
         _.qa('input[id$="-regexp"]', root).forEach(function(input) {
-          _.configui.editor.register(input, 'regexp', true);
+          _.configui.editor.register(input, 'regexp', lang, true);
         });
       },
 
@@ -1378,7 +1356,7 @@
         this.__default(root, section, lang);
 
         _.qa('input', root).forEach(function(input) {
-          _.configui.editor.register(input, 'key');
+          _.configui.editor.register(input, 'key', lang);
         });
       },
 
@@ -1620,7 +1598,6 @@
       this.lng = _.lng;
       this.container = container;
       this.toggle_btn = toggle_btn;
-      this.editor.init(container, this.lng);
     },
 
     create_tab: function(name, create_args) {
