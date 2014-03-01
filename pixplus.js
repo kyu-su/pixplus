@@ -1157,10 +1157,6 @@
               data.update(input.value);
             }
           });
-
-          g.setTimeout(function() {
-            data.input.focus();
-          }, 0);
         }
 
         if (data.input || data.update) {
