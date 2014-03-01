@@ -5474,7 +5474,6 @@
     bookmark: {
       run: function(query) {
         this.float_tag_list(query);
-        this.float_action_menu(query);
       },
 
       float_tag_list: function(query) {
@@ -5523,19 +5522,6 @@
           }
         } catch(ex) { }
 
-      },
-
-      float_action_menu: function() {
-        var form        = _.q('form[action*="bookmark_setting.php"]'),
-            action_menu = _.q('.column-action-menu');
-        if (form && action_menu) {
-          _.Floater.auto_run(function() {
-            action_menu.parentNode.removeChild(action_menu);
-            form.insertBefore(action_menu, form.firstChild);
-            action_menu.style.border = 'none';
-            new _.Floater(action_menu);
-          });
-        }
       }
     },
 
@@ -5561,19 +5547,6 @@
           inputs.push(radio);
           that[name](query, ul, li, radio, inputs);
         });
-
-        var nav = _.qa('.column-label,.column-menu,.column-menu+.column-order-menu,.column-menu+aside+.column-order-menu');
-        if (nav.length > 0) {
-          _.Floater.auto_run(function() {
-            var wrapper = _.e('div', {id: 'pp-search-header'});
-            nav[0].parentNode.insertBefore(wrapper, nav[0]);
-            nav.forEach(function(nav) {
-              nav.parentNode.removeChild(nav);
-              wrapper.appendChild(nav);
-            });
-            new _.Floater(wrapper);
-          });
-        }
 
         this.set_default_options(query);
       },
