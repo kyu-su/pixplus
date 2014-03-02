@@ -4,7 +4,8 @@
   pixplus.key.init();
   pixplus.key.listen(window, function(key, ev) {
     document.querySelector('textarea').value += ev.type + '=' + key + ' charCode=' + ev.charCode + ' keyCode=' + ev.keyCode + ' which=' + ev.which + '\n';
-    return true;
+    return ev.type === 'keypress' || /^F\d+$/.test(key)
   });
 </script>
+<input></input>
 <textarea style="width:100%;height:30em"></textarea>
