@@ -6042,6 +6042,7 @@ position:absolute;left:297px;top:-6px}\
 box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 \
 #pp-config{line-height:1.2em}\
+#pp-config ul{padding:0px;margin:0px}\
 #pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
 border:1px solid #becad8;border-radius:2px;margin:0.2em 0px;padding:0.1em 0.3em}\
 #pp-config button{white-space:nowrap}\
