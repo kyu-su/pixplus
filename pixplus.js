@@ -254,40 +254,39 @@
       elem.dispatchEvent(ev);
     },
 
-    lazy_scroll: function (target, root, scroll, offset) {
+    lazy_scroll: function(target, scroll) {
+      var de     = d.documentElement,
+          margin = g.Math.floor(de.clientHeight * 0.2);
+
       if (!target) {
         return;
       }
-      offset = g.parseFloat(typeof(offset) === 'undefined' ? 0.2 : offset);
-
-      if (!root || !scroll) {
-        var p = target.parentNode;
-        while(p && p !== d.body && p !== d.documentElement) {
-          if (p.scrollHeight > p.offsetHeight) {
-            root = scroll = p;
-            break;
-          }
-          p = p.parentNode;
-        }
-      }
-
-      if (!root) {
-        root = d.compatMode === 'BackCompat' ? d.body : d.documentElement;
-      }
-
       if (!scroll) {
-        _.lazy_scroll(target, root, d.body, offset);
-        scroll = d.documentElement;
+        scroll = target.parentElement;
       }
 
-      var r_root   = root.getBoundingClientRect(),
+      var r_scroll = scroll.getBoundingClientRect(),
           r_target = target.getBoundingClientRect(),
-          bt       = g.Math.floor(g.Math.max(0, r_root.top) + root.clientHeight * offset),
-          bb       = g.Math.floor(g.Math.max(0, r_root.top) + root.clientHeight * (1.0 - offset));
+          bt       = g.Math.max(margin, r_scroll.top + margin),
+          bb       = g.Math.min(r_scroll.bottom - margin, de.clientHeight - margin),
+          change   = 0;
+
       if (r_target.top < bt) {
-        scroll.scrollTop -= bt - r_target.top;
+        change = r_target.top - bt;
       } else if (r_target.bottom > bb) {
-        scroll.scrollTop += r_target.bottom - bb;
+        change = r_target.bottom - bb;
+      }
+
+      if (scroll === de) {
+        w.scrollBy(0, change);
+      } else {
+        var style = w.getComputedStyle(scroll);
+        if (scroll.scrollHeight > scroll.clientHeight) {
+          scroll.scrollTop += change;
+        }
+        if (scroll.parentElement && !/^fixed$/i.test(style.position)) {
+          _.lazy_scroll(target, scroll.parentElement);
+        }
       }
     },
 
@@ -4600,7 +4599,7 @@
         }
 
         this.sel.tag.classList.add('pp-tag-select');
-        _.lazy_scroll(this.sel.tag, group, group);
+        _.lazy_scroll(this.sel.tag);
 
       } else {
         this.sel.tag  = null;
