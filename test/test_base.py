@@ -210,7 +210,7 @@ class TestCase(unittest.TestCase):
       self.js('window.confirm=function(){return true}')
       pass
 
-    self.q('input[type="submit"][name="del"]').click()
+    self.click(self.q('input[type="submit"][name="del"]'))
     if self.b.supports_alert:
       self.alert_accept()
       pass
@@ -292,28 +292,30 @@ class TestCase(unittest.TestCase):
     time.sleep(0.3)
     pass
 
-  # chromium workaround
-  def scroll_and_click(self, elem):
-    self.js('window.scrollTo(%(x)s, %(y)s)' % elem.location)
-    elem.click()
+  def lazy_scroll(self, elem):
+    self.js('''
+      var rect = arguments[0].getBoundingClientRect(),
+          sw = document.documentElement.clientWidth,
+          sh = document.documentElement.clientHeight;
+      if (rect.left < 0 || rect.top < 0 || rect.right > sw || rect.bottom > sh) {
+        pixplus.lazy_scroll(arguments[0]);
+      }
+    ''', elem)
     pass
 
-  def auto_click(self, query):
-    clickable = self.js('''
-      var list = document.querySelectorAll(%s);
-      for(var i = 0; i < list.length; ++i) {
-        var rect = list[i].getClientRects()[0],
-            elem = document.elementFromPoint((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
-        if (elem === list[i] || list[i].contains(elem)) {
-          return list[i];
-        }
-      }
-      return null;
-    ''' % json.dumps(query))
-    if clickable:
-      clickable.click()
-      return clickable
-    raise RuntimeError('There\'s no clickable element for "%s"' % query)
+  def move_to(self, elem, off = None):
+    self.lazy_scroll(elem)
+    if off:
+      self.ac().move_to_element_with_offset(elem, off[0], off[1]).perform()
+    else:
+      self.ac().move_to_element(elem).perform()
+      pass
+    pass
+
+  def click(self, elem):
+    self.lazy_scroll(elem)
+    elem.click()
+    pass
 
   def start_bookmark(self):
     self.js('pixplus.popup.bookmark.start()')

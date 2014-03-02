@@ -37,7 +37,7 @@ class Test_TagEdit(TestCase):
     add_tag.send_keys(tag)
 
     query = '#pp-popup-tagedit-wrapper input[onclick^="addTag("]'
-    self.q(query).click()
+    self.click(self.q(query))
     self.wait_until(lambda driver: not self.qa(query))
 
     self.js('pixplus.popup.tagedit.end()')
@@ -65,7 +65,7 @@ class Test_TagEdit(TestCase):
     self.assertTrue(tag)
     self.assertIn(tag, tags)
 
-    del_btn.click()
+    self.click(del_btn)
     if self.b.supports_alert:
       self.alert_accept()
       pass

@@ -10,10 +10,10 @@ class Test_Bookmark(TestCase):
 
     input_tag.clear()
 
-    tags[0].click()
+    self.click(tags[0])
     self.assertEqual(input_tag.get_attribute('value').strip(), tags[0].get_attribute('data-tag'))
 
-    tags[0].click()
+    self.click(tags[0])
     self.assertEqual(input_tag.get_attribute('value').strip(), '')
     pass
 

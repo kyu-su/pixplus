@@ -16,10 +16,9 @@ class Test_Rate(TestCase):
     score = (int(time.time()) % 9) + 1
     width = score * 26
 
-    ac = self.ac()
-    ac.move_to_element_with_offset(rating, width - 10, 10).perform()
+    self.move_to(rating, width - 10, 10)
     # click() moves cursor to center on Firefox22
-    ac.click_and_hold().release().perform()
+    self.ac().click_and_hold().release().perform()
 
     if confirm:
       self.alert_accept()

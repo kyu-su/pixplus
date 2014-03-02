@@ -5,9 +5,9 @@ from test_base import TestCase
 class Test_FastFollow(TestCase):
 
   def unfollow(self):
-    self.q('.user-relation #favorite-button.following').click()
+    self.click(self.q('.user-relation #favorite-button.following'))
     time.sleep(1)
-    self.q('.user-relation #favorite-preference input.button.remove').click()
+    self.click(self.q('.user-relation #favorite-preference input.button.remove'))
     time.sleep(1)
     self.reload()
     self.assertFalse(self.has_class(self.q('.user-relation #favorite-button'), 'following'))
@@ -27,7 +27,7 @@ class Test_FastFollow(TestCase):
 
     btn = self.q('.user-relation #favorite-button')
     self.assertFalse(self.has_class(btn, 'following'))
-    btn.click()
+    self.click(btn)
     time.sleep(1)
 
     value = 1 if restrict else 0

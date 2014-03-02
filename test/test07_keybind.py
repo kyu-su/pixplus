@@ -159,7 +159,7 @@ class Test_KeyBind(TestCase):
   def test_move5(self):
     self.open('/member_illust.php?mode=medium&illust_id=40833644')
 
-    self.scroll_and_click(self.q('a[href*="mode=manga"] img')) # chromium workaround
+    self.click(self.q('a[href*="mode=manga"] img'))
     self.popup_wait_load()
 
     self.assertTrue(self.js('return pixplus.popup.manga.active'))
@@ -208,14 +208,14 @@ class Test_KeyBind(TestCase):
 
     self.assertEqual(self.has_class(header, 'pp-show'), cls_show)
     self.assertEqual(self.has_class(header, 'pp-hide'), cls_hide)
-    self.ac().move_to_element(title).perform()
+    self.move_to(title)
     self.assertEqual(header.is_displayed(), visible)
-    self.ac().move_to_element(header).perform()
+    self.move_to(header)
     self.assertEqual(header.is_displayed(), visible_hover)
     pass
 
   def toggle_caption(self, query):
-    self.ac().move_to_element(self.q(query)).perform()
+    self.move_to(self.q(query))
     self.send_keys('c')
     pass
 

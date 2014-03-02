@@ -27,7 +27,7 @@ class Test_AdvancedSearch(TestCase):
 
   def check_size(self, wlt, hlt, wgt, hgt):
     self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.q('.search-option').click()
+    self.click(self.q('.search-option'))
 
     self.set_size(wlt, hlt, wgt, hgt)
     self.q('#search-option .content form').submit()
@@ -89,7 +89,7 @@ class Test_AdvancedSearch(TestCase):
 
   def test_ratio(self):
     self.open('/search.php?s_mode=s_tag&word=pixiv')
-    self.q('.search-option').click()
+    self.click(self.q('.search-option'))
 
     slider = self.q('#pp-search-ratio-custom-slider')
     if slider.tag_name.lower() != 'input':

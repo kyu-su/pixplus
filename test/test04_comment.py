@@ -12,8 +12,9 @@ class Test_Comment(TestCase):
 
   def delete(self, comment):
     dellink = self.q('.delete-comment', comment)
-    self.ac().move_to_element(comment).perform()
-    dellink.click()
+    self.move_to(comment)
+    time.sleep(1)
+    self.click(dellink)
     self.alert_accept()
     time.sleep(1)
     pass
@@ -51,7 +52,7 @@ class Test_Comment(TestCase):
 
     message = '__hoge__c_%d' % time.time()
     comment.send_keys(message)
-    self.q(self.form_selector + ' .submit-button').click()
+    self.click(self.q(self.form_selector + ' .submit-button'))
 
     xpath = '//*[@id="pp-popup-comment"]//div[contains(concat(" ", @class, " "), " _comment-item ") and .//text()[contains(.,"%s")]]' % message
     self.wait_until(lambda driver: self.xa(xpath))
@@ -82,9 +83,9 @@ class Test_Comment(TestCase):
   def write_stamp(self, cat, num):
     xpath = self.make_stamp_xpath(num)
     self.assertFalse(self.xa(xpath))
-    self.q(self.form_selector + ' > .tabs .tab-stamp').click()
-    self.q(self.form_selector + ' .stamp-type-list .ui-tab[data-target="stamp-%d"]' % cat).click()
-    self.q(self.form_selector + ' .stamp-list.stamp-%d .stamp[data-id="%d"]' % (cat, num)).click()
+    self.click(self.q(self.form_selector + ' > .tabs .tab-stamp'))
+    self.click(self.q(self.form_selector + ' .stamp-type-list .ui-tab[data-target="stamp-%d"]' % cat))
+    self.click(self.q(self.form_selector + ' .stamp-list.stamp-%d .stamp[data-id="%d"]' % (cat, num)))
     self.wait_until(lambda driver: self.xa(xpath))
     pass
 
@@ -127,7 +128,7 @@ class Test_Comment(TestCase):
     self.assertTrue(comment.is_displayed())
     self.assertEqual(form.is_displayed(), visible)
 
-    self.q('#pp-popup-comment-form-btn').click()
+    self.click(self.q('#pp-popup-comment-form-btn'))
 
     self.assertEqual(self.get_conf('popup.show_comment_form'), visible)
 
@@ -171,7 +172,7 @@ class Test_Comment(TestCase):
 
     btn = self.q('#pp-popup-comment-config-btn')
     x, y, w, h = self.geom(btn)
-    btn.click()
+    self.click(btn)
     time.sleep(1)
 
     menu = self.q('.pp-popup-menu')
@@ -185,7 +186,7 @@ class Test_Comment(TestCase):
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
 
-    self.q(sel_show_comment_form).click()
+    self.click(self.q(sel_show_comment_form))
     time.sleep(1)
     self.assertTrue(self.q(self.form_selector).is_displayed())
     self.assertEqual(self.get_conf('popup.show_comment_form'), True)
@@ -193,24 +194,24 @@ class Test_Comment(TestCase):
     self.assertFalse(self.qa('.pp-popup-menu'))
     self.assertTrue(self.x(stamp_xpath).is_displayed())
 
-    btn.click()
+    self.click(btn)
     time.sleep(1)
     self.assertTrue(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
 
-    self.q(sel_hide_stamp_comments).click()
+    self.click(self.q(sel_hide_stamp_comments))
     time.sleep(1)
     self.assertEqual(self.get_conf('popup.show_comment_form'), True)
     self.assertEqual(self.get_conf('popup.hide_stamp_comments'), True)
     self.assertFalse(self.qa('.pp-popup-menu'))
     self.assertFalse(self.x(stamp_xpath).is_displayed())
 
-    btn.click()
+    self.click(btn)
     time.sleep(1)
     self.assertTrue(self.q(sel_show_comment_form).is_selected())
     self.assertTrue(self.q(sel_hide_stamp_comments).is_selected())
 
-    self.q(sel_show_comment_form).click()
+    self.click(self.q(sel_show_comment_form))
     time.sleep(1)
     self.assertTrue(self.q(self.form_selector).is_displayed())
     self.assertEqual(self.get_conf('popup.show_comment_form'), False)
@@ -218,12 +219,12 @@ class Test_Comment(TestCase):
     self.assertFalse(self.qa('.pp-popup-menu'))
     self.assertFalse(self.x(stamp_xpath).is_displayed())
 
-    btn.click()
+    self.click(btn)
     time.sleep(1)
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertTrue(self.q(sel_hide_stamp_comments).is_selected())
 
-    self.q(sel_hide_stamp_comments).click()
+    self.click(self.q(sel_hide_stamp_comments))
     time.sleep(1)
     self.assertTrue(self.q(self.form_selector).is_displayed())
     self.assertEqual(self.get_conf('popup.show_comment_form'), False)
@@ -231,7 +232,7 @@ class Test_Comment(TestCase):
     self.assertFalse(self.qa('.pp-popup-menu'))
     self.assertTrue(self.x(stamp_xpath).is_displayed())
 
-    btn.click()
+    self.click(btn)
     time.sleep(1)
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())

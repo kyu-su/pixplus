@@ -28,13 +28,13 @@ class Test_ModConfigUI(TestCase):
 
   def prepare(self):
     self.open('/')
-    self.q('#pp-config-btn').click()
+    self.click(self.q('#pp-config-btn'))
     self.current_section = None
     pass
 
   def activate_section(self, section):
     if section != self.current_section:
-      self.q('#pp-config-tab-%s' % section['name']).click()
+      self.click(self.q('#pp-config-tab-%s' % section['name']))
       self.current_section = section
       time.sleep(1)
       pass
@@ -135,7 +135,7 @@ class Test_ModConfigUI(TestCase):
 
         if isinstance(value, bool):
           if next_value is not None and value != next_value:
-            input_e.click()
+            self.click(input_e)
             pass
           pass
         elif input_e.tag_name.lower() == 'select':
@@ -154,7 +154,7 @@ class Test_ModConfigUI(TestCase):
   def check_reset_default(self, section, item, conf_key, default, current, input_e):
     if isinstance(default, bool):
       if current == default:
-        input_e.click()
+        self.click(input_e)
         pass
       pass
     elif input_e.tag_name.lower() == 'select':
@@ -171,7 +171,7 @@ class Test_ModConfigUI(TestCase):
       pass
 
     self.assertNotEqual(self.get_conf(conf_key), default)
-    self.auto_click(self.input_query(section, item, '-default'))
+    self.click(self.get_input(section, item, '-default'))
     self.assertEqual(self.get_conf(conf_key), default)
     pass
 
@@ -223,13 +223,13 @@ class Test_ModConfigUI(TestCase):
     self.check_key_editor_grab('t', 't')
     self.check_key_editor_grab(Keys.F5, 'F5')
 
-    self.q('.pp-config-key-editor-add').click()
+    self.click(self.q('.pp-config-key-editor-add'))
     self.assertEqual(self.q('.pp-config-key-editor-grab').get_attribute('value'), '')
 
     self.check_key_editor_keys(initial_keys + ['F5'])
     self.assertEqual(input_e.get_attribute('value'), ','.join(initial_keys + ['F5']))
 
-    self.q('.pp-config-key-editor-close').click()
+    self.click(self.q('.pp-config-key-editor-close'))
     self.assertFalse(self.qa('.pp-config-key-editor'))
     pass
 
@@ -279,15 +279,15 @@ class Test_ModConfigUI(TestCase):
     h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config-pixiv'))[1]) + 1
     self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (50, 50), (902, 902), (h, h))
 
-    self.auto_click('.notification-container .popboard ._icon')
+    self.click(self.q('.notification-container .popboard ._icon'))
     self.assertFalse(self.q('#pp-config').is_displayed())
     self.assertTrue(self.q('#notification-popboard').is_displayed())
 
-    self.auto_click('.pp-layout-history')
+    self.click(self.q('.pp-layout-history'))
     self.assertFalse(self.q('#notification-popboard').is_displayed())
     self.check_modal_position_size(self.q('#pp-layout-history-manager'), None, None, (400, 600), (300, 400))
 
-    self.auto_click('#pp-config-btn')
+    self.click(self.q('#pp-config-btn'))
     self.assertTrue(self.q('#pp-config').is_displayed())
     self.assertFalse(self.qa('#pp-layout-history-manager'))
     self.current_section = None
@@ -295,11 +295,11 @@ class Test_ModConfigUI(TestCase):
     self.activate_section(self.conf_map['key'])
 
     input_e = self.get_input('key', 'popup_first')
-    input_e.click()
+    self.click(input_e)
     self.check_keyeditor_position_size(input_e)
 
     input_e = self.get_input('key', 'popup_close')
-    input_e.click()
+    self.click(input_e)
     self.check_keyeditor_position_size(input_e)
 
     self.js('document.activeElement.blur()')
@@ -313,22 +313,22 @@ class Test_ModConfigUI(TestCase):
     self.check_keyeditor_position_size(self.q(input_query))
 
     time.sleep(1)
-    self.q('form[action*="search.php"]').click()
+    self.click(self.q('form[action*="search.php"]'))
     self.assertFalse(self.qa('.pp-config-key-editor'))
     self.assertTrue(self.q('#pp-config').is_displayed())
 
-    self.q('form[action*="search.php"]').click()
+    self.click(self.q('form[action*="search.php"]'))
     self.assertFalse(self.qa('.pp-config-key-editor'))
     self.assertFalse(self.q('#pp-config').is_displayed())
 
     self.blur()
     time.sleep(3)
 
-    self.auto_click('#pp-config-btn')
+    self.click(self.q('#pp-config-btn'))
     self.assertTrue(self.q('#pp-config').is_displayed())
 
     input_e = self.get_input('key', 'popup_prev')
-    input_e.click()
+    self.click(input_e)
     self.check_keyeditor_position_size(input_e)
 
     time.sleep(1)
@@ -340,14 +340,14 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.qa('.pp-config-key-editor'))
     self.assertFalse(self.q('#pp-config').is_displayed())
 
-    self.auto_click('#pp-config-btn')
+    self.click(self.q('#pp-config-btn'))
     self.assertTrue(self.q('#pp-config').is_displayed())
 
     time.sleep(1)
-    self.q('form[action*="search.php"]').click()
+    self.click(self.q('form[action*="search.php"]'))
     self.assertFalse(self.q('#pp-config').is_displayed())
 
-    self.auto_click('.pp-layout-history')
+    self.click(self.q('.pp-layout-history'))
     self.assertFalse(self.q('#pp-config').is_displayed())
     self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
 
