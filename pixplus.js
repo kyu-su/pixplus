@@ -117,10 +117,8 @@
         }
       });
       return base;
-    }
-  };
+    },
 
-  _.extend(_, {
     version: function() {
       return _.changelog[0].version;
     },
@@ -369,7 +367,7 @@
     calculate_ratio: function(width, height) {
       return (width - height) / g.Math.min(width, height);
     }
-  });
+  };
 
   ['log', 'error', 'debug', 'warn'].forEach(function(name) {
     if (g.console) {
@@ -1028,7 +1026,7 @@
     });
   };
 
-  _.PopupMenu.prototype = {
+  _.extend(_.PopupMenu.prototype, {
     add: function(name, text, options) {
       if (!options) {
         options = { };
@@ -1126,7 +1124,7 @@
         _.modal.end(this.dom.root);
       }
     }
-  };
+  });
 
   _.configui = {
     editor: {
@@ -5064,7 +5062,7 @@
     }
   };
 
-  _.Floater.prototype = {
+  _.extend(_.Floater.prototype, {
     init: function() {
       this.wrap.style.boxSizing = 'border-box';
       this.wrap.style.webkitBoxSizing = 'border-box';
@@ -5153,7 +5151,7 @@
     add_ignore_element: function(elem) {
       this.ignore_elements.push(elem);
     }
-  };
+  });
 
   _.extend(_.Floater, {
     instances: [],
