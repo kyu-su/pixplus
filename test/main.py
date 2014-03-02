@@ -8,7 +8,6 @@ import selenium.common.exceptions
 import util
 from firefox import Firefox
 from chrome import Chrome
-from safari import Safari
 
 testdir = os.path.abspath(os.path.dirname(__file__))
 
@@ -100,12 +99,10 @@ def main():
   from browser import Browser
   import firefox
   import chrome
-  import safari
 
   browsers = [
     (firefox, firefox.Firefox),
-    (chrome, chrome.Chrome),
-    (safari, safari.Safari)
+    (chrome, chrome.Chrome)
     ]
 
   all_tests = load_tests()

@@ -54,10 +54,6 @@ class Test_AdvancedSearch(TestCase):
     pass
 
   def check_slider(self, slider, knob, text):
-    if self.b.name == 'safari':
-      warnings.warn('safaridriver is currently not supports move_to_*', FutureWarning)
-      return
-
     sx, sy, sw, sh = self.geom(slider)
 
     self.ac().click_and_hold(knob or slider).move_by_offset(-sw, 0).release().perform()

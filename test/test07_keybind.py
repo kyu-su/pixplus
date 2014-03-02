@@ -220,10 +220,6 @@ class Test_KeyBind(TestCase):
     pass
 
   def test_header(self):
-    if self.b.name == 'safari':
-      self.skipTest('safaridriver is currently not supports move_to_*')
-      return
-
     self.prepare()
 
     self.open_popup()
