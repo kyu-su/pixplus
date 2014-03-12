@@ -6137,7 +6137,7 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 #pp-config .pp-config-key-editor-toolbar button{margin-left:0.2em}\
 \
 /* floater */\
-.pp-float{position:fixed;top:60px;z-index:90}\
+.pp-float{position:fixed;top:0px;z-index:90}\
 .column-action-menu.pp-float:not(:hover){opacity:0.6;}\
 #pp-search-header{background-color:#fff}\
 #pp-search-header.pp-float:not(:hover){opacity:0.6}\
