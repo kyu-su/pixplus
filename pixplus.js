@@ -929,6 +929,10 @@
         this.close();
       }
 
+      try {
+        w.pixiv.ui.modal.close();
+      } catch(ex) { }
+
       _.debug('Begin modal');
 
       this.dialog = {
@@ -1696,12 +1700,12 @@
     },
 
     is_active: function() {
-      return !!this.dom.root && this.container.classList.contains('pp-show');
+      return !!this.dom.root && this.dom.root.classList.contains('pp-show');
     },
 
     show: function() {
       this.create();
-      this.container.classList.add('pp-show');
+      this.dom.root.classList.add('pp-show');
       if (this.toggle_btn) {
         this.toggle_btn.classList.add('pp-active');
 
@@ -1711,7 +1715,7 @@
     },
 
     hide: function() {
-      this.container.classList.remove('pp-show');
+      this.dom.root.classList.remove('pp-show');
       if (this.toggle_btn) {
         this.toggle_btn.classList.remove('pp-active');
       }
@@ -5725,39 +5729,94 @@
     }
   };
 
-  _.setup_ready = function() {
-    _.i18n.setup();
+  _.config_button = {
+    init: function() {
+      var found = false;
 
-    _.redirect_jump_page();
-
-    (function(list) {
-      var wrapper = _.e('div', {id: 'pp-config-pixiv', cls: 'pp-dialog'}, d.body);
-      var button;
-
-      if (list) {
-        var li = _.e('li', {id: 'pp-config-btn-wrapper'}, list);
-        button = _.e('a', {href: '#pp-config'}, li);
-        _.e('i', {id: 'pp-config-btn', cls: '_icon'}, button);
+      for(var i = 0; i < this.buttons.length; ++i) {
+        var btn = this.buttons[i];
+        var container = _.q(btn.container);
+        if (container) {
+          found = true;
+          this.button = btn;
+          btn.func(container);
+          break;
+        }
       }
 
-      var show = function(ev) {
-        _.configui.show();
-        _.modal.begin(_.configui.container, {
-          onclose: _.configui.hide.bind(_.configui),
-          centerize: 'horizontal'
-        });
-        ev.preventDefault();
-      };
+      if (!found) {
+        this.button = this.fallback;
+        this.fallback.func();
+      }
 
-      _.onclick(button, show);
-      _.configui.init(wrapper, button);
-
+      var that = this;
       _.listen(w, 'hashchange', function() {
         if (w.location.hash === '#pp-config') {
-          show();
+          that.button.show();
         }
       });
-    })(_.q('._header .notification-container>ul'));
+    },
+
+    buttons: [
+
+      {
+        container: 'body>header .layout-wrapper>.notifications',
+        func: function(container) {
+          var li  = _.e('li', {id: 'pp-config-btn1-wrapper'}, container),
+              btn = _.e('span', {id: 'pp-config-btn1'}, li);
+          _.onclick(btn, this.show.bind(this));
+          _.configui.init(li, btn);
+        },
+        show: function() {
+          _.configui.show();
+          _.modal.begin(_.configui.dom.root, {
+            onclose: _.configui.hide.bind(_.configui)
+          });
+        }
+      }
+
+      // new
+      // , {
+      //   container: '._header .notification-container>ul',
+      //   func: function(container) {
+      //     var li  = _.e('li', {id: 'pp-config-btn2-wrapper'}, container),
+      //         btn = _.e('a', {href: '#pp-config'}, li);
+      //     _.e('i', {id: 'pp-config-btn2', cls: '_icon'}, btn);
+      //     _.onclick(btn, this.show.bind(this));
+      //     _.configui.init(li, btn);
+      //   },
+      //   show: function() {
+      //     _.configui.show();
+      //     _.modal.begin(_.configui.root, {
+      //       onclose: _.configui.hide.bind(_.configui),
+      //       centerize: 'horizontal'
+      //     });
+      //   }
+      // }
+
+    ],
+
+    fallback: {
+      func: function() {
+        var wrapper = _.e('div', {id: 'pp-config-btn-fallback-wrapper'}, d.body);
+        var btn = _.e('div', {id: 'pp-config-btn-fallback'}, wrapper);
+        _.onclick(btn, this.show.bind(this));
+        _.configui.init(wrapper, btn);
+      },
+      show: function() {
+        _.configui.show();
+        _.modal.begin(_.configui.dom.root, {
+          onclose: _.configui.hide.bind(_.configui),
+          centerize: 'both'
+        });
+      }
+    }
+  };
+
+  _.setup_ready = function() {
+    _.i18n.setup();
+    _.redirect_jump_page();
+    _.config_button.init();
 
     if (_.conf.general.bookmark_hide) {
       _.qa('a[href*="bookmark.php"]').forEach(function(link) {
@@ -6045,37 +6104,59 @@ border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}\
 #pp-popup-tagedit-table-wrapper{overflow:auto}\
 \
 /* config ui */\
-#pp-config-btn-wrapper{margin-left:2px;position:absolute}\
-#pp-config-btn{width:26px;height:26px;\
-/* __SUBST_FILE_CSS__(temp/icons/config_btn.txt) */background:url("\
-data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/w\
-D/AP+gvaeTAAACYElEQVQ4jbWUy0tUcRTHP+d3B2ccJbSwwBQnogc9kGjRRtKgUseyJxIt+gfatCkiAo\
-WIaNvGXVibgiYoKAZrIUHipgiSCsy0GUsUgsxwHub9nRZe7Y40MznQWf3O6/P7cs79XfhPJoWSz5JztR\
-anE9UWlD0Ia0Ec0FlgVIQBR+XewYbQ2D+B48lMK6qXBFoAU0ScC8Rc617o2FQ59VdwfCyzTRztBQ4sxR\
-TGRLmvyKARd9qqlAnUYuQkymmgzCv9pqqd7ZHw0DJ4QDWQSWauClwGgstQkfNt9cFeEdG/SX06kd3tuD\
-aGsNXrmAGnqa0h+M70T2lFNpl5JNDthwKIJZEPCtBRHxx2A3IUmPM6qkDvDKgGjGYzj4EOT/7X/KPMA6\
-8LjQjc+hPRvfPJ9HEDTHqR91bsidWCARYc6fP7ijljrKNXgBTCQ+MGfpYCjm4MfgRSPvQOE60LfxFll8\
-2GrpcCBfD2MO0LrTMArZHy8egWyZYKBhAk5vMmAqWC4ol0j/cluagcU2NjWLm4mNXhYq8qrxnVGu/oCL\
-rBuvrLl+wtWfFKi0Yq3gDyJDFTfaS+6nthsLD/+Sd9eWiz/ADoT6S7LdQCKDT5Ks/FE+l9Xs8Q0Jfzr+\
-gfz25XYz+swFuUntm50M01lZniC1Z92xYJNxab8QJgFp/q6qzgKFTklIM7acWUd+2U+Xgi1WUw1Z6ysy\
-o0e6V3BRkEsMpIUbBY3MORildLfntD+MHSuf9zqhGkGUCUF62R0G1/b84orNFrOWDRG4UuLmQ5io1qjf\
-rWqbA+X6MaM4zy2mscLVXAqu03/AbcrbOFCmQAAAAASUVORK5CYII=\
-") no-repeat center/* __SUBST_FILE_CSS_END__ */}\
-._type-slim-header ._header .search-container{margin-right:-28px}\
+#pp-config-btn1{border-radius:5px;margin-left:2px;cursor:pointer;\
+display:inline-block;padding:24px 0px 0px 34px;vertical-align:top;\
+border:3px solid #f2f4f6;\
+background:#f2f4f6 url("data:image/png;base64,\
+iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/wD/AP+gvaeTAAACXklE\
+QVQ4jbWUz0tUURTHP+c+0aQWWljmNpxmspJo0UabmUUEVqYzwxAt+gfatCkiAoWIaNvGXZibwmZC\
+oU20eE0pbopIqRnNjKgkQewXCVb3nRa+kRlxHB3orM75nns/fO+57134TyHrNYdHck3Wo1OVCHAI\
+2A44CD9EmfbAFWPuxtsDMxsCp55mj4vKJSACmDLmLJCynr2QjLZ8WRM8OJLb61j6gGiBPIPIPVVG\
+HePNqaXaMzSJSgxIANX+unlR7YxFQmMrYNd1qxZM41WQy0DNClLlfCwc6BMRXcvqUCZ7wCIpIOBL\
+39SxbYm2ltdm4NGrrQumcQikpwgKYORDKShAVzg0IUZPAb98qU6sc8d13SqzbUvNMMgJv/G5FKRU\
+xNpDU6jcKpAOLzi7u4wKswCCvkGle7NgAHG8/iJBOWOwzhVgUVXSqvysBNzdFnwLLBZI+0w82vzJ\
+wv7aRed6JVAA/x7mCqQdBiAZDr7v6GheqhQMIEqqoPxYVSkoncn2+l+SRcxpQVOqehEAlYlyf9V6\
+Hhv8xFH1dlk1f/IdY+ir2PHqSISbXwLy8Nl4/cn2g1/LgL2jg4/fjSSP7fkOkM5M9gBNAILXpv6L\
+IHAunZk8ArCk3hjQX/RWpNzJoBjNrqYj9Nod9qYz72zkgsfj4WBruRn/BYygdRsAFkW5GcfVY9YT\
+U5tsCf1+8CSXVNH65ZacBcLLuQ4AowCex1R5sBibiAae58tYJHg/n6czudY8WJFMIhy8Xbi1aBQi\
+eq2wVvVulDlRySh2LDQUl7Kz1EYRJlR5sbzOTFdqYNPxD/4mzdyqngK/AAAAAElFTkSuQmCC\
+") no-repeat 6px 1px;}\
+#pp-config-btn1:hover{background-color:#ddeaf6;border-color:#ddeaf6;}\
+#pp-config-btn1.pp-active{position:relative;z-index:10001;background-color:#fff;\
+padding-top:27px;border-color:#becad8;border-bottom:none;border-radius:5px 5px 0px 0px}\
 \
-#pp-config-pixiv{position:fixed;top:50px;width:900px}\
-#pp-config-pixiv:not(.pp-show){display:none}\
-#pp-config-pixiv #pp-config .pp-config-tab:first-child{border-top-left-radius:3px}\
-#pp-config-pixiv::before{content:"";display:block;width:0px;height:0px;\
-border:8px solid transparent;border-bottom-color:#d6dee5;border-top-width:0px;\
-position:absolute;left:296px;top:-8px}\
-#pp-config-pixiv::after{content:"";display:block;width:0px;height:0px;\
-border:7px solid transparent;border-bottom-color:#fff;border-top-width:0px;\
-position:absolute;left:297px;top:-6px}\
-#pp-config-pixiv #pp-config-content-wrapper{overflow-y:auto;\
-box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
+#pp-config-btn1-wrapper #pp-config{position:absolute;z-index:10000;top:27px;left:-400px;\
+width:800px;background-color:#fff;border:3px solid #becad8;border-radius:10px}\
+#pp-config-btn1-wrapper #pp-config .pp-config-tab:first-child:hover{\
+margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
+border-right:none;border-bottom:none}\
+\
+#pp-config-btn-fallback{position:fixed;right:0px;top:0px;opacity:0.2;padding:16px;\
+cursor:pointer;background-repeat:no-repeat;background-position:center;\
+/* __SUBST_FILE_CSS__(temp/icons/24.txt) */background-image:url("\
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/w\
+D/AP+gvaeTAAACY0lEQVRIibWUz0tUURTHP+fOc4apSDJKFwWKM0qSlFAEtoiorE2bFrVwn+aU/QMFks\
+s24TBjYkRt2wQGYRQJkQXSLxGhHBU0hNKCJAoa573TYsaZ92xsxpn6bi7ne8/9fs85l3vhP0MKZsTntq\
+HJYxhaUWkGrQE2AYvAAsoojnnCpfqJjRn0J06iXATaAH8RxY4gcpULodG/G8QTR0Cvgxx0sQ7IKKpjCE\
+uI+nGkFpHDoI2uPBuhl87QNUTUazAwU0nKiSG0uw6kgF585g4d9fN/FKMqxKdPINwCdud46SMSupwziM\
+4049Mh0No1Ej/oCm9ZdyirGJytZsV+CdS5TM4TCQ1KZtb3gK15jhZnABCbbkXUPf9lnFS9QYm6xJ8Cia\
+IE1yISeoHwzMVUItY5AxLNEN/wLZ9C+F6SAYAjDzyxcNqw+LEfGAce0nFgpWRxAOO89xJSZ9FzNAXsL0\
+s4qydfUTehVeafCK+iKvkaeOtilqyyBG9+2Idjxki/9CnOhhuJJYYQWtIJ+ry8DmxTTe4b2ZVeJHePRu\
+PldZAPVvI2tn8YJUBn43ghA0NfIkB3+FeW6Z/eizo1majFlesjPnUcG8ABvzUBUMggiMUCscQwPnODT/\
+PvUH0DUpEnNwDyOBslU/eBM8XcwXaEdhznEE07DZBPPB8CAIUMkqBRYBJVC5ps4EtR8iKfofCIVuhq6A\
+agZ8Qi0mADO7K7sUQbwqNM9JOu8Oa1At4OBl5VoAQ9+7HJ9G+afvEbhtfArrwC7HExQSRwtxThVXhHJM\
+yhzHpTdP3v26SmUGsYxAKdK6eQkvEbAe23PlzXIqUAAAAASUVORK5CYII=\
+")/* __SUBST_FILE_CSS_END__ */}\
+#pp-config-btn-fallback:hover,#pp-config-btn-fallback.pp-active{opacity:1}\
+\
+#pp-config-btn-fallback-wrapper #pp-config{position:fixed;background-color:#fff;\
+width:800px;height:70%;border:3px solid #becad8;border-radius:10px}\
+#pp-config-btn-fallback-wrapper #pp-config .pp-config-tab:first-child:hover{\
+margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;\
+border-right:none;border-bottom:none}\
 \
 #pp-config{line-height:1.2em}\
+#pp-config:not(.pp-show){display:none}\
 #pp-config ul{padding:0px;margin:0px}\
 #pp-config input,#pp-config button,#pp-config select,#pp-config textarea{\
 border:1px solid #becad8;border-radius:2px;margin:0.2em 0px;padding:0.1em 0.3em}\
@@ -6089,12 +6170,12 @@ border:1px solid #becad8;border-radius:2px;margin:0.2em 0px;padding:0.1em 0.3em}
 #pp-config table{border-collapse:collapse;border-spacing:0px}\
 #pp-config table td{padding:0px 0.2em}\
 #pp-config label{cursor:pointer}\
-#pp-config-tabbar{border-bottom:2px solid #d6dee5}\
+#pp-config-tabbar{border-bottom:2px solid #becad8}\
 #pp-config-tabbar label{cursor:pointer}\
 #pp-config-close-button{padding:0.4em}\
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
 #pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}\
-#pp-config-tabbar .pp-config-tab.pp-active{background-color:#d6dee5}\
+#pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
 #pp-config-content-wrapper{padding:0.4em}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
