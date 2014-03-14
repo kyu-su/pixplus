@@ -3805,7 +3805,7 @@
     },
 
     update: function() {
-      _.qa('._comment-item > .comment > .stamp-container', _.popup.dom.comment).forEach(function(stamp) {
+      _.qa('._comment-item > .comment > .sticker-container', _.popup.dom.comment).forEach(function(stamp) {
         stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
       });
       _.popup.adjust();
