@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.9.1
+// @version     1.10.0
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
@@ -6714,14 +6714,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   _.changelog = [
     {
       "date": "2014/xx/xx",
-      "version": "1.9.1",
+      "version": "1.10.0",
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Add] Add regular expression editor in preferences dialog."
+          "[Add] Add \"Open popup in manga page\" option.",
+          "[Add] Add regular expression editor in preferences dialog.",
+          "[Fix] Fix key event handling.",
+          "[Fix] Fix \"Hide stamp comments\" option."
         ],
         "ja": [
-          "[\u8ffd\u52a0] \u8a2d\u5b9a\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u6b63\u898f\u8868\u73fe\u30a8\u30c7\u30a3\u30bf\u3092\u8ffd\u52a0\u3002"
+          "[\u8ffd\u52a0] \u300c\u6f2b\u753b\u4f5c\u54c1\u306e\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002",
+          "[\u8ffd\u52a0] \u8a2d\u5b9a\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u6b63\u898f\u8868\u73fe\u30a8\u30c7\u30a3\u30bf\u3092\u8ffd\u52a0\u3002",
+          "[\u4fee\u6b63] \u30ad\u30fc\u30a4\u30d9\u30f3\u30c8\u306e\u51e6\u7406\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
