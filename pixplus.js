@@ -1210,7 +1210,7 @@
 
         _.modal.begin(editor, {
           onclose: this.close.bind(this),
-          parent: _.configui.container,
+          parent: _.configui.dom.root,
           members: [input]
         });
 
