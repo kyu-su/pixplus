@@ -28,7 +28,7 @@ class Test_ModConfigUI(TestCase):
 
   def prepare(self):
     self.open('/')
-    self.click(self.q('#pp-config-btn'))
+    self.click(self.q('#pp-config-btn1'))
     self.current_section = None
     pass
 
@@ -272,11 +272,11 @@ class Test_ModConfigUI(TestCase):
   def test_modal(self):
     self.prepare()
 
-    el = self.q('#pp-config-content-wrapper')
     sw, sh = self.screen_size()
-    x, y, w, h = self.geom(el)
-    h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config-pixiv'))[1]) + 1
-    self.check_modal_position_size(self.q('#pp-config-pixiv'), None, (50, 50), (902, 902), (h, h))
+    x, y, w, h = self.geom(self.q('#pp-config-content-wrapper'))
+    h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config'))[1]) + 5
+    print(self.screen_size(), self.geom(self.q('#pp-config')), self.geom(self.q('#pp-config-content-wrapper')))
+    self.check_modal_position_size(self.q('#pp-config'), None, (27, 27), (806, 806), (h, h))
 
     self.click(self.q('.notification-container .popboard ._icon'))
     self.assertFalse(self.q('#pp-config').is_displayed())
@@ -286,7 +286,7 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.q('#notification-popboard').is_displayed())
     self.check_modal_position_size(self.q('#pp-layout-history-manager'), None, None, (400, 600), (300, 400))
 
-    self.click(self.q('#pp-config-btn'))
+    self.click(self.q('#pp-config-btn1'))
     self.assertTrue(self.q('#pp-config').is_displayed())
     self.assertFalse(self.qa('#pp-layout-history-manager'))
     self.current_section = None
@@ -323,7 +323,7 @@ class Test_ModConfigUI(TestCase):
     self.blur()
     time.sleep(3)
 
-    self.click(self.q('#pp-config-btn'))
+    self.click(self.q('#pp-config-btn1'))
     self.assertTrue(self.q('#pp-config').is_displayed())
 
     input_e = self.get_input('key', 'popup_prev')
@@ -339,7 +339,7 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.qa('.pp-config-key-editor'))
     self.assertFalse(self.q('#pp-config').is_displayed())
 
-    self.click(self.q('#pp-config-btn'))
+    self.click(self.q('#pp-config-btn1'))
     self.assertTrue(self.q('#pp-config').is_displayed())
 
     time.sleep(1)
