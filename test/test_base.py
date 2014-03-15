@@ -312,9 +312,14 @@ class TestCase(unittest.TestCase):
       pass
     pass
 
-  def click(self, elem):
+  def click(self, elem, hold = True):
     self.lazy_scroll(elem)
-    elem.click()
+    if hold:
+      self.ac().move_to_element(elem).click_and_hold(elem).release().perform()
+    else:
+      self.ac().move_to_element(elem).click(elem).perform()
+      # elem.click()
+      pass
     pass
 
   def start_bookmark(self):

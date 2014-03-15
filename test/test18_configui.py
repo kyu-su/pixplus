@@ -51,7 +51,7 @@ class Test_ModConfigUI(TestCase):
     return '#' + input_id
 
   def get_input(self, section, item, suffix = ''):
-    return self.q(self.input_query(section, item, suffix = ''))
+    return self.q(self.input_query(section, item, suffix))
 
   def each_item(self, callback, *args):
     for section in self.conf_schema:
@@ -108,6 +108,19 @@ class Test_ModConfigUI(TestCase):
       pass
     pass
 
+  def check_conf(self, key, expected_value, invert = False):
+    value = self.get_conf(key)
+    if invert:
+      self.assertNotEqual(value, expected_value,
+                          'conf.%s should NOT be "%s" but got "%s"'
+                          % (key, expected_value, value))
+    else:
+      self.assertEqual(value, expected_value,
+                       'conf.%s should be "%s" but got "%s"'
+                       % (key, expected_value, value))
+      pass
+    pass
+
   def test_change(self):
     conf = self.prepare()
     steps = []
@@ -119,8 +132,7 @@ class Test_ModConfigUI(TestCase):
       for section, item, value, next_value in items:
         self.activate_section(section)
 
-        conf_value = self.get_conf('%s.%s' % (section['name'], item['key']))
-        self.assertEqual(conf_value, value)
+        self.check_conf('%s.%s' % (section['name'], item['key']), value)
 
         input_e = self.get_input(section, item)
 
@@ -135,7 +147,7 @@ class Test_ModConfigUI(TestCase):
 
         if isinstance(value, bool):
           if next_value is not None and value != next_value:
-            self.click(input_e)
+            self.click(input_e, False)
             pass
           pass
         elif input_e.tag_name.lower() == 'select':
@@ -154,7 +166,7 @@ class Test_ModConfigUI(TestCase):
   def check_reset_default(self, section, item, conf_key, default, current, input_e):
     if isinstance(default, bool):
       if current == default:
-        self.click(input_e)
+        self.click(input_e, False)
         pass
       pass
     elif input_e.tag_name.lower() == 'select':
@@ -170,9 +182,9 @@ class Test_ModConfigUI(TestCase):
       input_e.send_keys(default + 'hoge')
       pass
 
-    self.assertNotEqual(self.get_conf(conf_key), default)
+    self.check_conf(conf_key, default, True)
     self.click(self.get_input(section, item, '-default'))
-    self.assertEqual(self.get_conf(conf_key), default)
+    self.check_conf(conf_key, default)
     pass
 
   def test_reset_default(self):
@@ -272,13 +284,12 @@ class Test_ModConfigUI(TestCase):
   def test_modal(self):
     self.prepare()
 
-    sw, sh = self.screen_size()
-    x, y, w, h = self.geom(self.q('#pp-config-content-wrapper'))
-    h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config'))[1]) + 5
-    print(self.screen_size(), self.geom(self.q('#pp-config')), self.geom(self.q('#pp-config-content-wrapper')))
-    self.check_modal_position_size(self.q('#pp-config'), None, (27, 27), (806, 806), (h, h))
+    # sw, sh = self.screen_size()
+    # x, y, w, h = self.geom(self.q('#pp-config-content-wrapper'))
+    # h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config'))[1]) + 5
+    # self.check_modal_position_size(self.q('#pp-config'), None, (27, 27), (806, 806), (h, h))
 
-    self.click(self.q('.notification-container .popboard ._icon'))
+    self.click(self.q('.notifications .popboard'))
     self.assertFalse(self.q('#pp-config').is_displayed())
     self.assertTrue(self.q('#notification-popboard').is_displayed())
 
