@@ -6176,7 +6176,7 @@ border:1px solid #becad8;border-radius:2px;margin:0.2em 0px;padding:0.1em 0.3em}
 #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}\
 #pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}\
 #pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}\
-#pp-config-content-wrapper{padding:0.4em}\
+#pp-config-content-wrapper{padding:0.4em;overflow-x:visible;overflow-y:auto}\
 .pp-config-content{display:none}\
 .pp-config-content.pp-active{display:block}\
 .pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}\
