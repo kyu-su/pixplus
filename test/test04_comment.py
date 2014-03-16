@@ -40,6 +40,48 @@ class Test_Comment(TestCase):
     self.assertFalse(self.qa('.delete-comment'))
     pass
 
+  def test_default_tab(self):
+    self.open_test_user()
+    self.set_conf('popup.show_comment_form', True)
+    self.open_popup()
+    self.start_comment()
+
+    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
+    self.popup_reload()
+    self.start_comment()
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment._current'))
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker:not(._current)'))
+    self.assertTrue(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
+    self.assertFalse(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+
+    self.click(self.q(self.form_selector + ' > .tabs .tab-sticker'))
+    self.popup_reload()
+    self.start_comment()
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment:not(._current)'))
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker._current'))
+    self.assertFalse(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
+    self.assertTrue(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+
+    self.reload()
+
+    self.open_popup()
+    self.start_comment()
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment:not(._current)'))
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker._current'))
+    self.assertFalse(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
+    self.assertTrue(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+
+    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
+    self.reload()
+
+    self.open_popup()
+    self.start_comment()
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment._current'))
+    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker:not(._current)'))
+    self.assertTrue(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
+    self.assertFalse(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+    pass
+
   def test_write(self):
     self.delete_all()
 
@@ -48,6 +90,7 @@ class Test_Comment(TestCase):
     self.open_popup()
     self.start_comment()
 
+    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
     comment = self.q(self.form_selector + ' textarea[name="comment"]')
 
     message = '__hoge__c_%d' % time.time()
@@ -77,15 +120,15 @@ class Test_Comment(TestCase):
     return '\
 //*[@id="pp-popup-comment"]//div[\
   contains(concat(" ", @class, " "), " _comment-item ")\
-  and .//*[contains(concat(" ", @class, " "), " stamp-container ")]\
+  and .//*[contains(concat(" ", @class, " "), " sticker-container ")]\
          //img[contains(@src, "/stamps/%d_s.jpg")]]' % num
 
   def write_stamp(self, cat, num):
     xpath = self.make_stamp_xpath(num)
     self.assertFalse(self.xa(xpath))
-    self.click(self.q(self.form_selector + ' > .tabs .tab-stamp'))
-    self.click(self.q(self.form_selector + ' .stamp-type-list .ui-tab[data-target="stamp-%d"]' % cat))
-    self.click(self.q(self.form_selector + ' .stamp-list.stamp-%d .stamp[data-id="%d"]' % (cat, num)))
+    self.click(self.q(self.form_selector + ' > .tabs .tab-sticker'))
+    self.click(self.q(self.form_selector + ' .sticker-type-list .ui-tab[data-target="sticker-%d"]' % cat))
+    self.click(self.q(self.form_selector + ' .sticker-list.sticker-%d .sticker[data-id="%d"]' % (cat, num)))
     self.wait_until(lambda driver: self.xa(xpath))
     pass
 
