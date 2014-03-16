@@ -26,7 +26,7 @@ class Test_FloatTagList(TestCase):
     if on:
       self.assertTrue(self.has_class(element, 'pp-float'))
       offset = 0
-      margin_top += 60
+      # margin_top += 60
     else:
       margin_top = 0
       pass
