@@ -3226,21 +3226,7 @@
         dom.image_layout.href = illust.image_url_big;
       }
 
-      dom.comment.innerHTML = illust.comment;
-      _.qa('img[data-src]', dom.comment).forEach(function(img) {
-        img.src = img.dataset.src;
-      });
-      _.onclick(_.q('.more-comment', dom.comment), function(ev) {
-        w.pixiv.comment.more(ev);
-      });
-      _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
-        form.setAttribute('action', '/member_illust.php');
-      });
-      try {
-        w.pixiv.ui.tab.restore(dom.comment.querySelector('form'));
-      } catch(ex) {
-        _.error(ex);
-      }
+      _.popup.comment.setup(illust.comment);
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -3841,6 +3827,35 @@
 
     toggle_form: function() {
       _.popup.dom.root.classList.toggle('pp-show-comment-form');
+    },
+
+    setup: function(html) {
+      var dom = _.popup.dom;
+
+      dom.comment.innerHTML = html;
+      _.qa('img[data-src]', dom.comment).forEach(function(img) {
+        img.src = img.dataset.src;
+      });
+
+      _.onclick(_.q('.more-comment', dom.comment), function(ev) {
+        w.pixiv.comment.more(ev);
+      });
+
+      _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
+        form.setAttribute('action', '/member_illust.php');
+      });
+
+      try {
+        w.pixiv.ui.tab.restore(dom.comment.querySelector('form'));
+      } catch(ex) {
+        _.error(ex);
+      }
+
+      try {
+        w.pixiv.emoji.setup();
+      } catch(ex) {
+        _.error(ex);
+      }
     },
 
     start: function() {
