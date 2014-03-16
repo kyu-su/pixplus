@@ -16,7 +16,10 @@ class Test_MarkVisited(TestCase):
     pass
 
   def check_link_color(self, color):
-    link = self.js('return pixplus.illust.list[0].link')
+    link = self.js('''
+      window.scrollTo(0, 0);
+      return pixplus.illust.list[0].link
+    ''')
     x, y, w, h = self.geom(link)
     self.assertTrue(w > 140)
     self.assertTrue(h > 150)
