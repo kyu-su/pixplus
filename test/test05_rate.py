@@ -16,7 +16,7 @@ class Test_Rate(TestCase):
     score = (int(time.time()) % 9) + 1
     width = score * 26
 
-    self.move_to(rating, width - 10, 10)
+    self.move_to(rating, (width - 10, 10))
     # click() moves cursor to center on Firefox22
     self.ac().click_and_hold().release().perform()
 
