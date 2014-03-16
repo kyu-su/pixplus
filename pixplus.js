@@ -3237,7 +3237,7 @@
         form.setAttribute('action', '/member_illust.php');
       });
       try {
-        w.pixiv.ui.tab.restore(pixplus.popup.dom.comment.querySelector('form'));
+        w.pixiv.ui.tab.restore(dom.comment.querySelector('form'));
       } catch(ex) {
         _.error(ex);
       }
