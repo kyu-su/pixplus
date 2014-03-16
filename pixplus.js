@@ -931,7 +931,9 @@
 
       try {
         w.pixiv.ui.modal.close();
-      } catch(ex) { }
+      } catch(ex) {
+        _.error(ex);
+      }
 
       _.debug('Begin modal');
 
@@ -2296,7 +2298,9 @@
 
       try {
         illust.author_is_me = illust.author_id == w.pixiv.user.id;
-      } catch(ex) { }
+      } catch(ex) {
+        _.error(ex);
+      }
 
       illust.url_author_staccfeed = null;
       if (staccfeed_link) {
@@ -3232,6 +3236,11 @@
       _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
         form.setAttribute('action', '/member_illust.php');
       });
+      try {
+        w.pixiv.ui.tab.restore(pixplus.popup.dom.comment.querySelector('form'));
+      } catch(ex) {
+        _.error(ex);
+      }
 
       try {
         w.pixiv.context.illustId = illust.id;
@@ -3430,7 +3439,9 @@
         try {
           w.pixiv.rating.rate = score;
           w.pixiv.rating.apply();
-        } catch(ex) { }
+        } catch(ex) {
+          _.error(ex);
+        }
       }
     },
 
@@ -4674,7 +4685,9 @@
       this.dom.input_tag.value = tags_value.join(' ');
       try {
         w.pixiv.tag.update();
-      } catch(ex) {}
+      } catch(ex) {
+        _.error(ex);
+      }
     },
 
     setup_tag_order: function() {
@@ -5481,7 +5494,9 @@
         } else if ((re = /^#pp-manga-page-(\d+)$/.exec(w.location.hash))) {
           try {
             w.pixiv.mangaViewer.listView.move(g.parseInt(re[1], 10));
-          } catch(ex) { }
+          } catch(ex) {
+            _.error(ex);
+          }
         }
       },
 
@@ -5562,7 +5577,9 @@
             w.bookmarkToggle('bookmark_list', 'cloud');
             w.bookmarkToggle('bookmark_list', 'flat');
           }
-        } catch(ex) { }
+        } catch(ex) {
+          _.error(ex);
+        }
 
       }
     },
@@ -5852,7 +5869,9 @@
     if (_.conf.general.disable_effect) {
       try {
         w.jQuery.fx.off = true;
-      } catch(ex) { }
+      } catch(ex) {
+        _.error(ex);
+      }
     }
 
     try {
