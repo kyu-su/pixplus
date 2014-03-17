@@ -75,9 +75,7 @@ class TestCase(unittest.TestCase):
       self.wait_illust_list()
       self.js('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
       pass
-
-    self.popup_wait_load()
-    return popup
+    return self.popup_wait_load()
 
   def close_popup(self):
     self.js('pixplus.popup.hide()')
@@ -88,7 +86,7 @@ class TestCase(unittest.TestCase):
     self.assertTrue(popup.is_displayed())
     self.wait_until(lambda d: not self.has_class(popup, 'pp-loading'))
     self.assertFalse(self.has_class(popup, 'pp-error'))
-    pass
+    return popup
 
   def popup_wait_big_image(self):
     self.wait_until(lambda d: self.js('''
