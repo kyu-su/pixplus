@@ -22,9 +22,7 @@ class TestCase(unittest.TestCase):
     return filter(lambda n: n.startswith('test_'), dir(cls))
 
   def __getattr__(self, name):
-    if hasattr(self.b, name):
-      return getattr(self.b, name)
-    raise AttributeError()
+    return getattr(self.b, name)
 
   def setUp(self):
     if self.args.repeatable and not self.repeatable:
@@ -78,8 +76,6 @@ class TestCase(unittest.TestCase):
       self.js('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
       pass
 
-    popup = self.q('#pp-popup')
-    self.assertTrue(popup.is_displayed())
     self.popup_wait_load()
     return popup
 
@@ -89,6 +85,7 @@ class TestCase(unittest.TestCase):
 
   def popup_wait_load(self):
     popup = self.q('#pp-popup')
+    self.assertTrue(popup.is_displayed())
     self.wait_until(lambda d: not self.has_class(popup, 'pp-loading'))
     self.assertFalse(self.has_class(popup, 'pp-error'))
     pass
