@@ -3256,12 +3256,6 @@
         _.error(ex);
       }
 
-      try {
-        w.pixiv.comment.setup();
-      } catch(ex) {
-        _.error(ex);
-      }
-
       this.status_complete();
       this.set_images([illust.image_big || illust.image_medium]);
     },
@@ -3784,6 +3778,7 @@
 
   _.popup.comment = {
     active: false,
+    first_setup_done: false,
 
     clear: function() {
       var show_form = _.conf.popup.show_comment_form;
@@ -3852,9 +3847,20 @@
       }
 
       try {
+        w.colon.d.off('click.pixivEmoji');
         w.pixiv.emoji.setup();
       } catch(ex) {
         _.error(ex);
+      }
+
+      if (!this.first_setup_done) {
+        try {
+          w.pixiv.comment.setup();
+        } catch(ex) {
+          _.error(ex);
+        }
+
+        this.first_setup_done = true;
       }
     },
 
