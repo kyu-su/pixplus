@@ -6011,6 +6011,7 @@ padding:0.2em 0.4em;text-align:center;font-weight:bold}\
 #pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}\
 #pp-popup-button-resize-mode{cursor:pointer}\
 #pp-popup-status{color:#888}\
+#pp-popup.pp-error #pp-popup-status{color:#a00;font-weight:bold}\
 #pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;\
 background-color:#fff;line-height:1.1em;z-index:20001}\
 #pp-popup-header:not(.pp-show):not(:hover){opacity:0 !important}\
