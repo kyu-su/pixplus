@@ -93,7 +93,8 @@ class Test_IllustData(TestCase):
           u'\u306a\u306b\u3053\u308c\u304b\u308f\u3044\u3044',
           u'\u30aa\u30c1\u306e\u30b7\u30e5\u30fc\u30eb\u3055\u306b\u5b8c\u6557',
           u'\u30b9\u30e9\u30a4\u30c9\u5f62\u5f0f\u5fa9\u6d3b\u5e0c\u671b',
-          u'\u30c1\u30e7\u30d3', '\u53ef\u611b\u3044\u30fb\u30fb\u30fb',
+          u'\u30c1\u30e7\u30d3',
+          u'\u53ef\u611b\u3044\u30fb\u30fb\u30fb',
           u'\u62cd\u624b\u30fb\u9801\u9001\u308a\u306f\u4e0b\u90e8\u304c\u52dd\u624b\u304c\u826f\u3044\u3002',
           u'\u898b\u958b\u304d\u306e\u305f\u3081\u306b\u6a2a\u5e451000\uff5e1200\u304f\u3089\u3044\u306b\u3057\u3066\u307b\u3057\u3044',
           u'\u898b\u958b\u304d\u306f\u3059\u3054\u304f\u4fbf\u5229\u3060\u3068\u601d\u3046'
@@ -162,14 +163,14 @@ class Test_IllustData(TestCase):
      }
     ]
 
-  def check_object_equal(self, o1, o2):
+  def check_object_equal(self, o1, o2, msg, path = []):
     if isinstance(o1, dict):
       for key, value in o1.items():
-        self.check_object_equal(value, o2[key])
+        self.check_object_equal(value, o2[key], msg, path + [key])
         pass
       pass
     else:
-      self.assertEqual(o1, o2)
+      self.assertEqual(o1, o2, msg % {'path': '/'.join(path), 'obj1': '%s' % o1, 'obj2': '%s' % o2})
       pass
     pass
 
@@ -191,7 +192,7 @@ class Test_IllustData(TestCase):
         self.open_popup(data['id'])
         illust_data = self.popup_get_illust_data()
         illust_data['tags'] = set(illust_data['tags'])
-        self.check_object_equal(data, illust_data)
+        self.check_object_equal(data, illust_data, 'Illust data mismatch! %d[%%(path)s] =>\n  %%(obj1)s\n    vs\n  %%(obj2)s' % data['id'])
         pass
       pass
     pass
