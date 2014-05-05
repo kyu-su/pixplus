@@ -20,7 +20,7 @@ class Test_MarkVisited(TestCase):
       window.scrollTo(0, 0);
       return pixplus.illust.list[0].link
     ''')
-    x, y, w, h = self.geom(link)
+    x, y, w, h = tuple(map(int, self.geom(link)))
     self.assertTrue(w > 140)
     self.assertTrue(h > 150)
 
