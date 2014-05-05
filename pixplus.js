@@ -1007,11 +1007,31 @@
       if (!this.conn_resize) {
         this.conn_resize = _.listen(w, 'resize', this.centerize.bind(this), {async: true});
       }
+
+      if (!this.conn_pixiv_modal_open) {
+        var on_modal_open = function() {
+          that.end();
+        };
+        try {
+          w.colon.d.on('uiModalOpen', on_modal_open);
+        } catch(ex) {
+          _.error(ex);
+        }
+        this.conn_pixiv_modal_open = {
+          disconnect: function() {
+            try {
+              w.colon.d.off('uiModalOpen', on_modal_open);
+            } catch(ex) {
+              _.error(ex);
+            }
+          }
+        };
+      }
     },
 
     uninit_events: function() {
       var that = this;
-      ['key', 'click', 'resize'].forEach(function(name) {
+      ['key', 'click', 'resize', 'pixiv_modal_open'].forEach(function(name) {
         if (that['conn_' + name]) {
           that['conn_' + name].disconnect();
           that['conn_' + name] = null;
