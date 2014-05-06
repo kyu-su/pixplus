@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.10.0 - 2014/05/06]()
+
+### 変更点
+
+* [追加] 「漫画作品のページでポップアップを開く」オプションを追加。
+* [修正] キーイベントの処理を修正。
+* [修正] 「スタンプのコメントを非表示にする」オプションが動作しなくなっていた不具合を修正。
+* [修正] コメントの絵文字をサポート。
+
+### Changes
+
+* [Add] Add "Open popup in manga page" option.
+* [Fix] Fix key event handling.
+* [Fix] Fix "Hide stamp comments" option.
+* [Fix] Support emoji comment.
+
 ## [1.9.0 - 2014/02/21](http://crckyl.hatenablog.com/entry/2014/02/21/130255)
 
 ### 変更点

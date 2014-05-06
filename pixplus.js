@@ -6773,8 +6773,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
+
     {
-      "date": "2014/xx/xx",
+      "date": "2014/05/06",
       "version": "1.10.0",
       "releasenote": "",
       "changes_i18n": {
@@ -6792,8 +6794,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         ]
       }
     },
-
-    // __CHANGELOG_BEGIN__
 
     {
       "date": "2014/02/21",
