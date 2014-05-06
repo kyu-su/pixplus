@@ -13,6 +13,9 @@ def atom_changes(changes):
   out.append('</ul>')
   return out
 
+def make_atom_time(version):
+  return '%sT00:00:00.000Z' % version['date'].replace('/', '-')
+
 def atom(changelog):
   out = []
 
@@ -20,17 +23,17 @@ def atom(changelog):
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">pixplus</title>
-  <id>http://crckyl.ath.cx/pixplus/feed.atom</id>
-  <updated>2013-06-26T00:00:00Z</updated>
-  <link href="http://crckyl.ath.cx/pixplus" />
-  <link href="http://crckyl.ath.cx/pixplus/feed.atom" rel="self" />
+  <id>http://crckyl.ath.cx/pixplus/release.atom</id>
+  <updated>%(time)s</updated>
+  <link href="http://crckyl.ath.cx/pixplus/" />
+  <link href="http://crckyl.ath.cx/pixplus/release.atom" rel="self" />
   <author>
     <name>wowo</name>
     <uri>http://crckyl.ath.cx/</uri>
     <email>crckyl@gmail.com</email>
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
-'''.strip('\n'))
+'''.strip('\n') % {'time': make_atom_time(changelog[0])})
 
   for version in changelog:
     changes = []
@@ -42,10 +45,10 @@ def atom(changelog):
       pass
 
     entry = '''
-  <entry xml:base="http://crckyl.ath.cx/pixplus/feed.atom">
+  <entry>
     <title type="text">pixplus %(ver)s</title>
     <id>http://crckyl.ath.cx/pixplus/archive/%(ver)s</id>
-    <updated>%(date)sT00:00:00+09:00</updated>
+    <updated>%(time)s</updated>
     <link href="http://crckyl.ath.cx/pixplus/archive/%(ver)s" />
     <author>
       <name>wowo</name>
@@ -61,7 +64,7 @@ def atom(changelog):
 
     entry = entry.strip('\n') % {
       'ver': version['version'],
-      'date': version['date'],
+      'time': make_atom_time(version),
       'changes': '\n      '.join(changes)
       }
 
