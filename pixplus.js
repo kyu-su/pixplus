@@ -6778,7 +6778,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     {
       "date": "2014/05/06",
       "version": "1.10.0",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/05/06/203423",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Open popup in manga page\" option.",
