@@ -2987,6 +2987,8 @@
         return;
       }
 
+      _.log('popup: adjust');
+
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
 
@@ -5979,23 +5981,27 @@
 
     try {
       var displayFrame = w.ZipImagePlayer.prototype._displayFrame;
+
       w.ZipImagePlayer.prototype._displayFrame = function() {
-        var ret, canvas, width, height;
+        var ret, canvas;
+
 
         if (_.popup.running && _.popup.illust.ugoira_canvas) {
           canvas = _.popup.illust.ugoira_canvas;
-          width = canvas.offsetWidth;
-          height = canvas.offsetHeight;
         }
 
         ret = displayFrame.apply(this, arguments);
 
-        if (canvas && (canvas.offsetWidth !== width || canvas.offsetHeight !== height)) {
+        if (canvas && (canvas.width !== canvas.naturalWidth ||
+                       canvas.height !== canvas.naturalHeight)) {
+          canvas.naturalWidth = canvas.width;
+          canvas.naturalHeight = canvas.height;
           _.popup.adjust();
         }
 
         return ret;
       };
+
     } catch(ex) {
       _.log('ZipImagePlayer error - ' + g.String(ex));
     }
