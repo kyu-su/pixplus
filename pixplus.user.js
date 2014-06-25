@@ -23,10 +23,10 @@
   }
 
   var greasemonkey =
-        /* __GREASEMONKEY_REMOVE__
-         true;
-         * __GREASEMONKEY_REMOVE__ */
-      false; // __GREASEMONKEY_REMOVE__
+        /* __OPERA_USERJS_REMOVE__
+         false;
+         * __OPERA_USERJS_REMOVE__ */
+      true; // __OPERA_USERJS_REMOVE__
 
   var inject = function(data) {
     var s = w.document.createElement('script'), d = w.document;
@@ -1509,9 +1509,9 @@
 
       about: function(root, section, lang) {
         var urls = [
-          'http://crckyl.ath.cx/pixplus/',
+          'http://ccl4.info/pixplus/',
           'https://github.com/crckyl/pixplus',
-          'http://crckyl.ath.cx/cgit/pixplus.git/',
+          'http://ccl4.info/cgit/pixplus.git/',
           'http://crckyl.hatenablog.com/',
           'http://twitter.com/crckyl'
         ];
@@ -2241,22 +2241,32 @@
         return false;
       }
 
-      var img = _.fastxml.q(root, '.works_display a img');
-      if (img) {
-        var p = this.parse_image_url(img.attrs.src, '_m');
-        if (p) {
-          if (p.id !== illust.id) {
-            illust.error = 'Invalid medium image url';
-            return false;
-          }
-          _.extend(illust, p);
-        } else if (!illust.image_url_base) {
-          illust.error = 'Failed to parse medium image url';
+      if ((re = /pixiv\.context\.ugokuIllustData *= *(\{[^;]*?\});/.exec(html))) {
+        try {
+          illust.ugoira = g.JSON.parse(re[1]);
+        } catch(ex) {
+          illust.error = g.String(ex);
           return false;
         }
-      } else if (!illust.image_url_base) {
-        illust.error = 'Medium image not found';
-        return false;
+
+      } else {
+        var img = _.fastxml.q(root, '.works_display a img');
+        if (img) {
+          var p = this.parse_image_url(img.attrs.src, '_m');
+          if (p) {
+            if (p.id !== illust.id) {
+              illust.error = 'Invalid medium image url';
+              return false;
+            }
+            _.extend(illust, p);
+          } else if (!illust.image_url_base) {
+            illust.error = 'Failed to parse medium image url';
+            return false;
+          }
+        } else if (!illust.image_url_base) {
+          illust.error = 'Medium image not found';
+          return false;
+        }
       }
 
       // error check end
@@ -2467,6 +2477,29 @@
         }
 
         statuses.html = 2;
+
+        if (illust.ugoira) {
+          illust.loaded = true;
+          illust.ugoira_canvas = _.e('canvas');
+          try {
+            illust.ugoira_player = new w.ZipImagePlayer({
+              canvas: illust.ugoira_canvas,
+              source: illust.ugoira.src,
+              metadata: illust.ugoira,
+              chunkSize: 3e5,
+              loop: true,
+              autoStart: true,
+              debug: false,
+              autosize: true
+            });
+          } catch(ex) {
+            send_error(g.String(ex));
+            return;
+          }
+          _.popup.onload(illust);
+          return;
+        }
+
         if (statuses.medium === 0) {
           start_images();
         } else {
@@ -3277,7 +3310,7 @@
       }
 
       this.status_complete();
-      this.set_images([illust.image_big || illust.image_medium]);
+      this.set_images([illust.ugoira_canvas || illust.image_big || illust.image_medium]);
     },
 
     onerror: function(illust) {
@@ -5942,6 +5975,29 @@
       };
     } catch(ex) {
       _.log('rating error - ' + g.String(ex));
+    }
+
+    try {
+      var displayFrame = w.ZipImagePlayer.prototype._displayFrame;
+      w.ZipImagePlayer.prototype._displayFrame = function() {
+        var ret, canvas, width, height;
+
+        if (_.popup.running && _.popup.illust.ugoira_canvas) {
+          canvas = _.popup.illust.ugoira_canvas;
+          width = canvas.offsetWidth;
+          height = canvas.offsetHeight;
+        }
+
+        ret = displayFrame.apply(this, arguments);
+
+        if (canvas && (canvas.offsetWidth !== width || canvas.offsetHeight !== height)) {
+          _.popup.adjust();
+        }
+
+        return ret;
+      };
+    } catch(ex) {
+      _.log('ZipImagePlayer error - ' + g.String(ex));
     }
   };
 
