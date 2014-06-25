@@ -12,7 +12,7 @@ PYTHON                          = python
 LICENSE                         = LICENSE.TXT
 ICON_SVG                        = pixplus.svg
 ICON_SMALL_SVG                  = pixplus_small.svg
-SRC_USERJS                      = pixplus.js
+SRC_USERJS                      = pixplus.user.js
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
@@ -20,7 +20,7 @@ BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1
 
 VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
 DESCRIPTION                     = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
-WEBSITE                         = http://crckyl.ath.cx/pixplus/
+WEBSITE                         = http://ccl4.info/pixplus/
 WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
 BUILD_DIR                       = $(CURDIR)/temp
@@ -140,7 +140,7 @@ clean: clean-changelog
 $(CHANGELOG_JSON): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@echo '[' > $@
-	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) >> $@
+	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
 	@echo ']' >> $@
 
 $(CHANGELOG_MD): $(CHANGELOG_JSON)
@@ -163,14 +163,14 @@ clean-changelog:
 $(OPERA_USERJS): $(SRC_USERJS)
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cp $< $@
+	@sed -e '/__OPERA_USERJS_REMOVE__/d' < $< > $@
 
 # ================ GreaseMonkey ================
 
 $(GREASEMONKEY_JS): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@sed -e '/__GREASEMONKEY_REMOVE__/d' < $< > $@
+	@cp $< $@
 	@echo
 
 # ================ Extension common files ================

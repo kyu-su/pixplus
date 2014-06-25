@@ -1,7 +1,7 @@
 pixplus version history
 =======================
 
-## [1.10.0 - 2014/05/06]()
+## [1.10.0 - 2014/05/06](http://crckyl.hatenablog.com/entry/2014/05/06/203423)
 
 ### 変更点
 
