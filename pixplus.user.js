@@ -3355,7 +3355,7 @@
 
       dom.rating.innerHTML = illust.rating + illust.question;
 
-      ['pixpedia', 'pixiv_comic'].forEach(function(name) {
+      ['pixpedia', 'pixiv_comic', 'booth'].forEach(function(name) {
         var f = _.conf.popup['remove_' + name];
         dom.taglist.classList[f ? 'add' : 'remove']('pp-no-' + name.replace('_', '-'));
       });
@@ -6271,6 +6271,7 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}\
 #pp-popup-taglist.pp-no-pixpedia a[href^="http://dic.pixiv.net/"]{display:none}\
 #pp-popup-taglist.pp-no-pixiv-comic a[href^="http://comic.pixiv.net/"]{display:none}\
+#pp-popup-taglist.pp-no-booth a[href^="https://booth.pm/"]{display:none}\
 #pp-popup-rating *{margin:0px;padding:0px}\
 #pp-popup-rating .score dl{display:inline}\
 #pp-popup-rating .score dt{display:inline;margin-right:0.2em}\
@@ -6525,6 +6526,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "caption_opacity", "value": 0.9},
       {"key": "remove_pixpedia", "value": false},
       {"key": "remove_pixiv_comic", "value": false},
+      {"key": "remove_booth", "value": false},
       {"key": "rate_key", "value": true},
       {"key": "font_size", "value": ""},
       {"key": "auto_manga", "value": 0},
@@ -6669,6 +6671,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           caption_opacity: 'Caption opacity',
           remove_pixpedia: 'Remove pixiv encyclopedia icon',
           remove_pixiv_comic: 'Remove pixiv comic icon',
+          remove_booth: 'Remove booth icon',
           rate_key: 'Enable rate keys',
           font_size: 'Font size(e.g. 10px)',
           auto_manga: {
@@ -6837,6 +6840,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           caption_opacity: '\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6',
           remove_pixpedia: 'pixiv\u767e\u79d1\u4e8b\u5178\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
           remove_pixiv_comic: 'pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
+          remove_booth: 'BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b',
           rate_key: '\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b',
           font_size: '\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(\u4f8b: 10px)',
           auto_manga: {
@@ -6967,9 +6971,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Add] Add setting to remove BOOTH icon.",
           "[Fix] Support for Ugoira."
         ],
         "ja": [
+          "[\u8ffd\u52a0] BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002",
           "[\u4fee\u6b63] \u3046\u3054\u30a4\u30e9\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
         ]
       }
