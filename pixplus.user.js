@@ -6205,7 +6205,7 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-author-image:hover~#pp-popup-author-status{display:none}\
 #pp-popup-tools:empty{display:none}\
 #pp-popup-tools{margin-left:0.6em}\
-#pp-popup-tools a{margin-right:0.6em}\
+#pp-popup-tools a+a{margin-left:0.6em}\
 #pp-popup-ugoira-info{margin-left:0.6em}\
 #pp-popup:not(.pp-ugoira) #pp-popup-ugoira-info{display:none}\
 #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}\
