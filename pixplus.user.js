@@ -6933,9 +6933,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] Support for UgokuIllust."
+          "[Fix] Support for Ugoira."
         ],
         "ja": [
+          "[\u4fee\u6b63] \u3046\u3054\u30a4\u30e9\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
         ]
       }
     },
