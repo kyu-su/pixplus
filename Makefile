@@ -111,7 +111,7 @@ ALL_TARGETS += $(SAFARIEXTZ)
 endif
 
 all: info $(ALL_TARGETS) changelog
-	@echo '$(notdir $(GREASEMONKEY_JS)):    yes'
+	@echo '$(notdir $(OPERA_USERJS)):         yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
 	@echo '$(notdir $(SAFARIEXTZ)): $(BUILD_SAFARIEXTZ)'
