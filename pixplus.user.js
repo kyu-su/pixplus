@@ -2253,7 +2253,7 @@
     },
 
     parse_medium_html: function(illust, html) {
-      var root = _.fastxml.parse(html), re;
+      var root = _.fastxml.parse(html), re, re2;
 
       var error = _.fastxml.q(root, '.one_column_body .errorArea h2');
       if (error) {
@@ -2261,19 +2261,45 @@
         return false;
       }
 
-      if ((re = /pixiv\.context\.ugokuIllustData *= *(\{[^;]*?\});/.exec(html))) {
-        try {
-          illust.ugoira = g.JSON.parse(re[1]);
-        } catch(ex) {
-          illust.error = g.String(ex);
+      re = /pixiv\.context\.ugokuIllustData *= *(\{[^;]*?\});/.exec(html);
+      re2 = /pixiv\.context\.ugokuIllustFullscreenData *= *(\{[^;]*?\});/.exec(html);
+
+      if (re || re2) {
+        var err;
+
+        if (re) {
+          try {
+            illust.ugoira_small = g.JSON.parse(re[1]);
+          } catch(ex) {
+            err = ex;
+            illust.ugoira_small = null;
+          }
+        }
+
+        if (re2) {
+          try {
+            illust.ugoira_big = g.JSON.parse(re2[1]);
+          } catch(ex) {
+            err = ex;
+            illust.ugoira_big = null;
+          }
+        }
+
+        if (!illust.ugoira_small && !illust.ugoira_big) {
+          illust.error = g.String(err);
           return false;
         }
 
-        illust.ugoira.duration = 0;
-        illust.ugoira.progress = [];
-        illust.ugoira.frames.forEach(function(frame) {
-          illust.ugoira.duration += frame.delay;
-          illust.ugoira.progress.push(illust.ugoira.duration);
+        [illust.ugoira_small, illust.ugoira_big].forEach(function(ugoira) {
+          if (!ugoira) {
+            return;
+          }
+          ugoira.duration = 0;
+          ugoira.progress = [];
+          ugoira.frames.forEach(function(frame) {
+            ugoira.duration += frame.delay;
+            ugoira.progress.push(ugoira.duration);
+          });
         });
 
       } else {
@@ -2505,8 +2531,16 @@
 
         statuses.html = 2;
 
-        if (illust.ugoira) {
+        if (illust.ugoira_big || illust.ugoira_small) {
+
           illust.loaded = true;
+
+          if (load_big_image && illust.ugoira_big) {
+            illust.ugoira = illust.ugoira_big;
+          } else {
+            illust.ugoira = illust.ugoira_small;
+          }
+
           if (!illust.ugoira_player) {
             illust.ugoira_canvas = _.e('canvas');
 
@@ -2811,7 +2845,7 @@
       this.ugoira_menu.add('dl-zip', 'Download zip', {
         type: 'link',
         get_url: function() {
-          return that.illust.ugoira.src;
+          return (that.illust.ugoira_big || that.illust.ugoira_small).src;
         }
       });
       this.ugoira_menu.add('gen-tc', 'Generate timecode', {
