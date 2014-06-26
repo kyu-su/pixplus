@@ -2487,23 +2487,49 @@
 
         if (illust.ugoira) {
           illust.loaded = true;
-          illust.ugoira_canvas = _.e('canvas');
-          try {
-            illust.ugoira_player = new w.ZipImagePlayer({
-              canvas: illust.ugoira_canvas,
-              source: illust.ugoira.src,
-              metadata: illust.ugoira,
-              chunkSize: 3e5,
-              loop: true,
-              autoStart: true,
-              debug: false,
-              autosize: true
-            });
-          } catch(ex) {
-            send_error(g.String(ex));
-            return;
+          if (!illust.ugoira_player) {
+            illust.ugoira_canvas = _.e('canvas');
+
+            try {
+
+              illust.ugoira_player = new w.ZipImagePlayer({
+                canvas: illust.ugoira_canvas,
+                source: illust.ugoira.src,
+                metadata: illust.ugoira,
+                chunkSize: 3e5,
+                loop: true,
+                autoStart: false,
+                debug: false,
+                autosize: true
+              });
+
+              illust.ugoira_player._displayFrame = function() {
+                var ret;
+
+                ret = w.ZipImagePlayer.prototype._displayFrame.apply(this, arguments);
+
+                if (_.popup.running && _.popup.illust === illust) {
+                  var canvas = illust.ugoira_canvas;
+
+                  if (canvas.width !== canvas.naturalWidth ||
+                      canvas.height !== canvas.naturalHeight) {
+                    canvas.naturalWidth = canvas.width;
+                    canvas.naturalHeight = canvas.height;
+                    _.popup.adjust();
+                  }
+
+                  _.popup.update_ugoira_info(this.getCurrentFrame());
+                }
+
+                return ret;
+              };
+
+            } catch(ex) {
+              send_error(g.String(ex));
+              return;
+            }
+            _.popup.onload(illust);
           }
-          _.popup.onload(illust);
           return;
         }
 
@@ -2548,6 +2574,11 @@
         return;
       }
       illust.loaded = false;
+      if (illust.ugoira_player) {
+        illust.ugoira_player.stop();
+        illust.ugoira_player = null;
+        illust.ugoira_canvas = null;
+      }
       _.xhr.remove_cache(illust.url_medium);
     },
 
@@ -3144,6 +3175,10 @@
 
       this.images = [];
 
+      if (this.illust && this.illust.ugoira_player) {
+        this.illust.ugoira_player.pause();
+      }
+
       this.clear_submod();
     },
 
@@ -3333,6 +3368,11 @@
         _.error(ex);
       }
 
+      if (illust.ugoira_canvas) {
+        illust.ugoira_player.rewind();
+        illust.ugoira_player.play();
+      }
+
       this.status_complete();
       this.set_images([illust.ugoira_canvas || illust.image_big || illust.image_medium]);
     },
@@ -3402,6 +3442,10 @@
       this.create();
       dom.root.style.fontSize = _.conf.popup.font_size;
       dom.header.style.backgroundColor = 'rgba(255,255,255,' + _.conf.popup.caption_opacity + ')';
+
+      if (this.illust && this.illust.ugoira_player) {
+        this.illust.ugoira_player.pause();
+      }
 
       this.illust = illust;
       this.running = true;
@@ -5999,36 +6043,6 @@
       };
     } catch(ex) {
       _.log('rating error - ' + g.String(ex));
-    }
-
-    try {
-      var displayFrame = w.ZipImagePlayer.prototype._displayFrame;
-
-      w.ZipImagePlayer.prototype._displayFrame = function() {
-        var ret, canvas;
-
-        if (_.popup.running && this.op.metadata === _.popup.illust.ugoira) {
-          canvas = _.popup.illust.ugoira_canvas;
-        }
-
-        ret = displayFrame.apply(this, arguments);
-
-        if (canvas) {
-          if (canvas.width !== canvas.naturalWidth ||
-              canvas.height !== canvas.naturalHeight) {
-            canvas.naturalWidth = canvas.width;
-            canvas.naturalHeight = canvas.height;
-            _.popup.adjust();
-          }
-
-          _.popup.update_ugoira_info(this.getCurrentFrame());
-        }
-
-        return ret;
-      };
-
-    } catch(ex) {
-      _.log('ZipImagePlayer error - ' + g.String(ex));
     }
   };
 
