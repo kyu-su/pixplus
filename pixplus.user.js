@@ -1045,6 +1045,7 @@
     this.dom.root = _.e('div', {cls: 'pp-popup-menu'});
     this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
     this.button = button;
+    this.onopen = [];
 
     var that = this;
     _.onclick(button, function() {
@@ -1060,33 +1061,48 @@
 
       var that = this;
 
-      var li = _.e('li', {cls: 'pp-popup-menu-item', 'data-name': name}, this.dom.list);
-      var label = _.e('label', null, li);
+      var li = _.e('li', {
+        cls: 'pp-popup-menu-item',
+        'data-name': name,
+        'data-type': options.type || 'normal'
+      }, this.dom.list);
 
-      if (options.type === 'checkbox') {
-        var check = _.e('input', {type: 'checkbox'}, label);
-
-        label.appendChild(d.createTextNode(text));
-        if (options.checked) {
-          check.checked = true;
+      if (options.type === 'link') {
+        var link = _.e('a', {text: text, href: options.url || ''}, li);
+        if (options.get_url) {
+          this.onopen.push(function() {
+            link.href = options.get_url();
+          });
         }
 
-        _.listen(check, 'change', function(ev) {
-          if (options.callback) {
-            options.callback(name, check.checked);
-          }
-          that.close();
-        });
-
       } else {
-        label.textContent = text;
+        var label = _.e('label', null, li);
 
-        _.onclick(li, function(ev) {
-          if (options.callback) {
-            options.callback(name);
+        if (options.type === 'checkbox') {
+          var check = _.e('input', {type: 'checkbox'}, label);
+
+          label.appendChild(d.createTextNode(text));
+          if (options.checked) {
+            check.checked = true;
           }
-          that.close();
-        });
+
+          _.listen(check, 'change', function(ev) {
+            if (options.callback) {
+              options.callback(name, check.checked);
+            }
+            that.close();
+          });
+
+        } else {
+          label.textContent = text;
+
+          _.onclick(li, function(ev) {
+            if (options.callback) {
+              options.callback(name);
+            }
+            that.close();
+          });
+        }
       }
     },
 
@@ -1118,6 +1134,10 @@
       if (this.dom.root.parentNode) {
         return;
       }
+
+      this.onopen.forEach(function(handler) {
+        handler.call(that);
+      });
 
       d.body.appendChild(this.dom.root);
 
@@ -2759,6 +2779,7 @@
       dom.size_tools        = _.e('div', {id: 'pp-popup-size-tools'}, dom.info);
       dom.size              = _.e('span', {id: 'pp-popup-size'}, dom.info);
       dom.tools             = _.e('span', {id: 'pp-popup-tools'}, dom.info);
+      dom.ugoira_menubtn    = _.e('a', {id: 'pp-popup-ugoira-menubtn', text: '[A]'}, dom.info);
       dom.ugoira_info       = _.e('span', {id: 'pp-popup-ugoira-info'}, dom.info);
       dom.author_links      = _.e('div', {id: 'pp-popup-author-links'}, dom.info);
       dom.author_profile    = _.e('a', {id: 'pp-popup-author-profile'}, dom.author_links);
@@ -2784,6 +2805,32 @@
       });
       this.comment_conf_menu.add_conf_item('popup', 'hide_stamp_comments', function(checked) {
         that.comment.update_hide_stamp_comments();
+      });
+
+      this.ugoira_menu = new _.PopupMenu(dom.ugoira_menubtn);
+      this.ugoira_menu.add('dl-zip', 'Download zip', {
+        type: 'link',
+        get_url: function() {
+          return that.illust.ugoira.src;
+        }
+      });
+      this.ugoira_menu.add('gen-tc', 'Generate timecode', {
+        callback: function() {
+          var data = '# timecode format v2\r\n' + that.illust.ugoira.progress.join('\r\n') + '\r\n';
+          w.open('data:text/plain,' + w.encodeURIComponent(data));
+        }
+      });
+      this.ugoira_menu.add('help', 'How to use?', {
+        callback: function() {
+          var text = [
+            '$ unzip downloaded_file.zip',
+            '$ ffmpeg -i "%06d.jpg" -vcodec mjpeg -qscale 0 test.avi',
+            '$ mkvmerge --timecodes 0:generated_timecode.txt test.avi -o test2.mkv',
+            '$ mplayer -loop 0 test2.mkv',
+            "$ echo 'yay!'",
+          ].join('\r\n');
+          w.open('data:text/plain,' + w.encodeURIComponent(text));
+        }
       });
 
       _.listen(dom.comment, 'DOMNodeInserted', this.comment.update.bind(this.comment), {async: true});
@@ -6117,7 +6164,8 @@ width:6px;height:14px;margin:-7px -4px}\
 .pp-popup-menu{position:fixed;background-color:#fff;border:1px solid #aaa;\
 border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}\
 .pp-popup-menu-item:hover{background-color:#ddd}\
-.pp-popup-menu-item>label{display:block;padding:0.3em 0.6em}\
+.pp-popup-menu-item>label,.pp-popup-menu-item>a{display:block;padding:0.3em 0.6em;\
+color:inherit;text-decoration:none}\
 .pp-popup-menu-item input[type="checkbox"]{border:1px solid #aaa;cursor:pointer}\
 .pp-dialog{position:absolute;z-index:10000;background-color:#fff;\
 border:1px solid #d6dee5;border-radius:5px}\
@@ -6206,6 +6254,8 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-tools:empty{display:none}\
 #pp-popup-tools{margin-left:0.6em}\
 #pp-popup-tools a+a{margin-left:0.6em}\
+#pp-popup-ugoira-menubtn{margin-left:0.6em;font-weight:bold;cursor:pointer}\
+#pp-popup:not(.pp-ugoira) #pp-popup-ugoira-menubtn{display:none}\
 #pp-popup-ugoira-info{margin-left:0.6em}\
 #pp-popup:not(.pp-ugoira) #pp-popup-ugoira-info{display:none}\
 #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}\
