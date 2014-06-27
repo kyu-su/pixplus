@@ -59,7 +59,7 @@ DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wil
 DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
 DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
 
-OEX_USERJS                      = $(BUILD_DIR_OEX)/includes/$(SRC_USERJS)
+OEX_USERJS                      = $(BUILD_DIR_OEX)/includes/$(notdir $(OPERA_USERJS))
 OEX_CONFIG_XML_IN               = $(CURDIR)/opera/config.xml.in
 OEX_CONFIG_XML                  = $(BUILD_DIR_OEX)/config.xml
 OEX_ICON_DIR                    = icons
@@ -69,7 +69,7 @@ OEX_DIST_FILES                  = $(DIST_FILES_ALL:%=$(BUILD_DIR_OEX)/%) \
 
 CRX_SIGN_KEY                    = $(CURDIR)/chrome/sign/$(notdir $(CRX)).pem
 CRX_MANIFEST_JSON_IN            = $(CURDIR)/chrome/manifest.json.in
-CRX_USERJS                      = $(BUILD_DIR_CRX)/$(SRC_USERJS)
+CRX_USERJS                      = $(BUILD_DIR_CRX)/$(notdir $(OPERA_USERJS))
 CRX_MANIFEST_JSON               = $(BUILD_DIR_CRX)/manifest.json
 CRX_ICON_DIR                    = icons
 CRX_ICON_FILES                  = $(ICON_SIZE:%=$(BUILD_DIR_CRX)/$(CRX_ICON_DIR)/%.png)
@@ -80,7 +80,7 @@ SAFARIEXTZ_CERTS                = $(sort $(wildcard $(CURDIR)/safari/sign/cert??
 SAFARIEXTZ_SIGN_KEY             = $(CURDIR)/safari/sign/key.pem
 SAFARIEXTZ_INFO_PLIST_IN        = $(CURDIR)/safari/Info.plist.in
 SAFARIEXTZ_SETTINGS_PLIST_IN    = $(CURDIR)/safari/Settings.plist.in
-SAFARIEXTZ_USERJS               = $(BUILD_DIR_SAFARIEXTZ)/$(SRC_USERJS)
+SAFARIEXTZ_USERJS               = $(BUILD_DIR_SAFARIEXTZ)/$(notdir $(OPERA_USERJS))
 SAFARIEXTZ_INFO_PLIST           = $(BUILD_DIR_SAFARIEXTZ)/Info.plist
 SAFARIEXTZ_SETTINGS_PLIST       = $(BUILD_DIR_SAFARIEXTZ)/Settings.plist
 SAFARIEXTZ_ICON_FILES           = $(ICON_SIZE:%=$(BUILD_DIR_SAFARIEXTZ)/Icon-%.png)
@@ -254,7 +254,7 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
 	@$(PYTHON) conf-parser.py opera < $(CONFIG_JSON) >> $@
 	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
-$(OEX_USERJS): $(SRC_USERJS)
+$(OEX_USERJS): $(OPERA_USERJS)
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
@@ -297,7 +297,7 @@ $(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(SRC_USERJS)
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
            < $< | tr -d '\r' >> $@
 
-$(CRX_USERJS): $(SRC_USERJS)
+$(CRX_USERJS): $(OPERA_USERJS)
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
@@ -343,7 +343,7 @@ $(SAFARIEXTZ_SETTINGS_PLIST): $(SAFARIEXTZ_SETTINGS_PLIST_IN) $(CONFIG_JSON)
 	@$(PYTHON) conf-parser.py safari < $(CONFIG_JSON) >> $@
 	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
-$(SAFARIEXTZ_USERJS): $(SRC_USERJS)
+$(SAFARIEXTZ_USERJS): $(OPERA_USERJS)
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
