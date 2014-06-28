@@ -23,13 +23,13 @@ def atom(changelog):
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">pixplus</title>
-  <id>http://crckyl.ath.cx/pixplus/release.atom</id>
+  <id>http://ccl4.info/pixplus/release.atom</id>
   <updated>%(time)s</updated>
-  <link href="http://crckyl.ath.cx/pixplus/" />
-  <link href="http://crckyl.ath.cx/pixplus/release.atom" rel="self" />
+  <link href="http://ccl4.info/pixplus/" />
+  <link href="http://ccl4.info/pixplus/release.atom" rel="self" />
   <author>
     <name>wowo</name>
-    <uri>http://crckyl.ath.cx/</uri>
+    <uri>http://ccl4.info/</uri>
     <email>crckyl@gmail.com</email>
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
@@ -47,12 +47,12 @@ def atom(changelog):
     entry = '''
   <entry>
     <title type="text">pixplus %(ver)s</title>
-    <id>http://crckyl.ath.cx/pixplus/archive/%(ver)s</id>
+    <id>http://ccl4.info/pixplus/archive/%(ver)s</id>
     <updated>%(time)s</updated>
-    <link href="http://crckyl.ath.cx/pixplus/archive/%(ver)s" />
+    <link href="http://ccl4.info/pixplus/archive/%(ver)s" />
     <author>
       <name>wowo</name>
-      <uri>http://crckyl.ath.cx/</uri>
+      <uri>http://ccl4.info/</uri>
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[

@@ -4,10 +4,10 @@
 // @version     1.11.0
 // @license     The MIT License
 // @description hogehoge
-// @icon        http://crckyl.ath.cx/pixplus/pixplus_48.png
-// @icon64      http://crckyl.ath.cx/pixplus/pixplus_64.png
+// @icon        http://ccl4.info/pixplus/pixplus_48.png
+// @icon64      http://ccl4.info/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
-// @updateURL   http://crckyl.ath.cx/pixplus/archive/latest/pixplus.user.js
+// @updateURL   http://ccl4.info/pixplus/archive/latest/pixplus.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
 // @run-at      document-start
