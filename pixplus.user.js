@@ -7099,10 +7099,12 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    // __CHANGELOG_BEGIN__
+
     {
-      "date": "2014/06/25",
+      "date": "2014/06/28",
       "version": "1.11.0",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0",
       "changes_i18n": {
         "en": [
           "[Add] Add setting to remove BOOTH icon.",
@@ -7114,8 +7116,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         ]
       }
     },
-
-    // __CHANGELOG_BEGIN__
 
     {
       "date": "2014/05/06",

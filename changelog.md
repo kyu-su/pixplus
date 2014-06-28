@@ -1,6 +1,18 @@
 pixplus version history
 =======================
 
+## [1.11.0 - 2014/06/28](http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0)
+
+### 変更点
+
+* [追加] BOOTHアイコンを除去する設定を追加。
+* [修正] うごイラをサポート。
+
+### Changes
+
+* [Add] Add setting to remove BOOTH icon.
+* [Fix] Support for Ugoira.
+
 ## [1.10.0 - 2014/05/06](http://crckyl.hatenablog.com/entry/2014/05/06/203423)
 
 ### 変更点

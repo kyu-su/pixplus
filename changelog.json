@@ -1,6 +1,22 @@
 [
 
     {
+      "date": "2014/06/28",
+      "version": "1.11.0",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0",
+      "changes_i18n": {
+        "en": [
+          "[Add] Add setting to remove BOOTH icon.",
+          "[Fix] Support for Ugoira."
+        ],
+        "ja": [
+          "[\u8ffd\u52a0] BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002",
+          "[\u4fee\u6b63] \u3046\u3054\u30a4\u30e9\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
+        ]
+      }
+    },
+
+    {
       "date": "2014/05/06",
       "version": "1.10.0",
       "releasenote": "http://crckyl.hatenablog.com/entry/2014/05/06/203423",
