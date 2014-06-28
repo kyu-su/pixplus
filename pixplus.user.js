@@ -2839,9 +2839,9 @@
         var svg = _.e('svg', {viewBox: '0 0 24 24'}, dom.ugoira_status);
         dom.ugoira_progress_svg = svg;
         dom.ugoira_progress_clip = _.e('path', null, _.e('clipPath', {id: 'pp-popup-ugoira-progress-clip'}, _.e('defs', null, svg)));
-        _.e('path', {d: 'M 23,12 A 11,11 0 1 1 1,12 11,11 0 1 1 23,12 z', 'clip-path': 'url(#pp-popup-ugoira-progress-clip)', style: 'fill:none;stroke:#000;stroke-width:2'}, svg);
+        _.e('path', {d: 'M 22,12 A 10,10 0 1 1 2,12 10,10 0 1 1 22,12 z', 'clip-path': 'url(#pp-popup-ugoira-progress-clip)', style: 'fill:none;stroke:#000;stroke-width:2'}, svg);
         _.e('path', {d: 'M 8,6 8,18 19,12 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-playing'}, svg);
-        _.e('path', {d: 'M 6,6 10,6 10,18 6,18 z M 14,6 18,6 18,18 14,18 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-paused'}, svg);
+        _.e('path', {d: 'M 7,7 10,7 10,17 7,18 z M 14,7 17,7 17,17 14,17 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-paused'}, svg);
       })();
 
       this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
