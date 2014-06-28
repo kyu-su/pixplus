@@ -1129,9 +1129,9 @@
     },
 
     open: function(button) {
-      var that = this;
+      var that = this, root = this.dom.root;
 
-      if (this.dom.root.parentNode) {
+      if (root.parentNode) {
         return;
       }
 
@@ -1139,26 +1139,31 @@
         handler.call(that);
       });
 
-      d.body.appendChild(this.dom.root);
+      d.body.appendChild(root);
 
       var options = {
         onclose: function() {
           if (that.button) {
-            that.dom.root.parentNode.removeChild(that.dom.root);
+            root.parentNode.removeChild(root);
             that.button.classList.remove('pp-active');
           }
         }
       };
 
       if (button) {
-        var rect = button.getBoundingClientRect();
-        this.dom.root.style.top = rect.bottom + 'px';
-        this.dom.root.style.left = rect.left + 'px';
+        var rect = button.getBoundingClientRect(), de = d.documentElement;
+        var x, y;
+
+        x = g.Math.max(g.Math.min(rect.left, de.clientWidth - root.offsetWidth), 0);
+        y = g.Math.max(g.Math.min(rect.bottom, de.clientHeight - root.offsetHeight), 0);
+
+        root.style.left = x + 'px';
+        root.style.top = y + 'px';
       } else {
         options.centerize = 'both';
       }
 
-      _.modal.begin(this.dom.root, options);
+      _.modal.begin(root, options);
 
       if (this.button) {
         this.button.classList.add('pp-active');
@@ -2832,7 +2837,7 @@
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
       (function() {
-        var svg = _.e('svg', {viewBox: '0 0 24 24', cls: '_ui-tooltip'}, dom.ugoira_status);
+        var svg = _.e('svg', {viewBox: '0 0 24 24'}, dom.ugoira_status);
         dom.ugoira_progress_svg = svg;
         dom.ugoira_progress_clip = _.e('path', null, _.e('clipPath', {id: 'pp-popup-ugoira-progress-clip'}, _.e('defs', null, svg)));
         _.e('path', {d: 'M 23,12 A 11,11 0 1 1 1,12 11,11 0 1 1 23,12 z', 'clip-path': 'url(#pp-popup-ugoira-progress-clip)', style: 'fill:none;stroke:#000;stroke-width:2'}, svg);
@@ -2851,19 +2856,19 @@
       });
 
       this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg);
-      this.ugoira_menu.add('dl-zip', 'Download zip', {
+      this.ugoira_menu.add('dl-zip', _.lng.ugoira_download_zip, {
         type: 'link',
         get_url: function() {
           return (that.illust.ugoira_big || that.illust.ugoira_small).src;
         }
       });
-      this.ugoira_menu.add('gen-tc', 'Generate timecode', {
+      this.ugoira_menu.add('gen-tc', _.lng.ugoira_generate_timecode, {
         callback: function() {
           var data = '# timecode format v2\r\n' + that.illust.ugoira.progress.join('\r\n') + '\r\n';
           w.open('data:text/plain,' + w.encodeURIComponent(data));
         }
       });
-      this.ugoira_menu.add('help', 'How to use?', {
+      this.ugoira_menu.add('help', _.lng.ugoira_how_to_use, {
         callback: function() {
           var text = [
             '$ unzip downloaded_file.zip',
@@ -6899,7 +6904,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       search_wlt: 'Min width <=',
       search_hlt: 'Min height <=',
       search_wgt: '<= Max width',
-      search_hgt: '<= Max height'
+      search_hgt: '<= Max height',
+
+      ugoira_download_zip: 'Download zip',
+      ugoira_generate_timecode: 'Generate timecode',
+      ugoira_how_to_use: 'How to use?'
     },
 
     ja: {
@@ -7071,7 +7080,11 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       search_wlt: '\u5e45\u306e\u6700\u5c0f\u5024 <=',
       search_hlt: '\u9ad8\u3055\u306e\u6700\u5c0f\u5024 <=',
       search_wgt: '<= \u5e45\u306e\u6700\u5927\u5024',
-      search_hgt: '<= \u9ad8\u3055\u306e\u6700\u5927\u5024'
+      search_hgt: '<= \u9ad8\u3055\u306e\u6700\u5927\u5024',
+
+      ugoira_download_zip: 'zip\u3092\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9',
+      ugoira_generate_timecode: '\u30bf\u30a4\u30e0\u30b3\u30fc\u30c9\u3092\u751f\u6210',
+      ugoira_how_to_use: '\u4f7f\u3044\u65b9'
     },
 
     setup: function() {
