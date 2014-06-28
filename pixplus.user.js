@@ -4618,6 +4618,57 @@
         return true;
       }
       return false;
+    },
+
+    ugoira_play_pause: function() {
+      var player = _.popup.illust.ugoira_player;
+
+      if (!player) {
+        return false;
+      }
+
+      if (player._paused) {
+        player.play();
+      } else {
+        player.pause();
+      }
+
+      return true;
+    },
+
+    ugoira_prev_frame: function() {
+      var player = _.popup.illust.ugoira_player;
+
+      if (!player) {
+        return false;
+      }
+
+      if (!player._paused) {
+        player.pause();
+      }
+
+      if (--player._frame < 0) {
+        player._frame = player.getFrameCount() - 1;
+      }
+      player._displayFrame();
+
+      return true;
+    },
+
+    ugoira_next_frame: function() {
+      var player = _.popup.illust.ugoira_player;
+
+      if (!player) {
+        return false;
+      }
+
+      if (!player._paused) {
+        player.pause();
+      }
+
+      player._nextFrame();
+
+      return true;
     }
   });
 
@@ -4642,6 +4693,10 @@
 
       'tag_edit_start',
       'tag_edit_end',
+
+      'ugoira_play_pause',
+      'ugoira_prev_frame',
+      'ugoira_next_frame',
 
       'illust_scroll_up',
       'illust_scroll_down',
@@ -6592,6 +6647,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "popup_rate08", "value": "Shift+3,Shift+#"},
       {"key": "popup_rate09", "value": "Shift+2,Shift+\""},
       {"key": "popup_rate10", "value": "Shift+1,Shift+!"},
+      {"key": "popup_ugoira_play_pause", "value": "m"},
+      {"key": "popup_ugoira_prev_frame", "value": "comma"},
+      {"key": "popup_ugoira_next_frame", "value": "."},
       {"key": "popup_bookmark_start", "value": "b", "subsection": "bookmark"},
       {"key": "popup_bookmark_submit", "value": "Enter,Space", "subsection": "bookmark"},
       {"key": "popup_bookmark_end", "value": "Escape", "subsection": "bookmark"},
@@ -6735,16 +6793,19 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           popup_reload: 'Reload',
           popup_open_bookmark_detail: 'Open bookmark information page',
           popup_open_manga_thumbnail: 'Open manga thumbnail page',
-          popup_rate01: 'Rate(1pt)',
-          popup_rate02: 'Rate(2pt)',
-          popup_rate03: 'Rate(3pt)',
-          popup_rate04: 'Rate(4pt)',
-          popup_rate05: 'Rate(5pt)',
-          popup_rate06: 'Rate(6pt)',
-          popup_rate07: 'Rate(7pt)',
-          popup_rate08: 'Rate(8pt)',
-          popup_rate09: 'Rate(9pt)',
-          popup_rate10: 'Rate(10pt)',
+          popup_rate01: 'Rate (1pt)',
+          popup_rate02: 'Rate (2pt)',
+          popup_rate03: 'Rate (3pt)',
+          popup_rate04: 'Rate (4pt)',
+          popup_rate05: 'Rate (5pt)',
+          popup_rate06: 'Rate (6pt)',
+          popup_rate07: 'Rate (7pt)',
+          popup_rate08: 'Rate (8pt)',
+          popup_rate09: 'Rate (9pt)',
+          popup_rate10: 'Rate (10pt)',
+          popup_ugoira_play_pause: '[Ugoira] Play/Pause',
+          popup_ugoira_prev_frame: '[Ugoira] Show previous frame',
+          popup_ugoira_next_frame: '[Ugoira] Show next frame',
           popup_bookmark_start: 'Start bookmark mode',
           popup_bookmark_submit: 'Send',
           popup_bookmark_end: 'End bookmark mode',
@@ -6904,16 +6965,19 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
           popup_reload: '\u30ea\u30ed\u30fc\u30c9',
           popup_open_bookmark_detail: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f',
           popup_open_manga_thumbnail: '\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f',
-          popup_rate01: '\u8a55\u4fa1\u3059\u308b(1\u70b9)',
-          popup_rate02: '\u8a55\u4fa1\u3059\u308b(2\u70b9)',
-          popup_rate03: '\u8a55\u4fa1\u3059\u308b(3\u70b9)',
-          popup_rate04: '\u8a55\u4fa1\u3059\u308b(4\u70b9)',
-          popup_rate05: '\u8a55\u4fa1\u3059\u308b(5\u70b9)',
-          popup_rate06: '\u8a55\u4fa1\u3059\u308b(6\u70b9)',
-          popup_rate07: '\u8a55\u4fa1\u3059\u308b(7\u70b9)',
-          popup_rate08: '\u8a55\u4fa1\u3059\u308b(8\u70b9)',
-          popup_rate09: '\u8a55\u4fa1\u3059\u308b(9\u70b9)',
-          popup_rate10: '\u8a55\u4fa1\u3059\u308b(10\u70b9)',
+          popup_rate01: '\u8a55\u4fa1\u3059\u308b (1\u70b9)',
+          popup_rate02: '\u8a55\u4fa1\u3059\u308b (2\u70b9)',
+          popup_rate03: '\u8a55\u4fa1\u3059\u308b (3\u70b9)',
+          popup_rate04: '\u8a55\u4fa1\u3059\u308b (4\u70b9)',
+          popup_rate05: '\u8a55\u4fa1\u3059\u308b (5\u70b9)',
+          popup_rate06: '\u8a55\u4fa1\u3059\u308b (6\u70b9)',
+          popup_rate07: '\u8a55\u4fa1\u3059\u308b (7\u70b9)',
+          popup_rate08: '\u8a55\u4fa1\u3059\u308b (8\u70b9)',
+          popup_rate09: '\u8a55\u4fa1\u3059\u308b (9\u70b9)',
+          popup_rate10: '\u8a55\u4fa1\u3059\u308b (10\u70b9)',
+          popup_ugoira_play_pause: '[\u3046\u3054\u30a4\u30e9] \u518d\u751f/\u4e00\u6642\u505c\u6b62',
+          popup_ugoira_prev_frame: '[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u623b\u3057',
+          popup_ugoira_next_frame: '[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u9001\u308a',
           popup_bookmark_start: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb',
           popup_bookmark_submit: '\u9001\u4fe1',
           popup_bookmark_end: '\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86',
