@@ -3260,7 +3260,7 @@
       path.push(x + ',' + y);
 
       this.dom.ugoira_progress_clip.setAttribute('d', 'M ' + path.join(' ') + ' z');
-      this.dom.ugoira_progress_svg.style.width = this.dom.ugoira_progress_svg.style.width =
+      this.dom.ugoira_progress_svg.style.width = this.dom.ugoira_progress_svg.style.height =
         this.dom.button_bookmark.offsetHeight + 'px';
     },
 
@@ -6331,7 +6331,7 @@ padding:0.2em 0.4em;text-align:center;font-weight:bold}\
 #pp-popup.pp-error #pp-popup-status{color:#a00;font-weight:bold}\
 #pp-popup-ugoira-status{opacity:0.4}\
 #pp-popup:not(.pp-ugoira) #pp-popup-ugoira-status{display:none}\
-#pp-popup-ugoira-status svg{display:inline-block;vertical-align:middle;cursor:pointer}\
+#pp-popup-ugoira-status svg{display:inline-block;vertical-align:middle;cursor:pointer;width:1em;height:1em}\
 #pp-popup:not(.pp-ugoira-playing) #pp-popup-ugoira-playing{display:none}\
 #pp-popup:not(.pp-ugoira-paused) #pp-popup-ugoira-paused{display:none}\
 #pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;\
