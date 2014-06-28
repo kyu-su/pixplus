@@ -2863,6 +2863,7 @@
       });
       this.ugoira_menu.add('gen-tc', _.lng.ugoira_generate_timecode, {
         callback: function() {
+          // http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge.html#mkvmerge.external_timecode_files
           var data = '# timecode format v2\r\n' + that.illust.ugoira.progress.join('\r\n') + '\r\n';
           w.open('data:text/plain,' + w.encodeURIComponent(data));
         }
