@@ -2,12 +2,11 @@
   "name": "pixplus",
   "version": "@VERSION@",
   "manifest_version": 2,
-
   "description": "@DESCRIPTION@",
+  "update_url": "http://ccl4.info/cgit/pixplus.git/plain/autoupdate/chrome.xml?h=@BRANCH@",
   "icons": {
     @ICONS@
   },
-
   "background": {
     "page": "index.html"
   },
@@ -20,6 +19,5 @@
       "run_at": "document_start",
       "all_frames": true
     }
-  ],
-  "update_url": "http://crckyl.ath.cx/pixplus/update.php?browser=chrome&version=@VERSION@"
+  ]
 }

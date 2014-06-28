@@ -19,6 +19,7 @@ BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || ec
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
 VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
+BRANCH                          = $(shell git name-rev --name-only HEAD)
 DESCRIPTION                     = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
 WEBSITE                         = http://ccl4.info/pixplus/
 WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
@@ -88,7 +89,10 @@ SAFARIEXTZ_DIST_FILES           = $(DIST_FILES_ALL:%=$(BUILD_DIR_SAFARIEXTZ)/%) 
                                   $(SAFARIEXTZ_USERJS) $(SAFARIEXTZ_INFO_PLIST) \
                                   $(SAFARIEXTZ_SETTINGS_PLIST) $(SAFARIEXTZ_ICON_FILES)
 
-ALL_TARGETS                     = $(OPERA_USERJS) $(GREASEMONKEY_JS)
+AUTOUPDATE_TARGETS              = chrome.xml safari.xml opera.xml
+AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/%)
+
+ALL_TARGETS                     = $(AUTOUPDATE_FILES) autoupdate/metadata.user.js $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
 ifeq ($(SVG_TO_PNG_OK),yes)
 ALL_TARGETS += $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT)
@@ -111,16 +115,18 @@ ALL_TARGETS += $(SAFARIEXTZ)
 endif
 
 all: info $(ALL_TARGETS) changelog
+
+info:
+	@echo 'Version: $(VERSION)'
+	@echo 'Branch: $(BRANCH)'
+	@echo 'Description: $(DESCRIPTION)'
+	@echo 'Website: $(WEBSITE)'
+	@echo 'SVG rasterizer: $(SVG_TO_PNG_CMD)'
+	@echo
 	@echo '$(notdir $(OPERA_USERJS)):         yes'
 	@echo '$(notdir $(OEX)):        $(BUILD_OEX)'
 	@echo '$(notdir $(CRX)):        $(BUILD_CRX)'
 	@echo '$(notdir $(SAFARIEXTZ)): $(BUILD_SAFARIEXTZ)'
-
-info:
-	@echo 'Version: $(VERSION)'
-	@echo 'Description: $(DESCRIPTION)'
-	@echo 'Website: $(WEBSITE)'
-	@echo 'SVG rasterizer: $(SVG_TO_PNG_CMD)'
 	@echo
 
 subst:
@@ -133,7 +139,7 @@ $(XAR):
 
 clean: clean-changelog
 	@echo 'Cleaning'
-	@rm -rf $(BUILD_DIR) $(DIST_DIR)
+	@rm -rf $(BUILD_DIR) $(DIST_DIR) $(AUTOUPDATE_FILES) autoupdate/metadata.user.js
 
 # ================ Changelog ================
 
@@ -146,12 +152,10 @@ $(CHANGELOG_JSON): $(SRC_USERJS)
 $(CHANGELOG_MD): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py markdown < $< > $@
-	@echo
 
 $(RELEASE_ATOM): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py atom < $< > $@
-	@echo
 
 changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
 
@@ -244,6 +248,7 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
              -e 's/@VERSION@/$(VERSION)/' \
              -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+             -e 's/@BRANCH@/$(BRANCH)/' \
            < $< > $@
 	@echo '  <license>' >> $@
 	@cat $(LICENSE) >> $@
@@ -286,6 +291,7 @@ $(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(SRC_USERJS)
 	@sed -e '/@ICONS@/,$$d' \
              -e 's/@VERSION@/$(VERSION)/' \
              -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
+             -e 's/@BRANCH@/$(BRANCH)/' \
            < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
            test $$first -eq 1 && first=0 || echo ',' >> $@; \
@@ -334,6 +340,7 @@ $(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN)
 	@mkdir -p $(dir $@)
 	@sed -e 's/@VERSION@/$(VERSION)/' \
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+             -e 's/@BRANCH@/$(BRANCH)/' \
            < $< > $@
 
 $(SAFARIEXTZ_SETTINGS_PLIST): $(SAFARIEXTZ_SETTINGS_PLIST_IN) $(CONFIG_JSON)
@@ -378,3 +385,15 @@ else
 endif
 	@chmod 644 $@
 	@echo
+
+# ================ AutoUpdate ================
+
+$(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS)
+	@echo 'Generate: $@'
+	@sed -e 's/@VERSION@/$(VERSION)/g' -e 's/@BRANCH@/$(BRANCH)/g' < $< > $@
+
+autoupdate/metadata.user.js: $(SRC_USERJS)
+	@echo 'Generate: $@'
+	@sed -e '/==\/UserScript==/,$$d' < $< > $@
+	@echo '// @downloadURL https://github.com/crckyl/pixplus/raw/v$(VERSION)/bin/pixplus.user.js' >> $@
+	@echo '// ==\/UserScript==' >> $@
