@@ -8,6 +8,8 @@ Image URL
     * Thumbnail (2013~)
 * `http://i2.pixiv.net/img114/group/176mw/username/99999999_m.jpg`
     * **/group/?id=11313**
+* `http://i2.pixiv.net/c/240x480/img-master/img/2014/06/26/01/23/45/123456789_master1200.jpg`
+    * **/ranking.php?mode=daily&content=ugoira**
 
 ## Description
 

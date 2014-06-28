@@ -7,6 +7,7 @@ class Test_PageCheck(TestCase):
     '/bookmark_new_illust.php',
     '/mypixiv_new_illust.php',
     '/ranking.php?mode=daily',
+    '/ranking.php?mode=daily&content=ugoira',
     '/ranking_area.php',
     '/stacc/p/activity',
     '/stacc/p/activity?mode=unify',
