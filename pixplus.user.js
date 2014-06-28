@@ -2075,8 +2075,7 @@
       }
 
       var re;
-      // http://i2.pixiv.net/c/240x480/img-master/img/2014/06/26/13/58/24/44319939_master1200.jpg
-      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/(?:c\/240x480\/img-master|img(\d+|-inf))\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
+      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/(?:c\/\d+x\d+\/img-master|img(\d+|-inf))\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
         return null;
       }
 
