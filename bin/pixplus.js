@@ -3056,7 +3056,9 @@
       var layout_height = 0, layout_width = 0, image_height = [];
       this.images.forEach(function(img, idx) {
         var nsize  = natural_sizes[idx],
+            width  = g.Math.round(nsize.width  * scale),
             height = g.Math.round(nsize.height * scale);
+        img.style.width = width + 'px';
         img.style.height = height + 'px';
         if (height > layout_height) {
           layout_height = height;
