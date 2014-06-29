@@ -7,7 +7,7 @@
         <key>Developer Identifier</key><string>5RSCNV2FP6</string>
         <key>CFBundleVersion</key><string>@VERSION@</string>
         <key>CFBundleShortVersionString</key><string>@VERSION@</string>
-        <key>URL</key><string>http://ccl4.info/cgit/pixplus.git/plain/bin/pixplus.safariextz?h=@BRANCH@&amp;id=v@VERSION@</string>
+        <key>URL</key><string>http://ccl4.info/cgit/pixplus.git/plain/bin/pixplus.safariextz?h=@BRANCH@&amp;id=@TAG@</string>
       </dict>
     </array>
   </dict>
