@@ -42,13 +42,11 @@
 
   if (g.opera || unsafeWindow) {
     if (g.opera && g.opera.extension) {
-      var open_options = function() {
-        g.opera.extension.postMessage(g.JSON.stringify({command: 'open-options'}));
-      };
       g.opera.extension.onmessage = function(ev){
         var data = g.JSON.parse(ev.data);
         if (data.command === 'config') {
-          entrypoint(g, w, w.document, {conf: data.data, open_options: open_options});
+          // entrypoint(g, w, w.document, {conf: data.data});
+          inject({conf: data.data});
         }
       };
       g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
