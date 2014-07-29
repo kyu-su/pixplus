@@ -1,4 +1,4 @@
 release.atom -diff
 changelog.md -diff
 changelog.json -diff
-bin/* -diff
+bin/* -diff merge=ours
