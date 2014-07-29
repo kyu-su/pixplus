@@ -1054,6 +1054,10 @@
         options = { };
       }
 
+      if (options.key) {
+        text = _.i18n.key_subst(text, options.key);
+      }
+
       var that = this;
 
       var li = _.e('li', {
@@ -2849,13 +2853,33 @@
         that.comment.update_hide_stamp_comments();
       });
 
+
+
       this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg);
+
+      this.ugoira_menu.add(
+        'play-pause', _.lng.ugoira_play_pause,
+        {callback: this.ugoira_play_pause.bind(this),
+         key: _.conf.key.popup_ugoira_play_pause}
+      );
+      this.ugoira_menu.add(
+        'next-frame', _.lng.ugoira_next_frame,
+        {callback: this.ugoira_next_frame.bind(this),
+         key: _.conf.key.popup_ugoira_next_frame}
+      );
+      this.ugoira_menu.add(
+        'prev-frame', _.lng.ugoira_prev_frame,
+        {callback: this.ugoira_prev_frame.bind(this),
+         key: _.conf.key.popup_ugoira_prev_frame}
+      );
+
       this.ugoira_menu.add('dl-zip', _.lng.ugoira_download_zip, {
         type: 'link',
         get_url: function() {
           return (that.illust.ugoira_big || that.illust.ugoira_small).src;
         }
       });
+
       this.ugoira_menu.add('gen-tc', _.lng.ugoira_generate_timecode, {
         callback: function() {
           // http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge.html#mkvmerge.external_timecode_files
@@ -2863,6 +2887,7 @@
           w.open('data:text/plain,' + w.encodeURIComponent(data));
         }
       });
+
       this.ugoira_menu.add('help', _.lng.ugoira_how_to_use, {
         callback: function() {
           var text = [
@@ -2875,6 +2900,8 @@
           w.open('data:text/plain,' + w.encodeURIComponent(text));
         }
       });
+
+
 
       _.listen(dom.comment, 'DOMNodeInserted', this.comment.update.bind(this.comment), {async: true});
 
@@ -6907,6 +6934,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       search_wgt: '<= Max width',
       search_hgt: '<= Max height',
 
+      ugoira_play_pause: 'Play/Pause (#{key})',
+      ugoira_next_frame: 'Next frame (#{key})',
+      ugoira_prev_frame: 'Previous frame (#{key})',
       ugoira_download_zip: 'Download zip',
       ugoira_generate_timecode: 'Generate timecode',
       ugoira_how_to_use: 'How to use?'
@@ -7083,6 +7113,9 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       search_wgt: '<= \u5e45\u306e\u6700\u5927\u5024',
       search_hgt: '<= \u9ad8\u3055\u306e\u6700\u5927\u5024',
 
+      ugoira_play_pause: '\u518d\u751f/\u4e00\u6642\u505c\u6b62 (#{key})',
+      ugoira_next_frame: '\u30b3\u30de\u9001\u308a (#{key})',
+      ugoira_prev_frame: '\u30b3\u30de\u623b\u3057 (#{key})',
       ugoira_download_zip: 'zip\u3092\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9',
       ugoira_generate_timecode: '\u30bf\u30a4\u30e0\u30b3\u30fc\u30c9\u3092\u751f\u6210',
       ugoira_how_to_use: '\u4f7f\u3044\u65b9'
@@ -7097,6 +7130,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
         lng = _.i18n[g.navigator.language];
       }
       _.lng = lng || _.i18n.en;
+    },
+
+    key_subst: function(msg, key) {
+      return msg.replace('#{key}', {'comma': ',', 'plus': '+'}[key] || key);
     }
   };
 
