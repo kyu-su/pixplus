@@ -3558,6 +3558,10 @@
         this.illust.ugoira_player.pause();
       }
 
+      if (illust !== this.illust && illust.manga) {
+        illust.manga.viewed = false;
+      }
+
       this.illust = illust;
       this.running = true;
       if (!dom.root.parentNode) {
