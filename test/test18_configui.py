@@ -293,13 +293,9 @@ class Test_ModConfigUI(TestCase):
     self.assertFalse(self.q('#pp-config').is_displayed())
     self.assertTrue(self.q('#notification-popboard').is_displayed())
 
-    self.click(self.q('.pp-layout-history'))
-    self.assertFalse(self.q('#notification-popboard').is_displayed())
-    self.check_modal_position_size(self.q('#pp-layout-history-manager'), None, None, (400, 600), (300, 400))
-
     self.click(self.q('#pp-config-btn1'))
     self.assertTrue(self.q('#pp-config').is_displayed())
-    self.assertFalse(self.qa('#pp-layout-history-manager'))
+    self.assertFalse(self.q('#notification-popboard').is_displayed())
     self.current_section = None
 
     self.activate_section(self.conf_map['key'])
@@ -356,15 +352,6 @@ class Test_ModConfigUI(TestCase):
     time.sleep(1)
     self.click(self.q('form[action*="search.php"]'))
     self.assertFalse(self.q('#pp-config').is_displayed())
-
-    self.click(self.q('.pp-layout-history'))
-    self.assertFalse(self.q('#pp-config').is_displayed())
-    self.assertTrue(self.q('#pp-layout-history-manager').is_displayed())
-
-    time.sleep(1)
-    self.send_keys(Keys.ESCAPE, self.q('body'))
-    self.assertFalse(self.q('#pp-config').is_displayed())
-    self.assertFalse(self.qa('#pp-layout-history-manager'))
     pass
 
   pass

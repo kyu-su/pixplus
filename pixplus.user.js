@@ -5599,217 +5599,6 @@
     }
   });
 
-  _.mypage = {
-    history_manager: {
-      create: function() {
-        if (this.dom) {
-          return;
-        }
-
-        var that = this;
-
-        this.dom = {};
-        this.dom.root = _.e('div', {id: 'pp-layout-history-manager', cls: 'pp-dialog'});
-        this.dom.header = _.e('header', {cls: 'pp-dialog-title'}, this.dom.root);
-        this.dom.close_btn = _.e('span', {
-          id: 'pp-layout-history-manager-close',
-          text: '\u2715',
-          css: 'cursor:pointer'
-        }, this.dom.header);
-        this.dom.error = _.e('p', {cls: 'pp-error-message'}, this.dom.root);
-        this.dom.table = _.e('table', null, this.dom.root);
-
-        _.onclick(this.dom.close_btn, _.modal.end.bind(_.modal));
-        _.e('h2', {text: _.lng.mypage_layout_history}, this.dom.header);
-
-        var row = this.dom.table.insertRow(-1);
-        this.dom.list = _.e('ul', {id: 'pp-layout-history'}, row.insertCell(-1));
-        this.dom.preview = _.e('ul', {id: 'pp-layout-preview'}, row.insertCell(-1));
-
-        _.e('p', {text: _.lng.mypage_layout_history_help}, this.dom.root);
-      },
-
-      preview: function(layout) {
-        var that = this;
-
-        _.clear(this.dom.preview);
-
-        var name_map = {};
-        _.qa('#item-container header h1').forEach(function(h, i) {
-          var key = w.pixiv.mypage.order[i];
-          name_map[key] = _.strip(h.textContent);
-        });
-
-        layout.split('').forEach(function(d) {
-          var item = _.e('li', {text: name_map[d.toLowerCase()], 'data-pp-key': d}, that.dom.preview);
-          if (d.toUpperCase() === d) {
-            item.classList.add('pp-open');
-          }
-          _.e('div', null, item);
-        });
-      },
-
-      refresh: function() {
-        var that = this;
-
-        this.create();
-
-        _.clear(this.dom.list, this.dom.preview);
-
-        var history = _.conf.mypage.layout_history;
-        if (!history) {
-          this.dom.error.textContent = _.lng.mypage_layout_history_empty;
-          this.dom.root.classList.add('pp-error');
-          return;
-        } else {
-          this.dom.root.classList.remove('pp-error');
-        }
-
-        history = history.split(',').map(function(entry) {
-          return entry.split(':');
-        });
-
-        var last_active;
-        history.forEach(function(entry, idx) {
-          var layout = entry[0], text, item;
-
-          if (entry[1]) {
-            var date = new g.Date();
-            date.setTime(g.parseInt(entry[1]));
-            text = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
-          } else {
-            text = layout;
-          }
-
-          item = _.e('li', {text: text, 'data-pp-layout': layout}, that.dom.list);
-
-          _.listen(item, 'mouseover', function() {
-            if (item === last_active) {
-              return;
-            }
-            if (last_active) {
-              last_active.classList.remove('pp-active');
-            }
-            item.classList.add('pp-active');
-            last_active = item;
-            that.preview(layout);
-          });
-
-          _.onclick(item, function() {
-            _.mypage.restore_layout(layout);
-          });
-
-          if (idx === 0) {
-            item.classList.add('pp-active');
-            that.preview(layout);
-            last_active = item;
-          }
-        });
-      },
-
-      show: function() {
-        this.refresh();
-
-        if (!this.dom.root.parentNode) {
-          d.body.appendChild(this.dom.root);
-        }
-
-        _.modal.begin(this.dom.root, {
-          onclose: this.hide.bind(this),
-          centerize: 'both'
-        });
-      },
-
-      hide: function() {
-        if (this.dom && this.dom.root.parentNode) {
-          this.dom.root.parentNode.removeChild(this.dom.root);
-        }
-      }
-    },
-
-    setup_item_actions: function() {
-      var that = this;
-      _.qa('#item-container header .action').forEach(function(actions) {
-        var li = _.e('li', {cls: 'pp-layout-history _ui-tooltip',
-                            'data-tooltip': _.lng.mypage_layout_history});
-        actions.insertBefore(li, actions.firstChild);
-        _.onclick(li, that.history_manager.show.bind(that.history_manager));
-      });
-    },
-
-    save_layout: function() {
-      var layout = '';
-      w.pixiv.mypage.order.forEach(function(item) {
-        if (!/^[a-z]$/.test(item)) {
-          throw 'unknown pattern - ' + item;
-        }
-        if (w.pixiv.mypage.visible[item]) {
-          item = item.toUpperCase();
-        }
-        layout += item;
-      });
-
-      if (!layout) {
-        return;
-      }
-
-      var history = [];
-      if (_.conf.mypage.layout_history) {
-        history = _.conf.mypage.layout_history.split(',').map(function(entry) {
-          return entry.split(':', 2);
-        });
-      }
-
-      if (history.length && layout === history[0][0]) {
-        return;
-      }
-
-      var new_history = [[layout, g.Date.now()]];
-      history.forEach(function(entry) {
-        if (entry[0] !== layout) {
-          new_history.push(entry);
-        }
-      });
-      _.conf.mypage.layout_history = new_history.slice(0, 10).map(function(entry) {
-        return entry.join(':');
-      }).join(',');
-    },
-
-    restore_layout: function(layout) {
-      w.pixiv.mypage.order = layout.split('').map(function(d) {
-        var lc = d.toLowerCase();
-        w.pixiv.mypage.visible[lc] = d !== lc;
-        return lc;
-      });
-      w.pixiv.mypage.update();
-      w.location.reload();
-    },
-
-    run: function() {
-      var that = this;
-
-      this.setup_item_actions();
-
-      try {
-        this.save_layout();
-
-        var pixiv_mypage_update = w.pixiv.mypage.update;
-        w.pixiv.mypage.update = function() {
-          pixiv_mypage_update.apply(this, arguments);
-          that.save_layout();
-        };
-
-        var pixiv_mypage_parse = w.pixiv.mypage.parse;
-        w.pixiv.mypage.parse = function() {
-          pixiv_mypage_parse.apply(this, arguments);
-          that.save_layout();
-        };
-      } catch(ex) {
-        _.log('mypage error - ' + g.String(ex));
-      }
-    }
-  };
-
   _.pages = {
     run: function() {
       var re;
@@ -5861,8 +5650,6 @@
         }, 10);
       });
     },
-
-    mypage: _.mypage,
 
     member: {
       run: function(query) {
@@ -6644,24 +6431,6 @@ box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box}\
 #pp-search-header{background-color:#fff}\
 #pp-search-header.pp-float:not(:hover){opacity:0.6}\
 \
-/* mypage layout */\
-#page-mypage #item-container header .action .pp-layout-history{background-image:url(\
-data:image/gif;base64,R0lGODlhDAAMAMIAAP///////+Tk5Hl5ef///////////////yH5BAEKAAQALA\
-AAAAAMAAwAAAMdSLHc2jBKKMYM1co8umac9y3Z0kWVOULnBT0TkQAAOw==) !important}\
-#pp-layout-history-manager .pp-error-message{display:none}\
-#pp-layout-history-manager.pp-error .pp-error-message{display:block}\
-#pp-layout-history-manager.pp-error table{display:none}\
-#pp-layout-history-manager table td{vertical-align:top}\
-#pp-layout-history-manager header span{float:right}\
-#pp-layout-history{margin:0.2em}\
-#pp-layout-history li{cursor:pointer;padding:0px 0.3em}\
-#pp-layout-history li.pp-active{background-color:#d6dee5}\
-#pp-layout-preview{min-width:400px;min-height:300px}\
-#pp-layout-preview li{border:1px solid #ccc;margin:0.2em;padding:0.1em 0.2em;color:#888}\
-#pp-layout-preview li.pp-open{font-weight:bold;color:#444}\
-#pp-layout-preview li div{display:none;border-top:1px solid #ccc;padding:0.6em;margin-top:0.1em}\
-#pp-layout-preview li.pp-open div{display:block}\
-\
 /* search */\
 #pp-search-size-custom input[type="text"]{\
 width:3em;padding:0px;height:auto;border:1px solid #eee}\
@@ -7172,10 +6941,14 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] Fix bookmark mode is not working properly."
+          "[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.",
+          "[Fix] Fix bookmark mode is not working properly.",
+          "[Remove] Remove mypage layout history manager."
         ],
         "ja": [
-          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u6b63\u3057\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+          "[\u8ffd\u52a0] \u300c\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044\u300d\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002",
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u6b63\u3057\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u524a\u9664] \u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74\u3092\u7ba1\u7406\u3059\u308b\u6a5f\u80fd\u3092\u524a\u9664\u3002"
         ]
       }
     },
