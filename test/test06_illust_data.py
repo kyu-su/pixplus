@@ -175,25 +175,13 @@ class Test_IllustData(TestCase):
     pass
 
   def test_illust_data(self):
-    self.open('/setting_user.php')
-    lang = Select(self.q('select[name="user_language"]'))
+    self.open('/')
 
-    lang_names = ['ja', 'fr', 'ko', 'ru', 'th', 'zh', 'zh_tw', 'es', 'en']
-    self.assertEqual(set([o.get_attribute('value') for o in lang.options]), set(lang_names))
-
-    for lang_name in lang_names:
-      lang = Select(self.q('select[name="user_language"]'))
-      lang.select_by_value(lang_name)
-      self.q('form[action="setting_user.php"]').submit()
-      self.wait_page_load()
-      self.assertEqual(self.q('select[name="user_language"]').get_attribute('value'), lang_name)
-
-      for data in self.illust_list:
-        self.open_popup(data['id'])
-        illust_data = self.popup_get_illust_data()
-        illust_data['tags'] = set(illust_data['tags'])
-        self.check_object_equal(data, illust_data, 'Illust data mismatch! %d[%%(path)s] =>\n  %%(obj1)s\n    vs\n  %%(obj2)s' % data['id'])
-        pass
+    for data in self.illust_list:
+      self.open_popup(data['id'])
+      illust_data = self.popup_get_illust_data()
+      illust_data['tags'] = set(illust_data['tags'])
+      self.check_object_equal(data, illust_data, 'Illust data mismatch! %d[%%(path)s] =>\n  %%(obj1)s\n    vs\n  %%(obj2)s' % data['id'])
       pass
     pass
 
