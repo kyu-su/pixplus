@@ -10,13 +10,11 @@
 // @updateURL   https://raw.githubusercontent.com/crckyl/pixplus/master/autoupdate/metadata.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
-// @run-at      document-start
+// @run-at      document-end
 // ==/UserScript==
 
 (function(entrypoint) {
-  var w = window,
-      g = this || window,
-      unsafeWindow = g.unsafeWindow;
+  var w = window, g = this || window;
 
   if (w.location.href.indexOf('pixivreader') >= 0) {
     return;
@@ -37,7 +35,7 @@
 
   var send_message;
 
-  if (g.opera || unsafeWindow) {
+  if (g.opera) {
     if (g.opera && g.opera.extension) {
       g.opera.extension.onmessage = function(ev){
         var data = g.JSON.parse(ev.data);
@@ -52,7 +50,7 @@
       };
 
     } else {
-      entrypoint(g, unsafeWindow || w, (unsafeWindow || w).document);
+      entrypoint(g, w, w.document);
     }
 
   } else if (greasemonkey) {
@@ -6080,12 +6078,6 @@
   };
 
   _.run = function() {
-    if (!d.documentElement) {
-      // for gecko
-      g.setTimeout(_.run, 100);
-      return;
-    }
-
     if (_extension_data) {
       var config_set_data = _.e('div', {css: 'display:none'}, d.documentElement);
 
