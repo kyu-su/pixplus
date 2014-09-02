@@ -1390,7 +1390,6 @@
               info = lang.conf[section.name][item.key] || '[Error]',
               row  = _.e('tr', null, tbody),
               desc = _.e('td', null, row),
-              value = _.e('td', null, row),
               input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-'),
               control, control_propname;
           if (info === '[Error]') {
@@ -1402,7 +1401,9 @@
             control = _.e('input', {type: 'checkbox', id: input_id}, label);
             control_propname = 'checked';
             label.appendChild(d.createTextNode(info.desc || info));
+            desc.setAttribute('colspan', '2');
           } else {
+            var value = _.e('td', null, row);
             desc.textContent = info.desc || info;
             if (info.hint) {
               control = _.e('select', {id: input_id}, value);
@@ -3588,7 +3589,8 @@
         this.illust.ugoira_player.pause();
       }
 
-      if (illust !== this.illust && illust.manga) {
+      if (illust !== this.illust && illust.manga &&
+          !_.conf.popup.manga_viewed_flags) {
         illust.manga.viewed = false;
       }
 
@@ -6681,6 +6683,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       {"key": "font_size", "value": ""},
       {"key": "auto_manga", "value": 0},
       {"key": "auto_manga_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage|ranking|bookmark)\\.php"},
+      {"key": "manga_viewed_flags", "value": true},
       {"key": "reverse", "value": 0},
       {"key": "reverse_regexp", "value": "/(?:bookmark_new_illust|member_illust|mypage)\\.php"},
       {"key": "overlay_control", "value": 0.3},
@@ -6832,6 +6835,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
             hint: ['Disable', 'Enable', 'Specify pages by regexp']
           },
           auto_manga_regexp: 'Regular expression for "Switch manga..." setting.',
+          manga_viewed_flags: 'Do not start manga mode automatically if you have already read it',
           reverse: {
             desc: 'Reverse move direction',
             hint: ['Disable', 'Enable', 'Specify pages by regexp']
@@ -7011,6 +7015,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
             hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a']
           },
           auto_manga_regexp: '"\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
+          manga_viewed_flags: '\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044',
           reverse: {
             desc: '\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b',
             hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a']
@@ -7148,8 +7153,10 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Fix] Fix bookmark mode is not working properly."
         ],
         "ja": [
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u6b63\u3057\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
