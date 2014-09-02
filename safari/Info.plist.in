@@ -50,7 +50,7 @@
       </dict>
     </dict>
     <key>Update Manifest URL</key>
-    <string>http://ccl4.info/cgit/pixplus.git/plain/autoupdate/safari.xml?h=@BRANCH@</string>
+    <string>http://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/safari.xml</string>
     <key>Website</key>
     <string>@WEBSITE@</string>
   </dict>

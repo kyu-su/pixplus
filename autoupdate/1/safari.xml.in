@@ -5,9 +5,9 @@
       <dict>
         <key>CFBundleIdentifier</key><string>org.crckyl.pixplus</string>
         <key>Developer Identifier</key><string>5RSCNV2FP6</string>
-        <key>CFBundleVersion</key><string>1.11.0</string>
-        <key>CFBundleShortVersionString</key><string>1.11.0</string>
-        <key>URL</key><string>http://ccl4.info/cgit/pixplus.git/plain/bin/pixplus.safariextz?h=master&amp;id=v1.11.0</string>
+        <key>CFBundleVersion</key><string>@VERSION@</string>
+        <key>CFBundleShortVersionString</key><string>@VERSION@</string>
+        <key>URL</key><string>http://ccl4.info/cgit/pixplus.git/plain/release/@VERSION@/pixplus.safariextz</string>
       </dict>
     </array>
   </dict>
