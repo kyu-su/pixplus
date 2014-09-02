@@ -2438,6 +2438,24 @@
       _.fastxml.remove_selector(comment, '.worksImageresponse');
       illust.comment = _.fastxml.inner_html(comment) || 'Error';
 
+      if (!_.stampSeries) {
+        re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
+        if (re) {
+          _.stampSeries = g.JSON.parse(re[1]);
+        } else {
+          _.error('pixiv.context.stampSeries not detected');
+        }
+      }
+
+      if (!_.emojiSeries) {
+        re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
+        if (re) {
+          _.emojiSeries = g.JSON.parse(re[1]);
+        } else {
+          _.error('pixiv.context.emojiSeries not detected');
+        }
+      }
+
       _.illust.update_urls(illust);
       return true;
     },
@@ -3480,6 +3498,17 @@
         dom.image_layout.href = illust.image_url_big;
       }
 
+      try {
+        if (_.stampSeries) {
+          w.pixiv.context.stampSeries = _.stampSeries;
+        }
+        if (_.emojiSeries) {
+          w.pixiv.context.emojiSeries = _.emojiSeries;
+        }
+      } catch(ex) {
+        _.error(ex);
+      }
+
       _.popup.comment.setup(illust.comment);
 
       try {
@@ -4173,26 +4202,16 @@
       });
 
       try {
-        w.pixiv.ui.tab.restore(dom.comment.querySelector('form'));
-      } catch(ex) {
-        _.error(ex);
-      }
-
-      try {
         w.colon.d.off('click.pixivEmoji');
         w.pixiv.emoji.setup();
       } catch(ex) {
         _.error(ex);
       }
 
-      if (!this.first_setup_done) {
-        try {
-          w.pixiv.comment.setup();
-        } catch(ex) {
-          _.error(ex);
-        }
-
-        this.first_setup_done = true;
+      try {
+        w.pixiv.comment.setup();
+      } catch(ex) {
+        _.error(ex);
       }
     },
 
