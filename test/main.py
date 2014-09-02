@@ -55,7 +55,7 @@ def login(browser, config):
   form.submit()
 
   try:
-    browser.wait_until(lambda d: browser.url == 'http://www.pixiv.net/mypage.php')
+    browser.wait_until(lambda d: browser.url.startswith('http://www.pixiv.net/mypage.php'))
   except selenium.common.exceptions.TimeoutException:
     print('Login failed!')
     raw_input('Please login manually and press enter...')
