@@ -5399,8 +5399,9 @@
         return;
       }
 
-      var form = _.q('form[action="bookmark_add.php"]', root);
+      var form = _.q('form[action^="bookmark_add.php?"]', root);
       if (!form) {
+        _.error('bookmark: form not found');
         return;
       }
 
