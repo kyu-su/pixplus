@@ -70,7 +70,7 @@ class Test_AdvancedSearch(TestCase):
     if knob:
       ac.click_and_hold(knob)
     else:
-      ac.move_to_element_with_offset(slider, 2, 4).click_and_hold()
+      ac.move_to_element_with_offset(slider, 4, int(sh / 2)).click_and_hold()
       pass
     ac.move_by_offset(sw * 2, 0).release().perform()
 
