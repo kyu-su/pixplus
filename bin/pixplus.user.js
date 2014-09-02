@@ -16,7 +16,7 @@
 (function(entrypoint) {
   var w = window, g = this || window;
 
-  if (w.location.href.indexOf('pixivreader') >= 0) {
+  if (/pixivreader/.test(w.location.href) || w !== w.top) {
     return;
   }
 
@@ -99,7 +99,7 @@
   }
 })(function(g, w, d, _extension_data) {
 
-  if (w.pixplus) {
+  if (w.pixplus || w !== w.top) {
     return;
   }
 
