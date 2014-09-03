@@ -58,6 +58,7 @@ class Test_Ugoira(TestCase):
     self.assertNotEqual(data1, data2)
 
     self.send_keys('m')
+    time.sleep(1)
 
     data1 = self.capture(canvas)
     time.sleep(0.2)

@@ -4,19 +4,12 @@ from test_base import TestCase
 
 class Test_FloatTagList(TestCase):
 
-  def check(self, element, on, margin_top = 0):
-    self.js('''
-      document.body.style.paddingBottom="100%";
-      var n = document.evaluate('//*[@class="ui-layout-west"]/*[@class="area_new" and *[@class="area_title"]/*[contains(@class,"sprites-premium")]]',
-                                document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-      if (n) {
-        n.parentNode.removeChild(n);
-      }
-      pixplus.Floater.update_height();
-    ''')
-
+  def setUp(self):
+    self.set_window_size(1024, 1600)
     time.sleep(1)
+    pass
 
+  def check(self, element, on, margin_top = 0):
     self.assertFalse(self.has_class(element, 'pp-float'))
 
     self.js('window.scrollBy(0, %d)' % (self.geom(element)[1] + 10))
