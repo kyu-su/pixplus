@@ -3729,6 +3729,14 @@
       return this.dom.image_scroller.scrollWidth > this.dom.image_scroller.clientWidth;
     },
 
+    ugoira_current_frame: function() {
+      return this.illust.ugoira_player.getCurrentFrame();
+    },
+
+    ugoira_frame_count: function() {
+      return this.illust.ugoira_player.getFrameCount();
+    },
+
     ugoira_play: function() {
       if (!this.illust.ugoira_player) {
         return false;

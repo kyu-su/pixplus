@@ -136,9 +136,16 @@ class Browser:
     self.js('document.cookie=%s' % json.dumps(cookie))
     pass
 
-  def screenshot(self):
+  def screenshot(self, elem = None):
     ss = self.driver.get_screenshot_as_base64().encode('ascii')
     io = util.BytesIO(base64.b64decode(ss))
-    return Image.open(io).convert('RGB')
+    img = Image.open(io).convert('RGB')
+
+    if elem is not None:
+      x, y, w, h = tuple(map(int, self.geom(elem)))
+      img = img.crop((x, y, x + w, y + h))
+      pass
+
+    return img
 
   pass
