@@ -1,3 +1,5 @@
+import hashlib
+
 import util
 from test_base import TestCase
 
@@ -31,7 +33,7 @@ class Test_MarkVisited(TestCase):
 
     img = self.screenshot().crop((x, y, x + w, y + h))
     try:
-      self.assertTrue(img.tobytes() == color * (w * h))
+      self.assertTrue(hashlib.sha1(img.tobytes()).hexdigest() == hashlib.sha1(color * (w * h)).hexdigest())
     except:
       img.save('test17_mark_visited_image_1.png')
 
