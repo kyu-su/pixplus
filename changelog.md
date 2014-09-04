@@ -1,7 +1,7 @@
 pixplus version history
 =======================
 
-## [1.12.0 - 2014/09/04]()
+## [1.12.0 - 2014/09/04](http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0)
 
 ### 変更点
 

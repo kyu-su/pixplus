@@ -6954,7 +6954,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     {
       "date": "2014/09/04",
       "version": "1.12.0",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.",
