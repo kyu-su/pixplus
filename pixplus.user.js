@@ -369,11 +369,11 @@
     if (g.console) {
       _[name] = function(msg) {
         if (name !== 'debug' || _.conf.general.debug) {
-          if (typeof(msg) === 'object') {
-            g.console[name]('pixplus: [' + name + '] ' + msg, msg);
-          } else {
-            g.console[name]('pixplus: [' + name + '] ' + msg);
+          var args = g.Array.prototype.slice.call(arguments);
+          if (typeof(args[0]) === 'string') {
+            args[0] = 'pixplus: [' + name + '] ' + args[0];
           }
+          (g.console[name] || g.console.log).apply(g.console, args);
         }
       };
     } else {
@@ -5426,7 +5426,7 @@
         return;
       }
 
-      var form = _.q('form[action^="bookmark_add.php?"]', root);
+      var form = _.q('form[action^="bookmark_add.php"]', root);
       if (!form) {
         _.error('bookmark: form not found');
         return;
@@ -6084,7 +6084,21 @@
         _.illust.unload(_.popup.illust);
       };
     } catch(ex) {
-      _.log('rating error - ' + g.String(ex));
+      _.error('Failed to setup filter of pixiv.rating.apply', ex);
+    }
+
+    try {
+      var req = w.pixiv.api.request;
+      w.pixiv.api.request = function() {
+        var args = g.Array.prototype.slice.call(arguments);
+        _.debug('pixiv.api.request', args[1]);
+        if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(args[1])) {
+          args[1] = '/' + args[1];
+        }
+        return req.apply(this, args);
+      };
+    } catch(ex) {
+      _.error('Failed to setup filter of pixiv.api.request', ex);
     }
   };
 
