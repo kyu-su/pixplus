@@ -21,10 +21,7 @@
   }
 
   var greasemonkey =
-        /* __OPERA_USERJS_REMOVE__
          false;
-         * __OPERA_USERJS_REMOVE__ */
-      true; // __OPERA_USERJS_REMOVE__
 
   var inject = function(data) {
     var s = w.document.createElement('script'), d = w.document;

@@ -397,6 +397,6 @@ $(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS)
 
 $(AUTOUPDATE_GM):
 	@echo 'Generate: $@'
-	@git show v$(VERSION_STABLE):$(SRC_USERJS) | sed -e '/==\/UserScript==/,$$d' > $@
+	@sed -e '/==\/UserScript==/,$$d' < $(SRC_USERJS) > $@
 	@echo '// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/release/$(VERSION_STABLE)/pixplus.user.js' >> $@
-	@echo '// ==\/UserScript==' >> $@
+	@echo '// ==/UserScript==' >> $@

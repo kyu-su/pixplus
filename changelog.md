@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.12.0 - 2014/09/04]()
+
+### 変更点
+
+* [追加] 「既に読んだマンガは自動でマンガモードを開始しない」設定を追加。
+* [修正] ブックマークモードが正しく動作しなくなっていた不具合を修正。
+* [修正] コメントフォームが動作しなくなっていた不具合を修正。
+* [削除] トップページのレイアウトの履歴を管理する機能を削除。
+
+### Changes
+
+* [Add] Add "Do not start manga mode automatically if you have already read it" setting.
+* [Fix] Fix bookmark mode is not working properly.
+* [Fix] Fix comment form was broken.
+* [Remove] Remove mypage layout history manager.
+
 ## [1.11.0 - 2014/06/28](http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0)
 
 ### 変更点
