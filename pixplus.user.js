@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.12.0
+// @version     1.12.1
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -6949,6 +6949,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    {
+      "date": "2014/xx/xx",
+      "version": "1.12.1",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix GreaseMonkey auto update."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] GreaseMonkey \u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
 
     {
