@@ -41,40 +41,40 @@ class Test_Ugoira(TestCase):
 
   def capture(self, canvas):
     self.capture_id += 1
+    filename = 'test22_ugoira_%d.png' % self.capture_id
     img = self.screenshot(canvas)
-    img.save('test22_ugoira_%d.png' % self.capture_id)
-    return hashlib.sha1(img.tobytes()).hexdigest()
+    img.save(filename)
+    return hashlib.sha1(img.tobytes()).hexdigest(), filename
 
   def test_ugoira(self):
     self.open('/')
     self.open_popup(self.illust_id)
+    self.js('pixplus.popup.hide_caption()')
 
     frames = self.js('return pixplus.popup.illust.ugoira.frames')
     canvas = self.q('#pp-popup-image-layout canvas')
 
-    data1 = self.capture(canvas)
-    time.sleep(0.2)
-    data2 = self.capture(canvas)
-    self.assertNotEqual(data1, data2)
+    data1 = self.capture(canvas)[0]
+    self.wait_until(lambda d: data1 != self.capture(canvas))
 
     self.send_keys('m')
     time.sleep(1)
 
-    data1 = self.capture(canvas)
-    time.sleep(0.2)
-    data2 = self.capture(canvas)
-    self.assertEqual(data1, data2)
+    data1, fn1 = self.capture(canvas)
+    time.sleep(1)
+    data2, fn2 = self.capture(canvas)
+    self.assertEqual(data1, data2, '%s != %s' % (fn1, fn2))
 
     curframe = self.current_frame()
-    self.assertEqual(self.images[frames[curframe]['file']], self.capture(canvas))
+    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
 
     self.send_keys(',')
     curframe = self.frame_count() - 1 if curframe == 0 else curframe - 1
-    self.assertEqual(self.images[frames[curframe]['file']], self.capture(canvas))
+    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
 
     self.send_keys('.')
     curframe = 0 if curframe == self.frame_count() - 1 else curframe + 1
-    self.assertEqual(self.images[frames[curframe]['file']], self.capture(canvas))
+    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
     pass
 
   pass
