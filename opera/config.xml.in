@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets" id="@WEBSITE@" version="@VERSION@">
   <name>pixplus</name>
-  <description>@DESCRIPTION@</description>
+  <description>hogehoge</description>
   <author href="http://my.opera.com/crckyl/">wowo</author>
   <update-description href="http://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/opera.xml"/>
 @LICENSE@

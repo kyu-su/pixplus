@@ -1,5 +1,12 @@
 import sys
+import re
 import json
+
+def out_json(changelog):
+  return [json.dumps(changelog, sort_keys = True, indent = 2)]
+
+def out_latest_version(changelog):
+  return [changelog[0]['version']]
 
 i18n = {
   'changes': {'ja': '\u5909\u66f4\u70b9', 'en': 'Changes'}
@@ -16,7 +23,7 @@ def atom_changes(changes):
 def make_atom_time(version):
   return '%sT00:00:00.000Z' % version['date'].replace('/', '-')
 
-def atom(changelog):
+def out_atom(changelog):
   out = []
 
   out.append('''
@@ -79,7 +86,7 @@ def markdown_escape(text):
   text = text.replace('*', '\\*')
   return text
 
-def markdown(changelog):
+def out_markdown(changelog):
   out = ['''
 pixplus version history
 =======================
@@ -105,16 +112,10 @@ pixplus version history
   return out
 
 if __name__ == '__main__':
-  if sys.version < '3':
-    import codecs
-    for key, translates in i18n.items():
-      for lng, text in translates.items():
-        translates[lng] = codecs.unicode_escape_decode(text)[0]
-        pass
-      pass
-    pass
+  pat = r'__CHANGELOG_BEGIN__.*\n([\s\S]*)\n.*__CHANGELOG_END__'
+  json_str = '[%s]' % re.search(pat, sys.stdin.read()).group(1)
 
-  changelog = json.load(sys.stdin)
+  changelog = json.loads(json_str)
   for version in changelog:
     if 'changes_i18n' not in version:
       version['changes_i18n'] = {
@@ -123,7 +124,7 @@ if __name__ == '__main__':
       pass
     pass
 
-  out = locals()[sys.argv[1]](changelog)
+  out = locals()['out_%s' % sys.argv[1]](changelog)
 
   out = '\n'.join(out).strip()
   try:

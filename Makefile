@@ -19,7 +19,7 @@ BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || ec
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
 VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-DESCRIPTION                     = $(shell grep '^// @description' $(SRC_USERJS) | sed -e 's/.*@description *//')
+VERSION_STABLE                  = $(shell $(PYTHON) changelog.py latest_version < $(SRC_USERJS))
 WEBSITE                         = http://ccl4.info/pixplus/
 WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
@@ -34,6 +34,7 @@ CHANGELOG_MD                    = changelog.md
 RELEASE_ATOM                    = release.atom
 
 DIST_DIR                        = $(CURDIR)/bin
+RELEASE_DIR                     = $(CURDIR)/release/$(VERSION)
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
 OEX                             = $(DIST_DIR)/pixplus.oex
@@ -43,7 +44,6 @@ SAFARIEXTZ                      = $(DIST_DIR)/pixplus.safariextz
 LIB_JS                          = $(BUILD_DIR)/lib.js
 DATA_JS                         = $(BUILD_DIR)/data.js
 CONFIG_JSON                     = $(BUILD_DIR)/config.json
-VERSION_STABLE                  = $(BUILD_DIR)/version_stable.txt
 ICON_SIZE_SMALL                 = 16 22 24
 ICON_SIZE_BIG                   = 32 48 64 128
 ICON_SIZE                       = $(ICON_SIZE_SMALL) $(ICON_SIZE_BIG)
@@ -93,7 +93,7 @@ AUTOUPDATE_TARGETS              = chrome.xml safari.xml opera.xml
 AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/1/%)
 AUTOUPDATE_GM                   = autoupdate/1/metadata.user.js
 
-ALL_TARGETS                     = $(AUTOUPDATE_FILES) $(AUTOUPDATE_GM) $(OPERA_USERJS) $(GREASEMONKEY_JS)
+RELEASE_TARGETS                 = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
 ifeq ($(SVG_TO_PNG_OK),yes)
 ALL_TARGETS += $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT)
@@ -104,22 +104,24 @@ BUILD_SAFARIEXTZ=no
 endif
 
 ifeq ($(BUILD_OEX),yes)
-ALL_TARGETS += $(OEX)
+RELEASE_TARGETS += $(OEX)
 endif
 
 ifeq ($(BUILD_CRX),yes)
-ALL_TARGETS += $(CRX)
+RELEASE_TARGETS += $(CRX)
 endif
 
 ifeq ($(BUILD_SAFARIEXTZ),yes)
-ALL_TARGETS += $(SAFARIEXTZ)
+RELEASE_TARGETS += $(SAFARIEXTZ)
 endif
+
+ALL_TARGETS = $(AUTOUPDATE_FILES) $(AUTOUPDATE_GM) $(RELEASE_TARGETS)
+RELEASE_FILES = $(RELEASE_TARGETS:$(DIST_DIR)/%=$(RELEASE_DIR)/%)
 
 all: info $(ALL_TARGETS) changelog
 
 info:
 	@echo 'Version: $(VERSION)'
-	@echo 'Description: $(DESCRIPTION)'
 	@echo 'Website: $(WEBSITE)'
 	@echo 'SVG rasterizer: $(SVG_TO_PNG_CMD)'
 	@echo
@@ -137,6 +139,13 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
+release: $(RELEASE_FILES)
+
+$(RELEASE_FILES): $(RELEASE_DIR)/%: $(DIST_DIR)/%
+	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@cp $< $@
+
 clean: clean-changelog
 	@echo 'Cleaning'
 	@rm -rf $(BUILD_DIR) $(DIST_DIR) $(AUTOUPDATE_FILES) $(AUTOUPDATE_GM)
@@ -145,27 +154,20 @@ clean: clean-changelog
 
 $(CHANGELOG_JSON): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@echo '[' > $@
-	@sed -e '1,/__CHANGELOG_BEGIN__/d' -e '/__CHANGELOG_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
-	@echo ']' >> $@
+	@$(PYTHON) changelog.py json < $< > $@
 
-$(CHANGELOG_MD): $(CHANGELOG_JSON)
+$(CHANGELOG_MD): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py markdown < $< > $@
 
-$(RELEASE_ATOM): $(CHANGELOG_JSON)
+$(RELEASE_ATOM): $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py atom < $< > $@
 
-$(VERSION_STABLE): $(CHANGELOG_JSON)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@$(PYTHON) -c 'import sys,json;print(json.load(sys.stdin)[0]["version"])' < $< > $@
-
-changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
+changelog: $(CHANGELOG_JSON) $(CHANGELOG_MD) $(RELEASE_ATOM)
 
 clean-changelog:
-	@rm -f $(CHANGELOG_MD) $(RELEASE_ATOM) $(VERSION_STABLE)
+	@rm -f $(CHANGELOG_JSON) $(CHANGELOG_MD) $(RELEASE_ATOM)
 
 # ================ Opera UserJS ================
 
@@ -251,7 +253,6 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
 	@mkdir -p $(dir $@)
 	@sed -e '/@LICENSE@/,$$d' \
              -e 's/@VERSION@/$(VERSION)/' \
-             -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
              -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
            < $< > $@
 	@echo '  <license>' >> $@
@@ -294,7 +295,6 @@ $(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@sed -e '/@ICONS@/,$$d' \
              -e 's/@VERSION@/$(VERSION)/' \
-             -e 's/@DESCRIPTION@/$(DESCRIPTION)/' \
            < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
            test $$first -eq 1 && first=0 || echo ',' >> $@; \
@@ -390,13 +390,13 @@ endif
 
 # ================ AutoUpdate ================
 
-$(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS) $(VERSION_STABLE)
+$(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS)
 	@echo 'Generate: $@'
-	@sed -e "s/@VERSION@/$$(cat $(VERSION_STABLE))/g" \
+	@sed -e "s/@VERSION@/$(VERSION_STABLE)/g" \
            < $< > $@
 
-$(AUTOUPDATE_GM): $(VERSION_STABLE)
+$(AUTOUPDATE_GM):
 	@echo 'Generate: $@'
-	@git show v$$(cat $(VERSION_STABLE)):$(SRC_USERJS) | sed -e '/==\/UserScript==/,$$d' > $@
-	@echo "// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/release/$$(cat $(VERSION_STABLE))/pixplus.user.js" >> $@
+	@git show v$(VERSION_STABLE):$(SRC_USERJS) | sed -e '/==\/UserScript==/,$$d' > $@
+	@echo '// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/release/$(VERSION_STABLE)/pixplus.user.js' >> $@
 	@echo '// ==\/UserScript==' >> $@
