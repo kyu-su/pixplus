@@ -28,26 +28,7 @@ class Test_TagEdit(TestCase):
   def find_tag_editable(self, query):
     return self.find_illust(self.check_tag_editable, query)
 
-  def test_tagedit_add(self):
-    self.open_test_user()
-    add_tag = self.find_tag_editable('input#add_tag')
-    tags = self.get_tags()
-
-    tag = 't%d' % time.time()
-    add_tag.send_keys(tag)
-
-    query = '#pp-popup-tagedit-wrapper input[onclick^="addTag("]'
-    self.click(self.q(query))
-    self.wait_until(lambda driver: not self.qa(query))
-
-    self.js('pixplus.popup.tagedit.end()')
-    self.popup_wait_load()
-
-    tags.add(tag)
-    self.popup_poll_reload(lambda: self.get_tags() == tags)
-    pass
-
-  def test_tagedit_delete(self):
+  def test_1_tagedit_delete(self):
     self.open_test_user()
     if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
@@ -74,6 +55,25 @@ class Test_TagEdit(TestCase):
     self.popup_wait_load()
 
     tags.remove(tag)
+    self.popup_poll_reload(lambda: self.get_tags() == tags)
+    pass
+
+  def test_2_tagedit_add(self):
+    self.open_test_user()
+    add_tag = self.find_tag_editable('input#add_tag')
+    tags = self.get_tags()
+
+    tag = 't%d' % time.time()
+    add_tag.send_keys(tag)
+
+    query = '#pp-popup-tagedit-wrapper input[onclick^="addTag("]'
+    self.click(self.q(query))
+    self.wait_until(lambda driver: not self.qa(query))
+
+    self.js('pixplus.popup.tagedit.end()')
+    self.popup_wait_load()
+
+    tags.add(tag)
     self.popup_poll_reload(lambda: self.get_tags() == tags)
     pass
 
