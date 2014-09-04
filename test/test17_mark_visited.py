@@ -9,7 +9,7 @@ class Test_MarkVisited(TestCase):
     self.js('''
       var style = document.createElement('style');
       style.textContent = [
-        'a.work{background-color:white !important;display:block}',
+        'a.work{background-color:white !important;display:block;overflow:hidden}',
         'a.work:visited{background-color:red !important}',
         'a.work *{opacity:0!important}'
       ].join('');
@@ -32,19 +32,17 @@ class Test_MarkVisited(TestCase):
     h -= 2
 
     img = self.screenshot().crop((x, y, x + w, y + h))
-    try:
-      self.assertTrue(hashlib.sha1(img.tobytes()).hexdigest() == hashlib.sha1(color * (w * h)).hexdigest())
-    except:
-      img.save('test17_mark_visited_image_1.png')
+    self.assertEqual(hashlib.sha1(img.tobytes()).hexdigest(),
+                     hashlib.sha1(color * (w * h)).hexdigest())
 
-      from PIL import ImageDraw
-      img = self.screenshot()
-      img.save('test17_mark_visited_image_2.png')
-      draw = ImageDraw.Draw(img)
-      points = [(20,40), (25,60), (40,80), (60,75), (80,95), (85,20), (50,40)]
-      draw.polygon([(x, y), (x, y + h), (x + w, y + h), (x + w, y)], outline='rgb(0,255,0)')
-      img.save('test17_mark_visited_image_3.png')
-      raise
+    img.save('test17_mark_visited_image_1.png')
+    from PIL import ImageDraw
+    img = self.screenshot()
+    img.save('test17_mark_visited_image_2.png')
+    draw = ImageDraw.Draw(img)
+    points = [(20,40), (25,60), (40,80), (60,75), (80,95), (85,20), (50,40)]
+    draw.polygon([(x, y), (x, y + h), (x + w, y + h), (x + w, y)], outline='rgb(0,255,0)')
+    img.save('test17_mark_visited_image_3.png')
     pass
 
   def test_on(self):
