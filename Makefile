@@ -91,7 +91,7 @@ SAFARIEXTZ_DIST_FILES           = $(DIST_FILES_ALL:%=$(BUILD_DIR_SAFARIEXTZ)/%) 
 
 AUTOUPDATE_TARGETS              = chrome.xml safari.xml opera.xml
 AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/1/%)
-AUTOUPDATE_GM                   = autoupdate/1/metadata.user.js
+AUTOUPDATE_GM                   = autoupdate/1/pixplus.user.js
 
 RELEASE_TARGETS                 = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
@@ -139,12 +139,16 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
-release: $(RELEASE_FILES)
+release: $(RELEASE_FILES) release/latest
 
 $(RELEASE_FILES): $(RELEASE_DIR)/%: $(DIST_DIR)/%
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
+
+release/latest:
+	@rm -rf $@
+	@cp -r $(RELEASE_DIR) $@
 
 clean: clean-changelog
 	@echo 'Cleaning'
@@ -395,8 +399,7 @@ $(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS)
 	@sed -e "s/@VERSION@/$(VERSION_STABLE)/g" \
            < $< > $@
 
-$(AUTOUPDATE_GM):
-	@echo 'Generate: $@'
-	@sed -e '/==\/UserScript==/,$$d' < $(SRC_USERJS) > $@
-	@echo '// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/release/$(VERSION_STABLE)/pixplus.user.js' >> $@
-	@echo '// ==/UserScript==' >> $@
+$(AUTOUPDATE_GM): release/latest/$(SRC_USERJS)
+	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@cp $< $@

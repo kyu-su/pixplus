@@ -7,10 +7,10 @@
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
 // @icon64      http://ccl4.info/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
+// @updateURL   https://raw.githubusercontent.com/crckyl/pixplus/master/autoupdate/1/metadata.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
 // @run-at      document-end
-// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/autoupdate/1/pixplus.user.js
 // ==/UserScript==
 
 (function(entrypoint) {
@@ -6954,7 +6954,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     {
       "date": "2014/09/04",
       "version": "1.12.0",
-      "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0",
+      "releasenote": "",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.",
