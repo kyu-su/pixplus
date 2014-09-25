@@ -6,6 +6,7 @@ import json
 import util
 
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 
 class TestCase(unittest.TestCase):
   run_in_pixiv = True
@@ -62,7 +63,10 @@ class TestCase(unittest.TestCase):
     pass
 
   def wait_illust_list(self):
-    self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
+    try:
+      self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
+    except TimeoutException:
+      raise RuntimeError('No illusts detected! - %s' % self.b.url)
     pass
 
   def has_class(self, element, classname):

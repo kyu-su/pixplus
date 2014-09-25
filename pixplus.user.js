@@ -2070,18 +2070,53 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types) {
+    parse_image_url: function(url, allow_types, allow_sizes) {
       if (!allow_types) {
-        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw', '_master1200'];
+        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+      }
+
+      if (!allow_sizes) {
+        allow_sizes = ['150x150', '240x480', '600x600'];
       }
 
       var re;
-      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/(?:c\/\d+x\d+\/img-master|img(\d+|-inf))\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
-        return null;
-      }
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
-      if (allow_types.indexOf(re[4]) >= 0) {
-        var id = g.parseInt(re[3], 10);
+        var server = re[1],
+            size = re[2],
+            dir = re[3],
+            id = re[4],
+            p0 = re[5],
+            suffix = re[6];
+
+        if (allow_sizes.indexOf(size) < 0) {
+          return null;
+        }
+
+        id = g.parseInt(id, 10);
+        if (id < 1) {
+          return null;
+        }
+
+        if (!p0) {
+          // maybe, it's ugoira
+          return {id: id};
+        }
+
+        return {
+          id: id,
+          image_url_medium: server + 'c/600x600/img-master/' + dir + id + '_p0_master1200' + suffix,
+          image_url_big: server + 'img-original/' + dir + id + '_p0.jpg?',
+          image_url_big_alt: [server + 'img-original/' + dir + id + '_p0.png?']
+        };
+
+      } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|(?:_p\d+)?_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
+
+        if (allow_types.indexOf(re[4]) < 0) {
+          return null;
+        }
+
+        id = g.parseInt(re[3], 10);
         if (id < 1) {
           return null;
         }
@@ -2090,15 +2125,17 @@
           return {id: id};
         } else {
           var url_base = re[1] + re[3], url_suffix = re[5];
+          if (!/\?/.test(url_suffix)) {
+            url_suffix += '?';
+          }
           return {
             id: id,
-            image_url_base: url_base,
-            image_url_suffix: url_suffix,
             image_url_medium: url_base + '_m' + url_suffix,
             image_url_big: url_base + url_suffix
           };
         }
       }
+
       return null;
     },
 
@@ -2106,6 +2143,7 @@
       return {
         id:                   id,
         url_medium:           '/member_illust.php?mode=medium&illust_id=' + id,
+        url_big:              '/member_illust.php?mode=big&illust_id=' + id,
         url_author_profile:   null,
         url_author_works:     null,
         url_author_bookmarks: null,
@@ -2311,18 +2349,18 @@
       } else {
         var img = _.fastxml.q(root, '.works_display a img');
         if (img) {
-          var p = this.parse_image_url(img.attrs.src, '_m');
+          var p = this.parse_image_url(img.attrs.src, ['_m'], ['600x600']);
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
               return false;
             }
             _.extend(illust, p);
-          } else if (!illust.image_url_base) {
+          } else if (!illust.image_url_medium) {
             illust.error = 'Failed to parse medium image url';
             return false;
           }
-        } else if (!illust.image_url_base) {
+        } else if (!illust.image_url_medium) {
           illust.error = 'Medium image not found';
           return false;
         }
@@ -2489,7 +2527,7 @@
       var statuses = {
         html:   0,
         medium: 0,
-        big:    0
+        big:    (load_big_image ? 0 : -1)
       };
 
       var image_medium, image_big;
@@ -2503,6 +2541,7 @@
         var image = new w.Image();
 
         _.listen(image, 'load', function() {
+          _.debug('Image loaded: ' + url);
           illust['image_' + name] = image;
           statuses[name] = 2;
           if (statuses.html > 1) {
@@ -2513,13 +2552,22 @@
 
         var err_on = statuses.html > 1;
         _.listen(image, 'error', function() {
-          statuses[name] = -1;
-          if (statuses[other] < 0 && err_on) {
-            send_error('Failed to load image - ' + url);
+          var alt = illust['image_url_' + name + '_alt'];
+          if (alt && alt.length > 0) {
+            _.debug('Failed to load image: ' + url);
+            var newurl = illust['image_url_' + name] = alt.shift();
+            _.debug('Retrying to load image with new url: ' + newurl);
+            statuses[name] = 0;
+            load_image(name, newurl, other);
+          } else {
+            statuses[name] = -1;
+            if (statuses[other] < 0 && err_on) {
+              send_error('Failed to load image: ' + url);
+            }
           }
         });
 
-        _.debug('trying to load image - ' + name + ':' + url);
+        _.debug('Trying to load image: ' + name + ':' + url);
         image.src = url;
         return image;
       };
@@ -2532,20 +2580,14 @@
           image_medium = load_image('medium', illust.image_url_medium, 'big');
         }
 
-        if (load_big_image) {
+        if (statuses.big === 0 && illust.image_url_big) {
           if (illust.image_big) {
             statuses.big = 2;
           } else {
             image_big = load_image('big', illust.image_url_big, 'medium');
           }
-        } else {
-          statuses.big = -1;
         }
       };
-
-      if (illust.image_url_base) {
-        start_images();
-      }
 
       _.xhr.get(illust.url_medium, function(text) {
         if (!that.parse_medium_html(illust, text)) {
@@ -2619,19 +2661,29 @@
             _.popup.onload(illust);
           }
 
-          if (statuses.medium <= 1 && statuses.big <= 1 &&
+          // error recovery
+
+          if (statuses.big <= 1 && statuses.medium <= 1 &&
               image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
-            _.log('reloading medium image with new url');
-            statuses.medium = 1;
-            image_medium.src = illust.image_url_medium;
+            _.debug('Reloading medium image with new url');
+            if (statuses.medium === 1) {
+              image_medium.src = illust.image_url_medium;
+            } else {
+              statuses.medium = 0;
+            }
           }
 
           if (load_big_image && statuses.big <= 1 &&
               image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
-            _.log('reloading big image with new url');
-            statuses.big = 1;
-            image_big.src = illust.image_url_big;
+            _.log('Reloading big image with new url');
+            if (statuses.big === 1) {
+              image_big.src = illust.image_url_big;
+            } else {
+              statuses.big = 0;
+            }
           }
+
+          start_images();
 
           if (statuses.medium < 0 && statuses.big < 0) {
             send_error('Failed to load image');
@@ -2645,6 +2697,10 @@
       }, function() {
         send_error('Failed to load medium html');
       });
+
+      if (illust.image_url_medium) {
+        start_images();
+      }
     },
 
     unload: function(illust) {
@@ -3165,7 +3221,7 @@
         return;
       }
 
-      _.log('popup: adjust');
+      _.debug('popup: adjust');
 
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
