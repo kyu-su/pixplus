@@ -74,7 +74,7 @@ class Test_Manga(TestCase):
 
 
     for page_pattern in '1,2-3,4', '1,3-2,4':
-      iid = self.config['manga-test-targets']['page-pattern'][page_pattern]
+      iid = self.config['test-targets']['manga'][page_pattern]
       self.open_popup(iid)
       data = self.popup_get_illust_data()
       btn = self.q('#pp-popup-button-manga')
