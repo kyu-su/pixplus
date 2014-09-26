@@ -3,7 +3,7 @@
   <name>pixplus</name>
   <description>hogehoge</description>
   <author href="http://my.opera.com/crckyl/">wowo</author>
-  <update-description href="http://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/opera.xml"/>
+  <update-description href="https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/opera.xml"/>
 @LICENSE@
 @ICONS@
 @CONFIG@

@@ -1,1 +1,1 @@
-<update-info xmlns="http://www.w3.org/ns/widgets" src="http://ccl4.info/cgit/pixplus.git/plain/release/@VERSION@/pixplus.oex" version="@VERSION@"></update-info>
+<update-info xmlns="http://www.w3.org/ns/widgets" src="https://ccl4.info/cgit/pixplus.git/plain/release/@VERSION@/pixplus.oex" version="@VERSION@"></update-info>
