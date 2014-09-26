@@ -8,14 +8,14 @@ class Test_Manga(TestCase):
     self.assertEqual(btn.text, '[M:%s/%d]' % ('-'.join(map(str, sorted(pages))), page_count))
     pass
 
-  def check(self, illust_id):
+  def check(self, illust_id, page_pattern):
     self.open('/member_illust.php?mode=manga&illust_id=%d' % illust_id)
 
     pages = self.js('return pixiv.context.pages')
     images = self.js('return pixiv.context.images')
     page_count = len(images)
 
-    self.page_patterns.add(','.join(map(lambda p: '-'.join(map(str, p)), pages)))
+    self.assertEqual(','.join(map(lambda p: '-'.join(map(str, p)), pages)), page_pattern)
 
     self.open_popup(illust_id)
     self.check_indicator([0], page_count)
@@ -64,8 +64,6 @@ class Test_Manga(TestCase):
     pass
 
   def test_manga(self):
-    self.page_patterns = set()
-
     self.open('/member_illust.php?mode=manga&illust_id=6209105')
 
     self.assertEqual(self.js('return pixiv.context.pages'), [[1], [2], [3]])
@@ -75,41 +73,16 @@ class Test_Manga(TestCase):
                       'http://i1.pixiv.net/img01/img/pixiv/6209105_p2.jpg'])
 
 
-    self.open_test_user()
-
-    ids = self.js('''
-      return pixplus.illust.list.map(function(illust) {
-        return illust.id;
-      });
-    ''')
-
-    manga_ids = []
-    for iid in ids:
+    for page_pattern in '1,2-3,4', '1,3-2,4':
+      iid = self.config['manga-test-targets']['page-pattern'][page_pattern]
       self.open_popup(iid)
       data = self.popup_get_illust_data()
       btn = self.q('#pp-popup-button-manga')
-      if data['manga']['available']:
-        self.assertTrue(btn.is_displayed())
-        self.assertEqual(btn.text, '[M:0/%d]' % data['manga']['page_count'])
-        manga_ids.append(iid)
-      else:
-        self.assertFalse(btn.is_displayed())
-        pass
+      self.assertTrue(data['manga']['available'])
+      self.assertTrue(btn.is_displayed())
+      self.assertEqual(btn.text, '[M:0/%d]' % data['manga']['page_count'])
+      self.check(iid, page_pattern)
       pass
-
-    self.assertTrue(manga_ids)
-
-    for iid in manga_ids:
-      self.check(iid)
-      pass
-
-    required_page_patterns = set([
-        '1,2-3,4',
-        '1,3-2,4',
-        '1-2,3-4',
-        '2-1,4-3'
-        ])
-    self.assertTrue(required_page_patterns.issubset(self.page_patterns))
     pass
 
   pass
