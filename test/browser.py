@@ -39,6 +39,14 @@ class Browser:
       desired_capabilities = caps
       )
     self.driver.implicitly_wait(2)
+
+    time.sleep(3)
+    for h in self.driver.window_handles[1:]:
+      self.driver.switch_to.window(h)
+      self.driver.close()
+      pass
+    self.driver.switch_to.window(self.driver.window_handles[0])
+    self.driver.switch_to_default_content()
     pass
 
   def quit(self):
@@ -66,7 +74,7 @@ class Browser:
 
   def wait_page_load(self):
     time.sleep(1)
-    self.wait_until(lambda d: self.js('return window.document&&document.readyState==="complete"'))
+    self.wait_until(lambda d: self.js('return window.document&&window.document.readyState==="complete"'))
     pass
 
   def open(self, url):
@@ -147,5 +155,13 @@ class Browser:
       pass
 
     return img
+
+  def download(self, url, filename):
+    dlpath = os.path.join(self.browserdir, filename)
+    if not os.path.exists(dlpath) or os.stat(dlpath).st_mtime < time.time() - 60 * 60 * 24:
+      util.download(url, dlpath)
+      pass
+    return dlpath
+
 
   pass

@@ -46,11 +46,7 @@ class Firefox(Browser):
   def prepare_addon(self, addonid, name):
     filename = 'addon-%d-latest.xpi' % addonid
     url = 'https://addons.mozilla.org/firefox/downloads/latest/%d/%s' % (addonid, filename)
-    dlpath = os.path.join(self.browserdir, filename)
-    if not os.path.exists(dlpath) or os.stat(dlpath).st_mtime < time.time() - 60 * 60 * 24:
-      util.download(url, dlpath)
-      pass
-    return dlpath
+    return self.download(url, filename)
 
   def add_addon(self, name):
     filename = self.prepare_addon(ADDONS[name], name)

@@ -1,5 +1,6 @@
 import os
 import base64
+import time
 
 from browser import Browser
 
@@ -8,8 +9,13 @@ class Chrome(Browser):
   capname = 'CHROME'
 
   def prepare_caps(self, caps):
+    # filename = 'abp.crx'
+    # url = 'https://downloads.adblockplus.org/devbuilds/adblockpluschrome/adblockpluschrome-1.8.5.1232.crx'
+    # abp = self.download(url, filename)
+
     self.extensions = []
     self.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
+    # self.add_extension(abp)
 
     caps['chromeOptions'] = {
       'extensions': self.extensions
