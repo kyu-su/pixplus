@@ -139,14 +139,15 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
-release: $(RELEASE_FILES) release/latest
+release: $(RELEASE_FILES) release/latest $(AUTOUPDATE_GM)
 
 $(RELEASE_FILES): $(RELEASE_DIR)/%: $(DIST_DIR)/%
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-release/latest:
+release/latest: $(RELEASE_DIR)
+	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@rm -rf $@
 	@cp -r $(RELEASE_DIR) $@
 

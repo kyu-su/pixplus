@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.12.0
+// @version     1.12.1
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
 // @icon64      http://ccl4.info/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
-// @updateURL   https://raw.githubusercontent.com/crckyl/pixplus/master/autoupdate/1/metadata.user.js
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
 // @run-at      document-end
+// @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
 // ==/UserScript==
 
 (function(entrypoint) {
@@ -2070,18 +2070,55 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types) {
+    parse_image_url: function(url, allow_types, allow_sizes) {
       if (!allow_types) {
-        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw', '_master1200'];
+        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+      }
+
+      if (!allow_sizes) {
+        allow_sizes = ['150x150', '240x480', '600x600'];
       }
 
       var re;
-      if (!(re = /^(http:\/\/i\d+\.pixiv\.net\/(?:c\/\d+x\d+\/img-master|img(\d+|-inf))\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
-        return null;
-      }
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
-      if (allow_types.indexOf(re[4]) >= 0) {
-        var id = g.parseInt(re[3], 10);
+        var server = re[1],
+            size   = re[2],
+            dir    = re[3],
+            id     = re[4],
+            rest   = re[5] || '', // access restriction
+            p0     = re[6],
+            suffix = re[7];
+
+        if (allow_sizes.indexOf(size) < 0) {
+          return null;
+        }
+
+        id = g.parseInt(id, 10);
+        if (id < 1) {
+          return null;
+        }
+
+        if (!p0) {
+          // maybe, it's ugoira
+          return {id: id};
+        }
+
+        return {
+          id: id,
+          image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + '_p0_master1200' + suffix,
+          image_url_big: server + 'img-original/' + dir + id + rest + '_p0.jpg?',
+          image_url_big_alt: [server + 'img-original/' + dir + id + rest + '_p0.png?',
+                              server + 'img-original/' + dir + id + rest + '_p0.gif?']
+        };
+
+      } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|(?:_p\d+)?_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
+
+        if (allow_types.indexOf(re[4]) < 0) {
+          return null;
+        }
+
+        id = g.parseInt(re[3], 10);
         if (id < 1) {
           return null;
         }
@@ -2090,15 +2127,17 @@
           return {id: id};
         } else {
           var url_base = re[1] + re[3], url_suffix = re[5];
+          if (!/\?/.test(url_suffix)) {
+            url_suffix += '?';
+          }
           return {
             id: id,
-            image_url_base: url_base,
-            image_url_suffix: url_suffix,
             image_url_medium: url_base + '_m' + url_suffix,
             image_url_big: url_base + url_suffix
           };
         }
       }
+
       return null;
     },
 
@@ -2106,6 +2145,7 @@
       return {
         id:                   id,
         url_medium:           '/member_illust.php?mode=medium&illust_id=' + id,
+        url_big:              '/member_illust.php?mode=big&illust_id=' + id,
         url_author_profile:   null,
         url_author_works:     null,
         url_author_bookmarks: null,
@@ -2311,18 +2351,18 @@
       } else {
         var img = _.fastxml.q(root, '.works_display a img');
         if (img) {
-          var p = this.parse_image_url(img.attrs.src, '_m');
+          var p = this.parse_image_url(img.attrs.src, ['_m'], ['600x600']);
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
               return false;
             }
             _.extend(illust, p);
-          } else if (!illust.image_url_base) {
+          } else if (!illust.image_url_medium) {
             illust.error = 'Failed to parse medium image url';
             return false;
           }
-        } else if (!illust.image_url_base) {
+        } else if (!illust.image_url_medium) {
           illust.error = 'Medium image not found';
           return false;
         }
@@ -2489,7 +2529,7 @@
       var statuses = {
         html:   0,
         medium: 0,
-        big:    0
+        big:    (load_big_image ? 0 : -1)
       };
 
       var image_medium, image_big;
@@ -2503,6 +2543,7 @@
         var image = new w.Image();
 
         _.listen(image, 'load', function() {
+          _.debug('Image loaded: ' + url);
           illust['image_' + name] = image;
           statuses[name] = 2;
           if (statuses.html > 1) {
@@ -2513,13 +2554,22 @@
 
         var err_on = statuses.html > 1;
         _.listen(image, 'error', function() {
-          statuses[name] = -1;
-          if (statuses[other] < 0 && err_on) {
-            send_error('Failed to load image - ' + url);
+          var alt = illust['image_url_' + name + '_alt'];
+          if (alt && alt.length > 0) {
+            _.debug('Failed to load image: ' + url);
+            var newurl = illust['image_url_' + name] = alt.shift();
+            _.debug('Retrying to load image with new url: ' + newurl);
+            statuses[name] = 0;
+            load_image(name, newurl, other);
+          } else {
+            statuses[name] = -1;
+            if (statuses[other] < 0 && err_on) {
+              send_error('Failed to load image: ' + url);
+            }
           }
         });
 
-        _.debug('trying to load image - ' + name + ':' + url);
+        _.debug('Trying to load image: ' + name + ':' + url);
         image.src = url;
         return image;
       };
@@ -2532,20 +2582,14 @@
           image_medium = load_image('medium', illust.image_url_medium, 'big');
         }
 
-        if (load_big_image) {
+        if (statuses.big === 0 && illust.image_url_big) {
           if (illust.image_big) {
             statuses.big = 2;
           } else {
             image_big = load_image('big', illust.image_url_big, 'medium');
           }
-        } else {
-          statuses.big = -1;
         }
       };
-
-      if (illust.image_url_base) {
-        start_images();
-      }
 
       _.xhr.get(illust.url_medium, function(text) {
         if (!that.parse_medium_html(illust, text)) {
@@ -2619,19 +2663,29 @@
             _.popup.onload(illust);
           }
 
-          if (statuses.medium <= 1 && statuses.big <= 1 &&
+          // error recovery
+
+          if (statuses.big <= 1 && statuses.medium <= 1 &&
               image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
-            _.log('reloading medium image with new url');
-            statuses.medium = 1;
-            image_medium.src = illust.image_url_medium;
+            _.debug('Reloading medium image with new url');
+            if (statuses.medium === 1) {
+              image_medium.src = illust.image_url_medium;
+            } else {
+              statuses.medium = 0;
+            }
           }
 
           if (load_big_image && statuses.big <= 1 &&
               image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
-            _.log('reloading big image with new url');
-            statuses.big = 1;
-            image_big.src = illust.image_url_big;
+            _.log('Reloading big image with new url');
+            if (statuses.big === 1) {
+              image_big.src = illust.image_url_big;
+            } else {
+              statuses.big = 0;
+            }
           }
+
+          start_images();
 
           if (statuses.medium < 0 && statuses.big < 0) {
             send_error('Failed to load image');
@@ -2645,6 +2699,10 @@
       }, function() {
         send_error('Failed to load medium html');
       });
+
+      if (illust.image_url_medium) {
+        start_images();
+      }
     },
 
     unload: function(illust) {
@@ -2677,6 +2735,7 @@
 
           ++cnt;
           if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
+            _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
             urls.unshift(url);
             urls_big.unshift(url_big);
           } else {
@@ -3165,7 +3224,7 @@
         return;
       }
 
-      _.log('popup: adjust');
+      _.debug('popup: adjust');
 
       var dom = this.dom, root = dom.root, de = d.documentElement,
           max_size = this.calculate_max_content_size();
@@ -3850,10 +3909,19 @@
 
       (function(re) {
         if (!re) {
+          _.error('Failed to detect pixiv.context.tags declaration');
           return;
         }
 
-        var tags = re[1].replace(/\\([\\\"])/g, '$1');
+        var tags, tags_data;
+
+        try {
+          tags = g.JSON.parse(re[1]); // eval(re[1])
+          tags_data = g.JSON.parse(tags);
+        } catch(ex) {
+          _.error('Failed to parse pixiv.context.tags json', ex);
+          return;
+        }
 
         w.pixiv.context.tags = tags;
 
@@ -3864,12 +3932,12 @@
 
         w.pixiv.tag.setup();
 
-        w.pixiv.bookmarkTag.data = g.JSON.parse(tags);
+        w.pixiv.bookmarkTag.data = tags_data;
         w.pixiv.bookmarkTag.initialize();
         w.pixiv.bookmarkTag.show();
         w.pixiv.bookmarkTag.tagContainer.removeClass('loading-indicator');
 
-      })(/>pixiv\.context\.tags\s*=\s*\'([^\']+)';/.exec(html));
+      })(/>pixiv\.context\.tags\s*=\s*(\"[^\"]+\");/.exec(html));
 
       var that = this;
 
@@ -6952,9 +7020,27 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     // __CHANGELOG_BEGIN__
 
     {
+      "date": "2014/09/27",
+      "version": "1.12.1",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/27/pixplus_1.12.1",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Follow pixiv's changes.",
+          "[Fix] Fix bookmark mode was broken.",
+          "[Fix] Fix GreaseMonkey auto update."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002",
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u3046\u307e\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] GreaseMonkey \u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
+    {
       "date": "2014/09/04",
       "version": "1.12.0",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0",
       "changes_i18n": {
         "en": [
           "[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.",

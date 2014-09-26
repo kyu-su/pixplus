@@ -1,6 +1,20 @@
 pixplus version history
 =======================
 
+## [1.12.1 - 2014/09/27](http://crckyl.hatenablog.com/entry/2014/09/27/pixplus_1.12.1)
+
+### 変更点
+
+* [修正] pixivの変更に対応。
+* [修正] ブックマークモードがうまく動作しなくなっていた不具合を修正。
+* [修正] GreaseMonkey の自動アップデートが壊れていた不具合を修正。
+
+### Changes
+
+* [Fix] Follow pixiv's changes.
+* [Fix] Fix bookmark mode was broken.
+* [Fix] Fix GreaseMonkey auto update.
+
 ## [1.12.0 - 2014/09/04](http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0)
 
 ### 変更点
