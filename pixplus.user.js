@@ -10,7 +10,7 @@
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
 // @run-at      document-end
-// @downloadURL https://raw.githubusercontent.com/crckyl/pixplus/master/autoupdate/1/pixplus.user.js
+// @downloadURL https://rawgit.com/crckyl/pixplus/master/autoupdate/1/pixplus.user.js
 // ==/UserScript==
 
 (function(entrypoint) {
