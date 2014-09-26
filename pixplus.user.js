@@ -2080,7 +2080,7 @@
       }
 
       var re;
-      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
         var server = re[1],
             size   = re[2],
