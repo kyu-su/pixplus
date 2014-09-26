@@ -2733,6 +2733,7 @@
 
           ++cnt;
           if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
+            _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
             urls.unshift(url);
             urls_big.unshift(url_big);
           } else {
