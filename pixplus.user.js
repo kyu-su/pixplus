@@ -3906,10 +3906,19 @@
 
       (function(re) {
         if (!re) {
+          _.error('Failed to detect pixiv.context.tags declaration');
           return;
         }
 
-        var tags = re[1].replace(/\\([\\\"])/g, '$1');
+        var tags, tags_data;
+
+        try {
+          tags = g.JSON.parse(re[1]); // eval(re[1])
+          tags_data = g.JSON.parse(tags);
+        } catch(ex) {
+          _.error('Failed to parse pixiv.context.tags json', ex);
+          return;
+        }
 
         w.pixiv.context.tags = tags;
 
@@ -3920,12 +3929,12 @@
 
         w.pixiv.tag.setup();
 
-        w.pixiv.bookmarkTag.data = g.JSON.parse(tags);
+        w.pixiv.bookmarkTag.data = tags_data;
         w.pixiv.bookmarkTag.initialize();
         w.pixiv.bookmarkTag.show();
         w.pixiv.bookmarkTag.tagContainer.removeClass('loading-indicator');
 
-      })(/>pixiv\.context\.tags\s*=\s*\'([^\']+)';/.exec(html));
+      })(/>pixiv\.context\.tags\s*=\s*(\"[^\"]+\");/.exec(html));
 
       var that = this;
 
