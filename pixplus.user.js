@@ -7023,9 +7023,13 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
+          "[Fix] Follow pixiv's changes.",
+          "[Fix] Fix bookmark mode was broken.",
           "[Fix] Fix GreaseMonkey auto update."
         ],
         "ja": [
+          "[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002",
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u3046\u307e\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
           "[\u4fee\u6b63] GreaseMonkey \u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
