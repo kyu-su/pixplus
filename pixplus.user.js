@@ -2080,14 +2080,15 @@
       }
 
       var re;
-      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
         var server = re[1],
-            size = re[2],
-            dir = re[3],
-            id = re[4],
-            p0 = re[5],
-            suffix = re[6];
+            size   = re[2],
+            dir    = re[3],
+            id     = re[4],
+            rest   = re[5] || '', // access restriction
+            p0     = re[6],
+            suffix = re[7];
 
         if (allow_sizes.indexOf(size) < 0) {
           return null;
@@ -2105,9 +2106,10 @@
 
         return {
           id: id,
-          image_url_medium: server + 'c/600x600/img-master/' + dir + id + '_p0_master1200' + suffix,
-          image_url_big: server + 'img-original/' + dir + id + '_p0.jpg?',
-          image_url_big_alt: [server + 'img-original/' + dir + id + '_p0.png?']
+          image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + '_p0_master1200' + suffix,
+          image_url_big: server + 'img-original/' + dir + id + rest + '_p0.jpg?',
+          image_url_big_alt: [server + 'img-original/' + dir + id + rest + '_p0.png?',
+                              server + 'img-original/' + dir + id + rest + '_p0.gif?']
         };
 
       } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|(?:_p\d+)?_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
