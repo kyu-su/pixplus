@@ -37,11 +37,13 @@ class TestCase(unittest.TestCase):
         self.open('/')
         pass
 
+      js = []
       for section in conf:
         for item in section['items']:
-          self.set_conf('%s.%s' % (section['name'], item['key']), item['value'])
+          js.append('pixplus.conf.%s.%s=%s' % (section['name'], item['key'], json.dumps(item['value'])))
           pass
         pass
+      self.js(';'.join(js))
       pass
     pass
 
@@ -232,7 +234,6 @@ class TestCase(unittest.TestCase):
     return self.js('return pixplus.conf.%s' % key)
 
   def set_conf(self, key, value):
-    old = self.get_conf(key)
     self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
     pass
 

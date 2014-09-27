@@ -9,18 +9,18 @@ class Chrome(Browser):
   capname = 'CHROME'
 
   def prepare_caps(self, caps):
-    # filename = 'abp.crx'
-    # url = 'https://downloads.adblockplus.org/devbuilds/adblockpluschrome/adblockpluschrome-1.8.5.1232.crx'
-    # abp = self.download(url, filename)
-
     self.extensions = []
     self.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
-    # self.add_extension(abp)
+    self.add_extension(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
 
     caps['chromeOptions'] = {
       'extensions': self.extensions
       }
     pass
+
+  def download_crx(self, filename, ext_id, chrome_version = '37.0.2062.120'):
+    url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc' % (ext_id, chrome_version)
+    return self.download(url, filename)
 
   def add_extension(self, filename):
     fp = open(filename, 'rb')

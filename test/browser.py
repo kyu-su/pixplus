@@ -74,7 +74,7 @@ class Browser:
 
   def wait_page_load(self):
     time.sleep(1)
-    self.wait_until(lambda d: self.js('return window.document&&window.document.readyState==="complete"'))
+    self.wait_until(lambda d: self.js('return !!(window.document&&window.document.readyState==="complete")'))
     pass
 
   def open(self, url):
