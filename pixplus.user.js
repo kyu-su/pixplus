@@ -2426,7 +2426,7 @@
       }
 
       try {
-        illust.author_is_me = illust.author_id == w.pixiv.user.id;
+        illust.author_is_me = illust.author_id === w.pixiv.user.id;
       } catch(ex) {
         _.error(ex);
       }
@@ -2719,44 +2719,108 @@
     },
 
     parse_manga_html: function(illust, html) {
-      var that = this, pages = [], cnt = 0;
+      var that = this, pages = [], i;
 
-      var root = _.fastxml.parse(html);
-      _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
-        var urls = [], urls_big = [];
+      var images = [], images_big = [];
 
-        _.fastxml.qa(page, 'img').forEach(function(img) {
-          if (img.attrs['data-filter'] !== 'manga-image') {
-            return;
+      (function() {
+        var terms = html.split(/pixiv\.context\.(images|originalImages)\[(\d+)\] *= *(\"[^\"]+\")/);
+        for(var i = 1; i + 1 < terms.length; i += 4) {
+          var type = terms[i],
+              num  = terms[i + 1],
+              url  = terms[i + 2];
+          _.log(type + ':' + num + ' ' + url);
+          try {
+            (type === 'originalImages' ? images : images_big)[g.parseInt(num)] = g.JSON.parse(url);
+          } catch(ex) {
+            _.warn('Failed to parse pixiv.context.images json', ex);
+          }
+        }
+      })();
+
+      if (/pixiv\.context\.bound *= *true/.test(html)) {
+        // book
+        var rtl = !(/pixiv\.context\.rtl *= *false/.test(html)); // make default to true
+        for(i = 0; i < illust.manga.page_count; ++i) {
+          if (!(images[i] && images_big[i])) {
+            _.error('Could not detect manga image url for page idx ' + 1);
+            return false;
           }
 
-          var url = img.attrs['data-src'] || img.attrs.src,
-              url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+          if (i === 0 || (i + 1) === illust.manga.page_count) {
+            pages.push({
+              image_urls: [images[i]],
+              image_urls_big: [images_big[i]],
+              images: [],
+              images_big: []
+            });
 
-          ++cnt;
-          if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
-            _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
-            urls.unshift(url);
-            urls_big.unshift(url_big);
           } else {
-            urls.push(url);
-            urls_big.push(url_big);
+            if (!(images[i + 1] && images_big[i + 1])) {
+              _.error('Could not detect manga image url for page idx ' + (i + 1));
+              return false;
+            }
+
+            if (rtl) {
+              pages.push({
+                image_urls: [images[i + 1], images[i]],
+                image_urls_big: [images_big[i + 1], images_big[i]],
+                images: [],
+                images_big: []
+              });
+            } else {
+              pages.push({
+                image_urls: [images[i], images[i + 1]],
+                image_urls_big: [images_big[i], images_big[i + 1]],
+                images: [],
+                images_big: []
+              });
+            }
+
+            ++i;
+          }
+        }
+
+      } else {
+        // multi images
+
+        var root = _.fastxml.parse(html), cnt = 0;
+        _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
+          var urls = [], urls_big = [];
+
+          _.fastxml.qa(page, 'img').forEach(function(img) {
+            if (img.attrs['data-filter'] !== 'manga-image') {
+              return;
+            }
+
+            var url = img.attrs['data-src'] || img.attrs.src,
+                url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+
+            ++cnt;
+            if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
+              _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
+              urls.unshift(url);
+              urls_big.unshift(url_big);
+            } else {
+              urls.push(url);
+              urls_big.push(url_big);
+            }
+          });
+
+          if (urls.length) {
+            pages.push({
+              image_urls: urls,
+              image_urls_big: urls_big,
+              images: [],
+              images_big: []
+            });
           }
         });
 
-        if (urls.length) {
-          pages.push({
-            image_urls: urls,
-            image_urls_big: urls_big,
-            images: [],
-            images_big: []
-          });
+        if (cnt !== illust.manga.page_count) {
+          _.error('Multiple illust page count mismatch!');
+          return false;
         }
-      });
-
-      if (cnt !== illust.manga.page_count) {
-        _.error('Manga page count mismatch!');
-        return false;
       }
 
       illust.manga.pages = pages;
