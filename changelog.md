@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.12.3 - 2014/10/01](http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3)
+
+### 変更点
+
+* [修正] ブック形式機能をサポート。
+
+### Changes
+
+* [Fix] Support for pixiv's new "book" feature.
+
 ## [1.12.1 - 2014/09/27](http://crckyl.hatenablog.com/entry/2014/09/27/pixplus_1.12.1)
 
 ### 変更点

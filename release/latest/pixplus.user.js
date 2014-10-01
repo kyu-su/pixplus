@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.12.1
+// @version     1.12.3
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -2426,7 +2426,7 @@
       }
 
       try {
-        illust.author_is_me = illust.author_id == w.pixiv.user.id;
+        illust.author_is_me = illust.author_id === w.pixiv.user.id;
       } catch(ex) {
         _.error(ex);
       }
@@ -2719,44 +2719,108 @@
     },
 
     parse_manga_html: function(illust, html) {
-      var that = this, pages = [], cnt = 0;
+      var that = this, pages = [], i;
 
-      var root = _.fastxml.parse(html);
-      _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
-        var urls = [], urls_big = [];
+      var images = [], images_big = [];
 
-        _.fastxml.qa(page, 'img').forEach(function(img) {
-          if (img.attrs['data-filter'] !== 'manga-image') {
-            return;
+      (function() {
+        var terms = html.split(/pixiv\.context\.(images|originalImages)\[(\d+)\] *= *(\"[^\"]+\")/);
+        for(var i = 1; i + 1 < terms.length; i += 4) {
+          var type = terms[i],
+              num  = terms[i + 1],
+              url  = terms[i + 2];
+          _.log(type + ':' + num + ' ' + url);
+          try {
+            (type === 'originalImages' ? images : images_big)[g.parseInt(num)] = g.JSON.parse(url);
+          } catch(ex) {
+            _.warn('Failed to parse pixiv.context.images json', ex);
+          }
+        }
+      })();
+
+      if (/pixiv\.context\.bound *= *true/.test(html)) {
+        // book
+        var rtl = !(/pixiv\.context\.rtl *= *false/.test(html)); // make default to true
+        for(i = 0; i < illust.manga.page_count; ++i) {
+          if (!(images[i] && images_big[i])) {
+            _.error('Could not detect manga image url for page idx ' + 1);
+            return false;
           }
 
-          var url = img.attrs['data-src'] || img.attrs.src,
-              url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+          if (i === 0 || (i + 1) === illust.manga.page_count) {
+            pages.push({
+              image_urls: [images[i]],
+              image_urls_big: [images_big[i]],
+              images: [],
+              images_big: []
+            });
 
-          ++cnt;
-          if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
-            _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
-            urls.unshift(url);
-            urls_big.unshift(url_big);
           } else {
-            urls.push(url);
-            urls_big.push(url_big);
+            if (!(images[i + 1] && images_big[i + 1])) {
+              _.error('Could not detect manga image url for page idx ' + (i + 1));
+              return false;
+            }
+
+            if (rtl) {
+              pages.push({
+                image_urls: [images[i + 1], images[i]],
+                image_urls_big: [images_big[i + 1], images_big[i]],
+                images: [],
+                images_big: []
+              });
+            } else {
+              pages.push({
+                image_urls: [images[i], images[i + 1]],
+                image_urls_big: [images_big[i], images_big[i + 1]],
+                images: [],
+                images_big: []
+              });
+            }
+
+            ++i;
+          }
+        }
+
+      } else {
+        // multi images
+
+        var root = _.fastxml.parse(html), cnt = 0;
+        _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
+          var urls = [], urls_big = [];
+
+          _.fastxml.qa(page, 'img').forEach(function(img) {
+            if (img.attrs['data-filter'] !== 'manga-image') {
+              return;
+            }
+
+            var url = img.attrs['data-src'] || img.attrs.src,
+                url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
+
+            ++cnt;
+            if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
+              _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
+              urls.unshift(url);
+              urls_big.unshift(url_big);
+            } else {
+              urls.push(url);
+              urls_big.push(url_big);
+            }
+          });
+
+          if (urls.length) {
+            pages.push({
+              image_urls: urls,
+              image_urls_big: urls_big,
+              images: [],
+              images_big: []
+            });
           }
         });
 
-        if (urls.length) {
-          pages.push({
-            image_urls: urls,
-            image_urls_big: urls_big,
-            images: [],
-            images_big: []
-          });
+        if (cnt !== illust.manga.page_count) {
+          _.error('Multiple illust page count mismatch!');
+          return false;
         }
-      });
-
-      if (cnt !== illust.manga.page_count) {
-        _.error('Manga page count mismatch!');
-        return false;
       }
 
       illust.manga.pages = pages;
@@ -3171,9 +3235,12 @@
         image_height.push(height);
       });
 
+      var left = 0;
       this.images.forEach(function(img, idx) {
-        var mtop = g.Math.floor((layout_height - image_height[idx]) / 2);
-        img.style.margin = mtop + 'px 0px 0px 0px';
+        var top = g.Math.floor((layout_height - image_height[idx]) / 2);
+        img.style.left = left + 'px';
+        img.style.top = top + 'px';
+        left += img.offsetWidth;
       });
 
       dom.image_layout.style.width  = layout_width + 'px';
@@ -6336,14 +6403,14 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
-#pp-popup-image-layout{display:block}\
+#pp-popup-image-layout{display:block;position:relative}\
+#pp-popup-image-layout img{position:absolute}\
 .pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}\
 .pp-popup-olc.pp-active:hover{opacity:0.6}\
 .pp-popup-olc svg{position:relative}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
 #pp-popup-olc-prev{left:0px}\
 #pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
-#pp-popup-image-layout{display:inline-block;font-size:200%}\
 \
 /* bookmark */\
 #pp-popup-bookmark-wrapper{display:none;border:1px solid #aaa}\
@@ -7018,6 +7085,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
   _.changelog = [
     // __CHANGELOG_BEGIN__
+
+    {
+      "date": "2014/10/01",
+      "version": "1.12.3",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Support for pixiv's new \"book\" feature."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u5f62\u5f0f\u6a5f\u80fd\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
+        ]
+      }
+    },
 
     {
       "date": "2014/09/27",
