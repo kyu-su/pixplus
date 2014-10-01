@@ -3235,9 +3235,12 @@
         image_height.push(height);
       });
 
+      var left = 0;
       this.images.forEach(function(img, idx) {
-        var mtop = g.Math.floor((layout_height - image_height[idx]) / 2);
-        img.style.margin = mtop + 'px 0px 0px 0px';
+        var top = g.Math.floor((layout_height - image_height[idx]) / 2);
+        img.style.left = left + 'px';
+        img.style.top = top + 'px';
+        left += img.offsetWidth;
       });
 
       dom.image_layout.style.width  = layout_width + 'px';
@@ -6400,14 +6403,14 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
-#pp-popup-image-layout{display:block}\
+#pp-popup-image-layout{display:block;position:relative}\
+#pp-popup-image-layout img{position:absolute}\
 .pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}\
 .pp-popup-olc.pp-active:hover{opacity:0.6}\
 .pp-popup-olc svg{position:relative}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
 #pp-popup-olc-prev{left:0px}\
 #pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
-#pp-popup-image-layout{display:inline-block;font-size:200%}\
 \
 /* bookmark */\
 #pp-popup-bookmark-wrapper{display:none;border:1px solid #aaa}\
