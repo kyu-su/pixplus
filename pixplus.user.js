@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.12.1
+// @version     1.12.3
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -7084,6 +7084,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+    {
+      "date": "2014/10/01",
+      "version": "1.12.3",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Support for pixiv's new \"book\" feature."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30d6\u30c3\u30af\u5f62\u5f0f\u6a5f\u80fd\u3092\u30b5\u30dd\u30fc\u30c8\u3002"
+        ]
+      }
+    },
+
     // __CHANGELOG_BEGIN__
 
     {
