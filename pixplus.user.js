@@ -2731,7 +2731,7 @@
               url  = terms[i + 2];
           _.log(type + ':' + num + ' ' + url);
           try {
-            (type === 'originalImages' ? images : images_big)[g.parseInt(num)] = g.JSON.parse(url);
+            (type === 'originalImages' ? images_big : images)[g.parseInt(num)] = g.JSON.parse(url);
           } catch(ex) {
             _.warn('Failed to parse pixiv.context.images json', ex);
           }
