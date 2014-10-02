@@ -6401,6 +6401,7 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
 #pp-popup-image-layout{display:inline-block}\
+#pp-popup-image-layout img{vertical-align:top}\
 .pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}\
 .pp-popup-olc.pp-active:hover{opacity:0.6}\
 .pp-popup-olc svg{position:relative}\
