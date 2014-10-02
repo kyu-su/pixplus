@@ -11,7 +11,7 @@ class Chrome(Browser):
   def prepare_caps(self, caps):
     self.extensions = []
     self.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
-    self.add_extension(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
+    # self.add_extension(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
 
     caps['chromeOptions'] = {
       'extensions': self.extensions

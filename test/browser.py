@@ -145,9 +145,9 @@ class Browser:
     pass
 
   def screenshot(self, elem = None):
-    ss = self.driver.get_screenshot_as_base64().encode('ascii')
-    io = util.BytesIO(base64.b64decode(ss))
-    img = Image.open(io).convert('RGB')
+    ss = self.driver.get_screenshot_as_png()
+    io = util.BytesIO(ss)
+    img = Image.open(io)
 
     if elem is not None:
       x, y, w, h = tuple(map(int, self.geom(elem)))

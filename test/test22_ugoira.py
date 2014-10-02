@@ -4,7 +4,8 @@ import time
 import hashlib
 import urllib.request
 import zipfile
-from PIL import Image
+
+from PIL import Image, ImageChops
 
 from test_base import TestCase
 
