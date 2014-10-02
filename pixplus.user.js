@@ -2079,16 +2079,16 @@
         allow_sizes = ['150x150', '240x480', '600x600'];
       }
 
-      var re;
-      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p0)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
+      var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page;
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
-        var server = re[1],
-            size   = re[2],
-            dir    = re[3],
-            id     = re[4],
-            rest   = re[5] || '', // access restriction
-            p0     = re[6],
-            suffix = re[7];
+        server = re[1];
+        size   = re[2];
+        dir    = re[3];
+        id     = re[4];
+        rest   = re[5] || ''; // access restriction
+        page   = re[6] || '';
+        suffix = re[7];
 
         if (allow_sizes.indexOf(size) < 0) {
           return null;
@@ -2099,41 +2099,49 @@
           return null;
         }
 
-        if (!p0) {
+        if (!page) {
           // maybe, it's ugoira
           return {id: id};
         }
 
         return {
           id: id,
-          image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + '_p0_master1200' + suffix,
-          image_url_big: server + 'img-original/' + dir + id + rest + '_p0.jpg?',
-          image_url_big_alt: [server + 'img-original/' + dir + id + rest + '_p0.png?',
-                              server + 'img-original/' + dir + id + rest + '_p0.gif?']
+          image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
+          image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
+          image_url_big_alt: [server + 'img-original/' + dir + id + rest + page + '.png',
+                              server + 'img-original/' + dir + id + rest + page + '.gif']
         };
 
-      } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+(?:_[\da-f]{10}|-[\da-f]{32})?)(_[sm]|_100|_128x128|_240m[sw]|(?:_big)?_p\d+|(?:_p\d+)?_master1200)(\.\w+(?:\?.*)?)$/.exec(url))) {
+      } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+)(_[\da-f]{10}|-[\da-f]{32})?(?:(_[sm]|_100|_128x128|_240m[sw])|(?:_big)?(_p\d+))(\.\w+(?:\?.*)?)$/.exec(url))) {
 
-        if (allow_types.indexOf(re[4]) < 0) {
+        prefix = re[1];
+        inf    = re[2];
+        id     = re[3];
+        rest   = re[4] || ''; // access restriction
+        type   = re[5] || '';
+        page   = re[6] || '';
+        suffix = re[7];
+
+        if (allow_types.indexOf(type) < 0) {
           return null;
         }
 
-        id = g.parseInt(re[3], 10);
+        id = g.parseInt(id, 10);
         if (id < 1) {
           return null;
         }
 
-        if ((!re[2] /* ugoira */) || (re[2] === '-inf' /* all jpg */)) {
+        if ((!inf /* ugoira */) || (inf === '-inf' /* all jpg */)) {
           return {id: id};
         } else {
-          var url_base = re[1] + re[3], url_suffix = re[5];
-          if (!/\?/.test(url_suffix)) {
-            url_suffix += '?';
+          var url_base = prefix + id;
+          if (!/\?/.test(suffix)) {
+            suffix += '?';
           }
           return {
             id: id,
-            image_url_medium: url_base + '_m' + url_suffix,
-            image_url_big: url_base + url_suffix
+            image_url_medium: url_base + rest + (page || '_m') + suffix,
+            image_url_big: url_base + rest + (page ? '_big' + page : '') + suffix
           };
         }
       }
@@ -2498,17 +2506,83 @@
       return true;
     },
 
+    // parhaps cb_success() will called 2 times or more
+    load_images: function(page, load_big_image, cb_success, cb_error) {
+      if (!load_big_image) {
+        load_big_image = _.conf.popup.big_image;
+      }
+
+      if (!page.load_statuses) {
+        page.load_statuses = {};
+      }
+
+      if (page.image_medium || page.image_big) {
+        cb_success(page);
+      }
+
+      var images = {};
+
+      var load = function(name, other_name, retry) {
+        if (/^(?:loading|complete)$/.test(page.load_statuses[name])) {
+          return;
+        }
+
+        var img, url = page['image_url_' + name];
+        images[name] = img = new w.Image();
+
+        img.addEventListener('load', function() {
+          _.debug('Successfully loaded ' + name + ' image: ' + url);
+          page['image_' + name] = img;
+          --page.loading_count;
+          page.load_statuses[name] = 'complete';
+          cb_success(page);
+        }, false);
+
+        img.addEventListener('error', function() {
+          --page.loading_count;
+          page.load_statuses[name] = 'error';
+
+          _.debug('Failed to load ' + name + ' image: ' + url);
+
+          var alt = page['image_url_' + name + '_alt'];
+          if (alt && alt.length > 0) {
+            url = alt.shift();
+            _.debug('Retrying to load ' + name + ' image with new url: ' + url);
+            page['image_url_' + name] = url;
+            load(name, other_name, true);
+          } else if (!/^(?:loading|complete)$/.test(page.load_statuses[other_name])) {
+            cb_error();
+          }
+        }, false);
+
+        if (!retry) {
+          _.debug('Trying to load ' + name + ' image: ' + url);
+        }
+        img.src = url;
+        page.load_statuses[name] = 'loading';
+        page.loading_count = (page.loading_count || 0) + 1;
+      };
+
+      load('medium', 'big');
+
+      if (load_big_image) {
+        load('big', 'medium');
+      }
+    },
+
     load: function(illust, load_big_image) {
       if (!load_big_image) {
         load_big_image = _.conf.popup.big_image;
       }
 
-      if (illust.loaded && (!load_big_image || illust.image_big)) {
+      if (!illust.load_statuses) {
+        illust.load_statuses = {};
+      }
+
+      if (illust.load_statuses.html === 'complete' && (illust.image_medium || illust.image_big)) {
         _.popup.onload(illust);
         return;
       }
-
-      var that = this;
 
       var error_sent = false;
       var send_error = function(msg) {
@@ -2521,187 +2595,109 @@
         }
       };
 
-      /* -1: error
-       *  0: waiting
-       *  1: loading
-       *  2: complete
-       */
-      var statuses = {
-        html:   0,
-        medium: 0,
-        big:    (load_big_image ? 0 : -1)
-      };
-
-      var image_medium, image_big;
-
-      var load_image = function(name, url, other) {
-        if (statuses[name] !== 0) {
-          return null;
-        }
-        statuses[name] = 1;
-
-        var image = new w.Image();
-
-        _.listen(image, 'load', function() {
-          _.debug('Image loaded: ' + url);
-          illust['image_' + name] = image;
-          statuses[name] = 2;
-          if (statuses.html > 1) {
-            illust.loaded = true;
+      var that = this;
+      var load_images = function() {
+        that.load_images(illust, load_big_image, function() {
+          if (illust.load_statuses.html === 'complete') {
             _.popup.onload(illust);
           }
+        }, function() {
+          send_error('Failed to load images');
         });
+      };
 
-        var err_on = statuses.html > 1;
-        _.listen(image, 'error', function() {
-          var alt = illust['image_url_' + name + '_alt'];
-          if (alt && alt.length > 0) {
-            _.debug('Failed to load image: ' + url);
-            var newurl = illust['image_url_' + name] = alt.shift();
-            _.debug('Retrying to load image with new url: ' + newurl);
-            statuses[name] = 0;
-            load_image(name, newurl, other);
-          } else {
-            statuses[name] = -1;
-            if (statuses[other] < 0 && err_on) {
-              send_error('Failed to load image: ' + url);
+      if (illust.image_url_medium || (load_big_image && illust.image_url_big)) {
+        load_images();
+      }
+
+      if (!illust.load_statuses.html) {
+        _.debug('Start loading medium html...');
+
+        illust.load_statuses.html = 'loading';
+        illust.loading_count = (illust.loading_count || 0) + 1;
+
+        _.xhr.get(illust.url_medium, function(text) {
+          _.debug('Medium html loaded!');
+
+          --illust.loading_count;
+
+          if (!that.parse_medium_html(illust, text)) {
+            illust.load_statuses.html = 'error';
+            send_error('Failed to parse medium html');
+            return;
+          }
+
+          illust.load_statuses.html = 'complete';
+
+          if (illust.ugoira_big || illust.ugoira_small) {
+
+            illust.loaded = true;
+
+            if (load_big_image && illust.ugoira_big) {
+              illust.ugoira = illust.ugoira_big;
+            } else {
+              illust.ugoira = illust.ugoira_small;
             }
-          }
-        });
 
-        _.debug('Trying to load image: ' + name + ':' + url);
-        image.src = url;
-        return image;
-      };
+            if (!illust.ugoira_player) {
+              illust.ugoira_canvas = _.e('canvas');
 
-      var start_images = function() {
-        var send_loaded = false;
-        if (illust.image_medium) {
-          statuses.medium = 2;
-        } else {
-          image_medium = load_image('medium', illust.image_url_medium, 'big');
-        }
+              try {
 
-        if (statuses.big === 0 && illust.image_url_big) {
-          if (illust.image_big) {
-            statuses.big = 2;
-          } else {
-            image_big = load_image('big', illust.image_url_big, 'medium');
-          }
-        }
-      };
+                illust.ugoira_player = new w.ZipImagePlayer({
+                  canvas: illust.ugoira_canvas,
+                  source: illust.ugoira.src,
+                  metadata: illust.ugoira,
+                  chunkSize: 3e5,
+                  loop: true,
+                  autoStart: false,
+                  debug: false,
+                  autosize: true
+                });
 
-      _.xhr.get(illust.url_medium, function(text) {
-        if (!that.parse_medium_html(illust, text)) {
-          send_error();
-          return;
-        }
+                illust.ugoira_player._displayFrame = function() {
+                  var ret;
 
-        statuses.html = 2;
+                  ret = w.ZipImagePlayer.prototype._displayFrame.apply(this, arguments);
 
-        if (illust.ugoira_big || illust.ugoira_small) {
+                  if (_.popup.running && _.popup.illust === illust) {
+                    var canvas = illust.ugoira_canvas;
 
-          illust.loaded = true;
+                    if (canvas.width !== canvas.naturalWidth ||
+                        canvas.height !== canvas.naturalHeight) {
+                      canvas.naturalWidth = canvas.width;
+                      canvas.naturalHeight = canvas.height;
+                      _.popup.adjust();
+                    }
 
-          if (load_big_image && illust.ugoira_big) {
-            illust.ugoira = illust.ugoira_big;
-          } else {
-            illust.ugoira = illust.ugoira_small;
-          }
-
-          if (!illust.ugoira_player) {
-            illust.ugoira_canvas = _.e('canvas');
-
-            try {
-
-              illust.ugoira_player = new w.ZipImagePlayer({
-                canvas: illust.ugoira_canvas,
-                source: illust.ugoira.src,
-                metadata: illust.ugoira,
-                chunkSize: 3e5,
-                loop: true,
-                autoStart: false,
-                debug: false,
-                autosize: true
-              });
-
-              illust.ugoira_player._displayFrame = function() {
-                var ret;
-
-                ret = w.ZipImagePlayer.prototype._displayFrame.apply(this, arguments);
-
-                if (_.popup.running && _.popup.illust === illust) {
-                  var canvas = illust.ugoira_canvas;
-
-                  if (canvas.width !== canvas.naturalWidth ||
-                      canvas.height !== canvas.naturalHeight) {
-                    canvas.naturalWidth = canvas.width;
-                    canvas.naturalHeight = canvas.height;
-                    _.popup.adjust();
+                    _.popup.update_ugoira_progress(this.getCurrentFrame());
                   }
 
-                  _.popup.update_ugoira_progress(this.getCurrentFrame());
-                }
+                  return ret;
+                };
 
-                return ret;
-              };
-
-            } catch(ex) {
-              send_error(g.String(ex));
-              return;
+              } catch(ex) {
+                send_error(g.String(ex));
+                return;
+              }
+              _.popup.onload(illust);
             }
-            _.popup.onload(illust);
+            return;
           }
-          return;
-        }
 
-        if (statuses.medium === 0) {
-          start_images();
-        } else {
-          if (statuses.medium > 1 || statuses.big > 1) {
-            illust.loaded = true;
+          if (illust.image_medium || illust.image_big) {
             _.popup.onload(illust);
           }
 
-          // error recovery
-
-          if (statuses.big <= 1 && statuses.medium <= 1 &&
-              image_medium.src.split('?')[0] !== illust.image_url_medium.split('?')[0]) {
-            _.debug('Reloading medium image with new url');
-            if (statuses.medium === 1) {
-              image_medium.src = illust.image_url_medium;
-            } else {
-              statuses.medium = 0;
-            }
+          if (_.conf.popup.preload && illust.manga.available) {
+            that.load_manga_page(illust, 0);
           }
 
-          if (load_big_image && statuses.big <= 1 &&
-              image_big.src.split('?')[0] !== illust.image_url_big.split('?')[0]) {
-            _.log('Reloading big image with new url');
-            if (statuses.big === 1) {
-              image_big.src = illust.image_url_big;
-            } else {
-              statuses.big = 0;
-            }
-          }
-
-          start_images();
-
-          if (statuses.medium < 0 && statuses.big < 0) {
-            send_error('Failed to load image');
-          }
-        }
-
-        if (_.conf.popup.preload && illust.manga.available) {
-          that.load_manga_page(illust, 0);
-        }
-
-      }, function() {
-        send_error('Failed to load medium html');
-      });
-
-      if (illust.image_url_medium) {
-        start_images();
+        }, function() {
+          illust.load_statuses.html = 'error';
+          --illust.loading_count;
+          send_error('Failed to load medium html');
+        });
       }
     },
 
@@ -2718,112 +2714,114 @@
       _.xhr.remove_cache(illust.url_medium);
     },
 
-    parse_manga_html: function(illust, html) {
-      var that = this, pages = [], i;
+    create_manga_page: function(page, medium, big, pagenum) {
+      if (medium) {
+        page.image_url_medium = medium;
+      }
+      if (big) {
+        page.image_url_big = big;
+      }
+      page.url_manga_big = '/member_illust.php?mode=manga_big&illust_id=' + page.id + '&page=' + pagenum;
+      return page;
+    },
 
+    parse_book_html: function(illust, html) {
       var images = [], images_big = [];
 
-      (function() {
-        var terms = html.split(/pixiv\.context\.(images|originalImages)\[(\d+)\] *= *(\"[^\"]+\")/);
-        for(var i = 1; i + 1 < terms.length; i += 4) {
-          var type = terms[i],
-              num  = terms[i + 1],
-              url  = terms[i + 2];
-          _.log(type + ':' + num + ' ' + url);
-          try {
-            (type === 'originalImages' ? images_big : images)[g.parseInt(num)] = g.JSON.parse(url);
-          } catch(ex) {
-            _.warn('Failed to parse pixiv.context.images json', ex);
-          }
-        }
-      })();
-
-      if (/pixiv\.context\.bound *= *true/.test(html)) {
-        // book
-        var rtl = !(/pixiv\.context\.rtl *= *false/.test(html)); // make default to true
-        for(i = 0; i < illust.manga.page_count; ++i) {
-          if (!(images[i] && images_big[i])) {
-            _.error('Could not detect manga image url for page idx ' + 1);
-            return false;
-          }
-
-          if (i === 0 || (i + 1) === illust.manga.page_count) {
-            pages.push({
-              image_urls: [images[i]],
-              image_urls_big: [images_big[i]],
-              images: [],
-              images_big: []
-            });
-
-          } else {
-            if (!(images[i + 1] && images_big[i + 1])) {
-              _.error('Could not detect manga image url for page idx ' + (i + 1));
-              return false;
-            }
-
-            if (rtl) {
-              pages.push({
-                image_urls: [images[i + 1], images[i]],
-                image_urls_big: [images_big[i + 1], images_big[i]],
-                images: [],
-                images_big: []
-              });
-            } else {
-              pages.push({
-                image_urls: [images[i], images[i + 1]],
-                image_urls_big: [images_big[i], images_big[i + 1]],
-                images: [],
-                images_big: []
-              });
-            }
-
-            ++i;
-          }
-        }
-
-      } else {
-        // multi images
-
-        var root = _.fastxml.parse(html), cnt = 0;
-        _.fastxml.qa(root, '.manga .item-container').forEach(function(page, pagenum) {
-          var urls = [], urls_big = [];
-
-          _.fastxml.qa(page, 'img').forEach(function(img) {
-            if (img.attrs['data-filter'] !== 'manga-image') {
-              return;
-            }
-
-            var url = img.attrs['data-src'] || img.attrs.src,
-                url_big = url.replace(/(_p\d+\.\w+)(?=\?|$)/, '_big$1');
-
-            ++cnt;
-            if (html.indexOf('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ')') >= 0) {
-              _.debug('pixiv.context.pages[' + pagenum + '].unshift(' + cnt + ') detected');
-              urls.unshift(url);
-              urls_big.unshift(url_big);
-            } else {
-              urls.push(url);
-              urls_big.push(url_big);
-            }
-          });
-
-          if (urls.length) {
-            pages.push({
-              image_urls: urls,
-              image_urls_big: urls_big,
-              images: [],
-              images_big: []
-            });
-          }
-        });
-
-        if (cnt !== illust.manga.page_count) {
-          _.error('Multiple illust page count mismatch!');
-          return false;
+      var terms = html.split(/pixiv\.context\.(images|originalImages)\[(\d+)\] *= *(\"[^\"]+\")/);
+      for(var i = 1; i + 1 < terms.length; i += 4) {
+        var type = terms[i],
+            num  = terms[i + 1],
+            url  = terms[i + 2];
+        _.log(type + ':' + num + ' ' + url);
+        try {
+          (type === 'originalImages' ? images_big : images)[g.parseInt(num)] = g.JSON.parse(url);
+        } catch(ex) {
+          _.warn('Failed to parse pixiv.context.images json', ex);
         }
       }
 
-      illust.manga.pages = pages;
+      var page_pairs = [];
+
+      var rtl = !(/pixiv\.context\.rtl *= *false/.test(html)); // make default to true
+      for(i = 0; i < illust.manga.page_count; ++i) {
+        if (!(images[i] && images_big[i])) {
+          _.error('Could not detect manga image url for page idx ' + 1);
+          return false;
+        }
+
+        if (i === 0 || (i + 1) === illust.manga.page_count) {
+          page_pairs.push([this.create_manga_page({id: illust.id}, images[i], images_big[i], i)]);
+
+        } else {
+          if (!(images[i + 1] && images_big[i + 1])) {
+            _.error('Could not detect manga image url for page idx ' + (i + 1));
+            return false;
+          }
+
+          if (rtl) {
+            page_pairs.push([
+              this.create_manga_page({id: illust.id}, images[i + 1], images_big[i + 1], i + 1),
+              this.create_manga_page({id: illust.id}, images[i], images_big[i], i)
+            ]);
+          } else {
+            page_pairs.push([
+              this.create_manga_page({id: illust.id}, images[i], images_big[i], i),
+              this.create_manga_page({id: illust.id}, images[i + 1], images_big[i + 1], i + 1)
+            ]);
+          }
+
+          ++i;
+        }
+      }
+
+      illust.manga.pages = page_pairs;
+      return true;
+    },
+
+    parse_manga_html: function(illust, html) {
+      illust.manga.book = /pixiv\.context\.bound *= *true/.test(html);
+      if (illust.manga.book) {
+        return this.parse_book_html(illust, html);
+      }
+
+      var that = this, page_pairs = [], cnt = 0;
+      var root = _.fastxml.parse(html);
+
+      var containers = _.fastxml.qa(root, '.manga .item-container');
+      for(var i = 0; i < containers.length; ++i) {
+
+        var pages = [];
+        var images = _.fastxml.qa(containers[i], 'img');
+
+        for(var j = 0; j < images.length; ++j) {
+          var img = images[j];
+
+          if (img.attrs['data-filter'] !== 'manga-image') {
+            continue;
+          }
+
+          var src = img.attrs['data-src'] || img.attrs.src;
+          var p = _.illust.parse_image_url(src, [''], ['1200x1200']);
+
+          if (p && p.image_url_medium) {
+            pages.push(this.create_manga_page(p, null, null, cnt));
+            ++cnt;
+          } else {
+            _.error('Failed to parse manga page image url');
+            return false;
+          }
+        }
+
+        page_pairs.push(pages);
+      }
+
+      if (cnt !== illust.manga.page_count) {
+        _.error('Multiple illust page count mismatch!');
+        return false;
+      }
+
+      illust.manga.pages = page_pairs;
       return true;
     },
 
@@ -2831,13 +2829,17 @@
       var that = this;
 
       if (!illust.manga.pages) {
+        _.debug('Start loading manga html...');
         _.xhr.get(illust.url_manga, function(text) {
+          _.debug('Manga html loaded!');
           if (that.parse_manga_html(illust, text)) {
-            that.load_manga_page(illust, page);
+            that.load_manga_page(illust, page, load_big_image);
           } else {
+            _.debug('Failed to parse manga html');
             _.popup.manga.onerror(illust, page);
           }
         }, function() {
+          _.debug('Failed to load manga html');
           _.popup.manga.onerror(illust, page);
         });
         return;
@@ -2848,13 +2850,7 @@
         return;
       }
 
-      if (!load_big_image) {
-        load_big_image = _.conf.popup.big_image;
-      }
-
-      var page_data = illust.manga.pages[page],
-          urls = load_big_image ? page_data.image_urls_big : page_data.image_urls,
-          images = load_big_image ? page_data.images_big : page_data.images;
+      var pages = illust.manga.pages[page];
 
       var error_sent = false;
       var send_error = function() {
@@ -2864,36 +2860,20 @@
         }
       };
 
-      var load_count = 0;
       var onload = function() {
-        if (!error_sent && ++load_count === urls.length) {
-          _.popup.manga.onload(illust, page);
-        }
-      };
-
-      urls.forEach(function(url, idx) {
-        if (images[idx]) {
-          onload();
+        if (error_sent) {
           return;
         }
-
-        var img = new g.Image();
-
-        img.onload = function() {
-          images[idx] = img;
-          onload();
-        };
-
-        img.onerror = function() {
-          if (load_big_image) {
-            img.src = page_data.image_urls[idx];
-            _.warn('Big image for manga loading failed. Falling back to default image.');
-          } else {
-            send_error();
+        for(var i = 0; i < pages.length; ++i) {
+          if (!(pages[i].image_medium || pages[i].image_big)) {
+            return;
           }
-        };
+        }
+        _.popup.manga.onload(illust, page);
+      };
 
-        img.src = url;
+      pages.forEach(function(page) {
+        _.illust.load_images(page, load_big_image, onload, send_error);
       });
     },
 
@@ -4114,7 +4094,9 @@
 
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.status_complete();
-      _.popup.set_images(page_data.images_big.length ? page_data.images_big : page_data.images);
+      _.popup.set_images(illust.manga.pages[page].map(function(page) {
+        return page.image_big || page.image_medium;
+      }));
     },
 
     onerror: function(illust, page) {
@@ -4136,10 +4118,10 @@
       if (this.page >= 0 && pages) {
         page = 1;
         for(var i = 0; i < this.page; ++i) {
-          page += pages[i].image_urls.length;
+          page += pages[i].length;
         }
 
-        var img_cnt = pages[this.page].image_urls.length;
+        var img_cnt = pages[this.page].length;
         if (img_cnt > 1) {
           page = page + '-' + (page + img_cnt - 1);
         }
@@ -4691,7 +4673,7 @@
 
       if (_.popup.manga.active) {
         var page_data = _.popup.illust.manga.pages[_.popup.manga.page];
-        if (page_data.images_big.length === 0) {
+        if (page_data.filter(function(p){return !p.image_big;}).length >= 1) {
           if (_.popup.resize_mode === _.popup.RM_FIT_LONG) {
             _.popup.resize_mode = _.popup.RM_AUTO;
           }
@@ -4723,9 +4705,10 @@
     open_big: function() {
       if (_.popup.illust.manga.available) {
         if (_.popup.manga.active) {
-          var page = _.popup.illust.manga.pages[_.popup.manga.page];
-          page.image_urls_big.forEach(function(url, idx) {
-            _.open(url);
+          _.popup.illust.manga.pages[_.popup.manga.page].forEach(function(p) {
+            _.open(p.image_big
+                   ? p.image_big.src
+                   : (p.image_url_big_alt ? p.url_manga_big : p.image_url_big));
           });
         } else {
           _.open(_.popup.illust.url_manga);
