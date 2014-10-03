@@ -99,11 +99,16 @@ class TestCase(unittest.TestCase):
       var illust = pixplus.popup.illust,
           images = pixplus.popup.images;
       if (pixplus.popup.manga.active) {
-        var page = illust.manga.pages[pixplus.popup.manga.page];
-        return (images.length === page.images_big.length &&
-                images.reduce(function(a, b, i) {
-                  return a && b === page.images_big[i];
-                }, true));
+        var pages = illust.manga.pages[pixplus.popup.manga.page];
+        if (images.length !== pages.length) {
+          return false;
+        }
+        for(var i = 0; i < images.length; ++i) {
+          if (images[i].src !== pages[i].image_url_big) {
+            return false;
+          }
+        }
+        return true;
       } else {
         return images.length === 1 && images[0] === illust.image_big;
       }
