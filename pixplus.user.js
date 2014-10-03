@@ -2985,11 +2985,11 @@
       dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
       dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
       dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
+      dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_scroller);
       dom.olc_prev_icon     = this.create_olc_icon(dom.olc_prev);
       dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_scroller);
       dom.olc_next_icon     = this.create_olc_icon(dom.olc_next);
-      dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
       dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
       dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
@@ -3531,6 +3531,7 @@
       dom.root.classList[illust.is_manga ? 'add' : 'remove']('pp-mangawork');
       dom.root.classList[illust.ugoira ? 'add' : 'remove']('pp-ugoira');
       dom.root.classList[illust.manga.available ? 'add' : 'remove']('pp-multipage');
+      dom.root.classList[illust.manga.available ? 'add' : 'remove']('pp-frontpage');
       if (illust.manga.book_mode) {
         dom.root.classList.add('pp-book');
         if (illust.manga.book_mode === 'rtl') {
@@ -4147,6 +4148,8 @@
       _.popup.set_images(illust.manga.pages[page].map(function(page) {
         return page.image_big || page.image_medium;
       }));
+
+      _.popup.dom.root.classList.remove('pp-frontpage');
     },
 
     onerror: function(illust, page) {
@@ -4206,7 +4209,7 @@
       if (this.active) {
         return;
       }
-      this.show(0);
+      this.show(1);
     },
 
     end: function() {
