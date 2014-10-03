@@ -2109,7 +2109,8 @@
           image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
           image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
           image_url_big_alt: [server + 'img-original/' + dir + id + rest + page + '.png',
-                              server + 'img-original/' + dir + id + rest + page + '.gif']
+                              server + 'img-original/' + dir + id + rest + page + '.gif'],
+          new_url_pattern: true
         };
 
       } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+)(_[\da-f]{10}|-[\da-f]{32})?(?:(_[sm]|_100|_128x128|_240m[sw])|(?:_big)?(_p\d+))(\.\w+(?:\?.*)?)$/.exec(url))) {
@@ -2714,7 +2715,7 @@
           }
 
           if (_.conf.popup.preload && illust.manga.available) {
-            that.load_manga_page(illust, 1);
+            that.load_manga_page(illust, 0);
           }
 
         }, function() {
@@ -3530,8 +3531,18 @@
 
       dom.root.classList[illust.is_manga ? 'add' : 'remove']('pp-mangawork');
       dom.root.classList[illust.ugoira ? 'add' : 'remove']('pp-ugoira');
-      dom.root.classList[illust.manga.available ? 'add' : 'remove']('pp-multipage');
-      dom.root.classList[illust.manga.available ? 'add' : 'remove']('pp-frontpage');
+
+      if (illust.manga.available) {
+        dom.root.classList.add('pp-multipage');
+        dom.root.classList.add('pp-frontpage');
+        dom.root.classList.add(illust.new_url_pattern ? 'pp-frontpage-new' : 'pp-frontpage-old');
+      } else {
+        dom.root.classList.remove('pp-multipage');
+        dom.root.classList.remove('pp-frontpage');
+        dom.root.classList.remove('pp-frontpage-new');
+        dom.root.classList.remove('pp-frontpage-old');
+      }
+
       if (illust.manga.book_mode) {
         dom.root.classList.add('pp-book');
         if (illust.manga.book_mode === 'rtl') {
@@ -3697,7 +3708,14 @@
       }
 
       this.status_complete();
-      this.set_images([illust.ugoira_canvas || illust.image_big || illust.image_medium]);
+
+      if (illust.ugoira_canvas) {
+        this.set_images([illust.ugoira_canvas]);
+      } else if (illust.image_big && !(illust.manga.available && illust.image_medium)) {
+        this.set_images([illust.image_big]);
+      } else {
+        this.set_images([illust.image_medium]);
+      }
     },
 
     onerror: function(illust) {
@@ -4143,13 +4161,14 @@
 
       var page_data = illust.manga.pages[page];
 
+      _.popup.dom.root.classList.remove('pp-frontpage');
+      _.popup.dom.root.classList.remove('pp-frontpage-new');
+      _.popup.dom.root.classList.remove('pp-frontpage-old');
       _.popup.dom.image_layout.href = illust.url_manga + '#pp-manga-page-' + page;
       _.popup.status_complete();
       _.popup.set_images(illust.manga.pages[page].map(function(page) {
         return page.image_big || page.image_medium;
       }));
-
-      _.popup.dom.root.classList.remove('pp-frontpage');
     },
 
     onerror: function(illust, page) {
@@ -4209,7 +4228,7 @@
       if (this.active) {
         return;
       }
-      this.show(1);
+      this.show(0);
     },
 
     end: function() {
@@ -6435,6 +6454,9 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup:not(.pp-ugoira) #pp-popup-ugoira-info{display:none}\
 #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}\
 #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}\
+#pp-popup.pp-frontpage-new #pp-popup-image-wrapper{\
+border-image-source:url("data:image/gif;base64,R0lGODdhAwAMAKECAKqqqsbGxv///////ywAAAAAAwAMAAACCoR/osGt0tyKoQAAOw==");\
+border-image-slice:1 1 10 1;border-image-repeat:repeat;border-bottom-width:10px;border-style:solid}\
 #pp-popup-image-scroller{min-width:480px;min-height:360px}\
 #pp-popup-image-layout{display:inline-block}\
 #pp-popup-image-layout img{vertical-align:top}\
