@@ -3,10 +3,11 @@ import unittest
 import time
 import json
 
-import util
-
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
+from PIL import Image, ImageChops
+
+import util
 
 class TestCase(unittest.TestCase):
   run_in_pixiv = True
@@ -338,6 +339,27 @@ class TestCase(unittest.TestCase):
 
   def blur(self):
     self.js('document.activeElement && document.activeElement.blur()')
+    pass
+
+  def save_image(self, image, filename):
+    path = os.path.join('screenshot', filename)
+    dirpath = os.path.dirname(path)
+    if not os.path.exists(dirpath):
+      os.makedirs(dirpath)
+      pass
+    image.save(path)
+    return image
+
+  def assertImageEqual(self, img1, img2, diff_filename):
+    diff = ImageChops.difference(img1, img2)
+    self.save_image(diff, diff_filename)
+    self.assertIsNone(diff.getbbox())
+    pass
+
+  def assertImageNotEqual(self, img1, img2, diff_filename):
+    diff = ImageChops.difference(img1, img2)
+    self.save_image(diff, diff_filename)
+    self.assertIsNotNone(diff.getbbox())
     pass
 
   pass

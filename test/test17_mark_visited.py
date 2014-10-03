@@ -1,4 +1,4 @@
-import hashlib
+from PIL import Image
 
 import util
 from test_base import TestCase
@@ -32,27 +32,26 @@ class Test_MarkVisited(TestCase):
     h -= 2
 
     img = self.screenshot().crop((x, y, x + w, y + h))
-    self.assertEqual(hashlib.sha1(img.tobytes()).hexdigest(),
-                     hashlib.sha1(color * (w * h)).hexdigest())
+    self.assertImageEqual(img, Image.new('RGB', (w, h), color))
 
-    img.save('test17_mark_visited_image_1.png')
+    self.save_image(img, 'test17_mark_visited_image_1.png')
     from PIL import ImageDraw
     img = self.screenshot()
-    img.save('test17_mark_visited_image_2.png')
+    self.save_image(img, 'test17_mark_visited_image_2.png')
     draw = ImageDraw.Draw(img)
     points = [(20,40), (25,60), (40,80), (60,75), (80,95), (85,20), (50,40)]
     draw.polygon([(x, y), (x, y + h), (x + w, y + h), (x + w, y)], outline='rgb(0,255,0)')
-    img.save('test17_mark_visited_image_3.png')
+    self.save_image(img, 'test17_mark_visited_image_3.png')
     pass
 
   def test_on(self):
     self.open('/member_illust.php?id=11&p=9')
     self.inject_css()
 
-    self.check_link_color(b'\xff\xff\xff')
+    self.check_link_color('white')
     self.open_popup()
     self.close_popup()
-    self.check_link_color(b'\xff\x00\x00')
+    self.check_link_color('red')
     pass
 
   def test_off(self):
@@ -60,10 +59,10 @@ class Test_MarkVisited(TestCase):
     self.set_conf('popup.mark_visited', False)
     self.inject_css()
 
-    self.check_link_color(b'\xff\xff\xff')
+    self.check_link_color('white')
     self.open_popup()
     self.close_popup()
-    self.check_link_color(b'\xff\xff\xff')
+    self.check_link_color('white')
     pass
 
   pass

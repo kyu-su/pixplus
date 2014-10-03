@@ -44,7 +44,7 @@ class Test_Ugoira(TestCase):
     self.capture_id += 1
     filename = 'test22_ugoira_%d.png' % self.capture_id
     img = self.screenshot(canvas)
-    img.save(filename)
+    self.save_image(img, filename)
     return hashlib.sha1(img.tobytes()).hexdigest(), filename
 
   def test_ugoira(self):
