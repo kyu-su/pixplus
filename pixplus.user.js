@@ -2714,7 +2714,7 @@
           }
 
           if (_.conf.popup.preload && illust.manga.available) {
-            that.load_manga_page(illust, 0);
+            that.load_manga_page(illust, 1);
           }
 
         }, function() {
