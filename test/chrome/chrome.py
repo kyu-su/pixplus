@@ -11,7 +11,7 @@ class Chrome(Browser):
   def prepare_caps(self, caps):
     self.extensions = []
     self.add_extension(os.path.join(self.bindir, 'pixplus.crx'))
-    # self.add_extension(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
+    self.add_extension(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
 
     caps['chromeOptions'] = {
       'extensions': self.extensions
@@ -19,7 +19,7 @@ class Chrome(Browser):
     pass
 
   def download_crx(self, filename, ext_id, chrome_version = '37.0.2062.120'):
-    url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc' % (ext_id, chrome_version)
+    url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc' % (chrome_version, ext_id)
     return self.download(url, filename)
 
   def add_extension(self, filename):
