@@ -3005,7 +3005,7 @@
 
       (function() {
         var svg = _.e('svg', {id: 'pp-popup-multipage-icon',
-                              width: '100', height: '100',
+                              width: '160', height: '160',
                               viewBox: '0 0 100 100'}, dom.image_scroller);
         dom.multipage_icon = svg;
         var grad = _.e('linearGradient',
@@ -6483,7 +6483,7 @@ border:0px;box-shadow:none;background:none}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
 #pp-popup-olc-prev{left:0px}\
 #pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
-#pp-popup-multipage-icon{position:absolute;right:0px;bottom:0px}\
+#pp-popup-multipage-icon{position:absolute;right:0px;bottom:0px;opacity:.8}\
 #pp-popup:not(.pp-frontpage-new) #pp-popup-multipage-icon{display:none}\
 \
 /* bookmark */\
