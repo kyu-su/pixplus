@@ -2730,7 +2730,7 @@
       if (!illust) {
         return;
       }
-      illust.loaded = false;
+      illust.load_statuses.html = null;
       if (illust.ugoira_player) {
         illust.ugoira_player.stop();
         illust.ugoira_player = null;
