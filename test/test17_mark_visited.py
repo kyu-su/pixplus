@@ -17,14 +17,14 @@ class Test_MarkVisited(TestCase):
     ''')
     pass
 
-  def check_link_color(self, color):
+  def check_link_color(self, color, filename_suffix):
     link = self.js('''
       window.scrollTo(0, 0);
       return pixplus.illust.list[0].link
     ''')
     x, y, w, h = tuple(map(int, self.geom(link)))
-    self.assertTrue(w > 140)
-    self.assertTrue(h > 150)
+    self.assertTrue(w > 100)
+    self.assertTrue(h > 100)
 
     x += 1
     y += 1
@@ -32,7 +32,8 @@ class Test_MarkVisited(TestCase):
     h -= 2
 
     img = self.screenshot().crop((x, y, x + w, y + h))
-    self.assertImageEqual(img, Image.new('RGB', (w, h), color))
+    self.assertImageEqual(img, Image.new('RGB', (w, h), color),
+                          'test17_mark_visited_%s.png' % filename_suffix)
 
     self.save_image(img, 'test17_mark_visited_image_1.png')
     from PIL import ImageDraw
@@ -48,10 +49,10 @@ class Test_MarkVisited(TestCase):
     self.open('/member_illust.php?id=11&p=9')
     self.inject_css()
 
-    self.check_link_color('white')
+    self.check_link_color('white', 'on1')
     self.open_popup()
     self.close_popup()
-    self.check_link_color('red')
+    self.check_link_color('red', 'on2')
     pass
 
   def test_off(self):
@@ -59,10 +60,10 @@ class Test_MarkVisited(TestCase):
     self.set_conf('popup.mark_visited', False)
     self.inject_css()
 
-    self.check_link_color('white')
+    self.check_link_color('white', 'off1')
     self.open_popup()
     self.close_popup()
-    self.check_link_color('white')
+    self.check_link_color('white', 'off2')
     pass
 
   pass
