@@ -2602,7 +2602,8 @@
         illust.load_statuses = {};
       }
 
-      if (illust.load_statuses.html === 'complete' && (illust.image_medium || illust.image_big)) {
+      if (illust.load_statuses.html === 'complete' &&
+          ((!load_big_image && illust.image_medium) || illust.image_big)) {
         _.popup.onload(illust);
         return;
       }
@@ -3727,8 +3728,6 @@
         this.ugoira_play();
       }
 
-      this.status_complete();
-
       if (illust.ugoira_canvas) {
         this.set_images([illust.ugoira_canvas]);
       } else if (illust.image_big && !(illust.manga.available && illust.image_medium)) {
@@ -3736,6 +3735,8 @@
       } else {
         this.set_images([illust.image_medium]);
       }
+
+      this.status_complete();
     },
 
     onerror: function(illust) {
