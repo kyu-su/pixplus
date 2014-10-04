@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.12.5
+// @version     1.13.0
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -7161,7 +7161,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
 
     {
       "date": "2014/10/xx",
-      "version": "1.12.5",
+      "version": "1.13.0",
       "releasenote": "",
       "changes_i18n": {
         "en": [
