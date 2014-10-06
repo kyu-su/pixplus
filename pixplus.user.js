@@ -2310,9 +2310,10 @@
     parse_medium_html: function(illust, html) {
       var root = _.fastxml.parse(html), re, re2;
 
-      var error = _.fastxml.q(root, '.one_column_body .errorArea h2');
+      var error = _.fastxml.q(root, '.one_column_body .error');
       if (error) {
         illust.error = _.fastxml.text(error);
+        _.error('pixiv reported error: ' + illust.error);
         return false;
       }
 
@@ -2326,7 +2327,8 @@
           try {
             illust.ugoira_small = g.JSON.parse(re[1]);
           } catch(ex) {
-            err = ex;
+            err = 'Failed to parse pixiv.context.ugokuIllustData JSON';
+            _.error(err, ex);
             illust.ugoira_small = null;
           }
         }
@@ -2335,13 +2337,14 @@
           try {
             illust.ugoira_big = g.JSON.parse(re2[1]);
           } catch(ex) {
-            err = ex;
+            err = 'Failed to parse pixiv.context.ugokuIllustFullscreenData JSON';
+            _.error(err, ex);
             illust.ugoira_big = null;
           }
         }
 
         if (!illust.ugoira_small && !illust.ugoira_big) {
-          illust.error = g.String(err);
+          illust.error = err;
           return false;
         }
 
@@ -2608,10 +2611,12 @@
         return;
       }
 
+      illust.error = null;
+
       var error_sent = false;
       var send_error = function(msg) {
         if (!error_sent) {
-          if (msg) {
+          if (msg && !illust.error) {
             illust.error = msg;
           }
           _.popup.onerror(illust);
@@ -3004,22 +3009,36 @@
         _.e('path', {d: 'M 7,7 10,7 10,17 7,18 z M 14,7 17,7 17,17 14,17 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-paused'}, svg);
       })();
 
-      (function() {
+      dom.multipage_icon = (function(topright) {
         var svg = _.e('svg', {id: 'pp-popup-multipage-icon',
                               width: '160', height: '160',
                               viewBox: '0 0 100 100'}, dom.image_scroller);
-        dom.multipage_icon = svg;
-        var grad = _.e('linearGradient',
-                       {id: 'pp-popup-multipage-icon-grad1',
-                        x1: '50%', y1: '50%', x2: '100%', y2: '100%'},
-                       _.e('defs', null, svg));
-        _.e('stop', {offset: '0%', style: 'stop-color:black;stop-opacity:0'}, grad);
-        _.e('stop', {offset: '100%', style: 'stop-color:black;stop-opacity:1'}, grad);
-        _.e('path', {d: 'M 100 0 L 0 100 L 100 100 z', fill: 'url(#pp-popup-multipage-icon-grad1)'}, svg);
-        _.e('rect', {x: '64', y: '58', width: '18', height: '24', fill: 'white'}, svg);
-        _.e('path', {d: 'M 84 63 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, svg);
-        _.e('path', {d: 'M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, svg);
-      })();
+
+        svg.classList.add(topright ? 'pp-topright' : 'pp-bottomright');
+
+        var defs = _.e('defs', null, svg);
+
+        var make_grad = function(topright) {
+          var grad = _.e('linearGradient',
+                         {id: 'pp-popup-multipage-icon-grad-' + (topright ? 'topright' : 'bottomright'),
+                          x1: '50%', y1: '50%', x2: '100%', y2: (topright ? '0%' : '100%')},
+                         defs);
+          _.e('stop', {offset: '0%', style: 'stop-color:black;stop-opacity:0'}, grad);
+          _.e('stop', {offset: '100%', style: 'stop-color:black;stop-opacity:1'}, grad);
+        };
+
+        make_grad(true);
+        make_grad(false);
+
+        _.e('rect', {x: '0', y: '0', width: '100', height: '100', id: 'pp-popup-multipage-icon-bg'}, svg);
+
+        var g = _.e('g', null, svg);
+        _.e('rect', {x: '64', y: '58', width: '18', height: '24', fill: 'white'}, g);
+        _.e('path', {d: 'M 84 63 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
+        _.e('path', {d: 'M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
+
+        return svg;
+      })(true);
 
 
       this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
@@ -3758,22 +3777,34 @@
       }
     },
 
+    set_status_tooltip: function(text) {
+      if (text) {
+        this.dom.status.classList.add('_ui-tooltip');
+        this.dom.status.setAttribute('data-tooltip', text);
+      } else {
+        this.dom.status.classList.remove('_ui-tooltip');
+      }
+    },
+
     status_loading: function() {
       this.dom.root.classList.add('pp-loading');
       this.dom.root.classList.remove('pp-error');
       this.set_status_text('Loading');
+      this.set_status_tooltip();
     },
 
     status_complete: function() {
       this.dom.root.classList.remove('pp-loading');
       this.dom.root.classList.remove('pp-error');
       this.set_status_text('');
+      this.set_status_tooltip();
     },
 
     status_error: function(message) {
       this.dom.root.classList.remove('pp-loading');
       this.dom.root.classList.add('pp-error');
       this.set_status_text('Error');
+      this.set_status_tooltip(message);
       if (message) {
         _.error(message);
       }
@@ -6484,8 +6515,15 @@ border:0px;box-shadow:none;background:none}\
 .pp-popup-olc svg path{fill:#ddd;stroke:#222;stroke-width:10;stroke-linejoin:round}\
 #pp-popup-olc-prev{left:0px}\
 #pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
-#pp-popup-multipage-icon{position:absolute;right:0px;bottom:0px;opacity:.8}\
+#pp-popup-multipage-icon{position:absolute;opacity:.8}\
 #pp-popup:not(.pp-frontpage-new) #pp-popup-multipage-icon{display:none}\
+#pp-popup-multipage-icon.pp-topright{right:0px;top:0px}\
+#pp-popup-multipage-icon.pp-bottomright{right:0px;bottom:0px}\
+#pp-popup-multipage-icon.pp-topright #pp-popup-multipage-icon-bg{\
+fill:url(#pp-popup-multipage-icon-grad-topright)}\
+#pp-popup-multipage-icon.pp-bottomright #pp-popup-multipage-icon-bg{\
+fill:url(#pp-popup-multipage-icon-grad-bottomright)}\
+#pp-popup-multipage-icon.pp-topright g{transform:translate(-3px,-47px)}\
 \
 /* bookmark */\
 #pp-popup-bookmark-wrapper{display:none;border:1px solid #aaa}\
