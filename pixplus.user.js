@@ -2639,7 +2639,7 @@
         load_images();
       }
 
-      if (!illust.load_statuses.html) {
+      if (!/^(?:loading|complete)$/.test(illust.load_statuses.html)) {
         _.debug('Start loading medium html...');
 
         illust.load_statuses.html = 'loading';
