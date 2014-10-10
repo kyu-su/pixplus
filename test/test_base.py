@@ -90,9 +90,9 @@ class TestCase(unittest.TestCase):
 
   def popup_wait_load(self):
     popup = self.q('#pp-popup')
-    self.assertTrue(popup.is_displayed())
+    self.assertTrue(popup.is_displayed(), self.url)
     self.wait_until(lambda d: not self.has_class(popup, 'pp-loading'))
-    self.assertFalse(self.has_class(popup, 'pp-error'))
+    self.assertFalse(self.has_class(popup, 'pp-error'), self.url)
     return popup
 
   def popup_wait_big_image(self):

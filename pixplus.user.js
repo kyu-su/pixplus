@@ -2076,7 +2076,7 @@
       }
 
       if (!allow_sizes) {
-        allow_sizes = ['100x100', '128x128', '150x150', '240x480', '600x600'];
+        allow_sizes = ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
       }
 
       var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page;
