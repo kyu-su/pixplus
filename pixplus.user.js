@@ -2076,11 +2076,11 @@
       }
 
       if (!allow_sizes) {
-        allow_sizes = ['100x100', '150x150', '240x480', '600x600'];
+        allow_sizes = ['100x100', '128x128', '150x150', '240x480', '600x600'];
       }
 
       var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page;
-      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_master1200(\.\w+(?:\?.*)?)$/.exec(url))) {
+      if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
         server = re[1];
         size   = re[2];
@@ -3038,7 +3038,7 @@
         _.e('path', {d: 'M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
 
         return svg;
-      })(true);
+      })(false);
 
 
       this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
