@@ -1,7 +1,6 @@
 import os
 import io
 import time
-import hashlib
 import urllib.request
 import zipfile
 
@@ -30,8 +29,7 @@ class Test_Ugoira(TestCase):
       pass
 
     zf = zipfile.ZipFile(self.zip_filename)
-    self.images = dict([(fn, hashlib.sha1(Image.open(io.BytesIO(zf.read(fn))).tobytes()).hexdigest())
-                        for fn in zf.namelist()])
+    self.images = dict([(fn, Image.open(io.BytesIO(zf.read(fn)))) for fn in zf.namelist()])
     pass
 
   def frame_count(self):
@@ -45,7 +43,7 @@ class Test_Ugoira(TestCase):
     filename = 'test22_ugoira_%d.png' % self.capture_id
     img = self.screenshot(canvas)
     self.save_image(img, filename)
-    return hashlib.sha1(img.tobytes()).hexdigest(), filename
+    return img, filename
 
   def test_ugoira(self):
     self.open('/')
@@ -64,18 +62,18 @@ class Test_Ugoira(TestCase):
     data1, fn1 = self.capture(canvas)
     time.sleep(1)
     data2, fn2 = self.capture(canvas)
-    self.assertEqual(data1, data2, '%s != %s' % (fn1, fn2))
+    self.assertImageEqual(data1, data2, '%s != %s' % (fn1, fn2))
 
     curframe = self.current_frame()
-    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
 
     self.send_keys(',')
     curframe = self.frame_count() - 1 if curframe == 0 else curframe - 1
-    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
 
     self.send_keys('.')
     curframe = 0 if curframe == self.frame_count() - 1 else curframe + 1
-    self.assertEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
     pass
 
   pass

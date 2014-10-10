@@ -154,7 +154,7 @@ class Browser:
       img = img.crop((x, y, x + w, y + h))
       pass
 
-    return img
+    return img.convert('RGB')
 
   def download(self, url, filename):
     dlpath = os.path.join(self.browserdir, filename)

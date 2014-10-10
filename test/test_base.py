@@ -2,6 +2,7 @@ import os
 import unittest
 import time
 import json
+import math, operator
 
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
@@ -346,16 +347,27 @@ class TestCase(unittest.TestCase):
     image.save(path)
     return image
 
-  def assertImageEqual(self, img1, img2, diff_filename):
+  def image_diff(self, img1, img2, diff_filename):
+    if img1.mode != img2.mode:
+      raise RuntimeError('Image diff: Colorspace mismatch! - %s vs %s' % (img1.mode, img2.mode))
     diff = ImageChops.difference(img1, img2)
-    self.save_image(diff, diff_filename)
-    self.assertIsNone(diff.getbbox())
+    if diff_filename is not None:
+      self.save_image(diff, diff_filename)
+      pass
+    return diff
+
+  def image_rmsdiff(self, img1, img2, diff_filename):
+    diff = self.image_diff(img1.convert('L'), img2.convert('L'), diff_filename)
+    h = diff.histogram()
+    s = sum(map(lambda p, i: (p * ((i / float(len(h) - 1)) ** 2)), h, range(len(h))))
+    return math.sqrt(s / float(operator.mul(*diff.size)))
+
+  def assertImageEqual(self, img1, img2, diff_filename, threshold = 0.001):
+    self.assertLess(self.image_rmsdiff(img1, img2, diff_filename), threshold)
     pass
 
-  def assertImageNotEqual(self, img1, img2, diff_filename):
-    diff = ImageChops.difference(img1, img2)
-    self.save_image(diff, diff_filename)
-    self.assertIsNotNone(diff.getbbox())
+  def assertImageNotEqual(self, img1, img2, diff_filename, threshold = 0.001):
+    self.assertGreaterEqual(self.image_rmsdiff(img1, img2, diff_filename), threshold)
     pass
 
   pass
