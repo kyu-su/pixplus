@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.13.0 - 2014/10/10](http://crckyl.hatenablog.com/entry/2014/10/10/pixplus_1.13.0)
+
+### 変更点
+
+* [変更] 複数ページ作品の扉ページを表示した際のデザインを変更。
+* [修正] 「原寸の画像を表示する」オプションの動作が「ブック」に対して逆になっていた不具合を修正。
+* [修正] スタックフィード、地域ランキング、マイページ(ランキングペイン)でポップアップが表示されない不具合を修正。
+* [削除] 「再投稿」表示を削除。
+
+### Changes
+
+* [Change] Change design of frontpage of multi-page works.
+* [Fix] Fix "Use original size image" setting is inverted for "book" type works.
+* [Fix] Fix support for staccfeed, area-ranking and mypage (ranking pane).
+* [Remove] Remove repost display.
+
 ## [1.12.3 - 2014/10/01](http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3)
 
 ### 変更点
