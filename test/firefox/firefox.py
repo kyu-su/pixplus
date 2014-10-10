@@ -15,7 +15,8 @@ from browser import Browser
 
 ADDONS = {
   'greasemonkey': 748,
-  'scriptish': 231203
+  'scriptish': 231203,
+  'adblockplus': 1865
   }
 
 class Firefox(Browser):
@@ -26,6 +27,7 @@ class Firefox(Browser):
     self.user_prefs = {}
     self.create_profile()
     self.add_addon(self.args.firefox_mode)
+    self.add_addon('adblockplus')
 
     fp = open(os.path.join(self.profiledir, 'user.js'), 'w')
     try:
@@ -52,7 +54,7 @@ class Firefox(Browser):
     filename = self.prepare_addon(ADDONS[name], name)
     print('Setup %s' % name)
     self.install_xpi(filename)
-    getattr(self, 'setup_%s' % name)()
+    getattr(self, 'setup_%s' % name, lambda: None)()
     pass
 
   def install_xpi(self, filename):
