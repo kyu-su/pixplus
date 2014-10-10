@@ -195,16 +195,12 @@ class TestCase(unittest.TestCase):
     url = self.b.url
 
     def check():
-      return self.js('''
-        var link = document.querySelector('input[name="book_id[]"]~a[href*="illust_id=%d"]');
-        if (!link) {
-          return false;
-        }
-
-        var check = link.parentNode.querySelector('input[name="book_id[]"]');
-        check.checked = true;
-        return true;
-      ''' % illust_id)
+      checkbox = self.xa('//li[contains(concat(" ", @class, " "), " image-item ") \
+      and a[contains(@href, "mode=medium&illust_id=%d")]]//input[@name="book_id[]"]' % illust_id)
+      if len(checkbox) >= 1:
+        checkbox[0].click()
+        return True
+      return False
 
     self.open('/bookmark.php')
     checked = check()
