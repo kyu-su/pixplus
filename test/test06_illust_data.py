@@ -40,8 +40,7 @@ class Test_IllustData(TestCase):
      'url_response':            '/response.php?illust_id=1580459',
      'url_response_to':         None,
      'has_image_response':      True,
-     'image_response_to':       None,
-     'repost':                  None
+     'image_response_to':       None
      },
 
     {'id': 35064276,
@@ -76,8 +75,7 @@ class Test_IllustData(TestCase):
      'url_response':            '/response.php?illust_id=35064276',
      'url_response_to':         None,
      'has_image_response':      True,
-     'image_response_to':       None,
-     'repost':                  {'year': '2013', 'month': '04', 'date': '24', 'hour': '19', 'minute': '31'}
+     'image_response_to':       None
      },
 
     {'id': 6209105,
@@ -116,8 +114,7 @@ class Test_IllustData(TestCase):
      'url_response':            '/response.php?illust_id=6209105',
      'url_response_to':         None,
      'has_image_response':      False,
-     'image_response_to':       None,
-     'repost':                  None
+     'image_response_to':       None
      },
 
     {'id': 37442895,
@@ -150,19 +147,23 @@ class Test_IllustData(TestCase):
      'url_response':            '/response.php?illust_id=37442895',
      'url_response_to':         None,
      'has_image_response':      True,
-     'image_response_to':       None,
-     'repost':                  None
+     'image_response_to':       None
      }
     ]
 
   def check_object_equal(self, o1, o2, msg, path = []):
+    msg_s = msg % {'path': '/'.join(path), 'obj1': '%s' % o1, 'obj2': '%s' % o2}
+
     if isinstance(o1, dict):
+      if not isinstance(o2, dict):
+        raise RuntimeError(msg_s)
+
       for key, value in o1.items():
         self.check_object_equal(value, o2[key], msg, path + [key])
         pass
       pass
     else:
-      self.assertEqual(o1, o2, msg % {'path': '/'.join(path), 'obj1': '%s' % o1, 'obj2': '%s' % o2})
+      self.assertEqual(o1, o2, msg_s)
       pass
     pass
 

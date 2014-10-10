@@ -2453,10 +2453,6 @@
           meta2 = _.fastxml.text(meta[1]);
 
       illust.datetime = _.fastxml.text(meta[0]);
-      illust.repost = null;
-      if ((re = /(\d{4})\u5e74(\d+)\u6708(\d+) (\d+):(\d\d) \u306b\u518d\u6295\u7a3f/.exec(html))) {
-        illust.repost = {year: re[1], month: re[2], date: re[3], hour: re[4], minute: re[5]};
-      }
 
       illust.is_manga = !!_.fastxml.q(root, '._work.manga');
 
@@ -3662,15 +3658,7 @@
         dom.author_image.classList.remove('pp-hide');
       }
 
-      var datetime = illust.datetime;
-      if (illust.repost) {
-        var repost = _.lng.repost;
-        for(var key in illust.repost) {
-          repost = repost.replace('$' + key, illust.repost[key]);
-        }
-        datetime += repost;
-      }
-      dom.datetime.textContent = datetime;
+      dom.datetime.textContent = illust.datetime;
 
       _.clear(dom.tools);
       illust.tools.forEach(function(tool) {
@@ -6976,7 +6964,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       },
 
       cancel: 'Cancel',
-      repost: ' (Re: $month/$date/$year $hour:$minute)',
       rate_confirm: 'Rate it?\n$pointpt',
       author_works: 'Works',
       author_bookmarks: 'Bookmarks',
@@ -7156,7 +7143,6 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       },
 
       cancel: '\u4e2d\u6b62',
-      repost: ' (\u518d: $year\u5e74$month\u6708$date\u65e5 $hour:$minute)',
       rate_confirm: '\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n$point\u70b9',
       author_works: '\u4f5c\u54c1',
       author_bookmarks: '\u30d6\u30c3\u30af\u30de\u30fc\u30af',
@@ -7204,10 +7190,12 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] Fix \"Use original size image\" setting is inverted for \"book\" type works."
+          "[Fix] Fix \"Use original size image\" setting is inverted for \"book\" type works.",
+          "[Remove] Remove repost display."
         ],
         "ja": [
-          "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u306e\u52d5\u4f5c\u304c\u300c\u30d6\u30c3\u30af\u300d\u306b\u5bfe\u3057\u3066\u9006\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+          "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u306e\u52d5\u4f5c\u304c\u300c\u30d6\u30c3\u30af\u300d\u306b\u5bfe\u3057\u3066\u9006\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u524a\u9664] \u300c\u518d\u6295\u7a3f\u300d\u8868\u793a\u3092\u524a\u9664\u3002"
         ]
       }
     },
