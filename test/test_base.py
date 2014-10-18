@@ -362,6 +362,9 @@ class TestCase(unittest.TestCase):
     s = sum(map(lambda p, i: (p * ((i / float(len(h) - 1)) ** 2)), h, range(len(h))))
     return math.sqrt(s / float(operator.mul(*diff.size)))
 
+  def image_isEqual(self, img1, img2, threshold = 0.001):
+    return self.image_rmsdiff(img1, img2, None) < threshold
+
   def assertImageEqual(self, img1, img2, diff_filename, threshold = 0.001):
     self.assertLess(self.image_rmsdiff(img1, img2, diff_filename), threshold)
     pass

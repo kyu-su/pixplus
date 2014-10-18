@@ -29,7 +29,7 @@ class Test_Ugoira(TestCase):
       pass
 
     zf = zipfile.ZipFile(self.zip_filename)
-    self.images = dict([(fn, Image.open(io.BytesIO(zf.read(fn)))) for fn in zf.namelist()])
+    self.images = dict([(fn, Image.open(io.BytesIO(zf.read(fn))).convert('RGB')) for fn in zf.namelist()])
     pass
 
   def frame_count(self):
@@ -53,16 +53,16 @@ class Test_Ugoira(TestCase):
     frames = self.js('return pixplus.popup.illust.ugoira.frames')
     canvas = self.q('#pp-popup-image-layout canvas')
 
-    data1 = self.capture(canvas)[0]
-    self.wait_until(lambda d: data1 != self.capture(canvas))
+    img1 = self.capture(canvas)[0]
+    self.wait_until(lambda d: img1 != self.capture(canvas)[0])
 
     self.send_keys('m')
     time.sleep(1)
 
-    data1, fn1 = self.capture(canvas)
+    img1, fn1 = self.capture(canvas)
     time.sleep(1)
-    data2, fn2 = self.capture(canvas)
-    self.assertImageEqual(data1, data2, '%s != %s' % (fn1, fn2))
+    img2, fn2 = self.capture(canvas)
+    self.assertImageEqual(img1, img2, '%s != %s' % (fn1, fn2))
 
     curframe = self.current_frame()
     self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
