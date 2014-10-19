@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.13.1 - 2014/10/19](http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1)
+
+### 変更点
+
+* [修正] Safari 5/6でポップアップが動作しなくなっていたバグを修正。
+
+### Changes
+
+* [Fix] Fix popup was broken on Safari 5/6.
+
 ## [1.13.0 - 2014/10/10](http://crckyl.hatenablog.com/entry/2014/10/10/pixplus_1.13.0)
 
 ### 変更点

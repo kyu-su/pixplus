@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.13.0
+// @version     1.13.1
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -3005,26 +3005,17 @@
         _.e('path', {d: 'M 7,7 10,7 10,17 7,18 z M 14,7 17,7 17,17 14,17 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-paused'}, svg);
       })();
 
-      dom.multipage_icon = (function(topright) {
+      dom.multipage_icon = (function() {
         var svg = _.e('svg', {id: 'pp-popup-multipage-icon',
                               width: '160', height: '160',
                               viewBox: '0 0 100 100'}, dom.image_scroller);
 
-        svg.classList.add(topright ? 'pp-topright' : 'pp-bottomright');
-
-        var defs = _.e('defs', null, svg);
-
-        var make_grad = function(topright) {
-          var grad = _.e('linearGradient',
-                         {id: 'pp-popup-multipage-icon-grad-' + (topright ? 'topright' : 'bottomright'),
-                          x1: '50%', y1: '50%', x2: '100%', y2: (topright ? '0%' : '100%')},
-                         defs);
-          _.e('stop', {offset: '0%', style: 'stop-color:black;stop-opacity:0'}, grad);
-          _.e('stop', {offset: '100%', style: 'stop-color:black;stop-opacity:1'}, grad);
-        };
-
-        make_grad(true);
-        make_grad(false);
+        var grad = _.e('linearGradient',
+                       {id: 'pp-popup-multipage-icon-grad',
+                        x1: '50%', y1: '50%', x2: '100%', y2: '100%'},
+                       _.e('defs', null, svg));
+        _.e('stop', {offset: '0%', style: 'stop-color:black;stop-opacity:0'}, grad);
+        _.e('stop', {offset: '100%', style: 'stop-color:black;stop-opacity:1'}, grad);
 
         _.e('rect', {x: '0', y: '0', width: '100', height: '100', id: 'pp-popup-multipage-icon-bg'}, svg);
 
@@ -3034,7 +3025,7 @@
         _.e('path', {d: 'M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
 
         return svg;
-      })(false);
+      })();
 
 
       this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
@@ -6505,13 +6496,8 @@ border:0px;box-shadow:none;background:none}\
 #pp-popup-olc-next svg{transform:matrix(-1,0,0,1,0,0);-webkit-transform:matrix(-1,0,0,1,0,0)}\
 #pp-popup-multipage-icon{position:absolute;opacity:.8}\
 #pp-popup:not(.pp-frontpage-new) #pp-popup-multipage-icon{display:none}\
-#pp-popup-multipage-icon.pp-topright{right:0px;top:0px}\
-#pp-popup-multipage-icon.pp-bottomright{right:0px;bottom:0px}\
-#pp-popup-multipage-icon.pp-topright #pp-popup-multipage-icon-bg{\
-fill:url(#pp-popup-multipage-icon-grad-topright)}\
-#pp-popup-multipage-icon.pp-bottomright #pp-popup-multipage-icon-bg{\
-fill:url(#pp-popup-multipage-icon-grad-bottomright)}\
-#pp-popup-multipage-icon.pp-topright g{transform:translate(-3px,-47px)}\
+#pp-popup-multipage-icon{right:0px;bottom:0px;\
+fill:url(#pp-popup-multipage-icon-grad)}\
 \
 /* bookmark */\
 #pp-popup-bookmark-wrapper{display:none;border:1px solid #aaa}\
@@ -7185,6 +7171,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   _.changelog = [
 
     // __CHANGELOG_BEGIN__
+
+    {
+      "date": "2014/10/19",
+      "version": "1.13.1",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix popup was broken on Safari 5/6."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] Safari 5/6\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
 
     {
       "date": "2014/10/10",

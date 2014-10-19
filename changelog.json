@@ -2,6 +2,19 @@
   {
     "changes_i18n": {
       "en": [
+        "[Fix] Fix popup was broken on Safari 5/6."
+      ], 
+      "ja": [
+        "[\u4fee\u6b63] Safari 5/6\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"
+      ]
+    }, 
+    "date": "2014/10/19", 
+    "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1", 
+    "version": "1.13.1"
+  }, 
+  {
+    "changes_i18n": {
+      "en": [
         "[Change] Change design of frontpage of multi-page works.", 
         "[Fix] Fix \"Use original size image\" setting is inverted for \"book\" type works.", 
         "[Fix] Fix support for staccfeed, area-ranking and mypage (ranking pane).", 
