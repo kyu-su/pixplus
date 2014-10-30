@@ -2502,7 +2502,7 @@
         return false;
       });
 
-      var comment = _.fastxml.q(root, '#one_comment .worksOption');
+      var comment = _.fastxml.q(root, '#one_comment .layout-column-1');
       _.fastxml.remove_selector(comment, '.worksImageresponse');
       illust.comment = _.fastxml.inner_html(comment) || 'Error';
 
