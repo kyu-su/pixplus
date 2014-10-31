@@ -2,6 +2,9 @@
 *.log
 config.json
 cookie.json
-profile
 44298467_ugoira600x600.zip
 screenshot
+*.safariextz
+mac2ipaddr
+*.jar
+selenium
