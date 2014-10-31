@@ -43,7 +43,7 @@ def save_cookie(driver):
 
 def login(browser, config):
   print('Logging in...')
-  browser.open('https://www.secure.pixiv.net/login.php')
+  # browser.open('https://www.secure.pixiv.net/login.php')
 
   form = browser.wait_until(lambda d: browser.qa('form[action*="login.php"]'))[-1]
 
@@ -55,7 +55,8 @@ def login(browser, config):
   e_pw.clear()
   e_pw.send_keys(config['password'])
 
-  form.submit()
+  # form.submit()
+  form.find_element_by_css_selector('#login_submit').click()
 
   try:
     browser.wait_until(lambda d: browser.url.startswith('http://www.pixiv.net/mypage.php'))
