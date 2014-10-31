@@ -1,12 +1,12 @@
 import os
 import io
 import time
-import urllib.request
 import zipfile
 
 from PIL import Image, ImageChops
 
 from test_base import TestCase
+import util
 
 class Test_Ugoira(TestCase):
   illust_id = 44298467
@@ -15,19 +15,9 @@ class Test_Ugoira(TestCase):
 
   def setUp(self):
     self.capture_id = 0
-
     if not os.path.exists(self.zip_filename):
-      print('Download: %s' % self.zip_url)
-      req = urllib.request.Request(self.zip_url)
-      req.add_header('Referer', 'http://www.pixiv.net/mypage.php')
-      res = urllib.request.urlopen(req)
-      zip_data = res.read()
-      res.close()
-      with open(self.zip_filename, 'wb') as f:
-        f.write(zip_data)
-        pass
+      util.download(self.zip_url, zip_filename)
       pass
-
     zf = zipfile.ZipFile(self.zip_filename)
     self.images = dict([(fn, Image.open(io.BytesIO(zf.read(fn))).convert('RGB')) for fn in zf.namelist()])
     pass
