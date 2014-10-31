@@ -3,13 +3,16 @@ import argparse
 import unittest
 import subprocess
 
+testdir = os.path.abspath(os.path.dirname(__file__))
+
+selenium_py_dir = os.path.join(testdir, 'selenium', 'py')
+if os.path.exists(selenium_py_dir):
+  sys.path.insert(0, selenium_py_dir)
+  pass
+
 import selenium.common.exceptions
 
 import util
-from firefox import Firefox
-from chrome import Chrome
-
-testdir = os.path.abspath(os.path.dirname(__file__))
 
 def load_tests():
   tests = {}
@@ -99,10 +102,12 @@ def main():
   from browser import Browser
   import firefox
   import chrome
+  import safari
 
   browsers = [
     (firefox, firefox.Firefox),
-    (chrome, chrome.Chrome)
+    (chrome, chrome.Chrome),
+    (safari, safari.Safari)
     ]
 
   all_tests = load_tests()
@@ -110,6 +115,8 @@ def main():
 
   parser = argparse.ArgumentParser(usage = '%(prog)s [options]')
 
+  parser.add_argument('-d', dest = 'server_host',
+                      default = 'localhost', help = 'Selenium server host name')
   parser.add_argument('-p', dest = 'server_port', type = int,
                       required = True, help = 'Selenium server port')
   parser.add_argument('-t', dest = 'tests', action = 'append',

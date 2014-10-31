@@ -35,7 +35,7 @@ class Browser:
     caps.update(getattr(DesiredCapabilities, self.capname))
     self.prepare_caps(caps)
     self.driver = WebDriver(
-      'http://localhost:%d/wd/hub' % self.args.server_port,
+      'http://%s:%d/wd/hub' % (self.args.server_host, self.args.server_port),
       desired_capabilities = caps
       )
     self.driver.implicitly_wait(2)
@@ -162,5 +162,19 @@ class Browser:
       util.download(url, dlpath)
       pass
     return dlpath
+
+  def read_file_as_base64(self, filename):
+    fp = open(filename, 'rb')
+    try:
+      data = fp.read()
+    finally:
+      fp.close()
+      pass
+    data = base64.b64encode(data)
+    try:
+      data = str(data, 'ascii')
+    except TypeError:
+      pass
+    return data
 
   pass
