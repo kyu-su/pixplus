@@ -9,7 +9,7 @@ def out_latest_version(changelog):
   return [changelog[0]['version']]
 
 i18n = {
-  'changes': {'ja': '\u5909\u66f4\u70b9', 'en': 'Changes'}
+  'changes': {'ja': u'\u5909\u66f4\u70b9', 'en': 'Changes'}
   }
 
 def atom_changes(changes):
