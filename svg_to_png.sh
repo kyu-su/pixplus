@@ -1,8 +1,21 @@
 #!/bin/bash
 
-RSVG_CONVERT=rsvg-convert
-INKSCAPE=inkscape
-GIMP=gimp
+if test "${RSVG_CONVERT:-x}" = x; then
+  RSVG_CONVERT=rsvg-convert
+fi
+
+if test "${INKSCAPE:-x}" = x; then
+  INKSCAPE=inkscape
+fi
+
+if test "${GIMP:-x}" = x; then
+  for cmd in gimp /Applications/GIMP.app/Contents/MacOS/GIMP; do
+    if which $cmd >/dev/null 2>&1; then
+      GIMP=$cmd
+      break
+    fi
+  done
+fi
 
 SVG=
 PNG=

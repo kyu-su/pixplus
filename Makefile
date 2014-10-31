@@ -1,7 +1,4 @@
-RSVG_CONVERT                    = rsvg-convert
-INKSCAPE                        = inkscape
-GIMP                            = gimp
-SVG_TO_PNG                      = ./svg_to_png.sh -rsvg-convert "$(RSVG_CONVERT)" -inkscape "$(INKSCAPE)" -gimp "$(GIMP)"
+SVG_TO_PNG                      = ./svg_to_png.sh
 SVG_TO_PNG_OK                   = $(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no)
 SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
