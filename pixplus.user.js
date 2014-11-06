@@ -2464,7 +2464,7 @@
         page_count: 0
       };
 
-      if (_.fastxml.q(root, '._work.multiple')) {
+      if (_.fastxml.q(root, '.works_display ._work.multiple')) {
         illust.manga.available = true;
       }
 
