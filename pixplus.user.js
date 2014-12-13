@@ -4381,8 +4381,10 @@
     },
 
     update: function() {
-      _.qa('._comment-item > .comment > .sticker-container', _.popup.dom.comment).forEach(function(stamp) {
-        stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
+      _.qa('._comment-item', _.popup.dom.comment).forEach(function(item) {
+        if (_.q('.sticker-container', item)) {
+          item.classList.add('pp-stamp-comment');
+        }
       });
       _.popup.adjust();
     },
@@ -6448,14 +6450,13 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 5rDK0fzuBf5vjxA4xDxUUbDZuFAAAAAElFTkSuQmCC\
 ")/* __SUBST_FILE_CSS_END__ */}\
 #pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}\
-#pp-popup-comment ._comment-item .comment{margin-bottom:1em}\
-#pp-popup-comment ._comment-item .user-icon-container{top:0px}\
 #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}\
 #pp-popup-comment .comment.header::before{display:none}\
 #pp-popup-comment .comment.header::after{display:none}\
 #pp-popup-comment ._comment-items ._no-item{\
 margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
 #pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}\
+#pp-popup.pp-hide-stamp-comments .sticker-container{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
