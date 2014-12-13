@@ -27,8 +27,8 @@ class Test_IllustData(TestCase):
      'author_mypixiv':          False,
      'size':                    {'width': 749, 'height': 711},
      'manga':                   {'available': False, 'viewed': False},
-     'image_url_big':           'http://i1.pixiv.net/img01/img/pixiv/1580459.jpg?',
-     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/1580459_m.jpg?',
+     'image_url_big':           'http://i1.pixiv.net/img01/img/pixiv/1580459.jpg',
+     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/1580459_m.jpg',
      'url_medium':              '/member_illust.php?mode=medium&illust_id=1580459',
      'url_author_profile':      '/member.php?id=11',
      'url_author_works':        '/member_illust.php?id=11',
@@ -101,8 +101,7 @@ class Test_IllustData(TestCase):
      'author_mutual_favorite':  False,
      'author_mypixiv':          False,
      'manga':                   {'available': True, 'viewed': False, 'page_count': 3},
-     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/6209105_m.jpg?',
-     'image_url_big':           'http://i1.pixiv.net/img01/img/pixiv/6209105.jpg?',
+     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/6209105_m.jpg',
      'url_medium':              '/member_illust.php?mode=medium&illust_id=6209105',
      'url_author_profile':      '/member.php?id=11',
      'url_author_works':        '/member_illust.php?id=11',
@@ -134,8 +133,7 @@ class Test_IllustData(TestCase):
      'author_mutual_favorite':  False,
      'author_mypixiv':          False,
      'manga':                   {'available': True, 'viewed': False, 'page_count': 2},
-     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/37442895_m.jpg?',
-     'image_url_big':           'http://i1.pixiv.net/img01/img/pixiv/37442895.jpg?',
+     'image_url_medium':        'http://i1.pixiv.net/img01/img/pixiv/37442895_m.jpg',
      'url_medium':              '/member_illust.php?mode=medium&illust_id=37442895',
      'url_author_profile':      '/member.php?id=11',
      'url_author_works':        '/member_illust.php?id=11',
@@ -169,9 +167,13 @@ class Test_IllustData(TestCase):
 
   def test_illust_data(self):
     self.open('/')
+    self.set_conf('popup.big_image', True)
 
     for data in self.illust_list:
       self.open_popup(data['id'])
+      if 'image_url_big' in data:
+        self.popup_wait_big_image()
+        pass
       illust_data = self.popup_get_illust_data()
       illust_data['tags'] = set(illust_data['tags'])
       self.check_object_equal(data, illust_data, 'Illust data mismatch! %d[%%(path)s] =>\n  %%(obj1)s\n    vs\n  %%(obj2)s' % data['id'])
