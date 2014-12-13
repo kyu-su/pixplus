@@ -2070,7 +2070,7 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types, allow_sizes) {
+    parse_image_url: function(url, allow_types, allow_sizes, is_manga_page) {
       if (!allow_types) {
         allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
       }
@@ -2079,7 +2079,7 @@
         allow_sizes = ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
       }
 
-      var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page;
+      var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page, ret;
       if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
         server = re[1];
@@ -2104,7 +2104,7 @@
           return {id: id};
         }
 
-        return {
+        ret = {
           id: id,
           image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
           image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
@@ -2136,10 +2136,7 @@
           return {id: id};
         } else {
           var url_base = prefix + id;
-          if (!/\?/.test(suffix)) {
-            suffix += '?';
-          }
-          return {
+          ret = {
             id: id,
             image_url_medium: url_base + rest + (page || '_m') + suffix,
             image_url_big: url_base + rest + (page ? '_big' + page : '') + suffix
@@ -2147,7 +2144,12 @@
         }
       }
 
-      return null;
+      if (ret && !is_manga_page) {
+        delete ret.image_url_big;
+        delete ret.image_url_big_alt;
+      }
+
+      return ret || null;
     },
 
     create_from_id: function(id) {
@@ -2361,9 +2363,10 @@
         });
 
       } else {
-        var img = _.fastxml.q(root, '.works_display a img');
-        if (img) {
-          var p = this.parse_image_url(img.attrs.src, ['_m'], ['600x600']);
+        var med = (_.fastxml.q(root, '.works_display img.medium') ||
+                   _.fastxml.q(root, '.works_display a img'));
+        if (med) {
+          var p = this.parse_image_url(med.attrs.src, ['_m'], ['600x600']);
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
@@ -2377,6 +2380,20 @@
         } else if (!illust.image_url_medium) {
           illust.error = 'Medium image not found';
           return false;
+        }
+
+        var big = _.fastxml.q(root, '.works_display img.big');
+        if (big) {
+          var big_src = big.attrs.src || big.attrs['data-src'];
+          if (big_src) {
+            _.debug('Big image found: ' + big_src);
+            illust.image_url_big = big_src;
+          }
+        } else {
+          if (!illust.load_statuses) {
+            illust.load_statuses = {};
+          }
+          illust.load_statuses.big = 'error';
         }
       }
 
@@ -2550,6 +2567,9 @@
         }
 
         var img, url = page['image_url_' + name];
+        if (!url) {
+          return;
+        }
         images[name] = img = new w.Image();
 
         img.addEventListener('load', function() {
@@ -2586,7 +2606,6 @@
       };
 
       load('medium', 'big');
-
       if (load_big_image) {
         load('big', 'medium');
       }
@@ -2712,6 +2731,9 @@
 
           if (illust.image_medium || illust.image_big) {
             _.popup.onload(illust);
+            if (illust.image_url_big && !illust.image_big) {
+              load_images();
+            }
           } else {
             load_images();
           }
@@ -2838,7 +2860,7 @@
           }
 
           var src = img.attrs['data-src'] || img.attrs.src;
-          var p = _.illust.parse_image_url(src, [''], ['1200x1200']);
+          var p = _.illust.parse_image_url(src, [''], ['1200x1200'], true);
 
           if (p && p.image_url_medium) {
             pages.push(this.create_manga_page(p, null, null, cnt));
@@ -3483,6 +3505,7 @@
       dom.button_response.classList.add('pp-hide');
       dom.author_status.classList.add('pp-hide');
       dom.author_image.classList.add('pp-hide');
+      dom.root.classList.remove('pp-frontpage-new');
 
       _.clear(
         dom.title_link,
