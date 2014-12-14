@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.13.1
+// @version     1.13.2
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -7193,6 +7193,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   };
 
   _.changelog = [
+
+    {
+      "date": "2014/12/14",
+      "version": "1.13.2",
+      "releasenote": "",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix comment mode (Shift+c) was not working."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30e2\u30fc\u30c9(Shift+c)\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
 
     // __CHANGELOG_BEGIN__
 
