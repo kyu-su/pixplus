@@ -39,6 +39,11 @@ class TestCase(unittest.TestCase):
         self.open('/')
         pass
 
+      dialog_close = self.qa('._premium-promotion-modal .ui-modal-close')
+      if dialog_close and dialog_close[0].is_displayed():
+        self.click(dialog_close[0])
+        pass
+
       js = []
       for section in conf:
         for item in section['items']:
