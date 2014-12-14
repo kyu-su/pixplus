@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.13.1
+// @version     1.13.2
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -2070,7 +2070,7 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types, allow_sizes) {
+    parse_image_url: function(url, allow_types, allow_sizes, is_manga_page) {
       if (!allow_types) {
         allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
       }
@@ -2079,7 +2079,7 @@
         allow_sizes = ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
       }
 
-      var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page;
+      var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page, ret;
       if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
 
         server = re[1];
@@ -2104,7 +2104,7 @@
           return {id: id};
         }
 
-        return {
+        ret = {
           id: id,
           image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
           image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
@@ -2136,10 +2136,7 @@
           return {id: id};
         } else {
           var url_base = prefix + id;
-          if (!/\?/.test(suffix)) {
-            suffix += '?';
-          }
-          return {
+          ret = {
             id: id,
             image_url_medium: url_base + rest + (page || '_m') + suffix,
             image_url_big: url_base + rest + (page ? '_big' + page : '') + suffix
@@ -2147,7 +2144,12 @@
         }
       }
 
-      return null;
+      if (ret && !is_manga_page) {
+        delete ret.image_url_big;
+        delete ret.image_url_big_alt;
+      }
+
+      return ret || null;
     },
 
     create_from_id: function(id) {
@@ -2361,9 +2363,10 @@
         });
 
       } else {
-        var img = _.fastxml.q(root, '.works_display a img');
-        if (img) {
-          var p = this.parse_image_url(img.attrs.src, ['_m'], ['600x600']);
+        var med = (_.fastxml.q(root, '.works_display img.medium') ||
+                   _.fastxml.q(root, '.works_display a img'));
+        if (med) {
+          var p = this.parse_image_url(med.attrs.src, ['_m'], ['600x600']);
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
@@ -2377,6 +2380,20 @@
         } else if (!illust.image_url_medium) {
           illust.error = 'Medium image not found';
           return false;
+        }
+
+        var big = _.fastxml.q(root, '.works_display img.big');
+        if (big) {
+          var big_src = big.attrs.src || big.attrs['data-src'];
+          if (big_src) {
+            _.debug('Big image found: ' + big_src);
+            illust.image_url_big = big_src;
+          }
+        } else {
+          if (!illust.load_statuses) {
+            illust.load_statuses = {};
+          }
+          illust.load_statuses.big = 'error';
         }
       }
 
@@ -2464,7 +2481,7 @@
         page_count: 0
       };
 
-      if (_.fastxml.q(root, '._work.multiple')) {
+      if (_.fastxml.q(root, '.works_display ._work.multiple')) {
         illust.manga.available = true;
       }
 
@@ -2502,7 +2519,7 @@
         return false;
       });
 
-      var comment = _.fastxml.q(root, '#one_comment .worksOption');
+      var comment = _.fastxml.q(root, '#one_comment .layout-column-1');
       _.fastxml.remove_selector(comment, '.worksImageresponse');
       illust.comment = _.fastxml.inner_html(comment) || 'Error';
 
@@ -2550,6 +2567,9 @@
         }
 
         var img, url = page['image_url_' + name];
+        if (!url) {
+          return;
+        }
         images[name] = img = new w.Image();
 
         img.addEventListener('load', function() {
@@ -2586,7 +2606,6 @@
       };
 
       load('medium', 'big');
-
       if (load_big_image) {
         load('big', 'medium');
       }
@@ -2712,6 +2731,9 @@
 
           if (illust.image_medium || illust.image_big) {
             _.popup.onload(illust);
+            if (illust.image_url_big && !illust.image_big) {
+              load_images();
+            }
           } else {
             load_images();
           }
@@ -2838,7 +2860,7 @@
           }
 
           var src = img.attrs['data-src'] || img.attrs.src;
-          var p = _.illust.parse_image_url(src, [''], ['1200x1200']);
+          var p = _.illust.parse_image_url(src, [''], ['1200x1200'], true);
 
           if (p && p.image_url_medium) {
             pages.push(this.create_manga_page(p, null, null, cnt));
@@ -3483,6 +3505,7 @@
       dom.button_response.classList.add('pp-hide');
       dom.author_status.classList.add('pp-hide');
       dom.author_image.classList.add('pp-hide');
+      dom.root.classList.remove('pp-frontpage-new');
 
       _.clear(
         dom.title_link,
@@ -4381,8 +4404,10 @@
     },
 
     update: function() {
-      _.qa('._comment-item > .comment > .sticker-container', _.popup.dom.comment).forEach(function(stamp) {
-        stamp.parentNode.parentNode.classList.add('pp-stamp-comment');
+      _.qa('._comment-item', _.popup.dom.comment).forEach(function(item) {
+        if (_.q('.sticker-container', item)) {
+          item.classList.add('pp-stamp-comment');
+        }
       });
       _.popup.adjust();
     },
@@ -6448,14 +6473,13 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 5rDK0fzuBf5vjxA4xDxUUbDZuFAAAAAElFTkSuQmCC\
 ")/* __SUBST_FILE_CSS_END__ */}\
 #pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}\
-#pp-popup-comment ._comment-item .comment{margin-bottom:1em}\
-#pp-popup-comment ._comment-item .user-icon-container{top:0px}\
 #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}\
 #pp-popup-comment .comment.header::before{display:none}\
 #pp-popup-comment .comment.header::after{display:none}\
 #pp-popup-comment ._comment-items ._no-item{\
 margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
 #pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}\
+#pp-popup.pp-hide-stamp-comments .sticker-container{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
@@ -7044,7 +7068,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
             hint: ['\u7121\u52b9', '\u6709\u52b9', '\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a']
           },
           reverse_regexp: '"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe',
-          overlay_control: '\u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)',
+          overlay_control: '\u79fb\u52d5\u77e2\u5370\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044/<1:\u753b\u50cf\u306b\u5bfe\u3059\u308b\u5272\u5408/>1:\u30d4\u30af\u30bb\u30eb)',
           scroll_height: '\u30b9\u30af\u30ed\u30fc\u30eb\u5e45(px)',
           scroll_height_page: 'PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45',
           author_status_icon: '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b',
@@ -7171,6 +7195,20 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   _.changelog = [
 
     // __CHANGELOG_BEGIN__
+
+    {
+      "date": "2014/12/14",
+      "version": "1.13.2",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Fix comment mode (Shift+c) was not working."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30e2\u30fc\u30c9(Shift+c)\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
 
     {
       "date": "2014/10/19",

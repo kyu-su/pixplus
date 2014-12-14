@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.13.2 - 2014/12/14](http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2)
+
+### 変更点
+
+* [修正] コメントモード(Shift+c)が動かなくなっていた不具合を修正。
+
+### Changes
+
+* [Fix] Fix comment mode (Shift+c) was not working.
+
 ## [1.13.1 - 2014/10/19](http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1)
 
 ### 変更点
