@@ -2363,8 +2363,7 @@
         });
 
       } else {
-        var med = (_.fastxml.q(root, '.works_display img.medium') ||
-                   _.fastxml.q(root, '.works_display a img'));
+        var med = _.fastxml.q(root, '.works_display img');
         if (med) {
           var p = this.parse_image_url(med.attrs.src, ['_m'], ['600x600']);
           if (p) {
@@ -2382,7 +2381,7 @@
           return false;
         }
 
-        var big = _.fastxml.q(root, '.works_display img.big');
+        var big = _.fastxml.q(root, 'img.original-image');
         if (big) {
           var big_src = big.attrs.src || big.attrs['data-src'];
           if (big_src) {
