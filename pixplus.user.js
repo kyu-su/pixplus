@@ -2070,14 +2070,13 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types, allow_sizes) {
-      if (!allow_types) {
-        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+    parse_image_url: function(url, opt) {
+      if (!opt) {
+        opt = {};
       }
 
-      if (!allow_sizes) {
-        allow_sizes = ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
-      }
+      var allow_types = opt.allow_types || ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+      var allow_sizes = opt.allow_sizes || ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
 
       var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page, ret;
       if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
@@ -2144,6 +2143,11 @@
         }
       }
 
+      if (ret && !opt.manga_page) {
+        delete ret.image_url_big;
+        delete ret.image_url_big_alt;
+      }
+
       return ret || null;
     },
 
@@ -2198,7 +2202,7 @@
           continue;
         }
 
-        var p = this.parse_image_url(src, allow_types);
+        var p = this.parse_image_url(src, {allow_types: allow_types});
 
         if (!p) {
           continue;
@@ -2360,7 +2364,7 @@
       } else {
         var med = _.fastxml.q(root, '.works_display img');
         if (med) {
-          var p = this.parse_image_url(med.attrs.src, ['_m'], ['600x600']);
+          var p = this.parse_image_url(med.attrs.src, {allow_types: ['_m'], allow_sizes: ['600x600']});
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
@@ -2376,19 +2380,19 @@
           return false;
         }
 
-        // var big = _.fastxml.q(root, 'img.original-image');
-        // if (big) {
-        //   var big_src = big.attrs.src || big.attrs['data-src'];
-        //   if (big_src) {
-        //     _.debug('Big image found: ' + big_src);
-        //     illust.image_url_big = big_src;
-        //   }
-        // } else {
-        //   if (!illust.load_statuses) {
-        //     illust.load_statuses = {};
-        //   }
-        //   illust.load_statuses.big = 'error';
-        // }
+        var big = _.fastxml.q(root, 'img.original-image');
+        if (big) {
+          var big_src = big.attrs.src || big.attrs['data-src'];
+          if (big_src) {
+            _.debug('Big image found: ' + big_src);
+            illust.image_url_big = big_src;
+          }
+        } else {
+          if (!illust.load_statuses) {
+            illust.load_statuses = {};
+          }
+          illust.load_statuses.big = 'error';
+        }
       }
 
       // error check end
@@ -2854,7 +2858,11 @@
           }
 
           var src = img.attrs['data-src'] || img.attrs.src;
-          var p = _.illust.parse_image_url(src, [''], ['1200x1200']);
+          var p = _.illust.parse_image_url(src, {
+            allow_types: [''],
+            allow_sizes: ['1200x1200'],
+            manga_page: true
+          });
 
           if (p && p.image_url_medium) {
             pages.push(this.create_manga_page(p, null, null, cnt));
