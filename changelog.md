@@ -13,7 +13,7 @@ pixplus version history
 * [Fix] Popup window reports an error for old works.
 * [Fix] "Use original size image" option was not working.
 
-## [1.13.2 - 2014/12/14]()
+## [1.13.2 - 2014/12/14](http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2)
 
 ### 変更点
 

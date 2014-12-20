@@ -7217,7 +7217,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     {
       "date": "2014/12/14",
       "version": "1.13.2",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2",
       "changes_i18n": {
         "en": [
           "[Fix] Fix comment mode (Shift+c) was not working."
