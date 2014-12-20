@@ -1,7 +1,19 @@
 pixplus version history
 =======================
 
-## [1.13.2 - 2014/12/14](http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2)
+## [1.13.3 - 2014/12/20](http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3)
+
+### 変更点
+
+* [修正] 古い作品でエラーになる不具合を修正。
+* [修正] 「原寸の画像を表示する」オプションが動かなくなっていた不具合を修正。
+
+### Changes
+
+* [Fix] Popup window reports an error for old works.
+* [Fix] "Use original size image" option was not working.
+
+## [1.13.2 - 2014/12/14]()
 
 ### 変更点
 

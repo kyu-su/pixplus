@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.13.2
+// @version     1.13.3
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -2070,14 +2070,13 @@
     last_link_count: 0,
     list: [ ],
 
-    parse_image_url: function(url, allow_types, allow_sizes, is_manga_page) {
-      if (!allow_types) {
-        allow_types = ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+    parse_image_url: function(url, opt) {
+      if (!opt) {
+        opt = {};
       }
 
-      if (!allow_sizes) {
-        allow_sizes = ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
-      }
+      var allow_types = opt.allow_types || ['_s', '_100', '_128x128', '_240ms', '_240mw'];
+      var allow_sizes = opt.allow_sizes || ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
 
       var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page, ret;
       if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
@@ -2144,7 +2143,7 @@
         }
       }
 
-      if (ret && !is_manga_page) {
+      if (ret && !opt.manga_page) {
         delete ret.image_url_big;
         delete ret.image_url_big_alt;
       }
@@ -2203,7 +2202,7 @@
           continue;
         }
 
-        var p = this.parse_image_url(src, allow_types);
+        var p = this.parse_image_url(src, {allow_types: allow_types});
 
         if (!p) {
           continue;
@@ -2363,10 +2362,9 @@
         });
 
       } else {
-        var med = (_.fastxml.q(root, '.works_display img.medium') ||
-                   _.fastxml.q(root, '.works_display a img'));
+        var med = _.fastxml.q(root, '.works_display img');
         if (med) {
-          var p = this.parse_image_url(med.attrs.src, ['_m'], ['600x600']);
+          var p = this.parse_image_url(med.attrs.src, {allow_types: ['_m'], allow_sizes: ['600x600']});
           if (p) {
             if (p.id !== illust.id) {
               illust.error = 'Invalid medium image url';
@@ -2382,7 +2380,7 @@
           return false;
         }
 
-        var big = _.fastxml.q(root, '.works_display img.big');
+        var big = _.fastxml.q(root, 'img.original-image');
         if (big) {
           var big_src = big.attrs.src || big.attrs['data-src'];
           if (big_src) {
@@ -2860,7 +2858,11 @@
           }
 
           var src = img.attrs['data-src'] || img.attrs.src;
-          var p = _.illust.parse_image_url(src, [''], ['1200x1200'], true);
+          var p = _.illust.parse_image_url(src, {
+            allow_types: [''],
+            allow_sizes: ['1200x1200'],
+            manga_page: true
+          });
 
           if (p && p.image_url_medium) {
             pages.push(this.create_manga_page(p, null, null, cnt));
@@ -7197,9 +7199,25 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     // __CHANGELOG_BEGIN__
 
     {
+      "date": "2014/12/20",
+      "version": "1.13.3",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3",
+      "changes_i18n": {
+        "en": [
+          "[Fix] Popup window reports an error for old works.",
+          "[Fix] \"Use original size image\" option was not working."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u53e4\u3044\u4f5c\u54c1\u3067\u30a8\u30e9\u30fc\u306b\u306a\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
+    {
       "date": "2014/12/14",
       "version": "1.13.2",
-      "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2",
+      "releasenote": "",
       "changes_i18n": {
         "en": [
           "[Fix] Fix comment mode (Shift+c) was not working."
