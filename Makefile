@@ -340,7 +340,7 @@ endif
 
 # ================ Safari ================
 
-$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN)
+$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN) $(SRC_USERJS)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e 's/@VERSION@/$(VERSION)/' \
