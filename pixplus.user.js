@@ -2070,6 +2070,13 @@
     last_link_count: 0,
     list: [ ],
 
+    try_guessed_big_image_urls: function(illust) {
+      if (illust && illust.image_url_big_guess && illust.image_url_big_guess.length) {
+        illust.image_url_big = illust.image_url_big_guess[0];
+        illust.image_url_big_alt = illust.image_url_big_guess.slice(1);
+      }
+    },
+
     parse_image_url: function(url, opt) {
       if (!opt) {
         opt = {};
@@ -2103,12 +2110,12 @@
           return {id: id};
         }
 
+        var orig = server + 'img-original/' + dir + id + rest + page;
+
         ret = {
           id: id,
           image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
-          image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
-          image_url_big_alt: [server + 'img-original/' + dir + id + rest + page + '.png',
-                              server + 'img-original/' + dir + id + rest + page + '.gif'],
+          image_url_big_guess: [orig + '.jpg', orig + '.png', orig + '.gif'],
           new_url_pattern: true
         };
 
@@ -2143,9 +2150,8 @@
         }
       }
 
-      if (ret && !opt.manga_page) {
-        delete ret.image_url_big;
-        delete ret.image_url_big_alt;
+      if (opt.manga_page) {
+        this.try_guessed_big_image_urls(ret);
       }
 
       return ret || null;
@@ -2381,17 +2387,16 @@
         }
 
         var big = _.fastxml.q(root, 'img.original-image');
+        var big_src;
         if (big) {
-          var big_src = big.attrs.src || big.attrs['data-src'];
-          if (big_src) {
-            _.debug('Big image found: ' + big_src);
-            illust.image_url_big = big_src;
-          }
+          big_src = big.attrs.src || big.attrs['data-src'];
+        }
+        if (big_src) {
+          _.debug('Big image found: ' + big_src);
+          illust.image_url_big = big_src;
         } else {
-          if (!illust.load_statuses) {
-            illust.load_statuses = {};
-          }
-          illust.load_statuses.big = 'error';
+          _.debug('Big image not found. Retrying with guessed urls.');
+          _.illust.try_guessed_big_image_urls(illust);
         }
       }
 
@@ -4844,7 +4849,7 @@
           _.open(_.popup.illust.url_manga);
         }
       } else {
-        _.open(_.popup.illust.image_url_big);
+        _.open(_.popup.illust.image_url_big || _.popup.illust.url_medium);
       }
       return true;
     },
