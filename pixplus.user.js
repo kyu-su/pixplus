@@ -7202,15 +7202,17 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
   _.changelog = [
 
     {
-      "date": "2014/12/xx",
+      "date": "2015/01/xx",
       "version": "1.13.4",
       "releasenote": "",
       "changes_i18n": {
         "en": [
-          "[Fix] The \"Use original size image\" option was not working for vertically/horizontally long illust works."
+          "[Fix] The \"Use original size image\" option was not working for vertically/horizontally long illust works.",
+          "[Fix] The \"Use original size image\" option was not working for single page manga works."
         ],
         "ja": [
-          "[\u4fee\u6b63] \u975e\u5e38\u306b\u7e26\u30fb\u6a2a\u306b\u9577\u3044\u30a4\u30e9\u30b9\u30c8\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+          "[\u4fee\u6b63] \u975e\u5e38\u306b\u7e26\u30fb\u6a2a\u306b\u9577\u3044\u30a4\u30e9\u30b9\u30c8\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u5358\u30da\u30fc\u30b8\u306e\u30de\u30f3\u30ac\u4f5c\u54c1\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
         ]
       }
     },
