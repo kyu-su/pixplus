@@ -1,6 +1,18 @@
 pixplus version history
 =======================
 
+## [1.13.4 - 2015/01/01](http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4)
+
+### 変更点
+
+* [修正] 非常に縦・横に長いイラストに対して「原寸の画像を表示する」オプションが機能していなかった不具合を修正。
+* [修正] 単ページのマンガ作品に対して「原寸の画像を表示する」オプションが機能していなかった不具合を修正。
+
+### Changes
+
+* [Fix] The "Use original size image" option was not working for vertically/horizontally long illust works.
+* [Fix] The "Use original size image" option was not working for single page manga works.
+
 ## [1.13.3 - 2014/12/20](http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3)
 
 ### 変更点

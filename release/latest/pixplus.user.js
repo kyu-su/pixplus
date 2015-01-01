@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.13.3
+// @version     1.13.4
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -2070,6 +2070,13 @@
     last_link_count: 0,
     list: [ ],
 
+    try_guessed_big_image_urls: function(illust) {
+      if (illust && illust.image_url_big_guess && illust.image_url_big_guess.length) {
+        illust.image_url_big = illust.image_url_big_guess[0];
+        illust.image_url_big_alt = illust.image_url_big_guess.slice(1);
+      }
+    },
+
     parse_image_url: function(url, opt) {
       if (!opt) {
         opt = {};
@@ -2103,12 +2110,12 @@
           return {id: id};
         }
 
+        var orig = server + 'img-original/' + dir + id + rest + page;
+
         ret = {
           id: id,
           image_url_medium: server + 'c/600x600/img-master/' + dir + id + rest + page + '_master1200' + suffix,
-          image_url_big: server + 'img-original/' + dir + id + rest + page + '.jpg',
-          image_url_big_alt: [server + 'img-original/' + dir + id + rest + page + '.png',
-                              server + 'img-original/' + dir + id + rest + page + '.gif'],
+          image_url_big_guess: [orig + '.jpg', orig + '.png', orig + '.gif'],
           new_url_pattern: true
         };
 
@@ -2143,9 +2150,8 @@
         }
       }
 
-      if (ret && !opt.manga_page) {
-        delete ret.image_url_big;
-        delete ret.image_url_big_alt;
+      if (opt.manga_page) {
+        this.try_guessed_big_image_urls(ret);
       }
 
       return ret || null;
@@ -2381,17 +2387,16 @@
         }
 
         var big = _.fastxml.q(root, 'img.original-image');
+        var big_src;
         if (big) {
-          var big_src = big.attrs.src || big.attrs['data-src'];
-          if (big_src) {
-            _.debug('Big image found: ' + big_src);
-            illust.image_url_big = big_src;
-          }
+          big_src = big.attrs.src || big.attrs['data-src'];
+        }
+        if (big_src) {
+          _.debug('Big image found: ' + big_src);
+          illust.image_url_big = big_src;
         } else {
-          if (!illust.load_statuses) {
-            illust.load_statuses = {};
-          }
-          illust.load_statuses.big = 'error';
+          _.debug('Big image not found. Retrying with guessed urls.');
+          _.illust.try_guessed_big_image_urls(illust);
         }
       }
 
@@ -4844,7 +4849,7 @@
           _.open(_.popup.illust.url_manga);
         }
       } else {
-        _.open(_.popup.illust.image_url_big);
+        _.open(_.popup.illust.image_url_big || _.popup.illust.url_medium);
       }
       return true;
     },
@@ -7199,6 +7204,22 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     // __CHANGELOG_BEGIN__
 
     {
+      "date": "2015/01/01",
+      "version": "1.13.4",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4",
+      "changes_i18n": {
+        "en": [
+          "[Fix] The \"Use original size image\" option was not working for vertically/horizontally long illust works.",
+          "[Fix] The \"Use original size image\" option was not working for single page manga works."
+        ],
+        "ja": [
+          "[\u4fee\u6b63] \u975e\u5e38\u306b\u7e26\u30fb\u6a2a\u306b\u9577\u3044\u30a4\u30e9\u30b9\u30c8\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002",
+          "[\u4fee\u6b63] \u5358\u30da\u30fc\u30b8\u306e\u30de\u30f3\u30ac\u4f5c\u54c1\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"
+        ]
+      }
+    },
+
+    {
       "date": "2014/12/20",
       "version": "1.13.3",
       "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3",
@@ -7217,7 +7238,7 @@ input[type="text"]:focus~#pp-search-ratio-custom-preview{display:block}\
     {
       "date": "2014/12/14",
       "version": "1.13.2",
-      "releasenote": "",
+      "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2",
       "changes_i18n": {
         "en": [
           "[Fix] Fix comment mode (Shift+c) was not working."
