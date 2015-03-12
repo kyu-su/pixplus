@@ -6487,6 +6487,8 @@ GgBpa+Kvaq5FhxCWRdMVOTJXHTpSGATwjxZcmwAk7KKgundAm7yq8M/LfHJyrAwcA/hgSwPbQupOEsuk
 margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}\
 #pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}\
 #pp-popup.pp-hide-stamp-comments .sticker-container{display:none}\
+#pp-popup-comment ._comment-item{padding:0.2em 0px}\
+#pp-popup-comment .comment .action-list{display:none}\
 #pp-popup-taglist{margin:0px;padding:0px;background:none}\
 #pp-popup-taglist ul{display:inline}\
 #pp-popup-taglist li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;\
