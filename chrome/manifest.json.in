@@ -3,7 +3,7 @@
   "version": "@VERSION@",
   "manifest_version": 2,
   "description": "hogehoge",
-  "update_url": "http://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/chrome.xml",
+  "update_url": "https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/chrome.xml",
   "icons": {
     @ICONS@
   },
