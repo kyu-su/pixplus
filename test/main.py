@@ -144,7 +144,7 @@ def main():
 
   Browser.testdir = testdir
   Browser.rootdir = os.path.dirname(testdir)
-  Browser.bindir = os.path.join(Browser.rootdir, 'bin')
+  Browser.distdir = os.path.join(Browser.rootdir, 'dist')
   Browser.args = args
   Browser.config = config
 

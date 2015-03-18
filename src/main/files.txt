@@ -1,0 +1,16 @@
+util.js
+fastxml.js
+illust.js
+popup.js
+comment.js
+bookmark.js
+manga.js
+question.js
+tagedit.js
+input.js
+key.js
+mouse.js
+bookmarkform.js
+floater.js
+pages.js
+entrypoint.js

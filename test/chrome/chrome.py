@@ -11,7 +11,7 @@ class Chrome(Browser):
   def prepare_caps(self, caps):
     caps['chromeOptions'] = {
       'extensions': [
-        self.read_file_as_base64(os.path.join(self.bindir, 'pixplus.crx')),
+        self.read_file_as_base64(os.path.join(self.distdir, 'pixplus.crx')),
         self.read_file_as_base64(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
       ]
     }

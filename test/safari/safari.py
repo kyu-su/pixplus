@@ -12,7 +12,7 @@ class Safari(Browser):
     caps['safari.options'] = {
       'extensions': [
         {'filename': 'pixplus.safariextz',
-         'contents': self.read_file_as_base64(os.path.join(self.bindir, 'pixplus.safariextz'))},
+         'contents': self.read_file_as_base64(os.path.join(self.distdir, 'pixplus.safariextz'))},
         {'filename': 'AdBlock.safariextz',
          'contents': self.read_file_as_base64(self.download('https://data.getadblock.com/safari/AdBlock.safariextz', 'AdBlock.safariextz'))}
       ]

@@ -1,24 +1,39 @@
 SVG_TO_PNG                      = ./svg_to_png.sh
-SVG_TO_PNG_OK                   = $(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no)
 SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
 CRXMAKE                         = $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
 PYTHON                          = python
+SCSS                            = scss
+
+ifeq ($(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no),no)
+$(error Could not find svg converter command)
+endif
+
+ifeq ($(shell which $(PYTHON) --version >/dev/null 2>&1 && echo yes || echo no),no)
+$(error scss command not found)
+endif
+
+ifeq ($(shell which $(SCSS) >/dev/null 2>&1 && echo yes || echo no),no)
+$(error scss command not found)
+endif
+
+STR2JSON                        = $(PYTHON) -c 'import sys,json;json.dump(sys.stdin.read().decode("utf-8"),sys.stdout)'
+JSON2ASCII                      = $(PYTHON) -c 'import sys,json;json.dump(json.loads(sys.stdin.read().decode("utf-8")),sys.stdout)'
 
 LICENSE                         = LICENSE.TXT
-ICON_SVG                        = pixplus.svg
-ICON_SMALL_SVG                  = pixplus_small.svg
-SRC_USERJS                      = pixplus.user.js
+ICON_SVG                        = src/data/pixplus.svg
+ICON_SMALL_SVG                  = src/data/pixplus_small.svg
+CONFIG_JSON                     = src/data/config.json
+CHANGELOG_JSON                  = src/data/changelog.json
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
-VERSION                         = $(shell grep '^// @version' $(SRC_USERJS) | sed -e 's/.*@version *//')
-VERSION_STABLE                  = $(shell $(PYTHON) changelog.py latest_version < $(SRC_USERJS))
+VERSION                         = $(shell cat version.txt)
+VERSION_STABLE                  = $(shell $(PYTHON) changelog.py latest_version < $(CHANGELOG_JSON))
 WEBSITE                         = http://ccl4.info/pixplus/
-WEBSITE_SED                     = $(shell echo $(WEBSITE) | sed -e 's/\//\\\//g')
 
 BUILD_DIR                       = $(CURDIR)/temp
 BUILD_DIR_ICON                  = $(BUILD_DIR)/icons
@@ -26,11 +41,10 @@ BUILD_DIR_OEX                   = $(BUILD_DIR)/oex
 BUILD_DIR_CRX                   = $(BUILD_DIR)/crx
 BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
 
-CHANGELOG_JSON                  = changelog.json
 CHANGELOG_MD                    = changelog.md
 RELEASE_ATOM                    = release.atom
 
-DIST_DIR                        = $(CURDIR)/bin
+DIST_DIR                        = $(CURDIR)/dist
 RELEASE_DIR                     = $(CURDIR)/release/$(VERSION)
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
@@ -40,19 +54,17 @@ SAFARIEXTZ                      = $(DIST_DIR)/pixplus.safariextz
 
 LIB_JS                          = $(BUILD_DIR)/lib.js
 DATA_JS                         = $(BUILD_DIR)/data.js
-CONFIG_JSON                     = $(BUILD_DIR)/config.json
 ICON_SIZE_SMALL                 = 16 22 24
 ICON_SIZE_BIG                   = 32 48 64 128
 ICON_SIZE                       = $(ICON_SIZE_SMALL) $(ICON_SIZE_BIG)
 ICON_FILES_SMALL                = $(ICON_SIZE_SMALL:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES_BIG                  = $(ICON_SIZE_BIG:%=$(BUILD_DIR_ICON)/%.png)
 ICON_FILES                      = $(ICON_FILES_SMALL) $(ICON_FILES_BIG)
-ICON_CONFIG_BTN_SVG             = $(BUILD_DIR_ICON)/config_btn.svg
-ICON_CONFIG_BTN                 = $(BUILD_DIR_ICON)/config_btn.png
-ICON_CONFIG_BTN_B64             = $(BUILD_DIR_ICON)/config_btn.txt
-B64_ICONS                       = pencil pencil_off cogwheel
-B64_ICON_FILES_PNG              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.png)
-B64_ICON_FILES_TXT              = $(B64_ICONS:%=$(BUILD_DIR_ICON)/%.txt) $(ICON_SIZE:%=$(BUILD_DIR_ICON)/%.txt)
+ICON_CONFIG_BTN_SVG             = $(BUILD_DIR_ICON)/config-button.svg
+ICON_CONFIG_BTN_PNG             = $(BUILD_DIR_ICON)/config-button.png
+CSS_ICON_NAMES                  = pencil pencil-off cogwheel
+CSS_ICON_FILES_PNG              = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.png)
+CSS_ICON_FILES_SCSS             = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.scss) $(BUILD_DIR_ICON)/config-button.scss $(BUILD_DIR_ICON)/pixplus-24.scss
 DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)
 DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
 DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
@@ -92,14 +104,6 @@ AUTOUPDATE_GM                   = autoupdate/1/pixplus.user.js
 
 RELEASE_TARGETS                 = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 
-ifeq ($(SVG_TO_PNG_OK),yes)
-ALL_TARGETS += $(ICON_CONFIG_BTN_B64) $(B64_ICON_FILES_TXT)
-else
-BUILD_OEX=no
-BUILD_CRX=no
-BUILD_SAFARIEXTZ=no
-endif
-
 ifeq ($(BUILD_OEX),yes)
 RELEASE_TARGETS += $(OEX)
 endif
@@ -128,9 +132,6 @@ info:
 	@echo '$(notdir $(SAFARIEXTZ)): $(BUILD_SAFARIEXTZ)'
 	@echo
 
-subst:
-	@>$(SRC_USERJS).new $(PYTHON) subst.py <$(SRC_USERJS) && mv $(SRC_USERJS).new $(SRC_USERJS)
-
 deps: $(XAR)
 
 $(XAR):
@@ -154,62 +155,110 @@ clean: clean-changelog
 
 # ================ Changelog ================
 
-$(CHANGELOG_JSON): $(SRC_USERJS)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@$(PYTHON) changelog.py json < $< > $@
-
-$(CHANGELOG_MD): $(SRC_USERJS)
+$(CHANGELOG_MD): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py markdown < $< > $@
 
-$(RELEASE_ATOM): $(SRC_USERJS)
+$(RELEASE_ATOM): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@$(PYTHON) changelog.py atom < $< > $@
 
-changelog: $(CHANGELOG_JSON) $(CHANGELOG_MD) $(RELEASE_ATOM)
+changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
 
 clean-changelog:
-	@rm -f $(CHANGELOG_JSON) $(CHANGELOG_MD) $(RELEASE_ATOM)
+	@rm -f $(CHANGELOG_MD) $(RELEASE_ATOM)
 
-# ================ Opera UserJS ================
+# ================  ================
 
-$(OPERA_USERJS): $(SRC_USERJS)
+$(CSS_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: src/data/%.svg
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@$(SVG_TO_PNG) -svg $< -png $@
+
+$(BUILD_DIR_ICON)/pixplus-24.png: $(BUILD_DIR_ICON)/24.png
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@sed -e '/__OPERA_USERJS_REMOVE__/d' < $< > $@
+	@cp $< $@
+
+$(CSS_ICON_FILES_SCSS): %.scss: %.png
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo -n '$$icon-$(shell echo $(basename $(notdir $@))):url("data:image/png;base64,' > $@
+	@base64 -w 0 $< >> $@
+	@echo '");' >> $@
+
+$(ICON_CONFIG_BTN_SVG): $(ICON_SMALL_SVG)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@sed 's/#0096db/#adc1d8/' $< > $@
+
+$(ICON_CONFIG_BTN_PNG): $(ICON_CONFIG_BTN_SVG)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@$(SVG_TO_PNG) -svg $< -size 22 -png $@
+
+$(BUILD_DIR)/_lib.js: $(shell sed 's|^|src/lib/|' src/lib/files.txt)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo '// generated from:' > $@
+	@echo $^ | xargs -n 1 echo '//  ' >> $@
+	@cat $^ >> $@
+
+$(LIB_JS): $(BUILD_DIR)/_lib.js
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo '(function(g, w, d) {' >> $@
+	@cat $^ >> $@
+	@echo '})(this, this.window, this.window.document);' >> $@
+
+$(BUILD_DIR)/_main.js: $(shell sed 's|^|src/main/|' src/main/files.txt)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo '// generated from:' > $@
+	@echo $^ | xargs -n 1 echo '//  ' >> $@
+	@cat $^ >> $@
+
+$(BUILD_DIR)/_data.js: src/data/style.scss src/data/config.json src/data/i18n.json src/data/i18n.js $(CHANGELOG_JSON) $(CSS_ICON_FILES_SCSS)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo '// generated from:' > $@
+	@echo $^ | xargs -n 1 echo '//  ' >> $@
+	@echo '_.css=' >> $@
+	@$(SCSS) --style compressed -I $(BUILD_DIR_ICON) < src/data/style.scss | $(STR2JSON) >> $@
+	@echo ';_.conf.__schema=' >> $@
+	@$(JSON2ASCII) < src/data/config.json >> $@
+	@echo ';_.i18n=' >> $@
+	@$(JSON2ASCII) < src/data/i18n.json >> $@
+	@echo ';' >> $@
+	@cat src/data/i18n.js >> $@
+	@echo '_.changelog=' >> $@
+	@$(JSON2ASCII) < $(CHANGELOG_JSON) >> $@
+	@echo ';' >> $@
+
+$(DATA_JS): $(BUILD_DIR)/_data.js
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@echo '(function(g, w, d, _) {' >> $@
+	@cat $^ >> $@
+	@echo '})(this, this.window, this.window.document, this.window.pixplus);' >> $@
 
 # ================ GreaseMonkey ================
 
-$(GREASEMONKEY_JS): $(SRC_USERJS)
+$(GREASEMONKEY_JS): src/wrapper.js $(BUILD_DIR)/_lib.js $(BUILD_DIR)/_main.js $(BUILD_DIR)/_data.js
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@cp $< $@
-	@echo
+	@sed -e '/__SRC__/,$$d' -e 's/@VERSION@/$(VERSION)/' src/wrapper.js > $@
+	@cat $(BUILD_DIR)/_lib.js $(BUILD_DIR)/_main.js $(BUILD_DIR)/_data.js >> $@
+	@sed -e '1,/__SRC__/d' -e 's/@VERSION@/$(VERSION)/' src/wrapper.js >> $@
+
+# ================ Opera UserJS ================
+
+$(OPERA_USERJS): $(GREASEMONKEY_JS)
+	@echo 'Generate: $(@:$(CURDIR)/%=%)'
+	@mkdir -p $(dir $@)
+	@sed -e '/__OPERA_USERJS_REMOVE__/d' $< > $@
 
 # ================ Extension common files ================
-
-$(LIB_JS): $(SRC_USERJS)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@echo '// this file was automatically generated from $<' > $@
-	@echo '(function(g, w, d) {' >> $@
-	@sed -e '1,/__LIBRARY_BEGIN__/d' -e '/__LIBRARY_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
-	@echo '})(this, this.window, this.window.document);' >> $@
-
-$(DATA_JS): $(SRC_USERJS)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@echo '// this file was automatically generated from $<' > $@
-	@echo '(function(g, w, d, _) {' >> $@
-	@sed -e '1,/__DATA_BEGIN__/d' -e '/__DATA_END__/,$$d' < $(SRC_USERJS) | tr -d '\r' >> $@
-	@echo '})(this, this.window, this.window.document, this.window.pixplus);' >> $@
-
-$(CONFIG_JSON): $(SRC_USERJS)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@echo '[' > $@
-	@sed -e '1,/__CONFIG_BEGIN__/d' -e '/__CONFIG_END__/,$$d' < $(SRC_USERJS) >> $@
-	@echo ']' >> $@
 
 $(ICON_FILES_SMALL): $(ICON_SMALL_SVG)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
@@ -221,41 +270,14 @@ $(ICON_FILES_BIG): $(ICON_SVG)
 	@mkdir -p $(dir $@)
 	@$(SVG_TO_PNG) -svg $< -size $(basename $(notdir $@)) -png $@
 
-$(ICON_CONFIG_BTN_SVG): $(ICON_SMALL_SVG)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@cat $< | sed 's/#0096db/#b8e1f7/' > $@
-
-$(ICON_CONFIG_BTN): $(ICON_CONFIG_BTN_SVG)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@$(SVG_TO_PNG) -svg $< -size 22 -png $@
-
-$(ICON_CONFIG_BTN_B64): $(ICON_CONFIG_BTN)
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@echo -n 'data:image/png;base64,' > $@
-	@base64 $< | tr -d '\r\n' >> $@
-
-$(B64_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: %.svg
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@$(SVG_TO_PNG) -svg $< -png $@
-
-$(B64_ICON_FILES_TXT): %.txt: %.png
-	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@echo -n 'data:image/png;base64,' > $@
-	@base64 $< | tr -d '\r\n' >> $@
-
 # ================ Opera ================
 
-$(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(SRC_USERJS) $(CONFIG_JSON)
+$(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) version.txt $(CONFIG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e '/@LICENSE@/,$$d' \
              -e 's/@VERSION@/$(VERSION)/' \
-             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+             -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< > $@
 	@echo '  <license>' >> $@
 	@cat $(LICENSE) >> $@
@@ -293,7 +315,7 @@ $(OEX): $(OEX_DIST_FILES)
 
 # ================ Chrome ================
 
-$(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(SRC_USERJS)
+$(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) version.txt
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@sed -e '/@ICONS@/,$$d' \
              -e 's/@VERSION@/$(VERSION)/' \
@@ -305,7 +327,7 @@ $(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(SRC_USERJS)
 	@echo >> $@;
 	@sed -e '1,/@ICONS@/d' \
              -e 's/@VERSION@/$(VERSION)/' \
-             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+             -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< | tr -d '\r' >> $@
 
 $(CRX_USERJS): $(OPERA_USERJS)
@@ -340,11 +362,11 @@ endif
 
 # ================ Safari ================
 
-$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN) $(SRC_USERJS)
+$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN) version.txt
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e 's/@VERSION@/$(VERSION)/' \
-             -e 's/@WEBSITE@/$(WEBSITE_SED)/' \
+             -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< > $@
 
 $(SAFARIEXTZ_SETTINGS_PLIST): $(SAFARIEXTZ_SETTINGS_PLIST_IN) $(CONFIG_JSON)
@@ -392,12 +414,11 @@ endif
 
 # ================ AutoUpdate ================
 
-$(AUTOUPDATE_FILES): %: %.in $(SRC_USERJS)
+$(AUTOUPDATE_FILES): %: %.in $(CHANGELOG_JSON)
 	@echo 'Generate: $@'
-	@sed -e "s/@VERSION@/$(VERSION_STABLE)/g" \
-           < $< > $@
+	@sed -e "s/@VERSION@/$(VERSION_STABLE)/g" < $< > $@
 
-$(AUTOUPDATE_GM): release/latest/$(SRC_USERJS)
+$(AUTOUPDATE_GM): release/latest/$(notdir $(GREASEMONKEY_JS))
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@

@@ -112,10 +112,7 @@ pixplus version history
   return out
 
 if __name__ == '__main__':
-  pat = r'__CHANGELOG_BEGIN__.*\n([\s\S]*)\n.*__CHANGELOG_END__'
-  json_str = '[%s]' % re.search(pat, sys.stdin.read()).group(1)
-
-  changelog = json.loads(json_str)
+  changelog = json.loads(sys.stdin.read().decode('utf-8'))
   for version in changelog:
     if 'changes_i18n' not in version:
       version['changes_i18n'] = {

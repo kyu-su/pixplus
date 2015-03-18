@@ -1,0 +1,397 @@
+{
+  "en": {
+    "__name__": "en",
+    "pref": {
+      "general": "General",
+      "popup": "Popup",
+      "key": "Key",
+      "key_bookmark": "Bookmark mode",
+      "key_manga": "Manga mode",
+      "key_question": "Tag edit mode",
+      "bookmark": "Bookmark tag",
+      "importexport": "Import/Export",
+      "export": "Export",
+      "import": "Import",
+      "about": "About",
+      "about_web": "Web",
+      "about_email": "Mail",
+      "about_license": "License",
+      "changelog": "Changelog",
+      "releasenote": "Release note",
+      "debug": "Debug",
+      "default": "Default",
+      "add": "Add",
+      "close": "Close",
+      "regex_valid": "Valid",
+      "regex_invalid": "Invalid"
+    },
+    "conf": {
+      "general": {
+        "debug": "Debug mode",
+        "bookmark_hide": "Make private bookmark by default",
+        "float_tag_list": {
+          "desc": "Enable float view for tag list",
+          "hint": [
+            "Disable",
+            "Enable"
+          ]
+        },
+        "rate_confirm": "Show confirmation dialog when rating",
+        "disable_effect": "Disable UI animation",
+        "fast_user_bookmark": {
+          "desc": "Follow user by one-click",
+          "hint": [
+            "Disable",
+            "Enable(public)",
+            "Enable(private)"
+          ]
+        },
+        "redirect_jump_page": {
+          "desc": "Redirect jump.php",
+          "hint": [
+            "Disable",
+            "Open target",
+            "Modify link"
+          ]
+        }
+      },
+      "popup": {
+        "preload": "Enable preloading",
+        "big_image": "Use original size image",
+        "caption_height": "Caption height(ratio)",
+        "caption_minheight": "Caption minimum height(px)",
+        "caption_opacity": "Caption opacity",
+        "remove_pixpedia": "Remove pixiv encyclopedia icon",
+        "remove_pixiv_comic": "Remove pixiv comic icon",
+        "remove_booth": "Remove booth icon",
+        "rate_key": "Enable rate keys",
+        "font_size": "Font size(e.g. 10px)",
+        "auto_manga": {
+          "desc": "Switch manga-mode automatically",
+          "hint": [
+            "Disable",
+            "Enable",
+            "Specify pages by regexp"
+          ]
+        },
+        "auto_manga_regexp": "Regular expression for \"Switch manga...\" setting.",
+        "manga_viewed_flags": "Do not start manga mode automatically if you have already read it",
+        "reverse": {
+          "desc": "Reverse move direction",
+          "hint": [
+            "Disable",
+            "Enable",
+            "Specify pages by regexp"
+          ]
+        },
+        "reverse_regexp": "Regular expression for \"Reverse...\" setting.",
+        "overlay_control": "Click area width(0:Disable/<1:Ratio/>1:Pixel)",
+        "scroll_height": "Scroll step(px)",
+        "scroll_height_page": "Scroll step for PageUp/PageDown",
+        "author_status_icon": "Show icon on profile image",
+        "show_comment_form": "Show comment form by default",
+        "hide_stamp_comments": "Hide stamp comments",
+        "mouse_wheel": {
+          "desc": "Mouse wheel operation",
+          "hint": [
+            "Do nothing",
+            "Move to prev/next illust",
+            "Move to prev/next illust(respect \"reverse\" setting)"
+          ]
+        },
+        "mouse_wheel_delta": "Threshold for mouse wheel setting(if set negative value, invert direction)",
+        "fit_short_threshold": "Aspect ratio threshold for switch resize mode(0:Disable)",
+        "mark_visited": "Mark link as visited",
+        "manga_page_action": {
+          "desc": "Open popup in manga page",
+          "hint": [
+            "Do nothing",
+            "Open popup",
+            "Open popup in manga mode"
+          ]
+        }
+      },
+      "key": {
+        "popup_prev": "Move to previous illust",
+        "popup_prev_direction": "Move to previous illust(ignore \"reverse\" setting)",
+        "popup_next": "Move to next illust",
+        "popup_next_direction": "Move to next illust(ignore \"reverse\" setting)",
+        "popup_first": "Move to first illust",
+        "popup_last": "Move to last illust",
+        "popup_close": "Close",
+        "popup_caption_scroll_up": "Scroll caption up",
+        "popup_caption_scroll_down": "Scroll caption down",
+        "popup_caption_toggle": "Toggle caption display",
+        "popup_comment_toggle": "Toggle comment",
+        "popup_illust_scroll_up": "Scroll illust up",
+        "popup_illust_scroll_down": "Scroll illust down",
+        "popup_illust_scroll_left": "Scroll illust left",
+        "popup_illust_scroll_right": "Scroll illust right",
+        "popup_illust_scroll_top": "Scroll illust to top",
+        "popup_illust_scroll_bottom": "Scroll illust to bottom",
+        "popup_illust_page_up": "Scroll illust up (PageUp)",
+        "popup_illust_page_down": "Scroll illust down (PageDown)",
+        "popup_switch_resize_mode": "Switch resize mode",
+        "popup_open": "Open illust page",
+        "popup_open_big": "Open image",
+        "popup_open_profile": "Open profile",
+        "popup_open_illust": "Open works",
+        "popup_open_bookmark": "Open bookmark",
+        "popup_open_staccfeed": "Open feed",
+        "popup_open_response": "Open image response",
+        "popup_reload": "Reload",
+        "popup_open_bookmark_detail": "Open bookmark information page",
+        "popup_open_manga_thumbnail": "Open manga thumbnail page",
+        "popup_rate01": "Rate (1pt)",
+        "popup_rate02": "Rate (2pt)",
+        "popup_rate03": "Rate (3pt)",
+        "popup_rate04": "Rate (4pt)",
+        "popup_rate05": "Rate (5pt)",
+        "popup_rate06": "Rate (6pt)",
+        "popup_rate07": "Rate (7pt)",
+        "popup_rate08": "Rate (8pt)",
+        "popup_rate09": "Rate (9pt)",
+        "popup_rate10": "Rate (10pt)",
+        "popup_ugoira_play_pause": "[Ugoira] Play/Pause",
+        "popup_ugoira_prev_frame": "[Ugoira] Show previous frame",
+        "popup_ugoira_next_frame": "[Ugoira] Show next frame",
+        "popup_bookmark_start": "Start bookmark mode",
+        "popup_bookmark_submit": "Send",
+        "popup_bookmark_end": "End bookmark mode",
+        "popup_manga_start": "Start manga mode",
+        "popup_manga_open_page": "Open manga page",
+        "popup_manga_end": "End manga mode",
+        "popup_qrate_start": "Start questionnaire mode",
+        "popup_qrate_select_prev": "Select previous item",
+        "popup_qrate_select_next": "Select next item",
+        "popup_qrate_submit": "Send",
+        "popup_qrate_end": "End questionnaire mode",
+        "popup_tag_edit_start": "Start tag edit mode",
+        "popup_tag_edit_end": "End tag edit mode"
+      },
+      "bookmark": {
+        "tag_order": "Reorder tags. 1 tag per line.\n-: Separator\n*: Others",
+        "tag_aliases": "Tag association. Used for auto input. Separate by space."
+      }
+    },
+    "cancel": "Cancel",
+    "rate_confirm": "Rate it?\n$pointpt",
+    "author_works": "Works",
+    "author_bookmarks": "Bookmarks",
+    "author_staccfeed": "Feed",
+    "sending": "Sending",
+    "importing": "Importing",
+    "associate_tags": "Associate tags",
+    "mypage_layout_history": "Layout history",
+    "mypage_layout_history_empty": "Layout history is empty",
+    "mypage_layout_history_help": "Click list item to restore layout.",
+    "search_wlt": "Min width <=",
+    "search_hlt": "Min height <=",
+    "search_wgt": "<= Max width",
+    "search_hgt": "<= Max height",
+    "ugoira_play_pause": "Play/Pause (#{key})",
+    "ugoira_next_frame": "Next frame (#{key})",
+    "ugoira_prev_frame": "Previous frame (#{key})",
+    "ugoira_download_zip": "Download zip",
+    "ugoira_generate_timecode": "Generate timecode",
+    "ugoira_how_to_use": "How to use?"
+  },
+  "ja": {
+    "__name__": "ja",
+    "pref": {
+      "general": "全般",
+      "popup": "ポップアップ",
+      "key": "キー",
+      "key_bookmark": "ブックマーク編集モード",
+      "key_manga": "マンガモード",
+      "key_question": "アンケートモード",
+      "key_tagedit": "タグ編集モード",
+      "bookmark": "ブックマークタグ",
+      "importexport": "インポート/エクスポート",
+      "export": "エクスポート",
+      "import": "インポート",
+      "about": "情報",
+      "about_web": "ウェブサイト",
+      "about_email": "メール",
+      "about_license": "ライセンス",
+      "changelog": "更新履歴",
+      "releasenote": "リリースノート",
+      "debug": "デバッグ",
+      "default": "デフォルト",
+      "add": "追加",
+      "close": "閉じる",
+      "regex_valid": "有効",
+      "regex_invalid": "不正"
+    },
+    "conf": {
+      "general": {
+        "debug": "デバッグモード",
+        "bookmark_hide": "ブックマーク非公開をデフォルトにする",
+        "float_tag_list": {
+          "desc": "タグリストをフロート表示する",
+          "hint": [
+            "無効",
+            "有効"
+          ]
+        },
+        "rate_confirm": "イラストを評価する時に確認をとる",
+        "disable_effect": "アニメーションなどのエフェクトを無効化する",
+        "fast_user_bookmark": {
+          "desc": "ワンクリックでユーザーをフォローする",
+          "hint": [
+            "無効",
+            "有効(公開)",
+            "有効(非公開)"
+          ]
+        },
+        "redirect_jump_page": {
+          "desc": "jump.phpをリダイレクトする",
+          "hint": [
+            "無効",
+            "ページを開く",
+            "リンクを変更"
+          ]
+        }
+      },
+      "popup": {
+        "preload": "先読みを使用する",
+        "big_image": "原寸の画像を表示する",
+        "caption_height": "キャプションの高さ(率)",
+        "caption_minheight": "キャプションの高さの最小値(px)",
+        "caption_opacity": "キャプションの不透明度",
+        "remove_pixpedia": "pixiv百科事典アイコンを除去する",
+        "remove_pixiv_comic": "pixivコミックアイコンを除去する",
+        "remove_booth": "BOOTHアイコンを除去する",
+        "rate_key": "評価のキーバインドを有効にする",
+        "font_size": "フォントサイズ(例: 10px)",
+        "auto_manga": {
+          "desc": "自動的にマンガモードを開始する",
+          "hint": [
+            "無効",
+            "有効",
+            "ページを正規表現で指定"
+          ]
+        },
+        "auto_manga_regexp": "\"自動的にマンガモードを開始する\"で使用する正規表現",
+        "manga_viewed_flags": "既に読んだマンガは自動でマンガモードを開始しない",
+        "reverse": {
+          "desc": "移動方向を反対にする",
+          "hint": [
+            "無効",
+            "有効",
+            "ページを正規表現で指定"
+          ]
+        },
+        "reverse_regexp": "\"移動方向を反対にする\"で使用する正規表現",
+        "overlay_control": "移動矢印の幅(0:使用しない/<1:画像に対する割合/>1:ピクセル)",
+        "scroll_height": "スクロール幅(px)",
+        "scroll_height_page": "PageUp/PageDownのスクロール幅",
+        "author_status_icon": "プロフィール画像の左上にアイコンを表示する",
+        "show_comment_form": "コメントの投稿フォームをデフォルトで表示する",
+        "hide_stamp_comments": "スタンプのコメントを非表示にする",
+        "mouse_wheel": {
+          "desc": "マウスホイールの動作",
+          "hint": [
+            "何もしない",
+            "前/次のイラストに移動",
+            "前/次のイラストに移動(反転の設定に従う)"
+          ]
+        },
+        "mouse_wheel_delta": "ホイール設定の閾値(負数の場合は方向を反転)",
+        "fit_short_threshold": "リサイズモードを切り替える縦横比の閾値(0:無効)",
+        "mark_visited": "リンクを訪問済みにする",
+        "manga_page_action": {
+          "desc": "漫画作品のページでポップアップを開く",
+          "hint": [
+            "何もしない",
+            "ポップアップを開く",
+            "ポップアップをマンガモードで開く"
+          ]
+        }
+      },
+      "key": {
+        "popup_prev": "前のイラストに移動",
+        "popup_prev_direction": "前のイラストに移動(\"反対にする\"オプションに影響されない)",
+        "popup_next": "次のイラストに移動",
+        "popup_next_direction": "次のイラストに移動(\"反対にする\"オプションに影響されない)",
+        "popup_first": "最初のイラストに移動",
+        "popup_last": "最後のイラストに移動",
+        "popup_close": "閉じる",
+        "popup_caption_scroll_up": "キャプションを上にスクロールする",
+        "popup_caption_scroll_down": "キャプションを下にスクロールする",
+        "popup_caption_toggle": "キャプションの常時表示/自動表示を切り替える",
+        "popup_comment_toggle": "コメント表示を切り替え",
+        "popup_illust_scroll_up": "イラストを上にスクロールする",
+        "popup_illust_scroll_down": "イラストを下にスクロールする",
+        "popup_illust_scroll_left": "イラストを左にスクロールする",
+        "popup_illust_scroll_right": "イラストを右にスクロールする",
+        "popup_illust_scroll_top": "イラストを上端にスクロールする",
+        "popup_illust_scroll_bottom": "イラストを下端にスクロールする",
+        "popup_illust_page_up": "イラストを上にスクロールする (PageUp)",
+        "popup_illust_page_down": "イラストを下にスクロールする (PageDown)",
+        "popup_switch_resize_mode": "リサイズモードを切り替える",
+        "popup_open": "イラストページを開く",
+        "popup_open_big": "イラスト画像を開く",
+        "popup_open_profile": "プロフィールを開く",
+        "popup_open_illust": "作品一覧を開く",
+        "popup_open_bookmark": "ブックマークを開く",
+        "popup_open_staccfeed": "フィードを開く",
+        "popup_open_response": "イメージレスポンス一覧を開く",
+        "popup_reload": "リロード",
+        "popup_open_bookmark_detail": "ブックマーク詳細ページを開く",
+        "popup_open_manga_thumbnail": "マンガサムネイルページを開く",
+        "popup_rate01": "評価する (1点)",
+        "popup_rate02": "評価する (2点)",
+        "popup_rate03": "評価する (3点)",
+        "popup_rate04": "評価する (4点)",
+        "popup_rate05": "評価する (5点)",
+        "popup_rate06": "評価する (6点)",
+        "popup_rate07": "評価する (7点)",
+        "popup_rate08": "評価する (8点)",
+        "popup_rate09": "評価する (9点)",
+        "popup_rate10": "評価する (10点)",
+        "popup_ugoira_play_pause": "[うごイラ] 再生/一時停止",
+        "popup_ugoira_prev_frame": "[うごイラ] コマ戻し",
+        "popup_ugoira_next_frame": "[うごイラ] コマ送り",
+        "popup_bookmark_start": "ブックマーク編集モード開始",
+        "popup_bookmark_submit": "送信",
+        "popup_bookmark_end": "ブックマーク編集モード終了",
+        "popup_manga_start": "マンガモード開始",
+        "popup_manga_open_page": "表示しているページを開く。",
+        "popup_manga_end": "マンガモード終了",
+        "popup_qrate_start": "アンケートモード開始",
+        "popup_qrate_select_prev": "前の選択肢を選択",
+        "popup_qrate_select_next": "次の選択肢を選択",
+        "popup_qrate_submit": "送信",
+        "popup_qrate_end": "アンケートモード終了",
+        "popup_tag_edit_start": "タグ編集モード開始",
+        "popup_tag_edit_end": "タグ編集モード終了"
+      },
+      "bookmark": {
+        "tag_order": "ブックマークタグの並べ替えとグルーピング。1行1タグ。\n-: セパレータ\n*: 残り全部",
+        "tag_aliases": "タグの関連付け。自動入力に使用する。スペース区切り。"
+      }
+    },
+    "cancel": "中止",
+    "rate_confirm": "評価しますか？\n$point点",
+    "author_works": "作品",
+    "author_bookmarks": "ブックマーク",
+    "author_staccfeed": "フィード",
+    "sending": "送信中",
+    "importing": "インポート中",
+    "associate_tags": "タグを関連付ける",
+    "mypage_layout_history": "レイアウトの履歴",
+    "mypage_layout_history_empty": "履歴が空です",
+    "mypage_layout_history_help": "リストをクリックするとレイアウトを復元します。",
+    "search_wlt": "幅の最小値 <=",
+    "search_hlt": "高さの最小値 <=",
+    "search_wgt": "<= 幅の最大値",
+    "search_hgt": "<= 高さの最大値",
+    "ugoira_play_pause": "再生/一時停止 (#{key})",
+    "ugoira_next_frame": "コマ送り (#{key})",
+    "ugoira_prev_frame": "コマ戻し (#{key})",
+    "ugoira_download_zip": "zipをダウンロード",
+    "ugoira_generate_timecode": "タイムコードを生成",
+    "ugoira_how_to_use": "使い方"
+  }
+}

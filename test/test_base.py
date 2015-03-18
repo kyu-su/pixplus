@@ -33,7 +33,7 @@ class TestCase(unittest.TestCase):
       pass
 
     if self.run_in_pixiv:
-      conf = util.read_json(os.path.join(self.rootdir, 'temp', 'config.json'))
+      conf = util.read_json(os.path.join(self.rootdir, 'src', 'data', 'config.json'))
 
       if not self.url.startswith('http://www.pixiv.net/'):
         self.open('/')
