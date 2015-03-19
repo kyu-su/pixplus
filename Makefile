@@ -64,17 +64,17 @@ ICON_CONFIG_BTN_SVG             = $(BUILD_DIR_ICON)/config-button.svg
 ICON_CONFIG_BTN_PNG             = $(BUILD_DIR_ICON)/config-button.png
 CSS_ICON_NAMES                  = pencil pencil-off cogwheel
 CSS_ICON_FILES_PNG              = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.png)
-CSS_ICON_FILES_SCSS             = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.scss) $(BUILD_DIR_ICON)/config-button.scss $(BUILD_DIR_ICON)/pixplus-24.scss
-DIST_FILES_ROOT                 = $(LICENSE) common.js $(wildcard index.*) $(wildcard options.*)
-DIST_FILES_BUILD                = $(notdir $(LIB_JS) $(DATA_JS))
-DIST_FILES_ALL                  = $(DIST_FILES_ROOT) $(DIST_FILES_BUILD)
+CSS_ICON_FILES_SCSS             = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.scss) \
+                                  $(BUILD_DIR_ICON)/config-button.scss \
+                                  $(BUILD_DIR_ICON)/pixplus-24.scss
+DIST_FILES                      = $(LICENSE) $(wildcard extension/*) $(LIB_JS) $(DATA_JS)
 
 OEX_USERJS                      = $(BUILD_DIR_OEX)/includes/$(notdir $(OPERA_USERJS))
 OEX_CONFIG_XML_IN               = $(CURDIR)/opera/config.xml.in
 OEX_CONFIG_XML                  = $(BUILD_DIR_OEX)/config.xml
 OEX_ICON_DIR                    = icons
 OEX_ICON_FILES                  = $(ICON_SIZE:%=$(BUILD_DIR_OEX)/$(OEX_ICON_DIR)/%.png)
-OEX_DIST_FILES                  = $(DIST_FILES_ALL:%=$(BUILD_DIR_OEX)/%) \
+OEX_DIST_FILES                  = $(addprefix $(BUILD_DIR_OEX)/,$(notdir $(DIST_FILES))) \
                                   $(OEX_USERJS) $(OEX_CONFIG_XML) $(OEX_ICON_FILES)
 
 CRX_SIGN_KEY                    = $(CURDIR)/chrome/sign/$(notdir $(CRX)).pem
@@ -83,7 +83,7 @@ CRX_USERJS                      = $(BUILD_DIR_CRX)/$(notdir $(OPERA_USERJS))
 CRX_MANIFEST_JSON               = $(BUILD_DIR_CRX)/manifest.json
 CRX_ICON_DIR                    = icons
 CRX_ICON_FILES                  = $(ICON_SIZE:%=$(BUILD_DIR_CRX)/$(CRX_ICON_DIR)/%.png)
-CRX_DIST_FILES                  = $(DIST_FILES_ALL:%=$(BUILD_DIR_CRX)/%) \
+CRX_DIST_FILES                  = $(addprefix $(BUILD_DIR_CRX)/,$(notdir $(DIST_FILES))) \
                                   $(CRX_USERJS) $(CRX_MANIFEST_JSON) $(CRX_ICON_FILES)
 
 SAFARIEXTZ_CERTS                = $(sort $(wildcard $(CURDIR)/safari/sign/cert??))
@@ -94,7 +94,7 @@ SAFARIEXTZ_USERJS               = $(BUILD_DIR_SAFARIEXTZ)/$(notdir $(OPERA_USERJ
 SAFARIEXTZ_INFO_PLIST           = $(BUILD_DIR_SAFARIEXTZ)/Info.plist
 SAFARIEXTZ_SETTINGS_PLIST       = $(BUILD_DIR_SAFARIEXTZ)/Settings.plist
 SAFARIEXTZ_ICON_FILES           = $(ICON_SIZE:%=$(BUILD_DIR_SAFARIEXTZ)/Icon-%.png)
-SAFARIEXTZ_DIST_FILES           = $(DIST_FILES_ALL:%=$(BUILD_DIR_SAFARIEXTZ)/%) \
+SAFARIEXTZ_DIST_FILES           = $(addprefix $(BUILD_DIR_SAFARIEXTZ)/,$(notdir $(DIST_FILES))) \
                                   $(SAFARIEXTZ_USERJS) $(SAFARIEXTZ_INFO_PLIST) \
                                   $(SAFARIEXTZ_SETTINGS_PLIST) $(SAFARIEXTZ_ICON_FILES)
 
@@ -295,12 +295,9 @@ $(OEX_USERJS): $(OPERA_USERJS)
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-$(DIST_FILES_ROOT:%=$(BUILD_DIR_OEX)/%): $(BUILD_DIR_OEX)/%: %
-	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@cp $< $@
-
-$(DIST_FILES_BUILD:%=$(BUILD_DIR_OEX)/%): $(BUILD_DIR_OEX)/%: $(BUILD_DIR)/%
+.SECONDEXPANSION:
+$(addprefix $(BUILD_DIR_OEX)/,$(notdir $(DIST_FILES))): \
+  $$(filter $$(notdir $$@) %/$$(notdir $$@),$$(DIST_FILES))
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
@@ -337,12 +334,10 @@ $(CRX_USERJS): $(OPERA_USERJS)
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-$(DIST_FILES_ROOT:%=$(BUILD_DIR_CRX)/%): $(BUILD_DIR_CRX)/%: %
-	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@cp $< $@
 
-$(DIST_FILES_BUILD:%=$(BUILD_DIR_CRX)/%): $(BUILD_DIR_CRX)/%: $(BUILD_DIR)/%
+.SECONDEXPANSION:
+$(addprefix $(BUILD_DIR_CRX)/,$(notdir $(DIST_FILES))): \
+  $$(filter $$(notdir $$@) %/$$(notdir $$@),$$(DIST_FILES))
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
@@ -383,12 +378,9 @@ $(SAFARIEXTZ_USERJS): $(OPERA_USERJS)
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-$(DIST_FILES_ROOT:%=$(BUILD_DIR_SAFARIEXTZ)/%): $(BUILD_DIR_SAFARIEXTZ)/%: %
-	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
-	@mkdir -p $(dir $@)
-	@cp $< $@
-
-$(DIST_FILES_BUILD:%=$(BUILD_DIR_SAFARIEXTZ)/%): $(BUILD_DIR_SAFARIEXTZ)/%: $(BUILD_DIR)/%
+.SECONDEXPANSION:
+$(addprefix $(BUILD_DIR_SAFARIEXTZ)/,$(notdir $(DIST_FILES))): \
+  $$(filter $$(notdir $$@) %/$$(notdir $$@),$$(DIST_FILES))
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
