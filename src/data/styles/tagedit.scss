@@ -1,0 +1,23 @@
+#pp-popup-tagedit-button {
+  color: #888;
+  font-size: 90%;
+}
+
+#pp-popup-tagedit-wrapper {
+  display: none;
+  font-size: 12px;
+  overflow: auto;
+
+  #tag-editor > div {
+    margin: 0px !important;
+  }
+}
+
+#pp-popup.pp-tagedit-mode {
+  #pp-popup-header,
+  #pp-popup-image-wrapper,
+  .pp-popup-olc,
+  #pp-popup-tagedit-wrapper {
+    display: none;
+  }
+}

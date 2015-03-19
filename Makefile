@@ -218,13 +218,15 @@ $(BUILD_DIR)/_main.js: $(shell sed 's|^|src/main/|' src/main/files.txt)
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
 	@cat $^ >> $@
 
-$(BUILD_DIR)/_data.js: src/data/style.scss src/data/config.json src/data/i18n.json src/data/i18n.js $(CHANGELOG_JSON) $(CSS_ICON_FILES_SCSS)
+$(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js \
+                       $(CHANGELOG_JSON) $(CSS_ICON_FILES_SCSS) \
+                       $(wildcard src/data/styles/*.scss)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@echo '// generated from:' > $@
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
 	@echo '_.css=' >> $@
-	@$(SCSS) --style compressed -I $(BUILD_DIR_ICON) < src/data/style.scss | $(STR2JSON) >> $@
+	@cat $(wildcard src/data/styles/*.scss) | $(SCSS) --style compressed -I $(BUILD_DIR_ICON) | $(STR2JSON) >> $@
 	@echo ';_.conf.__schema=' >> $@
 	@$(JSON2ASCII) < src/data/config.json >> $@
 	@echo ';_.i18n=' >> $@

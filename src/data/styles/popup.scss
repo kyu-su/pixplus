@@ -1,0 +1,353 @@
+@import "pencil";
+@import "pencil-off";
+@import "cogwheel";
+
+#pp-popup {
+  position: fixed;
+  border: 2px solid #aaa;
+  background-color: #fff;
+  padding: 0.2em;
+  z-index: 20000;
+
+  #pp-popup-title a {
+    font-size: 120%;
+    font-weight: bold;
+    line-height: 1em;
+  }
+
+  #pp-popup-rightbox {
+    float: right;
+    font-size: 80%;
+
+    a {
+      margin-left: 0.2em;
+      font-weight: bold;
+
+      &.pp-active{
+        color: #888;
+        font-weight: normal;
+      }
+    }
+  }
+
+  #pp-popup-button-resize-mode {
+    cursor: pointer;
+  }
+
+  #pp-popup-status {
+    color: #888;
+  }
+  &.pp-error #pp-popup-status {
+    color: #a00;
+    font-weight: bold;
+  }
+
+  #pp-popup-ugoira-status {
+    opacity: 0.4;
+
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+      cursor: pointer;
+      width: 1em;
+      height: 1em;
+    }
+  }
+  &:not(.pp-ugoira) #pp-popup-ugoira-status {
+    display: none;
+  }
+  &:not(.pp-ugoira-playing) #pp-popup-ugoira-playing {
+    display: none;
+  }
+  &:not(.pp-ugoira-paused) #pp-popup-ugoira-paused {
+    display: none;
+  }
+
+  #pp-popup-header {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    padding: 0px 0.2em;
+    background-color: #fff;
+    line-height: 1.1em;
+    z-index: 20001;
+
+    &:not(.pp-show):not(:hover) {
+      opacity: 0;
+    }
+
+    .pp-popup-separator {
+      border-top: 1px solid #aaa;
+      margin-top: 0.1em;
+      padding-top: 0.1em;
+    }
+
+    #pp-popup-caption-wrapper {
+      overflow-y: auto;
+    }
+  }
+
+  &:not(.pp-comment-mode) #pp-popup-comment-wrapper{
+    display: none;
+  }
+
+  #pp-popup-comment-toolbar {
+    margin: 0.4em 1em 0px 1em;
+  }
+
+  .pp-popup-comment-btn {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    opacity: 0.2;
+    padding: 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    &:hover {
+      border-color: #000;
+    }
+
+    &:focus:not(:hover):not(:active):not(.pp-active) {
+      border: 1px dashed #000;
+    }
+
+    &:active, &.pp-active {
+      opacity: 0.4;
+      border-color: #000;
+    }
+  }
+
+  #pp-popup-comment-form-btn {
+    background-image: $icon-pencil;
+  }
+  &.pp-show-comment-form #pp-popup-comment-form-btn {
+    background-image: $icon-pencil-off;
+  }
+
+  #pp-popup-comment-config-btn {
+    background-image: $icon-cogwheel;
+  }
+
+  &:not(.pp-show-comment-form) #pp-popup-comment > ._comment-item:first-child {
+    display: none;
+  }
+
+  #pp-popup-comment {
+    .comment.header {
+      form {
+        background-color: #fff;
+        margin-bottom: 1em;
+        width: 100%;
+      }
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    ._comment-items ._no-item {
+      margin: 0px 0px 0px 1em;
+      color: inherit;
+      background-color: transparent;
+      text-align: left;
+    }
+
+    ._comment-item {
+      padding: 0.2em 0px;
+      .comment {
+        padding-right: 0px;
+      }
+    }
+
+    .comment .action-list {
+      display: none;
+    }
+  }
+
+  &.pp-hide-stamp-comments .pp-stamp-comment {
+    display: none;
+  }
+  &.pp-hide-stamp-comments .sticker-container {
+    display: none;
+  }
+
+  #pp-popup-taglist {
+    margin: 0px;
+    padding: 0px;
+    background: none;
+
+    ul {
+      display: inline;
+
+      li {
+        display: inline;
+        margin: 0px 0.6em 0px 0px;
+        padding: 0px;
+        border: 0px;
+        box-shadow: none;
+        background: none;
+      }
+    }
+
+    .no-item {
+      color: #aaa;
+      margin-right: 0.6em;
+    }
+
+    &.pp-no-pixpedia a[href^="http://dic.pixiv.net/"],
+    &.pp-no-pixiv-comic a[href^="http://comic.pixiv.net/"],
+    &.pp-no-booth a[href^="https://booth.pm/"] {
+      display: none;
+    }
+  }
+
+  #pp-popup-rating {
+    * {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .score {
+      dl, dt, dd {
+        display: inline;
+      }
+      dt {
+        margin-right: 0.2em;
+      }
+      dd {
+        margin-right: 0.6em;
+      }
+    }
+
+    .questionnaire {
+      text-align: inherit;
+    }
+  }
+
+  #pp-popup-info {
+    padding-bottom: 0.1em;
+  }
+
+  #pp-popup-author-image {
+    max-height: 3.2em;
+    float: left;
+    border: 1px solid #aaa;
+    margin-right: 0.2em;
+
+    &:hover {
+      max-height: none;
+    }
+  }
+
+  #pp-popup-author-status {
+    position: absolute;
+    left: 2px;
+    margin: 2px;
+
+    &:not(.pp-hide) {
+      display: inline-block;
+    }
+
+    &.pp-fav {
+      width: 14px;
+      height: 14px;
+      background-position: -200px -320px;
+    }
+    &.pp-fav-m{
+      width: 16px;
+      height: 14px;
+      background-position: -200px -480px;
+    }
+    &.pp-mypix{
+      width: 14px;
+      height: 16px;
+      background-position: 0px -360px;
+    }
+  }
+  #pp-popup-author-image:hover~#pp-popup-author-status {
+    display: none;
+  }
+
+  #pp-popup-tools {
+    margin-left:0.6em;
+    &:empty {
+      display: none;
+    }
+    a + a {
+      margin-left: 0.6em;
+    }
+  }
+
+  #pp-popup-ugoira-info {
+    margin-left: 0.6em;
+  }
+  &:not(.pp-ugoira) #pp-popup-ugoira-info {
+    display: none;
+  }
+
+  #pp-popup-author-links a {
+    margin-right: 0.6em;
+    font-weight: bold;
+  }
+
+  #pp-popup-image-wrapper {
+    line-height: 0;
+    border: 1px solid #aaa;
+    position: relative;
+  }
+  #pp-popup-image-scroller {
+    min-width: 480px;
+    min-height:360px;
+  }
+  #pp-popup-image-layout {
+    display: inline-block;
+    img {
+      vertical-align: top;
+    }
+  }
+
+  .pp-popup-olc {
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+    top: 0px;
+    height: 100%;
+    line-height: 0px;
+
+    &.pp-active:hover {
+      opacity: 0.6;
+    }
+
+    svg {
+      position: relative;
+      path {
+        fill: #ddd;
+        stroke: #222;
+        stroke-width: 10;
+        stroke-linejoin: round;
+      }
+    }
+  }
+
+  #pp-popup-olc-prev {
+    left: 0px;
+  }
+
+  #pp-popup-olc-next svg {
+    -webkit-transform: matrix(-1,0,0,1,0,0);
+    transform: matrix(-1,0,0,1,0,0);
+  }
+
+  #pp-popup-multipage-icon {
+    position: absolute;
+    opacity: 0.8;
+    right:0px;
+    bottom:0px;
+    fill:url(#pp-popup-multipage-icon-grad);
+  }
+  &:not(.pp-frontpage-new) #pp-popup-multipage-icon {
+    display: none;
+  }
+}

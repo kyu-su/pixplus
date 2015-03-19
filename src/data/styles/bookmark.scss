@@ -1,0 +1,83 @@
+#pp-popup.pp-bookmark-mode {
+  #pp-popup-header,
+  #pp-popup-image-wrapper,
+  .pp-popup-olc {
+    display: none;
+  }
+  #pp-popup-bookmark-wrapper {
+    display: block;
+  }
+}
+
+#pp-popup-bookmark-wrapper {
+  display: none;
+  border: 1px solid #aaa;
+
+  .layout-body {
+    margin: 0px;
+    border: none;
+  }
+
+  .bookmark-detail-unit {
+    border-radius: 0px;
+    border: none;
+  }
+
+  .bookmark-list-unit {
+    border-radius: 0px;
+    border: none;
+    margin: 0px;
+  }
+
+  .tag-container {
+    overflow-y: auto;
+  }
+
+  .list-container + .list-container {
+    margin-top: 0px;
+  }
+
+  ._list-unit {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .tag-cloud {
+    padding: 4px !important;
+  }
+
+  .pp-tag-select {
+    outline: 2px solid #0f0;
+  }
+
+  .pp-tag-link {
+    outline: 2px solid #f00;
+  }
+
+  .pp-tag-associate-button {
+    display: none;
+    background-color: #eee;
+    margin-right: 0.2em;
+    border: 1px solid #bbb;
+    border-radius: 0.4em;
+    padding: 0px 0.4em;
+    color: #000;
+
+    &.pp-active {
+      background-color: #aaa;
+    }
+
+    &:hover {
+      background-color: #ddd;
+    }
+  }
+
+  .pp-associate-tag {
+    .tag-container .list-items .tag {
+      display: none;
+    }
+    .pp-tag-associate-button {
+      display: inline;
+    }
+  }
+}
