@@ -1,5 +1,17 @@
 [
   {
+    "date": "2015/xx/xx",
+    "version": "1.13.5",
+    "releasenote": "",
+    "changes_i18n": {
+      "en": [
+        "[Fix] Begin using of MutationObserver. (MutationEvents warnings disappeared)",
+        "[Change] Improve comment area layout. (make white spaces narrow)",
+        "[Change][Opera12] Improve Presto Opera support."
+      ]
+    }
+  },
+  {
     "date": "2015/01/01",
     "version": "1.13.4",
     "releasenote": "http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4",
