@@ -255,6 +255,12 @@ var _ = w.pixplus = {
 
   calculate_ratio: function(width, height) {
     return (width - height) / g.Math.min(width, height);
+  },
+
+  parse_html: function(html) {
+    var doc = d.implementation.createHTMLDocument('');
+    doc.documentElement.innerHTML = html;
+    return doc;
   }
 };
 

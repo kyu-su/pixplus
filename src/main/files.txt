@@ -1,5 +1,4 @@
 util.js
-fastxml.js
 illust.js
 popup.js
 comment.js

@@ -248,11 +248,11 @@ _.illust = {
   },
 
   parse_medium_html: function(illust, html) {
-    var root = _.fastxml.parse(html), re, re2;
+    var doc = _.parse_html(html), re, re2;
 
-    var error = _.fastxml.q(root, '.one_column_body .error');
+    var error = _.q('.one_column_body .error', doc);
     if (error) {
-      illust.error = _.fastxml.text(error);
+      illust.error = error.textContent;
       _.error('pixiv reported error: ' + illust.error);
       return false;
     }
@@ -301,9 +301,12 @@ _.illust = {
       });
 
     } else {
-      var med = _.fastxml.q(root, '.works_display img');
+      var med = _.q('.works_display img', doc);
       if (med) {
-        var p = this.parse_image_url(med.attrs.src, {allow_types: ['_m'], allow_sizes: ['600x600']});
+        var p = this.parse_image_url(
+          med.getAttribute('src'),
+          {allow_types: ['_m'], allow_sizes: ['600x600']}
+        );
         if (p) {
           if (p.id !== illust.id) {
             illust.error = 'Invalid medium image url';
@@ -319,10 +322,10 @@ _.illust = {
         return false;
       }
 
-      var big = _.fastxml.q(root, 'img.original-image');
+      var big = _.q('img.original-image', doc);
       var big_src;
       if (big) {
-        big_src = big.attrs.src || big.attrs['data-src'];
+        big_src = big.getAttribute('src') || big.getAttribute('data-src');
       }
       if (big_src) {
         _.debug('Big image found: ' + big_src);
@@ -335,52 +338,59 @@ _.illust = {
 
     // error check end
 
-    var work_info = _.fastxml.q(root, '.work-info'),
-        title     = _.fastxml.q(work_info, '.title'),
-        caption   = _.fastxml.q(work_info, '.caption'),
-        score     = _.fastxml.q(work_info, '.score'),
-        question  = _.fastxml.q(work_info, '.questionnaire'),
-        tags_tmpl = _.fastxml.q(root, '#template-work-tags'),
-        tags      = _.fastxml.q(root, '.work-tags .tags-container');
+    var work_info = _.q('.work-info', doc),
+        title     = work_info ? _.q('.title', work_info) : null,
+        caption   = work_info ? _.q('.caption', work_info) : null,
+        score     = work_info ? _.q('.score', work_info) : null,
+        question  = work_info ? _.q('.questionnaire', work_info) : null,
+        tags_tmpl = _.q('#template-work-tags', doc),
+        tags      = _.q('.work-tags .tags-container', doc);
 
-    illust.title = _.strip(_.fastxml.text(title));
-    illust.caption = _.strip(_.fastxml.inner_html(caption));
-    illust.tags = _.fastxml.qa(tags, '.tag .text').map(function(tag) {
-      return _.strip(_.fastxml.text(tag));
-    });
+    illust.title = title ? _.strip(title.textContent) : '';
+    illust.caption = caption ? caption.innerHTML : '';
+    illust.tags = [];
+    if (tags) {
+      illust.tags = _.qa('.tag .text', tags).map(function(tag) {
+        return _.strip(tag.textContent);
+      });
+    }
     illust.score = {};
-    ['view', 'rated', 'score'].forEach(function(name) {
-      var node = _.fastxml.q(score, '.' + name + '-count');
-      illust.score[name] = g.parseInt(_.strip(_.fastxml.text(node)));
-    });
-
-    illust.taglist  = _.fastxml.html(tags_tmpl, true) + _.fastxml.html(tags);
-    illust.rating   = _.fastxml.html(score);
-    illust.question = _.fastxml.html(question, true);
-
-    illust.rated = !!_.fastxml.q(score, '.rating.rated');
-    illust.answered = null;
-    if (question) {
-      illust.answered = !_.fastxml.q(question, '.list');
+    if (score) {
+      ['view', 'rated', 'score'].forEach(function(name) {
+        var node = _.q('.' + name + '-count', score);
+        if (node) {
+          illust.score[name] = g.parseInt(_.strip(node.textContent));
+        }
+      });
     }
 
-    var profile_area   = _.fastxml.q(root, '.profile-unit'),
-        avatar         = _.fastxml.q(profile_area, 'img.user-image'),
-        author_link    = _.fastxml.q(profile_area, 'a.user-link'),
-        author_name    = _.fastxml.q(author_link, 'h1.user'),
-        staccfeed_link = _.fastxml.q(root, '.column-header .tabs a', function(link) {
-          return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.attrs.href);
-        });
+    illust.taglist  = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
+    illust.rating   = score ? score.outerHTML : '';
+    illust.question = question ? question.outerHTML : '';
+
+    illust.rated = score ? !!_.q('.rating.rated', score) : false;
+    illust.answered = null;
+    if (question) {
+      illust.answered = !_.q('.list', question);
+    }
+
+    var profile_area   = _.q('.profile-unit', doc),
+        avatar         = profile_area ? _.q('img.user-image', profile_area) : null,
+        author_link    = profile_area ? _.q('a.user-link', profile_area) : null,
+        author_name    = author_link ? _.q('h1.user', author_link) : null,
+        staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function(link) {
+          return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
+        })[0];
 
     illust.author_id              = null;
-    illust.author_name            = author_name ? _.fastxml.text(author_name) : null;
-    illust.author_favorite        = !!_.fastxml.q(profile_area, '#favorite-button.following');
-    illust.author_mutual_favorite = !!_.fastxml.q(profile_area, '.user-relation .sprites-heart');
-    illust.author_mypixiv         = !!_.fastxml.q(profile_area, '#mypixiv-button.mypixiv');
-    illust.author_image_url       = avatar ? avatar.attrs.src : null;
+    illust.author_name            = author_name ? author_name.textContent : null;
+    illust.author_favorite        = !!(profile_area && _.q('#favorite-button.following', profile_area));
+    illust.author_mutual_favorite = !!(profile_area && _.q('.user-relation .sprites-heart', profile_area));
+    illust.author_mypixiv         = !!(profile_area && _.q('#mypixiv-button.mypixiv', profile_area));
+    illust.author_image_url       = avatar ? avatar.getAttribute('src') : null;
     illust.author_is_me           = null;
 
-    if (author_link && (re = /\/member\.php\?id=(\d+)/.exec(author_link.attrs.href))) {
+    if (author_link && (re = /\/member\.php\?id=(\d+)/.exec(author_link.getAttribute('href')))) {
       illust.author_id = g.parseInt(re[1], 10);
     }
 
@@ -399,15 +409,15 @@ _.illust = {
     illust.url_author_staccfeed = null;
     if (staccfeed_link) {
       illust.url_author_staccfeed =
-        staccfeed_link.attrs.href.replace(/^http:\/\/www.pixiv.net(?=\/)/, '');
+        staccfeed_link.getAttribute('href').replace(/^http:\/\/www.pixiv.net(?=\/)/, '');
     }
 
-    var meta = _.fastxml.qa(work_info, '.meta li'),
-        meta2 = _.fastxml.text(meta[1]);
+    var meta = work_info ? _.qa('.meta li', work_info) : [],
+        meta2 = meta[1] ? meta[1].textContent : '';
 
-    illust.datetime = _.fastxml.text(meta[0]);
+    illust.datetime = meta[0] ? meta[0].textContent : '';
 
-    illust.is_manga = !!_.fastxml.q(root, '._work.manga');
+    illust.is_manga = !!_.q('._work.manga', doc);
 
     illust.size = null;
     illust.manga = {
@@ -417,13 +427,13 @@ _.illust = {
       page_count: 0
     };
 
-    if (_.fastxml.q(root, '.works_display ._work.multiple')) {
+    if (_.q('.works_display ._work.multiple', doc)) {
       illust.manga.available = true;
     }
 
-    if (_.fastxml.q(root, '._work.rtl')) {
+    if (_.q('._work.rtl', doc)) {
       illust.manga.book_mode = 'rtl';
-    } else if (_.fastxml.q(root, '._work.ltr')) {
+    } else if (_.q('._work.ltr', doc)) {
       illust.manga.book_mode = 'ltr';
     }
 
@@ -438,26 +448,33 @@ _.illust = {
       _.debug('It seems manga but page count not detected');
     }
 
-    illust.tools = _.fastxml.qa(work_info, '.meta .tools li').map(function(node) {
-      return _.strip(_.fastxml.text(node));
-    });
+    if (work_info) {
+      illust.tools = _.qa('.meta .tools li', work_info).map(function(node) {
+        return _.strip(node.textContent);
+      });
+    }
 
-    illust.bookmarked = !!_.fastxml.q(root, '.bookmark-container .bookmark-count');
+    illust.bookmarked = !!_.q('.bookmark-container .bookmark-count', doc);
 
-    illust.has_image_response = !!_.fastxml.q(root, '.worksImageresponse .worksResponse');
+    illust.has_image_response = !!_.q('.worksImageresponse .worksResponse', doc);
     illust.image_response_to  = null;
-    _.fastxml.q(root, '.worksImageresponseInfo a', function(link) {
-      re = /^\/member_illust\.php\?.*&(?:amp;)?illust_id=(\d+).*&(?:amp;)?uarea=response_out(?:&|$)/.exec(link.attrs.href);
+    _.qa('.worksImageresponseInfo a', doc).forEach(function(link) {
+      if (illust.image_response_to) {
+        return;
+      }
+      re = /^\/member_illust\.php\?.*&(?:amp;)?illust_id=(\d+).*&(?:amp;)?uarea=response_out(?:&|$)/.exec(link.getAttribute('href'));
       if (re) {
         illust.image_response_to = g.parseInt(re[1]);
-        return true;
       }
-      return false;
     });
 
-    var comment = _.fastxml.q(root, '#one_comment .layout-column-1');
-    _.fastxml.remove_selector(comment, '.worksImageresponse');
-    illust.comment = _.fastxml.inner_html(comment) || 'Error';
+    var comment = _.q('#one_comment .layout-column-1', doc);
+    if (comment) {
+      _.qa('.worksImageresponse', comment).forEach(function(node) {
+        node.parentNode.removeChild(node);
+      });
+    }
+    illust.comment = (comment ? comment.innerHTML : '') || 'Error';
 
     if (!_.stampSeries) {
       re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
@@ -780,22 +797,22 @@ _.illust = {
     }
 
     var that = this, page_pairs = [], cnt = 0;
-    var root = _.fastxml.parse(html);
+    var doc = _.parse_html(html);
 
-    var containers = _.fastxml.qa(root, '.manga .item-container');
+    var containers = _.qa('.manga .item-container', doc);
     for(var i = 0; i < containers.length; ++i) {
 
       var pages = [];
-      var images = _.fastxml.qa(containers[i], 'img');
+      var images = _.qa('img', containers[i]);
 
       for(var j = 0; j < images.length; ++j) {
         var img = images[j];
 
-        if (img.attrs['data-filter'] !== 'manga-image') {
+        if (img.getAttribute('data-filter') !== 'manga-image') {
           continue;
         }
 
-        var src = img.attrs['data-src'] || img.attrs.src;
+        var src = img.getAttribute('data-src') || img.getAttribute('src');
         var p = _.illust.parse_image_url(src, {
           allow_types: [''],
           allow_sizes: ['1200x1200'],

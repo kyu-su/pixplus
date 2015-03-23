@@ -34,12 +34,12 @@ _.popup.bookmark = {
 
     this.init();
 
-    var root = _.fastxml.parse(html),
-        body = _.fastxml.q(root, '.layout-body');
+    var doc = _.parse_html(html);
+    var body = _.q('.layout-body', doc);
 
     var re, wrapper = _.popup.dom.bookmark_wrapper;
 
-    wrapper.innerHTML = _.fastxml.html(body, true);
+    wrapper.innerHTML = body.outerHTML;
 
     (function(re) {
       if (!re) {
