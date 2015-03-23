@@ -33,6 +33,21 @@ var _ = w.pixplus = {
     return g.Array.prototype.slice.call(list);
   },
 
+  throttle_wrap: function(func) {
+    var throttling_timer;
+    return function() {
+      if (throttling_timer) {
+        return;
+      }
+      var that = this;
+      var args = Array.prototype.slice.call(arguments);
+      throttling_timer = g.setTimeout(function() {
+        func.apply(that, args);
+        throttling_timer = 0;
+      }, 50);
+    };
+  },
+
   listen: function(targets, events, listener, options) {
     var throttling_timer;
 
@@ -91,6 +106,15 @@ var _ = w.pixplus = {
       });
     });
     return connection;
+  },
+
+  observe_domnodeinserted: function(target, callback) {
+    if (w.MutationObserver) {
+      var observer = new w.MutationObserver(_.throttle_wrap(callback));
+      observer.observe(target, {childList: true, subtree: true});
+    } else {
+      _.listen(target, 'DOMNodeInserted', callback, {async: true});
+    }
   },
 
   onclick: function(context, listener, options) {

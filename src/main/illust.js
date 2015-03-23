@@ -244,7 +244,7 @@ _.illust = {
     this.root = root;
     this.update();
 
-    _.listen(this.root, 'DOMNodeInserted', this.update.bind(this), {async: true});
+    _.observe_domnodeinserted(this.root, this.update.bind(this));
   },
 
   parse_medium_html: function(illust, html) {

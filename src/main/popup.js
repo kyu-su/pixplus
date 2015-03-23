@@ -157,7 +157,7 @@ _.popup = {
 
 
 
-    _.listen(dom.comment, 'DOMNodeInserted', this.comment.update.bind(this.comment), {async: true});
+    _.observe_domnodeinserted(dom.comment, this.comment.update.bind(this.comment));
 
     this.input.init();
 
