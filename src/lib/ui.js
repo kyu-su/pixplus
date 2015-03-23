@@ -91,6 +91,8 @@ _.modal = {
       return;
     }
 
+    var that = this;
+
     while(this.dialog && this.dialog.container !== options.parent) {
       this.close();
     }
@@ -110,24 +112,25 @@ _.modal = {
     };
 
     this.centerize();
-    this.init_events();
+    this.set_event_listeners();
 
-    var that = this;
     this.suspend = true;
-
     g.setTimeout(function() {
       that.suspend = false;
     }, 100);
   },
 
   close: function() {
+    if (!this.dialog) {
+      return;
+    }
     _.debug('End modal');
     if (this.dialog.options && this.dialog.options.onclose) {
       this.dialog.options.onclose(this.dialog.container);
     }
     this.dialog = this.dialog.parent;
     if (!this.dialog) {
-      this.uninit_events();
+      this.unset_event_listeners();
     }
   },
 
@@ -141,7 +144,7 @@ _.modal = {
     }
   },
 
-  init_events: function() {
+  set_event_listeners: function() {
     var that = this;
     if (!this.conn_key) {
       this.conn_key = _.key.listen_global(function(key) {
@@ -195,7 +198,7 @@ _.modal = {
     }
   },
 
-  uninit_events: function() {
+  unset_event_listeners: function() {
     var that = this;
     ['key', 'click', 'resize', 'pixiv_modal_open'].forEach(function(name) {
       if (that['conn_' + name]) {
@@ -203,6 +206,19 @@ _.modal = {
         that['conn_' + name] = null;
       }
     });
+  },
+
+  init: function() {
+    var that = this;
+    try {
+      var pixiv_ui_modal_initialize = w.pixiv.ui.modal.initialize;
+      w.pixiv.ui.modal.initialize = function() {
+        that.close();
+        return pixiv_ui_modal_initialize.apply(this, Array.prototype.slice.call(arguments));
+      };
+    } catch(ex) {
+      _.error(ex);
+    }
   }
 };
 
