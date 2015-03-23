@@ -413,10 +413,9 @@ _.popup = {
       this.tagedit.adjust(max_size[0], max_size[1]);
 
     } else {
-      dom.image_layout.style.margin = '0px';
-
       this.layout_images(max_size[0], max_size[1]);
 
+      dom.image_layout.style.margin = '0px';
       var mh = dom.image_scroller.clientWidth  - dom.image_layout.offsetWidth,
           mv = dom.image_scroller.clientHeight - dom.image_layout.offsetHeight;
       dom.image_layout.style.marginLeft = g.Math.max(g.Math.floor(mh / 2), 0) + 'px';
