@@ -302,12 +302,7 @@ class TestCase(unittest.TestCase):
 
   def lazy_scroll(self, elem):
     self.js('''
-      var rect = arguments[0].getBoundingClientRect(),
-          sw = document.documentElement.clientWidth,
-          sh = document.documentElement.clientHeight;
-      if (rect.left < 0 || rect.top < 0 || rect.right > sw || rect.bottom > sh) {
-        pixplus.lazy_scroll(arguments[0]);
-      }
+      pixplus.lazy_scroll(arguments[0]);
     ''', elem)
     pass
 

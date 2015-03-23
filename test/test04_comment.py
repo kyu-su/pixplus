@@ -14,6 +14,8 @@ class Test_Comment(TestCase):
     dellink = self.q('.delete-comment', comment)
     self.move_to(comment)
     time.sleep(1)
+    self.move_to(dellink)
+    time.sleep(1)
     self.click(dellink)
     self.alert_accept()
     time.sleep(1)
@@ -27,7 +29,7 @@ class Test_Comment(TestCase):
     while not end:
       end = True
 
-      for comment in self.qa('._comment-item'):
+      for comment in self.qa('._comment-item, .sticker-item'):
         if self.qa('.delete-comment', comment):
           end = False
           self.delete(comment)
