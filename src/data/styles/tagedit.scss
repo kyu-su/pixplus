@@ -4,7 +4,6 @@
 }
 
 #pp-popup-tagedit-wrapper {
-  display: none;
   font-size: 12px;
   overflow: auto;
 
@@ -16,8 +15,11 @@
 #pp-popup.pp-tagedit-mode {
   #pp-popup-header,
   #pp-popup-image-wrapper,
-  .pp-popup-olc,
-  #pp-popup-tagedit-wrapper {
+  .pp-popup-olc {
     display: none;
   }
+}
+
+#pp-popup:not(.pp-tagedit-mode) #pp-popup-tagedit-wrapper {
+  display: none;
 }

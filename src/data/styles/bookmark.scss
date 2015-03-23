@@ -1,16 +1,4 @@
-#pp-popup.pp-bookmark-mode {
-  #pp-popup-header,
-  #pp-popup-image-wrapper,
-  .pp-popup-olc {
-    display: none;
-  }
-  #pp-popup-bookmark-wrapper {
-    display: block;
-  }
-}
-
 #pp-popup-bookmark-wrapper {
-  display: none;
   border: 1px solid #aaa;
 
   .layout-body {
@@ -80,4 +68,16 @@
       display: inline;
     }
   }
+}
+
+#pp-popup.pp-bookmark-mode {
+  #pp-popup-header,
+  #pp-popup-image-wrapper,
+  .pp-popup-olc {
+    display: none;
+  }
+}
+
+#pp-popup:not(.pp-bookmark-mode) #pp-popup-bookmark-wrapper {
+  display: none;
 }
