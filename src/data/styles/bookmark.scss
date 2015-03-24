@@ -43,7 +43,6 @@
   }
 
   .pp-tag-associate-button {
-    display: none;
     background-color: #eee;
     margin-right: 0.2em;
     border: 1px solid #bbb;
@@ -60,13 +59,9 @@
     }
   }
 
-  .pp-associate-tag {
-    .tag-container .list-items .tag {
-      display: none;
-    }
-    .pp-tag-associate-button {
-      display: inline;
-    }
+  &.pp-associate-tag .tag-container .list-items .tag,
+  &:not(.pp-associate-tag) .pp-tag-associate-button {
+    display: none;
   }
 }
 
