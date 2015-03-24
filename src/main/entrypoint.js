@@ -117,7 +117,6 @@ _.run = function() {
 
   _.i18n.setup();
   _.key.init();
-  _.modal.init();
 
   _.e('style', {text: _.css}, d.documentElement);
 

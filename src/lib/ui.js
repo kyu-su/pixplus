@@ -182,14 +182,14 @@ _.modal = {
         that.end();
       };
       try {
-        w.colon.d.on('uiModalOpen', on_modal_open);
+        w.colon.d.on('uimodalopen', on_modal_open);
       } catch(ex) {
         _.error(ex);
       }
       this.conn_pixiv_modal_open = {
         disconnect: function() {
           try {
-            w.colon.d.off('uiModalOpen', on_modal_open);
+            w.colon.d.off('uimodalopen', on_modal_open);
           } catch(ex) {
             _.error(ex);
           }
@@ -206,19 +206,6 @@ _.modal = {
         that['conn_' + name] = null;
       }
     });
-  },
-
-  init: function() {
-    var that = this;
-    try {
-      var pixiv_ui_modal_initialize = w.pixiv.ui.modal.initialize;
-      w.pixiv.ui.modal.initialize = function() {
-        that.close();
-        return pixiv_ui_modal_initialize.apply(this, Array.prototype.slice.call(arguments));
-      };
-    } catch(ex) {
-      _.error(ex);
-    }
   }
 };
 
