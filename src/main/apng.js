@@ -282,32 +282,41 @@
           'onmessage=apng.onmessage.bind(apng);'
         ];
 
-        var worker;
+        var worker, objurl;
 
         if (w.URL) {
           var blob = new w.Blob(code, {type: 'application/javascript'});
-          worker = new w.Worker(w.URL.createObjectURL(blob));
+          objurl = w.URL.createObjectURL(blob);
+          worker = new w.Worker(objurl);
         } else {
           // Presto Opera support
           worker = new w.Worker('data:application/javascript,' + w.encodeURIComponent(code.join('')));
         }
 
+        var end = function() {
+          worker.terminate();
+          if (objurl) {
+            w.URL.revokeObjectURL(objurl);
+          }
+        };
+
         worker.onmessage = function(ev) {
-          var data = ev.data;
+          var data = ev.data, stop = false;
+
           if (data.command === 'progress') {
             onprogress(data.data[0], data.data[1]);
           } else if (data.command === 'error') {
             onerror(data.data);
-            worker.terminate();
+            end();
           } else if (data.command === 'complete') {
             oncomplete('data:image/png;base64,' + data.data);
-            worker.terminate();
+            end();
           }
         };
 
         worker.onerror = function(ev) {
           onerror(ev.message);
-          worker.terminate();
+          end();
         };
 
         worker.postMessage(frames, transferables);
