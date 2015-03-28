@@ -277,12 +277,20 @@
       var that = this;
 
       this.prepare_frames(frames, function(frames, transferables) {
-        var blob = new w.Blob([
+        var code = [
           'apng=(', that.__mod_generator.toString(), ')();',
           'onmessage=apng.onmessage.bind(apng);'
-        ], {type: 'application/javascript'});
+        ];
 
-        var worker = new w.Worker(w.URL.createObjectURL(blob));
+        var worker;
+
+        if (w.URL) {
+          var blob = new w.Blob(code, {type: 'application/javascript'});
+          worker = new w.Worker(w.URL.createObjectURL(blob));
+        } else {
+          // Presto Opera support
+          worker = new w.Worker('data:application/javascript,' + w.encodeURIComponent(code.join('')));
+        }
 
         worker.onmessage = function(ev) {
           var data = ev.data;
