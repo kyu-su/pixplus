@@ -71,7 +71,7 @@ _.popup.tagedit = {
         ajaxSettings: {dataType: 'text'}
       }).done(function(data) {
         try {
-          that.onload(illust, g.JSON.parse(data).html);
+          that.onload(illust, JSON.parse(data).html);
         } catch(ex) {
           that.onerror(illust, g.String(ex));
         }

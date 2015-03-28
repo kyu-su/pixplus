@@ -13,3 +13,4 @@ bookmarkform.js
 floater.js
 pages.js
 entrypoint.js
+apng.js

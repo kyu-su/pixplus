@@ -50,8 +50,8 @@ _.popup.bookmark = {
       var tags, tags_data;
 
       try {
-        tags = g.JSON.parse(re[1]); // eval(re[1])
-        tags_data = g.JSON.parse(tags);
+        tags = JSON.parse(re[1]); // eval(re[1])
+        tags_data = JSON.parse(tags);
       } catch(ex) {
         _.error('Failed to parse pixiv.context.tags json', ex);
         return;

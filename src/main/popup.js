@@ -127,6 +127,11 @@ _.popup = {
        key: _.conf.key.popup_ugoira_prev_frame}
     );
 
+    this.ugoira_menu.add(
+      'gen-apng', _.lng.ugoira_generate_apng,
+      {callback: this.ugoira_generate_apng.bind(this)}
+    );
+
     this.ugoira_menu.add('dl-zip', _.lng.ugoira_download_zip, {
       type: 'link',
       get_url: function() {
@@ -1074,5 +1079,28 @@ _.popup = {
     }
     this.illust.ugoira_player._nextFrame();
     return true;
+  },
+
+  ugoira_generate_apng: function() {
+    if (!this.illust || !this.illust.ugoira_player) {
+      return;
+    }
+
+    var that = this;
+    _.apng.dialog.open(
+      function() {
+        var player = that.illust.ugoira_player;
+        if (!player._frameImages || player._frameImages.length !== that.illust.ugoira.frames.length) {
+          return null;
+        }
+
+        return that.illust.ugoira.frames.map(function(frm, idx) {
+          return {
+            delay: frm.delay,
+            image: player._frameImages[idx]
+          };
+        });
+      }
+    );
   }
 };

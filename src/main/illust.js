@@ -265,7 +265,7 @@ _.illust = {
 
       if (re) {
         try {
-          illust.ugoira_small = g.JSON.parse(re[1]);
+          illust.ugoira_small = JSON.parse(re[1]);
         } catch(ex) {
           err = 'Failed to parse pixiv.context.ugokuIllustData JSON';
           _.error(err, ex);
@@ -275,7 +275,7 @@ _.illust = {
 
       if (re2) {
         try {
-          illust.ugoira_big = g.JSON.parse(re2[1]);
+          illust.ugoira_big = JSON.parse(re2[1]);
         } catch(ex) {
           err = 'Failed to parse pixiv.context.ugokuIllustFullscreenData JSON';
           _.error(err, ex);
@@ -479,7 +479,7 @@ _.illust = {
     if (!_.stampSeries) {
       re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
       if (re) {
-        _.stampSeries = g.JSON.parse(re[1]);
+        _.stampSeries = JSON.parse(re[1]);
       } else {
         _.error('pixiv.context.stampSeries not detected');
       }
@@ -488,7 +488,7 @@ _.illust = {
     if (!_.emojiSeries) {
       re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
       if (re) {
-        _.emojiSeries = g.JSON.parse(re[1]);
+        _.emojiSeries = JSON.parse(re[1]);
       } else {
         _.error('pixiv.context.emojiSeries not detected');
       }
@@ -738,7 +738,7 @@ _.illust = {
       page_count = g.Math.max(num + 1, page_count);
       _.log(type + ':' + num + ' ' + url);
       try {
-        (type === 'originalImages' ? images_big : images)[num] = g.JSON.parse(url);
+        (type === 'originalImages' ? images_big : images)[num] = JSON.parse(url);
       } catch(ex) {
         _.warn('Failed to parse pixiv.context.images json', ex);
       }

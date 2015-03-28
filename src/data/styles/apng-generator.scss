@@ -1,0 +1,54 @@
+#pp-apng-generator {
+  text-align: center;
+
+  .pp-dialog-content {
+    width: 640px;
+  }
+
+  #pp-apng-generator-error {
+    color: #800;
+    font-weight: bold;
+  }
+
+  &.pp-done .pp-progress-bar {
+    display: none;
+  }
+
+  #pp-apng-generator-result {
+    max-width: 100%;
+    max-height: 480px;
+  }
+
+  &:not(.pp-preparing) {
+    #pp-apng-generator-preparing {
+      display: none;
+    }
+  }
+
+  &:not(.pp-done) {
+    #pp-apng-generator-result,
+    #pp-apng-generator-howtosave {
+      display: none;
+    }
+  }
+
+  &:not(.pp-error) {
+    #pp-apng-generator-error {
+      display: none;
+    }
+  }
+
+  &:not(.pp-done):not(.pp-error) {
+    #pp-apng-generator-close {
+      display: none;
+    }
+  }
+
+  &.pp-done, &.pp-error {
+    #pp-apng-generator-warning,
+    #pp-apng-generator-generate,
+    #pp-apng-generator-cancel {
+      display: none;
+    }
+  }
+}

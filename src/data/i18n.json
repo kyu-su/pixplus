@@ -193,8 +193,18 @@
     "ugoira_next_frame": "Next frame (#{key})",
     "ugoira_prev_frame": "Previous frame (#{key})",
     "ugoira_download_zip": "Download zip",
+    "ugoira_generate_apng": "Generate APNG",
     "ugoira_generate_timecode": "Generate timecode",
-    "ugoira_how_to_use": "How to use?"
+    "ugoira_how_to_use": "How to use?",
+    "apng": {
+      "title": "APNG generator",
+      "warning": "WARNING: This may take a long time and uses much of memory.",
+      "preparing": "Preparing...",
+      "how2save": "To save image, right click and select \"Save Image As\".",
+      "generate": "Generate",
+      "cancel": "Cancel",
+      "close": "Close"
+    }
   },
   "ja": {
     "__name__": "ja",
@@ -391,7 +401,17 @@
     "ugoira_next_frame": "コマ送り (#{key})",
     "ugoira_prev_frame": "コマ戻し (#{key})",
     "ugoira_download_zip": "zipをダウンロード",
+    "ugoira_generate_apng": "APNGを生成",
     "ugoira_generate_timecode": "タイムコードを生成",
-    "ugoira_how_to_use": "使い方"
+    "ugoira_how_to_use": "使い方",
+    "apng": {
+      "title": "APNGジェネレータ",
+      "warning": "注意: 長い時間がかかりメモリをたくさん消費することがあります。",
+      "preparing": "準備中...",
+      "how2save": "画像を保存するには右クリックして「画像を保存」を選択してください。",
+      "generate": "生成",
+      "cancel": "キャンセル",
+      "close": "閉じる"
+    }
   }
 }
