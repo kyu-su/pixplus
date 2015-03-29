@@ -8,15 +8,22 @@
   #pp-apng-generator-error {
     color: #800;
     font-weight: bold;
+    text-align: left;
+    white-space: pre-wrap;
   }
 
   &.pp-done .pp-progress-bar {
     display: none;
   }
 
-  #pp-apng-generator-result {
+  #pp-apng-generator-preview {
     max-width: 100%;
     max-height: 480px;
+    margin: 0.2em;
+  }
+
+  #pp-apng-generator-howtosave:not(.pp-show) {
+    display: none;
   }
 
   &:not(.pp-preparing) {
@@ -26,8 +33,7 @@
   }
 
   &:not(.pp-done) {
-    #pp-apng-generator-result,
-    #pp-apng-generator-howtosave {
+    #pp-apng-generator-preview {
       display: none;
     }
   }

@@ -136,15 +136,10 @@ input.pp-flat-input {
     color: #fff;
   }
 
-  .pp-dialog-content {
-    padding: 0.2em;
-  }
-
   .pp-dialog-actions {
     text-align: center;
-    margin-top: 0.2em;
 
-    button + button {
+    > * + * {
       margin-left: 0.2em;
     }
   }
