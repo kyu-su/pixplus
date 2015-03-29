@@ -254,12 +254,12 @@
 
     onmessage: function(ev) {
       try {
-        postMessage({
+        self.postMessage({
           command: 'complete',
           data: this.b64.encode(this.generate_bytes(ev.data))
         });
       } catch(ex) {
-        postMessage({
+        self.postMessage({
           command: 'error',
           data: String(ex)
         });
@@ -267,7 +267,7 @@
     },
 
     send_progress: function(curr, max) {
-      postMessage({
+      self.postMessage({
         command: 'progress',
         data: [curr, max]
       });
