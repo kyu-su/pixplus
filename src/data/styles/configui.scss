@@ -88,27 +88,15 @@
   }
 
   input, button, select, textarea {
-    border: 1px solid #becad8;
-    border-radius: 2px;
-    margin: 0.2em 0px;
-    padding: 0.1em 0.3em;
+    @extend .pp-control;
   }
 
   input[type="checkbox"] {
-    padding: 1px
+    @extend .pp-checkbox;
   }
 
   button {
-    white-space: nowrap;
-    background-color: #f2f4f6;
-
-    &:hover {
-      background-color: #ddeaf6;
-    }
-
-    &:active {
-      background-color: #becad8;
-    }
+    @extend .pp-button;
   }
 
   ul {
