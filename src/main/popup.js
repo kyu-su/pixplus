@@ -1088,6 +1088,7 @@ _.popup = {
 
     var that = this;
     _.apng.dialog.open(
+      that.illust,
       function() {
         var player = that.illust.ugoira_player;
         if (!player._frameImages || player._frameImages.length !== that.illust.ugoira.frames.length) {

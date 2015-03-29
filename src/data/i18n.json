@@ -203,6 +203,7 @@
       "how2save": "To save image, right click and select \"Save Image As\".",
       "generate": "Generate",
       "cancel": "Cancel",
+      "download": "Download",
       "close": "Close"
     }
   },
@@ -411,6 +412,7 @@
       "how2save": "画像を保存するには右クリックして「画像を保存」を選択してください。",
       "generate": "生成",
       "cancel": "キャンセル",
+      "download": "ダウンロード",
       "close": "閉じる"
     }
   }

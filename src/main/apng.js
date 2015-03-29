@@ -165,18 +165,20 @@
         dom.progressbar = _.e('div', {cls: 'pp-progress-bar'}, dom.content);
         dom.progress = _.e('div', {cls: 'pp-progress'}, dom.progressbar);
         dom.error = _.e('div', {id: 'pp-apng-generator-error'}, dom.content);
-        dom.result = new w.Image();
-        dom.content.appendChild(dom.result);
-        dom.result.id = 'pp-apng-generator-result';
+        dom.preview = new w.Image();
+        dom.preview.id = 'pp-apng-generator-preview';
+        dom.content.appendChild(dom.preview);
         dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
         dom.preparing = _.e('div', {id: 'pp-apng-generator-preparing', text: _.lng.apng.preparing}, dom.content);
         dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
         dom.actions = _.e('div', {cls: 'pp-dialog-actions'}, dom.content);
         dom.generate = _.e('button', {text: _.lng.apng.generate, id: 'pp-apng-generator-generate'}, dom.actions);
         dom.cancel = _.e('button', {text: _.lng.apng.cancel, id: 'pp-apng-generator-cancel'}, dom.actions);
+        dom.dl_link = _.e('a', null, dom.actions);
+        dom.download = _.e('button', {text: _.lng.apng.download}, dom.dl_link);
         dom.close = _.e('button', {text: _.lng.apng.close, id: 'pp-apng-generator-close'}, dom.actions);
 
-        _.listen(this.dom.result, 'load', function() {
+        _.listen(this.dom.preview, 'load', function() {
           _.modal.centerize();
         });
 
@@ -212,18 +214,47 @@
         _.modal.centerize();
       },
 
-      oncomplete: function(url) {
-        this.dom.result.src = url;
+      oncomplete: function(result, b64) {
+        var dom = this.dom;
+        if (b64) {
+          dom.preview.src = 'data:image/png;base64,' + result;
+          dom.howtosave.classList.add('pp-show');
+        } else {
+          var dl_filename = [
+            this.illust.author_id,
+            this.illust.id,
+            this.illust.author_name,
+            this.illust.title
+          ].join(' ') + '.png';
+
+          var blob = new w.Blob(result, {type: 'image/png'});
+          this.object_url = w.URL.createObjectURL(blob);
+          this.dom.preview.src = this.object_url;
+          this.dom.dl_link.href = this.object_url;
+          this.dom.dl_link.setAttribute('download', dl_filename);
+          this.dom.dl_link.classList.remove('pp-hide');
+          dom.howtosave.classList.remove('pp-show');
+        }
         this.dom.root.classList.add('pp-done');
       },
 
-      open: function(get_frames) {
+      revoke_object_url: function() {
+        if (this.object_url) {
+          w.URL.revokeObjectURL(this.object_url);
+          delete this.object_url;
+        }
+      },
+
+      open: function(illust, get_frames) {
         this.create();
 
+        this.illust = illust;
+
         this.dom.progress.style.width = '0px';
-        this.dom.result.src = '';
+        this.dom.preview.src = '';
         this.dom.root.classList.remove('pp-done');
         this.dom.root.classList.remove('pp-error');
+        this.dom.dl_link.classList.add('pp-hide');
 
         d.body.appendChild(this.dom.root);
         _.modal.begin(this.dom.root, {
@@ -246,6 +277,7 @@
       },
 
       close: function() {
+        this.revoke_object_url();
         if (this.dom.root.parentNode) {
           this.dom.root.parentNode.removeChild(this.dom.root);
         }
@@ -254,14 +286,41 @@
 
     onmessage: function(ev) {
       try {
+        var data = ev.data;
+        var frames = data.frames;
+        var transferables = [];
+        frames.forEach(function(frame) {
+          if (frame.image_buf) {
+            transferables.push(frame.image_buf);
+          }
+        });
+
+        var result = this.generate_bytes(frames);
+        if (data.return_b64) {
+          result = this.b64.encode(result);
+        }
         self.postMessage({
           command: 'complete',
-          data: this.b64.encode(this.generate_bytes(ev.data))
+          data: {
+            result: result,
+            b64: data.return_b64
+          }
         });
       } catch(ex) {
+        var msg = String(ex);
+        if (msg.length > 100) {
+          msg = msg.slice(0, 100) + ' ...';
+        }
         self.postMessage({
           command: 'error',
-          data: String(ex)
+          data: [
+            'JS error (maybe bug)',
+            '',
+            msg,
+            '',
+            'Stack:',
+            ex.stack
+          ].join('\n')
         });
       }
     },
@@ -284,7 +343,7 @@
 
         var worker, objurl;
 
-        if (w.URL) {
+        if (w.Blob && w.URL) {
           var blob = new w.Blob(code, {type: 'application/javascript'});
           objurl = w.URL.createObjectURL(blob);
           worker = new w.Worker(objurl);
@@ -309,7 +368,7 @@
             onerror(data.data);
             end();
           } else if (data.command === 'complete') {
-            oncomplete('data:image/png;base64,' + data.data);
+            oncomplete(data.data.result, data.data.b64);
             end();
           }
         };
@@ -319,7 +378,10 @@
           end();
         };
 
-        worker.postMessage(frames, transferables);
+        worker.postMessage({
+          frames: frames,
+          return_b64: !(w.Blob && w.URL)
+        }, transferables);
       }, function(msg) {
         onerror(msg);
       }, onprogress);
@@ -362,12 +424,11 @@
           var reader = new w.FileReader();
 
           reader.onload = function() {
-            var ui8ary = new Uint8Array(reader.result);
             frames_new.push({
               delay: frame.delay,
-              image_ary: ui8ary
+              image_buf: reader.result
             });
-            transferables.push(ui8ary.buffer);
+            transferables.push(reader.result);
 
             onprogress(++prog, prog_max);
 
@@ -413,13 +474,13 @@
         [0x61, 0x63, 0x54, 0x4c], // acTL
         [
           this.uint32(frames.length),
-          [0, 0, 0, 0] // loop count
+          this.uint32(0) // loop count
         ]
       );
 
       this.seq_num = 0;
 
-      var data = [[137, 80, 78, 71, 13, 10, 26, 10]];
+      var data = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])];
       for(var i = 0; i < frames.length; ++i) {
         var frame = this.make_frame(frames[i], i === 0 ? acTL : null);
         data = data.concat(frame);
@@ -432,23 +493,27 @@
     },
 
     uint32: function(value) {
-      return [(value >> 24) & 0xff,
-              (value >> 16) & 0xff,
-              (value >>  8) & 0xff,
-              (value >>  0) & 0xff];
+      return new Uint8Array([
+        (value >> 24) & 0xff,
+        (value >> 16) & 0xff,
+        (value >>  8) & 0xff,
+        (value >>  0) & 0xff
+      ]);
     },
 
     uint16: function(value) {
-      return [(value >> 8) & 0xff,
-              (value >> 0) & 0xff];
+      return new Uint8Array([
+        (value >> 8) & 0xff,
+        (value >> 0) & 0xff
+      ]);
     },
 
     pack_chunk: function(type, bodies) {
       return [
         this.uint32(bodies.reduce(function(a, b) {
-          return a + b.length;
+          return a + b.byteLength;
         }, 0)),
-        type
+        new Uint8Array(type)
       ].concat(bodies).concat([
         this.uint32(this.crc.calc([type].concat(bodies)))
       ]);
@@ -471,8 +536,8 @@
        */
 
       var data;
-      if (frame.image_ary) {
-        data = frame.image_ary;
+      if (frame.image_buf) {
+        data = new Uint8Array(frame.image_buf);
       } else {
         data = this.b64.decode(frame.image_b64);
       }
@@ -540,12 +605,12 @@
         [
           this.uint32(this.seq_num++),
           IHDR.data.subarray(0, 8), // width, height
-          [0, 0, 0, 0,  // x_offset
-           0, 0, 0, 0], // y_offset
+          this.uint32(0), // x_offset
+          this.uint32(0), // y_offset
           this.uint16(frame.delay), // delay_num
           this.uint16(1000), // delay_den (1000 means that delay_num is millisecond)
 
-          [
+          new Uint8Array([
             // dispose_op:
             //   0 APNG_DISPOSE_OP_NONE
             //   1 APNG_DISPOSE_OP_BACKGROUND
@@ -556,7 +621,7 @@
             //   0 APNG_BLEND_OP_SOURCE
             //   1 APNG_BLEND_OP_OVER
             0
-          ]
+          ])
         ]
       );
 
