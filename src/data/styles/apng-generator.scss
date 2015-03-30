@@ -1,4 +1,4 @@
-#pp-apng-generator {
+.pp-apng-generator {
   text-align: center;
 
   .pp-dialog-content {
@@ -33,7 +33,8 @@
   }
 
   &:not(.pp-done) {
-    #pp-apng-generator-preview {
+    #pp-apng-generator-preview,
+    .pp-dialog-action-download {
       display: none;
     }
   }
@@ -44,16 +45,9 @@
     }
   }
 
-  &:not(.pp-done):not(.pp-error) {
-    #pp-apng-generator-close {
-      display: none;
-    }
-  }
-
   &.pp-done, &.pp-error {
     #pp-apng-generator-warning,
-    #pp-apng-generator-generate,
-    #pp-apng-generator-cancel {
+    .pp-popup-action-generate {
       display: none;
     }
   }

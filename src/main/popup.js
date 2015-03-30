@@ -1094,7 +1094,7 @@ _.popup = {
     }
 
     var that = this;
-    _.apng.dialog.open(
+    var dialog = new _.apng.Dialog(
       that.illust,
       function() {
         var player = that.illust.ugoira_player;
@@ -1108,8 +1108,9 @@ _.popup = {
             image: player._frameImages[idx]
           };
         });
-      },
-      this.dom.root
+      }
     );
+
+    dialog.open(this.dom.root, {centerize: 'both'});
   }
 };

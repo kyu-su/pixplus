@@ -1,6 +1,130 @@
 (function(generator) {
   _.apng = generator();
   _.apng.__mod_generator = generator;
+
+  var APNGDialog = function(illust, get_frames) {
+    _.Dialog.call(this, {title: _.lng.apng.title, cls: 'pp-apng-generator'});
+    this.illust = illust;
+    this.get_frames = get_frames;
+    this.init();
+  };
+
+  _.extend(APNGDialog.prototype, _.Dialog.prototype, {
+    init: function() {
+      var dom = this.dom;
+      dom.progressbar = _.e('div', {cls: 'pp-progress-bar'}, dom.content);
+      dom.progress = _.e('div', {cls: 'pp-progress'}, dom.progressbar);
+      dom.error = _.e('div', {id: 'pp-apng-generator-error'}, dom.content);
+      dom.preview = new w.Image();
+      dom.preview.id = 'pp-apng-generator-preview';
+      dom.content.appendChild(dom.preview);
+      dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
+      dom.preparing = _.e('div', {id: 'pp-apng-generator-preparing', text: _.lng.apng.preparing}, dom.content);
+      dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
+
+      _.listen(dom.preview, 'load', function() {
+        _.modal.centerize();
+      });
+
+      var that = this;
+      dom.generate = this.add_action('generate', {
+        text: _.lng.apng.generate,
+        callback: this.generate.bind(this)
+      });
+
+      dom.dl_link = this.add_action('download', {
+        text: _.lng.apng.download,
+        type: 'link'
+      });
+
+      this.add_action('close');
+
+      var retry = function() {
+        that.frames = that.get_frames();
+        if (that.frames) {
+          that.dom.root.classList.remove('pp-preparing');
+        } else {
+          that.dom.root.classList.add('pp-preparing');
+          w.setTimeout(retry, 1000);
+        }
+        that.dom.generate[(that.frames ? 'remove' : 'set') + 'Attribute']('disabled', '');
+      };
+      retry();
+    },
+
+    generate: function() {
+      this.dom.generate.setAttribute('disabled', '');
+      try {
+        _.apng.generate(
+          this.frames,
+          this.oncomplete.bind(this),
+          this.onerror.bind(this),
+          this.onprogress.bind(this)
+        );
+      } catch(ex) {
+        var msg = String(ex);
+        if (msg.length > 100) {
+          msg = msg.slice(0, 100) + ' ...';
+        }
+        this.onerror([
+          msg,
+          '',
+          'Stack:',
+          ex.stack
+        ].join('\n'));
+      }
+    },
+
+    onprogress: function(curr, max) {
+      this.dom.progress.style.width =
+        g.Math.floor(this.dom.progressbar.clientWidth * curr / max) + 'px';
+    },
+
+    onerror: function(msg) {
+      this.dom.error.textContent = (msg || 'Unknown error');
+      this.dom.root.classList.add('pp-error');
+      _.modal.centerize();
+    },
+
+    oncomplete: function(result, b64) {
+      var dom = this.dom;
+      if (b64) {
+        dom.preview.src = 'data:image/png;base64,' + result;
+        dom.howtosave.classList.add('pp-show');
+      } else {
+        var dl_filename = [
+          this.illust.author_id,
+          this.illust.id,
+          this.illust.author_name,
+          this.illust.title
+        ].join(' ') + '.png';
+
+        var blob = new w.Blob(result, {type: 'image/png'});
+        this.object_url = w.URL.createObjectURL(blob);
+        this.dom.preview.src = this.object_url;
+        this.dom.dl_link.href = this.object_url;
+        this.dom.dl_link.setAttribute('download', dl_filename);
+        this.dom.dl_link.classList.remove('pp-hide');
+        dom.howtosave.classList.remove('pp-show');
+      }
+      this.dom.root.classList.add('pp-done');
+    },
+
+    revoke_object_url: function() {
+      if (this.object_url) {
+        w.URL.revokeObjectURL(this.object_url);
+        delete this.object_url;
+      }
+    },
+
+    onclose: function() {
+      _.Dialog.prototype.onclose.call(this);
+      this.revoke_object_url();
+    }
+  });
+
+  _.apng.Dialog = APNGDialog;
+
 })(function() {
   return {
     crc: {
@@ -150,141 +274,6 @@
       }
     },
 
-    dialog: {
-      dom: {},
-
-      create: function() {
-        if (this.dom.root) {
-          return;
-        }
-
-        var dom = this.dom;
-        dom.root = _.e('div', {id: 'pp-apng-generator', cls: 'pp-dialog'});
-        dom.title = _.e('div', {text: _.lng.apng.title, cls: 'pp-dialog-title'}, dom.root);
-        dom.content = _.e('div', {cls: 'pp-dialog-content'}, dom.root);
-        dom.progressbar = _.e('div', {cls: 'pp-progress-bar'}, dom.content);
-        dom.progress = _.e('div', {cls: 'pp-progress'}, dom.progressbar);
-        dom.error = _.e('div', {id: 'pp-apng-generator-error'}, dom.content);
-        dom.preview = new w.Image();
-        dom.preview.id = 'pp-apng-generator-preview';
-        dom.content.appendChild(dom.preview);
-        dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
-        dom.preparing = _.e('div', {id: 'pp-apng-generator-preparing', text: _.lng.apng.preparing}, dom.content);
-        dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
-        dom.actions = _.e('div', {cls: 'pp-dialog-actions'}, dom.content);
-        dom.generate = _.e('button', {text: _.lng.apng.generate, id: 'pp-apng-generator-generate'}, dom.actions);
-        dom.cancel = _.e('button', {text: _.lng.apng.cancel, id: 'pp-apng-generator-cancel'}, dom.actions);
-        dom.dl_link = _.e('a', null, dom.actions);
-        dom.download = _.e('button', {text: _.lng.apng.download}, dom.dl_link);
-        dom.close = _.e('button', {text: _.lng.apng.close, id: 'pp-apng-generator-close'}, dom.actions);
-
-        _.listen(this.dom.preview, 'load', function() {
-          _.modal.centerize();
-        });
-
-        var that = this;
-
-        _.listen(dom.generate, 'click', function() {
-          dom.generate.setAttribute('disabled', '');
-          try {
-            _.apng.generate(
-              that.frames,
-              that.oncomplete.bind(that),
-              that.onerror.bind(that),
-              that.onprogress.bind(that)
-            );
-          } catch(ex) {
-            that.onerror(String(ex));
-          }
-        });
-
-        _.listen([dom.cancel, dom.close], 'click', function() {
-          _.modal.end(dom.root);
-        });
-      },
-
-      onprogress: function(curr, max) {
-        this.dom.progress.style.width =
-          g.Math.floor(this.dom.progressbar.clientWidth * curr / max) + 'px';
-      },
-
-      onerror: function(msg) {
-        this.dom.error.textContent = 'Error: ' + (msg || 'Unknown error');
-        this.dom.root.classList.add('pp-error');
-        _.modal.centerize();
-      },
-
-      oncomplete: function(result, b64) {
-        var dom = this.dom;
-        if (b64) {
-          dom.preview.src = 'data:image/png;base64,' + result;
-          dom.howtosave.classList.add('pp-show');
-        } else {
-          var dl_filename = [
-            this.illust.author_id,
-            this.illust.id,
-            this.illust.author_name,
-            this.illust.title
-          ].join(' ') + '.png';
-
-          var blob = new w.Blob(result, {type: 'image/png'});
-          this.object_url = w.URL.createObjectURL(blob);
-          this.dom.preview.src = this.object_url;
-          this.dom.dl_link.href = this.object_url;
-          this.dom.dl_link.setAttribute('download', dl_filename);
-          this.dom.dl_link.classList.remove('pp-hide');
-          dom.howtosave.classList.remove('pp-show');
-        }
-        this.dom.root.classList.add('pp-done');
-      },
-
-      revoke_object_url: function() {
-        if (this.object_url) {
-          w.URL.revokeObjectURL(this.object_url);
-          delete this.object_url;
-        }
-      },
-
-      open: function(illust, get_frames, parent) {
-        this.create();
-
-        this.illust = illust;
-
-        this.dom.progress.style.width = '0px';
-        this.dom.preview.src = '';
-        this.dom.root.classList.remove('pp-done');
-        this.dom.root.classList.remove('pp-error');
-        this.dom.dl_link.classList.add('pp-hide');
-
-        d.body.appendChild(this.dom.root);
-        _.modal.begin(this.dom.root, {
-          onclose: this.close.bind(this),
-          centerize: 'both',
-          parent: parent
-        });
-
-        var that = this;
-        var retry = function() {
-          that.frames = get_frames();
-          if (that.frames) {
-            that.dom.root.classList.remove('pp-preparing');
-          } else {
-            that.dom.root.classList.add('pp-preparing');
-            w.setTimeout(retry, 1000);
-          }
-          that.dom.generate[(that.frames ? 'remove' : 'set') + 'Attribute']('disabled', '');
-        };
-        retry();
-      },
-
-      close: function() {
-        this.revoke_object_url();
-        if (this.dom.root.parentNode) {
-          this.dom.root.parentNode.removeChild(this.dom.root);
-        }
-      }
-    },
-
     onmessage: function(ev) {
       try {
         var data = ev.data;
@@ -315,8 +304,6 @@
         self.postMessage({
           command: 'error',
           data: [
-            'JS error (maybe bug)',
-            '',
             msg,
             '',
             'Stack:',

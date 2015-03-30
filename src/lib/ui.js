@@ -435,11 +435,11 @@ _.extend(_.Dialog.prototype, {
     }
   },
 
-  open: function(parent_dialog, options) {
+  open: function(parent, options) {
     d.body.appendChild(this.dom.root);
     _.modal.begin(this.dom.root, _.extend({
       onclose: this.onclose.bind(this),
-      parent: parent_dialog
+      parent: parent
     }, options));
   },
 
