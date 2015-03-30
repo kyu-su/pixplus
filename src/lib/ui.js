@@ -165,7 +165,7 @@ _.modal = {
           return true;
         }
         return false;
-      });
+      }, {capture: true});
     }
 
     if (!this.conn_click) {
