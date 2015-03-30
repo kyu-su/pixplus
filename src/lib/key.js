@@ -8,10 +8,6 @@ _.key = {
     ' ': 'Space',
     '\t': 'Tab'
   },
-  global: {
-    connection: null,
-    handlers: []
-  },
 
   parse_event: function(ev) {
     var keys = [], key, chr = ev['char'];
@@ -65,41 +61,6 @@ _.key = {
       }
       return res;
     }, options);
-  },
-
-  listen_global: function(listener) {
-    var that = this;
-
-    if (!this.global.connection) {
-      _.debug('key.listen_global: begin');
-
-      this.global.connection = this.listen(w, function() {
-        for(var i = 0; i < that.global.handlers.length; ++i) {
-          var ret = that.global.handlers[i].apply(this, arguments);
-          if (ret) {
-            return ret;
-          }
-        }
-        return false;
-      }, {capture: true});
-    }
-
-    this.global.handlers.unshift(listener);
-
-    return {
-      disconnect: function() {
-        var idx = that.global.handlers.indexOf(listener);
-        if (idx >= 0) {
-          that.global.handlers.splice(idx, 1);
-        }
-        if (that.global.handlers.length === 0) {
-          that.global.connection.disconnect();
-          that.global.connection = null;
-
-          _.debug('key.listen_global: end');
-        }
-      }
-    };
   },
 
   init: function() {

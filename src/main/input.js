@@ -218,11 +218,6 @@ _.popup.input = (function(mod) {
     return true;
   },
 
-  close: function() {
-    _.popup.hide();
-    return true;
-  },
-
   open: function() {
     _.open(_.popup.illust.url_medium);
     return true;

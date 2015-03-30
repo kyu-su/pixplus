@@ -42,7 +42,6 @@ _.popup.key = {
     'caption_scroll_up',
     'caption_scroll_down',
     'switch_resize_mode',
-    'close',
 
     'rate01',
     'rate02',
@@ -70,47 +69,34 @@ _.popup.key = {
     'comment_toggle'
   ],
 
-  activate: function() {
-    if (this.conn) {
-      return;
-    }
-
+  onkey: function(key, ev) {
     var that = this;
 
-    this.conn = _.key.listen_global(function(key, ev, connection) {
-      if (!_.popup.running || !_.key_enabled(ev)) {
-        return false;
-      }
-
-      var cancel = false;
-
-      for(var i = 0; i < that.keys.length; ++i) {
-        var item = that.keys[i];
-
-        if (item instanceof g.Function) {
-          if (item.call(_.popup.input)) {
-            break;
-          }
-          continue;
-        }
-
-        if (_.conf.key['popup_' + item].split(',').indexOf(key) >= 0) {
-          var action = _.popup.input[item];
-          cancel = true;
-          if (action.call(_.popup.input)) {
-            break;
-          }
-        }
-      }
-
-      return cancel;
-    });
-  },
-
-  inactivate: function() {
-    if (this.conn) {
-      this.conn.disconnect();
-      this.conn = null;
+    if (!_.popup.running || !_.key_enabled(ev)) {
+      return false;
     }
+
+    var cancel = false;
+
+    for(var i = 0; i < that.keys.length; ++i) {
+      var item = that.keys[i];
+
+      if (item instanceof g.Function) {
+        if (item.call(_.popup.input)) {
+          break;
+        }
+        continue;
+      }
+
+      if (_.conf.key['popup_' + item].split(',').indexOf(key) >= 0) {
+        var action = _.popup.input[item];
+        if (action.call(_.popup.input)) {
+          cancel = true;
+          break;
+        }
+      }
+    }
+
+    return cancel;
   }
 };

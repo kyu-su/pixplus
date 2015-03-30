@@ -97,7 +97,7 @@ _.popup = {
     })();
 
 
-    this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn);
+    this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn, this.dom.root);
     this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
       if (checked) {
         that.comment.show_form();
@@ -109,7 +109,7 @@ _.popup = {
 
 
 
-    this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg);
+    this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg, this.dom.root);
 
     this.ugoira_menu.add(
       'play-pause', _.lng.ugoira_play_pause,
@@ -468,10 +468,8 @@ _.popup = {
       }
     }
 
-    root.style.left = g.Math.floor((de.clientWidth  - root.offsetWidth)  / 2) + 'px';
-    root.style.top  = g.Math.floor((de.clientHeight - root.offsetHeight) / 2) + 'px';
-
     this.update_info();
+    _.modal.centerize();
   },
 
   update_info: function() {
@@ -863,6 +861,28 @@ _.popup = {
     }
   },
 
+  onclose: function() {
+    if (!this.running) {
+      return;
+    }
+
+    if (this.saved_context) {
+      _.debug('restoring pixiv.context');
+      w.pixiv.context = this.saved_context;
+    } else {
+      _.error('pixiv.context not saved (bug)');
+    }
+
+    var dom = this.dom;
+    if (dom.root.parentNode) {
+      dom.root.parentNode.removeChild(dom.root);
+    }
+    this.clear();
+    this.dom.header.classList.remove('pp-hide');
+    this.dom.header.classList.remove('pp-show');
+    this.running = false;
+  },
+
   show: function(illust) {
     if (!this.saved_context) {
       _.debug('saving pixiv.context');
@@ -874,8 +894,6 @@ _.popup = {
       this.hide();
       return;
     }
-
-    _.modal.end();
 
     if (this.bookmark.active) {
       this.bookmark.end();
@@ -903,7 +921,16 @@ _.popup = {
     if (!dom.root.parentNode) {
       d.body.insertBefore(dom.root, d.body.firstChild);
     }
-    _.popup.key.activate();
+
+    _.modal.end();
+    _.modal.begin(
+      this.dom.root,
+      {
+        onclose: this.onclose.bind(this),
+        onkey: this.key.onkey.bind(this.key),
+        centerize: 'both'
+      }
+    );
 
     this.resize_mode = this.RM_AUTO;
     if (illust.loaded) {
@@ -926,27 +953,7 @@ _.popup = {
   },
 
   hide: function() {
-    _.popup.key.inactivate();
-
-    if (!this.running) {
-      return;
-    }
-
-    if (this.saved_context) {
-      _.debug('restoring pixiv.context');
-      w.pixiv.context = this.saved_context;
-    } else {
-      _.error('pixiv.context not saved (bug)');
-    }
-
-    var dom = this.dom;
-    if (dom.root.parentNode) {
-      dom.root.parentNode.removeChild(dom.root);
-    }
-    this.clear();
-    this.dom.header.classList.remove('pp-hide');
-    this.dom.header.classList.remove('pp-show');
-    this.running = false;
+    _.modal.end(this.dom.root);
   },
 
   reload: function() {
@@ -1101,7 +1108,8 @@ _.popup = {
             image: player._frameImages[idx]
           };
         });
-      }
+      },
+      this.dom.root
     );
   }
 };

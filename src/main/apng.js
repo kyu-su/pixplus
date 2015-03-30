@@ -245,7 +245,7 @@
         }
       },
 
-      open: function(illust, get_frames) {
+      open: function(illust, get_frames, parent) {
         this.create();
 
         this.illust = illust;
@@ -259,7 +259,8 @@
         d.body.appendChild(this.dom.root);
         _.modal.begin(this.dom.root, {
           onclose: this.close.bind(this),
-          centerize: 'both'
+          centerize: 'both',
+          parent: parent
         });
 
         var that = this;
