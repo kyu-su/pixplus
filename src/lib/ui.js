@@ -93,11 +93,15 @@ _.modal = {
   },
 
   begin: function(container, options) {
+    var that = this;
+
     if (this.dialog && container === this.dialog.container) {
       return;
     }
 
-    var that = this;
+    if (!options) {
+      options = {};
+    }
 
     while(this.dialog && this.dialog.container !== options.parent) {
       this.close();
@@ -114,7 +118,7 @@ _.modal = {
     this.dialog = {
       parent: this.dialog,
       container: container,
-      options: options || { }
+      options: options
     };
 
     this.centerize();
@@ -160,7 +164,9 @@ _.modal = {
           }
         }
 
-        if (!that.suspend && _.conf.key.popup_close.split(',').indexOf(key) >= 0) {
+        if (!that.suspend &&
+            _.key_enabled(ev) &&
+            _.conf.key.popup_close.split(',').indexOf(key) >= 0) {
           that.close();
           return true;
         }
