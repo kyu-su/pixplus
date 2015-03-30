@@ -82,6 +82,12 @@ _.modal = {
         container.style.top  = g.Math.floor(y) + 'px';
       }
 
+      if (options.top_left_of) {
+        var rect = options.top_left_of.getBoundingClientRect();
+        container.style.left = (rect.left - container.offsetWidth) + 'px';
+        container.style.top = rect.top + 'px';
+      }
+
       dlg = dlg.parent;
     }
   },
@@ -147,8 +153,14 @@ _.modal = {
   set_event_listeners: function() {
     var that = this;
     if (!this.conn_key) {
-      this.conn_key = _.key.listen_global(function(key) {
-        if (!that.suspend && key === 'Escape') {
+      this.conn_key = _.key.listen(w, function(key, ev) {
+        if (that.dialog.options.onkey) {
+          if (that.dialog.options.onkey(key, ev)) {
+            return true;
+          }
+        }
+
+        if (!that.suspend && _.conf.key.popup_close.split(',').indexOf(key) >= 0) {
           that.close();
           return true;
         }
@@ -209,12 +221,13 @@ _.modal = {
   }
 };
 
-_.PopupMenu = function(button) {
+_.PopupMenu = function(button, parent) {
   this.dom = { };
-  this.dom.root = _.e('div', {cls: 'pp-popup-menu'});
+  this.dom.root = _.e('div', {cls: 'pp-popup-menu pp-toplevel'});
   this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
   this.button = button;
   this.onopen = [];
+  this.parent = parent;
 
   var that = this;
   _.onclick(button, function() {
@@ -320,7 +333,8 @@ _.extend(_.PopupMenu.prototype, {
           root.parentNode.removeChild(root);
           that.button.classList.remove('pp-active');
         }
-      }
+      },
+      parent: this.parent
     };
 
     if (button) {
@@ -347,5 +361,82 @@ _.extend(_.PopupMenu.prototype, {
     if (this.dom.root.parentNode) {
       _.modal.end(this.dom.root);
     }
+  }
+});
+
+_.Dialog = function(options) {
+  if (!options) {
+    options = {};
+  }
+
+  this.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
+
+  if (options.title) {
+    _.e('div', {cls: 'pp-dialog-title', text: options.title}, this.root);
+  }
+
+  this.content = _.e('div', {cls: 'pp-dialog-content'}, this.root);
+};
+
+_.extend(_.Dialog.prototype, {
+  default_actions: {
+    close: function() {
+      this.close();
+    }
+  },
+
+  add_action: function(name, options) {
+    var that = this;
+
+    if (!options) {
+      options = {};
+    }
+
+    if (!options.text && _.lng.dialog[name]) {
+      options.text = _.lng.dialog[name];
+    }
+
+    if (!this.actions) {
+      this.actions = _.e('div', {cls: 'pp-dialog-actions'}, this.root);
+    }
+
+    var btn = _.e('button', {text: options.text}), ret = btn;
+
+    if (options.type === 'link') {
+      ret = _.e('a', null, this.actions);
+      ret.appendChild(btn);
+    } else {
+      this.actions.appendChild(btn);
+    }
+
+    if (!options.callback) {
+      options.callback = this.default_actions[name];
+    }
+
+    if (options.callback) {
+      _.listen(btn, 'click', function() {
+        options.callback.call(that, name);
+      });
+    }
+
+    return ret;
+  },
+
+  onclose: function() {
+    if (this.root.parentNode) {
+      this.root.parentNode.removeChild(this.root);
+    }
+  },
+
+  open: function(parent_dialog, options) {
+    d.body.appendChild(this.root);
+    _.modal.begin(this.root, _.extend({
+      onclose: this.onclose.bind(this),
+      parent: parent_dialog
+    }, options));
+  },
+
+  close: function() {
+    _.modal.end(this.root);
   }
 });

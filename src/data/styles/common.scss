@@ -1,26 +1,29 @@
 .pp-control {
   border: 1px solid #becad8;
   border-radius: 2px;
-  margin: 0.2em 0px;
   padding: 0.1em 0.3em;
+  margin: 0.2em;
 }
 
-.pp-checkbox {
-  @extend .pp-control;
-  padding: 1px;
-}
-
-.pp-button {
-  @extend .pp-control;
-
-  white-space: nowrap;
-  background-color: #f2f4f6;
-
-  &:hover {
-    background-color: #ddeaf6;
+.pp-toplevel {
+  input, button, select, textarea {
+    @extend .pp-control;
   }
-  &:active {
-    background-color: #becad8;
+
+  input[type="checkbox"] {
+    padding: 1px;
+  }
+
+  button {
+    white-space: nowrap;
+    background-color: #f2f4f6;
+
+    &:hover {
+      background-color: #ddeaf6;
+    }
+    &:active {
+      background-color: #becad8;
+    }
   }
 }
 
@@ -124,10 +127,6 @@ input.pp-flat-input {
   border: 0.3em solid #6082a1;
   box-shadow: 0px 0px 1em 0.2em rgba(0, 0, 0, 0.6);
 
-  button {
-    @extend .pp-button;
-  }
-
   .pp-dialog-title {
     background-color: #6082a1;
     padding: 0.2em 0.4em;
@@ -139,8 +138,10 @@ input.pp-flat-input {
   .pp-dialog-actions {
     text-align: center;
 
-    > * + * {
-      margin-left: 0.2em;
+    >a, >button {
+      +a, +button {
+        margin-left: 0.2em;
+      }
     }
   }
 }
