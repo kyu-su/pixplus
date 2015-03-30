@@ -459,19 +459,19 @@ _.configui = {
 
   _.extend(Key.prototype, Base.prototype, {
     init: function() {
-      this.list = _.e('ul', null, this.content);
+      var that = this, dom = this.dom;
 
-      var that = this;
+      dom.list = _.e('ul', null, dom.content);
 
-      this.add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, this.content);
-      _.key.listen(this.add_input, function(key) {
-        that.add_input.value = key;
+      dom.add_input = _.e('input', {'placeholder': 'Grab key', cls: 'pp-config-key-editor-grab'}, dom.content);
+      _.key.listen(dom.add_input, function(key) {
+        dom.add_input.value = key;
         return true;
       });
 
       this.add_action('add', {callback: function() {
-        that.add(that.add_input.value);
-        that.add_input.value = '';
+        that.add(dom.add_input.value);
+        dom.add_input.value = '';
         that.apply();
       }});
 
@@ -479,13 +479,13 @@ _.configui = {
     },
 
     update: function(value) {
-      _.clear(this.list);
+      _.clear(this.dom.list);
       value.split(',').forEach(this.add.bind(this));
     },
 
     add: function(key) {
       var that = this;
-      var li = _.e('li', null, this.list);
+      var li = _.e('li', null, this.dom.list);
       _.onclick(_.e('button', {text: '\u2715'}, li), function() {
         li.parentNode.removeChild(li);
         that.apply();
@@ -495,7 +495,7 @@ _.configui = {
 
     apply: function() {
       var keys = [];
-      _.qa('li label', this.list).forEach(function(key) {
+      _.qa('li label', this.dom.list).forEach(function(key) {
         keys.push(key.textContent);
       });
       this.change(keys.join(','));
@@ -535,21 +535,21 @@ _.configui = {
     ],
 
     init: function() {
-      var that = this;
+      var that = this, dom = this.dom;
 
-      this.textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, this.content);
-      _.listen(this.textarea, 'input', function() {
-        that.src_input.value = that.textarea.value;
-        that.check(that.textarea.value);
+      dom.textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, dom.content);
+      _.listen(dom.textarea, 'input', function() {
+        that.src_input.value = dom.textarea.value;
+        that.check(dom.textarea.value);
       });
 
-      this.list = _.e('ul', null, this.content);
-      this.status = _.e('li', {cls: 'pp-config-regexp-editor-status'}, this.list);
+      dom.list = _.e('ul', null, dom.content);
+      dom.status = _.e('li', {cls: 'pp-config-regexp-editor-status'}, dom.list);
 
-      this.pagecheck_table = _.e('table', null, this.content);
+      dom.pagecheck_table = _.e('table', null, dom.content);
 
       this.paths.forEach(function(path) {
-        var row = that.pagecheck_table.insertRow(-1);
+        var row = dom.pagecheck_table.insertRow(-1);
         _.e('a', {href: path, text: path, target: '_blank'}, row.insertCell(-1));
 
         var cell = row.insertCell(-1);
@@ -559,7 +559,7 @@ _.configui = {
     },
 
     update: function(value) {
-      this.textarea.value = value;
+      this.dom.textarea.value = value;
       this.check(value);
     },
 
@@ -571,11 +571,12 @@ _.configui = {
         valid = false;
       }
 
-      this.status.classList[valid ? 'add' : 'remove']('pp-yes');
-      this.status.classList[valid ? 'remove' : 'add']('pp-no');
-      this.status.textContent = valid ? this.lang.pref.regex_valid : this.lang.pref.regex_invalid;
+      var dom = this.dom;
+      dom.status.classList[valid ? 'add' : 'remove']('pp-yes');
+      dom.status.classList[valid ? 'remove' : 'add']('pp-no');
+      dom.status.textContent = valid ? this.lang.pref.regex_valid : this.lang.pref.regex_invalid;
 
-      _.qa('*[data-path]', this.pagecheck_table).forEach(function(status) {
+      _.qa('*[data-path]', dom.pagecheck_table).forEach(function(status) {
         var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
         status.classList[yes ? 'add' : 'remove']('pp-yes');
         status.classList[yes ? 'remove' : 'add']('pp-no');

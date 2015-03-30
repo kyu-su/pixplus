@@ -369,24 +369,29 @@ _.Dialog = function(options) {
     options = {};
   }
 
-  this.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
+  var dom = this.dom = {};
+
+  dom.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
 
   if (options.title) {
-    _.e('div', {cls: 'pp-dialog-title', text: options.title}, this.root);
+    _.e('div', {cls: 'pp-dialog-title', text: options.title}, dom.root);
   }
 
-  this.content = _.e('div', {cls: 'pp-dialog-content'}, this.root);
+  dom.content = _.e('div', {cls: 'pp-dialog-content'}, dom.root);
 };
 
 _.extend(_.Dialog.prototype, {
   default_actions: {
     close: function() {
       this.close();
+    },
+    cancel: function() {
+      this.close();
     }
   },
 
   add_action: function(name, options) {
-    var that = this;
+    var that = this, dom = this.dom;
 
     if (!options) {
       options = {};
@@ -396,18 +401,20 @@ _.extend(_.Dialog.prototype, {
       options.text = _.lng.dialog[name];
     }
 
-    if (!this.actions) {
-      this.actions = _.e('div', {cls: 'pp-dialog-actions'}, this.root);
+    if (!dom.actions) {
+      dom.actions = _.e('div', {cls: 'pp-dialog-actions'}, dom.root);
     }
 
     var btn = _.e('button', {text: options.text}), ret = btn;
 
     if (options.type === 'link') {
-      ret = _.e('a', null, this.actions);
+      ret = _.e('a', null, dom.actions);
       ret.appendChild(btn);
     } else {
-      this.actions.appendChild(btn);
+      dom.actions.appendChild(btn);
     }
+
+    ret.className = 'pp-dialog-action pp-dialog-action-' + name;
 
     if (!options.callback) {
       options.callback = this.default_actions[name];
@@ -423,20 +430,20 @@ _.extend(_.Dialog.prototype, {
   },
 
   onclose: function() {
-    if (this.root.parentNode) {
-      this.root.parentNode.removeChild(this.root);
+    if (this.dom.root.parentNode) {
+      this.dom.root.parentNode.removeChild(this.dom.root);
     }
   },
 
   open: function(parent_dialog, options) {
-    d.body.appendChild(this.root);
-    _.modal.begin(this.root, _.extend({
+    d.body.appendChild(this.dom.root);
+    _.modal.begin(this.dom.root, _.extend({
       onclose: this.onclose.bind(this),
       parent: parent_dialog
     }, options));
   },
 
   close: function() {
-    _.modal.end(this.root);
+    _.modal.end(this.dom.root);
   }
 });
