@@ -87,18 +87,6 @@
     display: none;
   }
 
-  input, button, select, textarea {
-    @extend .pp-control;
-  }
-
-  input[type="checkbox"] {
-    @extend .pp-checkbox;
-  }
-
-  button {
-    @extend .pp-button;
-  }
-
   ul {
     padding: 0px;
     margin: 0px;
@@ -256,49 +244,39 @@
   input.pp-active {
     background-color: #ffc;
   }
+}
 
-  .pp-config-editor-wrapper {
-    position: relative;
+.pp-config-regexp-editor {
+  .pp-dialog-content {
+    padding: 0.2em;
   }
 
-  .pp-config-editor {
-    padding: 0.4em;
-    right: 100%;
+  textarea {
+    width: 100%;
+    height: 10em;
+    margin: 0px;
+    box-sizing: border-box;
   }
 
-  .pp-config-regexp-editor {
-    textarea {
-      width: 100%;
-      height: 10em;
-      box-sizing: border-box;
-    }
-    table {
-      white-space: pre;
-    }
+  table {
+    white-space: pre;
+  }
+}
+
+.pp-config-regexp-editor-status {
+  font-weight: bold;
+
+  &.pp-yes {
+    color: green;
   }
 
-  .pp-config-regexp-editor-status {
-    font-weight: bold;
-
-    &.pp-yes {
-      color: green;
-    }
-
-    &.pp-no {
-      color: red;
-    }
+  &.pp-no {
+    color: red;
   }
+}
 
-  .pp-config-key-editor ul button {
-    padding: 0px;
-    margin-right: 0.2em;
-  }
-
-  .pp-config-key-editor-toolbar {
-    margin-top: 0.2em;
-
-    button {
-      margin-left: 0.2em;
-    }
+.pp-config-key-editor {
+  ul {
+    margin: 0.2em;
   }
 }
