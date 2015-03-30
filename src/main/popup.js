@@ -914,17 +914,17 @@ _.popup = {
     this.running = true;
     if (!dom.root.parentNode) {
       d.body.insertBefore(dom.root, d.body.firstChild);
-    }
 
-    _.modal.end();
-    _.modal.begin(
-      this.dom.root,
-      {
-        onclose: this.onclose.bind(this),
-        onkey: this.key.onkey.bind(this.key),
-        centerize: 'both'
-      }
-    );
+      _.modal.end();
+      _.modal.begin(
+        this.dom.root,
+        {
+          onclose: this.onclose.bind(this),
+          onkey: this.key.onkey.bind(this.key),
+          centerize: 'both'
+        }
+      );
+    }
 
     this.resize_mode = this.RM_AUTO;
     if (illust.loaded) {
