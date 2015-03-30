@@ -921,7 +921,8 @@ _.popup = {
         {
           onclose: this.onclose.bind(this),
           onkey: this.key.onkey.bind(this.key),
-          centerize: 'both'
+          centerize: 'both',
+          dont_close_by_click: true
         }
       );
     }

@@ -176,7 +176,7 @@ _.modal = {
 
     if (!this.conn_click) {
       this.conn_click = _.onclick(d, function(ev) {
-        if (that.suspend || !d.body.contains(ev.target)) {
+        if (that.suspend || !d.body.contains(ev.target) || that.dialog.options.dont_close_by_click) {
           return;
         }
 
