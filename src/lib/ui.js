@@ -67,8 +67,8 @@ _.modal = {
   centerize: function() {
     var dlg = this.dialog;
     while(dlg) {
-      var options = this.dialog.options,
-          container = this.dialog.container;
+      var options = dlg.options,
+          container = dlg.container;
 
       var de = d.documentElement, x, y;
 

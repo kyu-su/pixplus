@@ -166,12 +166,6 @@ _.popup = {
 
     this.input.init();
 
-    _.listen(w, 'resize', function() {
-      if (that.running) {
-        that.adjust();
-      }
-    }, {async: true});
-
     dom.created = true;
   },
 
