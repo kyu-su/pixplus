@@ -227,21 +227,21 @@ _.modal = {
   }
 };
 
-_.PopupMenu = function(button, parent) {
-  this.dom = { };
-  this.dom.root = _.e('div', {cls: 'pp-popup-menu pp-toplevel'});
-  this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
-  this.button = button;
-  this.onopen = [];
-  this.parent = parent;
+_.PopupMenu = _.class.create({
+  init: function(button, parent) {
+    this.dom = { };
+    this.dom.root = _.e('div', {cls: 'pp-popup-menu pp-toplevel'});
+    this.dom.list = _.e('ol', {cls: 'pp-popup-menu-items'}, this.dom.root);
+    this.button = button;
+    this.onopen = [];
+    this.parent = parent;
 
-  var that = this;
-  _.onclick(button, function() {
-    that.open(button);
-  });
-};
+    var that = this;
+    _.onclick(button, function() {
+      that.open(button);
+    });
+  },
 
-_.extend(_.PopupMenu.prototype, {
   add: function(name, text, options) {
     if (!options) {
       options = { };
@@ -370,23 +370,23 @@ _.extend(_.PopupMenu.prototype, {
   }
 });
 
-_.Dialog = function(options) {
-  if (!options) {
-    options = {};
-  }
+_.Dialog = _.class.create({
+  init: function(options) {
+    if (!options) {
+      options = {};
+    }
 
-  var dom = this.dom = {};
+    var dom = this.dom = {};
 
-  dom.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
+    dom.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
 
-  if (options.title) {
-    _.e('div', {cls: 'pp-dialog-title', text: options.title}, dom.root);
-  }
+    if (options.title) {
+      _.e('div', {cls: 'pp-dialog-title', text: options.title}, dom.root);
+    }
 
-  dom.content = _.e('div', {cls: 'pp-dialog-content'}, dom.root);
-};
+    dom.content = _.e('div', {cls: 'pp-dialog-content'}, dom.root);
+  },
 
-_.extend(_.Dialog.prototype, {
   default_actions: {
     close: function() {
       this.close();

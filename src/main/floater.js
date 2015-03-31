@@ -1,19 +1,19 @@
-_.Floater = function(wrap, cont, ignore_elements) {
-  this.wrap = wrap;
-  this.cont = cont;
-  this.floating = false;
-  this.disable_float = false;
-  this.disable_float_temp = false;
-  this.use_placeholder = true;
-  this.ignore_elements = ignore_elements || [];
-  _.Floater.instances.push(this);
-  if (_.Floater.initialized) {
-    this.init();
-  }
-};
+_.Floater = _.class.create({
+  init: function(wrap, cont, ignore_elements) {
+    this.wrap = wrap;
+    this.cont = cont;
+    this.floating = false;
+    this.disable_float = false;
+    this.disable_float_temp = false;
+    this.use_placeholder = true;
+    this.ignore_elements = ignore_elements || [];
+    _.Floater.instances.push(this);
+    if (_.Floater.initialized) {
+      this.setup();
+    }
+  },
 
-_.extend(_.Floater.prototype, {
-  init: function() {
+  setup: function() {
     this.wrap.style.boxSizing = 'border-box';
     this.wrap.style.webkitBoxSizing = 'border-box';
     this.wrap.style.MozBoxSizing = 'border-box';

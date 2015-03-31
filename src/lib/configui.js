@@ -422,23 +422,23 @@ _.configui = {
 };
 
 (function() {
-  var Base = function(src_input, lang, type) {
-    _.Dialog.call(this, {cls: 'pp-config-editor pp-config-' + type + '-editor'});
-    this.src_input = src_input;
-    this.lang = lang;
-    this.init();
-    this.update(src_input.value);
-  };
+  var Base = _.class.create(_.Dialog.prototype, {
+    init: function(src_input, lang, type) {
+      Base.super.init.call(this, {cls: 'pp-config-editor pp-config-' + type + '-editor'});
+      this.src_input = src_input;
+      this.lang = lang;
+      this.setup();
+      this.update(src_input.value);
+    },
 
-  _.extend(Base.prototype, _.Dialog.prototype, {
     open: function() {
       this.src_input.classList.add('pp-active');
-      _.Dialog.prototype.open.apply(this, arguments);
+      Base.super.open.apply(this, arguments);
     },
 
     close: function() {
       this.src_input.classList.remove('pp-active');
-      _.Dialog.prototype.close.apply(this, arguments);
+      Base.super.close.apply(this, arguments);
     },
 
     update: function(value) {
@@ -453,12 +453,12 @@ _.configui = {
     }
   });
 
-  var Key = function(src_input, lang) {
-    Base.call(this, src_input, lang, 'key');
-  };
+  var Key = _.class.create(Base.prototype, {
+    init: function(src_input, lang) {
+      Key.super.init.call(this, src_input, lang, 'key');
+    },
 
-  _.extend(Key.prototype, Base.prototype, {
-    init: function() {
+    setup: function() {
       var that = this, dom = this.dom;
 
       dom.list = _.e('ul', null, dom.content);
@@ -502,11 +502,7 @@ _.configui = {
     }
   });
 
-  var Regexp = function(src_input, lang) {
-    Base.call(this, src_input, lang, 'regexp');
-  };
-
-  _.extend(Regexp.prototype, Base.prototype, {
+  var Regexp = _.class.create(Base.prototype, {
     paths: [
       '/mypage.php',
       '/new_illust.php',
@@ -534,7 +530,11 @@ _.configui = {
       '/search_user.php'
     ],
 
-    init: function() {
+    init: function(src_input, lang) {
+      Regexp.super.init.call(this, src_input, lang, 'regexp');
+    },
+
+    setup: function() {
       var that = this, dom = this.dom;
 
       dom.textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, dom.content);

@@ -285,6 +285,20 @@ var _ = w.pixplus = {
     var doc = d.implementation.createHTMLDocument('');
     doc.documentElement.innerHTML = html;
     return doc;
+  },
+
+  class: {
+    create: function() {
+      var constructor = function() {
+        this.init.apply(this, arguments);
+      };
+      _.extend.apply(_, [constructor.prototype].concat(
+        g.Array.prototype.slice.call(arguments)));
+      if (arguments.length >= 2) {
+        constructor.super = arguments[0];
+      }
+      return constructor;
+    }
   }
 };
 

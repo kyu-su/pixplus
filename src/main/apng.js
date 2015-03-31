@@ -2,15 +2,12 @@
   _.apng = generator();
   _.apng.__mod_generator = generator;
 
-  var APNGDialog = function(illust, get_frames) {
-    _.Dialog.call(this, {title: _.lng.apng.title, cls: 'pp-apng-generator'});
-    this.illust = illust;
-    this.get_frames = get_frames;
-    this.init();
-  };
+  var APNGDialog = _.class.create(_.Dialog.prototype, {
+    init: function(illust, get_frames) {
+      APNGDialog.super.init.call(this, {title: _.lng.apng.title, cls: 'pp-apng-generator'});
+      this.illust = illust;
+      this.get_frames = get_frames;
 
-  _.extend(APNGDialog.prototype, _.Dialog.prototype, {
-    init: function() {
       var dom = this.dom;
       dom.progressbar = _.e('div', {cls: 'pp-progress-bar'}, dom.content);
       dom.progress = _.e('div', {cls: 'pp-progress'}, dom.progressbar);
@@ -118,7 +115,7 @@
     },
 
     onclose: function() {
-      _.Dialog.prototype.onclose.call(this);
+      APNGDialog.super.onclose.call(this);
       this.revoke_object_url();
     }
   });
