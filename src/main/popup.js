@@ -202,7 +202,7 @@ _.popup = {
   layout_images: function(max_width, max_height) {
     var that = this;
 
-    var natural_sizes, dom = this.dom;
+    var dom = this.dom;
 
     if (!this.images || this.images.length <= 0) {
       dom.image_layout.style.width  = 'auto';
@@ -210,15 +210,21 @@ _.popup = {
       return;
     }
 
-    natural_sizes = this.images.map(function(img) {
-      return {width: img.naturalWidth, height: img.naturalHeight};
+    var total_height = g.Math.max.apply(
+      g.Math, this.images.map(function(img) {
+        return img.naturalHeight;
+      }));
+
+    var natural_sizes = this.images.map(function(img) {
+      return {
+        width: g.Math.floor(img.naturalWidth * total_height / img.naturalHeight),
+        height: total_height
+      };
     });
 
-    var total_width = 0, total_height = 0;
-    natural_sizes.forEach(function(size) {
-      total_width += size.width;
-      total_height = g.Math.max(total_height, size.height);
-    });
+    var total_width = natural_sizes.reduce(function(w, size) {
+      return w + size.width;
+    }, 0);
 
     // initialize
 
