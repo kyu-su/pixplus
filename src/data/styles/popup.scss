@@ -156,8 +156,11 @@
 
     ._comment-item {
       padding: 0.2em 0px;
-      .comment {
+      &:not(.host-user) .comment {
         padding-right: 0px;
+      }
+      &.host-user .comment {
+        padding-left: 0px;
       }
     }
   }
