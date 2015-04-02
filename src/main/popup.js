@@ -166,6 +166,12 @@ _.popup = {
 
     this.input.init();
 
+    _.listen(w, 'resize', function() {
+      if (that.running) {
+        that.adjust();
+      }
+    }, {async: true});
+
     dom.created = true;
   },
 
@@ -590,7 +596,7 @@ _.popup = {
   set_images: function(images) {
     var dom = this.dom;
     this.images = images;
-    this.adjust();
+    // this.adjust();
     if (dom.image_layout.childElementCount === images.length) {
       this.images.forEach(function(img, idx) {
         dom.image_layout.replaceChild(img, dom.image_layout.children[idx]);
