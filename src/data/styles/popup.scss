@@ -250,19 +250,19 @@
     }
 
     &.pp-fav {
-      width: 14px;
-      height: 14px;
-      background-position: -200px -320px;
+      background-position: 0px -71px;
+      height: 16px;
+      width: 16px;
     }
     &.pp-fav-m{
+      background-position: -172px -32px;
+      height: 16px;
       width: 16px;
-      height: 14px;
-      background-position: -200px -480px;
     }
     &.pp-mypix{
-      width: 14px;
+      background-position: -42px -48px;
       height: 16px;
-      background-position: 0px -360px;
+      width: 16px;
     }
   }
   #pp-popup-author-image:hover~#pp-popup-author-status {
