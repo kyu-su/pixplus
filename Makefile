@@ -225,15 +225,17 @@ $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js 
 	@mkdir -p $(dir $@)
 	@echo '// generated from:' > $@
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
-	@echo '_.css=' >> $@
+	@echo -n '_.css=' >> $@
 	@cat $(wildcard src/data/styles/*.scss) | $(SCSS) --style compressed -I $(BUILD_DIR_ICON) | $(STR2JSON) >> $@
-	@echo ';_.conf.__schema=' >> $@
+	@echo ';'>> $@
+	@echo -n '_.conf.__schema=' >> $@
 	@$(JSON2ASCII) < src/data/config.json >> $@
-	@echo ';_.i18n=' >> $@
+	@echo ';'>> $@
+	@echo -n '_.i18n=' >> $@
 	@$(JSON2ASCII) < src/data/i18n.json >> $@
 	@echo ';' >> $@
 	@cat src/data/i18n.js >> $@
-	@echo '_.changelog=' >> $@
+	@echo -n '_.changelog=' >> $@
 	@$(JSON2ASCII) < $(CHANGELOG_JSON) >> $@
 	@echo ';' >> $@
 
