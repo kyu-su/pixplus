@@ -195,25 +195,25 @@ _.modal = {
       this.conn_resize = _.listen(w, 'resize', this.centerize.bind(this), {async: true});
     }
 
-    if (!this.conn_pixiv_modal_open) {
-      var on_modal_open = function() {
-        that.end();
-      };
-      try {
-        w.colon.d.on('uimodalopen', on_modal_open);
-      } catch(ex) {
-        _.error(ex);
-      }
-      this.conn_pixiv_modal_open = {
-        disconnect: function() {
-          try {
-            w.colon.d.off('uimodalopen', on_modal_open);
-          } catch(ex) {
-            _.error(ex);
-          }
-        }
-      };
-    }
+    // if (!this.conn_pixiv_modal_open) {
+    //   var on_modal_open = function() {
+    //     that.end();
+    //   };
+    //   try {
+    //     w.colon.d.on('uimodalopen', on_modal_open);
+    //   } catch(ex) {
+    //     _.error(ex);
+    //   }
+    //   this.conn_pixiv_modal_open = {
+    //     disconnect: function() {
+    //       try {
+    //         w.colon.d.off('uimodalopen', on_modal_open);
+    //       } catch(ex) {
+    //         _.error(ex);
+    //       }
+    //     }
+    //   };
+    // }
   },
 
   unset_event_listeners: function() {
