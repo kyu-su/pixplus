@@ -157,10 +157,12 @@
     ._comment-item {
       padding: 0.2em 0px;
       &:not(.host-user) .comment {
+        padding-left: 48px;
         padding-right: 0px;
       }
       &.host-user .comment {
         padding-left: 0px;
+        padding-right: 48px;
       }
     }
   }
