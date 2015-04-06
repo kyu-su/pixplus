@@ -31,8 +31,8 @@ BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo
 BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
-VERSION                         = $(shell cat version.txt)
-VERSION_STABLE                  = $(shell $(PYTHON) changelog.py latest_version < $(CHANGELOG_JSON))
+VERSION_DEV                     = $(shell $(PYTHON) changelog.py dev_version < $(CHANGELOG_JSON))
+VERSION_STABLE                  = $(shell $(PYTHON) changelog.py stable_version < $(CHANGELOG_JSON))
 WEBSITE                         = http://ccl4.info/pixplus/
 
 BUILD_DIR                       = $(CURDIR)/temp
@@ -45,7 +45,7 @@ CHANGELOG_MD                    = changelog.md
 RELEASE_ATOM                    = release.atom
 
 DIST_DIR                        = $(CURDIR)/dist
-RELEASE_DIR                     = $(CURDIR)/release/$(VERSION)
+RELEASE_DIR                     = $(CURDIR)/release/$(VERSION_STABLE)
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
 OEX                             = $(DIST_DIR)/pixplus.oex
@@ -122,7 +122,7 @@ RELEASE_FILES = $(RELEASE_TARGETS:$(DIST_DIR)/%=$(RELEASE_DIR)/%)
 all: info $(ALL_TARGETS) changelog
 
 info:
-	@echo 'Version: $(VERSION)'
+	@echo 'Version: $(VERSION_DEV)'
 	@echo 'Website: $(WEBSITE)'
 	@echo 'SVG rasterizer: $(SVG_TO_PNG_CMD)'
 	@echo
@@ -251,9 +251,9 @@ $(DATA_JS): $(BUILD_DIR)/_data.js
 $(GREASEMONKEY_JS): src/wrapper.js $(BUILD_DIR)/_lib.js $(BUILD_DIR)/_main.js $(BUILD_DIR)/_data.js
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@sed -e '/__SRC__/,$$d' -e 's/@VERSION@/$(VERSION)/' src/wrapper.js > $@
+	@sed -e '/__SRC__/,$$d' -e 's/@VERSION@/$(VERSION_DEV)/' src/wrapper.js > $@
 	@cat $(BUILD_DIR)/_lib.js $(BUILD_DIR)/_main.js $(BUILD_DIR)/_data.js >> $@
-	@sed -e '1,/__SRC__/d' -e 's/@VERSION@/$(VERSION)/' src/wrapper.js >> $@
+	@sed -e '1,/__SRC__/d' -e 's/@VERSION@/$(VERSION_DEV)/' src/wrapper.js >> $@
 
 # ================ Opera UserJS ================
 
@@ -276,11 +276,11 @@ $(ICON_FILES_BIG): $(ICON_SVG)
 
 # ================ Opera ================
 
-$(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) version.txt $(CONFIG_JSON)
+$(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(CONFIG_JSON) $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e '/@LICENSE@/,$$d' \
-             -e 's/@VERSION@/$(VERSION)/' \
+             -e 's/@VERSION@/$(VERSION_DEV)/' \
              -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< > $@
 	@echo '  <license>' >> $@
@@ -316,10 +316,10 @@ $(OEX): $(OEX_DIST_FILES)
 
 # ================ Chrome ================
 
-$(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) version.txt
+$(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@sed -e '/@ICONS@/,$$d' \
-             -e 's/@VERSION@/$(VERSION)/' \
+             -e 's/@VERSION@/$(VERSION_DEV)/' \
            < $< | tr -d '\r' > $@
 	@first=1;for size in $(ICON_SIZE); do \
            test $$first -eq 1 && first=0 || echo ',' >> $@; \
@@ -327,7 +327,7 @@ $(CRX_MANIFEST_JSON): $(CRX_MANIFEST_JSON_IN) version.txt
          done
 	@echo >> $@;
 	@sed -e '1,/@ICONS@/d' \
-             -e 's/@VERSION@/$(VERSION)/' \
+             -e 's/@VERSION@/$(VERSION_DEV)/' \
              -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< | tr -d '\r' >> $@
 
@@ -361,10 +361,10 @@ endif
 
 # ================ Safari ================
 
-$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN) version.txt
+$(SAFARIEXTZ_INFO_PLIST): $(SAFARIEXTZ_INFO_PLIST_IN) $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@sed -e 's/@VERSION@/$(VERSION)/' \
+	@sed -e 's/@VERSION@/$(VERSION_DEV)/' \
              -e 's|@WEBSITE@|$(WEBSITE)|' \
            < $< > $@
 

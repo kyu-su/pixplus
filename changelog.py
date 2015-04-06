@@ -2,15 +2,24 @@ import sys
 import re
 import json
 
+def stable(f):
+  def w(changelog):
+    return f(list(filter(lambda v: v['date'], changelog)))
+  return w
+
 def out_json(changelog):
   return [json.dumps(changelog, sort_keys = True, indent = 2)]
 
-def out_latest_version(changelog):
+def out_dev_version(changelog):
+  return [changelog[0]['version']]
+
+@stable
+def out_stable_version(changelog):
   return [changelog[0]['version']]
 
 i18n = {
   'changes': {'ja': u'\u5909\u66f4\u70b9', 'en': 'Changes'}
-  }
+}
 
 def atom_changes(changes):
   out = ['<ul>']
@@ -23,6 +32,7 @@ def atom_changes(changes):
 def make_atom_time(version):
   return '%sT00:00:00.000Z' % version['date'].replace('/', '-')
 
+@stable
 def out_atom(changelog):
   out = []
 
@@ -86,6 +96,7 @@ def markdown_escape(text):
   text = text.replace('*', '\\*')
   return text
 
+@stable
 def out_markdown(changelog):
   out = ['''
 pixplus version history

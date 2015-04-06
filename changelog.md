@@ -1,12 +1,6 @@
 pixplus version history
 =======================
 
-## [1.13.5 - 2015/xx/xx]()
-
-* [Fix] Begin using of MutationObserver. (MutationEvents warnings disappeared)
-* [Change] Improve comment area layout. (make white spaces narrow)
-* [Change][Opera12] Improve Presto Opera support.
-
 ## [1.13.4 - 2015/01/01](http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4)
 
 ### 変更点
