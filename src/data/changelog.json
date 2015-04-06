@@ -1,10 +1,12 @@
 [
   {
-    "date": "2015/xx/xx",
-    "version": "1.13.5",
+    "date": "",
+    "version": "1.14.0",
     "releasenote": "",
     "changes_i18n": {
       "en": [
+        "[Add] Add APNG generator.",
+        "[Change] Improve page layout of Book format works.",
         "[Fix] Begin using of MutationObserver. (MutationEvents warnings disappeared)",
         "[Change] Improve comment area layout. (make white spaces narrow)",
         "[Change][Opera12] Improve Presto Opera support."
