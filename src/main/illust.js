@@ -15,8 +15,8 @@ _.illust = {
       opt = {};
     }
 
-    var allow_types = opt.allow_types || ['_s', '_100', '_128x128', '_240ms', '_240mw'];
-    var allow_sizes = opt.allow_sizes || ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600'];
+    var allow_types = opt.allow_types || ['_s', '_100', '_128x128', '_240ms', '_240mw', '_480mw'];
+    var allow_sizes = opt.allow_sizes || ['100x100', '128x128', '150x150', '240x240', '240x480', '600x600', '480x960'];
 
     var re, server, size, dir, id, rest, p0, suffix, prefix, inf, type, page, ret;
     if ((re = /^(http:\/\/i\d+\.pixiv\.net\/)c\/(\d+x\d+)\/img-master\/(img\/(?:\d+\/){6})(\d+)(-[0-9a-f]{32})?(_p\d+)?_(?:master|square)1200(\.\w+(?:\?.*)?)$/.exec(url))) {
@@ -52,7 +52,7 @@ _.illust = {
         new_url_pattern: true
       };
 
-    } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+)(_[\da-f]{10}|-[\da-f]{32})?(?:(_[sm]|_100|_128x128|_240m[sw])|(?:_big)?(_p\d+))(\.\w+(?:\?.*)?)$/.exec(url))) {
+    } else if ((re = /^(http:\/\/i\d+\.pixiv\.net\/img(\d+|-inf)\/img\/[^\/]+\/(?:(?:\d+\/){5})?)(?:mobile\/)?(\d+)(_[\da-f]{10}|-[\da-f]{32})?(?:(_[sm]|_100|_128x128|_240m[sw]|_480mw)|(?:_big)?(_p\d+))(\.\w+(?:\?.*)?)$/.exec(url))) {
 
       prefix = re[1];
       inf    = re[2];

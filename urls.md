@@ -57,6 +57,9 @@ Image URL
     * Unix time.
 * /176mw/
     * 176x (fit width)
+* \_480mw
+    * Spotlight
+    * **\/spotlight\/334**
 
 Search URL
 ===========
