@@ -6,6 +6,7 @@
     "changes_i18n": {
       "en": [
         "[Add] Add APNG generator.",
+        "[Add] Support for pixiv spotlight.",
         "[Change] Improve page layout of Book format works.",
         "[Fix] Begin using of MutationObserver. (MutationEvents warnings disappeared)",
         "[Change] Improve comment area layout. (make white spaces narrow)",
