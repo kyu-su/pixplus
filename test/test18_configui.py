@@ -234,13 +234,13 @@ class Test_ModConfigUI(TestCase):
     self.check_key_editor_grab('t', 't')
     self.check_key_editor_grab(Keys.F5, 'F5')
 
-    self.click(self.q('.pp-config-key-editor-add'))
+    self.click(self.q('.pp-dialog-action-add'))
     self.assertEqual(self.q('.pp-config-key-editor-grab').get_attribute('value'), '')
 
     self.check_key_editor_keys(initial_keys + ['F5'])
     self.assertEqual(input_e.get_attribute('value'), ','.join(initial_keys + ['F5']))
 
-    self.click(self.q('.pp-config-key-editor-close'))
+    self.click(self.q('.pp-dialog-action-close'))
     self.assertFalse(self.qa('.pp-config-key-editor'))
     pass
 
@@ -284,18 +284,6 @@ class Test_ModConfigUI(TestCase):
   def test_modal(self):
     self.prepare()
 
-    # sw, sh = self.screen_size()
-    # x, y, w, h = self.geom(self.q('#pp-config-content-wrapper'))
-    # h = int((sh - y) * 0.7) + (y - self.geom(self.q('#pp-config'))[1]) + 5
-    # self.check_modal_position_size(self.q('#pp-config'), None, (27, 27), (806, 806), (h, h))
-
-    self.click(self.q('.notifications .popboard'))
-    self.assertFalse(self.q('#pp-config').is_displayed())
-    self.assertTrue(self.q('#notification-popboard').is_displayed())
-
-    self.click(self.q('#pp-config-btn1'))
-    self.assertTrue(self.q('#pp-config').is_displayed())
-    self.assertFalse(self.q('#notification-popboard').is_displayed())
     self.current_section = None
 
     self.activate_section(self.conf_map['key'])
