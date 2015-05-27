@@ -186,6 +186,8 @@ var _ = w.pixplus = {
       change = r_target.top - bt;
     } else if (r_target.bottom > bb) {
       change = r_target.bottom - bb;
+    } else {
+      return;
     }
 
     if (scroll === de) {
