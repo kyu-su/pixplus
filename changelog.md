@@ -1,6 +1,26 @@
 pixplus version history
 =======================
 
+## [1.14.0 - 2015/05/28](http://crckyl.hatenablog.com/entry/2015/05/28/pixplus_1.14.0)
+
+### 変更点
+
+* [追加] APNGジェネレータを追加。
+* [追加] pixivスポットライトページに対応。
+* [修正] 可能ならMutationObserverを使用するように変更。(Firefoxで警告が出なくなった)
+* [変更] ブックフォーマットのレイアウトを改善。
+* [変更] コメント欄のレイアウトを改善。(余白を狭く)
+* [変更][Opera12] Presto Operaのサポートを改善。
+
+### Changes
+
+* [Add] Add APNG generator.
+* [Add] Support for pixiv spotlight.
+* [Fix] Start using MutationObserver. (MutationEvents warnings disappeared on Firefox)
+* [Change] Improve page layout of Book-format works.
+* [Change] Improve comment area layout. (make white spaces narrow)
+* [Change][Opera12] Improve Presto Opera support.
+
 ## [1.13.4 - 2015/01/01](http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4)
 
 ### 変更点
