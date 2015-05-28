@@ -7,10 +7,18 @@
       "en": [
         "[Add] Add APNG generator.",
         "[Add] Support for pixiv spotlight.",
-        "[Change] Improve page layout of Book format works.",
-        "[Fix] Begin using of MutationObserver. (MutationEvents warnings disappeared)",
+        "[Fix] Start using MutationObserver. (MutationEvents warnings disappeared on Firefox)",
+        "[Change] Improve page layout of Book-format works.",
         "[Change] Improve comment area layout. (make white spaces narrow)",
         "[Change][Opera12] Improve Presto Opera support."
+      ],
+      "ja": [
+        "[追加] APNGジェネレータを追加。",
+        "[追加] pixivスポットライトページに対応。",
+        "[修正] 可能ならMutationObserverを使用するように変更。(Firefoxで警告が出なくなった)",
+        "[変更] ブックフォーマットのレイアウトを改善。",
+        "[変更] コメント欄のレイアウトを改善。(余白を狭く)",
+        "[変更][Opera12] Presto Operaのサポートを改善。"
       ]
     }
   },
