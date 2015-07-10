@@ -45,7 +45,8 @@ CHANGELOG_MD                    = changelog.md
 RELEASE_ATOM                    = release.atom
 
 DIST_DIR                        = $(CURDIR)/dist
-RELEASE_DIR                     = $(CURDIR)/release/$(VERSION_STABLE)
+RELEASE_DIR                     = $(CURDIR)/releases/$(VERSION_STABLE)
+RELEASE_LATEST                  = $(CURDIR)/releases/latest
 OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
 GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
 OEX                             = $(DIST_DIR)/pixplus.oex
@@ -137,14 +138,14 @@ deps: $(XAR)
 $(XAR):
 	@cd ext/xar/xar && ./autogen.sh && $(MAKE)
 
-release: $(RELEASE_FILES) release/latest $(AUTOUPDATE_GM)
+release: $(RELEASE_FILES) $(RELEASE_LATEST) $(AUTOUPDATE_GM)
 
 $(RELEASE_FILES): $(RELEASE_DIR)/%: $(DIST_DIR)/%
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-release/latest: $(RELEASE_DIR)
+$(RELEASE_LATEST): $(RELEASE_DIR)
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@rm -rf $@
 	@cp -r $(RELEASE_DIR) $@
@@ -414,7 +415,7 @@ $(AUTOUPDATE_FILES): %: %.in $(CHANGELOG_JSON)
 	@echo 'Generate: $@'
 	@sed -e "s/@VERSION@/$(VERSION_STABLE)/g" < $< > $@
 
-$(AUTOUPDATE_GM): release/latest/$(notdir $(GREASEMONKEY_JS))
+$(AUTOUPDATE_GM): $(RELEASE_LATEST)/$(notdir $(GREASEMONKEY_JS))
 	@echo 'Copy: $(<:$(CURDIR)/%=%) => $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@cp $< $@
