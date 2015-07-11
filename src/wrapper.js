@@ -9,7 +9,7 @@
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
 // @exclude     *pixivreader*
-// @run-at      document-end
+// @run-at      document-start
 // @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
 // ==/UserScript==
 
@@ -27,13 +27,21 @@
       true; // __OPERA_USERJS_REMOVE__
 
   var inject = function(data) {
-    var s = w.document.createElement('script'), d = w.document;
+    var d = w.document;
+    if (!(d.body || d.documentElement)) {
+      // for scriptish
+      window.setTimeout(function() {
+        inject(data);
+      }, 100);
+      return;
+    }
+    var s = w.document.createElement('script');
     s.setAttribute('type', 'text/javascript');
     s.textContent
       = ('(' + entrypoint.toString() + ')'
          + '(this || window,window,window.document,'
          + g.JSON.stringify(data) + ')');
-    (d.body || d.documentElement || d).appendChild(s);
+    (d.body || d.documentElement).appendChild(s);
   };
 
   var send_message;
