@@ -1,5 +1,4 @@
 _.setup_ready = function() {
-  _.i18n.setup();
   _.redirect_jump_page();
   _.config_button.init();
 
