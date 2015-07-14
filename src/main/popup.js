@@ -940,7 +940,8 @@ _.popup = {
     }
 
     this.resize_mode = this.RM_AUTO;
-    if (illust.loaded) {
+    var st = illust.load_statuses;
+    if (st && st.html === 'complete' && (st.big === 'complete' || st.medium === 'complete')) {
       this.status_complete();
       this.onload(illust);
     } else {
