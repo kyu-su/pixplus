@@ -1,5 +1,20 @@
 [
   {
+    "date": "",
+    "version": "1.14.1",
+    "releasenote": "",
+    "changes_i18n": {
+      "en": [
+        "[Fix] Rarely manga mode ends unexpectedly.",
+        "[Fix] Improve performance."
+      ],
+      "ja": [
+        "[修正] 稀にマンガモードが勝手に終了するバグを修正。",
+        "[修正] パフォーマンスを改善。"
+      ]
+    }
+  },
+  {
     "date": "2015/05/28",
     "version": "1.14.0",
     "releasenote": "http://crckyl.hatenablog.com/entry/2015/05/28/pixplus_1.14.0",
