@@ -612,7 +612,7 @@ _.popup = {
   },
 
   onload: function(illust) {
-    if (illust !== this.illust || this.bookmark.active || this.tagedit.active) {
+    if (illust !== this.illust || this.bookmark.active || this.tagedit.active || this.manga.active) {
       return;
     }
 
