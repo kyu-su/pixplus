@@ -1,6 +1,6 @@
 _.popup.comment = {
   active: false,
-  first_setup_done: false,
+  ready: false,
 
   clear: function() {
     var show_form = _.conf.popup.show_comment_form;
@@ -50,8 +50,20 @@ _.popup.comment = {
 
   setup: function(html) {
     var dom = _.popup.dom;
-
     dom.comment.innerHTML = html;
+    this.ready = false;
+    if (this.active) {
+      this.setup_real();
+    }
+  },
+
+  setup_real: function() {
+    if (this.ready) {
+      return;
+    }
+    this.ready = true;
+
+    var dom = _.popup.dom;
     _.qa('img[data-src]', dom.comment).forEach(function(img) {
       img.src = img.dataset.src;
     });
@@ -82,7 +94,9 @@ _.popup.comment = {
     if (this.active) {
       return;
     }
+
     this.active = true;
+    this.setup_real();
     _.popup.dom.root.classList.add('pp-comment-mode');
     _.popup.show_caption();
     _.popup.adjust();
