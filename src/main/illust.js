@@ -628,8 +628,6 @@ _.illust = {
 
         if (illust.ugoira_big || illust.ugoira_small) {
 
-          illust.loaded = true;
-
           if (load_big_image && illust.ugoira_big) {
             illust.ugoira = illust.ugoira_big;
           } else {
