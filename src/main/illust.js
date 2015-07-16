@@ -573,8 +573,7 @@ _.illust = {
       illust.load_statuses = {};
     }
 
-    if (illust.load_statuses.html === 'complete' &&
-        ((!load_big_image && illust.image_medium) || illust.image_big)) {
+    if (illust.load_statuses.html === 'complete' && (illust.image_medium || illust.image_big)) {
       _.popup.onload(illust);
       return;
     }
@@ -891,7 +890,7 @@ _.illust = {
     };
 
     pages.forEach(function(page) {
-      _.illust.load_images(page, load_big_image, onload, send_error);
+      that.load_images(page, load_big_image, onload, send_error);
     });
   },
 
