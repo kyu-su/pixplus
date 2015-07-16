@@ -691,6 +691,7 @@ _.illust = {
         }
 
         if (_.conf.popup.preload && illust.manga.available) {
+          _.debug('Attempting to preload manga page');
           that.load_manga_page(illust, 0);
         }
 
