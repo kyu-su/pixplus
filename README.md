@@ -30,10 +30,16 @@ The MIT License
 * make (GNU Make)
 * rsvg-convert or Inkscape or GIMP
 * python 2.7+ or 3.3+
-* zip (oex)
-* ruby (crx)
-* rubyzip 1.0.0+ (crx)
-* openssl (crx/safariextz)
+* ruby
+* zip command (oex only)
+* openssl (crx, safariextz)
+
+Followings are downloaded under `ext/` dir by `git submodule update --init`.
+
+* crxmake
+* rubyzip (required by crxmake)
+* xar
+* sass
 
 ## How to build
 
@@ -43,21 +49,18 @@ $ make deps
 $ make
 ```
 
-You can skip `make deps` if you don't want to build safariextz.
-
-You can skip `git submodule update --init` and `make deps`
-if you don't want to build crx and safariextz.
+If you don't want to build safariextz, you can skip `make deps`.
 
 ## How to sign safariextz
 
-1.  Get signing certificates from [Safari Dev Center].
-1.  Make an empty extension, **foo.safariextz**.
-1.  Export secret key from **Keychain Access.app** as pkcs12 format.
-1.  Extract certificates from **foo.safariextz** and put into **safari/sign/??.crt**. (??: 00~02)
-1.  Convert exported pkcs12 file to PEM format and put into **safari/sign/key.pem**.
-1.  `make clean; make`
+1. Get signing certificates from [Safari Dev Center].
+1. Make an empty extension, **foo.safariextz**.
+1. Export secret key from **Keychain Access.app** as pkcs12 format.
+1. Extract certificates from **foo.safariextz** and put into **safari/sign/??.crt**. (??: 00~02)
+1. Convert exported pkcs12 file to PEM format and put into **safari/sign/key.pem**.
+1. `make clean; make`
 
-You can shortcut step4~5 by following:
+You can shortcut step4--5 by following:
 
 ```bash
 $ safari/prepare_sign.sh foo.safariextz Certificates.p12
