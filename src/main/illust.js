@@ -630,8 +630,10 @@ _.illust = {
 
           if (load_big_image && illust.ugoira_big) {
             illust.ugoira = illust.ugoira_big;
+            illust.load_statuses.big = 'complete';
           } else {
             illust.ugoira = illust.ugoira_small;
+            illust.load_statuses.medium = 'complete';
           }
 
           if (!illust.ugoira_player) {
