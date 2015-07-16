@@ -4,3 +4,9 @@
 [submodule "ext/xar"]
 	path = ext/xar
 	url = https://github.com/mackyle/xar.git
+[submodule "ext/sass"]
+	path = ext/sass
+	url = https://github.com/sass/sass.git
+[submodule "ext/rubyzip"]
+	path = ext/rubyzip
+	url = https://github.com/rubyzip/rubyzip.git

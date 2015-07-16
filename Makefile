@@ -1,20 +1,20 @@
 SVG_TO_PNG                      = ./svg_to_png.sh
 SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
-CRXMAKE                         = $(CURDIR)/ext/crxmake/bin/crxmake
+CRXMAKE                         = RUBYLIB=$(CURDIR)/ext/rubyzip/lib $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
 PYTHON                          = python
-SCSS                            = scss
+SCSS                            = RUBYLIB=$(CURDIR)/ext/sass/lib $(CURDIR)/ext/sass/bin/scss
 
 ifeq ($(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no),no)
 $(error Could not find svg converter command)
 endif
 
-ifeq ($(shell which $(PYTHON) --version >/dev/null 2>&1 && echo yes || echo no),no)
-$(error scss command not found)
+ifeq ($(shell which $(PYTHON) >/dev/null 2>&1 && echo yes || echo no),no)
+$(error python command not found)
 endif
 
-ifeq ($(shell which $(SCSS) >/dev/null 2>&1 && echo yes || echo no),no)
+ifeq ($(shell $(SCSS) -v >/dev/null 2>&1 && echo yes || echo no),no)
 $(error scss command not found)
 endif
 
@@ -28,7 +28,7 @@ CONFIG_JSON                     = src/data/config.json
 CHANGELOG_JSON                  = src/data/changelog.json
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
-BUILD_CRX                       = $(shell test -x "$(CRXMAKE)" && echo yes || echo no)
+BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
 VERSION_DEV                     = $(shell $(PYTHON) changelog.py dev_version < $(CHANGELOG_JSON))
@@ -184,7 +184,7 @@ $(BUILD_DIR_ICON)/pixplus-24.png: $(BUILD_DIR_ICON)/24.png
 $(CSS_ICON_FILES_SCSS): %.scss: %.png
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
-	@echo -n '$$icon-$(shell echo $(basename $(notdir $@))):url("data:image/png;base64,' > $@
+	@/bin/echo -n '$$icon-$(shell echo $(basename $(notdir $@))):url("data:image/png;base64,' > $@
 	@base64 -w 0 $< >> $@
 	@echo '");' >> $@
 
@@ -226,17 +226,17 @@ $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js 
 	@mkdir -p $(dir $@)
 	@echo '// generated from:' > $@
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
-	@echo -n '_.css=' >> $@
+	@/bin/echo -n '_.css=' >> $@
 	@cat $(wildcard src/data/styles/*.scss) | $(SCSS) --style compressed -I $(BUILD_DIR_ICON) | $(STR2JSON) >> $@
 	@echo ';'>> $@
-	@echo -n '_.conf.__schema=' >> $@
+	@/bin/echo -n '_.conf.__schema=' >> $@
 	@$(JSON2ASCII) < src/data/config.json >> $@
 	@echo ';'>> $@
-	@echo -n '_.i18n=' >> $@
+	@/bin/echo -n '_.i18n=' >> $@
 	@$(JSON2ASCII) < src/data/i18n.json >> $@
 	@echo ';' >> $@
 	@cat src/data/i18n.js >> $@
-	@echo -n '_.changelog=' >> $@
+	@/bin/echo -n '_.changelog=' >> $@
 	@$(JSON2ASCII) < $(CHANGELOG_JSON) >> $@
 	@echo ';' >> $@
 
@@ -353,7 +353,7 @@ $(CRX_ICON_FILES): $(BUILD_DIR_CRX)/$(CRX_ICON_DIR)/%: $(BUILD_DIR_ICON)/%
 $(CRX): $(CRX_DIST_FILES)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 ifeq ($(wildcard $(CRX_SIGN_KEY)),)
-	@echo 'Warn: $(CRX_SIGN_KEY:$(CURDIR)/%=%) not found'
+	@echo 'Warning: $(CRX_SIGN_KEY:$(CURDIR)/%=%) not found'
 	@$(CRXMAKE) --pack-extension=$(BUILD_DIR_CRX) --extension-output=$@ --key-output=$(BUILD_DIR)/$(notdir $(CRX_SIGN_KEY))
 else
 	@$(CRXMAKE) --pack-extension=$(BUILD_DIR_CRX) --pack-extension-key=$(CRX_SIGN_KEY) --extension-output=$@
