@@ -5,7 +5,7 @@ if test "${RSVG_CONVERT:-x}" = x; then
 fi
 
 if test "${INKSCAPE:-x}" = x; then
-  for cmd in gimp /Applications/Inkscape.app/Contents/Resources/script; do
+  for cmd in inkscape /Applications/Inkscape.app/Contents/Resources/script; do
     if which $cmd >/dev/null 2>&1; then
       INKSCAPE=$cmd
       break
