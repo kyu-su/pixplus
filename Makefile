@@ -22,10 +22,10 @@ STR2JSON                        = $(PYTHON) -c 'import sys,json;json.dump(sys.st
 JSON2ASCII                      = $(PYTHON) -c 'import sys,json;json.dump(json.loads(sys.stdin.read().decode("utf-8")),sys.stdout)'
 
 LICENSE                         = LICENSE.TXT
-ICON_SVG                        = src/data/pixplus.svg
-ICON_SMALL_SVG                  = src/data/pixplus_small.svg
-CONFIG_JSON                     = src/data/config.json
-CHANGELOG_JSON                  = src/data/changelog.json
+ICON_SVG                        = $(CURDIR)/src/data/pixplus.svg
+ICON_SMALL_SVG                  = $(CURDIR)/src/data/pixplus_small.svg
+CONFIG_JSON                     = $(CURDIR)/src/data/config.json
+CHANGELOG_JSON                  = $(CURDIR)/src/data/changelog.json
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
@@ -171,7 +171,7 @@ clean-changelog:
 
 # ================  ================
 
-$(CSS_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: src/data/%.svg
+$(CSS_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: $(CURDIR)/src/data/%.svg
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@$(SVG_TO_PNG) -svg $< -png $@
