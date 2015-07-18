@@ -1,14 +1,16 @@
 [
   {
     "date": "",
-    "version": "1.14.1",
+    "version": "1.15.0",
     "releasenote": "",
     "changes_i18n": {
       "en": [
+        "[Add] Added an option to disable profile card popup (in the 'Genral' tab).",
         "[Fix] Rarely manga mode ends unexpectedly.",
         "[Fix] Improve performance."
       ],
       "ja": [
+        "[追加] プロフィールカードのポップアップを無効化するオプションを追加(全般タブ)。",
         "[修正] 稀にマンガモードが勝手に終了するバグを修正。",
         "[修正] パフォーマンスを改善。"
       ]

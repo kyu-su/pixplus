@@ -25,6 +25,7 @@
       "regex_valid": "Valid",
       "regex_invalid": "Invalid"
     },
+
     "conf": {
       "general": {
         "debug": "Debug mode",
@@ -53,8 +54,10 @@
             "Open target",
             "Modify link"
           ]
-        }
+        },
+        "disable_profile_popup": "Disable profile card popup"
       },
+
       "popup": {
         "preload": "Enable preloading",
         "big_image": "Use original size image",
@@ -111,6 +114,7 @@
           ]
         }
       },
+
       "key": {
         "popup_prev": "Move to previous illust",
         "popup_prev_direction": "Move to previous illust(ignore \"reverse\" setting)",
@@ -169,11 +173,13 @@
         "popup_tag_edit_start": "Start tag edit mode",
         "popup_tag_edit_end": "End tag edit mode"
       },
+
       "bookmark": {
         "tag_order": "Reorder tags. 1 tag per line.\n-: Separator\n*: Others",
         "tag_aliases": "Tag association. Used for auto input. Separate by space."
       }
     },
+
     "dialog": {
       "close": "Close",
       "cancel": "Cancel",
@@ -181,6 +187,7 @@
       "no": "No",
       "add": "Add"
     },
+
     "cancel": "Cancel",
     "rate_confirm": "Rate it?\n$pointpt",
     "author_works": "Works",
@@ -203,6 +210,7 @@
     "ugoira_generate_apng": "Generate APNG",
     "ugoira_generate_timecode": "Generate timecode",
     "ugoira_how_to_use": "How to use?",
+
     "apng": {
       "title": "APNG generator",
       "warning": "WARNING: This may take a long time and uses much of memory.",
@@ -214,6 +222,7 @@
       "close": "Close"
     }
   },
+
   "ja": {
     "__name__": "ja",
     "pref": {
@@ -241,6 +250,7 @@
       "regex_valid": "有効",
       "regex_invalid": "不正"
     },
+
     "conf": {
       "general": {
         "debug": "デバッグモード",
@@ -269,8 +279,10 @@
             "ページを開く",
             "リンクを変更"
           ]
-        }
+        },
+        "disable_profile_popup": "プロフィールカードのポップアップを無効化する"
       },
+
       "popup": {
         "preload": "先読みを使用する",
         "big_image": "原寸の画像を表示する",
@@ -327,6 +339,7 @@
           ]
         }
       },
+
       "key": {
         "popup_prev": "前のイラストに移動",
         "popup_prev_direction": "前のイラストに移動(\"反対にする\"オプションに影響されない)",
@@ -385,11 +398,13 @@
         "popup_tag_edit_start": "タグ編集モード開始",
         "popup_tag_edit_end": "タグ編集モード終了"
       },
+
       "bookmark": {
         "tag_order": "ブックマークタグの並べ替えとグルーピング。1行1タグ。\n-: セパレータ\n*: 残り全部",
         "tag_aliases": "タグの関連付け。自動入力に使用する。スペース区切り。"
       }
     },
+
     "dialog": {
       "close": "閉じる",
       "cancel": "キャンセル",
@@ -397,6 +412,7 @@
       "no": "いいえ",
       "add": "追加"
     },
+
     "cancel": "中止",
     "rate_confirm": "評価しますか？\n$point点",
     "author_works": "作品",
@@ -419,6 +435,7 @@
     "ugoira_generate_apng": "APNGを生成",
     "ugoira_generate_timecode": "タイムコードを生成",
     "ugoira_how_to_use": "使い方",
+
     "apng": {
       "title": "APNGジェネレータ",
       "warning": "注意: 長い時間がかかりメモリをたくさん消費することがあります。",
