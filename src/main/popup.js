@@ -44,7 +44,7 @@ _.popup = {
     dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
     dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
     dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
-    dom.author_status     = _.e('img', {id: 'pp-popup-author-status', cls: 'pp-sprite'}, dom.info);
+    dom.author_status     = _.e('img', {id: 'pp-popup-author-status'}, dom.info);
     dom.datetime          = _.e('div', {id: 'pp-popup-date'}, dom.info);
     dom.size_tools        = _.e('div', {id: 'pp-popup-size-tools'}, dom.info);
     dom.size              = _.e('span', {id: 'pp-popup-size'}, dom.info);
@@ -64,6 +64,14 @@ _.popup = {
     dom.olc_next_icon     = this.create_olc_icon(dom.olc_next);
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
+
+    _.e('div', {id: 'pp-popup-comment-form-btn-on'}, dom.comment_form_btn).appendChild(_.svg.pencil(d));
+    _.e('div', {id: 'pp-popup-comment-form-btn-off'}, dom.comment_form_btn).appendChild(_.svg.pencil_off(d));
+    dom.comment_conf_btn.appendChild(_.svg.cogwheel(d));
+
+    _.e('div', {id: 'pp-popup-author-status-following'}, dom.author_status).appendChild(_.svg.following(d));
+    _.e('div', {id: 'pp-popup-author-status-heart'}, dom.author_status).appendChild(_.svg.heart(d));
+    _.e('div', {id: 'pp-popup-author-status-mypixiv'}, dom.author_status).appendChild(_.svg.mypixiv(d));
 
     (function() {
       var svg = _.e('svg', {viewBox: '0 0 24 24'}, dom.ugoira_status);
