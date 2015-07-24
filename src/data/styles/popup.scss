@@ -256,8 +256,10 @@
 
     svg {
       display: block;
-      width: 0.8em;
-      height: 0.8em;
+      width: 1.2em;
+      height: 1.2em;
+      min-width: 16px;
+      min-height: 16px;
     }
 
     &:not(.pp-fav), &.pp-fav-m, &.pp-mypix {
