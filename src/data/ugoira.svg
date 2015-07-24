@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="pp-icon-ugoira-progress-clip">
+      <path d="M 0,0 24,24 24,0 z"/>
+    </clipPath>
+  </defs>
+  <path d="M 22,12 A 10,10 0 1 1 2,12 10,10 0 1 1 22,12 z"
+        clip-path="url(#pp-icon-ugoira-progress-clip)"
+        fill="none" stroke="#000000" stroke-width="2"/>
+  <path d="M 8,6 8,18 19,12 z" fill="none" stroke="#000000" stroke-width="2" id="pp-icon-ugoira-playing"/>
+  <path d="M 7,7 10,7 10,17 7,18 z M 14,7 17,7 17,17 14,17 z"
+        fill="none" stroke="#000000" stroke-width="2" id="pp-icon-ugoira-paused"/>
+</svg>

@@ -52,10 +52,10 @@
   &:not(.pp-ugoira) #pp-popup-ugoira-status {
     display: none;
   }
-  &:not(.pp-ugoira-playing) #pp-popup-ugoira-playing {
+  &:not(.pp-ugoira-playing) #pp-icon-ugoira-playing {
     display: none;
   }
-  &:not(.pp-ugoira-paused) #pp-popup-ugoira-paused {
+  &:not(.pp-ugoira-paused) #pp-icon-ugoira-paused {
     display: none;
   }
 
@@ -336,12 +336,6 @@
 
     svg {
       position: relative;
-      path {
-        fill: #ddd;
-        stroke: #222;
-        stroke-width: 10;
-        stroke-linejoin: round;
-      }
     }
   }
 
@@ -350,18 +344,16 @@
   }
 
   #pp-popup-olc-next svg {
-    -webkit-transform: matrix(-1,0,0,1,0,0);
     transform: matrix(-1,0,0,1,0,0);
   }
 
-  #pp-popup-multipage-icon {
+  #pp-icon-multipage {
     position: absolute;
     opacity: 0.8;
-    right:0px;
-    bottom:0px;
-    fill:url(#pp-popup-multipage-icon-grad);
+    right: 0px;
+    bottom: 0px;
   }
-  &:not(.pp-frontpage-new) #pp-popup-multipage-icon {
+  &:not(.pp-frontpage-new) #pp-icon-multipage {
     display: none;
   }
 }

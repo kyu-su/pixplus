@@ -59,9 +59,7 @@ _.popup = {
     dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
     dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
     dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_scroller);
-    dom.olc_prev_icon     = this.create_olc_icon(dom.olc_prev);
     dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_scroller);
-    dom.olc_next_icon     = this.create_olc_icon(dom.olc_next);
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
@@ -73,37 +71,13 @@ _.popup = {
     dom.author_status.appendChild(_.svg.heart(d));
     dom.author_status.appendChild(_.svg.mypixiv(d));
 
-    (function() {
-      var svg = _.e('svg', {viewBox: '0 0 24 24'}, dom.ugoira_status);
-      dom.ugoira_progress_svg = svg;
-      dom.ugoira_progress_clip = _.e('path', null, _.e('clipPath', {id: 'pp-popup-ugoira-progress-clip'}, _.e('defs', null, svg)));
-      _.e('path', {d: 'M 22,12 A 10,10 0 1 1 2,12 10,10 0 1 1 22,12 z', 'clip-path': 'url(#pp-popup-ugoira-progress-clip)', style: 'fill:none;stroke:#000;stroke-width:2'}, svg);
-      _.e('path', {d: 'M 8,6 8,18 19,12 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-playing'}, svg);
-      _.e('path', {d: 'M 7,7 10,7 10,17 7,18 z M 14,7 17,7 17,17 14,17 z', style: 'fill:none;stroke:#000;stroke-width:2', id: 'pp-popup-ugoira-paused'}, svg);
-    })();
+    dom.ugoira_status.appendChild(dom.ugoira_progress_svg = _.svg.ugoira(d));
+    dom.ugoira_progress_clip = _.q('#pp-icon-ugoira-progress-clip path', dom.ugoira_progress_svg);
 
-    dom.multipage_icon = (function() {
-      var svg = _.e('svg', {id: 'pp-popup-multipage-icon',
-                            width: '160', height: '160',
-                            viewBox: '0 0 100 100'}, dom.image_scroller);
+    dom.image_scroller.appendChild(_.svg.multipage(d));
 
-      var grad = _.e('linearGradient',
-                     {id: 'pp-popup-multipage-icon-grad',
-                      x1: '50%', y1: '50%', x2: '100%', y2: '100%'},
-                     _.e('defs', null, svg));
-      _.e('stop', {offset: '0%', style: 'stop-color:black;stop-opacity:0'}, grad);
-      _.e('stop', {offset: '100%', style: 'stop-color:black;stop-opacity:1'}, grad);
-
-      _.e('rect', {x: '0', y: '0', width: '100', height: '100', id: 'pp-popup-multipage-icon-bg'}, svg);
-
-      var g = _.e('g', null, svg);
-      _.e('rect', {x: '64', y: '58', width: '18', height: '24', fill: 'white'}, g);
-      _.e('path', {d: 'M 84 63 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
-      _.e('path', {d: 'M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z', fill: 'white'}, g);
-
-      return svg;
-    })();
-
+    dom.olc_prev.appendChild(dom.olc_prev_icon = _.svg.olc_arrow(d));
+    dom.olc_next.appendChild(dom.olc_next_icon = _.svg.olc_arrow(d));
 
     this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn, this.dom.root);
     this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
@@ -181,12 +155,6 @@ _.popup = {
     }, {async: true});
 
     dom.created = true;
-  },
-
-  create_olc_icon: function(parent) {
-    var icon = _.e('svg', {viewBox: '0 0 100 100'}, parent);
-    _.e('path', {'d': 'M 10 50 l 45 -45 l 0 30 l 35 0 l 0 30 l -35 0 l 0 30 z'}, icon);
-    return icon;
   },
 
   update_scrollbar_size: function() {

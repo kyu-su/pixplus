@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160" height="160" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="pp-icon-multipage-gradient"
+                    x1="50%" y1="50%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="100" height="100" id="pp-popup-multipage-icon-bg"
+        fill="url(#pp-icon-multipage-gradient)"/>
+  <rect x="64" y="58" width="18" height="24" fill="#ffffff"/>
+  <path d="M 84 63 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z" fill="#ffffff"/>
+  <path d="M 89 68 l 3 0 l 0 24 l -18 0 l 0 -3 l 15 0 z" fill="#ffffff"/>
+</svg>
