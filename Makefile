@@ -68,7 +68,7 @@ CSS_ICON_FILES_PNG              = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.png)
 CSS_ICON_FILES_SCSS             = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.scss) \
                                   $(BUILD_DIR_ICON)/config-button.scss \
                                   $(BUILD_DIR_ICON)/pixplus-24.scss
-SVG_GEN_GEN                     = $(PYTHON) $(CURDIR)/tools/svg_generator_generator.py
+SVG_GEN_GEN                     = tools/svg_generator_generator.py
 SVG_GEN_NAMES                   = pencil pencil-off cogwheel following heart mypixiv
 SVG_GEN_FILES                   = $(SVG_GEN_NAMES:%=$(CURDIR)/src/data/%.svg)
 DIST_FILES                      = $(LICENSE) $(wildcard extension/*) $(LIB_JS) $(DATA_JS)
@@ -225,7 +225,7 @@ $(BUILD_DIR)/_main.js: $(shell sed 's|^|src/main/|' src/main/files.txt)
 $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js \
                        $(CHANGELOG_JSON) $(CSS_ICON_FILES_SCSS) \
                        $(wildcard src/data/styles/*.scss) \
-                       $(SVG_GEN_FILES)
+                       $(SVG_GEN_FILES) $(SVG_GEN_GEN)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@echo '// generated from:' > $@
@@ -243,7 +243,7 @@ $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js 
 	@/bin/echo -n '_.changelog=' >> $@
 	@$(JSON2ASCII) < $(CHANGELOG_JSON) >> $@
 	@echo ';' >> $@
-	@$(SVG_GEN_GEN) $(SVG_GEN_FILES) >> $@
+	@$(PYTHON) $(SVG_GEN_GEN) $(SVG_GEN_FILES) >> $@
 
 $(DATA_JS): $(BUILD_DIR)/_data.js
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
