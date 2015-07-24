@@ -1,4 +1,4 @@
-SVG_TO_PNG                      = ./svg_to_png.sh
+SVG_TO_PNG                      = tools/svg_to_png.sh
 SVG_TO_PNG_CMD                  = $(shell $(SVG_TO_PNG))
 ZIP                             = zip
 CRXMAKE                         = RUBYLIB=$(CURDIR)/ext/rubyzip/lib $(CURDIR)/ext/crxmake/bin/crxmake
@@ -31,8 +31,8 @@ BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo
 BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
 BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
 
-VERSION_DEV                     = $(shell $(PYTHON) changelog.py dev_version < $(CHANGELOG_JSON))
-VERSION_STABLE                  = $(shell $(PYTHON) changelog.py stable_version < $(CHANGELOG_JSON))
+VERSION_DEV                     = $(shell $(PYTHON) tools/changelog.py dev_version < $(CHANGELOG_JSON))
+VERSION_STABLE                  = $(shell $(PYTHON) tools/changelog.py stable_version < $(CHANGELOG_JSON))
 WEBSITE                         = http://ccl4.info/pixplus/
 
 BUILD_DIR                       = $(CURDIR)/temp
@@ -161,11 +161,11 @@ clean: clean-changelog
 
 $(CHANGELOG_MD): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@$(PYTHON) changelog.py markdown < $< > $@
+	@$(PYTHON) tools/changelog.py markdown < $< > $@
 
 $(RELEASE_ATOM): $(CHANGELOG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
-	@$(PYTHON) changelog.py atom < $< > $@
+	@$(PYTHON) tools/changelog.py atom < $< > $@
 
 changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
 
@@ -295,7 +295,7 @@ $(OEX_CONFIG_XML): $(OEX_CONFIG_XML_IN) $(CONFIG_JSON) $(CHANGELOG_JSON)
 	@sed -e '1,/@LICENSE@/d' -e '/@ICONS@/,$$d' < $< >> $@
 	@for size in $(ICON_SIZE); do echo "  <icon src=\"$(OEX_ICON_DIR)/$$size.png\" />" >> $@; done
 	@sed -e '1,/@ICONS@/d' -e '/@CONFIG@/,$$d' < $< >> $@
-	@$(PYTHON) conf-parser.py opera < $(CONFIG_JSON) >> $@
+	@$(PYTHON) tools/conf-parser.py opera < $(CONFIG_JSON) >> $@
 	@sed -e '1,/@CONFIG@/d' < $< >> $@
 
 $(OEX_USERJS): $(OPERA_USERJS)
@@ -378,7 +378,7 @@ $(SAFARIEXTZ_SETTINGS_PLIST): $(SAFARIEXTZ_SETTINGS_PLIST_IN) $(CONFIG_JSON)
 	@echo 'Generate: $(@:$(CURDIR)/%=%)'
 	@mkdir -p $(dir $@)
 	@sed -e '/__SETTINGS__/,$$d' < $< > $@
-	@$(PYTHON) conf-parser.py safari < $(CONFIG_JSON) >> $@
+	@$(PYTHON) tools/conf-parser.py safari < $(CONFIG_JSON) >> $@
 	@sed -e '1,/__SETTINGS__/d' < $< >> $@
 
 $(SAFARIEXTZ_USERJS): $(OPERA_USERJS)
