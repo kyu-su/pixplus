@@ -30,9 +30,11 @@ class Generator:
 
     return varname
 
-  def gen(self, filename):
+  def gen(self, filename, name):
     self.out.write('function(doc){ // %s\n' % filename)
-    self.out.write('return %s;\n' % self.elem(ET.parse(filename).getroot()))
+    varname = self.elem(ET.parse(filename).getroot())
+    self.out.write('%s.setAttribute("id", "pp-icon-%s");\n' % (varname, name))
+    self.out.write('return %s;\n' % varname)
     self.out.write('}\n')
     pass
 
@@ -41,8 +43,9 @@ class Generator:
 def main(files, out):
   out.write('_.svg={\n')
   for fn in files:
-    out.write('%s:' % fn.split('/')[-1].split('.')[0].replace('-', '_'))
-    Generator(out).gen(fn)
+    name = fn.split('/')[-1].split('.')[0]
+    out.write('%s:' % name.replace('-', '_'))
+    Generator(out).gen(fn, name)
     out.write(',')
     pass
   out.write('};\n')

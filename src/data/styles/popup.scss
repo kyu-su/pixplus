@@ -124,11 +124,11 @@
     }
   }
 
-  &:not(.pp-show-comment-form) #pp-popup-comment-form-btn-off {
+  &:not(.pp-show-comment-form) #pp-icon-pencil-off {
     display: none;
   }
 
-  &.pp-show-comment-form #pp-popup-comment-form-btn-on {
+  &.pp-show-comment-form #pp-icon-pencil {
     display: none;
   }
 
@@ -263,19 +263,19 @@
     }
 
     &:not(.pp-fav), &.pp-fav-m, &.pp-mypix {
-      #pp-popup-author-status-following {
+      #pp-icon-following {
         display: none;
       }
     }
 
     &:not(.pp-fav-m), &.pp-mypix {
-      #pp-popup-author-status-heart {
+      #pp-icon-heart {
         display: none;
       }
     }
 
     &:not(.pp-mypix) {
-      #pp-popup-author-status-mypixiv {
+      #pp-icon-mypixiv {
         display: none;
       }
     }

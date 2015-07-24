@@ -65,13 +65,13 @@ _.popup = {
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
-    _.e('div', {id: 'pp-popup-comment-form-btn-on'}, dom.comment_form_btn).appendChild(_.svg.pencil(d));
-    _.e('div', {id: 'pp-popup-comment-form-btn-off'}, dom.comment_form_btn).appendChild(_.svg.pencil_off(d));
+    dom.comment_form_btn.appendChild(_.svg.pencil(d));
+    dom.comment_form_btn.appendChild(_.svg.pencil_off(d));
     dom.comment_conf_btn.appendChild(_.svg.cogwheel(d));
 
-    _.e('div', {id: 'pp-popup-author-status-following'}, dom.author_status).appendChild(_.svg.following(d));
-    _.e('div', {id: 'pp-popup-author-status-heart'}, dom.author_status).appendChild(_.svg.heart(d));
-    _.e('div', {id: 'pp-popup-author-status-mypixiv'}, dom.author_status).appendChild(_.svg.mypixiv(d));
+    dom.author_status.appendChild(_.svg.following(d));
+    dom.author_status.appendChild(_.svg.heart(d));
+    dom.author_status.appendChild(_.svg.mypixiv(d));
 
     (function() {
       var svg = _.e('svg', {viewBox: '0 0 24 24'}, dom.ugoira_status);
