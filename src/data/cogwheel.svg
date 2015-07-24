@@ -6,12 +6,12 @@
     </clipPath>
   </defs>
   <g clip-path="url(#pp-icon-cogwheel-clip)">
-    <path d="M 20,12 A 8,8 0 0 1 4,12 8,8 0 1 1 20,12 z" style="fill:#000000"/>
-    <rect x="10" y="2" width="4" height="20" style="fill:#000000"/>
-    <rect x="-14" y="2" height="20" width="4" transform="matrix(0,-1,1,0,0,0)" style="fill:#000000"/>
-    <rect height="20" width="4" y="-10" x="14.970563" style="fill:#000000"
+    <path d="M 20,12 A 8,8 0 0 1 4,12 8,8 0 1 1 20,12 z" fill="#000000"/>
+    <rect x="10" y="2" width="4" height="20" fill="#000000"/>
+    <rect x="-14" y="2" height="20" width="4" transform="matrix(0,-1,1,0,0,0)" fill="#000000"/>
+    <rect height="20" width="4" y="-10" x="14.970563" fill="#000000"
           transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"/>
-    <rect height="20" width="4" y="6.9705629" x="-2" style="fill:#000000"
+    <rect height="20" width="4" y="6.9705629" x="-2" fill="#000000"
           transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,0,0)"/>
   </g>
 </svg>
