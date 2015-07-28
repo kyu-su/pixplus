@@ -400,7 +400,7 @@ $(SAFARIEXTZ_ICON_FILES): $(BUILD_DIR_SAFARIEXTZ)/Icon-%: $(BUILD_DIR_ICON)/%
 
 $(SAFARIEXTZ): $(SAFARIEXTZ_DIST_FILES)
 	@echo 'Generate: $@'
-	@$(XAR) -C $(dir $(BUILD_DIR_SAFARIEXTZ)) -cf $@ $(notdir $(BUILD_DIR_SAFARIEXTZ))
+	@$(XAR) -C $(dir $(BUILD_DIR_SAFARIEXTZ)) --distribution -cf $@ $(notdir $(BUILD_DIR_SAFARIEXTZ))
 ifeq ($(wildcard $(SAFARIEXTZ_SIGN_KEY)),)
 	@echo 'Warning: $(SAFARIEXTZ_SIGN_KEY) not found'
 else
