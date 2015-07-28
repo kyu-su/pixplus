@@ -41,6 +41,9 @@ def save_cookie(driver):
   util.write_json(os.path.join(testdir, 'cookie.json'), cookie)
   pass
 
+def is_logged_in(browser):
+  return bool(browser.qa('.my-profile-unit'))
+
 def login(browser, config):
   print('Logging in...')
   # browser.open('https://www.secure.pixiv.net/login.php')
@@ -59,10 +62,10 @@ def login(browser, config):
   form.find_element_by_css_selector('#login_submit').click()
 
   try:
-    browser.wait_until(lambda d: browser.url.startswith('http://www.pixiv.net/mypage.php'))
+    browser.wait_until(lambda d: is_logged_in(browser))
   except selenium.common.exceptions.TimeoutException:
     print('Login failed!')
-    raw_input('Please login manually and press enter...')
+    input('Please login manually and press enter...')
     pass
 
   save_cookie(browser.driver)
@@ -88,7 +91,7 @@ def test(browser, config, tests):
 
       browser.open('http://www.pixiv.net/')
 
-      if browser.url == 'http://www.pixiv.net/':
+      if not is_logged_in(browser):
         login(browser, config)
         pass
       pass
