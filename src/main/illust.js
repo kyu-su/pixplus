@@ -573,7 +573,8 @@ _.illust = {
       illust.load_statuses = {};
     }
 
-    if (illust.load_statuses.html === 'complete' && (illust.image_medium || illust.image_big)) {
+    if (illust.load_statuses.html === 'complete' &&
+        ((illust.image_medium && !load_big_image) || illust.image_big)) {
       _.popup.onload(illust);
       return;
     }
