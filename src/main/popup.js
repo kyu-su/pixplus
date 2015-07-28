@@ -588,9 +588,15 @@ _.popup = {
   },
 
   onload: function(illust) {
-    if (illust !== this.illust || this.bookmark.active || this.tagedit.active || this.manga.active) {
+    if (illust !== this.illust || this.bookmark.active || this.tagedit.active) {
       return;
     }
+
+    if (this.illust_real && this.manga.active && this.illust_real === illust) {
+      return;
+    }
+
+    this.illust_real = illust;
 
     var that = this;
     var dom = this.dom;
