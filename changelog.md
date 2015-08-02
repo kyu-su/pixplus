@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.15.0 - 2015/08/02](http://crckyl.hatenablog.com/entry/2015/08/02/pixplus_1.15.0)
+
+### 変更点
+
+* [追加] プロフィールカードのポップアップを無効化するオプションを追加(全般タブ)。
+* [修正] 作者アイコンのバッジが表示されなくなっていた不具合を修正。
+* [修正] 稀にマンガモードが勝手に終了するバグを修正。
+* [修正] パフォーマンスを改善。
+
+### Changes
+
+* [Add] Added an option to disable profile card popup (in the 'Genral' tab).
+* [Fix] Author icon badges were broken.
+* [Fix] Rarely manga mode ends unexpectedly.
+* [Fix] Improve performance.
+
 ## [1.14.0 - 2015/05/28](http://crckyl.hatenablog.com/entry/2015/05/28/pixplus_1.14.0)
 
 ### 変更点
