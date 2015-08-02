@@ -11,7 +11,8 @@ class Test_MarkVisited(TestCase):
       style.textContent = [
         'a.work{background-color:white !important;display:block;overflow:hidden}',
         'a.work:visited{background-color:red !important}',
-        'a.work *{opacity:0!important}'
+        'a.work *{opacity:0!important}',
+        '._work.manga::after{display:none}'
       ].join('');
       document.body.appendChild(style);
     ''')
@@ -20,7 +21,7 @@ class Test_MarkVisited(TestCase):
   def check_link_color(self, color, filename_suffix):
     link = self.js('''
       window.scrollTo(0, 0);
-      return pixplus.illust.list[0].link
+      return pixplus.illust.list[0].link.querySelector('img._thumbnail')
     ''')
     x, y, w, h = tuple(map(int, self.geom(link)))
     self.assertTrue(w > 100)
