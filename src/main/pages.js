@@ -357,7 +357,7 @@ _.config_button = {
       container: 'body>header .layout-wrapper>.notifications',
       func: function(container) {
         var li  = _.e('li', {id: 'pp-config-btn1-wrapper'}, container),
-            btn = _.e('span', {id: 'pp-config-btn1'}, li);
+            btn = _.e('a', {id: 'pp-config-btn1', cls: 'notification-button'}, li);
         _.onclick(btn, this.show.bind(this));
         _.configui.init(li, btn);
       },

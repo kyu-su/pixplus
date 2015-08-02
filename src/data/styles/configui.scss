@@ -2,11 +2,9 @@
 @import "pixplus-24";
 
 #pp-config-btn1 {
-  border-radius: 5px;
   margin-left: 2px;
   cursor: pointer;
   display: inline-block;
-  padding: 24px 0px 0px 34px;
   vertical-align: top;
   border: 3px solid #f2f4f6;
   background: #f2f4f6 $icon-config-button no-repeat 6px 1px;
@@ -20,10 +18,10 @@
     position: relative;
     z-index: 10001;
     background-color: #fff;
-    padding-top: 27px;
+    height: 27px;
     border-color: #becad8;
     border-bottom: none;
-    border-radius: 5px 5px 0px 0px;
+    border-radius: 0px 5px 0px 0px;
   }
 }
 
