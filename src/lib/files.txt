@@ -1,4 +1,6 @@
 base.js
+base64.js
+crc32.js
 conf.js
 xhr.js
 key.js
