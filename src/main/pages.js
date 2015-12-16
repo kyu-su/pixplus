@@ -398,7 +398,7 @@ _.config_button = {
       _.configui.init(wrapper, btn);
     },
     show: function() {
-      _.configui.show();
+      _.configui.show(true);
       _.modal.begin(_.configui.dom.root, {
         onclose: _.configui.hide.bind(_.configui),
         centerize: 'both'

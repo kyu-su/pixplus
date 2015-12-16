@@ -394,14 +394,15 @@ _.configui = {
     return !!this.dom.root && this.dom.root.classList.contains('pp-show');
   },
 
-  show: function() {
+  show: function(center) {
     this.create();
     this.dom.root.classList.add('pp-show');
     if (this.toggle_btn) {
       this.toggle_btn.classList.add('pp-active');
 
-      var el = this.dom.content, de = d.documentElement;
-      el.style.height = g.Math.floor((de.clientHeight - el.getBoundingClientRect().top) * 0.7) + 'px';
+      var el = this.dom.content, de = d.documentElement, h;
+      h = de.clientHeight - (center ? 0 : el.getBoundingClientRect().top);
+      el.style.height = Math.floor(h * 0.7) + 'px';
     }
   },
 
