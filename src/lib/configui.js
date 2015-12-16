@@ -539,7 +539,7 @@ _.configui = {
 
       dom.textarea = _.e('textarea', {cls: 'pp-config-regexp-editor-textarea'}, dom.content);
       _.listen(dom.textarea, 'input', function() {
-        that.src_input.value = dom.textarea.value;
+        that.change(dom.textarea.value);
         that.check(dom.textarea.value);
       });
 
