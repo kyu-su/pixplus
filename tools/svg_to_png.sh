@@ -39,8 +39,9 @@ while test $# -gt 0; do
 done
 
 check_rsvg_convert() {
-  "$RSVG_CONVERT" -v 2>/dev/null | grep rsvg-convert >/dev/null 2>&1
-  return $?
+  return 1
+  # "$RSVG_CONVERT" -v 2>/dev/null | grep rsvg-convert >/dev/null 2>&1
+  # return $?
 }
 
 run_rsvg_convert() {
