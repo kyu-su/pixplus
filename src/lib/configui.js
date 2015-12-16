@@ -504,7 +504,7 @@ _.configui = {
 
   var Regexp = _.class.create(Base.prototype, {
     paths: [
-      '/mypage.php',
+      '/',
       '/new_illust.php',
       '/bookmark_new_illust.php',
       '/mypixiv_new_illust.php',
