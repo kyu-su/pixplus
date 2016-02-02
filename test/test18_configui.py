@@ -155,6 +155,7 @@ class Test_ModConfigUI(TestCase):
         else:
           input_e.clear()
           input_e.send_keys(str(next_value))
+          self.js('pixplus.modal.dialog.container.classList.contains("pp-config-regexp-editor")&&pixplus.modal.close()')
           pass
 
         pass
