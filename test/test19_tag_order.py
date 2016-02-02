@@ -33,7 +33,7 @@ class Test_TagOrder(TestCase):
       self.open_popup()
       self.start_bookmark()
 
-      uls = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container ul')[:-1]
+      uls = self.qa('#pp-popup-bookmark-wrapper .tag-cloud-container ul')
       self.assertEqual([self.ul_to_tags(ul, True) for ul in uls], tags)
       pass
     pass
