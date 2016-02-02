@@ -15,7 +15,7 @@ $(error python command not found)
 endif
 
 ifeq ($(shell $(SCSS) -v >/dev/null 2>&1 && echo yes || echo no),no)
-$(error scss command not found)
+$(error scss command not found; run `git submodule update --ini` first)
 endif
 
 STR2JSON                        = $(PYTHON) -c 'import sys,json;json.dump(sys.stdin.read().decode("utf-8"),sys.stdout)'
