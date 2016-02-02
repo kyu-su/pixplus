@@ -24,8 +24,8 @@ class Test_MarkVisited(TestCase):
       return pixplus.illust.list[0].link.querySelector('img._thumbnail')
     ''')
     x, y, w, h = tuple(map(int, self.geom(link)))
-    self.assertTrue(w > 100)
-    self.assertTrue(h > 100)
+    self.assertGreater(w, 100)
+    self.assertGreater(h, 100)
 
     x += 1
     y += 1
@@ -47,7 +47,7 @@ class Test_MarkVisited(TestCase):
     pass
 
   def test_on(self):
-    self.open('/member_illust.php?id=11&p=9')
+    self.open_test_user()
     self.inject_css()
 
     self.check_link_color('white', 'on1')
@@ -57,7 +57,7 @@ class Test_MarkVisited(TestCase):
     pass
 
   def test_off(self):
-    self.open('/member_illust.php?id=11&p=10')
+    self.open_test_user()
     self.set_conf('popup.mark_visited', False)
     self.inject_css()
 
