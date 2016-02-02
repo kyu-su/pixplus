@@ -365,7 +365,7 @@ class Test_KeyBind(TestCase):
     self.poll_open('/member_illust.php?mode=medium&illust_id=1580459')
 
     self.send_keys('f')
-    self.poll_open('http://i1.pixiv.net/img01/img/pixiv/1580459.jpg')
+    self.poll_open('http://i4.pixiv.net/img-original/img/2008/09/10/17/47/18/1580459_p0.jpg')
 
     self.send_keys('e')
     self.poll_open('/member.php?id=11')
