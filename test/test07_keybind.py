@@ -428,7 +428,12 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.q('#pp-popup-button-manga.pp-active').is_displayed())
 
     self.send_keys('f')
-    self.poll_open('http://i1.pixiv.net/img01/img/pixiv/6209105_big_p0.jpg')
+    self.poll_open('/member_illust.php?mode=manga_big&illust_id=6209105&page=0')
+
+    self.send_keys('w')
+    self.popup_wait_big_image()
+    self.send_keys('f')
+    self.poll_open('http://i2.pixiv.net/img-original/img/2009/09/18/15/38/43/6209105_p0.jpg')
 
     self.send_keys('F')
     self.poll_open('/member_illust.php?mode=manga&illust_id=6209105#pp-manga-page-0')
