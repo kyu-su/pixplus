@@ -14,7 +14,6 @@ class Test_Ugoira(TestCase):
   zip_filename = zip_url.split('/')[-1]
 
   def setUp(self):
-    self.capture_id = 0
     if not os.path.exists(self.zip_filename):
       util.download(self.zip_url, zip_filename)
       pass
@@ -28,13 +27,6 @@ class Test_Ugoira(TestCase):
   def current_frame(self):
     return self.js('return pixplus.popup.ugoira_current_frame()')
 
-  def capture(self, canvas):
-    self.capture_id += 1
-    filename = 'test22_ugoira_%d.png' % self.capture_id
-    img = self.screenshot(canvas)
-    self.save_image(img, filename)
-    return img, filename
-
   def test_ugoira(self):
     self.open('/')
     self.open_popup(self.illust_id)
@@ -43,27 +35,41 @@ class Test_Ugoira(TestCase):
     frames = self.js('return pixplus.popup.illust.ugoira.frames')
     canvas = self.q('#pp-popup-image-layout canvas')
 
-    img1 = self.capture(canvas)[0]
-    self.wait_until(lambda d: img1 != self.capture(canvas)[0])
+    img1 = self.screenshot(canvas)
+    self.wait_until(lambda d: not self.image_isEqual(img1, self.screenshot(canvas)))
 
     self.send_keys('m')
     time.sleep(1)
 
-    img1, fn1 = self.capture(canvas)
+    img1 = self.screenshot(canvas)
     time.sleep(1)
-    img2, fn2 = self.capture(canvas)
-    self.assertImageEqual(img1, img2, '%s != %s' % (fn1, fn2))
+    img2 = self.screenshot(canvas)
+    self.save_image(img1, 'test22_ugoira_pause_test_expected.png')
+    self.save_image(img2, 'test22_ugoira_pause_test_got.png')
+    self.assertImageEqual(img1, img2)
 
     curframe = self.current_frame()
-    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    img1 = self.images[frames[curframe]['file']]
+    img2 = self.screenshot(canvas)
+    self.save_image(img1, 'test22_ugoira_frame_test_expected.png')
+    self.save_image(img2, 'test22_ugoira_frame_test_got.png')
+    self.assertImageEqual(img1, img2)
 
     self.send_keys(',')
     curframe = self.frame_count() - 1 if curframe == 0 else curframe - 1
-    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    img1 = self.images[frames[curframe]['file']]
+    img2 = self.screenshot(canvas)
+    self.save_image(img1, 'test22_ugoira_prev_frame_test_expected.png')
+    self.save_image(img2, 'test22_ugoira_prev_frame_test_got.png')
+    self.assertImageEqual(img1, img2)
 
     self.send_keys('.')
     curframe = 0 if curframe == self.frame_count() - 1 else curframe + 1
-    self.assertImageEqual(self.images[frames[curframe]['file']], *self.capture(canvas))
+    img1 = self.images[frames[curframe]['file']]
+    img2 = self.screenshot(canvas)
+    self.save_image(img1, 'test22_ugoira_next_frame_test_expected.png')
+    self.save_image(img2, 'test22_ugoira_next_frame_test_got.png')
+    self.assertImageEqual(img1, img2)
     pass
 
   pass

@@ -347,30 +347,15 @@ class TestCase(unittest.TestCase):
     image.save(path)
     return image
 
-  def image_diff(self, img1, img2, diff_filename):
-    if img1.mode != img2.mode:
-      raise RuntimeError('Image diff: Colorspace mismatch! - %s vs %s' % (img1.mode, img2.mode))
-    diff = ImageChops.difference(img1, img2)
-    if diff_filename is not None:
-      self.save_image(diff, diff_filename)
-      pass
-    return diff
+  def image_isEqual(self, img1, img2):
+    return img1.size == img2.size and img1.tostring('raw', 'RGB') == img2.tostring('raw', 'RGB')
 
-  def image_rmsdiff(self, img1, img2, diff_filename):
-    diff = self.image_diff(img1.convert('L'), img2.convert('L'), diff_filename)
-    h = diff.histogram()
-    s = sum(map(lambda p, i: (p * ((i / float(len(h) - 1)) ** 2)), h, range(len(h))))
-    return math.sqrt(s / float(operator.mul(*diff.size)))
-
-  def image_isEqual(self, img1, img2, threshold = 0.001):
-    return self.image_rmsdiff(img1, img2, None) < threshold
-
-  def assertImageEqual(self, img1, img2, diff_filename, threshold = 0.001):
-    self.assertLess(self.image_rmsdiff(img1, img2, diff_filename), threshold)
+  def assertImageEqual(self, img1, img2):
+    self.assertTrue(self.image_isEqual(img1, img2))
     pass
 
-  def assertImageNotEqual(self, img1, img2, diff_filename, threshold = 0.001):
-    self.assertGreaterEqual(self.image_rmsdiff(img1, img2, diff_filename), threshold)
+  def assertImageNotEqual(self, img1, img2):
+    self.assertFalse(self.image_isEqual(img1, img2))
     pass
 
   pass

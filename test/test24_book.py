@@ -46,7 +46,7 @@ class Test_Manga(TestCase):
     expected = self.make_image(image_numbers)
     self.save_image(got, 'test24_book_%s_%s_got.png' % (name, ','.join(map(str, image_numbers))))
     self.save_image(expected, 'test24_book_%s_%s_expected.png' % (name, ','.join(map(str, image_numbers))))
-    self.assertImageEqual(got, expected, 'test24_book_%s_%s_diff.png' % (name, ','.join(map(str, image_numbers))))
+    self.assertImageEqual(got, expected)
     pass
 
   def test_illust_set(self):

@@ -32,18 +32,18 @@ class Test_MarkVisited(TestCase):
     w -= 2
     h -= 2
 
-    img = self.screenshot().crop((x, y, x + w, y + h))
-    self.assertImageEqual(img, Image.new('RGB', (w, h), color),
-                          'test17_mark_visited_%s.png' % filename_suffix)
-
-    self.save_image(img, 'test17_mark_visited_image_1.png')
-    from PIL import ImageDraw
     img = self.screenshot()
-    self.save_image(img, 'test17_mark_visited_image_2.png')
-    draw = ImageDraw.Draw(img)
+    img_crop = img.crop((x, y, x + w, y + h))
+
+    from PIL import ImageDraw
+    img2 = img.copy()
+    draw = ImageDraw.Draw(img2)
     points = [(20,40), (25,60), (40,80), (60,75), (80,95), (85,20), (50,40)]
     draw.polygon([(x, y), (x, y + h), (x + w, y + h), (x + w, y)], outline='rgb(0,255,0)')
-    self.save_image(img, 'test17_mark_visited_image_3.png')
+    self.save_image(img2, 'test17_mark_visited_image_%s_all.png' % filename_suffix)
+    self.save_image(img_crop, 'test17_mark_visited_image_%s_crop.png' % filename_suffix)
+
+    self.assertImageEqual(img_crop, Image.new('RGB', (w, h), color))
     pass
 
   def test_on(self):
