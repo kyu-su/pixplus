@@ -12,7 +12,7 @@ class Chrome(Browser):
 
   def prepare_caps(self, caps):
     v_str = subprocess.check_output([self.args.chrome_bin, '--version'])
-    m = re.match(rb'Chromium ([\d\.]+)\s*', v_str)
+    m = re.match(r'Chromium ([\d\.]+)\s*', v_str.decode('utf-8'))
     if not m:
       raise RuntimeError('Failed to detect Chromium version')
     self.chrome_version = m.group(1)
