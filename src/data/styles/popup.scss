@@ -201,7 +201,10 @@
     }
 
     &.pp-no-pixpedia a[href^="http://dic.pixiv.net/"],
+    &.pp-no-pixpedia a[href^="https://dic.pixiv.net/"],
     &.pp-no-pixiv-comic a[href^="http://comic.pixiv.net/"],
+    &.pp-no-pixiv-comic a[href^="https://comic.pixiv.net/"],
+    &.pp-no-booth a[href^="http://booth.pm/"],
     &.pp-no-booth a[href^="https://booth.pm/"] {
       display: none;
     }

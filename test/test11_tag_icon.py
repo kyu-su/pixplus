@@ -21,12 +21,12 @@ class Test_TagIcon(TestCase):
 
     self.open_popup()
     self.popup_show_caption()
-    self.assertTrue(self.q('#pp-popup-taglist .tag a[href^="http://comic.pixiv.net/"]').is_displayed())
+    self.assertTrue(self.q('#pp-popup-taglist .tag a[href^="https://comic.pixiv.net/"]').is_displayed())
 
     self.set_conf('popup.remove_pixiv_comic', True)
     self.popup_reload()
     self.popup_show_caption()
-    self.assertFalse(self.q('#pp-popup-taglist .tag a[href^="http://comic.pixiv.net/"]').is_displayed())
+    self.assertFalse(self.q('#pp-popup-taglist .tag a[href^="https://comic.pixiv.net/"]').is_displayed())
     pass
 
   pass
