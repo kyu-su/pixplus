@@ -12,7 +12,7 @@ convert -size 500x2000 xc:gray test6.jpg
 mkdir -p manga_big manga_small
 for i in 1 2 3 4; do
   convert -size 1600x1600 -background white -pointsize 512 -fill black -gravity center label:$i manga_big/$i.png
-  convert -size 200x200 -background white -pointsize 96 -fill black -gravity center label:$i manga_small/$i.png
+  convert -size 200x200 -background white -pointsize 96 -fill black -gravity center label:$i -threshold 128 manga_small/$i.png
 done
 
 rm -f manga_{big,small}.zip
