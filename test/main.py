@@ -33,69 +33,10 @@ def load_tests():
 
   return tests
 
-def save_cookie(driver):
-  cookie = {}
-  for key in ['PHPSESSID']:
-    cookie[key] = driver.get_cookie(key)
-    pass
-  util.write_json(os.path.join(testdir, 'cookie.json'), cookie)
-  pass
-
-def is_logged_in(browser):
-  return bool(browser.qa('.my-profile-unit'))
-
-def login(browser, config):
-  print('Logging in...')
-  # browser.open('https://www.secure.pixiv.net/login.php')
-
-  form = browser.wait_until(lambda d: browser.qa('form[action*="login.php"]'))[-1]
-
-  e_id = form.find_element_by_css_selector('input[name="pixiv_id"]')
-  e_id.clear()
-  e_id.send_keys(config['username'])
-
-  e_pw = form.find_element_by_css_selector('input[name="pass"]')
-  e_pw.clear()
-  e_pw.send_keys(config['password'])
-
-  # form.submit()
-  form.find_element_by_css_selector('#login_submit').click()
-
-  try:
-    browser.wait_until(lambda d: is_logged_in(browser))
-  except selenium.common.exceptions.TimeoutException:
-    print('Login failed!')
-    input('Please login manually and press enter...')
-    pass
-
-  save_cookie(browser.driver)
-  pass
-
 def test(browser, config, tests):
-  browser.start()
   try:
     suite = unittest.TestSuite()
     suite.addTests([cls(browser, config, testname) for cls, testname in tests])
-
-    browser.set_window_size(1024, 768)
-
-    if list(filter(lambda p: p[0].run_in_pixiv, tests)):
-      browser.open('http://www.pixiv.net/')
-
-      cookie = util.read_json(os.path.join(testdir, 'cookie.json'), {})
-      for name, item in cookie.items():
-        browser.set_cookie(item['name'], item['value'],
-                           item.get('domain', '.pixiv.net'),
-                           item['path'])
-        pass
-
-      browser.open('http://www.pixiv.net/')
-
-      if not is_logged_in(browser):
-        login(browser, config)
-        pass
-      pass
-
     unittest.TextTestRunner(verbosity = 2).run(suite)
   finally:
     browser.quit()

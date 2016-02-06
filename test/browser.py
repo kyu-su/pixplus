@@ -31,6 +31,9 @@ class Browser:
     pass
 
   def start(self):
+    if self.driver:
+      raise RuntimeError('%s is already running' % self.name)
+
     caps = {}
     caps.update(getattr(DesiredCapabilities, self.capname))
     self.prepare_caps(caps)
@@ -51,7 +54,9 @@ class Browser:
 
   def quit(self):
     try:
-      self.driver.quit()
+      if self.driver:
+        self.driver.quit()
+        self.driver = None
     except http_client.BadStatusLine:
       pass
     pass

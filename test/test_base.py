@@ -13,6 +13,7 @@ import util
 class TestCase(unittest.TestCase):
   run_in_pixiv = True
   repeatable = True
+  restart_browser = False
 
   def __init__(self, browser, config, testname):
     unittest.TestCase.__init__(self, testname)
@@ -27,9 +28,48 @@ class TestCase(unittest.TestCase):
   def __getattr__(self, name):
     return getattr(self.b, name)
 
+  def is_logged_in(self):
+    return bool(self.js('try { return pixiv.user.id; } catch(ex) { return null; }'))
+
+  def login(self):
+    print('Logging in...')
+    self.b.open('https://www.secure.pixiv.net/login.php')
+
+    form = self.b.wait_until(lambda d: self.qa('form[action*="login.php"]'))[-1]
+
+    e_id = self.q('input[name="pixiv_id"]', form)
+    e_id.clear()
+    e_id.send_keys(self.config['username'])
+
+    e_pw = self.q('input[name="pass"]', form)
+    e_pw.clear()
+    e_pw.send_keys(self.config['password'])
+
+    # form.submit()
+    self.q('#login_submit', form).click()
+
+    try:
+      self.b.wait_until(lambda d: self.is_logged_in())
+      print('Logged in')
+    except selenium.common.exceptions.TimeoutException:
+      print('Login failed!')
+      input('Please login manually and press enter...')
+      pass
+    pass
+
   def setUp(self):
     if self.args.repeatable and not self.repeatable:
       self.skipTest('%s is not repeatable' % self.__class__.__name__)
+      pass
+
+    if self.restart_browser or not self.b.driver:
+      if self.b.driver:
+        print('Restarting browser...')
+        self.b.quit()
+        pass
+
+      self.b.start()
+      self.b.set_window_size(1024, 768)
       pass
 
     if self.run_in_pixiv:
@@ -39,9 +79,8 @@ class TestCase(unittest.TestCase):
         self.open('/')
         pass
 
-      dialog_close = self.qa('._premium-promotion-modal .ui-modal-close')
-      if dialog_close and dialog_close[0].is_displayed():
-        self.click(dialog_close[0])
+      if not self.is_logged_in():
+        self.login()
         pass
 
       js = []

@@ -4,6 +4,7 @@ import util
 from test_base import TestCase
 
 class Test_MarkVisited(TestCase):
+  restart_browser = True
 
   def inject_css(self):
     self.js('''
