@@ -970,6 +970,7 @@ _.popup = {
     var h = this.dom.header;
     return (!h.classList.contains('pp-hide') &&
             (h.classList.contains('pp-show') ||
+             (h.matches && h.matches(':hover')) ||
              (h.oMatchesSelector && h.oMatchesSelector(':hover')) ||
              (h.mozMatchesSelector && h.mozMatchesSelector(':hover')) ||
              (h.webkitMatchesSelector && h.webkitMatchesSelector(':hover'))));
