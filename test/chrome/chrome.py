@@ -1,6 +1,8 @@
 import os
 import base64
 import time
+import subprocess
+import re
 
 from browser import Browser
 
@@ -9,10 +11,16 @@ class Chrome(Browser):
   capname = 'CHROME'
 
   def prepare_caps(self, caps):
+    v_str = subprocess.check_output([self.args.chrome_bin, '--version'])
+    m = re.match(rb'Chromium ([\d\.]+)\s*', v_str)
+    if not m:
+      raise RuntimeError('Failed to detect Chromium version')
+    self.chrome_version = m.group(1)
+
     caps['chromeOptions'] = {
       'extensions': [
         self.read_file_as_base64(os.path.join(self.distdir, 'pixplus.crx')),
-        self.read_file_as_base64(self.download_crx('ab.crx', 'gighmmpiobklfepjocnamgkkbiglidom'))
+        self.read_file_as_base64(self.download_crx('abp.crx', 'cfhdojbkjhnklbpkdaibdccddilifddb'))
       ]
     }
     if self.args.chrome_bin:
@@ -20,8 +28,9 @@ class Chrome(Browser):
       pass
     pass
 
-  def download_crx(self, filename, ext_id, chrome_version = '37.0.2062.120'):
-    url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc' % (chrome_version, ext_id)
+  def download_crx(self, filename, ext_id):
+    url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc'
+    url = url % (self.chrome_version, ext_id)
     return self.download(url, filename)
 
   pass
