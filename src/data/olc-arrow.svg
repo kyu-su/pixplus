@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="100" height="100" viewBox="0 0 100 100">
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <path d="M 10 50 l 45 -45 l 0 30 l 35 0 l 0 30 l -35 0 l 0 30 z"
         fill="#ddd" stroke="#222" stroke-width="10" stroke-linejoin="round"/>
 </svg>

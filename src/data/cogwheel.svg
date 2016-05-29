@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="24" height="24" viewBox="0 0 24 24">
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <clipPath clipPathUnits="userSpaceOnUse" id="pp-icon-cogwheel-clip">
       <path d="M 12,0 C 5.372583,0 0,5.3726 0,12 0,18.6274 5.372583,24 12,24 18.627417,24 24,18.6274 24,12 24,5.3726 18.627417,0 12,0 z m 0,9 c 1.656854,0 3,1.3431 3,3 0,1.6569 -1.343146,3 -3,3 -1.656854,0 -3,-1.3431 -3,-3 0,-1.6569 1.343146,-3 3,-3 z"/>
