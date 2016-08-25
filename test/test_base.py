@@ -33,20 +33,20 @@ class TestCase(unittest.TestCase):
 
   def login(self):
     print('Logging in...')
-    self.b.open('https://www.secure.pixiv.net/login.php')
+    self.b.open('https://accounts.pixiv.net/login')
 
-    form = self.b.wait_until(lambda d: self.qa('form[action*="login.php"]'))[-1]
+    form = self.b.wait_until(lambda d: self.qa('#LoginComponent'))[0]
 
-    e_id = self.q('input[name="pixiv_id"]', form)
+    e_id = self.q('input[placeholder*="pixiv ID"]', form)
     e_id.clear()
     e_id.send_keys(self.config['username'])
 
-    e_pw = self.q('input[name="pass"]', form)
+    e_pw = self.q('input[placeholder*="Password"]', form)
     e_pw.clear()
     e_pw.send_keys(self.config['password'])
 
     # form.submit()
-    self.q('#login_submit', form).click()
+    self.q('.signup-form__submit', form).click()
 
     try:
       self.b.wait_until(lambda d: self.is_logged_in())
