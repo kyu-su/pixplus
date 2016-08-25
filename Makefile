@@ -29,7 +29,8 @@ CHANGELOG_JSON                  = src/data/changelog.json
 
 BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
 BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
-BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+# BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+BUILD_SAFARIEXTZ                = no
 
 VERSION_DEV                     = $(shell $(PYTHON) tools/changelog.py dev_version < $(CHANGELOG_JSON))
 VERSION_STABLE                  = $(shell $(PYTHON) tools/changelog.py stable_version < $(CHANGELOG_JSON))
@@ -102,7 +103,7 @@ SAFARIEXTZ_DIST_FILES           = $(addprefix $(BUILD_DIR_SAFARIEXTZ)/,$(notdir 
                                   $(SAFARIEXTZ_USERJS) $(SAFARIEXTZ_INFO_PLIST) \
                                   $(SAFARIEXTZ_SETTINGS_PLIST) $(SAFARIEXTZ_ICON_FILES)
 
-AUTOUPDATE_TARGETS              = chrome.xml safari.xml opera.xml
+AUTOUPDATE_TARGETS              = chrome.xml opera.xml
 AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/1/%)
 AUTOUPDATE_GM                   = autoupdate/1/pixplus.user.js
 
