@@ -1,6 +1,18 @@
 pixplus version history
 =======================
 
+## [1.15.1 - 2016/08/26](http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1)
+
+### 変更点
+
+* [修正] マンガページ内で設定ダイアログのレイアウトが壊れていた不具合を修正。
+* [修正] 「pixivコミックアイコンを除去する」オプションが機能しなくなっていた不具合を修正。
+
+### Changes
+
+* [Fix] Preference dialog on manga page was broken.
+* [Fix] 'Remove pixiv comic icon' option was broken.
+
 ## [1.15.0 - 2015/08/02](http://crckyl.hatenablog.com/entry/2015/08/02/pixplus_1.15.0)
 
 ### 変更点

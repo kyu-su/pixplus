@@ -1,8 +1,8 @@
 [
   {
-    "date": "",
+    "date": "2016/08/26",
     "version": "1.15.1",
-    "releasenote": "",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1",
     "changes_i18n": {
       "en": [
         "[Fix] Preference dialog on manga page was broken.",
