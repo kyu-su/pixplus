@@ -338,7 +338,7 @@ class TestCase(unittest.TestCase):
     return image
 
   def image_isEqual(self, img1, img2):
-    return img1.size == img2.size and img1.tostring('raw', 'RGB') == img2.tostring('raw', 'RGB')
+    return img1.size == img2.size and img1.tobytes('raw', 'RGB') == img2.tobytes('raw', 'RGB')
 
   def assertImageEqual(self, img1, img2):
     self.assertTrue(self.image_isEqual(img1, img2))
