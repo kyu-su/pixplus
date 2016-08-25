@@ -16,11 +16,14 @@ class Test_Rate(TestCase):
     score = (int(time.time()) % 9) + 1
     width = score * 26
 
+    if confirm and not self.b.supports_alert:
+      self.js('window.confirm=function(){return true}')
+
     self.move_to(rating, (width - 10, 10))
     # click() moves cursor to center on Firefox22
     self.ac().click_and_hold().release().perform()
 
-    if confirm:
+    if confirm and self.b.supports_alert:
       self.alert_accept()
 
     rate = self.q('#pp-popup-rating .score .rating .rate')

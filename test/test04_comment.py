@@ -15,8 +15,11 @@ class Test_Comment(TestCase):
     time.sleep(1)
     self.move_to(dellink)
     time.sleep(1)
+    if not self.b.supports_alert:
+      self.js('window.confirm=function(){return true}')
     self.click(dellink)
-    self.alert_accept()
+    if self.b.supports_alert:
+      self.alert_accept()
     time.sleep(1)
 
   def delete_all(self):
