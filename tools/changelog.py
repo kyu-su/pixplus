@@ -42,11 +42,11 @@ def out_atom(changelog):
   <title type="text">pixplus</title>
   <id>http://ccl4.info/pixplus/release.atom</id>
   <updated>%(time)s</updated>
-  <link href="http://ccl4.info/pixplus/" />
-  <link href="http://ccl4.info/pixplus/release.atom" rel="self" />
+  <link href="https://ccl4.info/pixplus/" />
+  <link href="https://ccl4.info/cgit/pixplus.git/plain/release.atom" rel="self" />
   <author>
     <name>wowo</name>
-    <uri>http://ccl4.info/</uri>
+    <uri>https://ccl4.info/</uri>
     <email>crckyl@gmail.com</email>
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
@@ -64,12 +64,12 @@ def out_atom(changelog):
     entry = '''
   <entry>
     <title type="text">pixplus %(ver)s</title>
-    <id>http://ccl4.info/pixplus/archive/%(ver)s</id>
+    <id>https://ccl4.info/pixplus/archive/%(ver)s</id>
     <updated>%(time)s</updated>
-    <link href="http://ccl4.info/pixplus/archive/%(ver)s" />
+    <link href="https://ccl4.info/pixplus/archive/%(ver)s" />
     <author>
       <name>wowo</name>
-      <uri>http://ccl4.info/</uri>
+      <uri>https://ccl4.info/</uri>
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
