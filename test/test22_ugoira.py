@@ -14,6 +14,7 @@ class Test_Ugoira(TestCase):
   zip_filename = zip_url.split('/')[-1]
 
   def setUp(self):
+    TestCase.setUp(self)
     if not os.path.exists(self.zip_filename):
       util.download(self.zip_url, zip_filename)
     zf = zipfile.ZipFile(self.zip_filename)
