@@ -15,7 +15,6 @@ class Test_Bookmark(TestCase):
 
     self.click(tags[0])
     self.assertEqual(input_tag.get_attribute('value').strip(), '')
-    pass
 
   def check(self, hide):
     self.open_popup()
@@ -25,7 +24,6 @@ class Test_Bookmark(TestCase):
       self.unbookmark()
       self.open_popup()
       bookmark_btn = self.q('#pp-popup-button-bookmark')
-      pass
 
     self.popup_poll_reload(
       lambda: not self.has_class(bookmark_btn, 'pp-active')
@@ -47,18 +45,13 @@ class Test_Bookmark(TestCase):
     self.popup_poll_reload(lambda: self.has_class(bookmark_btn, 'pp-active'))
 
     self.unbookmark()
-    pass
 
   def test_bookmark(self):
     self.open_test_user()
     self.set_conf('general.bookmark_hide', False)
     self.check(False)
-    pass
 
   def test_bookmark_hide(self):
     self.open_test_user()
     self.set_conf('general.bookmark_hide', True)
     self.check(True)
-    pass
-
-  pass

@@ -16,6 +16,3 @@ class Test_TagAlias(TestCase):
     self.open_popup(1580459)
     self.start_bookmark()
     self.assertEqual(self.q('#pp-popup-bookmark-wrapper #input_tag').get_attribute('value'), tag)
-    pass
-
-  pass

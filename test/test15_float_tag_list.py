@@ -7,7 +7,6 @@ class Test_FloatTagList(TestCase):
   def setUp(self):
     self.set_window_size(1024, 1600)
     time.sleep(1)
-    pass
 
   def check(self, element, on, margin_top = 0):
     self.assertFalse(self.has_class(element, 'pp-float'))
@@ -22,7 +21,6 @@ class Test_FloatTagList(TestCase):
       # margin_top += 60
     else:
       margin_top = 0
-      pass
 
     self.assertEqual(self.geom(element)[1], offset + margin_top)
 
@@ -33,7 +31,6 @@ class Test_FloatTagList(TestCase):
 
     self.js('window.scrollTo(0, 0)')
     time.sleep(1)
-    pass
 
   def test_on(self):
     self.set_conf('general.float_tag_list', 1)
@@ -43,7 +40,6 @@ class Test_FloatTagList(TestCase):
 
     self.open_test_user()
     self.check(self.q('.ui-layout-west'), True)
-    pass
 
   def test_off(self):
     self.set_conf('general.float_tag_list', 0)
@@ -53,6 +49,3 @@ class Test_FloatTagList(TestCase):
 
     self.open_test_user()
     self.check(self.q('.ui-layout-west'), False)
-    pass
-
-  pass

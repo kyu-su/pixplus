@@ -22,6 +22,3 @@ class Test_MangaPage(TestCase):
     self.click(self.q('a[href*="mode=manga"] img'))
     self.popup_wait_load()
     self.assertTrue(self.js('return pixplus.popup.manga.active'))
-    pass
-
-  pass

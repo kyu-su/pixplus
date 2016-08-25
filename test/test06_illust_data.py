@@ -158,12 +158,9 @@ class Test_IllustData(TestCase):
 
       for key, value in o1.items():
         self.check_object_equal(value, o2[key], msg, path + [key])
-        pass
-      pass
+
     else:
       self.assertEqual(o1, o2, msg_s)
-      pass
-    pass
 
   def test_illust_data(self):
     self.open('/')
@@ -173,11 +170,6 @@ class Test_IllustData(TestCase):
       self.open_popup(data['id'])
       if 'image_url_big' in data:
         self.popup_wait_big_image()
-        pass
       illust_data = self.popup_get_illust_data()
       illust_data['tags'] = set(illust_data['tags'])
       self.check_object_equal(data, illust_data, 'Illust data mismatch! %d[%%(path)s] =>\n  %%(obj1)s\n    vs\n  %%(obj2)s' % data['id'])
-      pass
-    pass
-
-  pass

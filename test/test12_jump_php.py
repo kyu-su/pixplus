@@ -24,6 +24,3 @@ class Test_Jumpphp(TestCase):
     self.popup_reload()
 
     self.assertEqual(self.q('#pp-popup-caption a').get_attribute('href'), real_url)
-    pass
-
-  pass

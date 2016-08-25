@@ -8,7 +8,6 @@ try:
   from elementtree.ElementTree import ElementTree
 except ImportError:
   from xml.etree.ElementTree import ElementTree
-  pass
 
 import util
 from browser import Browser
@@ -33,17 +32,13 @@ class Firefox(Browser):
     try:
       for key, value in self.user_prefs.items():
         fp.write('user_pref("%s", %s);\n' % (key, value))
-        pass
     finally:
       fp.close()
-      pass
 
     caps['firefox_profile'] = self.b64()
 
     if self.args.firefox_bin:
       caps['firefox_binary'] = self.args.firefox_bin
-      pass
-    pass
 
   def prepare_addon(self, addonid, name):
     filename = 'addon-%d-latest.xpi' % addonid
@@ -55,7 +50,6 @@ class Firefox(Browser):
     print('Setup %s' % name)
     self.install_xpi(filename)
     getattr(self, 'setup_%s' % name, lambda: None)()
-    pass
 
   def install_xpi(self, filename):
     extract_path = os.path.join(self.profiledir, 'extensions', os.path.basename(filename))
@@ -66,7 +60,6 @@ class Firefox(Browser):
     doc = ElementTree(file = os.path.join(extract_path, 'install.rdf'))
     eid = doc.find('.//{http://www.mozilla.org/2004/em-rdf#}id').text
     os.rename(extract_path, os.path.join(os.path.dirname(extract_path), eid))
-    pass
 
   def setup_greasemonkey(self):
     path_gm = os.path.join(self.profiledir, 'gm_scripts')
@@ -74,7 +67,6 @@ class Firefox(Browser):
     util.copy_file(os.path.join(self.browserdir, 'gm_config.xml'), os.path.join(path_gm, 'config.xml'))
     util.copy_file(os.path.join(self.distdir, 'pixplus.user.js'), path_gm)
     self.user_prefs['extensions.greasemonkey.stats.prompted'] = 'true'
-    pass
 
   def setup_scriptish(self):
     path_st = os.path.join(self.profiledir, 'scriptish_scripts')
@@ -82,7 +74,6 @@ class Firefox(Browser):
     util.copy_file(os.path.join(self.browserdir, 'scriptish-config.json'), path_st)
     util.copy_file(os.path.join(self.distdir, 'pixplus.user.js'), path_st)
     os.utime(os.path.join(path_st, 'pixplus.user.js'), (2000000000, 2000000000))
-    pass
 
   def b64(self):
     fp = util.BytesIO()
@@ -91,8 +82,6 @@ class Firefox(Browser):
       for filename in files:
         path = os.path.join(base, filename)
         z.write(path, path[len(self.profiledir):].lstrip('/'))
-        pass
-      pass
     z.close()
 
     data = base64.b64encode(fp.getvalue())
@@ -102,12 +91,9 @@ class Firefox(Browser):
       pass
     return data
 
-  pass
-
 def register_args(parser):
   parser.add_argument('--firefox-command', dest = 'firefox_bin')
   parser.add_argument('--firefox-mode', dest = 'firefox_mode',
                       choices = ADDONS.keys(),
                       default = 'greasemonkey',
                       help = ','.join(ADDONS.keys()))
-  pass

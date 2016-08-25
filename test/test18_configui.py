@@ -22,31 +22,23 @@ class Test_ModConfigUI(TestCase):
       self.conf_map[secname] = section
       for item in section['items']:
         self.conf_map[secname, item['key']] = item
-        pass
-      pass
-    pass
 
   def prepare(self):
     self.open('/')
     self.click(self.q('#pp-config-btn1'))
     self.current_section = None
-    pass
 
   def activate_section(self, section):
     if section != self.current_section:
       self.click(self.q('#pp-config-tab-%s' % section['name']))
       self.current_section = section
       time.sleep(1)
-      pass
-    pass
 
   def input_query(self, section, item, suffix = ''):
     if isinstance(section, dict):
       section = section['name']
-      pass
     if isinstance(item, dict):
       item = item['key']
-      pass
     input_id = 'pp-config-%s-%s%s' % (section, item.replace('_', '-'), suffix)
     return '#' + input_id
 
@@ -70,13 +62,8 @@ class Test_ModConfigUI(TestCase):
           self.assertEqual(input_e.is_selected(), current)
         else:
           self.assertEqual(input_e.get_attribute('value'), str(current))
-          pass
 
         callback(section, item, conf_key, default, current, input_e, *args)
-        pass
-
-      pass
-    pass
 
   def update_change_steps(self, section, item, conf_key, default, current, input_e, steps):
     self.set_conf(conf_key, default)
@@ -91,7 +78,6 @@ class Test_ModConfigUI(TestCase):
       values = [default + 1]
     else:
       values = [default + 'hoge']
-      pass
 
     values.insert(0, default)
     values.append(default)
@@ -99,14 +85,10 @@ class Test_ModConfigUI(TestCase):
     for idx, value in enumerate(values):
       if len(steps) == idx:
         steps.append([])
-        pass
       next = None
       if idx + 1 < len(values):
         next = values[idx + 1]
-        pass
       steps[idx].append((section, item, value, next))
-      pass
-    pass
 
   def check_conf(self, key, expected_value, invert = False):
     value = self.get_conf(key)
@@ -118,8 +100,6 @@ class Test_ModConfigUI(TestCase):
       self.assertEqual(value, expected_value,
                        'conf.%s should be "%s" but got "%s"'
                        % (key, expected_value, value))
-      pass
-    pass
 
   def test_change(self):
     conf = self.prepare()
@@ -140,7 +120,6 @@ class Test_ModConfigUI(TestCase):
           self.assertEqual(input_e.is_selected(), value)
         else:
           self.assertEqual(input_e.get_attribute('value'), str(value))
-          pass
 
         if next_value is None:
           continue
@@ -148,28 +127,19 @@ class Test_ModConfigUI(TestCase):
         if isinstance(value, bool):
           if next_value is not None and value != next_value:
             self.click(input_e, False)
-            pass
-          pass
         elif input_e.tag_name.lower() == 'select':
           Select(input_e).select_by_value(str(next_value))
         else:
           input_e.clear()
           input_e.send_keys(str(next_value))
           self.js('pixplus.modal.dialog.container.classList.contains("pp-config-regexp-editor")&&pixplus.modal.close()')
-          pass
-
-        pass
 
       time.sleep(1)
-      pass
-    pass
 
   def check_reset_default(self, section, item, conf_key, default, current, input_e):
     if isinstance(default, bool):
       if current == default:
         self.click(input_e, False)
-        pass
-      pass
     elif input_e.tag_name.lower() == 'select':
       sel = Select(input_e)
       values = [default.__class__(o.get_attribute('value')) for o in sel.options]
@@ -181,29 +151,24 @@ class Test_ModConfigUI(TestCase):
     else:
       input_e.clear()
       input_e.send_keys(default + 'hoge')
-      pass
 
     self.check_conf(conf_key, default, True)
     self.click(self.get_input(section, item, '-default'))
     self.check_conf(conf_key, default)
-    pass
 
   def test_reset_default(self):
     conf = self.prepare()
     self.each_item(self.check_reset_default)
-    pass
 
   def check_key_editor_keys(self, expected_keys):
     keys = [l.text for l in self.qa('.pp-config-key-editor ul li label')]
     self.assertEqual(keys, expected_keys)
-    pass
 
   def check_key_editor_grab(self, keys, value):
     self.js('document.querySelector(".pp-config-key-editor-grab").focus()')
     grab = self.q('.pp-config-key-editor-grab')
     self.send_keys(keys, grab)
     self.assertEqual(grab.get_attribute('value'), value)
-    pass
 
   def test_key_editor(self):
     conf = self.prepare()
@@ -243,7 +208,6 @@ class Test_ModConfigUI(TestCase):
 
     self.click(self.q('.pp-dialog-action-close'))
     self.assertFalse(self.qa('.pp-config-key-editor'))
-    pass
 
   def check_modal_position_size(self, dialog, left, top, width, height):
     self.assertTrue(dialog.is_displayed())
@@ -258,14 +222,11 @@ class Test_ModConfigUI(TestCase):
       self.assertEqual(x, int((sw - w) / 2))
     else:
       self.assertTrue(left[0] <= x <= left[1])
-      pass
 
     if top is None:
       self.assertEqual(y, int((sh - h) / 2))
     else:
       self.assertTrue(top[0] <= y <= top[1])
-      pass
-    pass
 
   def check_keyeditor_position_size(self, input_e):
     editor = self.qa('.pp-config-key-editor')
@@ -280,7 +241,6 @@ class Test_ModConfigUI(TestCase):
     self.assertTrue((ix - 2) <= (ex + ew) <= (ix + 2),
                     'input(x=%d,y=%d),editor(x=%d,y=%d,w=%d,h=%d) editor x+w should be at input x'
                     % (ix, iy, ex, ey, ew, eh))
-    pass
 
   def test_modal(self):
     self.prepare()
@@ -341,6 +301,3 @@ class Test_ModConfigUI(TestCase):
     time.sleep(1)
     self.click(self.q('form[action*="search.php"]'))
     self.assertFalse(self.q('#pp-config').is_displayed())
-    pass
-
-  pass

@@ -19,7 +19,6 @@ class TestCase(unittest.TestCase):
     unittest.TestCase.__init__(self, testname)
     self.b = browser
     self.config = config
-    pass
 
   @classmethod
   def list_tests(cls):
@@ -54,49 +53,37 @@ class TestCase(unittest.TestCase):
     except selenium.common.exceptions.TimeoutException:
       print('Login failed!')
       input('Please login manually and press enter...')
-      pass
-    pass
 
   def setUp(self):
     if self.args.repeatable and not self.repeatable:
       self.skipTest('%s is not repeatable' % self.__class__.__name__)
-      pass
 
     if self.restart_browser or not self.b.driver:
       if self.b.driver:
         print('Restarting browser...')
         self.b.quit()
-        pass
 
       self.b.start()
       self.b.set_window_size(1024, 768)
-      pass
 
     if self.run_in_pixiv:
       conf = util.read_json(os.path.join(self.rootdir, 'src', 'data', 'config.json'))
 
       if not self.url.startswith('http://www.pixiv.net/'):
         self.open('/')
-        pass
 
       if not self.is_logged_in():
         self.login()
-        pass
 
       js = []
       for section in conf:
         for item in section['items']:
           js.append('pixplus.conf.%s.%s=%s' % (section['name'], item['key'], json.dumps(item['value'])))
-          pass
-        pass
       self.js(';'.join(js))
-      pass
-    pass
 
   def tearDown(self):
     self.wait_page_load()
     time.sleep(1)
-    pass
 
   def open(self, path):
     url = 'http://www.pixiv.net%s' % path
@@ -104,18 +91,15 @@ class TestCase(unittest.TestCase):
 
     if self.qa('.one_column_body > .errorArea'):
       self.reload()
-      pass
 
     self.wait_until(lambda d: self.js('return !!window.pixplus'))
     time.sleep(1)
-    pass
 
   def wait_illust_list(self):
     try:
       self.wait_until(lambda d: self.js('return pixplus.illust.list.length>0'))
     except TimeoutException:
       raise RuntimeError('No illusts detected! - %s' % self.b.url)
-    pass
 
   def has_class(self, element, classname):
     return ' %s ' % classname in ' %s ' % element.get_attribute('class')
@@ -126,12 +110,10 @@ class TestCase(unittest.TestCase):
     else:
       self.wait_illust_list()
       self.js('pixplus.popup.show(pixplus.illust.list[%d])' % (idx or 0))
-      pass
     return self.popup_wait_load()
 
   def close_popup(self):
     self.js('pixplus.popup.hide()')
-    pass
 
   def popup_wait_load(self):
     popup = self.q('#pp-popup')
@@ -159,26 +141,21 @@ class TestCase(unittest.TestCase):
         return images.length === 1 && images[0] === illust.image_big;
       }
     '''))
-    pass
 
   def popup_show_caption(self):
     self.js('pixplus.popup.show_caption()')
-    pass
 
   def popup_reload(self):
     self.js('pixplus.popup.reload()')
     self.popup_wait_load()
-    pass
 
   def popup_prev(self):
     self.js('pixplus.popup.show(pixplus.popup.illust.prev)')
     self.popup_wait_load()
-    pass
 
   def popup_next(self):
     self.js('pixplus.popup.show(pixplus.popup.illust.next)')
     self.popup_wait_load()
-    pass
 
   def popup_get_illust_data(self, name = None):
     obj = self.safe_get_jsobj('pixplus.popup.illust')
@@ -189,7 +166,6 @@ class TestCase(unittest.TestCase):
   def open_test_user(self):
     self.open('/member_illust.php?id=%d' % self.config['test-user'])
     self.wait_illust_list()
-    pass
 
   def find_illust(self, callback, *args):
     popup = self.open_popup()
@@ -203,8 +179,6 @@ class TestCase(unittest.TestCase):
 
       self.popup_next()
       idx += 1
-      pass
-    pass
 
   def find_manga_page(self, callback, *args):
     popup = self.open_popup()
@@ -226,16 +200,12 @@ class TestCase(unittest.TestCase):
         r = callback(page, *args)
         if r:
           return r
-        pass
 
       self.popup_next()
-      pass
-    pass
 
   def unbookmark(self, illust_id = None):
     if illust_id is None:
       illust_id = self.popup_get_illust_data('id')
-      pass
 
     url = self.b.url
 
@@ -252,20 +222,16 @@ class TestCase(unittest.TestCase):
     if not checked:
       self.open('/bookmark.php?rest=hide')
       self.assertTrue(check())
-      pass
 
     if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
-      pass
 
     self.click(self.q('input[type="submit"][name="del"]'))
     if self.b.supports_alert:
       self.alert_accept()
-      pass
 
     self.wait_page_load()
     self.b.open(url)
-    pass
 
   def popup_poll_reload(self, callback):
     for i in range(10):
@@ -273,16 +239,13 @@ class TestCase(unittest.TestCase):
         break
       time.sleep(1)
       self.popup_reload()
-      pass
     self.assertTrue(callback())
-    pass
 
   def get_conf(self, key):
     return self.js('return pixplus.conf.%s' % key)
 
   def set_conf(self, key, value):
     self.js('pixplus.conf.%s=%s' % (key, json.dumps(value)))
-    pass
 
   def safe_get_jsobj(self, name):
     obj = self.js('''
@@ -330,20 +293,16 @@ class TestCase(unittest.TestCase):
       target.send_keys(keys)
     else:
       self.ac().send_keys(keys).perform()
-      pass
 
     if self.qa('#pp-popup'):
       self.popup_wait_load()
-      pass
 
     time.sleep(0.3)
-    pass
 
   def lazy_scroll(self, elem):
     self.js('''
       pixplus.lazy_scroll(arguments[0]);
     ''', elem)
-    pass
 
   def move_to(self, elem, off = None):
     self.lazy_scroll(elem)
@@ -351,8 +310,6 @@ class TestCase(unittest.TestCase):
       self.ac().move_to_element_with_offset(elem, off[0], off[1]).perform()
     else:
       self.ac().move_to_element(elem).perform()
-      pass
-    pass
 
   def click(self, elem, hold = True):
     self.lazy_scroll(elem)
@@ -361,28 +318,22 @@ class TestCase(unittest.TestCase):
     else:
       self.ac().move_to_element(elem).click(elem).perform()
       # elem.click()
-      pass
-    pass
 
   def start_bookmark(self):
     self.js('pixplus.popup.bookmark.start()')
     self.popup_wait_load()
-    pass
 
   def end_bookmark(self):
     self.js('pixplus.popup.bookmark.end()')
-    pass
 
   def blur(self):
     self.js('document.activeElement && document.activeElement.blur()')
-    pass
 
   def save_image(self, image, filename):
     path = os.path.join('screenshot', filename)
     dirpath = os.path.dirname(path)
     if not os.path.exists(dirpath):
       os.makedirs(dirpath)
-      pass
     image.save(path)
     return image
 
@@ -391,10 +342,6 @@ class TestCase(unittest.TestCase):
 
   def assertImageEqual(self, img1, img2):
     self.assertTrue(self.image_isEqual(img1, img2))
-    pass
 
   def assertImageNotEqual(self, img1, img2):
     self.assertFalse(self.image_isEqual(img1, img2))
-    pass
-
-  pass

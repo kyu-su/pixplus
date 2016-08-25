@@ -17,7 +17,6 @@ class Test_MarkVisited(TestCase):
       ].join('');
       document.body.appendChild(style);
     ''')
-    pass
 
   def check_link_color(self, color, filename_suffix):
     link = self.js('''
@@ -45,7 +44,6 @@ class Test_MarkVisited(TestCase):
     self.save_image(img_crop, 'test17_mark_visited_image_%s_crop.png' % filename_suffix)
 
     self.assertImageEqual(img_crop, Image.new('RGB', (w, h), color))
-    pass
 
   def test_on(self):
     self.open_test_user()
@@ -55,7 +53,6 @@ class Test_MarkVisited(TestCase):
     self.open_popup()
     self.close_popup()
     self.check_link_color('red', 'on2')
-    pass
 
   def test_off(self):
     self.open_test_user()
@@ -66,7 +63,3 @@ class Test_MarkVisited(TestCase):
     self.open_popup()
     self.close_popup()
     self.check_link_color('white', 'off2')
-    pass
-
-  pass
-

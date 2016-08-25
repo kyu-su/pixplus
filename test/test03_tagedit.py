@@ -23,7 +23,6 @@ class Test_TagEdit(TestCase):
     self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
     self.assertTrue(self.qa('#pp-popup:not(.pp-tagedit-mode)'))
-    pass
 
   def find_tag_editable(self, query):
     return self.find_illust(self.check_tag_editable, query)
@@ -32,7 +31,6 @@ class Test_TagEdit(TestCase):
     self.open_test_user()
     if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
-      pass
 
     del_btn = self.find_tag_editable('input[onclick^="delTag("]')
     tags = self.get_tags()
@@ -49,14 +47,12 @@ class Test_TagEdit(TestCase):
     self.click(del_btn)
     if self.b.supports_alert:
       self.alert_accept()
-      pass
 
     self.js('pixplus.popup.tagedit.end()')
     self.popup_wait_load()
 
     tags.remove(tag)
     self.popup_poll_reload(lambda: self.get_tags() == tags)
-    pass
 
   def test_2_tagedit_add(self):
     self.open_test_user()
@@ -75,6 +71,3 @@ class Test_TagEdit(TestCase):
 
     tags.add(tag)
     self.popup_poll_reload(lambda: self.get_tags() == tags)
-    pass
-
-  pass

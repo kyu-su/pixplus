@@ -8,7 +8,6 @@ class Test_Comment(TestCase):
   def start_comment(self):
     self.js('pixplus.popup.comment.start()')
     self.popup_wait_load()
-    pass
 
   def delete(self, comment):
     dellink = self.q('.delete-comment', comment)
@@ -19,7 +18,6 @@ class Test_Comment(TestCase):
     self.click(dellink)
     self.alert_accept()
     time.sleep(1)
-    pass
 
   def delete_all(self):
     self.open_test_user()
@@ -33,14 +31,10 @@ class Test_Comment(TestCase):
         if self.qa('.delete-comment', comment):
           end = False
           self.delete(comment)
-          pass
-        pass
 
       self.reload()
-      pass
 
     self.assertFalse(self.qa('.delete-comment'))
-    pass
 
   def test_default_tab(self):
     self.open_test_user()
@@ -82,7 +76,6 @@ class Test_Comment(TestCase):
     self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker:not(._current)'))
     self.assertTrue(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
     self.assertFalse(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
-    pass
 
   def test_write(self):
     self.delete_all()
@@ -108,7 +101,6 @@ class Test_Comment(TestCase):
       if self.xa(xpath):
         break
       time.sleep(1)
-      pass
 
     self.start_comment()
     self.delete(self.x(xpath))
@@ -116,7 +108,6 @@ class Test_Comment(TestCase):
     self.popup_wait_load()
     self.assertFalse(self.xa(xpath))
     self.assertFalse(self.qa('._comment-item .delete-comment'))
-    pass
 
   def make_stamp_xpath(self, num):
     return '\
@@ -132,7 +123,6 @@ class Test_Comment(TestCase):
     self.click(self.q(self.form_selector + ' .sticker-type-list .ui-tab[data-target="sticker-%d"]' % cat))
     self.click(self.q(self.form_selector + ' .sticker-list.sticker-%d .sticker[data-id="%d"]' % (cat, num)))
     self.wait_until(lambda driver: self.xa(xpath))
-    pass
 
   def test_write_stamp(self):
     self.delete_all()
@@ -151,7 +141,6 @@ class Test_Comment(TestCase):
       if self.xa(xpath):
         break
       time.sleep(1)
-      pass
 
     self.start_comment()
     self.delete(self.x(xpath))
@@ -159,7 +148,6 @@ class Test_Comment(TestCase):
     self.popup_wait_load()
     self.assertFalse(self.xa(xpath))
     self.assertFalse(self.qa('._comment-item .delete-comment'))
-    pass
 
   def check_toggle_form(self, visible):
     self.assertEqual(self.get_conf('popup.show_comment_form'), visible)
@@ -179,7 +167,6 @@ class Test_Comment(TestCase):
 
     self.assertTrue(comment.is_displayed())
     self.assertEqual(form.is_displayed(), not visible)
-    pass
 
   def test_toggle_form(self):
     self.open_test_user()
@@ -189,7 +176,6 @@ class Test_Comment(TestCase):
     self.reload()
     self.set_conf('popup.show_comment_form', True)
     self.check_toggle_form(True)
-    pass
 
   def test_cogwheel(self):
     self.delete_all()
@@ -277,6 +263,3 @@ class Test_Comment(TestCase):
     time.sleep(1)
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
-    pass
-
-  pass

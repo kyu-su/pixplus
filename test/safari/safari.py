@@ -17,6 +17,3 @@ class Safari(Browser):
          'contents': self.read_file_as_base64(self.download('https://data.getadblock.com/safari/AdBlock.safariextz', 'AdBlock.safariextz'))}
       ]
     }
-    pass
-
-  pass

@@ -64,22 +64,17 @@ class Test_ModKey(TestCase):
 
     for c in r"-;'./=[\]`":
       self.keys.append((c, ('keypress=' + c,)))
-      pass
 
     for c in r'_:"><?{|}~)!@#$%^&*(':
       self.keys.append((c, ('keypress=Shift+' + c,)))
-      pass
 
     for c in '0123456789abcdefghijklmnopqrstuvwxyz':
       self.keys.append((c, ('keydown=' + c, 'keypress=' + c)))
-      pass
 
     for c1, c2 in zip('abcdefghijklmnopqrstuvwxyz',
                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
       self.keys.append((c2, ('keydown=Shift+' + c1, 'keypress=Shift+' + c2.lower())))
-      pass
 
-    pass
 
   def test_mod_key1(self):
     self.b.open('file://%s/key_test.html' % self.testdir)
@@ -96,9 +91,3 @@ class Test_ModKey(TestCase):
 
       if key in (Keys.SHIFT, Keys.CONTROL, Keys.ALT):
         self.ac().key_down(key, target).key_up(key, target).perform()
-        pass
-
-      pass
-    pass
-
-  pass

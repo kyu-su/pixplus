@@ -16,10 +16,8 @@ class Test_Ugoira(TestCase):
   def setUp(self):
     if not os.path.exists(self.zip_filename):
       util.download(self.zip_url, zip_filename)
-      pass
     zf = zipfile.ZipFile(self.zip_filename)
     self.images = dict([(fn, Image.open(io.BytesIO(zf.read(fn))).convert('RGB')) for fn in zf.namelist()])
-    pass
 
   def frame_count(self):
     return self.js('return pixplus.popup.ugoira_frame_count()')
@@ -70,6 +68,3 @@ class Test_Ugoira(TestCase):
     self.save_image(img1, 'test22_ugoira_next_frame_test_expected.png')
     self.save_image(img2, 'test22_ugoira_next_frame_test_got.png')
     self.assertImageEqual(img1, img2)
-    pass
-
-  pass

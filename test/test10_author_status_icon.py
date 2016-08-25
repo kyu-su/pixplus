@@ -21,6 +21,3 @@ class Test_AuthorStatusIcon(TestCase):
     self.open_popup()
     self.popup_show_caption()
     self.assertFalse(self.q('#pp-popup-author-status').is_displayed())
-    pass
-
-  pass

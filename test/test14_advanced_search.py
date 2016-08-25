@@ -17,13 +17,10 @@ class Test_AdvancedSearch(TestCase):
       e.clear()
       if value is not None:
         e.send_keys(str(value))
-        pass
-      pass
 
     radio = self.get_radio('size')
     value = '%sx%s-%sx%s' % tuple(map(lambda a: '' if a is None else str(a), [wlt, hlt, wgt, hgt]))
     self.assertEqual(radio.get_attribute('value'), value)
-    pass
 
   def check_size(self, wlt, hlt, wgt, hgt):
     self.open('/search.php?s_mode=s_tag&word=pixiv')
@@ -42,16 +39,12 @@ class Test_AdvancedSearch(TestCase):
       self.assertEqual(name in query, value is not None)
       if value is not None:
         self.assertEqual(query[name], str(value))
-        pass
-      pass
-    pass
 
   def test_size(self):
     r = lambda: random.randint(1, 2000)
     self.check_size(*sorted(random.sample(range(2000), 4)))
     self.check_size(r(), None, r(), None)
     self.check_size(None, r(), None, r())
-    pass
 
   def check_slider(self, slider, knob, text):
     sx, sy, sw, sh = self.geom(slider)
@@ -64,14 +57,12 @@ class Test_AdvancedSearch(TestCase):
       kx, ky, kw, kh = self.geom(knob)
       self.assertEqual(kx, sx)
       self.assertEqual(ky, sy)
-      pass
 
     ac = self.ac()
     if knob:
       ac.click_and_hold(knob)
     else:
       ac.move_to_element_with_offset(slider, 4, int(sh / 2)).click_and_hold()
-      pass
     ac.move_by_offset(sw * 2, 0).release().perform()
 
     self.assertEqual(text.get_attribute('value'), '1.5')
@@ -80,8 +71,6 @@ class Test_AdvancedSearch(TestCase):
       kx, ky, kw, kh = self.geom(knob)
       self.assertEqual(kx, sx + sw - kw)
       self.assertEqual(ky, sy)
-      pass
-    pass
 
   def test_ratio(self):
     self.open('/search.php?s_mode=s_tag&word=pixiv')
@@ -101,6 +90,3 @@ class Test_AdvancedSearch(TestCase):
     text.clear()
     text.send_keys('123')
     self.assertEqual(self.get_radio('ratio').get_attribute('value'), '123')
-    pass
-
-  pass

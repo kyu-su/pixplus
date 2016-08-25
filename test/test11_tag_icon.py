@@ -13,7 +13,6 @@ class Test_TagIcon(TestCase):
     self.popup_reload()
     self.popup_show_caption()
     self.assertFalse(self.q('#pp-popup-taglist .tag a[href^="http://dic.pixiv.net/"]').is_displayed())
-    pass
 
   def test_pixiv_comic_icon(self):
     # /search.php?s_mode=s_tag_full&word=%E9%BB%92%E5%9F%B7%E4%BA%8B
@@ -27,6 +26,3 @@ class Test_TagIcon(TestCase):
     self.popup_reload()
     self.popup_show_caption()
     self.assertFalse(self.q('#pp-popup-taglist .tag a[href^="https://comic.pixiv.net/"]').is_displayed())
-    pass
-
-  pass

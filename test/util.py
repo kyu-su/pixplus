@@ -5,20 +5,17 @@ try:
   from urllib.request import urlopen
 except ImportError:
   from urllib2 import urlopen
-  pass
 
 try:
   from urllib.parse import urlparse, parse_qsl, quote, unquote
 except ImportError:
   from urlparse import urlparse, parse_qsl
   from urllib import quote, unquote
-  pass
 
 try:
   from io import BytesIO
 except ImportError:
   from cStringIO import StringIO as BytesIO
-  pass
 
 def download(url, filename):
   sys.stdout.write('Download: %s ' % url)
@@ -41,7 +38,6 @@ def download(url, filename):
       written += len(buf)
       sys.stdout.write('\b' * 4 + '%3d%%' % (written * 100 / size))
       sys.stdout.flush()
-      pass
 
     dst.close()
     src.close()
@@ -57,27 +53,22 @@ def download(url, filename):
 
   sys.stdout.write('\n')
   sys.stdout.flush()
-  pass
 
 def copy_file(path_from, path_to):
   if os.path.isdir(path_to):
     path_to = os.path.join(path_to, os.path.basename(path_from))
-    pass
 
   fp = open(path_from, 'rb')
   try:
     data = fp.read()
   finally:
     fp.close()
-    pass
 
   fp = open(path_to, 'wb')
   try:
     fp.write(data)
   finally:
     fp.close()
-    pass
-  pass
 
 def read_json(filename, default = None):
   if not os.path.exists(filename):
@@ -88,8 +79,6 @@ def read_json(filename, default = None):
     return json.load(fp)
   finally:
     fp.close()
-    pass
-  pass
 
 def write_json(filename, obj):
   fp = open(filename, 'w')
@@ -97,5 +86,3 @@ def write_json(filename, obj):
     json.dump(obj, fp)
   finally:
     fp.close()
-    pass
-  pass

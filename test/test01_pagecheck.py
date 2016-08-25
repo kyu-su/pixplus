@@ -31,7 +31,3 @@ class Test_PageCheck(TestCase):
     for url in self.pages:
       self.open(url)
       self.open_popup()
-      pass
-    pass
-
-  pass

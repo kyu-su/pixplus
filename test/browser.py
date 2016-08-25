@@ -10,7 +10,6 @@ try:
   import http.client as http_client
 except ImportError:
   import httplib as http_client
-  pass
 
 from selenium.webdriver import ActionChains
 from selenium.webdriver import DesiredCapabilities
@@ -28,7 +27,6 @@ class Browser:
   def __init__(self):
     self.driver = None
     self.profiledir = None
-    pass
 
   def start(self):
     if self.driver:
@@ -47,10 +45,8 @@ class Browser:
     for h in self.driver.window_handles[1:]:
       self.driver.switch_to.window(h)
       self.driver.close()
-      pass
     self.driver.switch_to.window(self.driver.window_handles[0])
     self.driver.switch_to_default_content()
-    pass
 
   def quit(self):
     try:
@@ -59,19 +55,16 @@ class Browser:
         self.driver = None
     except http_client.BadStatusLine:
       pass
-    pass
 
   def create_profile(self):
     self.profiledir = os.path.join(self.testdir, 'profile', self.name)
     if os.path.exists(self.profiledir):
       shutil.rmtree(self.profiledir)
-      pass
     os.makedirs(self.profiledir)
     return self.profiledir
 
   def set_window_size(self, width, height):
     self.driver.set_window_size(width, height)
-    pass
 
   @property
   def url(self):
@@ -80,16 +73,13 @@ class Browser:
   def wait_page_load(self):
     time.sleep(1)
     self.wait_until(lambda d: self.js('return !!(window.document&&window.document.readyState==="complete")'))
-    pass
 
   def open(self, url):
     self.driver.get(url)
     self.wait_page_load()
-    pass
 
   def reload(self):
     self.open(self.url)
-    pass
 
   def wait_until(self, callback):
     wait = WebDriverWait(self.driver, 20)
@@ -119,7 +109,6 @@ class Browser:
       Alert(self.driver).accept()
     else:
       raise RuntimeError('%s not supports alert handling' % self.name)
-    pass
 
   def js(self, script, *args):
     return self.driver.execute_script(script, *args)
@@ -144,10 +133,8 @@ class Browser:
     if value is None:
       value = ''
       expires = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-      pass
     cookie = '%s=%s; domain=%s; path=%s%s' % (name, value, domain, path, expires)
     self.js('document.cookie=%s' % json.dumps(cookie))
-    pass
 
   def screenshot(self, elem = None):
     ss = self.driver.get_screenshot_as_png()
@@ -157,7 +144,6 @@ class Browser:
     if elem is not None:
       x, y, w, h = tuple(map(int, self.geom(elem)))
       img = img.crop((x, y, x + w, y + h))
-      pass
 
     return img.convert('RGB')
 
@@ -165,7 +151,6 @@ class Browser:
     dlpath = os.path.join(self.browserdir, filename)
     if not os.path.exists(dlpath) or os.stat(dlpath).st_mtime < time.time() - 60 * 60 * 24:
       util.download(url, dlpath)
-      pass
     return dlpath
 
   def read_file_as_base64(self, filename):
@@ -174,12 +159,9 @@ class Browser:
       data = fp.read()
     finally:
       fp.close()
-      pass
     data = base64.b64encode(data)
     try:
       data = str(data, 'ascii')
     except TypeError:
       pass
     return data
-
-  pass

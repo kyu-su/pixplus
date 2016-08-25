@@ -11,15 +11,12 @@ class Test_KeyBind(TestCase):
   def prepare(self):
     self.open_test_user()
     self.illust_id_list = self.js('return pixplus.illust.list.map(function(i){return i.id})')
-    pass
 
   def check_id(self, idx):
     self.assertEqual(self.popup_get_illust_data('id'), self.illust_id_list[idx])
-    pass
 
   def check_closed(self):
     self.assertFalse(self.qa('#pp-popup'))
-    pass
 
   def test_move1(self):
     self.set_conf('popup.fit_short_threshold', 0)
@@ -46,7 +43,6 @@ class Test_KeyBind(TestCase):
     self.check_id(-1)
     self.send_keys(Keys.SPACE)
     self.check_closed()
-    pass
 
   def test_move2(self):
     self.set_conf('popup.fit_short_threshold', 0)
@@ -72,7 +68,6 @@ class Test_KeyBind(TestCase):
     self.check_id(0)
     self.send_keys(Keys.SPACE)
     self.check_closed()
-    pass
 
   def test_move3(self):
     self.set_conf('popup.fit_short_threshold', 0)
@@ -113,7 +108,6 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
-    pass
 
   def test_move4(self):
     self.set_conf('popup.fit_short_threshold', 0)
@@ -154,7 +148,6 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.RIGHT)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
-    pass
 
   def test_move5(self):
     self.open('/member_illust.php?mode=medium&illust_id=40833644')
@@ -170,7 +163,6 @@ class Test_KeyBind(TestCase):
     self.popup_wait_load()
     self.assertTrue(self.js('return pixplus.popup.manga.active'))
     self.assertEqual(self.js('return pixplus.popup.manga.page'), 1)
-    pass
 
   def test_move6(self):
     self.set_conf('popup.auto_manga', 1)
@@ -196,7 +188,6 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
     self.assertFalse(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx + 1)
-    pass
 
   def test_move7(self):
     self.set_conf('popup.auto_manga', 1)
@@ -222,7 +213,6 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
     self.assertTrue(self.js('return pixplus.popup.manga.active'))
     self.check_id(illust_idx)
-    pass
 
   def test_close(self):
     self.prepare()
@@ -236,7 +226,6 @@ class Test_KeyBind(TestCase):
     self.check_id(0)
     self.send_keys(Keys.ESCAPE)
     self.check_closed()
-    pass
 
   def check_caption(self, status):
     title = self.q('#pp-popup-title')
@@ -264,12 +253,10 @@ class Test_KeyBind(TestCase):
     self.assertEqual(header.is_displayed(), visible)
     self.move_to(header)
     self.assertEqual(header.is_displayed(), visible_hover)
-    pass
 
   def toggle_caption(self, query):
     self.move_to(self.q(query))
     self.send_keys('c')
-    pass
 
   def test_header(self):
     self.prepare()
@@ -327,7 +314,6 @@ class Test_KeyBind(TestCase):
     self.send_keys('C')
     self.assertTrue(self.qa('#pp-popup-header.pp-show'))
     self.assertFalse(comment.is_displayed())
-    pass
 
   def handle_open(self):
     self.js('''
@@ -335,7 +321,6 @@ class Test_KeyBind(TestCase):
         pixplus.test_handle_open = url;
       };
     ''')
-    pass
 
   def poll_open(self, url):
     self.assertTrue(url)
@@ -351,10 +336,8 @@ class Test_KeyBind(TestCase):
       if opened:
         break
       time.sleep(1)
-      pass
 
     self.assertEqual(opened, url)
-    pass
 
   def test_open(self):
     self.open('/')
@@ -381,7 +364,6 @@ class Test_KeyBind(TestCase):
 
     self.send_keys('B')
     self.poll_open('/bookmark_detail.php?illust_id=1580459')
-    pass
 
   def test_image_response(self):
     self.open('/')
@@ -406,7 +388,6 @@ class Test_KeyBind(TestCase):
     self.assertTrue(self.q('#pp-popup-button-response.pp-active').is_displayed())
     self.send_keys('R')
     self.poll_open('/member_illust.php?mode=medium&illust_id=1580459')
-    pass
 
   def test_manga(self):
     self.open('/')
@@ -443,7 +424,6 @@ class Test_KeyBind(TestCase):
 
     self.send_keys('v')
     self.assertTrue(self.q('#pp-popup-button-manga:not(.pp-active)').is_displayed())
-    pass
 
   def check_bookmark_tag_selection(self):
     input_tag = self.q('#pp-popup-bookmark-wrapper #input_tag')
@@ -470,7 +450,6 @@ class Test_KeyBind(TestCase):
 
     self.send_keys(Keys.ESCAPE, input_tag)
     self.assertFalse(self.has_class(tags[1], 'pp-tag-select'))
-    pass
 
   def test_bookmark(self):
     self.open_test_user()
@@ -481,7 +460,6 @@ class Test_KeyBind(TestCase):
       self.unbookmark()
       self.open_popup()
       bookmark_btn = self.q('#pp-popup-button-bookmark')
-      pass
 
     self.assertFalse(self.has_class(bookmark_btn, 'pp-active'))
 
@@ -512,7 +490,6 @@ class Test_KeyBind(TestCase):
     self.popup_poll_reload(lambda: self.qa('#pp-popup-button-bookmark.pp-active'))
 
     self.unbookmark()
-    pass
 
   def check_has_question(self, idx):
     question = self.qa('#pp-popup-rating .questionnaire')
@@ -554,7 +531,6 @@ class Test_KeyBind(TestCase):
     for i in range(len(items)):
       self.send_keys(Keys.DOWN)
       self.assertEqual(active(), items[i])
-      pass
     self.send_keys(Keys.DOWN)
     self.assertEqual(active(), items[0])
 
@@ -563,7 +539,6 @@ class Test_KeyBind(TestCase):
     for i in range(len(items) - 1, -1, -1):
       self.send_keys(Keys.UP)
       self.assertEqual(active(), items[i])
-      pass
     self.send_keys(Keys.UP)
     self.assertEqual(active(), items[-1])
 
@@ -576,7 +551,6 @@ class Test_KeyBind(TestCase):
     answer_idx = int(time.time()) % len(items)
     for i in range(answer_idx + 1):
       self.send_keys(Keys.DOWN)
-      pass
     self.assertEqual(active(), items[answer_idx])
     self.assertEqual(items[answer_idx][0], str(answer_idx + 1))
     answer = items[answer_idx][1]
@@ -594,7 +568,6 @@ class Test_KeyBind(TestCase):
 
     self.send_keys('d')
     self.assertFalse(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
-    pass
 
   def test_tag_edit(self):
     self.open_test_user()
@@ -612,7 +585,6 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.ESCAPE)
     self.assertFalse(self.has_class(popup, 'pp-tagedit-mode'))
     self.assertFalse(self.q('#pp-popup-tagedit-wrapper').is_displayed())
-    pass
 
   def get_layout_size(self):
     self.send_keys('w')
@@ -633,7 +605,6 @@ class Test_KeyBind(TestCase):
     if self.popup_get_illust_data('manga')['available']:
       if not self.js('return pixplus.popup.manga.active'):
         return False
-      pass
 
     self.assertFalse(self.q('#pp-popup-button-resize-mode').is_displayed())
 
@@ -664,11 +635,8 @@ class Test_KeyBind(TestCase):
         self.assertEqual(btn.text, '[O]')
       else:
         self.assertEqual(btn.text, '[S]')
-        pass
-      pass
     else:
       self.assertFalse(btn.is_displayed())
-      pass
 
     cw, ch, sw, sh, lw, lh = self.js('''
       return (function(s, l) {
@@ -684,16 +652,11 @@ class Test_KeyBind(TestCase):
       self.assertEqual(ch, sh)
       if strict:
         self.assertEqual(ch, lh)
-        pass
-      pass
 
     if not horizontal:
       self.assertEqual(cw, sw)
       if strict:
         self.assertEqual(cw, lw)
-        pass
-      pass
-    pass
 
   def check_resize_mode_real(self, illust_id, orientation, both_scrollable, has_margin, big_image):
     is_vertical = orientation == 'vertical'
@@ -710,7 +673,6 @@ class Test_KeyBind(TestCase):
     if is_manga:
       self.js('pixplus.popup.manga.show(%d)' % manga_page)
       self.popup_wait_load()
-      pass
 
     if big_image:
       # RM_AUTO (RM_FIT_LONG)
@@ -730,8 +692,6 @@ class Test_KeyBind(TestCase):
         # RM_AUTO (RM_FIT_LONG)
         self.check_scrollbar(False, False, False)
         self.send_keys('w')
-        pass
-      pass
 
     time.sleep(1)
 
@@ -740,7 +700,6 @@ class Test_KeyBind(TestCase):
       self.send_keys('w')
       time.sleep(1)
       self.check_scrollbar(True, True, True)
-      pass
     self.send_keys('w')
     time.sleep(1)
     self.check_scrollbar(False, False, False)
@@ -750,7 +709,6 @@ class Test_KeyBind(TestCase):
     if is_manga:
       self.js('pixplus.popup.manga.show(%d)' % manga_page)
       self.popup_wait_load()
-      pass
 
     if big_image:
       # RM_AUTO (RM_FIT_SHORT)
@@ -770,8 +728,6 @@ class Test_KeyBind(TestCase):
         # RM_AUTO (RM_FIT_SHORT)
         self.check_scrollbar(is_vertical, is_horizontal, not has_margin)
         self.send_keys('w')
-        pass
-      pass
 
     time.sleep(1)
 
@@ -779,18 +735,15 @@ class Test_KeyBind(TestCase):
       self.check_scrollbar(True, True, True)
       self.send_keys('w')
       time.sleep(1)
-      pass
     self.check_scrollbar(False, False, False)
     self.send_keys('w')
     time.sleep(1)
     self.check_scrollbar(is_vertical, is_horizontal, both_scrollable)
-    pass
 
   def check_resize_mode(self, illust_id, orientation, both_scrollable, has_margin, big_image):
     self.set_conf('popup.fit_short_threshold', 0)
     self.open_popup(illust_id)
     self.check_resize_mode_real(illust_id, orientation, both_scrollable, has_margin, big_image)
-    pass
 
   def test_resize_mode(self):
     targets = self.config['test-targets']['resize-mode']
@@ -813,7 +766,6 @@ class Test_KeyBind(TestCase):
     self.check_resize_mode(targets['horizontal-small'],  'horizontal', False, True,  True)
     self.check_resize_mode(targets['horizontal-medium'], 'horizontal', False, False, True)
     self.check_resize_mode(targets['horizontal-large'],  'horizontal', True,  False, True)
-    pass
 
   def check_resize_mode_manga(self, illust_id, orientation, both_scrollable, has_margin, big_image):
     self.set_conf('popup.fit_short_threshold', 0)
@@ -822,7 +774,6 @@ class Test_KeyBind(TestCase):
     self.js('pixplus.popup.manga.show(0)')
     self.popup_wait_load()
     self.check_resize_mode_real(illust_id, orientation, both_scrollable, has_margin, big_image)
-    pass
 
   def test_resize_mode_manga(self):
     targets = self.config['test-targets']['resize-mode']
@@ -831,7 +782,6 @@ class Test_KeyBind(TestCase):
     self.check_resize_mode_manga(targets['manga'], 'vertical', True, False, False)
     self.set_conf('popup.big_image', True)
     self.check_resize_mode_manga(targets['manga'], 'vertical', True, False, True)
-    pass
 
   def check_scrollable(self, idx, vertical, horizontal):
     if self.popup_get_illust_data('manga')['available']:
@@ -853,14 +803,12 @@ class Test_KeyBind(TestCase):
     if vertical == 0:
       if (sh - ch) != 0:
         return False
-      pass
     elif (sh - ch) < vertical:
       return False
 
     if horizontal == 0:
       if (sw - cw) != 0:
         return False
-      pass
     elif (sw - cw) < horizontal:
       return False
 
@@ -873,7 +821,6 @@ class Test_KeyBind(TestCase):
     ''')
     self.assertEqual(t, top)
     self.assertEqual(l, left)
-    pass
 
   def test_scroll(self):
     self.set_conf('popup.big_image', True)
@@ -910,7 +857,6 @@ class Test_KeyBind(TestCase):
     self.check_scroll_pos(sh - ch, sw - cw)
     self.send_keys(Keys.HOME)
     self.check_scroll_pos(0, 0)
-    pass
 
   def test_pageupdown_v(self):
     self.set_conf('popup.big_image', True)
@@ -937,7 +883,6 @@ class Test_KeyBind(TestCase):
     self.check_scroll_pos(pagedown * 2, 0)
     self.send_keys(Keys.PAGE_UP)
     self.check_scroll_pos(pagedown * 2 + pageup, 0)
-    pass
 
   def test_pageupdown_h(self):
     self.set_conf('popup.big_image', True)
@@ -964,7 +909,6 @@ class Test_KeyBind(TestCase):
     self.check_scroll_pos(0, pagedown * 2)
     self.send_keys(Keys.PAGE_UP)
     self.check_scroll_pos(0, pagedown * 2 + pageup)
-    pass
 
   def check_caption_scroll_pos(self, top, left):
     t, l = self.js('''
@@ -973,7 +917,6 @@ class Test_KeyBind(TestCase):
     ''')
     self.assertEqual(t, top)
     self.assertEqual(l, left)
-    pass
 
   def test_caption_scroll(self):
     self.open('/')
@@ -996,6 +939,3 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.UP)
     time.sleep(1)
     self.check_caption_scroll_pos(32, 0)
-    pass
-
-  pass

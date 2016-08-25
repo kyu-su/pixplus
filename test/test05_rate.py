@@ -22,7 +22,6 @@ class Test_Rate(TestCase):
 
     if confirm:
       self.alert_accept()
-      pass
 
     rate = self.q('#pp-popup-rating .score .rating .rate')
     self.assertEqual(rate.size['width'], width)
@@ -33,7 +32,6 @@ class Test_Rate(TestCase):
 
     self.assertTrue(self.qa('#pp-popup-rating .score .rating.rated'))
     self.assertEqual(self.popup_get_illust_data('rated'), True)
-    pass
 
   def test_rate(self):
     if not self.b.supports_alert:
@@ -43,12 +41,8 @@ class Test_Rate(TestCase):
     self.open_test_user()
     self.set_conf('general.rate_confirm', True)
     self.check(True)
-    pass
 
   def test_rate_noconfirm(self):
     self.open_test_user()
     self.set_conf('general.rate_confirm', False)
     self.check(False)
-    pass
-
-  pass

@@ -25,16 +25,11 @@ class Chrome(Browser):
     }
     if self.args.chrome_bin:
       caps['chromeOptions']['binary'] = self.args.chrome_bin
-      pass
-    pass
 
   def download_crx(self, filename, ext_id):
     url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc'
     url = url % (self.chrome_version, ext_id)
     return self.download(url, filename)
 
-  pass
-
 def register_args(parser):
   parser.add_argument('--chrome-command', dest = 'chrome_bin')
-  pass

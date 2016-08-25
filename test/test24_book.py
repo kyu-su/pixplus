@@ -17,19 +17,16 @@ class Test_Manga(TestCase):
       images.append(img)
       width += img.size[0]
       max_height = max(max_height, img.size[1])
-      pass
 
     left = 1
     if width < frame_min_width:
       left += int((frame_min_width - width) / 2)
-      pass
 
     height = max(max_height, frame_min_height)
     frame = Image.new('RGB', (max(width, frame_min_width) + 2, height + 2), 'white')
     for img in images:
       frame.paste(img, (left, int((height - img.size[1]) / 2) + 1))
       left += img.size[0]
-      pass
 
     from PIL import ImageDraw
     draw = ImageDraw.Draw(frame)
@@ -47,7 +44,6 @@ class Test_Manga(TestCase):
     self.save_image(got, 'test24_book_%s_%s_got.png' % (name, ','.join(map(str, image_numbers))))
     self.save_image(expected, 'test24_book_%s_%s_expected.png' % (name, ','.join(map(str, image_numbers))))
     self.assertImageEqual(got, expected)
-    pass
 
   def test_illust_set(self):
     self.set_conf('popup.big_image', True)
@@ -59,7 +55,6 @@ class Test_Manga(TestCase):
     self.check('illust_set', 1, [2])
     self.check('illust_set', 2, [3])
     self.check('illust_set', 3, [4])
-    pass
 
   def test_illust_book_right(self):
     self.set_conf('popup.big_image', True)
@@ -70,7 +65,6 @@ class Test_Manga(TestCase):
     self.check('illust_book_right', 0, [1])
     self.check('illust_book_right', 1, [3, 2])
     self.check('illust_book_right', 2, [4])
-    pass
 
   def test_illust_book_left(self):
     self.set_conf('popup.big_image', True)
@@ -81,7 +75,6 @@ class Test_Manga(TestCase):
     self.check('illust_book_left', 0, [1])
     self.check('illust_book_left', 1, [2, 3])
     self.check('illust_book_left', 2, [4])
-    pass
 
   def test_manga_set(self):
     self.set_conf('popup.big_image', True)
@@ -93,7 +86,6 @@ class Test_Manga(TestCase):
     self.check('manga_set', 1, [2])
     self.check('manga_set', 2, [3])
     self.check('manga_set', 3, [4])
-    pass
 
   def test_manga_book_right(self):
     self.set_conf('popup.big_image', True)
@@ -104,7 +96,6 @@ class Test_Manga(TestCase):
     self.check('manga_book_right', 0, [1])
     self.check('manga_book_right', 1, [3, 2])
     self.check('manga_book_right', 2, [4])
-    pass
 
   def test_manga_book_left(self):
     self.set_conf('popup.big_image', True)
@@ -115,6 +106,3 @@ class Test_Manga(TestCase):
     self.check('manga_book_left', 0, [1])
     self.check('manga_book_left', 1, [2, 3])
     self.check('manga_book_left', 2, [4])
-    pass
-
-  pass

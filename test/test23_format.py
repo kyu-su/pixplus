@@ -13,7 +13,3 @@ class Test_Format(TestCase):
       self.find_illust(lambda i: self.popup_get_illust_data('id') == iid)
       self.popup_wait_big_image()
       self.assertEqual(self.q('#pp-popup-image-layout img').get_attribute('src'), url)
-      pass
-    pass
-
-  pass

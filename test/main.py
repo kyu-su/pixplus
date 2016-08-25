@@ -8,7 +8,6 @@ testdir = os.path.abspath(os.path.dirname(__file__))
 selenium_py_dir = os.path.join(testdir, 'selenium', 'py')
 if os.path.exists(selenium_py_dir):
   sys.path.insert(0, selenium_py_dir)
-  pass
 
 import selenium.common.exceptions
 
@@ -29,7 +28,6 @@ def load_tests():
         continue
       tests[name] = getattr(mod, aname)
       break
-    pass
 
   return tests
 
@@ -40,8 +38,6 @@ def test(browser, config, tests):
     unittest.TextTestRunner(verbosity = 2).run(suite)
   finally:
     browser.quit()
-    pass
-  pass
 
 def main():
   from browser import Browser
@@ -75,9 +71,7 @@ def main():
   for mod, browser in browsers:
     if hasattr(mod, 'register_args'):
       mod.register_args(parser)
-      pass
     browser.browserdir = os.path.dirname(mod.__file__)
-    pass
 
   args = parser.parse_args()
 
@@ -100,8 +94,6 @@ def main():
     else:
       cls = all_tests[name]
       tests += [(cls, n) for n in cls.list_tests()]
-      pass
-    pass
 
   subprocess.call(['make', '-C', Browser.rootdir])
 
@@ -109,9 +101,6 @@ def main():
     if args.browsers and browser.name not in args.browsers:
       continue
     test(browser(), config, tests)
-    pass
-  pass
 
 if __name__ == '__main__':
   main()
-  pass
