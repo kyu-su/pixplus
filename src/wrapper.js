@@ -11,6 +11,7 @@
 // @exclude     *pixivreader*
 // @run-at      document-start
 // @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
+// @grant       none
 // ==/UserScript==
 
 (function(entrypoint) {
