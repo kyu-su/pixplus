@@ -354,8 +354,8 @@ _.popup = {
       c = dom.image_wrapper;
     }
     return [
-      de.clientWidth  - 20 - (root.offsetWidth  - c.clientWidth),
-      de.clientHeight - 20 - (root.offsetHeight - c.clientHeight)
+      de.clientWidth  - (root.offsetWidth  - c.clientWidth),
+      de.clientHeight - (root.offsetHeight - c.clientHeight)
     ];
   },
 
