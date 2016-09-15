@@ -359,28 +359,23 @@ _.popup = {
     ];
   },
 
-  adjust_olc_icon: function(icon, next) {
-    var olc  = icon.parentNode,
-        size = g.Math.min(g.Math.floor(g.Math.min(olc.offsetWidth, olc.offsetHeight) * 0.8), 200),
-        left = g.Math.min(g.Math.floor((olc.offsetWidth  - size) / 2), 50),
+  adjust_olc_icon: function(icon, olc_width, olc_height, next) {
+    var bsize = g.Math.min(olc_width, olc_height),
+        size  = g.Math.min(g.Math.floor(bsize * 0.8), 200),
+        left  = g.Math.min(g.Math.floor((olc_width  - size) / 2), 50),
         top;
 
-    // if (olc.offsetHeight - size < olc.offsetWidth - size) {
-    //   top = g.Math.floor((olc.offsetHeight  - size) / 2);
-    // } else {
-    //   top = olc.offsetHeight - size - left;
-    // }
-
-    top = g.Math.floor((olc.offsetHeight  - size) / 2);
+    top = g.Math.floor((olc_height  - size) / 2);
 
     if (next) {
-      left = olc.offsetWidth - size - left;
+      left = olc_width - size - left;
     }
 
-    icon.style.width  = size + 'px';
-    icon.style.height = size + 'px';
-    icon.style.left   = left + 'px';
-    icon.style.top    = top  + 'px';
+    icon.style.width      = size + 'px';
+    icon.style.height     = size + 'px';
+    icon.style.margin     = g.Math.floor((bsize - size) / 2) + 'px';
+    icon.style.marginLeft = left + 'px';
+    icon.style.marginTop  = top + 'px';
   },
 
   adjust: function() {
@@ -431,19 +426,17 @@ _.popup = {
           width = g.Math.floor(dom.image_scroller.clientWidth * width);
         }
 
-        // avoid overlap with scrollbar
+        // avoid overlap on scrollbar
 
         var height = dom.image_scroller.clientHeight;
 
-        dom.olc_prev.style.width  = width  + 'px';
-        dom.olc_next.style.width  = width  + 'px';
         dom.olc_prev.style.height = height + 'px';
         dom.olc_next.style.height = height + 'px';
 
         dom.olc_next.style.right = this.scrollbar_width + 'px';
 
-        this.adjust_olc_icon(dom.olc_prev_icon);
-        this.adjust_olc_icon(dom.olc_next_icon, true);
+        this.adjust_olc_icon(dom.olc_prev_icon, width, height);
+        this.adjust_olc_icon(dom.olc_next_icon, width, height, true);
 
         dom.olc_prev.classList.add('pp-active');
         dom.olc_next.classList.add('pp-active');
