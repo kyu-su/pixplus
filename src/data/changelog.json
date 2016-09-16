@@ -1,5 +1,19 @@
 [
   {
+    "date": "2016/09/17",
+    "version": "1.15.2",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2016/09/17/pixplus_1.15.2",
+    "changes_i18n": {
+      "en": [
+        "[Fix][Opera12] Fix the behavior of arrow buttons on Opera12."
+      ],
+      "ja": [
+        "[修正][Opera12] Opera12で矢印ボタンの動作がおかしかったのを修正。"
+      ]
+    }
+  },
+
+  {
     "date": "2016/08/26",
     "version": "1.15.1",
     "releasenote": "http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1",

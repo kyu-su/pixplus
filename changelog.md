@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.15.2 - 2016/09/17](http://crckyl.hatenablog.com/entry/2016/09/17/pixplus_1.15.2)
+
+### 変更点
+
+* [修正][Opera12] Opera12で矢印ボタンの動作がおかしかったのを修正。
+
+### Changes
+
+* [Fix][Opera12] Fix the behavior of arrow buttons on Opera12.
+
 ## [1.15.1 - 2016/08/26](http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1)
 
 ### 変更点
