@@ -236,6 +236,10 @@
 
     .questionnaire {
       text-align: inherit;
+
+      input[type="button"]:focus {
+        outline: 2px solid #0f0;
+      }
     }
   }
 

@@ -721,16 +721,8 @@ _.popup = {
       _.popup.rating.setup();
     }
 
-    try {
-      if (illust.question) {
-        w.pixiv.context.hasQuestionnaire = true;
-        w.pixiv.context.answered = illust.answered;
-        w.pixiv.questionnaire.setup();
-      } else {
-        w.pixiv.context.hasQuestionnaire = false;
-      }
-    } catch(ex) {
-      _.error(ex);
+    if (illust.question) {
+      this.question.setup();
     }
 
     if (illust.ugoira_canvas) {

@@ -63,18 +63,79 @@ _.popup.question = {
     }
   },
 
+  send: function(num) {
+    var that = this,
+        illust = _.popup.illust,
+        uid;
+    try {
+      uid = w.pixiv.user.id;
+    } catch(ex) {
+      _.error('Failed to get user id', ex);
+      alert('Error! - Failed to get your member id');
+      return;
+    }
+
+    if (!illust.token) {
+      _.error('Stop rating because pixplus failed to detect security token');
+      alert('Error! - Failed to detect security token');
+      return;
+    }
+
+    _.popup.status_loading();
+    _.xhr.post_data(
+      '/rpc_rating.php',
+      {
+        mode: 'save2',
+        i_id: illust.id,
+        u_id: uid,
+        qr: 1,
+        num: num,
+        tt: illust.token
+      },
+      function(res) {
+        that.end();
+        _.popup.reload();
+      },
+      function() {
+        _.popup.status_error();
+        alert('Error!');
+        that.end();
+      }
+    );
+  },
+
+  setup: function() {
+    var root = _.q('.questionnaire', _.popup.dom.rating);
+
+    this.dom = {
+      root:    root,
+      toggle:  _.q('.toggle-list,.toggle-stats', root),
+      list:    _.q('.list,.stats', root)
+    };
+
+    _.onclick(this.dom.toggle, this.toggle.bind(this));
+
+    var that = this;
+    _.qa('input[type="button"][data-key]', this.dom.list).forEach(function(btn) {
+      _.onclick(btn, function() {
+        that.send(btn.dataset.key);
+      });
+    });
+  },
+
+  toggle: function() {
+    this.dom.list.classList.toggle('visible');
+  },
+
   start: function() {
-    var toggle = _.q('.questionnaire .toggle-list,.questionnaire .toggle-stats', _.popup.dom.rating);
-    if (toggle) {
+    this.dom.list.classList.add('visible');
+    if (!_.popup.is_caption_visible()) {
       _.popup.show_caption();
-      _.send_click(toggle);
     }
   },
 
   end: function() {
     this.blur();
-    _.qa('.questionnaire .list,.questionnaire .stats', _.popup.dom.rating).forEach(function(elem) {
-      elem.classList.remove('visible');
-    });
+    this.dom.list.classList.remove('visible');
   }
 };
