@@ -214,7 +214,9 @@ _.bookmarkform = {
   },
 
   toggle: function(tag) {
-    var tags = this.dom.input_tag.value.split(/\s+/);
+    var tags = this.dom.input_tag.value.split(/\s+/).filter(function(a) {
+      return !!a;
+    });
     if (tags.indexOf(tag) >= 0) {
       tags = tags.filter(function(t) {
         return t !== tag;
