@@ -3,12 +3,8 @@ _.popup.comment = {
   ready: false,
 
   clear: function() {
-    var show_form = _.conf.popup.show_comment_form;
     _.popup.dom.root.classList.remove('pp-comment-mode');
-    _.popup.dom.root.classList[show_form ? 'add' : 'remove']('pp-show-comment-form');
-
     this.update_hide_stamp_comments();
-
     this.active = false;
   },
 
@@ -29,23 +25,6 @@ _.popup.comment = {
 
   scroll: function() {
     _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
-  },
-
-  show_form: function() {
-    if (_.popup.dom.root.classList.add('pp-show-comment-form')) {
-      var textarea = _.q('form textarea[name="comment"]', _.popup.dom.comment);
-      if (textarea) {
-        textarea.focus();
-      }
-    }
-  },
-
-  hide_form: function() {
-    _.popup.dom.root.classList.remove('pp-show-comment-form');
-  },
-
-  toggle_form: function() {
-    _.popup.dom.root.classList.toggle('pp-show-comment-form');
   },
 
   setup: function(html) {
@@ -75,19 +54,6 @@ _.popup.comment = {
     _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
       form.setAttribute('action', '/member_illust.php');
     });
-
-    try {
-      w.colon.d.off('click.pixivEmoji');
-      w.pixiv.emoji.setup();
-    } catch(ex) {
-      _.error(ex);
-    }
-
-    try {
-      w.pixiv.comment.setup();
-    } catch(ex) {
-      _.error(ex);
-    }
   },
 
   start: function() {

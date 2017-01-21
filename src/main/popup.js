@@ -36,9 +36,6 @@ _.popup = {
     dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
     dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
     dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
-    dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
-    dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
-    dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
     dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
     dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
     dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -63,10 +60,6 @@ _.popup = {
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
-    dom.comment_form_btn.appendChild(_.svg.pencil(d));
-    dom.comment_form_btn.appendChild(_.svg.pencil_off(d));
-    dom.comment_conf_btn.appendChild(_.svg.cogwheel(d));
-
     dom.author_status.appendChild(_.svg.following(d));
     dom.author_status.appendChild(_.svg.heart(d));
     dom.author_status.appendChild(_.svg.mypixiv(d));
@@ -78,17 +71,6 @@ _.popup = {
 
     dom.olc_prev.appendChild(dom.olc_prev_icon = _.svg.olc_arrow(d));
     dom.olc_next.appendChild(dom.olc_next_icon = _.svg.olc_arrow(d));
-
-    this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn, this.dom.root);
-    this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
-      if (checked) {
-        that.comment.show_form();
-      }
-    });
-    this.comment_conf_menu.add_conf_item('popup', 'hide_stamp_comments', function(checked) {
-      that.comment.update_hide_stamp_comments();
-    });
-
 
 
     this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg, this.dom.root);
