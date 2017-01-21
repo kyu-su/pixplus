@@ -188,6 +188,7 @@
 
     "cancel": "Cancel",
     "rate_confirm": "Rate it?\n$pointpt",
+    "delete_tag_confirm": "Really remove?\nYour member id will be notified to the author.",
     "author_works": "Works",
     "author_bookmarks": "Bookmarks",
     "author_staccfeed": "Feed",
@@ -411,6 +412,7 @@
 
     "cancel": "中止",
     "rate_confirm": "評価しますか？\n$point点",
+    "delete_tag_confirm": "このタグを削除しますか？\n*投稿者にユーザーIDが通知されます。",
     "author_works": "作品",
     "author_bookmarks": "ブックマーク",
     "author_staccfeed": "フィード",

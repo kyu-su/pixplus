@@ -163,6 +163,10 @@ _.popup.tagedit = {
   },
 
   remove_tag: function(tag) {
+    if (!confirm(_.lng.delete_tag_confirm)) {
+      return;
+    }
+
     var that = this,
         illust = _.popup.illust,
         uid;
