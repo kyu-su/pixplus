@@ -6,7 +6,7 @@ _.xhr = {
   },
 
   request: function(method, url, headers, data, cb_success, cb_error) {
-    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating)\.php(?:\?|$)/.test(url)) {
+    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating|rpc_tag_edit)\.php(?:\?|$)/.test(url)) {
       _.error('XHR: URL not allowed - ' + url);
       if (cb_error) {
         cb_error();
