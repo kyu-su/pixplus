@@ -9,7 +9,6 @@ from browser import Browser
 class Chrome(Browser):
   name = 'chrome'
   capname = 'CHROME'
-  supports_alert = False
 
   def prepare_caps(self, caps):
     v_str = subprocess.check_output([self.args.chrome_bin, '--version'])
