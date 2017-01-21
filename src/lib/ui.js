@@ -107,11 +107,11 @@ _.modal = {
       this.close();
     }
 
-    try {
-      w.pixiv.ui.modal.close();
-    } catch(ex) {
-      _.error(ex);
-    }
+    // try {
+    //   w.pixiv.ui.modal.close();
+    // } catch(ex) {
+    //   _.error(ex);
+    // }
 
     _.debug('Begin modal');
 
