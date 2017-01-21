@@ -32,13 +32,10 @@ class Test_TagEdit(TestCase):
     if not self.b.supports_alert:
       self.js('window.confirm=function(){return true}')
 
-    del_btn = self.find_tag_editable('input[onclick^="delTag("]')
+    del_btn = self.find_tag_editable('input.pp-remove-tag')
     tags = self.get_tags()
 
-    m = re.match(r'delTag\((\d+),\s*\d+\)', del_btn.get_attribute('onclick'))
-    self.assertIsNotNone(m)
-
-    tagid = int(m.group(1))
+    tagid = int(del_btn.get_attribute('data-pp-tag-id'))
     tag = self.js('return document.getElementById("tag%d").textContent' % tagid)
     tag = util.unquote(tag)
     self.assertTrue(tag)
@@ -62,7 +59,7 @@ class Test_TagEdit(TestCase):
     tag = 't%d' % time.time()
     add_tag.send_keys(tag)
 
-    query = '#pp-popup-tagedit-wrapper input[onclick^="addTag("]'
+    query = '#pp-popup-tagedit-wrapper input.pp-add-tag'
     self.click(self.q(query))
     self.wait_until(lambda driver: not self.qa(query))
 

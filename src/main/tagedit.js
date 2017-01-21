@@ -33,6 +33,7 @@ _.popup.tagedit = {
     var add_tag = _.q('input[onclick="addTag()"]', c);
     if (add_tag) {
       add_tag.removeAttribute('onclick');
+      add_tag.classList.add('pp-add-tag');
       _.onclick(add_tag, this.add_tag.bind(this));
     }
     this.input = _.q('#add_tag', c);
@@ -43,6 +44,8 @@ _.popup.tagedit = {
         var tag = _.q('#tag' + re[1], c);
         if (tag) {
           btn.removeAttribute('onclick');
+          btn.classList.add('pp-remove-tag');
+          btn.dataset.pp_tag_id = re[1];
           _.onclick(btn, function() {
             that.remove_tag(tag.textContent);
           });
