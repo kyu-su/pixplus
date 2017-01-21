@@ -37,7 +37,6 @@
             "Enable"
           ]
         },
-        "rate_confirm": "Show confirmation dialog when rating",
         "disable_effect": "Disable UI animation",
         "fast_user_bookmark": {
           "desc": "Follow user by one-click",
@@ -189,7 +188,6 @@
     },
 
     "cancel": "Cancel",
-    "rate_confirm": "Rate it?\n$pointpt",
     "author_works": "Works",
     "author_bookmarks": "Bookmarks",
     "author_staccfeed": "Feed",
@@ -262,7 +260,6 @@
             "有効"
           ]
         },
-        "rate_confirm": "イラストを評価する時に確認をとる",
         "disable_effect": "アニメーションなどのエフェクトを無効化する",
         "fast_user_bookmark": {
           "desc": "ワンクリックでユーザーをフォローする",
@@ -414,7 +411,6 @@
     },
 
     "cancel": "中止",
-    "rate_confirm": "評価しますか？\n$point点",
     "author_works": "作品",
     "author_bookmarks": "ブックマーク",
     "author_staccfeed": "フィード",

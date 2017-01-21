@@ -2,7 +2,6 @@
   {"name": "general", "items": [
     {"key": "bookmark_hide", "value": false},
     {"key": "float_tag_list", "value": 1},
-    {"key": "rate_confirm", "value": true},
     {"key": "disable_effect", "value": false},
     {"key": "fast_user_bookmark", "value": 0},
     {"key": "redirect_jump_page", "value": 1},

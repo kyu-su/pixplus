@@ -42,35 +42,6 @@ _.setup_ready = function() {
   }
 
   try {
-    var rate_apply = w.pixiv.rating.apply, waiting_confirmation;
-    w.pixiv.rating.apply = function() {
-      if (waiting_confirmation) { // workaround for chromium
-        return;
-      }
-
-      var msg = _.lng.rate_confirm.replace('$point', String(w.pixiv.rating.rate));
-      var rate = w.pixiv.rating.rate; // workaround for firefox
-
-      if (_.conf.general.rate_confirm) {
-        waiting_confirmation = true; // workaround for chromium
-        var confirmed = w.confirm(msg);
-        waiting_confirmation = false; // workaround for chromium
-        if (!confirmed) {
-          _.debug('rating cancelled');
-          return;
-        }
-      }
-
-      _.debug('send rating');
-      w.pixiv.rating.rate = rate; // workaround for firefox
-      rate_apply.apply(w.pixiv.rating, arguments);
-      _.illust.unload(_.popup.illust);
-    };
-  } catch(ex) {
-    _.error('Failed to setup filter of pixiv.rating.apply', ex);
-  }
-
-  try {
     var req = w.pixiv.api.request;
     w.pixiv.api.request = function() {
       var args = g.Array.prototype.slice.call(arguments);
