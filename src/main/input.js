@@ -4,7 +4,7 @@ _.popup.input = (function(mod) {
     mod['rate' + (i <= 9 ? '0' : '') + i] = (function(i) {
       return function() {
         if (_.conf.popup.rate_key) {
-          _.popup.send_rate(i);
+          _.popup.rating.rate(i);
           return true;
         }
         return false;

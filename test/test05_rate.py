@@ -42,10 +42,10 @@ class Test_Rate(TestCase):
       return
 
     self.open_test_user()
-    self.set_conf('general.rate_confirm', True)
+    self.set_conf('popup.rate_confirm', True)
     self.check(True)
 
   def test_rate_noconfirm(self):
     self.open_test_user()
-    self.set_conf('general.rate_confirm', False)
+    self.set_conf('popup.rate_confirm', False)
     self.check(False)

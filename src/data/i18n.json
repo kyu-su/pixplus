@@ -59,6 +59,7 @@
       "popup": {
         "preload": "Enable preloading",
         "big_image": "Use original size image",
+        "rate_confirm": "Show confirmation dialog when rating",
         "caption_height": "Caption height(ratio)",
         "caption_minheight": "Caption minimum height(px)",
         "caption_opacity": "Caption opacity",
@@ -186,6 +187,7 @@
     },
 
     "cancel": "Cancel",
+    "rate_confirm": "Rate it?\n$pointpt",
     "author_works": "Works",
     "author_bookmarks": "Bookmarks",
     "author_staccfeed": "Feed",
@@ -280,6 +282,7 @@
       "popup": {
         "preload": "先読みを使用する",
         "big_image": "原寸の画像を表示する",
+        "rate_confirm": "イラストを評価する時に確認をとる",
         "caption_height": "キャプションの高さ(率)",
         "caption_minheight": "キャプションの高さの最小値(px)",
         "caption_opacity": "キャプションの不透明度",
@@ -407,6 +410,7 @@
     },
 
     "cancel": "中止",
+    "rate_confirm": "評価しますか？\n$point点",
     "author_works": "作品",
     "author_bookmarks": "ブックマーク",
     "author_staccfeed": "フィード",

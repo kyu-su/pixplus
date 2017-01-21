@@ -1,6 +1,7 @@
 util.js
 illust.js
 popup.js
+rating.js
 comment.js
 bookmark.js
 manga.js

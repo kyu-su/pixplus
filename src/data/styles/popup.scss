@@ -216,6 +216,12 @@
       padding: 0px;
     }
 
+    .rating.pp-error {
+      .rate {
+        display: none;
+      }
+    }
+
     .score {
       dl, dt, dd {
         display: inline;

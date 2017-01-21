@@ -6,7 +6,7 @@ _.xhr = {
   },
 
   request: function(method, url, headers, data, cb_success, cb_error) {
-    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add)\.php(?:\?|$)/.test(url)) {
+    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating)\.php(?:\?|$)/.test(url)) {
       _.error('XHR: URL not allowed - ' + url);
       if (cb_error) {
         cb_error();
@@ -22,7 +22,7 @@ _.xhr = {
     };
     if (cb_error) {
       xhr.onerror = function() {
-        cb_error();
+        cb_error(xhr);
       };
     }
     xhr.open(method, url, true);
@@ -40,6 +40,16 @@ _.xhr = {
       return;
     }
     this.request('GET', url, null, null, cb_success, cb_error);
+  },
+
+  post_data: function(url, data, cb_success, cb_error) {
+    this.request(
+      'POST',
+      url,
+      [['Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8']],
+      this.serialize(data),
+      cb_success, cb_error
+    );
   },
 
   post: function(form, cb_success, cb_error) {

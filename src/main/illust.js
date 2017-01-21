@@ -257,6 +257,13 @@ _.illust = {
       return false;
     }
 
+    re = /pixiv\.context\.token *= *"([0-9a-f]{10,})";/.exec(html);
+    if (re) {
+      illust.token = re[1];
+    } else {
+      _.error('Failed to detect pixiv.context.token');
+    }
+
     re = /pixiv\.context\.ugokuIllustData *= *(\{[^;]*?\});/.exec(html);
     re2 = /pixiv\.context\.ugokuIllustFullscreenData *= *(\{[^;]*?\});/.exec(html);
 
@@ -475,24 +482,6 @@ _.illust = {
       });
     }
     illust.comment = (comment ? comment.innerHTML : '') || 'Error';
-
-    if (!_.stampSeries) {
-      re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
-      if (re) {
-        _.stampSeries = JSON.parse(re[1]);
-      } else {
-        _.error('pixiv.context.stampSeries not detected');
-      }
-    }
-
-    if (!_.emojiSeries) {
-      re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
-      if (re) {
-        _.emojiSeries = JSON.parse(re[1]);
-      } else {
-        _.error('pixiv.context.emojiSeries not detected');
-      }
-    }
 
     _.illust.update_urls(illust);
     return true;

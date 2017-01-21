@@ -715,33 +715,10 @@ _.popup = {
       dom.image_layout.href = illust.image_url_big;
     }
 
-    try {
-      if (_.stampSeries) {
-        w.pixiv.context.stampSeries = _.stampSeries;
-      }
-      if (_.emojiSeries) {
-        w.pixiv.context.emojiSeries = _.emojiSeries;
-      }
-    } catch(ex) {
-      _.error(ex);
-    }
-
     _.popup.comment.setup(illust.comment);
 
-    try {
-      w.pixiv.context.illustId = illust.id;
-      w.pixiv.context.userId = illust.author_id;
-      w.pixiv.context.rated = illust.rated;
-    } catch(ex) {
-      _.error(ex);
-    }
-
-    try {
-      if (illust.rating && !illust.rated) {
-        w.pixiv.rating.setup();
-      }
-    } catch(ex) {
-      _.error(ex);
+    if (illust.rating && !illust.rated) {
+      _.popup.rating.setup();
     }
 
     try {
@@ -829,13 +806,6 @@ _.popup = {
       return;
     }
 
-    if (this.saved_context) {
-      _.debug('restoring pixiv.context');
-      w.pixiv.context = this.saved_context;
-    } else {
-      _.error('pixiv.context not saved (bug)');
-    }
-
     var dom = this.dom;
     if (dom.root.parentNode) {
       dom.root.parentNode.removeChild(dom.root);
@@ -847,12 +817,6 @@ _.popup = {
   },
 
   show: function(illust) {
-    if (!this.saved_context) {
-      _.debug('saving pixiv.context');
-      this.saved_context = w.pixiv.context;
-      w.pixiv.context = _.extend({ }, w.pixiv.context);
-    }
-
     if (!illust) {
       this.hide();
       return;
@@ -956,17 +920,6 @@ _.popup = {
       this.hide_caption();
     } else {
       this.show_caption();
-    }
-  },
-
-  send_rate: function(score) {
-    if (this.illust.rating && !this.illust.rated) {
-      try {
-        w.pixiv.rating.rate = score;
-        w.pixiv.rating.apply();
-      } catch(ex) {
-        _.error(ex);
-      }
     }
   },
 
