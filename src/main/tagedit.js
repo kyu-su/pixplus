@@ -45,7 +45,7 @@ _.popup.tagedit = {
         if (tag) {
           btn.removeAttribute('onclick');
           btn.classList.add('pp-remove-tag');
-          btn.dataset.pp_tag_id = re[1];
+          btn.setAttribute('data-pp-tag-id', re[1]);
           _.onclick(btn, function() {
             that.remove_tag(tag.textContent);
           });
