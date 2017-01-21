@@ -53,8 +53,7 @@
             "Open target",
             "Modify link"
           ]
-        },
-        "disable_profile_popup": "Disable profile card popup"
+        }
       },
 
       "popup": {
@@ -276,8 +275,7 @@
             "ページを開く",
             "リンクを変更"
           ]
-        },
-        "disable_profile_popup": "プロフィールカードのポップアップを無効化する"
+        }
       },
 
       "popup": {
