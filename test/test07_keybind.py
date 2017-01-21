@@ -558,7 +558,7 @@ class Test_KeyBind(TestCase):
     self.send_keys(Keys.SPACE)
 
     self.wait_until(lambda d: answer in self.q('#pp-popup-rating .questionnaire .status').text)
-    self.assertFalse(self.q('#pp-popup-rating .questionnaire .list').is_displayed())
+    self.assertFalse(self.qa('#pp-popup-rating .questionnaire .list'))
     self.assertFalse(self.q('#pp-popup-rating .questionnaire .stats').is_displayed())
 
     self.blur()
