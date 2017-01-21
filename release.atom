@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">pixplus</title>
   <id>http://ccl4.info/pixplus/release.atom</id>
-  <updated>2016-09-17T00:00:00.000Z</updated>
+  <updated>2017-01-22T00:00:00.000Z</updated>
   <link href="https://ccl4.info/pixplus/" />
   <link href="https://ccl4.info/cgit/pixplus.git/plain/release.atom" rel="self" />
   <author>
@@ -11,6 +11,36 @@
     <email>crckyl@gmail.com</email>
   </author>
   <subtitle type="text">pixplus changelogs</subtitle>
+  <entry>
+    <title type="text">pixplus 1.16.0</title>
+    <id>https://ccl4.info/pixplus/archive/1.16.0</id>
+    <updated>2017-01-22T00:00:00.000Z</updated>
+    <link href="https://ccl4.info/pixplus/archive/1.16.0" />
+    <author>
+      <name>wowo</name>
+      <uri>https://ccl4.info/</uri>
+      <email>crckyl@gmail.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplus 1.16.0</h1>
+      <ul>
+        <li>[削除] 「プロフィールカードのポップアップを無効化する」オプションを削除。</li>
+        <li>[削除] コメント投稿機能を削除。</li>
+        <li>[修正] 評価機能が動かなくなっていた不具合を修正。</li>
+        <li>[修正] ブックマークモードが動かなくなっていた不具合を修正。</li>
+        <li>[修正] タグ編集モードが動かなくなっていた不具合を修正。</li>
+        <li>[修正] アンケート機能が動かなくなっていた不具合を修正。</li>
+      </ul>
+      <ul>
+        <li>[Remove] Remove 'Disable profile card popup' option.</li>
+        <li>[Remove] Remove posting comment feature.</li>
+        <li>[Fix] Rating feature was not working.</li>
+        <li>[Fix] Bookmark mode was not working.</li>
+        <li>[Fix] Tag edit mode was not working.</li>
+        <li>[Fix] Fix support of polling feature.</li>
+      </ul>
+    ]]></content>
+  </entry>
   <entry>
     <title type="text">pixplus 1.15.2</title>
     <id>https://ccl4.info/pixplus/archive/1.15.2</id>

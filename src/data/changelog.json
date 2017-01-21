@@ -1,8 +1,8 @@
 [
   {
-    "date": "",
+    "date": "2017/01/22",
     "version": "1.16.0",
-    "releasenote": "http://crckyl.hatenablog.com/entry/2016/01/22/pixplus_1.16.0",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0",
     "changes_i18n": {
       "en": [
         "[Remove] Remove 'Disable profile card popup' option.",

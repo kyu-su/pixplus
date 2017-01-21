@@ -1,6 +1,26 @@
 pixplus version history
 =======================
 
+## [1.16.0 - 2017/01/22](http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0)
+
+### 変更点
+
+* [削除] 「プロフィールカードのポップアップを無効化する」オプションを削除。
+* [削除] コメント投稿機能を削除。
+* [修正] 評価機能が動かなくなっていた不具合を修正。
+* [修正] ブックマークモードが動かなくなっていた不具合を修正。
+* [修正] タグ編集モードが動かなくなっていた不具合を修正。
+* [修正] アンケート機能が動かなくなっていた不具合を修正。
+
+### Changes
+
+* [Remove] Remove 'Disable profile card popup' option.
+* [Remove] Remove posting comment feature.
+* [Fix] Rating feature was not working.
+* [Fix] Bookmark mode was not working.
+* [Fix] Tag edit mode was not working.
+* [Fix] Fix support of polling feature.
+
 ## [1.15.2 - 2016/09/17](http://crckyl.hatenablog.com/entry/2016/09/17/pixplus_1.15.2)
 
 ### 変更点
