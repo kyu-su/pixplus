@@ -63,11 +63,7 @@ _.bookmarkform = {
     });
 
     this.dom.input_tag.value = tags_value.join(' ');
-    try {
-      w.pixiv.tag.update();
-    } catch(ex) {
-      _.error(ex);
-    }
+    this.update();
   },
 
   setup_tag_order: function() {
@@ -206,16 +202,7 @@ _.bookmarkform = {
     }
 
     if (key === 'Space') {
-      var tags = this.dom.input_tag.value.split(/\s+/),
-          tag  = this.sel.tag.dataset.tag;
-      if (tags.indexOf(tag) >= 0) {
-        tags = tags.filter(function(t) {
-          return t !== tag;
-        });
-      } else {
-        tags.push(tag);
-      }
-      this.dom.input_tag.value = tags.join(' ');
+      this.toggle(this.sel.tag.dataset.tag);
       return true;
 
     } else if (key === 'Escape') {
@@ -224,6 +211,28 @@ _.bookmarkform = {
     }
 
     return this.select_nearest_tag(key);
+  },
+
+  toggle: function(tag) {
+    var tags = this.dom.input_tag.value.split(/\s+/);
+    if (tags.indexOf(tag) >= 0) {
+      tags = tags.filter(function(t) {
+        return t !== tag;
+      });
+    } else {
+      tags.push(tag);
+    }
+    this.dom.input_tag.value = tags.join(' ');
+    this.update();
+  },
+
+  update: function() {
+    var tags = this.dom.input_tag.value.split(/\s+/);
+    _.qa('.tag[data-tag]', this.dom.root).forEach(function(tag) {
+      var on = tags.indexOf(tag.dataset.tag) >= 0;
+      tag.classList[on ? 'add' : 'remove']('on');
+      tag.classList[on ? 'add' : 'remove']('selected');
+    });
   },
 
   setup_key: function() {
@@ -243,6 +252,8 @@ _.bookmarkform = {
 
     _.key.listen(dom.input_tag, this.onkey.bind(this));
     dom.input_tag.setAttribute('autocomplete', 'off');
+
+    _.listen(dom.input_tag, 'input', this.update.bind(this), {capture:true});
   },
 
   setup_alias_ui: function() {

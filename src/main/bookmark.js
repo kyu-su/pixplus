@@ -9,7 +9,7 @@ _.popup.bookmark = {
 
     _.onclick(_.popup.dom.bookmark_wrapper, function(ev) {
       if (ev.target.classList.contains('tag')) {
-        w.pixiv.tag.toggle(ev.target.dataset.tag);
+        _.bookmarkform.toggle(ev.target.dataset.tag);
       }
     });
   },
@@ -57,19 +57,26 @@ _.popup.bookmark = {
         return;
       }
 
-      w.pixiv.context.tags = tags;
+      var items = [];
+      for(var tag in tags_data) {
+        var item = tags_data[tag];
+        item.name = tag;
+        items.push(item);
+      }
+      items.sort(function(a, b) {
+        return a.lev - b.lev;
+      });
+      console.log(items);
 
-      var load = w.pixiv.bookmarkTag.load;
-      w.pixiv.bookmarkTag.load = function(){};
-      w.pixiv.bookmarkTag.setup(_.q('.tag-cloud-container', wrapper));
-      w.pixiv.bookmarkTag.load = load;
-
-      w.pixiv.tag.setup();
-
-      w.pixiv.bookmarkTag.data = tags_data;
-      w.pixiv.bookmarkTag.initialize();
-      w.pixiv.bookmarkTag.show();
-      w.pixiv.bookmarkTag.tagContainer.removeClass('loading-indicator');
+      var cont = _.q('.tag-cloud-container ul.tag-cloud', wrapper);
+      cont.classList.remove('loading-indicator');
+      items.forEach(function(item) {
+        var li = _.e('li', null, cont),
+            span = _.e('span', null, li);
+        span.dataset.tag = item.name;
+        span.className = 'tag c' + item.lev;
+        span.textContent = item.name;
+      });
 
     })(/>pixiv\.context\.tags\s*=\s*(\"[^\"]+\");/.exec(html));
 
