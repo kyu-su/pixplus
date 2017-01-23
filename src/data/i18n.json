@@ -42,8 +42,8 @@
           "desc": "Follow user by one-click",
           "hint": [
             "Disable",
-            "Enable(public)",
-            "Enable(private)"
+            "Enable (public)",
+            "Enable (private)"
           ]
         },
         "redirect_jump_page": {
@@ -61,14 +61,14 @@
         "preload": "Enable preloading",
         "big_image": "Use original size image",
         "rate_confirm": "Show confirmation dialog when rating",
-        "caption_height": "Caption height(ratio)",
-        "caption_minheight": "Caption minimum height(px)",
+        "caption_height": "Caption height (ratio)",
+        "caption_minheight": "Caption minimum height (px)",
         "caption_opacity": "Caption opacity",
         "remove_pixpedia": "Remove pixiv encyclopedia icon",
         "remove_pixiv_comic": "Remove pixiv comic icon",
         "remove_booth": "Remove booth icon",
         "rate_key": "Enable rate keys",
-        "font_size": "Font size(e.g. 10px)",
+        "font_size": "Font size (e.g. 10px)",
         "auto_manga": {
           "desc": "Switch manga-mode automatically",
           "hint": [
@@ -88,8 +88,8 @@
           ]
         },
         "reverse_regexp": "Regular expression for \"Reverse...\" setting.",
-        "overlay_control": "Click area width(0:Disable/<1:Ratio/>1:Pixel)",
-        "scroll_height": "Scroll step(px)",
+        "overlay_control": "Click area width (0:disable; x<1:ratio to popup width; x>1:pixel)",
+        "scroll_height": "Scroll step (px)",
         "scroll_height_page": "Scroll step for PageUp/PageDown",
         "author_status_icon": "Show icon on profile image",
         "hide_stamp_comments": "Hide stamp comments",
@@ -98,11 +98,11 @@
           "hint": [
             "Do nothing",
             "Move to prev/next illust",
-            "Move to prev/next illust(respect \"reverse\" setting)"
+            "Move to prev/next illust (respect \"reverse\" setting)"
           ]
         },
-        "mouse_wheel_delta": "Threshold for mouse wheel setting(if set negative value, invert direction)",
-        "fit_short_threshold": "Aspect ratio threshold for switch resize mode(0:Disable)",
+        "mouse_wheel_delta": "Threshold for mouse wheel setting (if set negative value, invert direction)",
+        "fit_short_threshold": "Aspect ratio threshold for switch resize mode (0:Disable)",
         "mark_visited": "Mark link as visited",
         "manga_page_action": {
           "desc": "Open popup in manga page",
@@ -111,14 +111,15 @@
             "Open popup",
             "Open popup in manga mode"
           ]
-        }
+        },
+        "minimum_size": "Minimum image size (enlarge images which is smaller than this value; 0:disable; x<1:ratio to window size; x>1:pixel)"
       },
 
       "key": {
         "popup_prev": "Move to previous illust",
-        "popup_prev_direction": "Move to previous illust(ignore \"reverse\" setting)",
+        "popup_prev_direction": "Move to previous illust (ignore \"reverse\" setting)",
         "popup_next": "Move to next illust",
-        "popup_next_direction": "Move to next illust(ignore \"reverse\" setting)",
+        "popup_next_direction": "Move to next illust (ignore \"reverse\" setting)",
         "popup_first": "Move to first illust",
         "popup_last": "Move to last illust",
         "popup_close": "Close",
@@ -313,7 +314,7 @@
           ]
         },
         "reverse_regexp": "\"移動方向を反対にする\"で使用する正規表現",
-        "overlay_control": "移動矢印の幅(0:使用しない/<1:画像に対する割合/>1:ピクセル)",
+        "overlay_control": "移動矢印の幅(0:使用しない; x<1:ポップアップの幅に対する割合; x>1:ピクセル)",
         "scroll_height": "スクロール幅(px)",
         "scroll_height_page": "PageUp/PageDownのスクロール幅",
         "author_status_icon": "プロフィール画像の左上にアイコンを表示する",
@@ -336,7 +337,8 @@
             "ポップアップを開く",
             "ポップアップをマンガモードで開く"
           ]
-        }
+        },
+        "minimum_size": "最小サイズ (この値より小さい画像を拡大して表示; 0:無効; x<1:画面サイズに対する割合; x>1:ピクセル)"
       },
 
       "key": {
