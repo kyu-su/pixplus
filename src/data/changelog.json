@@ -5,12 +5,14 @@
     "releasenote": "",
     "changes_i18n": {
       "en": [
+        "[Add] Add an option to specify minimum size of popup.",
         "[Add] Re-implement 'Disable profile card popup' option.",
-        "[Add] Add an option to specify minimum size of popup"
+        "[Fix] Fix an issue that thumbnail-menu opens popup."
       ],
       "ja": [
+        "[追加] ポップアップの最小サイズを指定するオプションを追加。",
         "[追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。",
-        "[追加] ポップアップの最小サイズを指定するオプションを追加。"
+        "[修正] サムネイルメニューをクリックしてもポップアップが開いてしまう不具合を修正。"
       ]
     }
   },
