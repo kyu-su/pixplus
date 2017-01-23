@@ -164,7 +164,10 @@ _.pages = {
   search: {
     run: function(query) {
       var that = this;
-      ['size', 'ratio'].forEach(function(name) {
+      [
+        // 'size',
+        'ratio'
+      ].forEach(function(name) {
         var inputs = _.qa('#search-option ul>li>label>input[name="' + name + '"]');
         if (!inputs.length) {
           return;
@@ -219,52 +222,52 @@ _.pages = {
       });
     },
 
-    size: function(query, ul, li, radio, inputs) {
-      w.pixiv.search.parseSizeOption = function(value) {
-        var size = (value || '').split('-', 2).map(function(p) {
-          return p.split('x');
-        });
+    // size: function(query, ul, li, radio, inputs) {
+    //   w.pixiv.search.parseSizeOption = function(value) {
+    //     var size = (value || '').split('-', 2).map(function(p) {
+    //       return p.split('x');
+    //     });
 
-        var min = size[0] || [],
-            max = size[1] || [],
-            wlt = min[0] || null,
-            hlt = min[1] || null,
-            wgt = max[0] || null,
-            hgt = max[1] || null;
+    //     var min = size[0] || [],
+    //         max = size[1] || [],
+    //         wlt = min[0] || null,
+    //         hlt = min[1] || null,
+    //         wgt = max[0] || null,
+    //         hgt = max[1] || null;
 
-        return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
-      };
+    //     return {wlt: wlt, hlt: hlt, wgt: wgt, hgt: hgt};
+    //   };
 
-      var e = ['wlt', 'hlt', 'wgt', 'hgt'].map(function(n) {
-        return _.e('input', {
-          id: 'pp-search-size-custom-' + n,
-          type: 'text',
-          cls: '_ui-tooltip',
-          'data-tooltip': _.lng['search_' + n]
-        }, li);
-      });
+    //   var e = ['wlt', 'hlt', 'wgt', 'hgt'].map(function(n) {
+    //     return _.e('input', {
+    //       id: 'pp-search-size-custom-' + n,
+    //       type: 'text',
+    //       cls: '_ui-tooltip',
+    //       'data-tooltip': _.lng['search_' + n]
+    //     }, li);
+    //   });
 
-      var wlt = e[0], hlt = e[1], wgt = e[2], hgt = e[3];
+    //   var wlt = e[0], hlt = e[1], wgt = e[2], hgt = e[3];
 
-      [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
-        p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
-      });
+    //   [[hlt, 'x'], [wgt, '-'], [hgt, 'x']].forEach(function(p) {
+    //     p[0].parentNode.insertBefore(d.createTextNode(p[1]), p[0]);
+    //   });
 
-      var update = function() {
-        radio.value = wlt.value + 'x' + hlt.value + '-' + wgt.value + 'x' + hgt.value;
-      };
+    //   var update = function() {
+    //     radio.value = wlt.value + 'x' + hlt.value + '-' + wgt.value + 'x' + hgt.value;
+    //   };
 
-      wlt.value = query.wlt || '';
-      hlt.value = query.hlt || '';
-      wgt.value = query.wgt || '';
-      hgt.value = query.hgt || '';
-      update();
+    //   wlt.value = query.wlt || '';
+    //   hlt.value = query.hlt || '';
+    //   wgt.value = query.wgt || '';
+    //   hgt.value = query.hgt || '';
+    //   update();
 
-      _.listen([wlt, hlt, wgt, hgt], 'input', function() {
-        update();
-        radio.checked = true;
-      });
-    },
+    //   _.listen([wlt, hlt, wgt, hgt], 'input', function() {
+    //     update();
+    //     radio.checked = true;
+    //   });
+    // },
 
     ratio: function(query, ul, li, radio, inputs) {
       var min = -1.5, max = 1.5;

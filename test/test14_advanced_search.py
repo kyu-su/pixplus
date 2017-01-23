@@ -40,11 +40,11 @@ class Test_AdvancedSearch(TestCase):
       if value is not None:
         self.assertEqual(query[name], str(value))
 
-  def test_size(self):
-    r = lambda: random.randint(1, 2000)
-    self.check_size(*sorted(random.sample(range(2000), 4)))
-    self.check_size(r(), None, r(), None)
-    self.check_size(None, r(), None, r())
+  # def test_size(self):
+  #   r = lambda: random.randint(1, 2000)
+  #   self.check_size(*sorted(random.sample(range(2000), 4)))
+  #   self.check_size(r(), None, r(), None)
+  #   self.check_size(None, r(), None, r())
 
   def check_slider(self, slider, knob, text):
     sx, sy, sw, sh = self.geom(slider)
