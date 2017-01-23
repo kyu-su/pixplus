@@ -54,6 +54,14 @@ _.setup_ready = function() {
   } catch(ex) {
     _.error('Failed to setup filter of pixiv.api.request', ex);
   }
+
+  if (_.conf.general.disable_profile_popup) {
+    try {
+      w.colon.d.off('mouseenter','.ui-profile-popup');
+    } catch(ex) {
+      _.error('Failed to disable profile card', ex);
+    }
+  }
 };
 
 _.run = function() {
