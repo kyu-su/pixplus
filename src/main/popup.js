@@ -177,7 +177,8 @@ _.popup = {
     var total_height = g.Math.max.apply(
       g.Math, this.images.map(function(img) {
         return img.naturalHeight;
-      }));
+      })
+    );
 
     var natural_sizes = this.images.map(function(img) {
       return {
@@ -186,9 +187,45 @@ _.popup = {
       };
     });
 
-    var total_width = natural_sizes.reduce(function(w, size) {
-      return w + size.width;
-    }, 0);
+    var total_width;
+    var calc_total_width = function() {
+      total_width = natural_sizes.reduce(function(w, size) {
+        return w + size.width;
+      }, 0);
+    };
+    calc_total_width();
+
+    if (this.resize_mode === this.RM_AUTO && _.conf.popup.minimum_size !== 0) {
+      var cv = _.conf.popup.minimum_size, th_w, th_h;
+
+      if (cv < 0) {
+        if (max_width > 3000) {
+          cv = -cv;
+        } else {
+          cv = 0;
+        }
+      }
+
+      if (cv <= 1) {
+        th_w = Math.floor(max_width  * cv);
+        th_h = Math.floor(max_height * cv);
+      } else {
+        th_w = th_h = cv;
+      }
+
+      if (total_width < th_w || total_height < th_h) {
+        var r = Math.max(th_w/total_width, th_h/total_height);
+        _.debug('Resize to minimum size: ratio=' + r);
+        natural_sizes.map(function(item) {
+          item.width  = Math.floor(item.width*r);
+          item.height = Math.floor(item.height*r);
+        });
+        total_height = Math.floor(total_height*r);
+        calc_total_width();
+        // update_resize_mode = false;
+      }
+    }
+
 
     // initialize
 
@@ -207,6 +244,7 @@ _.popup = {
       aspect_ratio = 1 / aspect_ratio;
     }
     this.aspect_ratio = aspect_ratio;
+
 
     if (update_resize_mode) {
       resize_mode = this.RM_FIT_LONG;

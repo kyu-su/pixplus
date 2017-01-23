@@ -35,7 +35,8 @@
     {"key": "mouse_wheel_delta", "value": 1},
     {"key": "fit_short_threshold", "value": 4},
     {"key": "mark_visited", "value": true},
-    {"key": "manga_page_action", "value": 2}
+    {"key": "manga_page_action", "value": 2},
+    {"key": "minimum_size", "value": 0}
   ]},
 
   {"name": "mypage", "items": [
