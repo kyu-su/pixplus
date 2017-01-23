@@ -1,5 +1,19 @@
 [
   {
+    "date": "",
+    "version": "1.16.1",
+    "releasenote": "",
+    "changes_i18n": {
+      "en": [
+        "[Add] Re-implement 'Disable profile card popup' option."
+      ],
+      "ja": [
+        "[追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/01/22",
     "version": "1.16.0",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0",
