@@ -1,14 +1,16 @@
 [
   {
     "date": "",
-    "version": "1.16.1",
+    "version": "1.17.0",
     "releasenote": "",
     "changes_i18n": {
       "en": [
-        "[Add] Re-implement 'Disable profile card popup' option."
+        "[Add] Re-implement 'Disable profile card popup' option.",
+        "[Add] Add an option to specify minimum size of popup"
       ],
       "ja": [
-        "[追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。"
+        "[追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。",
+        "[追加] ポップアップの最小サイズを指定するオプションを追加。"
       ]
     }
   },
