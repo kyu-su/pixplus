@@ -170,7 +170,12 @@ _.illust = {
       illust.url_medium += '&uarea=' + query.uarea;
     }
 
-    illust.connection = _.onclick(illust.link, function() {
+    illust.connection = _.onclick(illust.link, function(ev) {
+      for(var p = ev.target; p; p = p.parentNode) {
+        if (p.classList && p.classList.contains('thumbnail-menu')) {
+          return false;
+        }
+      }
       _.popup.show(illust);
       if (cb_onshow) {
         cb_onshow();
