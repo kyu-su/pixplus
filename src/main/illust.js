@@ -413,7 +413,7 @@ _.illust = {
     }
 
     try {
-      illust.author_is_me = illust.author_id === w.pixiv.user.id;
+      illust.author_is_me = /pixiv\.context\.self\s*=\s*true/.test(html);
     } catch(ex) {
       _.error(ex);
     }
