@@ -85,13 +85,21 @@ _.popup.tagedit = {
       return;
     }
 
-    var that = this;
+    var that = this,
+        uid;
+    try {
+      uid = w.pixiv.user.id;
+    } catch(ex) {
+      this.onerror('Failed to get user id');
+      return;
+    }
+
     _.xhr.post_data(
       '/rpc_tag_edit.php', {
         mode: 'first',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: w.pixiv.user.id
+        e_id: uid
       },
       function(data) {
         try {
