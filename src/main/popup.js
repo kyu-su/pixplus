@@ -208,7 +208,8 @@ _.popup = {
 
     this.resize_mode_next = this.RM_FIT_LONG;
 
-    if (_.conf.popup.minimum_size !== 0) {
+    if (_.conf.popup.minimum_size !== 0 &&
+        !(this.illust.manga.available && !this.manga.active)) {
       var cv = _.conf.popup.minimum_size, th_w, th_h;
 
       if (cv < 0) {
