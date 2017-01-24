@@ -1,7 +1,7 @@
 _.popup.rating = {
   update: function(score) {
-    var cl = this.rating.classList;
-    if (cl.contains('rated') || cl.contains('pp-error')) {
+    var cl;
+    if (!this.rating || (cl = this.rating.classList).contains('rated') || cl.contains('pp-error')) {
       return;
     }
 
@@ -15,6 +15,9 @@ _.popup.rating = {
   },
 
   calc_score: function(ev) {
+    if (!this.rating) {
+      return 0;
+    }
     var x = ev.clientX - this.rating.getBoundingClientRect().left;
     if (x >= 0 && x < 260) {
       return Math.floor(x / 26) + 1;
@@ -41,12 +44,19 @@ _.popup.rating = {
   },
 
   set_error: function() {
+    if (!this.rating) {
+      return;
+    }
     this.rating.classList.remove('pp-error');
     this.update(0);
     this.rating.classList.add('pp-error');
   },
 
   rate: function(score) {
+    if (!this.rating) {
+      return;
+    }
+
     // rpc_rating.php
     //
     // {mode: 'save', i_id: '1234567890', u_id: '12345', qr: '1', score: '10',
@@ -114,6 +124,9 @@ _.popup.rating = {
   setup: function() {
     var dom = _.popup.dom;
     this.rating = _.q('.rating', dom.rating);
+    if (!this.rating) {
+      return;
+    }
     this.rating.style.position = 'relative';
     _.listen(this.rating, 'mousemove', this.onmousemove.bind(this));
     _.listen(this.rating, 'mouseleave', this.onmouseleave.bind(this));
