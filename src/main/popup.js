@@ -195,7 +195,20 @@ _.popup = {
     };
     calc_total_width();
 
-    if (this.resize_mode === this.RM_AUTO && _.conf.popup.minimum_size !== 0) {
+
+
+    // initialize
+
+    var image_scroller = dom.image_scroller;
+    image_scroller.style.cssText = '';
+
+
+
+    // enlarge
+
+    this.resize_mode_next = this.RM_FIT_LONG;
+
+    if (_.conf.popup.minimum_size !== 0) {
       var cv = _.conf.popup.minimum_size, th_w, th_h;
 
       if (cv < 0) {
@@ -214,25 +227,25 @@ _.popup = {
       }
 
       if (total_width < th_w || total_height < th_h) {
-        var r = Math.max(th_w/total_width, th_h/total_height);
-        _.debug('Resize to minimum size: ratio=' + r);
-        natural_sizes.map(function(item) {
-          item.width  = Math.floor(item.width*r);
-          item.height = Math.floor(item.height*r);
-        });
-        total_height = Math.floor(total_height*r);
-        calc_total_width();
-        // update_resize_mode = false;
+        if (this.resize_mode === this.RM_AUTO) {
+          var r = Math.max(th_w/total_width, th_h/total_height);
+          _.debug('Resize to minimum size: ratio=' + r);
+          natural_sizes.map(function(item) {
+            item.width  = Math.floor(item.width*r);
+            item.height = Math.floor(item.height*r);
+          });
+          total_height = Math.floor(total_height*r);
+          calc_total_width();
+          // update_resize_mode = false;
+        } else {
+          this.resize_mode_next = this.RM_AUTO;
+        }
       }
     }
 
 
-    // initialize
 
-    var image_scroller = dom.image_scroller;
-    image_scroller.style.cssText = '';
-
-    // calculate scale
+    // minify
 
     var scale = 1,
         update_scale = false,
@@ -250,7 +263,6 @@ _.popup = {
       resize_mode = this.RM_FIT_LONG;
     }
 
-    this.resize_mode_next = this.RM_FIT_LONG;
     if (total_width > max_width || total_height > max_height) {
       if (update_resize_mode && _.conf.popup.fit_short_threshold > 0) {
         if (aspect_ratio >= _.conf.popup.fit_short_threshold) {
@@ -336,6 +348,9 @@ _.popup = {
         }
       }
     }
+
+
+
 
     // apply scale
 
