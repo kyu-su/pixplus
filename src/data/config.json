@@ -11,7 +11,7 @@
 
   {"name": "popup", "items": [
     {"key": "preload", "value": true},
-    {"key": "big_image", "value": true},
+    {"key": "big_image", "value": false},
     {"key": "rate_confirm", "value": true},
     {"key": "caption_height", "value": 0.4},
     {"key": "caption_minheight", "value": 160},
