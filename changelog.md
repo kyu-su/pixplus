@@ -1,6 +1,22 @@
 pixplus version history
 =======================
 
+## [1.17.0 - 2017/01/25](http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0)
+
+### 変更点
+
+* [追加] ポップアップの最小サイズを指定するオプションを追加。
+* [追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。
+* [修正] サムネイルメニューをクリックしてもポップアップが開いてしまう不具合を修正。
+* [修正] ユーザー自身による作品をポップアップで開けないバグを修正。
+
+### Changes
+
+* [Add] Add an option to specify minimum size of popup.
+* [Add] Re-implement 'Disable profile card popup' option.
+* [Fix] Fix an issue that thumbnail-menu opens popup.
+* [Fix] Fix an issue that pixplus never stops loading when opening user's own works.
+
 ## [1.16.0 - 2017/01/22](http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0)
 
 ### 変更点

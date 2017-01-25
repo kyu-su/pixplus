@@ -1,8 +1,8 @@
 [
   {
-    "date": "",
+    "date": "2017/01/25",
     "version": "1.17.0",
-    "releasenote": "",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0",
     "changes_i18n": {
       "en": [
         "[Add] Add an option to specify minimum size of popup.",
