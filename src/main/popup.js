@@ -25,6 +25,8 @@ _.popup = {
     dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
     dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
+    dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
+    dom.status_message    = _.e('span', {id: 'pp-popup-status-message'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
     dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
@@ -823,45 +825,34 @@ _.popup = {
   },
 
   set_status_text: function(text) {
-    var dom = this.dom;
-    if (text) {
-      dom.status.textContent = text;
-      dom.status.classList.remove('pp-hide');
-    } else {
-      dom.status.classList.add('pp-hide');
-    }
+    this.dom.status_text.textContent = text || '';
   },
 
-  set_status_tooltip: function(text) {
-    if (text) {
-      this.dom.status.classList.add('_ui-tooltip');
-      this.dom.status.setAttribute('data-tooltip', text);
-    } else {
-      this.dom.status.classList.remove('_ui-tooltip');
-    }
+  set_status_message: function(text) {
+    this.dom.status_message.textContent = text || '';
   },
 
   status_loading: function() {
     this.dom.root.classList.add('pp-loading');
     this.dom.root.classList.remove('pp-error');
     this.set_status_text('Loading');
-    this.set_status_tooltip();
+    this.set_status_message();
   },
 
   status_complete: function() {
     this.dom.root.classList.remove('pp-loading');
     this.dom.root.classList.remove('pp-error');
     this.set_status_text('');
-    this.set_status_tooltip();
+    this.set_status_message();
   },
 
   status_error: function(message) {
     this.dom.root.classList.remove('pp-loading');
     this.dom.root.classList.add('pp-error');
     this.set_status_text('Error');
-    this.set_status_tooltip(message);
+    this.set_status_message(message);
     if (message) {
-      _.error(message);
+      _.error.apply(_, arguments);
     }
   },
 
