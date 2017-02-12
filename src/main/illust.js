@@ -488,6 +488,27 @@ _.illust = {
     }
     illust.comment = (comment ? comment.innerHTML : '') || 'Error';
 
+
+    // if (!_.stampSeries) {
+    //   re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
+    //   if (re) {
+    //     _.stampSeries = JSON.parse(re[1]);
+    //   } else {
+    //     _.error('pixiv.context.stampSeries not detected');
+    //   }
+    // }
+
+
+    if (!_.emoji_series) {
+      re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
+      if (re) {
+        _.emoji_series = JSON.parse(re[1]);
+      } else {
+        _.error('pixiv.context.emojiSeries not detected');
+      }
+    }
+
+
     _.illust.update_urls(illust);
     return true;
   },

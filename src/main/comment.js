@@ -15,11 +15,44 @@ _.popup.comment = {
   },
 
   update: function() {
+    if (_.emoji_series) {
+      if (!_.emoji_map) {
+        _.emoji_map = {};
+        _.emoji_series.forEach(function(item) {
+          _.emoji_map[item.name] = item;
+        });
+      }
+      if (!_.emoji_re) {
+        var pat = _.emoji_series.map(function(item) { return _.escape_regex(item.name); }).join('|');
+        _.emoji_re = new RegExp('\\((' + pat + ')\\)', 'g');
+      }
+    }
+
     _.qa('._comment-item', _.popup.dom.comment).forEach(function(item) {
       if (_.q('.sticker-container', item)) {
         item.classList.add('pp-stamp-comment');
       }
+
+      if (_.emoji_re) {
+        var body = _.q('.body p', item);
+        if (body) {
+          var html;
+          html = body.innerHTML.replace(_.emoji_re, function(all, name) {
+            var emoji = _.emoji_map[name];
+            if (!emoji) {
+              return all;
+            }
+
+            var url = '//source.pixiv.net/common/images/emoji/' + emoji.id + '.png';
+            return '<img src="' + url + '" class="emoji-text" width="28" height="28">';
+          });
+          if (html !== body.innerHTML) {
+            body.innerHTML = html;
+          }
+        }
+      }
     });
+
     _.popup.adjust();
   },
 
