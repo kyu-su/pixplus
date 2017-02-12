@@ -92,6 +92,7 @@
         "scroll_height": "Scroll step (px)",
         "scroll_height_page": "Scroll step for PageUp/PageDown",
         "author_status_icon": "Show icon on profile image",
+        "show_comment_form": "Show comment form by default",
         "hide_stamp_comments": "Hide stamp comments",
         "mouse_wheel": {
           "desc": "Mouse wheel operation",
@@ -318,6 +319,7 @@
         "scroll_height": "スクロール幅(px)",
         "scroll_height_page": "PageUp/PageDownのスクロール幅",
         "author_status_icon": "プロフィール画像の左上にアイコンを表示する",
+        "show_comment_form": "コメントの投稿フォームをデフォルトで表示する",
         "hide_stamp_comments": "スタンプのコメントを非表示にする",
         "mouse_wheel": {
           "desc": "マウスホイールの動作",

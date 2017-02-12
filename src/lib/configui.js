@@ -17,7 +17,7 @@ _.configui = {
       var tbody = _.e('tbody', null, _.e('table', null, root)), subsection;
 
       section.items.forEach(function(item) {
-        if (!_.conf.general.debug && item.hidden) {
+        if (!_.conf.general.debug && item.hide) {
           return;
         }
 

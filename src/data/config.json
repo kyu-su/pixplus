@@ -30,6 +30,7 @@
     {"key": "scroll_height", "value": 32},
     {"key": "scroll_height_page", "value": 0.8},
     {"key": "author_status_icon", "value": true},
+    {"key": "show_comment_form", "value": false, "hide": true},
     {"key": "hide_stamp_comments", "value": false},
     {"key": "mouse_wheel", "value": 2},
     {"key": "mouse_wheel_delta", "value": 1},
