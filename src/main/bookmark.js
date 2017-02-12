@@ -127,13 +127,13 @@ _.popup.bookmark = {
 
     _.xhr.get(illust.url_bookmark, function(html) {
       that.onload(illust, html);
-    }, function() {
+    }, function(msg) {
       if (illust !== _.popup.illust || !that.active) {
         return;
       }
 
       that.active = false;
-      _.popup.status_error();
+      _.popup.status_error(msg);
     });
   },
 
