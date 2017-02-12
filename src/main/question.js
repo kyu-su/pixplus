@@ -63,43 +63,26 @@ _.popup.question = {
     }
   },
 
-  send: function(num) {
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+  send: function(btn) {
+    var that = this;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.call(
       '/rpc_rating.php',
       {
         mode: 'save2',
-        i_id: illust.id,
-        u_id: uid,
+        i_id: _.popup.illust.id,
+        u_id: _.popup.api.uid,
         qr: 1,
-        num: num,
-        tt: illust.token
+        num: btn.dataset.key,
+        tt: _.popup.api.token
       },
       function(res) {
         that.end();
         _.popup.reload();
       },
       function() {
-        _.popup.status_error();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
@@ -118,7 +101,7 @@ _.popup.question = {
     var that = this;
     _.qa('input[type="button"][data-key]', this.dom.list).forEach(function(btn) {
       _.onclick(btn, function() {
-        that.send(btn.dataset.key);
+        that.send(btn);
       });
     });
   },
