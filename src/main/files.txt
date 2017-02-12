@@ -1,6 +1,7 @@
 util.js
 illust.js
 popup.js
+api.js
 rating.js
 comment.js
 bookmark.js
