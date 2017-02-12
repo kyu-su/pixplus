@@ -30,13 +30,16 @@ _.popup.tagedit = {
     var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
     c.innerHTML = html;
 
+    this.input = _.q('#add_tag', c);
+
     var add_tag = _.q('input[onclick="addTag()"]', c);
     if (add_tag) {
       add_tag.removeAttribute('onclick');
       add_tag.classList.add('pp-add-tag');
-      _.onclick(add_tag, this.add_tag.bind(this));
+      _.onclick(add_tag, function() {
+        that.add_tag(that.input.value, add_tag);
+      });
     }
-    this.input = _.q('#add_tag', c);
 
     _.qa('input[onclick^="delTag("]').forEach(function(btn) {
       var re = /delTag\((\d+),/.exec(btn.getAttribute('onclick'));
@@ -47,7 +50,7 @@ _.popup.tagedit = {
           btn.classList.add('pp-remove-tag');
           btn.setAttribute('data-pp-tag-id', re[1]);
           _.onclick(btn, function() {
-            that.remove_tag(tag.textContent);
+            that.remove_tag(tag.textContent, btn);
           });
           return;
         }
@@ -67,159 +70,76 @@ _.popup.tagedit = {
     _.popup.adjust();
   },
 
-  onerror: function(illust, message) {
-    if (illust !== _.popup.illust || !this.active) {
-      return;
-    }
-    if (!_.popup.dom.root.classList.contains('pp-tagedit-mode')) {
-      this.active = false;
-    }
-    _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
-    _.popup.status_error();
-  },
-
   reload: function() {
-    var illust = _.popup.illust;
-    if (!illust.author_id) {
-      this.onerror(illust, 'Author id not specified');
-      return;
-    }
-
-    var that = this,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      this.onerror('Failed to get user id');
-      return;
-    }
-
-    _.xhr.post_data(
-      '/rpc_tag_edit.php', {
+    var that = this, illust = _.popup.illust;
+    _.popup.status_loading();
+    _.popup.api.call(
+      '/rpc_tag_edit.php',
+      {
         mode: 'first',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid
+        e_id: _.popup.api.uid
       },
       function(data) {
-        try {
-          // console.log(JSON.parse(data));
-          that.onload(illust, JSON.parse(data).html);
-        } catch(ex) {
-          _.error(ex);
-          that.onerror(illust, String(ex));
-        }
+        that.onload(illust, data.html);
       },
       function() {
-        that.onerror(illust);
+        if (illust === _.popup.illust) {
+          that.end();
+        }
       }
     );
-
-    _.popup.status_loading();
   },
 
-  add_tag: function() {
-    var tag = this.input.value;
-
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+  add_tag: function(tag, btn) {
+    var that = this, illust = _.popup.illust;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.call(
       '/rpc_tag_edit.php',
       {
         mode: 'add_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid,
+        e_id: _.popup.api.uid,
         value: tag,
-        tt: illust.token
+        tt: _.popup.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          _.popup.status_complete();
-          that.end();
-          _.popup.reload();
-        } catch(ex) {
-          _.popup.status_complete();
-          _.error('Failed to update tag editor form', ex);
-          alert('Error!');
-          that.end();
-        }
+      function(data) {
+        that.end();
+        _.popup.reload();
       },
       function() {
-        _.popup.status_complete();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
 
-  remove_tag: function(tag) {
+  remove_tag: function(tag, btn) {
     if (!confirm(_.lng.delete_tag_confirm)) {
       return;
     }
 
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+    var that = this, illust = _.popup.illust;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.call(
       '/rpc_tag_edit.php',
       {
         mode: 'del_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid,
+        e_id: _.popup.api.uid,
         tag: tag,
-        tt: illust.token
+        tt: _.popup.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          _.popup.status_complete();
-          that.end();
-          _.popup.reload();
-        } catch(ex) {
-          _.popup.status_complete();
-          _.error('Failed to update tag editor form', ex);
-          alert('Error!');
-          that.end();
-        }
+      function(data) {
+        that.end();
+        _.popup.reload();
       },
       function() {
-        _.popup.status_complete();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
