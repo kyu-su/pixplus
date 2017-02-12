@@ -74,49 +74,25 @@ _.popup.rating = {
       }
     }
 
-
-
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
-    _.xhr.post_data(
+    var that = this;
+    _.popup.status_loading();
+    _.popup.api.call(
       '/rpc_rating.php',
       {
         mode: 'save',
-        i_id: illust.id,
-        u_id: uid,
+        i_id: _.popup.illust.id,
+        u_id: _.popup.api.uid,
         qr: 1,
         score: score,
-        tt: illust.token
+        tt: _.popup.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          that.update(parseInt(data.put_score));
-          that.rating.classList.add('rated');
-        } catch(ex) {
-          that.set_error();
-          _.error('Failed to update rating status', ex);
-          alert('Error!');
-        }
+      function(data) {
+        that.update(parseInt(data.put_score));
+        that.rating.classList.add('rated');
+        _.popup.status_complete();
       },
       function() {
         that.set_error();
-        alert('Error!');
       }
     );
   },
