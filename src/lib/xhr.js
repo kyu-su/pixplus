@@ -6,31 +6,48 @@ _.xhr = {
   },
 
   request: function(method, url, headers, data, cb_success, cb_error) {
+    var msg;
+
     if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating|rpc_tag_edit)\.php(?:\?|$)/.test(url)) {
-      _.error('XHR: URL not allowed - ' + url);
+      _.error(msg);
       if (cb_error) {
-        cb_error();
+        cb_error(msg);
       }
       return;
     }
 
     var that = this;
     var xhr = new w.XMLHttpRequest();
+
     xhr.onload = function() {
-      that.cache[url] = xhr.responseText;
-      cb_success(xhr.responseText);
+      if (xhr.status === 200) {
+        that.cache[url] = xhr.responseText;
+        cb_success(xhr.responseText);
+      } else {
+        msg = xhr.status + ' ' + xhr.message;
+        _.error(msg);
+        if (cb_error) {
+          cb_error(msg);
+        }
+      }
     };
-    if (cb_error) {
-      xhr.onerror = function() {
-        cb_error(xhr);
-      };
-    }
+
+    xhr.onerror = function() {
+      msg = 'XHR communication error';
+      _.error(msg);
+      if (cb_error) {
+        cb_error(msg);
+      }
+    };
+
     xhr.open(method, url, true);
+
     if (headers) {
       headers.forEach(function(p) {
         xhr.setRequestHeader(p[0], p[1]);
       });
     }
+
     xhr.send(data);
   },
 
