@@ -1,10 +1,5 @@
 .pp-commform-root {
   position: relative;
-  margin: 0.2em 0px;
-  background-color: #e8f0f6;
-  border: 1px solid #d6dee5;
-  border-radius: 5px;
-  overflow: hidden;
 
 
 
@@ -50,168 +45,208 @@
 
 
 
-  .pp-commform-tabbar {
+  .pp-commform-reply-to-wrap {
+    position: relative;
+
+    #pp-icon-comment-reply-to {
+      position: absolute;
+      bottom: 0px;
+      width: 2em;
+      height: 2em;
+      opacity: 0.2;
+    }
+
+    .pp-commform-reply-to {
+      margin-left: 2.4em;
+      background-color: #f2f4f6;
+      border: 1px solid #d6dee5;
+      border-radius: 5px;
+
+      ._comment-item {
+        border-width: 0px;
+        margin: 0px 0.2em;
+      }
+
+      .action-list {
+        display: none;
+      }
+    }
+  }
+
+
+
+  .pp-commform-form {
+    margin: 0.2em 0px;
     background-color: #e8f0f6;
-
-    .pp-commform-tab {
-      display: inline-block;
-      font-weight: bold;
-      padding: 10px;
-      background-color: #fff;
-      border-right: 1px solid #d6dee5;
-
-      &:not(.pp-active) {
-        cursor: pointer;
-      }
-    }
-  }
-
-  .pp-commform-tabbar-top {
-    border-bottom: 1px solid #d6dee5;
-
-    .pp-commform-tab.pp-active {
-      padding-bottom: 11px;
-      margin-bottom: -1px;
-    }
-  }
-
-  .pp-commform-tabbar-bottom {
-    border-top: 1px solid #d6dee5;
-
-    .pp-commform-tab.pp-active {
-      padding-top: 11px;
-      margin-top: -1px;
-    }
-  }
-
-  .pp-commform-tabbar-center {
-    text-align: center;
-
-    .pp-commform-tab:first-child {
-      border-left: 1px solid #d6dee5;
-    }
-  }
-
-  .pp-commform-cont {
-    background-color: #fff;
-
-    &:not(.pp-active) {
-      display: none;
-    }
-  }
+    border: 1px solid #d6dee5;
+    border-radius: 5px;
+    overflow: hidden;
 
 
 
-  .pp-commform-toolbar {
-    padding: 0.2em;
-    background-color: #fff;
-    border-top: 1px dashed #d6dee5;
+    .pp-commform-tabbar {
+      background-color: #e8f0f6;
 
-    button {
-      border-width: 0px;
-      background-color: transparent;
-      font-weight: bold;
-      padding: 0.6em 0.8em;
-      cursor: pointer;
-    }
-
-    .pp-commform-button-flat {
-      border-right: 1px solid #d6dee5;
-      color: #777;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
-    .pp-commform-button-blue {
-      background-color: #0096db;
-      color: #fff;
-      border-radius: 0.2em;
-
-      &:hover {
-        background-color: #00a7f5;
-      }
-    }
-
-    .pp-commform-send {
-      float: right;
-      padding: 0.6em 1.8em;
-    }
-  }
-
-
-
-  .pp-commform-cont-comment {
-    textarea {
-      border-width: 0px;
-      padding: 0.3em;
-      width: 100%;
-      height: 4em;
-      background-color: #fff;
-      font-size: inherit;
-    }
-
-    .pp-commform-emoji {
-      border-top: 1px dashed #d6dee5;
-      padding: 0.4em;
-
-      div {
-        margin: 3px 0px;
-      }
-
-      img {
+      .pp-commform-tab {
         display: inline-block;
-        width: 42px;
-        height: 42px;
-        border: 3px solid transparent;
-        margin: 0px 3px;
+        font-weight: bold;
+        padding: 10px;
+        background-color: #fff;
+        border-right: 1px solid #d6dee5;
 
-        &:hover {
-          border-color: #ddd;
-        }
-      }
-    }
-  }
-
-
-
-  .pp-commform-cont-stamp {
-    .pp-commform-stamp-group:not(.pp-active) {
-      display: none;
-    }
-
-    .pp-commform-stamp-group {
-      padding: 0.4em;
-
-      div {
-        margin: 3px 0px;
-      }
-
-      img {
-        display: inline-block;
-        width: 70px;
-        height: 70px;
-        border: 3px solid transparent;
-        margin: 0px 3px;
-
-        &:hover {
-          border-color: #ddd;
+        &:not(.pp-active) {
+          cursor: pointer;
         }
       }
     }
 
-    .pp-commform-tab {
-      padding: 4px 15px;
+    .pp-commform-tabbar-top {
+      border-bottom: 1px solid #d6dee5;
 
-      &.pp-active {
-        padding-top: 5px;
+      .pp-commform-tab.pp-active {
+        padding-bottom: 11px;
+        margin-bottom: -1px;
+      }
+    }
+
+    .pp-commform-tabbar-bottom {
+      border-top: 1px solid #d6dee5;
+
+      .pp-commform-tab.pp-active {
+        padding-top: 11px;
         margin-top: -1px;
       }
+    }
 
-      img {
-        width: 24px;
-        height: 24px;
+    .pp-commform-tabbar-center {
+      text-align: center;
+
+      .pp-commform-tab:first-child {
+        border-left: 1px solid #d6dee5;
+      }
+    }
+
+    .pp-commform-cont {
+      background-color: #fff;
+
+      &:not(.pp-active) {
+        display: none;
+      }
+    }
+
+
+
+    .pp-commform-toolbar {
+      padding: 0.2em;
+      background-color: #fff;
+      border-top: 1px dashed #d6dee5;
+
+      button {
+        border-width: 0px;
+        background-color: transparent;
+        font-weight: bold;
+        padding: 0.6em 0.8em;
+        cursor: pointer;
+      }
+
+      .pp-commform-button-flat {
+        border-right: 1px solid #d6dee5;
+        color: #777;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .pp-commform-button-blue {
+        background-color: #0096db;
+        color: #fff;
+        border-radius: 0.2em;
+
+        &:hover {
+          background-color: #00a7f5;
+        }
+      }
+
+      .pp-commform-send {
+        float: right;
+        padding: 0.6em 1.8em;
+      }
+    }
+
+
+
+    .pp-commform-cont-comment {
+      textarea {
+        border-width: 0px;
+        padding: 0.3em;
+        width: 100%;
+        height: 4em;
+        background-color: #fff;
+        font-size: inherit;
+      }
+
+      .pp-commform-emoji {
+        border-top: 1px dashed #d6dee5;
+        padding: 0.4em;
+
+        div {
+          margin: 3px 0px;
+        }
+
+        img {
+          display: inline-block;
+          width: 42px;
+          height: 42px;
+          border: 3px solid transparent;
+          margin: 0px 3px;
+
+          &:hover {
+            border-color: #ddd;
+          }
+        }
+      }
+    }
+
+
+
+    .pp-commform-cont-stamp {
+      .pp-commform-stamp-group:not(.pp-active) {
+        display: none;
+      }
+
+      .pp-commform-stamp-group {
+        padding: 0.4em;
+
+        div {
+          margin: 3px 0px;
+        }
+
+        img {
+          display: inline-block;
+          width: 70px;
+          height: 70px;
+          border: 3px solid transparent;
+          margin: 0px 3px;
+
+          &:hover {
+            border-color: #ddd;
+          }
+        }
+      }
+
+      .pp-commform-tab {
+        padding: 4px 15px;
+
+        &.pp-active {
+          padding-top: 5px;
+          margin-top: -1px;
+        }
+
+        img {
+          width: 24px;
+          height: 24px;
+        }
       }
     }
   }

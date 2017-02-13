@@ -72,7 +72,8 @@ CSS_ICON_FILES_SCSS             = $(CSS_ICON_NAMES:%=$(BUILD_DIR_ICON)/%.scss) \
 SVG_GEN_GEN                     = tools/svg_generator_generator.py
 SVG_GEN_NAMES                   = pencil pencil-off cogwheel following heart \
                                   mypixiv ugoira multipage olc-arrow \
-                                  rating-error comment-loading comment-error
+                                  rating-error comment-loading comment-error \
+                                  comment-reply-to
 SVG_GEN_FILES                   = $(SVG_GEN_NAMES:%=src/data/%.svg)
 DIST_FILES                      = $(LICENSE) $(wildcard extension/*) $(LIB_JS) $(DATA_JS)
 

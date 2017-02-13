@@ -31,6 +31,7 @@ _.popup.comment = {
     }
 
     _.qa('._comment-item', _.popup.dom.comment).forEach(this.update_comment_item.bind(this));
+    _.qa('._comment-sticker-item', _.popup.dom.comment).forEach(this.update_comment_stamp_item.bind(this));
     _.popup.adjust();
   },
 
@@ -41,6 +42,7 @@ _.popup.comment = {
 
     _.qa('img[data-src]', item).forEach(function(img) {
       img.src = img.dataset.src;
+      img.removeAttribute('data-src');
     });
 
     if (_.emoji_re) {
@@ -61,13 +63,23 @@ _.popup.comment = {
     }
   },
 
+  update_comment_stamp_item: function(item) {
+    _.qa('img[data-src]', item).forEach(function(img) {
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    });
+  },
+
   scroll: function() {
     _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
   },
 
   show_form: function() {
     if (_.popup.dom.root.classList.add('pp-show-comment-form')) {
-      this.form.comment_textarea.focus();
+      var that = this;
+      w.setTimeout(function() {
+        that.form.comment_textarea.focus();
+      }, 0);
     }
   },
 
@@ -79,25 +91,49 @@ _.popup.comment = {
     _.popup.dom.root.classList.toggle('pp-show-comment-form');
   },
 
-  setup: function(html) {
-    var dom = _.popup.dom;
-    dom.comment.innerHTML = html;
-    this.ready = false;
-    if (this.active) {
-      this.setup_real();
-    }
-  },
-
   delete_comment: function(item) {
+    if (!confirm(_.lng.delete_comment_confirm)) {
+      return;
+    }
+
+    _.popup.status_loading();
+    _.popup.api.post(
+      '/rpc_delete_comment.php',
+      {
+        i_id: _.popup.illust.id,
+        del_id: item.dataset.id,
+        tt: _.api.token
+      },
+      function(data) {
+        if (data.error) {
+          _.popup.status_error(data.message);
+        } else {
+          item.parentNode.removeChild(item);
+          _.popup.status_complete();
+        }
+      }
+    );
   },
 
   get_comment_item: function(target) {
     for(var p = target.parentNode; p; p = p.parentNode) {
-      if (p.classList.contains('_comment-item')) {
+      if (p.classList.contains('_comment-item') || p.classList.contains('sticker-item')) {
         return p;
       }
     }
     return null;
+  },
+
+  setup: function(html) {
+    _.clear(_.popup.dom.comment);
+
+    var comments = _.e('div', {id: 'pp-popup-comment-comments'}, _.popup.dom.comment);
+    comments.innerHTML = html;
+
+    this.ready = false;
+    if (this.active) {
+      this.setup_real();
+    }
   },
 
   setup_real: function() {
@@ -127,22 +163,28 @@ _.popup.comment = {
       }
     };
 
-    _.onclick(dom.comment, function(ev) {
-      var t = ev.target, p;
+    _.onclick(_.q('#pp-popup-comment-comments', dom.comment), function(ev) {
+      var t, p;
 
-      if (t.classList.contains('delete-comment')) {
-        if ((p = that.get_comment_item(t))) {
-          that.delete_comment(p);
+      for(t = ev.target; t; t = t.parentNode) {
+        if (t.classList.contains('delete-comment')) {
+          if ((p = that.get_comment_item(t))) {
+            that.delete_comment(p);
+            return true;
+          }
+
+        } else if (t.classList.contains('reply')) {
+          if ((p = that.get_comment_item(t))) {
+            that.show_form();
+            that.form.set_reply_to(p.dataset.id);
+            return true;
+          }
+
+        } else if (t.classList.contains('reply-to')) {
+          that.show_form();
+          that.form.set_reply_to(t.dataset.id);
           return true;
         }
-
-      } else if (t.classList.contains('reply')) {
-        if ((p = that.get_comment_item(t))) {
-          that.form.set_reply_to(p.dataset.id);
-        }
-
-      } else if (t.classList.contains('reply-to')) {
-        that.form.set_reply_to(t.dataset.id);
       }
 
       return false;

@@ -10,16 +10,22 @@ _.CommentForm = _.class.create({
     dom.root            = _.e('div', {cls: 'pp-commform-root'}, wrap);
     dom.overlay         = _.e('div', {cls: 'pp-commform-overlay'}, dom.root);
     dom.overlay_message = _.e('div', {cls: 'pp-commform-overlay-message'}, dom.overlay);
-    dom.tabbar          = _.e('div', {cls: 'pp-commform-tabbar pp-commform-tabbar-top'}, dom.root);
+    dom.reply_to_wrap   = _.e('div', {cls: 'pp-commform-reply-to-wrap pp-hide'}, dom.root);
+    dom.reply_to        = _.e('div', {cls: 'pp-commform-reply-to'}, dom.reply_to_wrap);
+    dom.form            = _.e('div', {cls: 'pp-commform-form'}, dom.root);
+    dom.tabbar          = _.e('div', {cls: 'pp-commform-tabbar pp-commform-tabbar-top'}, dom.form);
 
     dom.overlay.appendChild(dom.icon_loading = _.svg.comment_loading(d));
     dom.overlay.appendChild(dom.icon_error   = _.svg.comment_error(d));
+
+    dom.reply_to_wrap.insertBefore(
+      dom.icon_reply_to = _.svg.comment_reply_to(d), dom.reply_to_wrap.firstChild);
 
     var that = this;
     this.tabs.forEach(function(name) {
       var text = _.lng.commform['tab_' + name],
           tab  = _.e('div', {cls: 'pp-commform-tab', text: text}, dom.tabbar),
-          cont = _.e('div', {cls: 'pp-commform-cont pp-commform-cont-' + name}, dom.root);
+          cont = _.e('div', {cls: 'pp-commform-cont pp-commform-cont-' + name}, dom.form);
 
       _.onclick(tab, function() {
         that.select_tab(name);
@@ -37,7 +43,35 @@ _.CommentForm = _.class.create({
 
 
   set_reply_to: function(id) {
-    this.parent = id;
+    this.reply_to_id = id || null;
+
+    if (!id) {
+      this.dom.reply_to_wrap.classList.add('pp-hide');
+      return;
+    }
+
+    var that = this;
+    this.set_loading();
+    _.api.get(
+      '/rpc/get_comment.php',
+      this.illust,
+      {
+        comment_id: id,
+        tt: _.api.token
+      },
+      function(data) {
+        if (data.error) {
+          that.set_error(data.message || 'Unknown error');
+        } else {
+          that.dom.reply_to.innerHTML = data.body.html;
+          that.dom.reply_to_wrap.classList.remove('pp-hide');
+          that.set_complete();
+        }
+      },
+      function(msg) {
+        that.set_error(msg);
+      }
+    );
   },
 
 
@@ -69,8 +103,8 @@ _.CommentForm = _.class.create({
 
 
   send: function(data) {
-    if (this.parent) {
-      data.parent_id = this.parent;
+    if (this.reply_to_id) {
+      data.parent_id = this.reply_to_id;
     }
 
     var that = this;
@@ -84,6 +118,8 @@ _.CommentForm = _.class.create({
           that.set_error(data.message || 'Unknown error');
         } else {
           that.onsent(data.body.html);
+          that.comment_textarea.value = '';
+          that.set_reply_to();
           that.set_complete();
         }
       },
