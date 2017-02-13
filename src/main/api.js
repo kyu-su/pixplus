@@ -1,5 +1,5 @@
 _.api = {
-  post: function(url, illust, data, onsuccess, onerror) {
+  request: function(method, url, illust, data, onsuccess, onerror) {
     for(var key in data) {
       if (typeof(data[key]) === 'function') {
         var err = false;
@@ -15,27 +15,42 @@ _.api = {
       }
     }
 
-    _.xhr.post_data(
-      url,
-      data,
-      function(res) {
-        var data;
-        try {
-          data = JSON.parse(res);
-        } catch(ex) {
-          if (onerror) {
-            onerror('JSON parse error', ex);
-          }
-          return;
-        }
-        onsuccess(data);
-      },
-      function(message) {
+    var onsuc = function(res) {
+      var data;
+      try {
+        data = JSON.parse(res);
+      } catch(ex) {
         if (onerror) {
-          onerror('XHR error: ' + message);
+          onerror('JSON parse error', ex);
         }
+        return;
       }
-    );
+      onsuccess(data);
+    };
+
+    var onerr = function(message) {
+      if (onerror) {
+        onerror('XHR error: ' + message);
+      }
+    };
+
+    if (method === 'post') {
+      _.xhr.post_data(url, data, onsuc, onerr);
+    } else if (method === 'get') {
+      _.xhr.request('GET', url + '?' + _.xhr.serialize(data), null, null, onsuc, onerr);
+    } else {
+      if (onerror) {
+        onerror('Invalid method - ' + method);
+      }
+    }
+  },
+
+  post: function(url, illust, data, onsuccess, onerror) {
+    this.request('post', url, illust, data, onsuccess, onerror);
+  },
+
+  get: function(url, illust, data, onsuccess, onerror) {
+    this.request('get', url, illust, data, onsuccess, onerror);
   },
 
   token: function(illust, error) {
