@@ -104,6 +104,7 @@ _.popup.rating = {
       return;
     }
     this.rating.style.position = 'relative';
+    this.rating.appendChild(_.svg.rating_error(d));
     _.listen(this.rating, 'mousemove', this.onmousemove.bind(this));
     _.listen(this.rating, 'mouseleave', this.onmouseleave.bind(this));
     _.onclick(this.rating, this.onclick.bind(this));

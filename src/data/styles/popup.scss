@@ -241,6 +241,18 @@
       }
     }
 
+    #pp-icon-rating-error {
+      position: absolute;
+      width: 260px;
+      height: 26px;
+      left: 0px;
+      top: 0px;
+    }
+
+    .rating:not(.pp-error) #pp-icon-rating-error {
+      display: none;
+    }
+
     .score {
       dl, dt, dd {
         display: inline;
