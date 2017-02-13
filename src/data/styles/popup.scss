@@ -46,19 +46,8 @@
   }
 
   #pp-popup-status-message {
-    position: absolute;
     right: 0px;
     top: 1.5em;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    white-space: nowrap;
-    z-index: 20002;
-
-    &:empty {
-      display: none;
-    }
   }
 
   #pp-popup-status-text:not(:hover) + #pp-popup-status-message {

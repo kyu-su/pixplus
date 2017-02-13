@@ -145,6 +145,20 @@ input.pp-flat-input {
   }
 }
 
+.pp-tooltip {
+  position: absolute;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  background-color: #333;
+  color: #fff;
+  white-space: nowrap;
+  z-index: 20002;
+
+  &:empty {
+    display: none;
+  }
+}
+
 
 /********************************\
   floater
