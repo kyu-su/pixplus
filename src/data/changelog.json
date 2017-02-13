@@ -1,5 +1,19 @@
 [
   {
+    "date": "",
+    "version": "1.18.0",
+    "releasenote": "",
+    "changes_i18n": {
+      "en": [
+        "[Add] Re-implement comment posting feature."
+      ],
+      "ja": [
+        "[追加] コメント投稿機能を再実装。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/01/25",
     "version": "1.17.0",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0",
