@@ -6,6 +6,7 @@
     {"key": "fast_user_bookmark", "value": 0},
     {"key": "redirect_jump_page", "value": 1},
     {"key": "disable_profile_popup", "value": false},
+    {"key": "commform_default_tab", "value": "", "hide": true},
     {"key": "debug", "value": false}
   ]},
 

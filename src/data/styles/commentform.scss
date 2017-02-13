@@ -1,0 +1,218 @@
+.pp-commform-root {
+  position: relative;
+  margin: 0.2em 0px;
+  background-color: #e8f0f6;
+  border: 1px solid #d6dee5;
+  border-radius: 5px;
+  overflow: hidden;
+
+
+
+  .pp-commform-overlay {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: rgba(255,255,255,0.8);
+
+    svg {
+      position: absolute;
+      display: block;
+      margin: -25px;
+      left: 50%;
+      top: 50%;
+    }
+
+    .pp-commform-overlay-message {
+      position: absolute;
+      left: 0px;
+      right: 0px;
+      top: 50%;
+      margin-top: 30px;
+      text-align: center;
+
+      &:empty {
+        display: none;
+      }
+    }
+
+    &:not(.pp-loading):not(.pp-error) {
+      display: none;
+    }
+    &:not(.pp-loading) #pp-icon-comment-loading {
+      display: none;
+    }
+    &:not(.pp-error) #pp-icon-comment-error {
+      display: none;
+    }
+  }
+
+
+
+  .pp-commform-tabbar {
+    background-color: #e8f0f6;
+
+    .pp-commform-tab {
+      display: inline-block;
+      font-weight: bold;
+      padding: 10px;
+      background-color: #fff;
+      border-right: 1px solid #d6dee5;
+
+      &:not(.pp-active) {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .pp-commform-tabbar-top {
+    border-bottom: 1px solid #d6dee5;
+
+    .pp-commform-tab.pp-active {
+      padding-bottom: 11px;
+      margin-bottom: -1px;
+    }
+  }
+
+  .pp-commform-tabbar-bottom {
+    border-top: 1px solid #d6dee5;
+
+    .pp-commform-tab.pp-active {
+      padding-top: 11px;
+      margin-top: -1px;
+    }
+  }
+
+  .pp-commform-tabbar-center {
+    text-align: center;
+
+    .pp-commform-tab:first-child {
+      border-left: 1px solid #d6dee5;
+    }
+  }
+
+  .pp-commform-cont {
+    background-color: #fff;
+
+    &:not(.pp-active) {
+      display: none;
+    }
+  }
+
+
+
+  .pp-commform-toolbar {
+    padding: 0.2em;
+    background-color: #fff;
+    border-top: 1px dashed #d6dee5;
+
+    button {
+      border-width: 0px;
+      background-color: transparent;
+      font-weight: bold;
+      padding: 0.6em 0.8em;
+      cursor: pointer;
+    }
+
+    .pp-commform-button-flat {
+      border-right: 1px solid #d6dee5;
+      color: #777;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .pp-commform-button-blue {
+      background-color: #0096db;
+      color: #fff;
+      border-radius: 0.2em;
+
+      &:hover {
+        background-color: #00a7f5;
+      }
+    }
+
+    .pp-commform-send {
+      float: right;
+      padding: 0.6em 1.8em;
+    }
+  }
+
+
+
+  .pp-commform-cont-comment {
+    textarea {
+      border-width: 0px;
+      padding: 0.3em;
+      width: 100%;
+      height: 4em;
+      background-color: #fff;
+      font-size: inherit;
+    }
+
+    .pp-commform-emoji {
+      border-top: 1px dashed #d6dee5;
+      padding: 0.4em;
+
+      div {
+        margin: 3px 0px;
+      }
+
+      img {
+        display: inline-block;
+        width: 42px;
+        height: 42px;
+        border: 3px solid transparent;
+        margin: 0px 3px;
+
+        &:hover {
+          border-color: #ddd;
+        }
+      }
+    }
+  }
+
+
+
+  .pp-commform-cont-stamp {
+    .pp-commform-stamp-group:not(.pp-active) {
+      display: none;
+    }
+
+    .pp-commform-stamp-group {
+      padding: 0.4em;
+
+      div {
+        margin: 3px 0px;
+      }
+
+      img {
+        display: inline-block;
+        width: 70px;
+        height: 70px;
+        border: 3px solid transparent;
+        margin: 0px 3px;
+
+        &:hover {
+          border-color: #ddd;
+        }
+      }
+    }
+
+    .pp-commform-tab {
+      padding: 4px 15px;
+
+      &.pp-active {
+        padding-top: 5px;
+        margin-top: -1px;
+      }
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}

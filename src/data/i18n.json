@@ -189,6 +189,14 @@
       "add": "Add"
     },
 
+    "commform": {
+      "tab_comment": "Comments",
+      "tab_stamp": "Stickers",
+      "btn_emoji": "Emoji",
+      "btn_send": "Send",
+      "comment_placeholder": "Write a comment..."
+    },
+
     "cancel": "Cancel",
     "rate_confirm": "Rate it?\n$pointpt",
     "delete_tag_confirm": "Really remove?\nYour member id will be notified to the author.",
@@ -414,6 +422,14 @@
       "yes": "はい",
       "no": "いいえ",
       "add": "追加"
+    },
+
+    "commform": {
+      "tab_comment": "コメント",
+      "tab_stamp": "スタンプ",
+      "btn_emoji": "絵文字",
+      "btn_send": "送信",
+      "comment_placeholder": "コメントする..."
     },
 
     "cancel": "中止",

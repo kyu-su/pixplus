@@ -489,20 +489,33 @@ _.illust = {
     illust.comment = (comment ? comment.innerHTML : '') || 'Error';
 
 
-    // if (!_.stampSeries) {
-    //   re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
-    //   if (re) {
-    //     _.stampSeries = JSON.parse(re[1]);
-    //   } else {
-    //     _.error('pixiv.context.stampSeries not detected');
-    //   }
-    // }
+    if (!_.stamp_series) {
+      re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
+      if (re) {
+        try {
+          _.stamp_series = JSON.parse(re[1]);
+        } catch(ex) {
+          _.stamp_series = null;
+          _.error('Failed to parse pixiv.context.stampSeries', ex);
+        }
+      } else {
+        _.error('pixiv.context.stampSeries not detected');
+      }
+    }
 
 
     if (!_.emoji_series) {
       re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
       if (re) {
-        _.emoji_series = JSON.parse(re[1]);
+        try {
+          _.emoji_series = JSON.parse(re[1]);
+          _.emoji_series.forEach(function(item) {
+            item.url = '//source.pixiv.net/common/images/emoji/' + item.id + '.png';
+          });
+        } catch(ex) {
+          _.emoji_series = null;
+          _.error('Failed to parse pixiv.context.emojiSeries', ex);
+        }
       } else {
         _.error('pixiv.context.emojiSeries not detected');
       }

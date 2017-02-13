@@ -3,7 +3,9 @@ _.popup.comment = {
   ready: false,
 
   clear: function() {
+    var show_form = _.conf.popup.show_comment_form;
     _.popup.dom.root.classList.remove('pp-comment-mode');
+    _.popup.dom.root.classList[show_form ? 'add' : 'remove']('pp-show-comment-form');
     this.update_hide_stamp_comments();
     this.active = false;
   },
@@ -28,36 +30,53 @@ _.popup.comment = {
       }
     }
 
-    _.qa('._comment-item', _.popup.dom.comment).forEach(function(item) {
-      if (_.q('.sticker-container', item)) {
-        item.classList.add('pp-stamp-comment');
-      }
+    _.qa('._comment-item', _.popup.dom.comment).forEach(this.update_comment_item.bind(this));
+    _.popup.adjust();
+  },
 
-      if (_.emoji_re) {
-        var body = _.q('.body p', item);
-        if (body) {
-          var html;
-          html = body.innerHTML.replace(_.emoji_re, function(all, name) {
-            var emoji = _.emoji_map[name];
-            if (!emoji) {
-              return all;
-            }
+  update_comment_item: function(item) {
+    if (_.q('.sticker-container', item)) {
+      item.classList.add('pp-stamp-comment');
+    }
 
-            var url = '//source.pixiv.net/common/images/emoji/' + emoji.id + '.png';
-            return '<img src="' + url + '" class="emoji-text" width="28" height="28">';
-          });
-          if (html !== body.innerHTML) {
-            body.innerHTML = html;
-          }
-        }
-      }
+    _.qa('img[data-src]', item).forEach(function(img) {
+      img.src = img.dataset.src;
     });
 
-    _.popup.adjust();
+    if (_.emoji_re) {
+      var body = _.q('.body p', item);
+      if (body) {
+        var html;
+        html = body.innerHTML.replace(_.emoji_re, function(all, name) {
+          var emoji = _.emoji_map[name];
+          if (!emoji) {
+            return all;
+          }
+          return '<img src="' + emoji.url + '" class="emoji-text" width="28" height="28">';
+        });
+        if (html !== body.innerHTML) {
+          body.innerHTML = html;
+        }
+      }
+    }
   },
 
   scroll: function() {
     _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
+  },
+
+  show_form: function() {
+    if (_.popup.dom.root.classList.add('pp-show-comment-form')) {
+      this.form.comment_textarea.focus();
+    }
+  },
+
+  hide_form: function() {
+    _.popup.dom.root.classList.remove('pp-show-comment-form');
+  },
+
+  toggle_form: function() {
+    _.popup.dom.root.classList.toggle('pp-show-comment-form');
   },
 
   setup: function(html) {
@@ -69,6 +88,18 @@ _.popup.comment = {
     }
   },
 
+  delete_comment: function(item) {
+  },
+
+  get_comment_item: function(target) {
+    for(var p = target.parentNode; p; p = p.parentNode) {
+      if (p.classList.contains('_comment-item')) {
+        return p;
+      }
+    }
+    return null;
+  },
+
   setup_real: function() {
     if (this.ready) {
       return;
@@ -76,17 +107,46 @@ _.popup.comment = {
     this.ready = true;
 
     var dom = _.popup.dom;
-    _.qa('img[data-src]', dom.comment).forEach(function(img) {
-      img.src = img.dataset.src;
-    });
-
     _.onclick(_.q('.more-comment', dom.comment), function(ev) {
       w.pixiv.comment.more(ev);
     });
 
-    _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
-      form.setAttribute('action', '/member_illust.php');
-    });
+    this.form_cont = _.e('div', {id: 'pp-popup-comment-form-cont'});
+    dom.comment.insertBefore(this.form_cont, dom.comment.firstChild);
+    this.form = new _.CommentForm(this.form_cont, _.popup.illust);
+
+    var that = this;
+    this.form.onsent = function(html) {
+      var items = _.q('._comment-items', dom.comment);
+      if (items) {
+        items.insertAdjacentHTML('afterbegin', html);
+        that.update_comment_item(items.firstElementChild);
+        that.hide_form();
+      } else {
+        _.popup.reload();
+      }
+    };
+
+    _.onclick(dom.comment, function(ev) {
+      var t = ev.target, p;
+
+      if (t.classList.contains('delete-comment')) {
+        if ((p = that.get_comment_item(t))) {
+          that.delete_comment(p);
+          return true;
+        }
+
+      } else if (t.classList.contains('reply')) {
+        if ((p = that.get_comment_item(t))) {
+          that.form.set_reply_to(p.dataset.id);
+        }
+
+      } else if (t.classList.contains('reply-to')) {
+        that.form.set_reply_to(t.dataset.id);
+      }
+
+      return false;
+    }, {capture: true});
   },
 
   start: function() {

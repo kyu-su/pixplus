@@ -1,12 +1,11 @@
-_.popup.api = {
-  call: function(url, data, onsuccess, onerror) {
+_.api = {
+  call: function(url, illust, data, onsuccess, onerror) {
     for(var key in data) {
       if (typeof(data[key]) === 'function') {
         var err = false;
-        data[key] = data[key](function() {
-          _.popup.status_error.apply(_.popup, arguments);
+        data[key] = data[key](illust, function() {
           if (onerror) {
-            onerror();
+            onerror.call(w, arguments);
           }
           err = true;
         });
@@ -24,38 +23,45 @@ _.popup.api = {
         try {
           data = JSON.parse(res);
         } catch(ex) {
-          _.popup.status_error('JSON parse error', ex);
           if (onerror) {
-            onerror();
+            onerror('JSON parse error', ex);
           }
           return;
         }
         onsuccess(data);
       },
       function(message) {
-        _.popup.status_error('XHR error: ' + message);
         if (onerror) {
-          onerror();
+          onerror('XHR error: ' + message);
         }
       }
     );
   },
 
-  token: function(error) {
-    if (_.popup.illust.token) {
-      return _.popup.illust.token;
+  token: function(illust, error) {
+    if (illust && illust.token) {
+      return illust.token;
     } else {
       error('Failed to detect security token needed to call APIs');
     }
     return null;
   },
 
-  uid: function(error) {
+  uid: function(illust, error) {
     try {
       return w.pixiv.user.id;
     } catch(ex) {
       error('Failed to get user id', ex);
     }
     return null;
+  }
+};
+
+_.popup.api = {
+  call: function(url, data, onsuccess, onerror) {
+    _.api.call(url, _.popup.illust, data, onsuccess, function() {
+      _.popup.status_error.apply(_.popup, arguments);
+      onerror.call(w, arguments);
+    });
   }
 };

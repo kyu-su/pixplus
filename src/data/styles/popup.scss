@@ -148,11 +148,18 @@
     display: none;
   }
 
-  &:not(.pp-show-comment-form) #pp-popup-comment > ._comment-item:first-child {
+  ._comment-form-container {
+    display: none;
+  }
+  &:not(.pp-show-comment-form) #pp-popup-comment-form-cont {
     display: none;
   }
 
   #pp-popup-comment {
+    #pp-popup-comment-form-cont {
+      margin: 0 20px;
+    }
+
     .comment.header {
       form {
         background-color: #fff;
@@ -182,9 +189,6 @@
       &.host-user .comment {
         padding-left: 0px;
         padding-right: 48px;
-      }
-      .action-list {
-        display: none;
       }
     }
   }

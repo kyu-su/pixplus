@@ -12,6 +12,7 @@ input.js
 key.js
 mouse.js
 bookmarkform.js
+commentform.js
 floater.js
 pages.js
 entrypoint.js
