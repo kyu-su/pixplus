@@ -76,7 +76,7 @@ _.popup.rating = {
 
     var that = this;
     _.popup.status_loading();
-    _.popup.api.call(
+    _.popup.api.post(
       '/rpc_rating.php',
       {
         mode: 'save',

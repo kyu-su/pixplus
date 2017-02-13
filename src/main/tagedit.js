@@ -73,7 +73,7 @@ _.popup.tagedit = {
   reload: function() {
     var that = this, illust = _.popup.illust;
     _.popup.status_loading();
-    _.popup.api.call(
+    _.popup.api.post(
       '/rpc_tag_edit.php',
       {
         mode: 'first',
@@ -96,7 +96,7 @@ _.popup.tagedit = {
     var that = this, illust = _.popup.illust;
     btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.popup.api.call(
+    _.popup.api.post(
       '/rpc_tag_edit.php',
       {
         mode: 'add_tag',
@@ -124,7 +124,7 @@ _.popup.tagedit = {
     var that = this, illust = _.popup.illust;
     btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.popup.api.call(
+    _.popup.api.post(
       '/rpc_tag_edit.php',
       {
         mode: 'del_tag',

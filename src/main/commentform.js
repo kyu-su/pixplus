@@ -75,7 +75,7 @@ _.CommentForm = _.class.create({
 
     var that = this;
     this.set_loading();
-    _.api.call(
+    _.api.post(
       '/rpc/post_comment.php',
       this.illust,
       data,

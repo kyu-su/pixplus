@@ -1,5 +1,5 @@
 _.api = {
-  call: function(url, illust, data, onsuccess, onerror) {
+  post: function(url, illust, data, onsuccess, onerror) {
     for(var key in data) {
       if (typeof(data[key]) === 'function') {
         var err = false;
@@ -58,8 +58,8 @@ _.api = {
 };
 
 _.popup.api = {
-  call: function(url, data, onsuccess, onerror) {
-    _.api.call(url, _.popup.illust, data, onsuccess, function() {
+  post: function(url, data, onsuccess, onerror) {
+    _.api.post(url, _.popup.illust, data, onsuccess, function() {
       _.popup.status_error.apply(_.popup, arguments);
       onerror.call(w, arguments);
     });

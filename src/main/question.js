@@ -67,7 +67,7 @@ _.popup.question = {
     var that = this;
     btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.popup.api.call(
+    _.popup.api.post(
       '/rpc_rating.php',
       {
         mode: 'save2',
