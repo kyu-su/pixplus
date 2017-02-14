@@ -3,7 +3,7 @@ import time
 from test_base import TestCase
 
 class Test_Comment(TestCase):
-  form_selector = '#pp-popup-comment form._comment-form[action="/member_illust.php"]'
+  form_selector = '#pp-popup-comment-form-cont .pp-commform-form'
 
   def start_comment(self):
     self.js('pixplus.popup.comment.start()')
@@ -42,40 +42,40 @@ class Test_Comment(TestCase):
     self.open_popup()
     self.start_comment()
 
-    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
+    self.click(self.q(self.form_selector + ' .pp-commform-tab-comment'))
     self.popup_reload()
     self.start_comment()
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment._current'))
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker:not(._current)'))
-    self.assertTrue(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
-    self.assertFalse(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-comment.pp-active'))
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-stamp:not(.pp-active)'))
+    self.assertTrue(self.q(self.form_selector + ' .pp-commform-cont-comment').is_displayed())
+    self.assertFalse(self.q(self.form_selector + ' .pp-commform-cont-stamp').is_displayed())
 
-    self.click(self.q(self.form_selector + ' > .tabs .tab-sticker'))
+    self.click(self.q(self.form_selector + ' .pp-commform-tab-stamp'))
     self.popup_reload()
     self.start_comment()
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment:not(._current)'))
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker._current'))
-    self.assertFalse(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
-    self.assertTrue(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-comment:not(.pp-active)'))
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-stamp.pp-active'))
+    self.assertFalse(self.q(self.form_selector + ' .pp-commform-cont-comment').is_displayed())
+    self.assertTrue(self.q(self.form_selector + ' .pp-commform-cont-stamp').is_displayed())
 
     self.reload()
 
     self.open_popup()
     self.start_comment()
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment:not(._current)'))
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker._current'))
-    self.assertFalse(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
-    self.assertTrue(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-comment:not(.pp-active)'))
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-stamp.pp-active'))
+    self.assertFalse(self.q(self.form_selector + ' .pp-commform-cont-comment').is_displayed())
+    self.assertTrue(self.q(self.form_selector + ' .pp-commform-cont-stamp').is_displayed())
 
-    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
+    self.click(self.q(self.form_selector + ' .pp-commform-tab-comment'))
     self.reload()
 
     self.open_popup()
     self.start_comment()
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-comment._current'))
-    self.assertTrue(self.qa(self.form_selector + ' > .tabs .tab-sticker:not(._current)'))
-    self.assertTrue(self.q(self.form_selector + ' > .tab-content-comment').is_displayed())
-    self.assertFalse(self.q(self.form_selector + ' > .tab-content-sticker').is_displayed())
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-comment.pp-active'))
+    self.assertTrue(self.qa(self.form_selector + ' .pp-commform-tab-stamp:not(.pp-active)'))
+    self.assertTrue(self.q(self.form_selector + ' .pp-commform-cont-comment').is_displayed())
+    self.assertFalse(self.q(self.form_selector + ' .pp-commform-cont-stamp').is_displayed())
 
   def test_write(self):
     self.delete_all()
@@ -85,14 +85,15 @@ class Test_Comment(TestCase):
     self.open_popup()
     self.start_comment()
 
-    self.click(self.q(self.form_selector + ' > .tabs .tab-comment'))
-    comment = self.q(self.form_selector + ' textarea[name="comment"]')
+    self.click(self.q(self.form_selector + ' .pp-commform-tab-comment'))
+    comment = self.q(self.form_selector + ' .pp-commform-cont-comment textarea')
 
     message = '__hoge__c_%d' % time.time()
     comment.send_keys(message)
-    self.click(self.q(self.form_selector + ' .submit-button'))
+    self.click(self.q(self.form_selector + ' .pp-commform-send'))
+    self.popup_wait_load()
 
-    xpath = '//*[@id="pp-popup-comment"]//div[contains(concat(" ", @class, " "), " _comment-item ") and .//text()[contains(.,"%s")]]' % message
+    xpath = '//*[@id="pp-popup-comment-comments"]//div[contains(concat(" ", @class, " "), " _comment-item ") and .//text()[contains(.,"%s")]]' % message
     self.wait_until(lambda driver: self.xa(xpath))
 
     for i in range(10):
@@ -111,17 +112,17 @@ class Test_Comment(TestCase):
 
   def make_stamp_xpath(self, num):
     return '\
-//*[@id="pp-popup-comment"]//div[\
+//*[@id="pp-popup-comment-comments"]//div[\
   contains(concat(" ", @class, " "), " _comment-item ")\
   and .//*[contains(concat(" ", @class, " "), " sticker-container ")]\
          //img[contains(@src, "/stamps/%d_s.jpg")]]' % num
 
-  def write_stamp(self, cat, num):
+  def write_stamp(self, group, num):
     xpath = self.make_stamp_xpath(num)
     self.assertFalse(self.xa(xpath))
-    self.click(self.q(self.form_selector + ' > .tabs .tab-sticker'))
-    self.click(self.q(self.form_selector + ' .sticker-type-list .ui-tab[data-target="sticker-%d"]' % cat))
-    self.click(self.q(self.form_selector + ' .sticker-list.sticker-%d .sticker[data-id="%d"]' % (cat, num)))
+    self.click(self.q(self.form_selector + ' .pp-commform-tab-stamp'))
+    self.click(self.q(self.form_selector + ' .pp-commform-cont-stamp .pp-commform-tab[data-group="%s"]' % group))
+    self.click(self.q(self.form_selector + ' .pp-commform-stamp-group[data-group="%s"] img[data-id="%d"]' % (group, num)))
     self.wait_until(lambda driver: self.xa(xpath))
 
   def test_write_stamp(self):
@@ -133,7 +134,7 @@ class Test_Comment(TestCase):
     self.start_comment()
 
     xpath = self.make_stamp_xpath(408)
-    self.write_stamp(1, 408)
+    self.write_stamp('kitsune', 408)
 
     for i in range(10):
       self.js('pixplus.popup.reload()')
@@ -186,7 +187,7 @@ class Test_Comment(TestCase):
     self.start_comment()
 
     stamp_xpath = self.make_stamp_xpath(209)
-    self.write_stamp(2, 209)
+    self.write_stamp('moemusume', 209)
     self.assertTrue(self.x(stamp_xpath).is_displayed())
 
     self.open_test_user()
@@ -263,9 +264,3 @@ class Test_Comment(TestCase):
     time.sleep(1)
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
-
-  def test_reply(self):
-    pass
-
-  def test_reply_multistamp(self):
-    pass
