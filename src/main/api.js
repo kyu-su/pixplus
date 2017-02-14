@@ -5,7 +5,7 @@ _.api = {
         var err = false;
         data[key] = data[key](illust, function() {
           if (onerror) {
-            onerror.call(w, arguments);
+            onerror.apply(w, arguments);
           }
           err = true;
         });
