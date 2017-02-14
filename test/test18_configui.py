@@ -52,6 +52,9 @@ class Test_ModConfigUI(TestCase):
       self.activate_section(section)
 
       for item in section['items']:
+        if item.get('hide'):
+          continue
+
         default = item['value']
         input_e = self.get_input(section, item)
 
