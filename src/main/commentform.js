@@ -80,6 +80,9 @@ _.CommentForm = _.class.create({
     // override this function
   },
 
+  onstatuschange: function(status, message) {
+  },
+
 
 
   set_error: function(msg) {
@@ -87,17 +90,20 @@ _.CommentForm = _.class.create({
     this.dom.overlay.classList.remove('pp-loading');
     this.dom.overlay_message.textContent = msg || 'Unknown error';
     _.error.apply(_, arguments);
+    this.onstatuschange('error', msg);
   },
 
   set_loading: function() {
     this.dom.overlay.classList.remove('pp-error');
     this.dom.overlay.classList.add('pp-loading');
     this.dom.overlay_message.textContent = 'Loading';
+    this.onstatuschange('loading');
   },
 
   set_complete: function() {
     this.dom.overlay.classList.remove('pp-error');
     this.dom.overlay.classList.remove('pp-loading');
+    this.onstatuschange('complete');
   },
 
 

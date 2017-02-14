@@ -150,6 +150,9 @@ _.popup.comment = {
     this.form_cont = _.e('div', {id: 'pp-popup-comment-form-cont'});
     dom.comment.insertBefore(this.form_cont, dom.comment.firstChild);
     this.form = new _.CommentForm(this.form_cont, _.popup.illust);
+    this.form.onstatuschange = function(status, message) {
+      _.popup['status_' + status](message);
+    };
 
     var that = this;
     this.form.onsent = function(html) {
