@@ -81,10 +81,10 @@ _.popup.rating = {
       {
         mode: 'save',
         i_id: _.popup.illust.id,
-        u_id: _.popup.api.uid,
+        u_id: _.api.uid,
         qr: 1,
         score: score,
-        tt: _.popup.api.token
+        tt: _.api.token
       },
       function(data) {
         that.update(parseInt(data.put_score));

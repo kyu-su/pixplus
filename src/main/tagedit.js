@@ -79,7 +79,7 @@ _.popup.tagedit = {
         mode: 'first',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: _.popup.api.uid
+        e_id: _.api.uid
       },
       function(data) {
         that.onload(illust, data.html);
@@ -102,9 +102,9 @@ _.popup.tagedit = {
         mode: 'add_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: _.popup.api.uid,
+        e_id: _.api.uid,
         value: tag,
-        tt: _.popup.api.token
+        tt: _.api.token
       },
       function(data) {
         that.end();
@@ -130,9 +130,9 @@ _.popup.tagedit = {
         mode: 'del_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: _.popup.api.uid,
+        e_id: _.api.uid,
         tag: tag,
-        tt: _.popup.api.token
+        tt: _.api.token
       },
       function(data) {
         that.end();
