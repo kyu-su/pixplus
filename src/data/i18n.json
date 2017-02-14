@@ -54,7 +54,14 @@
             "Modify link"
           ]
         },
-        "disable_profile_popup": "Disable profile card popup"
+        "disable_profile_popup": "Disable profile card popup",
+        "commform_default_tab": {
+          "desc": "Default tab of comment form",
+          "hint": [
+            "comment",
+            "stamp"
+          ]
+        }
       },
 
       "popup": {
@@ -290,7 +297,14 @@
             "リンクを変更"
           ]
         },
-        "disable_profile_popup": "プロフィールカードのポップアップを無効化する"
+        "disable_profile_popup": "プロフィールカードのポップアップを無効化する",
+        "commform_default_tab": {
+          "desc": "コメントフォームのデフォルトタブ",
+          "hint": [
+            "comment",
+            "stamp"
+          ]
+        }
       },
 
       "popup": {
