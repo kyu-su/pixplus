@@ -244,6 +244,8 @@ _.CommentForm = _.class.create({
       var tab  = _.e('div', {cls: 'pp-commform-tab'}, tabbar),
           wrap = _.e('div', {cls: 'pp-commform-stamp-group'}, stamps),
           img  = new w.Image();
+      tab.dataset.group = grp.slug;
+      wrap.dataset.group = grp.slug;
       img.src = '//source.pixiv.net/common/images/stamp/main/' + grp.slug + '.png';
       tab.appendChild(img);
       tabs.push(tab);
@@ -265,6 +267,7 @@ _.CommentForm = _.class.create({
       var row;
       grp.stamps.forEach(function(id, i) {
         var img  = new w.Image();
+        img.dataset.id = id;
         img.src = '//source.pixiv.net/common//images/stamp/stamps/' + id + '_s.jpg';
         _.onclick(img, function() {
           that.send_stamp(id);
