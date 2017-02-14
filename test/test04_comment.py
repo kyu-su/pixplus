@@ -264,3 +264,32 @@ class Test_Comment(TestCase):
     time.sleep(1)
     self.assertFalse(self.q(sel_show_comment_form).is_selected())
     self.assertFalse(self.q(sel_hide_stamp_comments).is_selected())
+
+  def test_reply(self):
+    xpath = '//*[@id="pp-popup-comment-comments"]//div[\
+               contains(concat(" ", @class, " "), " _comment-item ") and \
+               .//*[contains(concat(" ", @class, " "), " reply ")]\
+             ]'
+
+    self.open_test_user()
+    self.find_illust(lambda i: self.xa(xpath))
+    self.start_comment()
+
+    item = self.x(xpath)
+    to_id = item.get_attribute('data-id')
+    to_name = self.q('.comment .meta .user-name', item).text
+    self.click(self.q('.reply', item))
+    self.popup_wait_load()
+
+    comment = self.q(self.form_selector + ' .pp-commform-cont-comment textarea')
+    message = '__hoge__c_%d' % time.time()
+    comment.send_keys(message)
+    self.click(self.q(self.form_selector + ' .pp-commform-send'))
+    self.popup_wait_load()
+
+    xpath = '//*[@id="pp-popup-comment-comments"]//div[contains(concat(" ", @class, " "), " _comment-item ") and .//text()[contains(.,"%s")]]' % message
+    self.wait_until(lambda driver: self.xa(xpath))
+    self.assertTrue(self.qa('.comment .reply-to', self.x(xpath)))
+    link = self.q('.comment .reply-to', self.x(xpath))
+    self.assertEqual(link.get_attribute('data-id'), to_id)
+    self.assertIn('> %s' % to_name, link.text)
