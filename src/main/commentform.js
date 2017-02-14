@@ -24,7 +24,7 @@ _.CommentForm = _.class.create({
     var that = this;
     this.tabs.forEach(function(name) {
       var text = _.lng.commform['tab_' + name],
-          tab  = _.e('div', {cls: 'pp-commform-tab', text: text}, dom.tabbar),
+          tab  = _.e('div', {cls: 'pp-commform-tab pp-commform-tab-' + name, text: text}, dom.tabbar),
           cont = _.e('div', {cls: 'pp-commform-cont pp-commform-cont-' + name}, dom.form);
 
       _.onclick(tab, function() {
