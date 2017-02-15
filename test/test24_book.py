@@ -9,8 +9,8 @@ class Test_Manga(TestCase):
     images = []
     width = 0
     max_height = 0
-    frame_min_width = 480
-    frame_min_height = 360
+    frame_min_width = 600
+    frame_min_height = 600
 
     for i in image_numbers:
       img = Image.open('images/manga_small/%d.png' % i)
