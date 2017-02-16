@@ -16,6 +16,7 @@ class Test_Comment(TestCase):
     self.move_to(dellink)
     time.sleep(1)
     self.click(dellink)
+    time.sleep(1)
     self.alert_accept()
     time.sleep(1)
 
