@@ -13,10 +13,11 @@ import util
 from browser import Browser
 
 ADDONS = {
-  'greasemonkey': 748,
-  'scriptish': 231203,
-  'adblockplus': 1865
-  }
+  'greasemonkey':    748,
+  'scriptish':    231203,
+  'adblockplus':    1865,
+  'ublock':       607454
+}
 
 class Firefox(Browser):
   name = 'firefox'
@@ -26,7 +27,7 @@ class Firefox(Browser):
     self.user_prefs = {}
     self.create_profile()
     self.add_addon(self.args.firefox_mode)
-    self.add_addon('adblockplus')
+    self.add_addon('ublock')
 
     fp = open(os.path.join(self.profiledir, 'user.js'), 'w')
     try:
@@ -49,7 +50,7 @@ class Firefox(Browser):
     filename = self.prepare_addon(ADDONS[name], name)
     print('Setup %s' % name)
     self.install_xpi(filename)
-    getattr(self, 'setup_%s' % name, lambda: None)()
+    getattr(self, 'setup_%s', lambda: None)()
 
   def install_xpi(self, filename):
     extract_path = os.path.join(self.profiledir, 'extensions', os.path.basename(filename))
@@ -90,6 +91,10 @@ class Firefox(Browser):
     except TypeError:
       pass
     return data
+
+  def initialSetup(self):
+    self.open('chrome://ublock0/content/settings.html')
+    self.q('#no-cosmetic-filtering').click()
 
 def register_args(parser):
   parser.add_argument('--firefox-command', dest = 'firefox_bin')
