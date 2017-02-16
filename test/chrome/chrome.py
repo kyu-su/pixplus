@@ -20,7 +20,8 @@ class Chrome(Browser):
     caps['chromeOptions'] = {
       'extensions': [
         self.read_file_as_base64(os.path.join(self.distdir, 'pixplus.crx')),
-        self.read_file_as_base64(self.download_crx('abp.crx', 'cfhdojbkjhnklbpkdaibdccddilifddb'))
+        # self.read_file_as_base64(self.download_crx('abp.crx', 'cfhdojbkjhnklbpkdaibdccddilifddb')),
+        self.read_file_as_base64(self.download_crx('ublock.crx', 'cjpalhdlnbpafiamejdnhcphjbkeiagm'))
       ]
     }
     if self.args.chrome_bin:
@@ -30,6 +31,10 @@ class Chrome(Browser):
     url = 'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=%s&x=id%%3D%s%%26uc'
     url = url % (self.chrome_version, ext_id)
     return self.download(url, filename)
+
+  def initialSetup(self):
+    self.open('chrome-extension://cjpalhdlnbpafiamejdnhcphjbkeiagm/settings.html')
+    self.q('#no-cosmetic-filtering').click()
 
 def register_args(parser):
   parser.add_argument('--chrome-command', dest = 'chrome_bin')

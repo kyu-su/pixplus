@@ -27,6 +27,10 @@ class Browser:
   def __init__(self):
     self.driver = None
     self.profiledir = None
+    self.initialized = False
+
+  def initialSetup(self):
+    pass
 
   def start(self):
     if self.driver:
@@ -47,6 +51,10 @@ class Browser:
       self.driver.close()
     self.driver.switch_to.window(self.driver.window_handles[0])
     self.driver.switch_to_default_content()
+
+    if not self.initialized:
+      self.initialSetup()
+      self.initialized = True
 
   def quit(self):
     try:
