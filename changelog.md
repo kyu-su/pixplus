@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.18.0 - 2017/03/05](http://crckyl.hatenablog.com/entry/2017/03/05/pixplus_1.18.0)
+
+### 変更点
+
+* [追加] コメント投稿機能を再実装。
+
+### Changes
+
+* [Add] Re-implement comment posting feature.
+
 ## [1.17.0 - 2017/01/25](http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0)
 
 ### 変更点

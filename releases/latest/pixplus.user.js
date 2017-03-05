@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        pixplus.js
 // @author      wowo
-// @version     1.17.0
+// @version     1.18.0
 // @license     The MIT License
 // @description hogehoge
 // @icon        http://ccl4.info/pixplus/pixplus_48.png
@@ -794,31 +794,49 @@ _.xhr = {
   },
 
   request: function(method, url, headers, data, cb_success, cb_error) {
-    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating|rpc_tag_edit)\.php(?:\?|$)/.test(url)) {
-      _.error('XHR: URL not allowed - ' + url);
+    var msg;
+
+    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating|rpc_tag_edit|rpc_delete_comment|rpc\/(?:post_comment|get_comment))\.php(?:\?|$)/.test(url)) {
+      msg = 'URL not allowed - ' + url;
+      _.error(msg);
       if (cb_error) {
-        cb_error();
+        cb_error(msg);
       }
       return;
     }
 
     var that = this;
     var xhr = new w.XMLHttpRequest();
+
     xhr.onload = function() {
-      that.cache[url] = xhr.responseText;
-      cb_success(xhr.responseText);
+      if (xhr.status === 200) {
+        that.cache[url] = xhr.responseText;
+        cb_success(xhr.responseText);
+      } else {
+        msg = xhr.status + ' ' + xhr.statusText;
+        _.error(msg);
+        if (cb_error) {
+          cb_error(msg);
+        }
+      }
     };
-    if (cb_error) {
-      xhr.onerror = function() {
-        cb_error(xhr);
-      };
-    }
+
+    xhr.onerror = function() {
+      msg = 'XHR communication error';
+      _.error(msg);
+      if (cb_error) {
+        cb_error(msg);
+      }
+    };
+
     xhr.open(method, url, true);
+
     if (headers) {
       headers.forEach(function(p) {
         xhr.setRequestHeader(p[0], p[1]);
       });
     }
+
     xhr.send(data);
   },
 
@@ -1487,7 +1505,7 @@ _.configui = {
       var tbody = _.e('tbody', null, _.e('table', null, root)), subsection;
 
       section.items.forEach(function(item) {
-        if (!_.conf.general.debug && item.hidden) {
+        if (!_.conf.general.debug && item.hide) {
           return;
         }
 
@@ -2064,6 +2082,7 @@ _.configui = {
 //   src/main/util.js
 //   src/main/illust.js
 //   src/main/popup.js
+//   src/main/api.js
 //   src/main/rating.js
 //   src/main/comment.js
 //   src/main/bookmark.js
@@ -2074,6 +2093,7 @@ _.configui = {
 //   src/main/key.js
 //   src/main/mouse.js
 //   src/main/bookmarkform.js
+//   src/main/commentform.js
 //   src/main/floater.js
 //   src/main/pages.js
 //   src/main/entrypoint.js
@@ -2661,6 +2681,40 @@ _.illust = {
     }
     illust.comment = (comment ? comment.innerHTML : '') || 'Error';
 
+
+    if (!_.stamp_series) {
+      re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
+      if (re) {
+        try {
+          _.stamp_series = JSON.parse(re[1]);
+        } catch(ex) {
+          _.stamp_series = null;
+          _.error('Failed to parse pixiv.context.stampSeries', ex);
+        }
+      } else {
+        _.error('pixiv.context.stampSeries not detected');
+      }
+    }
+
+
+    if (!_.emoji_series) {
+      re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
+      if (re) {
+        try {
+          _.emoji_series = JSON.parse(re[1]);
+          _.emoji_series.forEach(function(item) {
+            item.url = '//source.pixiv.net/common/images/emoji/' + item.id + '.png';
+          });
+        } catch(ex) {
+          _.emoji_series = null;
+          _.error('Failed to parse pixiv.context.emojiSeries', ex);
+        }
+      } else {
+        _.error('pixiv.context.emojiSeries not detected');
+      }
+    }
+
+
     _.illust.update_urls(illust);
     return true;
   },
@@ -3102,6 +3156,8 @@ _.popup = {
     dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
     dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
+    dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
+    dom.status_message    = _.e('span', {id: 'pp-popup-status-message', cls: 'pp-tooltip'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
     dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
@@ -3113,6 +3169,9 @@ _.popup = {
     dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
     dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
     dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
+    dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
+    dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
+    dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
     dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
     dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
     dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -3137,6 +3196,10 @@ _.popup = {
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
+    dom.comment_form_btn.appendChild(_.svg.pencil(d));
+    dom.comment_form_btn.appendChild(_.svg.pencil_off(d));
+    dom.comment_conf_btn.appendChild(_.svg.cogwheel(d));
+
     dom.author_status.appendChild(_.svg.following(d));
     dom.author_status.appendChild(_.svg.heart(d));
     dom.author_status.appendChild(_.svg.mypixiv(d));
@@ -3148,6 +3211,17 @@ _.popup = {
 
     dom.olc_prev.appendChild(dom.olc_prev_icon = _.svg.olc_arrow(d));
     dom.olc_next.appendChild(dom.olc_next_icon = _.svg.olc_arrow(d));
+
+
+    this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn, this.dom.root);
+    this.comment_conf_menu.add_conf_item('popup', 'show_comment_form', function(checked) {
+      if (checked) {
+        that.comment.show_form();
+      }
+    });
+    this.comment_conf_menu.add_conf_item('popup', 'hide_stamp_comments', function(checked) {
+      that.comment.update_hide_stamp_comments();
+    });
 
 
     this.ugoira_menu = new _.PopupMenu(dom.ugoira_progress_svg, this.dom.root);
@@ -3882,45 +3956,34 @@ _.popup = {
   },
 
   set_status_text: function(text) {
-    var dom = this.dom;
-    if (text) {
-      dom.status.textContent = text;
-      dom.status.classList.remove('pp-hide');
-    } else {
-      dom.status.classList.add('pp-hide');
-    }
+    this.dom.status_text.textContent = text || '';
   },
 
-  set_status_tooltip: function(text) {
-    if (text) {
-      this.dom.status.classList.add('_ui-tooltip');
-      this.dom.status.setAttribute('data-tooltip', text);
-    } else {
-      this.dom.status.classList.remove('_ui-tooltip');
-    }
+  set_status_message: function(text) {
+    this.dom.status_message.textContent = text || '';
   },
 
   status_loading: function() {
     this.dom.root.classList.add('pp-loading');
     this.dom.root.classList.remove('pp-error');
     this.set_status_text('Loading');
-    this.set_status_tooltip();
+    this.set_status_message();
   },
 
   status_complete: function() {
     this.dom.root.classList.remove('pp-loading');
     this.dom.root.classList.remove('pp-error');
-    this.set_status_text('');
-    this.set_status_tooltip();
+    this.set_status_text();
+    this.set_status_message();
   },
 
   status_error: function(message) {
     this.dom.root.classList.remove('pp-loading');
     this.dom.root.classList.add('pp-error');
     this.set_status_text('Error');
-    this.set_status_tooltip(message);
+    this.set_status_message(message);
     if (message) {
-      _.error(message);
+      _.error.apply(_, arguments);
     }
   },
 
@@ -4156,6 +4219,88 @@ _.popup = {
     dialog.open(this.dom.root, {centerize: 'both'});
   }
 };
+_.api = {
+  request: function(method, url, illust, data, onsuccess, onerror) {
+    for(var key in data) {
+      if (typeof(data[key]) === 'function') {
+        var err = false;
+        data[key] = data[key](illust, function() {
+          if (onerror) {
+            onerror.apply(w, arguments);
+          }
+          err = true;
+        });
+        if (err) {
+          return;
+        }
+      }
+    }
+
+    var onsuc = function(res) {
+      var data;
+      try {
+        data = JSON.parse(res);
+      } catch(ex) {
+        if (onerror) {
+          onerror('JSON parse error', ex);
+        }
+        return;
+      }
+      onsuccess(data);
+    };
+
+    var onerr = function(message) {
+      if (onerror) {
+        onerror('XHR error: ' + message);
+      }
+    };
+
+    if (method === 'post') {
+      _.xhr.post_data(url, data, onsuc, onerr);
+    } else if (method === 'get') {
+      _.xhr.request('GET', url + '?' + _.xhr.serialize(data), null, null, onsuc, onerr);
+    } else {
+      if (onerror) {
+        onerror('Invalid method - ' + method);
+      }
+    }
+  },
+
+  post: function(url, illust, data, onsuccess, onerror) {
+    this.request('post', url, illust, data, onsuccess, onerror);
+  },
+
+  get: function(url, illust, data, onsuccess, onerror) {
+    this.request('get', url, illust, data, onsuccess, onerror);
+  },
+
+  token: function(illust, error) {
+    if (illust && illust.token) {
+      return illust.token;
+    } else {
+      error('Failed to detect security token needed to call APIs');
+    }
+    return null;
+  },
+
+  uid: function(illust, error) {
+    try {
+      return w.pixiv.user.id;
+    } catch(ex) {
+      error('Failed to get user id', ex);
+    }
+    return null;
+  }
+};
+
+_.popup.api = {
+  post: function(url, data, onsuccess, onerror) {
+    _.api.post(url, _.popup.illust, data, onsuccess, function() {
+      _.popup.status_error.apply(_.popup, arguments);
+      onerror.call(w, arguments);
+    });
+  }
+};
 _.popup.rating = {
   update: function(score) {
     var cl;
@@ -4232,49 +4377,25 @@ _.popup.rating = {
       }
     }
 
-
-
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
-    _.xhr.post_data(
+    var that = this;
+    _.popup.status_loading();
+    _.popup.api.post(
       '/rpc_rating.php',
       {
         mode: 'save',
-        i_id: illust.id,
-        u_id: uid,
+        i_id: _.popup.illust.id,
+        u_id: _.api.uid,
         qr: 1,
         score: score,
-        tt: illust.token
+        tt: _.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          that.update(parseInt(data.put_score));
-          that.rating.classList.add('rated');
-        } catch(ex) {
-          that.set_error();
-          _.error('Failed to update rating status', ex);
-          alert('Error!');
-        }
+      function(data) {
+        that.update(parseInt(data.put_score));
+        that.rating.classList.add('rated');
+        _.popup.status_complete();
       },
       function() {
         that.set_error();
-        alert('Error!');
       }
     );
   },
@@ -4286,6 +4407,7 @@ _.popup.rating = {
       return;
     }
     this.rating.style.position = 'relative';
+    this.rating.appendChild(_.svg.rating_error(d));
     _.listen(this.rating, 'mousemove', this.onmousemove.bind(this));
     _.listen(this.rating, 'mouseleave', this.onmouseleave.bind(this));
     _.onclick(this.rating, this.onclick.bind(this));
@@ -4296,7 +4418,9 @@ _.popup.comment = {
   ready: false,
 
   clear: function() {
+    var show_form = _.conf.popup.show_comment_form;
     _.popup.dom.root.classList.remove('pp-comment-mode');
+    _.popup.dom.root.classList[show_form ? 'add' : 'remove']('pp-show-comment-form');
     this.update_hide_stamp_comments();
     this.active = false;
   },
@@ -4308,21 +4432,119 @@ _.popup.comment = {
   },
 
   update: function() {
-    _.qa('._comment-item', _.popup.dom.comment).forEach(function(item) {
-      if (_.q('.sticker-container', item)) {
-        item.classList.add('pp-stamp-comment');
+    if (_.emoji_series) {
+      if (!_.emoji_map) {
+        _.emoji_map = {};
+        _.emoji_series.forEach(function(item) {
+          _.emoji_map[item.name] = item;
+        });
       }
-    });
+      if (!_.emoji_re) {
+        var pat = _.emoji_series.map(function(item) { return _.escape_regex(item.name); }).join('|');
+        _.emoji_re = new RegExp('\\((' + pat + ')\\)', 'g');
+      }
+    }
+
+    _.qa('._comment-item', _.popup.dom.comment).forEach(this.update_comment_item.bind(this));
+    _.qa('._comment-sticker-item', _.popup.dom.comment).forEach(this.update_comment_stamp_item.bind(this));
     _.popup.adjust();
+  },
+
+  update_comment_item: function(item) {
+    if (_.q('.sticker-container', item)) {
+      item.classList.add('pp-stamp-comment');
+    }
+
+    _.qa('img[data-src]', item).forEach(function(img) {
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    });
+
+    if (_.emoji_re) {
+      var body = _.q('.body p', item);
+      if (body) {
+        var html;
+        html = body.innerHTML.replace(_.emoji_re, function(all, name) {
+          var emoji = _.emoji_map[name];
+          if (!emoji) {
+            return all;
+          }
+          return '<img src="' + emoji.url + '" class="emoji-text" width="28" height="28">';
+        });
+        if (html !== body.innerHTML) {
+          body.innerHTML = html;
+        }
+      }
+    }
+  },
+
+  update_comment_stamp_item: function(item) {
+    _.qa('img[data-src]', item).forEach(function(img) {
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    });
   },
 
   scroll: function() {
     _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
   },
 
+  show_form: function() {
+    if (_.popup.dom.root.classList.add('pp-show-comment-form')) {
+      var that = this;
+      w.setTimeout(function() {
+        that.form.comment_textarea.focus();
+      }, 0);
+    }
+  },
+
+  hide_form: function() {
+    _.popup.dom.root.classList.remove('pp-show-comment-form');
+  },
+
+  toggle_form: function() {
+    _.popup.dom.root.classList.toggle('pp-show-comment-form');
+  },
+
+  delete_comment: function(item) {
+    if (!confirm(_.lng.delete_comment_confirm)) {
+      return;
+    }
+
+    _.popup.status_loading();
+    _.popup.api.post(
+      '/rpc_delete_comment.php',
+      {
+        i_id: _.popup.illust.id,
+        del_id: item.dataset.id,
+        tt: _.api.token
+      },
+      function(data) {
+        if (data.error) {
+          _.popup.status_error(data.message);
+        } else {
+          item.parentNode.removeChild(item);
+          _.popup.status_complete();
+        }
+      }
+    );
+  },
+
+  get_comment_item: function(target) {
+    for(var p = target.parentNode; p; p = p.parentNode) {
+      if (p.classList.contains('_comment-item') || p.classList.contains('sticker-item')) {
+        return p;
+      }
+    }
+    return null;
+  },
+
   setup: function(html) {
-    var dom = _.popup.dom;
-    dom.comment.innerHTML = html;
+    _.clear(_.popup.dom.comment);
+
+    var comments = _.e('div', {id: 'pp-popup-comment-comments'}, _.popup.dom.comment);
+    comments.innerHTML = html;
+
     this.ready = false;
     if (this.active) {
       this.setup_real();
@@ -4336,17 +4558,55 @@ _.popup.comment = {
     this.ready = true;
 
     var dom = _.popup.dom;
-    _.qa('img[data-src]', dom.comment).forEach(function(img) {
-      img.src = img.dataset.src;
-    });
-
     _.onclick(_.q('.more-comment', dom.comment), function(ev) {
       w.pixiv.comment.more(ev);
     });
 
-    _.qa('form[action="member_illust.php"]', dom.comment).forEach(function(form) {
-      form.setAttribute('action', '/member_illust.php');
-    });
+    this.form_cont = _.e('div', {id: 'pp-popup-comment-form-cont'});
+    dom.comment.insertBefore(this.form_cont, dom.comment.firstChild);
+    this.form = new _.CommentForm(this.form_cont, _.popup.illust);
+    this.form.onstatuschange = function(status, message) {
+      _.popup['status_' + status](message);
+    };
+
+    var that = this;
+    this.form.onsent = function(html) {
+      var items = _.q('._comment-items', dom.comment);
+      if (items) {
+        items.insertAdjacentHTML('afterbegin', html);
+        that.update_comment_item(items.firstElementChild);
+        that.hide_form();
+      } else {
+        _.popup.reload();
+      }
+    };
+
+    _.onclick(_.q('#pp-popup-comment-comments', dom.comment), function(ev) {
+      var t, p;
+
+      for(t = ev.target; t; t = t.parentNode) {
+        if (t.classList.contains('delete-comment')) {
+          if ((p = that.get_comment_item(t))) {
+            that.delete_comment(p);
+            return true;
+          }
+
+        } else if (t.classList.contains('reply')) {
+          if ((p = that.get_comment_item(t))) {
+            that.show_form();
+            that.form.set_reply_to(p.dataset.id);
+            return true;
+          }
+
+        } else if (t.classList.contains('reply-to')) {
+          that.show_form();
+          that.form.set_reply_to(t.dataset.id);
+          return true;
+        }
+      }
+
+      return false;
+    }, {capture: true});
   },
 
   start: function() {
@@ -4509,13 +4769,13 @@ _.popup.bookmark = {
 
     _.xhr.get(illust.url_bookmark, function(html) {
       that.onload(illust, html);
-    }, function() {
+    }, function(msg) {
       if (illust !== _.popup.illust || !that.active) {
         return;
       }
 
       that.active = false;
-      _.popup.status_error();
+      _.popup.status_error(msg);
     });
   },
 
@@ -4721,43 +4981,26 @@ _.popup.question = {
     }
   },
 
-  send: function(num) {
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+  send: function(btn) {
+    var that = this;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.post(
       '/rpc_rating.php',
       {
         mode: 'save2',
-        i_id: illust.id,
-        u_id: uid,
+        i_id: _.popup.illust.id,
+        u_id: _.api.uid,
         qr: 1,
-        num: num,
-        tt: illust.token
+        num: btn.dataset.key,
+        tt: _.api.token
       },
       function(res) {
         that.end();
         _.popup.reload();
       },
       function() {
-        _.popup.status_error();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
@@ -4776,7 +5019,7 @@ _.popup.question = {
     var that = this;
     _.qa('input[type="button"][data-key]', this.dom.list).forEach(function(btn) {
       _.onclick(btn, function() {
-        that.send(btn.dataset.key);
+        that.send(btn);
       });
     });
   },
@@ -4829,13 +5072,16 @@ _.popup.tagedit = {
     var c = _.e('div', {id: 'tag-editor', css: 'display:block'}, _.popup.dom.tagedit_wrapper);
     c.innerHTML = html;
 
+    this.input = _.q('#add_tag', c);
+
     var add_tag = _.q('input[onclick="addTag()"]', c);
     if (add_tag) {
       add_tag.removeAttribute('onclick');
       add_tag.classList.add('pp-add-tag');
-      _.onclick(add_tag, this.add_tag.bind(this));
+      _.onclick(add_tag, function() {
+        that.add_tag(that.input.value, add_tag);
+      });
     }
-    this.input = _.q('#add_tag', c);
 
     _.qa('input[onclick^="delTag("]').forEach(function(btn) {
       var re = /delTag\((\d+),/.exec(btn.getAttribute('onclick'));
@@ -4846,7 +5092,7 @@ _.popup.tagedit = {
           btn.classList.add('pp-remove-tag');
           btn.setAttribute('data-pp-tag-id', re[1]);
           _.onclick(btn, function() {
-            that.remove_tag(tag.textContent);
+            that.remove_tag(tag.textContent, btn);
           });
           return;
         }
@@ -4866,159 +5112,76 @@ _.popup.tagedit = {
     _.popup.adjust();
   },
 
-  onerror: function(illust, message) {
-    if (illust !== _.popup.illust || !this.active) {
-      return;
-    }
-    if (!_.popup.dom.root.classList.contains('pp-tagedit-mode')) {
-      this.active = false;
-    }
-    _.popup.dom.tagedit_wrapper.textContent = message || 'Error';
-    _.popup.status_error();
-  },
-
   reload: function() {
-    var illust = _.popup.illust;
-    if (!illust.author_id) {
-      this.onerror(illust, 'Author id not specified');
-      return;
-    }
-
-    var that = this,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      this.onerror('Failed to get user id');
-      return;
-    }
-
-    _.xhr.post_data(
-      '/rpc_tag_edit.php', {
+    var that = this, illust = _.popup.illust;
+    _.popup.status_loading();
+    _.popup.api.post(
+      '/rpc_tag_edit.php',
+      {
         mode: 'first',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid
+        e_id: _.api.uid
       },
       function(data) {
-        try {
-          // console.log(JSON.parse(data));
-          that.onload(illust, JSON.parse(data).html);
-        } catch(ex) {
-          _.error(ex);
-          that.onerror(illust, String(ex));
-        }
+        that.onload(illust, data.html);
       },
       function() {
-        that.onerror(illust);
+        if (illust === _.popup.illust) {
+          that.end();
+        }
       }
     );
-
-    _.popup.status_loading();
   },
 
-  add_tag: function() {
-    var tag = this.input.value;
-
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+  add_tag: function(tag, btn) {
+    var that = this, illust = _.popup.illust;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.post(
       '/rpc_tag_edit.php',
       {
         mode: 'add_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid,
+        e_id: _.api.uid,
         value: tag,
-        tt: illust.token
+        tt: _.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          _.popup.status_complete();
-          that.end();
-          _.popup.reload();
-        } catch(ex) {
-          _.popup.status_complete();
-          _.error('Failed to update tag editor form', ex);
-          alert('Error!');
-          that.end();
-        }
+      function(data) {
+        that.end();
+        _.popup.reload();
       },
       function() {
-        _.popup.status_complete();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
 
-  remove_tag: function(tag) {
+  remove_tag: function(tag, btn) {
     if (!confirm(_.lng.delete_tag_confirm)) {
       return;
     }
 
-    var that = this,
-        illust = _.popup.illust,
-        uid;
-    try {
-      uid = w.pixiv.user.id;
-    } catch(ex) {
-      _.error('Failed to get user id', ex);
-      alert('Error! - Failed to get your member id');
-      return;
-    }
-
-    if (!illust.token) {
-      _.error('Stop rating because pixplus failed to detect security token');
-      alert('Error! - Failed to detect security token');
-      return;
-    }
-
+    var that = this, illust = _.popup.illust;
+    btn.setAttribute('disabled', 'true');
     _.popup.status_loading();
-    _.xhr.post_data(
+    _.popup.api.post(
       '/rpc_tag_edit.php',
       {
         mode: 'del_tag',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: uid,
+        e_id: _.api.uid,
         tag: tag,
-        tt: illust.token
+        tt: _.api.token
       },
-      function(res) {
-        try {
-          var data = JSON.parse(res);
-          _.popup.status_complete();
-          that.end();
-          _.popup.reload();
-        } catch(ex) {
-          _.popup.status_complete();
-          _.error('Failed to update tag editor form', ex);
-          alert('Error!');
-          that.end();
-        }
+      function(data) {
+        that.end();
+        _.popup.reload();
       },
       function() {
-        _.popup.status_complete();
-        alert('Error!');
-        that.end();
+        btn.value = 'Error';
       }
     );
   },
@@ -6136,6 +6299,291 @@ _.bookmarkform = {
     _.listen(form, 'submit', this.submit.bind(this));
   }
 };
+_.CommentForm = _.class.create({
+  init: function(wrap, illust) {
+    this.illust = illust;
+
+    var dom = this.dom = {};
+
+    dom.wrap = wrap;
+    dom.illust = illust;
+
+    dom.root            = _.e('div', {cls: 'pp-commform-root'}, wrap);
+    dom.overlay         = _.e('div', {cls: 'pp-commform-overlay'}, dom.root);
+    dom.overlay_message = _.e('div', {cls: 'pp-commform-overlay-message'}, dom.overlay);
+    dom.reply_to_wrap   = _.e('div', {cls: 'pp-commform-reply-to-wrap pp-hide'}, dom.root);
+    dom.reply_to        = _.e('div', {cls: 'pp-commform-reply-to'}, dom.reply_to_wrap);
+    dom.form            = _.e('div', {cls: 'pp-commform-form'}, dom.root);
+    dom.tabbar          = _.e('div', {cls: 'pp-commform-tabbar pp-commform-tabbar-top'}, dom.form);
+
+    dom.overlay.appendChild(dom.icon_loading = _.svg.comment_loading(d));
+    dom.overlay.appendChild(dom.icon_error   = _.svg.comment_error(d));
+
+    dom.reply_to_wrap.insertBefore(
+      dom.icon_reply_to = _.svg.comment_reply_to(d), dom.reply_to_wrap.firstChild);
+
+    var that = this;
+    this.tabs.forEach(function(name) {
+      var text = _.lng.commform['tab_' + name],
+          tab  = _.e('div', {cls: 'pp-commform-tab pp-commform-tab-' + name, text: text}, dom.tabbar),
+          cont = _.e('div', {cls: 'pp-commform-cont pp-commform-cont-' + name}, dom.form);
+
+      _.onclick(tab, function() {
+        that.select_tab(name);
+      });
+
+      dom['tab_' + name]  = tab;
+      dom['cont_' + name] = cont;
+
+      that['tab_' + name](cont);
+    });
+
+    this.select_tab(_.conf.general.commform_default_tab);
+  },
+
+
+
+  set_reply_to: function(id) {
+    this.reply_to_id = id || null;
+
+    if (!id) {
+      this.dom.reply_to_wrap.classList.add('pp-hide');
+      return;
+    }
+
+    var that = this;
+    this.set_loading();
+    _.api.get(
+      '/rpc/get_comment.php',
+      this.illust,
+      {
+        comment_id: id,
+        tt: _.api.token
+      },
+      function(data) {
+        if (data.error) {
+          that.set_error(data.message || 'Unknown error');
+        } else {
+          that.dom.reply_to.innerHTML = data.body.html;
+          that.dom.reply_to_wrap.classList.remove('pp-hide');
+          that.set_complete();
+        }
+      },
+      function(msg) {
+        that.set_error(msg);
+      }
+    );
+  },
+
+
+
+  onsent: function(html) {
+    // override this function
+  },
+
+  onstatuschange: function(status, message) {
+  },
+
+
+
+  set_error: function(msg) {
+    this.dom.overlay.classList.add('pp-error');
+    this.dom.overlay.classList.remove('pp-loading');
+    this.dom.overlay_message.textContent = msg || 'Unknown error';
+    _.error.apply(_, arguments);
+    this.onstatuschange('error', msg);
+  },
+
+  set_loading: function() {
+    this.dom.overlay.classList.remove('pp-error');
+    this.dom.overlay.classList.add('pp-loading');
+    this.dom.overlay_message.textContent = 'Loading';
+    this.onstatuschange('loading');
+  },
+
+  set_complete: function() {
+    this.dom.overlay.classList.remove('pp-error');
+    this.dom.overlay.classList.remove('pp-loading');
+    this.onstatuschange('complete');
+  },
+
+
+
+  send: function(data) {
+    if (this.reply_to_id) {
+      data.parent_id = this.reply_to_id;
+    }
+
+    var that = this;
+    this.set_loading();
+    _.api.post(
+      '/rpc/post_comment.php',
+      this.illust,
+      data,
+      function(data) {
+        if (data.error) {
+          that.set_error(data.message || 'Unknown error');
+        } else {
+          that.onsent(data.body.html);
+          that.comment_textarea.value = '';
+          that.set_reply_to();
+          that.set_complete();
+        }
+      },
+      function(msg) {
+        that.set_error(msg);
+      }
+    );
+  },
+
+  send_stamp: function(id) {
+    this.send({
+      type: 'stamp',
+      illust_id: this.illust.id,
+      author_user_id: this.illust.author_id,
+      stamp_id: id,
+      tt: _.api.token
+    });
+  },
+
+  send_comment: function() {
+    this.send({
+      type: 'comment',
+      illust_id: this.illust.id,
+      author_user_id: this.illust.author_id,
+      comment: this.comment_textarea.value,
+      tt: _.api.token
+    });
+  },
+
+  insert_text: function(text) {
+    var ta = this.comment_textarea,
+        s = ta.selectionStart,
+        e = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + text + ta.value.substring(e);
+    ta.setSelectionRange(s + text.length, s + text.length);
+    w.setTimeout(function() {
+      ta.focus();
+    }, 0);
+  },
+
+  insert_emoji: function(emoji) {
+    this.insert_text('(' + emoji.name + ')');
+  },
+
+
+
+  select_tab: function(name) {
+    if (this.tabs.indexOf(name) < 0) {
+      this.select_tab(this.tabs[0]);
+      return;
+    }
+
+    var that = this;
+    this.tabs.forEach(function(_n) {
+      var tab  = that.dom['tab_' + _n],
+          cont = that.dom['cont_' + _n];
+      tab.classList[_n === name ? 'add' : 'remove']('pp-active');
+      cont.classList[_n === name ? 'add' : 'remove']('pp-active');
+    });
+
+    _.conf.general.commform_default_tab = name;
+  },
+
+  tab_comment: function(cont) {
+    var textarea  = _.e('textarea', {placeholder: _.lng.commform.comment_placeholder}, cont),
+        emoji     = _.e('div', {cls: 'pp-commform-emoji'}, cont),
+        toolbar   = _.e('div', {cls: 'pp-commform-toolbar'}, cont),
+        btn_emoji = _.e('button', {cls: 'pp-commform-button-flat', text: _.lng.commform.btn_emoji}, toolbar),
+        btn_send  = _.e('button', {cls: 'pp-commform-button-blue pp-commform-send', text: _.lng.commform.btn_send}, toolbar);
+
+    var that = this;
+    emoji.classList.add('pp-hide');
+    _.onclick(btn_emoji, function() {
+      emoji.classList.toggle('pp-hide');
+    });
+    _.onclick(btn_send, function() {
+      that.send_comment();
+    });
+
+    this.comment_textarea = textarea;
+
+
+
+    if (_.emoji_series) {
+      var row;
+      _.emoji_series.forEach(function(item, i) {
+        var img = new w.Image();
+        img.src = item.url;
+        _.onclick(img, function() {
+          that.insert_emoji(item);
+        });
+
+        if (i % 8 === 0) {
+          row = _.e('div', null, emoji);
+        }
+        row.appendChild(img);
+      });
+    } else {
+      emoji.textContent = 'Error';
+    }
+  },
+
+  tab_stamp: function(cont) {
+    if (!_.stamp_series) {
+      cont.textContent = 'Error';
+      return;
+    }
+
+    var stamps = _.e('div', {cls: 'pp-commform-stamp-groups'}, cont),
+        tabbar = _.e('div', {cls: ['pp-commform-tabbar',
+                                   'pp-commform-tabbar-bottom',
+                                   'pp-commform-tabbar-center'].join(' ')}, cont);
+
+    var that = this, tabs = [], grp_wraps = [];
+    _.stamp_series.forEach(function(grp, n) {
+      var tab  = _.e('div', {cls: 'pp-commform-tab'}, tabbar),
+          wrap = _.e('div', {cls: 'pp-commform-stamp-group'}, stamps),
+          img  = new w.Image();
+      tab.dataset.group = grp.slug;
+      wrap.dataset.group = grp.slug;
+      img.src = '//source.pixiv.net/common/images/stamp/main/' + grp.slug + '.png';
+      tab.appendChild(img);
+      tabs.push(tab);
+      grp_wraps.push(wrap);
+      _.onclick(tab, function() {
+        tabs.forEach(function(t) {
+          t.classList[t === tab ? 'add' : 'remove']('pp-active');
+        });
+        grp_wraps.forEach(function(wr) {
+          wr.classList[wr === wrap ? 'add' : 'remove']('pp-active');
+        });
+      });
+
+      if (n === 0) {
+        tab.classList.add('pp-active');
+        wrap.classList.add('pp-active');
+      }
+
+      var row;
+      grp.stamps.forEach(function(id, i) {
+        var img  = new w.Image();
+        img.dataset.id = id;
+        img.src = '//source.pixiv.net/common//images/stamp/stamps/' + id + '_s.jpg';
+        _.onclick(img, function() {
+          that.send_stamp(id);
+        });
+
+        if (i % 5 === 0) {
+          row = _.e('div', null, wrap);
+        }
+        row.appendChild(img);
+      });
+    });
+  },
+
+  tabs: ['comment', 'stamp']
+});
 _.Floater = _.class.create({
   init: function(wrap, cont, ignore_elements) {
     this.wrap = wrap;
@@ -7350,6 +7798,7 @@ _.run = function() {
 //   temp/icons/config-button.scss
 //   temp/icons/pixplus-24.scss
 //   src/data/styles/apng-generator.scss
+//   src/data/styles/commentform.scss
 //   src/data/styles/tagedit.scss
 //   src/data/styles/common.scss
 //   src/data/styles/popup.scss
@@ -7364,10 +7813,14 @@ _.run = function() {
 //   src/data/ugoira.svg
 //   src/data/multipage.svg
 //   src/data/olc-arrow.svg
+//   src/data/rating-error.svg
+//   src/data/comment-loading.svg
+//   src/data/comment-error.svg
+//   src/data/comment-reply-to.svg
 //   tools/svg_generator_generator.py
-_.css="#pp-popup-bookmark-wrapper{border:1px solid #aaa}#pp-popup-bookmark-wrapper .layout-body{margin:0px;border:none}#pp-popup-bookmark-wrapper .bookmark-detail-unit{border-radius:0px;border:none}#pp-popup-bookmark-wrapper .bookmark-list-unit{border-radius:0px;border:none;margin:0px}#pp-popup-bookmark-wrapper .tag-container{overflow-y:auto}#pp-popup-bookmark-wrapper .list-container+.list-container{margin-top:0px}#pp-popup-bookmark-wrapper ._list-unit{padding-top:4px;padding-bottom:4px}#pp-popup-bookmark-wrapper .tag-cloud{padding:4px !important}#pp-popup-bookmark-wrapper .pp-tag-select{outline:2px solid #0f0}#pp-popup-bookmark-wrapper .pp-tag-link{outline:2px solid #f00}#pp-popup-bookmark-wrapper .pp-tag-associate-button{background-color:#eee;margin-right:0.2em;border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}#pp-popup-bookmark-wrapper .pp-tag-associate-button.pp-active{background-color:#aaa}#pp-popup-bookmark-wrapper .pp-tag-associate-button:hover{background-color:#ddd}#pp-popup-bookmark-wrapper.pp-associate-tag .tag-container .list-items .tag,#pp-popup-bookmark-wrapper:not(.pp-associate-tag) .pp-tag-associate-button{display:none}#pp-popup.pp-bookmark-mode #pp-popup-header,#pp-popup.pp-bookmark-mode #pp-popup-image-wrapper,#pp-popup.pp-bookmark-mode .pp-popup-olc{display:none}#pp-popup:not(.pp-bookmark-mode) #pp-popup-bookmark-wrapper{display:none}.pp-apng-generator{text-align:center}.pp-apng-generator .pp-dialog-content{width:640px}.pp-apng-generator #pp-apng-generator-error{color:#800;font-weight:bold;text-align:left;white-space:pre-wrap}.pp-apng-generator.pp-done .pp-progress-bar{display:none}.pp-apng-generator #pp-apng-generator-preview{max-width:100%;max-height:480px;margin:0.2em}.pp-apng-generator #pp-apng-generator-howtosave:not(.pp-show){display:none}.pp-apng-generator:not(.pp-preparing) #pp-apng-generator-preparing{display:none}.pp-apng-generator:not(.pp-done) #pp-apng-generator-preview,.pp-apng-generator:not(.pp-done) .pp-dialog-action-download{display:none}.pp-apng-generator:not(.pp-error) #pp-apng-generator-error{display:none}.pp-apng-generator.pp-done #pp-apng-generator-warning,.pp-apng-generator.pp-done .pp-dialog-action-generate,.pp-apng-generator.pp-error #pp-apng-generator-warning,.pp-apng-generator.pp-error .pp-dialog-action-generate{display:none}#pp-popup-tagedit-button{color:#888;font-size:90%}#pp-popup-tagedit-wrapper{font-size:12px;overflow:auto}#pp-popup-tagedit-wrapper #tag-editor>div{margin:0px !important}#pp-popup.pp-tagedit-mode #pp-popup-header,#pp-popup.pp-tagedit-mode #pp-popup-image-wrapper,#pp-popup.pp-tagedit-mode .pp-popup-olc{display:none}#pp-popup:not(.pp-tagedit-mode) #pp-popup-tagedit-wrapper{display:none}.pp-control,.pp-toplevel input,.pp-toplevel button,.pp-toplevel select,.pp-toplevel textarea,.pp-progress-bar{border:1px solid #becad8;border-radius:2px;padding:0.1em 0.3em;margin:0.2em}.pp-toplevel input[type=\"checkbox\"]{padding:1px}.pp-toplevel button{white-space:nowrap;background-color:#f2f4f6}.pp-toplevel button:hover{background-color:#ddeaf6}.pp-toplevel button:active{background-color:#becad8}.pp-hide{display:none}.pp-sprite{background-image:url(\"http://source.pixiv.net/www/images/sprites-sa61cacfa96.png\")}input.pp-flat-input{border:none}input.pp-flat-input:not(:hover):not(:focus){background:transparent}.pp-slider{display:inline-block;vertical-align:middle;padding:7px 4px}.pp-slider .pp-slider-rail{position:relative;width:160px;height:2px;background-color:#aaa}.pp-slider .pp-slider-knob{position:absolute;border:1px outset #ddd;background-color:#ccc;width:6px;height:14px;margin:-7px -4px}.pp-slider.pp-debug{outline:1px solid rgba(255,0,0,0.5)}.pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}.pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}.pp-popup-menu{position:fixed;background-color:#fff;border:1px solid #aaa;border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}.pp-popup-menu .pp-popup-menu-item:hover{background-color:#ddd}.pp-popup-menu .pp-popup-menu-item>label,.pp-popup-menu .pp-popup-menu-item>a{display:block;padding:0.3em 0.6em;color:inherit;text-decoration:none}.pp-popup-menu .pp-popup-menu-item input[type=\"checkbox\"]{border:1px solid #aaa;cursor:pointer}.pp-progress-bar{padding:0px;margin:0.2em;background-color:#eee}.pp-progress-bar .pp-progress{background-color:#d6dee5;width:0px;height:2em}.pp-dialog{position:fixed;z-index:22000;background-color:#fff;border:0.3em solid #6082a1;box-shadow:0px 0px 1em 0.2em rgba(0,0,0,0.6)}.pp-dialog .pp-dialog-title{background-color:#6082a1;padding:0.2em 0.4em;text-align:center;font-weight:bold;color:#fff}.pp-dialog .pp-dialog-actions{text-align:center}.pp-dialog .pp-dialog-actions .pp-dialog-action+.pp-dialog-action{margin-left:0.2em}.pp-float{position:fixed;top:0px;z-index:90}.column-action-menu.pp-float:not(:hover){opacity:0.6}#pp-search-header{background-color:#fff}#pp-search-header.pp-float:not(:hover){opacity:0.6}#pp-search-size-custom input[type=\"text\"]{width:3em;padding:0px;height:auto;border:1px solid #eee}#pp-search-ratio-custom-text{width:3em;padding:0px;height:auto}#pp-search-ratio-custom-preview{display:none}input[type=\"range\"]:active ~ #pp-search-ratio-custom-preview,.pp-slider.pp-active ~ #pp-search-ratio-custom-preview,input[type=\"text\"]:focus ~ #pp-search-ratio-custom-preview{display:block}#pp-search-ratio-custom-preview{position:absolute;margin-top:0.4em}#pp-search-ratio-custom-preview div{background-color:#ccc}.pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}.pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:2px solid #dae1e7}#pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}#pp-popup #pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}#pp-popup #pp-popup-rightbox{float:right;font-size:80%}#pp-popup #pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}#pp-popup #pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}#pp-popup #pp-popup-button-resize-mode{cursor:pointer}#pp-popup #pp-popup-status{color:#888}#pp-popup.pp-error #pp-popup-status{color:#a00;font-weight:bold}#pp-popup #pp-popup-ugoira-status{opacity:0.4}#pp-popup #pp-popup-ugoira-status svg{display:inline-block;vertical-align:middle;cursor:pointer;width:1em;height:1em}#pp-popup:not(.pp-ugoira) #pp-popup-ugoira-status{display:none}#pp-popup:not(.pp-ugoira-playing) #pp-icon-ugoira-playing{display:none}#pp-popup:not(.pp-ugoira-paused) #pp-icon-ugoira-paused{display:none}#pp-popup #pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;background-color:#fff;line-height:1.1em;z-index:20001}#pp-popup #pp-popup-header:not(.pp-show):not(:hover){opacity:0}#pp-popup #pp-popup-header .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}#pp-popup #pp-popup-header #pp-popup-caption-wrapper{overflow-y:auto}#pp-popup:not(.pp-comment-mode) #pp-popup-comment-wrapper{display:none}#pp-popup #pp-popup-comment-toolbar{margin:0.4em 1em 0.2em 1em}#pp-popup #pp-popup-comment-toolbar button{margin-right:0.4em}#pp-popup #pp-popup-comment-toolbar button svg{width:2em;height:2em}#pp-popup .pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;background-repeat:no-repeat;background-position:center}#pp-popup .pp-popup-comment-btn:hover{border-color:#000}#pp-popup .pp-popup-comment-btn:focus:not(:hover):not(:active):not(.pp-active){border:1px dashed #000}#pp-popup .pp-popup-comment-btn:active,#pp-popup .pp-popup-comment-btn.pp-active{opacity:0.4;border-color:#000}#pp-popup .pp-popup-comment-btn svg{display:block}#pp-popup:not(.pp-show-comment-form) #pp-icon-pencil-off{display:none}#pp-popup.pp-show-comment-form #pp-icon-pencil{display:none}#pp-popup:not(.pp-show-comment-form) #pp-popup-comment>._comment-item:first-child{display:none}#pp-popup #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}#pp-popup #pp-popup-comment .comment.header::before,#pp-popup #pp-popup-comment .comment.header::after{display:none}#pp-popup #pp-popup-comment ._comment-items ._no-item{margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}#pp-popup #pp-popup-comment ._comment-item{padding:0.2em 0px}#pp-popup #pp-popup-comment ._comment-item:not(.host-user) .comment{padding-left:48px;padding-right:0px}#pp-popup #pp-popup-comment ._comment-item.host-user .comment{padding-left:0px;padding-right:48px}#pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}#pp-popup.pp-hide-stamp-comments .sticker-container{display:none}#pp-popup #pp-popup-taglist{margin:0px;padding:0px;background:none}#pp-popup #pp-popup-taglist ul{display:inline}#pp-popup #pp-popup-taglist ul li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;border:0px;box-shadow:none;background:none}#pp-popup #pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}#pp-popup #pp-popup-taglist.pp-no-pixpedia a[href^=\"http://dic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixpedia a[href^=\"https://dic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixiv-comic a[href^=\"http://comic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixiv-comic a[href^=\"https://comic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-booth a[href^=\"http://booth.pm/\"],#pp-popup #pp-popup-taglist.pp-no-booth a[href^=\"https://booth.pm/\"]{display:none}#pp-popup #pp-popup-rating *{margin:0px;padding:0px}#pp-popup #pp-popup-rating .rating.pp-error .rate{display:none}#pp-popup #pp-popup-rating .score dl,#pp-popup #pp-popup-rating .score dt,#pp-popup #pp-popup-rating .score dd{display:inline}#pp-popup #pp-popup-rating .score dt{margin-right:0.2em}#pp-popup #pp-popup-rating .score dd{margin-right:0.6em}#pp-popup #pp-popup-rating .questionnaire{text-align:inherit}#pp-popup #pp-popup-rating .questionnaire input[type=\"button\"]:focus{outline:2px solid #0f0}#pp-popup #pp-popup-info{padding-bottom:0.1em}#pp-popup #pp-popup-author-image{max-height:3.2em;float:left;border:1px solid #aaa;margin-right:0.2em}#pp-popup #pp-popup-author-image:hover{max-height:none}#pp-popup #pp-popup-author-status{position:absolute;left:3px;margin:2px}#pp-popup #pp-popup-author-status:not(.pp-hide){display:inline-block}#pp-popup #pp-popup-author-status svg{display:block;width:1.2em;height:1.2em;min-width:16px;min-height:16px}#pp-popup #pp-popup-author-status:not(.pp-fav) #pp-icon-following,#pp-popup #pp-popup-author-status.pp-fav-m #pp-icon-following,#pp-popup #pp-popup-author-status.pp-mypix #pp-icon-following{display:none}#pp-popup #pp-popup-author-status:not(.pp-fav-m) #pp-icon-heart,#pp-popup #pp-popup-author-status.pp-mypix #pp-icon-heart{display:none}#pp-popup #pp-popup-author-status:not(.pp-mypix) #pp-icon-mypixiv{display:none}#pp-popup #pp-popup-author-image:hover ~ #pp-popup-author-status{display:none}#pp-popup #pp-popup-tools{margin-left:0.6em}#pp-popup #pp-popup-tools:empty{display:none}#pp-popup #pp-popup-tools a+a{margin-left:0.6em}#pp-popup #pp-popup-ugoira-info{margin-left:0.6em}#pp-popup:not(.pp-ugoira) #pp-popup-ugoira-info{display:none}#pp-popup #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}#pp-popup #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}#pp-popup #pp-popup-image-scroller{min-width:480px;min-height:360px}#pp-popup #pp-popup-image-layout{display:inline-block}#pp-popup #pp-popup-image-layout img{display:inline-block}#pp-popup .pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}#pp-popup .pp-popup-olc.pp-active:hover{opacity:0.6}#pp-popup .pp-popup-olc svg{position:relative}#pp-popup #pp-popup-olc-prev{left:0px}#pp-popup #pp-popup-olc-next svg{transform:matrix(-1, 0, 0, 1, 0, 0)}#pp-popup #pp-icon-multipage{position:absolute;opacity:0.8;right:0px;bottom:0px}#pp-popup:not(.pp-frontpage-new) #pp-icon-multipage{display:none}#pp-config-btn1{margin-left:2px;cursor:pointer;display:inline-block;vertical-align:top;border:3px solid #f2f4f6;background:#f2f4f6 url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAEwgAABMIBvM+QGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJaSURBVDiNtZTPS1RRGIaf79wBDYksQ3MREaiNTiAty3CcTQuFSr1a9Ce0C6LIRYVBm5YtihYRQkjqmNCq1e3SD4kWkWEzmmiUizIZikiwvOdr4cwwIzrjDPSuzvnec5773u9wDvwnSSFzwp/bb3WtG6ENpVWFGmAHwrIoMyr6zAQMd8eaP20LPOonTjjIJYUYYIqEC4BHEgpd6GlrWNoUPP480aRW7rIOzGgWdNioeY1jl9YsFaIcEJEuwAUq0uu+i+qpno7mySzY87xQyqm/gjIAVGaIqpx3O8J3too69mI6IkFoArQhXfqpQrvbHp4yQ0/fVaXMvgmUwVwogBjzuVAP3OORaSXoBH6lS7tE9YHneSFTVVnxBKQrbSwWAm0Kj7Z8ROR2TpwjKaf+tEGysAQqPaWCAQKjQ3kF5awhcAaAFYFx1ewvlaS+tkOzwEpOqcX0xhoXAzhc+du5UQ4UQEQU+JZTqjEA/dHwQmdn42q5YACFeM70S6hcUNyfuQZ6HbCIOWnQUat6EQBhqtitKpSxNj0wqrYuUPM3awX2XtmJN8qNNr4F5LG3UN0dO/ijIFjVdoy8mp7sPxZJAYz7ycsKu9Pu0ZwXwY37ySYAZfU98DDvrRjzZsJiNLGBbxWu2r3BLWfZ2c4BT/VGw63FerwKGCO6ZxvAPBVphfYJ5iuwsz8S+TPmJ88IWr3uyjkgml45BLwEEGSuKFiMY3vbm95k5m40PJIZx/1kawasiO9Gw/dz9+a1QhwdzI9sbxb6cCHlJ1Zq822p22qjIB8UnQexau18uQFK1j86/dLViN7vDQAAAABJRU5ErkJggg==\") no-repeat 6px 1px}#pp-config-btn1:hover{background-color:#ddeaf6;border-color:#ddeaf6}#pp-config-btn1.pp-active{position:relative;z-index:10001;background-color:#fff;height:27px;border-color:#becad8;border-bottom:none;border-radius:0px 5px 0px 0px}#pp-config-btn1-wrapper #pp-config{position:absolute;z-index:10000;top:27px;left:-400px;width:800px;background-color:#fff;border:3px solid #becad8;border-radius:10px}#pp-config-btn1-wrapper #pp-config .pp-config-tab:first-child:hover{margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;border-right:none;border-bottom:none}#pp-config-btn-fallback{position:fixed;right:0px;top:0px;opacity:0.2;padding:16px;cursor:pointer;background-repeat:no-repeat;background-position:center;background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAFMQAABTEBt+0oUgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJjSURBVEiJtZRPSFRRFMZ/585zdMrQBN0VmjMpVlAkhVCrpKJFixa2KIhW4phB+4ho0SpI1BkYkYJoG0EJZosWFoSm1MIEZxokI5MyNLA/Tu+922Km6b3n2Ewz9G0u5zvnft8553Ef/GdI3oqh1zWslR1DaAPZDdQCAWAJrRcQGQNrhHDz7L8ZROPtID3AccCfpw0NPEbsK3Q1TfzdIDp7GNQN4IBHYByYAr2IiA+kHk0b6CZHnQlcpyt4FRHtNrg5V0252Q+cdV0QfQ3LuMOFHW/X962FWKIdW4aA7Y5MhK5gDyI6bdCf3IPPHvYUAXwlHKpcvxEP+hK1GDIBuv4PKZ2Eg4PCQPIIyr4HVOW4WpgBQCR5CLGfOpgVbDOoUDriEH8CxAsS9KK78RnCmIOpRozTCmEgQ3zB5ATCalEGAMgDd8hJhVqJAdNohrkYWiteHMD2voUGRWfrT0xaqQ2eK00cEPnsYbYaAKV3nkFNaool/0tgX4b5aJQkGInvRWQc8IPM0hFsJpp46DB4rkoyQOrI/kb0tvQhqWxaq8HSJsgFI3ULy/8IdCXdjS/yGShuz1VwvuFHlhlI7kTpLZkWQ67a6Jv9WJnIZAYgn0GA7+Z7IokRfKqXxflXKHsaKMtRWwF6Mhv59H3gVCHfoAbhDLZ9kJY6tYF4LpQD5DNYA3qBmbRwiwV8Kkhe5APkX5FJOHQJgL5EOR1iAXXZbCRxFGE0E30jHNrsFXBPEJssQ6dHy+ZjC5uAoh+j28CqugzscjABzNW7xQj/hndF74BlFyMyt3F7ZhxtjIL40Hq+lEaKxi8x57FLc3TbGQAAAABJRU5ErkJggg==\")}#pp-config-btn-fallback:hover,#pp-config-btn-fallback.pp-active{opacity:1}#pp-config-btn-fallback-wrapper #pp-config{position:fixed;background-color:#fff;width:800px;border:3px solid #becad8;border-radius:10px}#pp-config-btn-fallback-wrapper #pp-config .pp-config-tab:first-child:hover{margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;border-right:none;border-bottom:none}#pp-config{line-height:1.2em}#pp-config:not(.pp-show){display:none}#pp-config ul{padding:0px;margin:0px;list-style-type:none}#pp-config li{display:block}#pp-config table{border-collapse:collapse;border-spacing:0px}#pp-config table td{padding:0px 0.2em}#pp-config label{cursor:pointer}#pp-config #pp-config-tabbar{border-bottom:2px solid #becad8}#pp-config #pp-config-tabbar label{cursor:pointer}#pp-config #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}#pp-config #pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}#pp-config #pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}#pp-config #pp-config-close-button{padding:0.4em}#pp-config #pp-config-content-wrapper{padding:0.4em;overflow-x:visible;overflow-y:auto}#pp-config .pp-config-content{display:none}#pp-config .pp-config-content.pp-active{display:block}#pp-config .pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}#pp-config .pp-config-content dl{margin-top:1.2em}#pp-config .pp-config-content dl dt{margin-top:0.4em}#pp-config .pp-config-content dl dd{margin-left:1em}#pp-config .pp-config-content .pp-config-subsection-title div{font-weight:bold;border-bottom:1px solid #becad8;border-left:0.8em solid #becad8;margin-top:1.6em;margin-bottom:0.4em;padding:0.3em 0.2em}#pp-config .pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}#pp-config #pp-config-bookmark-content textarea{width:100%;height:20em;box-sizing:border-box;margin-bottom:1em}#pp-config #pp-config-bookmark-tag-aliases{width:100%}#pp-config #pp-config-bookmark-tag-aliases td:last-child{width:100%}#pp-config #pp-config-bookmark-tag-aliases td:last-child input{width:100%;box-sizing:border-box}#pp-config #pp-config-importexport-toolbar{margin-bottom:0.2em}#pp-config #pp-config-importexport-toolbar button{margin-right:0.2em}#pp-config #pp-config-importexport-content textarea{width:100%;height:30em;box-sizing:border-box}#pp-config #pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}#pp-config #pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}#pp-config #pp-config-escaper{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}#pp-config #pp-config-escaper input{display:block;width:100%;box-sizing:border-box}#pp-config #pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}#pp-config input.pp-active{background-color:#ffc}.pp-config-regexp-editor .pp-dialog-content{padding:0.2em}.pp-config-regexp-editor textarea{width:100%;height:10em;margin:0px;box-sizing:border-box}.pp-config-regexp-editor table{white-space:pre}.pp-config-regexp-editor-status{font-weight:bold}.pp-config-regexp-editor-status.pp-yes{color:green}.pp-config-regexp-editor-status.pp-no{color:red}.pp-config-key-editor ul{margin:0.2em}\n";
-_.conf.__schema=[{"items": [{"value": false, "key": "bookmark_hide"}, {"value": 1, "key": "float_tag_list"}, {"value": false, "key": "disable_effect"}, {"value": 0, "key": "fast_user_bookmark"}, {"value": 1, "key": "redirect_jump_page"}, {"value": false, "key": "disable_profile_popup"}, {"value": false, "key": "debug"}], "name": "general"}, {"items": [{"value": true, "key": "preload"}, {"value": false, "key": "big_image"}, {"value": true, "key": "rate_confirm"}, {"value": 0.4, "key": "caption_height"}, {"value": 160, "key": "caption_minheight"}, {"value": 0.9, "key": "caption_opacity"}, {"value": false, "key": "remove_pixpedia"}, {"value": false, "key": "remove_pixiv_comic"}, {"value": false, "key": "remove_booth"}, {"value": true, "key": "rate_key"}, {"value": "", "key": "font_size"}, {"value": 0, "key": "auto_manga"}, {"value": "^http://www\\.pixiv\\.net/(?:(?:bookmark_new_illust|member_illust|ranking|bookmark)\\.php|$)", "key": "auto_manga_regexp"}, {"value": true, "key": "manga_viewed_flags"}, {"value": 0, "key": "reverse"}, {"value": "^http://www\\.pixiv\\.net/(?:bookmark_new_illust|member_illust)\\.php", "key": "reverse_regexp"}, {"value": 0.3, "key": "overlay_control"}, {"value": 32, "key": "scroll_height"}, {"value": 0.8, "key": "scroll_height_page"}, {"value": true, "key": "author_status_icon"}, {"value": false, "key": "hide_stamp_comments"}, {"value": 2, "key": "mouse_wheel"}, {"value": 1, "key": "mouse_wheel_delta"}, {"value": 4, "key": "fit_short_threshold"}, {"value": true, "key": "mark_visited"}, {"value": 2, "key": "manga_page_action"}, {"value": 0, "key": "minimum_size"}], "name": "popup"}, {"items": [{"value": "", "key": "layout_history"}], "name": "mypage"}, {"items": [{"value": "Backspace,a,k", "key": "popup_prev"}, {"value": "Left", "key": "popup_prev_direction"}, {"value": "Space,j", "key": "popup_next"}, {"value": "Right", "key": "popup_next_direction"}, {"value": "Home", "key": "popup_first"}, {"value": "End", "key": "popup_last"}, {"value": "Escape,q", "key": "popup_close"}, {"value": "Up", "key": "popup_caption_scroll_up"}, {"value": "Down", "key": "popup_caption_scroll_down"}, {"value": "c", "key": "popup_caption_toggle"}, {"value": "Shift+c", "key": "popup_comment_toggle"}, {"value": "Up", "key": "popup_illust_scroll_up"}, {"value": "Down", "key": "popup_illust_scroll_down"}, {"value": "Left", "key": "popup_illust_scroll_left"}, {"value": "Right", "key": "popup_illust_scroll_right"}, {"value": "Home", "key": "popup_illust_scroll_top"}, {"value": "End", "key": "popup_illust_scroll_bottom"}, {"value": "PageUp", "key": "popup_illust_page_up"}, {"value": "PageDown", "key": "popup_illust_page_down"}, {"value": "w", "key": "popup_switch_resize_mode"}, {"value": "Shift+f,Shift+o", "key": "popup_open"}, {"value": "f,o", "key": "popup_open_big"}, {"value": "e", "key": "popup_open_profile"}, {"value": "r", "key": "popup_open_illust"}, {"value": "t", "key": "popup_open_bookmark"}, {"value": "y", "key": "popup_open_staccfeed"}, {"value": "Shift+r", "key": "popup_open_response"}, {"value": "g", "key": "popup_reload"}, {"value": "Shift+b", "key": "popup_open_bookmark_detail"}, {"value": "Shift+v", "key": "popup_open_manga_thumbnail"}, {"value": "Shift+0,Shift+~", "key": "popup_rate01"}, {"value": "Shift+9,Shift+)", "key": "popup_rate02"}, {"value": "Shift+8,Shift+(", "key": "popup_rate03"}, {"value": "Shift+7,Shift+'", "key": "popup_rate04"}, {"value": "Shift+6,Shift+&", "key": "popup_rate05"}, {"value": "Shift+5,Shift+%", "key": "popup_rate06"}, {"value": "Shift+4,Shift+$", "key": "popup_rate07"}, {"value": "Shift+3,Shift+#", "key": "popup_rate08"}, {"value": "Shift+2,Shift+\"", "key": "popup_rate09"}, {"value": "Shift+1,Shift+!", "key": "popup_rate10"}, {"value": "m", "key": "popup_ugoira_play_pause"}, {"value": "comma", "key": "popup_ugoira_prev_frame"}, {"value": ".", "key": "popup_ugoira_next_frame"}, {"value": "b", "key": "popup_bookmark_start", "subsection": "bookmark"}, {"value": "Enter,Space", "key": "popup_bookmark_submit", "subsection": "bookmark"}, {"value": "Escape", "key": "popup_bookmark_end", "subsection": "bookmark"}, {"value": "v", "key": "popup_manga_start", "subsection": "manga"}, {"value": "Shift+f", "key": "popup_manga_open_page", "subsection": "manga"}, {"value": "v,Escape", "key": "popup_manga_end", "subsection": "manga"}, {"value": "d", "key": "popup_qrate_start", "subsection": "question"}, {"value": "Up", "key": "popup_qrate_select_prev", "subsection": "question"}, {"value": "Down", "key": "popup_qrate_select_next", "subsection": "question"}, {"value": "Enter,Space", "key": "popup_qrate_submit", "subsection": "question"}, {"value": "Escape,d", "key": "popup_qrate_end", "subsection": "question"}, {"value": "", "key": "popup_tag_edit_start", "subsection": "tagedit"}, {"value": "Escape", "key": "popup_tag_edit_end", "subsection": "tagedit"}], "name": "key"}, {"items": [{"value": "", "key": "tag_order"}, {"value": "", "key": "tag_aliases"}], "name": "bookmark"}];
-_.i18n={"en": {"ugoira_prev_frame": "Previous frame (#{key})", "mypage_layout_history_help": "Click list item to restore layout.", "search_wlt": "Min width <=", "cancel": "Cancel", "conf": {"bookmark": {"tag_order": "Reorder tags. 1 tag per line.\n-: Separator\n*: Others", "tag_aliases": "Tag association. Used for auto input. Separate by space."}, "popup": {"rate_key": "Enable rate keys", "caption_minheight": "Caption minimum height (px)", "author_status_icon": "Show icon on profile image", "overlay_control": "Click area width (0:disable; x<1:ratio to popup width; x>1:pixel)", "scroll_height": "Scroll step (px)", "auto_manga_regexp": "Regular expression for \"Switch manga...\" setting.", "caption_opacity": "Caption opacity", "remove_pixpedia": "Remove pixiv encyclopedia icon", "mark_visited": "Mark link as visited", "big_image": "Use original size image", "hide_stamp_comments": "Hide stamp comments", "scroll_height_page": "Scroll step for PageUp/PageDown", "fit_short_threshold": "Aspect ratio threshold for switch resize mode (0:Disable)", "remove_pixiv_comic": "Remove pixiv comic icon", "mouse_wheel": {"hint": ["Do nothing", "Move to prev/next illust", "Move to prev/next illust (respect \"reverse\" setting)"], "desc": "Mouse wheel operation"}, "preload": "Enable preloading", "manga_page_action": {"hint": ["Do nothing", "Open popup", "Open popup in manga mode"], "desc": "Open popup in manga page"}, "minimum_size": "Minimum image size (enlarge images which is smaller than this value; 0:disable; x<1:ratio to window size; x>1:pixel)", "mouse_wheel_delta": "Threshold for mouse wheel setting (if set negative value, invert direction)", "auto_manga": {"hint": ["Disable", "Enable", "Specify pages by regexp"], "desc": "Switch manga-mode automatically"}, "rate_confirm": "Show confirmation dialog when rating", "reverse_regexp": "Regular expression for \"Reverse...\" setting.", "manga_viewed_flags": "Do not start manga mode automatically if you have already read it", "font_size": "Font size (e.g. 10px)", "reverse": {"hint": ["Disable", "Enable", "Specify pages by regexp"], "desc": "Reverse move direction"}, "remove_booth": "Remove booth icon", "caption_height": "Caption height (ratio)"}, "key": {"popup_open_profile": "Open profile", "popup_caption_scroll_up": "Scroll caption up", "popup_prev_direction": "Move to previous illust (ignore \"reverse\" setting)", "popup_rate10": "Rate (10pt)", "popup_rate09": "Rate (9pt)", "popup_ugoira_next_frame": "[Ugoira] Show next frame", "popup_open_big": "Open image", "popup_bookmark_submit": "Send", "popup_tag_edit_start": "Start tag edit mode", "popup_manga_end": "End manga mode", "popup_switch_resize_mode": "Switch resize mode", "popup_illust_scroll_up": "Scroll illust up", "popup_illust_scroll_down": "Scroll illust down", "popup_illust_scroll_bottom": "Scroll illust to bottom", "popup_open_manga_thumbnail": "Open manga thumbnail page", "popup_rate06": "Rate (6pt)", "popup_qrate_select_next": "Select next item", "popup_ugoira_play_pause": "[Ugoira] Play/Pause", "popup_qrate_start": "Start questionnaire mode", "popup_manga_open_page": "Open manga page", "popup_qrate_submit": "Send", "popup_rate03": "Rate (3pt)", "popup_open": "Open illust page", "popup_illust_scroll_right": "Scroll illust right", "popup_qrate_select_prev": "Select previous item", "popup_next": "Move to next illust", "popup_illust_scroll_top": "Scroll illust to top", "popup_first": "Move to first illust", "popup_ugoira_prev_frame": "[Ugoira] Show previous frame", "popup_prev": "Move to previous illust", "popup_open_illust": "Open works", "popup_rate08": "Rate (8pt)", "popup_bookmark_start": "Start bookmark mode", "popup_tag_edit_end": "End tag edit mode", "popup_reload": "Reload", "popup_illust_page_up": "Scroll illust up (PageUp)", "popup_rate02": "Rate (2pt)", "popup_rate01": "Rate (1pt)", "popup_rate07": "Rate (7pt)", "popup_illust_page_down": "Scroll illust down (PageDown)", "popup_rate05": "Rate (5pt)", "popup_rate04": "Rate (4pt)", "popup_caption_toggle": "Toggle caption display", "popup_caption_scroll_down": "Scroll caption down", "popup_next_direction": "Move to next illust (ignore \"reverse\" setting)", "popup_bookmark_end": "End bookmark mode", "popup_comment_toggle": "Toggle comment", "popup_open_staccfeed": "Open feed", "popup_open_bookmark_detail": "Open bookmark information page", "popup_open_bookmark": "Open bookmark", "popup_last": "Move to last illust", "popup_qrate_end": "End questionnaire mode", "popup_close": "Close", "popup_illust_scroll_left": "Scroll illust left", "popup_manga_start": "Start manga mode", "popup_open_response": "Open image response"}, "general": {"disable_profile_popup": "Disable profile card popup", "fast_user_bookmark": {"hint": ["Disable", "Enable (public)", "Enable (private)"], "desc": "Follow user by one-click"}, "redirect_jump_page": {"hint": ["Disable", "Open target", "Modify link"], "desc": "Redirect jump.php"}, "float_tag_list": {"hint": ["Disable", "Enable"], "desc": "Enable float view for tag list"}, "debug": "Debug mode", "bookmark_hide": "Make private bookmark by default", "disable_effect": "Disable UI animation"}}, "importing": "Importing", "ugoira_how_to_use": "How to use?", "search_hgt": "<= Max height", "associate_tags": "Associate tags", "pref": {"key_question": "Tag edit mode", "releasenote": "Release note", "general": "General", "export": "Export", "about_license": "License", "close": "Close", "key_manga": "Manga mode", "importexport": "Import/Export", "bookmark": "Bookmark tag", "regex_valid": "Valid", "add": "Add", "import": "Import", "popup": "Popup", "key_bookmark": "Bookmark mode", "about_web": "Web", "key": "Key", "about_email": "Mail", "about": "About", "changelog": "Changelog", "default": "Default", "debug": "Debug", "regex_invalid": "Invalid"}, "author_bookmarks": "Bookmarks", "search_wgt": "<= Max width", "ugoira_next_frame": "Next frame (#{key})", "search_hlt": "Min height <=", "mypage_layout_history": "Layout history", "ugoira_generate_apng": "Generate APNG", "ugoira_download_zip": "Download zip", "mypage_layout_history_empty": "Layout history is empty", "author_staccfeed": "Feed", "ugoira_play_pause": "Play/Pause (#{key})", "rate_confirm": "Rate it?\n$pointpt", "__name__": "en", "sending": "Sending", "apng": {"title": "APNG generator", "how2save": "To save image, right click and select \"Save Image As\".", "download": "Download", "warning": "WARNING: This may take a long time and uses much of memory.", "preparing": "Preparing...", "cancel": "Cancel", "close": "Close", "generate": "Generate"}, "ugoira_generate_timecode": "Generate timecode", "delete_tag_confirm": "Really remove?\nYour member id will be notified to the author.", "dialog": {"cancel": "Cancel", "close": "Close", "yes": "Yes", "add": "Add", "no": "No"}, "author_works": "Works"}, "ja": {"ugoira_prev_frame": "\u30b3\u30de\u623b\u3057 (#{key})", "mypage_layout_history_help": "\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002", "search_wlt": "\u5e45\u306e\u6700\u5c0f\u5024 <=", "cancel": "\u4e2d\u6b62", "conf": {"bookmark": {"tag_order": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n-: \u30bb\u30d1\u30ec\u30fc\u30bf\n*: \u6b8b\u308a\u5168\u90e8", "tag_aliases": "\u30bf\u30b0\u306e\u95a2\u9023\u4ed8\u3051\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"}, "popup": {"rate_key": "\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b", "caption_minheight": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u306e\u6700\u5c0f\u5024(px)", "author_status_icon": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b", "overlay_control": "\u79fb\u52d5\u77e2\u5370\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044; x<1:\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u5e45\u306b\u5bfe\u3059\u308b\u5272\u5408; x>1:\u30d4\u30af\u30bb\u30eb)", "scroll_height": "\u30b9\u30af\u30ed\u30fc\u30eb\u5e45(px)", "auto_manga_regexp": "\"\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b\"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe", "caption_opacity": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6", "remove_pixpedia": "pixiv\u767e\u79d1\u4e8b\u5178\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "mark_visited": "\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b", "big_image": "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b", "hide_stamp_comments": "\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b", "scroll_height_page": "PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45", "fit_short_threshold": "\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b\u7e26\u6a2a\u6bd4\u306e\u95be\u5024(0:\u7121\u52b9)", "remove_pixiv_comic": "pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "mouse_wheel": {"hint": ["\u4f55\u3082\u3057\u306a\u3044", "\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)"], "desc": "\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c"}, "preload": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b", "manga_page_action": {"hint": ["\u4f55\u3082\u3057\u306a\u3044", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u958b\u304f"], "desc": "\u6f2b\u753b\u4f5c\u54c1\u306e\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f"}, "minimum_size": "\u6700\u5c0f\u30b5\u30a4\u30ba (\u3053\u306e\u5024\u3088\u308a\u5c0f\u3055\u3044\u753b\u50cf\u3092\u62e1\u5927\u3057\u3066\u8868\u793a; 0:\u7121\u52b9; x<1:\u753b\u9762\u30b5\u30a4\u30ba\u306b\u5bfe\u3059\u308b\u5272\u5408; x>1:\u30d4\u30af\u30bb\u30eb)", "mouse_wheel_delta": "\u30db\u30a4\u30fc\u30eb\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)", "auto_manga": {"hint": ["\u7121\u52b9", "\u6709\u52b9", "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"], "desc": "\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b"}, "rate_confirm": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b", "reverse_regexp": "\"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b\"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe", "manga_viewed_flags": "\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044", "font_size": "\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(\u4f8b: 10px)", "reverse": {"hint": ["\u7121\u52b9", "\u6709\u52b9", "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"], "desc": "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"}, "remove_booth": "BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "caption_height": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055(\u7387)"}, "key": {"popup_open_profile": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f", "popup_caption_scroll_up": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_prev_direction": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\"\u53cd\u5bfe\u306b\u3059\u308b\"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)", "popup_rate10": "\u8a55\u4fa1\u3059\u308b (10\u70b9)", "popup_rate09": "\u8a55\u4fa1\u3059\u308b (9\u70b9)", "popup_ugoira_next_frame": "[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u9001\u308a", "popup_open_big": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f", "popup_bookmark_submit": "\u9001\u4fe1", "popup_tag_edit_start": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb", "popup_manga_end": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_switch_resize_mode": "\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b", "popup_illust_scroll_up": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_illust_scroll_down": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_illust_scroll_bottom": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_open_manga_thumbnail": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_rate06": "\u8a55\u4fa1\u3059\u308b (6\u70b9)", "popup_qrate_select_next": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "popup_ugoira_play_pause": "[\u3046\u3054\u30a4\u30e9] \u518d\u751f/\u4e00\u6642\u505c\u6b62", "popup_qrate_start": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb", "popup_manga_open_page": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002", "popup_qrate_submit": "\u9001\u4fe1", "popup_rate03": "\u8a55\u4fa1\u3059\u308b (3\u70b9)", "popup_open": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_illust_scroll_right": "\u30a4\u30e9\u30b9\u30c8\u3092\u53f3\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_qrate_select_prev": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "popup_next": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_illust_scroll_top": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_first": "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_ugoira_prev_frame": "[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u623b\u3057", "popup_prev": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_open_illust": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f", "popup_rate08": "\u8a55\u4fa1\u3059\u308b (8\u70b9)", "popup_bookmark_start": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb", "popup_tag_edit_end": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_reload": "\u30ea\u30ed\u30fc\u30c9", "popup_illust_page_up": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageUp)", "popup_rate02": "\u8a55\u4fa1\u3059\u308b (2\u70b9)", "popup_rate01": "\u8a55\u4fa1\u3059\u308b (1\u70b9)", "popup_rate07": "\u8a55\u4fa1\u3059\u308b (7\u70b9)", "popup_illust_page_down": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageDown)", "popup_rate05": "\u8a55\u4fa1\u3059\u308b (5\u70b9)", "popup_rate04": "\u8a55\u4fa1\u3059\u308b (4\u70b9)", "popup_caption_toggle": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b", "popup_caption_scroll_down": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_next_direction": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\"\u53cd\u5bfe\u306b\u3059\u308b\"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)", "popup_bookmark_end": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_comment_toggle": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048", "popup_open_staccfeed": "\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f", "popup_open_bookmark_detail": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_open_bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f", "popup_last": "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_qrate_end": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_close": "\u9589\u3058\u308b", "popup_illust_scroll_left": "\u30a4\u30e9\u30b9\u30c8\u3092\u5de6\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_manga_start": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb", "popup_open_response": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"}, "general": {"disable_profile_popup": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b", "fast_user_bookmark": {"hint": ["\u7121\u52b9", "\u6709\u52b9(\u516c\u958b)", "\u6709\u52b9(\u975e\u516c\u958b)"], "desc": "\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u30e6\u30fc\u30b6\u30fc\u3092\u30d5\u30a9\u30ed\u30fc\u3059\u308b"}, "redirect_jump_page": {"hint": ["\u7121\u52b9", "\u30da\u30fc\u30b8\u3092\u958b\u304f", "\u30ea\u30f3\u30af\u3092\u5909\u66f4"], "desc": "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"}, "float_tag_list": {"hint": ["\u7121\u52b9", "\u6709\u52b9"], "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b"}, "debug": "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9", "bookmark_hide": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b", "disable_effect": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"}}, "importing": "\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d", "ugoira_how_to_use": "\u4f7f\u3044\u65b9", "search_hgt": "<= \u9ad8\u3055\u306e\u6700\u5927\u5024", "associate_tags": "\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b", "pref": {"key_question": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9", "releasenote": "\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8", "general": "\u5168\u822c", "export": "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8", "about_license": "\u30e9\u30a4\u30bb\u30f3\u30b9", "close": "\u9589\u3058\u308b", "key_manga": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9", "importexport": "\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8", "bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0", "regex_valid": "\u6709\u52b9", "add": "\u8ffd\u52a0", "key_tagedit": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9", "import": "\u30a4\u30f3\u30dd\u30fc\u30c8", "popup": "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7", "key_bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9", "about_web": "\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8", "key": "\u30ad\u30fc", "about_email": "\u30e1\u30fc\u30eb", "about": "\u60c5\u5831", "changelog": "\u66f4\u65b0\u5c65\u6b74", "default": "\u30c7\u30d5\u30a9\u30eb\u30c8", "debug": "\u30c7\u30d0\u30c3\u30b0", "regex_invalid": "\u4e0d\u6b63"}, "author_bookmarks": "\u30d6\u30c3\u30af\u30de\u30fc\u30af", "search_wgt": "<= \u5e45\u306e\u6700\u5927\u5024", "ugoira_next_frame": "\u30b3\u30de\u9001\u308a (#{key})", "search_hlt": "\u9ad8\u3055\u306e\u6700\u5c0f\u5024 <=", "mypage_layout_history": "\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74", "ugoira_generate_apng": "APNG\u3092\u751f\u6210", "ugoira_download_zip": "zip\u3092\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9", "mypage_layout_history_empty": "\u5c65\u6b74\u304c\u7a7a\u3067\u3059", "author_staccfeed": "\u30d5\u30a3\u30fc\u30c9", "ugoira_play_pause": "\u518d\u751f/\u4e00\u6642\u505c\u6b62 (#{key})", "rate_confirm": "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n$point\u70b9", "__name__": "ja", "sending": "\u9001\u4fe1\u4e2d", "apng": {"title": "APNG\u30b8\u30a7\u30cd\u30ec\u30fc\u30bf", "how2save": "\u753b\u50cf\u3092\u4fdd\u5b58\u3059\u308b\u306b\u306f\u53f3\u30af\u30ea\u30c3\u30af\u3057\u3066\u300c\u753b\u50cf\u3092\u4fdd\u5b58\u300d\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002", "download": "\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9", "warning": "\u6ce8\u610f: \u9577\u3044\u6642\u9593\u304c\u304b\u304b\u308a\u30e1\u30e2\u30ea\u3092\u305f\u304f\u3055\u3093\u6d88\u8cbb\u3059\u308b\u3053\u3068\u304c\u3042\u308a\u307e\u3059\u3002", "preparing": "\u6e96\u5099\u4e2d...", "cancel": "\u30ad\u30e3\u30f3\u30bb\u30eb", "close": "\u9589\u3058\u308b", "generate": "\u751f\u6210"}, "ugoira_generate_timecode": "\u30bf\u30a4\u30e0\u30b3\u30fc\u30c9\u3092\u751f\u6210", "delete_tag_confirm": "\u3053\u306e\u30bf\u30b0\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f\n*\u6295\u7a3f\u8005\u306b\u30e6\u30fc\u30b6\u30fcID\u304c\u901a\u77e5\u3055\u308c\u307e\u3059\u3002", "dialog": {"cancel": "\u30ad\u30e3\u30f3\u30bb\u30eb", "close": "\u9589\u3058\u308b", "yes": "\u306f\u3044", "add": "\u8ffd\u52a0", "no": "\u3044\u3044\u3048"}, "author_works": "\u4f5c\u54c1"}};
+_.css="#pp-popup-bookmark-wrapper{border:1px solid #aaa}#pp-popup-bookmark-wrapper .layout-body{margin:0px;border:none}#pp-popup-bookmark-wrapper .bookmark-detail-unit{border-radius:0px;border:none}#pp-popup-bookmark-wrapper .bookmark-list-unit{border-radius:0px;border:none;margin:0px}#pp-popup-bookmark-wrapper .tag-container{overflow-y:auto}#pp-popup-bookmark-wrapper .list-container+.list-container{margin-top:0px}#pp-popup-bookmark-wrapper ._list-unit{padding-top:4px;padding-bottom:4px}#pp-popup-bookmark-wrapper .tag-cloud{padding:4px !important}#pp-popup-bookmark-wrapper .pp-tag-select{outline:2px solid #0f0}#pp-popup-bookmark-wrapper .pp-tag-link{outline:2px solid #f00}#pp-popup-bookmark-wrapper .pp-tag-associate-button{background-color:#eee;margin-right:0.2em;border:1px solid #bbb;border-radius:0.4em;padding:0px 0.4em;color:#000}#pp-popup-bookmark-wrapper .pp-tag-associate-button.pp-active{background-color:#aaa}#pp-popup-bookmark-wrapper .pp-tag-associate-button:hover{background-color:#ddd}#pp-popup-bookmark-wrapper.pp-associate-tag .tag-container .list-items .tag,#pp-popup-bookmark-wrapper:not(.pp-associate-tag) .pp-tag-associate-button{display:none}#pp-popup.pp-bookmark-mode #pp-popup-header,#pp-popup.pp-bookmark-mode #pp-popup-image-wrapper,#pp-popup.pp-bookmark-mode .pp-popup-olc{display:none}#pp-popup:not(.pp-bookmark-mode) #pp-popup-bookmark-wrapper{display:none}.pp-apng-generator{text-align:center}.pp-apng-generator .pp-dialog-content{width:640px}.pp-apng-generator #pp-apng-generator-error{color:#800;font-weight:bold;text-align:left;white-space:pre-wrap}.pp-apng-generator.pp-done .pp-progress-bar{display:none}.pp-apng-generator #pp-apng-generator-preview{max-width:100%;max-height:480px;margin:0.2em}.pp-apng-generator #pp-apng-generator-howtosave:not(.pp-show){display:none}.pp-apng-generator:not(.pp-preparing) #pp-apng-generator-preparing{display:none}.pp-apng-generator:not(.pp-done) #pp-apng-generator-preview,.pp-apng-generator:not(.pp-done) .pp-dialog-action-download{display:none}.pp-apng-generator:not(.pp-error) #pp-apng-generator-error{display:none}.pp-apng-generator.pp-done #pp-apng-generator-warning,.pp-apng-generator.pp-done .pp-dialog-action-generate,.pp-apng-generator.pp-error #pp-apng-generator-warning,.pp-apng-generator.pp-error .pp-dialog-action-generate{display:none}#pp-popup-tagedit-button{color:#888;font-size:90%}#pp-popup-tagedit-wrapper{font-size:12px;overflow:auto}#pp-popup-tagedit-wrapper #tag-editor>div{margin:0px !important}#pp-popup.pp-tagedit-mode #pp-popup-header,#pp-popup.pp-tagedit-mode #pp-popup-image-wrapper,#pp-popup.pp-tagedit-mode .pp-popup-olc{display:none}#pp-popup:not(.pp-tagedit-mode) #pp-popup-tagedit-wrapper{display:none}.pp-commform-root{position:relative}.pp-commform-root .pp-commform-overlay{position:absolute;left:0px;right:0px;top:0px;bottom:0px;background-color:rgba(255,255,255,0.8)}.pp-commform-root .pp-commform-overlay svg{position:absolute;display:block;margin:-25px;left:50%;top:50%}.pp-commform-root .pp-commform-overlay .pp-commform-overlay-message{position:absolute;left:0px;right:0px;top:50%;margin-top:30px;text-align:center}.pp-commform-root .pp-commform-overlay .pp-commform-overlay-message:empty{display:none}.pp-commform-root .pp-commform-overlay:not(.pp-loading):not(.pp-error){display:none}.pp-commform-root .pp-commform-overlay:not(.pp-loading) #pp-icon-comment-loading{display:none}.pp-commform-root .pp-commform-overlay:not(.pp-error) #pp-icon-comment-error{display:none}.pp-commform-root .pp-commform-reply-to-wrap{position:relative}.pp-commform-root .pp-commform-reply-to-wrap #pp-icon-comment-reply-to{position:absolute;bottom:0px;width:2em;height:2em;opacity:0.2}.pp-commform-root .pp-commform-reply-to-wrap .pp-commform-reply-to{margin-left:2.4em;background-color:#f2f4f6;border:1px solid #d6dee5;border-radius:5px}.pp-commform-root .pp-commform-reply-to-wrap .pp-commform-reply-to ._comment-item{border-width:0px;margin:0px 0.2em}.pp-commform-root .pp-commform-reply-to-wrap .pp-commform-reply-to .action-list{display:none}.pp-commform-root .pp-commform-form{margin:0.2em 0px;background-color:#e8f0f6;border:1px solid #d6dee5;border-radius:5px;overflow:hidden}.pp-commform-root .pp-commform-form .pp-commform-tabbar{background-color:#e8f0f6}.pp-commform-root .pp-commform-form .pp-commform-tabbar .pp-commform-tab{display:inline-block;font-weight:bold;padding:10px;background-color:#fff;border-right:1px solid #d6dee5}.pp-commform-root .pp-commform-form .pp-commform-tabbar .pp-commform-tab:not(.pp-active){cursor:pointer}.pp-commform-root .pp-commform-form .pp-commform-tabbar-top{border-bottom:1px solid #d6dee5}.pp-commform-root .pp-commform-form .pp-commform-tabbar-top .pp-commform-tab.pp-active{padding-bottom:11px;margin-bottom:-1px}.pp-commform-root .pp-commform-form .pp-commform-tabbar-bottom{border-top:1px solid #d6dee5}.pp-commform-root .pp-commform-form .pp-commform-tabbar-bottom .pp-commform-tab.pp-active{padding-top:11px;margin-top:-1px}.pp-commform-root .pp-commform-form .pp-commform-tabbar-center{text-align:center}.pp-commform-root .pp-commform-form .pp-commform-tabbar-center .pp-commform-tab:first-child{border-left:1px solid #d6dee5}.pp-commform-root .pp-commform-form .pp-commform-cont{background-color:#fff}.pp-commform-root .pp-commform-form .pp-commform-cont:not(.pp-active){display:none}.pp-commform-root .pp-commform-form .pp-commform-toolbar{padding:0.2em;background-color:#fff;border-top:1px dashed #d6dee5}.pp-commform-root .pp-commform-form .pp-commform-toolbar button{border-width:0px;background-color:transparent;font-weight:bold;padding:0.6em 0.8em;cursor:pointer}.pp-commform-root .pp-commform-form .pp-commform-toolbar .pp-commform-button-flat{border-right:1px solid #d6dee5;color:#777}.pp-commform-root .pp-commform-form .pp-commform-toolbar .pp-commform-button-flat:hover{text-decoration:underline}.pp-commform-root .pp-commform-form .pp-commform-toolbar .pp-commform-button-blue{background-color:#0096db;color:#fff;border-radius:0.2em}.pp-commform-root .pp-commform-form .pp-commform-toolbar .pp-commform-button-blue:hover{background-color:#00a7f5}.pp-commform-root .pp-commform-form .pp-commform-toolbar .pp-commform-send{float:right;padding:0.6em 1.8em}.pp-commform-root .pp-commform-form .pp-commform-cont-comment textarea{border-width:0px;padding:0.3em;width:100%;height:4em;background-color:#fff;font-size:inherit}.pp-commform-root .pp-commform-form .pp-commform-cont-comment .pp-commform-emoji{border-top:1px dashed #d6dee5;padding:0.4em}.pp-commform-root .pp-commform-form .pp-commform-cont-comment .pp-commform-emoji div{margin:3px 0px}.pp-commform-root .pp-commform-form .pp-commform-cont-comment .pp-commform-emoji img{display:inline-block;width:42px;height:42px;border:3px solid transparent;margin:0px 3px}.pp-commform-root .pp-commform-form .pp-commform-cont-comment .pp-commform-emoji img:hover{border-color:#ddd}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-stamp-group:not(.pp-active){display:none}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-stamp-group{padding:0.4em}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-stamp-group div{margin:3px 0px}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-stamp-group img{display:inline-block;width:70px;height:70px;border:3px solid transparent;margin:0px 3px}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-stamp-group img:hover{border-color:#ddd}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-tab{padding:4px 15px}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-tab.pp-active{padding-top:5px;margin-top:-1px}.pp-commform-root .pp-commform-form .pp-commform-cont-stamp .pp-commform-tab img{width:24px;height:24px}.pp-control,.pp-toplevel input,.pp-toplevel button,.pp-toplevel select,.pp-toplevel textarea,.pp-progress-bar{border:1px solid #becad8;border-radius:2px;padding:0.1em 0.3em;margin:0.2em}.pp-toplevel input[type=\"checkbox\"]{padding:1px}.pp-toplevel button{white-space:nowrap;background-color:#f2f4f6}.pp-toplevel button:hover{background-color:#ddeaf6}.pp-toplevel button:active{background-color:#becad8}.pp-hide{display:none}.pp-sprite{background-image:url(\"http://source.pixiv.net/www/images/sprites-sa61cacfa96.png\")}input.pp-flat-input{border:none}input.pp-flat-input:not(:hover):not(:focus){background:transparent}.pp-slider{display:inline-block;vertical-align:middle;padding:7px 4px}.pp-slider .pp-slider-rail{position:relative;width:160px;height:2px;background-color:#aaa}.pp-slider .pp-slider-knob{position:absolute;border:1px outset #ddd;background-color:#ccc;width:6px;height:14px;margin:-7px -4px}.pp-slider.pp-debug{outline:1px solid rgba(255,0,0,0.5)}.pp-slider.pp-debug .pp-slider-rail{background-color:#0f0}.pp-slider.pp-debug .pp-slider-knob{border:1px solid #f0f;background-color:#00f;opacity:0.5}.pp-popup-menu{position:fixed;background-color:#fff;border:1px solid #aaa;border-radius:3px;padding:3px 0px;z-index:30000;white-space:pre}.pp-popup-menu .pp-popup-menu-item:hover{background-color:#ddd}.pp-popup-menu .pp-popup-menu-item>label,.pp-popup-menu .pp-popup-menu-item>a{display:block;padding:0.3em 0.6em;color:inherit;text-decoration:none}.pp-popup-menu .pp-popup-menu-item input[type=\"checkbox\"]{border:1px solid #aaa;cursor:pointer;vertical-align:bottom}.pp-progress-bar{padding:0px;margin:0.2em;background-color:#eee}.pp-progress-bar .pp-progress{background-color:#d6dee5;width:0px;height:2em}.pp-dialog{position:fixed;z-index:22000;background-color:#fff;border:0.3em solid #6082a1;box-shadow:0px 0px 1em 0.2em rgba(0,0,0,0.6)}.pp-dialog .pp-dialog-title{background-color:#6082a1;padding:0.2em 0.4em;text-align:center;font-weight:bold;color:#fff}.pp-dialog .pp-dialog-actions{text-align:center}.pp-dialog .pp-dialog-actions .pp-dialog-action+.pp-dialog-action{margin-left:0.2em}.pp-tooltip{position:absolute;padding:0.1em 0.3em;border-radius:2px;background-color:#333;color:#fff;white-space:nowrap;z-index:20002}.pp-tooltip:empty{display:none}.pp-float{position:fixed;top:0px;z-index:90}.column-action-menu.pp-float:not(:hover){opacity:0.6}#pp-search-header{background-color:#fff}#pp-search-header.pp-float:not(:hover){opacity:0.6}#pp-search-size-custom input[type=\"text\"]{width:3em;padding:0px;height:auto;border:1px solid #eee}#pp-search-ratio-custom-text{width:3em;padding:0px;height:auto}#pp-search-ratio-custom-preview{display:none}input[type=\"range\"]:active ~ #pp-search-ratio-custom-preview,.pp-slider.pp-active ~ #pp-search-ratio-custom-preview,input[type=\"text\"]:focus ~ #pp-search-ratio-custom-preview{display:block}#pp-search-ratio-custom-preview{position:absolute;margin-top:0.4em}#pp-search-ratio-custom-preview div{background-color:#ccc}.pp-bookmark-tag-list ul+ul:not(.tagCloud){border-top:2px solid #dae1e7}.pp-bookmark-tag-list ul+ul.tagCloud{border-bottom:2px solid #dae1e7}#pp-popup{position:fixed;border:2px solid #aaa;background-color:#fff;padding:0.2em;z-index:20000}#pp-popup #pp-popup-title a{font-size:120%;font-weight:bold;line-height:1em}#pp-popup #pp-popup-rightbox{float:right;font-size:80%}#pp-popup #pp-popup-rightbox a{margin-left:0.2em;font-weight:bold}#pp-popup #pp-popup-rightbox a.pp-active{color:#888;font-weight:normal}#pp-popup #pp-popup-button-resize-mode{cursor:pointer}#pp-popup #pp-popup-status{position:relative}#pp-popup #pp-popup-status-text{color:#888}#pp-popup #pp-popup-status-text:empty{display:none}#pp-popup.pp-error #pp-popup-status-text{color:#a00;font-weight:bold}#pp-popup #pp-popup-status-message{right:0px;top:1.5em}#pp-popup #pp-popup-status-text:not(:hover)+#pp-popup-status-message{display:none}#pp-popup #pp-popup-ugoira-status{opacity:0.4}#pp-popup #pp-popup-ugoira-status svg{display:inline-block;vertical-align:middle;cursor:pointer;width:1em;height:1em}#pp-popup:not(.pp-ugoira) #pp-popup-ugoira-status{display:none}#pp-popup:not(.pp-ugoira-playing) #pp-icon-ugoira-playing{display:none}#pp-popup:not(.pp-ugoira-paused) #pp-icon-ugoira-paused{display:none}#pp-popup #pp-popup-header{position:absolute;left:0px;right:0px;padding:0px 0.2em;background-color:#fff;line-height:1.1em;z-index:20001}#pp-popup #pp-popup-header:not(.pp-show):not(:hover){opacity:0}#pp-popup #pp-popup-header .pp-popup-separator{border-top:1px solid #aaa;margin-top:0.1em;padding-top:0.1em}#pp-popup #pp-popup-header #pp-popup-caption-wrapper{overflow-y:auto}#pp-popup:not(.pp-comment-mode) #pp-popup-comment-wrapper{display:none}#pp-popup #pp-popup-comment-toolbar{margin:0.4em 1em 0.2em 1em}#pp-popup #pp-popup-comment-toolbar button{margin-right:0.4em}#pp-popup #pp-popup-comment-toolbar button svg{width:2em;height:2em}#pp-popup .pp-popup-comment-btn{cursor:pointer;border:1px solid transparent;border-radius:3px;opacity:0.2;background-color:transparent}#pp-popup .pp-popup-comment-btn:hover{border-color:#000}#pp-popup .pp-popup-comment-btn:focus:not(:hover):not(:active):not(.pp-active){border:1px dashed #000}#pp-popup .pp-popup-comment-btn:active,#pp-popup .pp-popup-comment-btn.pp-active{opacity:0.4;border-color:#000}#pp-popup .pp-popup-comment-btn svg{display:block}#pp-popup:not(.pp-show-comment-form) #pp-icon-pencil-off{display:none}#pp-popup.pp-show-comment-form #pp-icon-pencil{display:none}#pp-popup ._comment-form-container{display:none}#pp-popup:not(.pp-show-comment-form) #pp-popup-comment-form-cont{display:none}#pp-popup #pp-popup-comment #pp-popup-comment-form-cont{margin:0 20px}#pp-popup #pp-popup-comment .comment.header form{background-color:#fff;margin-bottom:1em;width:100%}#pp-popup #pp-popup-comment .comment.header::before,#pp-popup #pp-popup-comment .comment.header::after{display:none}#pp-popup #pp-popup-comment ._comment-items ._no-item{margin:0px 0px 0px 1em;color:inherit;background-color:transparent;text-align:left}#pp-popup #pp-popup-comment ._comment-item{padding:0.2em 0px}#pp-popup #pp-popup-comment ._comment-item:not(.host-user) .comment{padding-left:48px;padding-right:0px}#pp-popup #pp-popup-comment ._comment-item.host-user .comment{padding-left:0px;padding-right:48px}#pp-popup.pp-hide-stamp-comments .pp-stamp-comment{display:none}#pp-popup.pp-hide-stamp-comments .sticker-container{display:none}#pp-popup #pp-popup-taglist{margin:0px;padding:0px;background:none}#pp-popup #pp-popup-taglist ul{display:inline}#pp-popup #pp-popup-taglist ul li{display:inline;margin:0px 0.6em 0px 0px;padding:0px;border:0px;box-shadow:none;background:none}#pp-popup #pp-popup-taglist .no-item{color:#aaa;margin-right:0.6em}#pp-popup #pp-popup-taglist.pp-no-pixpedia a[href^=\"http://dic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixpedia a[href^=\"https://dic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixiv-comic a[href^=\"http://comic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-pixiv-comic a[href^=\"https://comic.pixiv.net/\"],#pp-popup #pp-popup-taglist.pp-no-booth a[href^=\"http://booth.pm/\"],#pp-popup #pp-popup-taglist.pp-no-booth a[href^=\"https://booth.pm/\"]{display:none}#pp-popup #pp-popup-rating *{margin:0px;padding:0px}#pp-popup #pp-popup-rating .rating.pp-error .rate{display:none}#pp-popup #pp-popup-rating #pp-icon-rating-error{position:absolute;width:260px;height:26px;left:0px;top:0px}#pp-popup #pp-popup-rating .rating:not(.pp-error) #pp-icon-rating-error{display:none}#pp-popup #pp-popup-rating .score dl,#pp-popup #pp-popup-rating .score dt,#pp-popup #pp-popup-rating .score dd{display:inline}#pp-popup #pp-popup-rating .score dt{margin-right:0.2em}#pp-popup #pp-popup-rating .score dd{margin-right:0.6em}#pp-popup #pp-popup-rating .questionnaire{text-align:inherit}#pp-popup #pp-popup-rating .questionnaire input[type=\"button\"]:focus{outline:2px solid #0f0}#pp-popup #pp-popup-info{padding-bottom:0.1em}#pp-popup #pp-popup-author-image{max-height:3.2em;float:left;border:1px solid #aaa;margin-right:0.2em}#pp-popup #pp-popup-author-image:hover{max-height:none}#pp-popup #pp-popup-author-status{position:absolute;left:3px;margin:2px}#pp-popup #pp-popup-author-status:not(.pp-hide){display:inline-block}#pp-popup #pp-popup-author-status svg{display:block;width:1.2em;height:1.2em;min-width:16px;min-height:16px}#pp-popup #pp-popup-author-status:not(.pp-fav) #pp-icon-following,#pp-popup #pp-popup-author-status.pp-fav-m #pp-icon-following,#pp-popup #pp-popup-author-status.pp-mypix #pp-icon-following{display:none}#pp-popup #pp-popup-author-status:not(.pp-fav-m) #pp-icon-heart,#pp-popup #pp-popup-author-status.pp-mypix #pp-icon-heart{display:none}#pp-popup #pp-popup-author-status:not(.pp-mypix) #pp-icon-mypixiv{display:none}#pp-popup #pp-popup-author-image:hover ~ #pp-popup-author-status{display:none}#pp-popup #pp-popup-tools{margin-left:0.6em}#pp-popup #pp-popup-tools:empty{display:none}#pp-popup #pp-popup-tools a+a{margin-left:0.6em}#pp-popup #pp-popup-ugoira-info{margin-left:0.6em}#pp-popup:not(.pp-ugoira) #pp-popup-ugoira-info{display:none}#pp-popup #pp-popup-author-links a{margin-right:0.6em;font-weight:bold}#pp-popup #pp-popup-image-wrapper{line-height:0;border:1px solid #aaa;position:relative}#pp-popup #pp-popup-image-scroller{min-width:600px;min-height:600px}#pp-popup #pp-popup-image-layout{display:inline-block}#pp-popup #pp-popup-image-layout img{display:inline-block}#pp-popup .pp-popup-olc{position:absolute;cursor:pointer;opacity:0;top:0px;height:100%;line-height:0px}#pp-popup .pp-popup-olc.pp-active:hover{opacity:0.6}#pp-popup .pp-popup-olc svg{position:relative}#pp-popup #pp-popup-olc-prev{left:0px}#pp-popup #pp-popup-olc-next svg{transform:matrix(-1, 0, 0, 1, 0, 0)}#pp-popup #pp-icon-multipage{position:absolute;opacity:0.8;right:0px;bottom:0px}#pp-popup:not(.pp-frontpage-new) #pp-icon-multipage{display:none}#pp-config-btn1{margin-left:2px;cursor:pointer;display:inline-block;vertical-align:top;border:3px solid #f2f4f6;background:#f2f4f6 url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAEwgAABMIBvM+QGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJaSURBVDiNtZTPS1RRGIaf79wBDYksQ3MREaiNTiAty3CcTQuFSr1a9Ce0C6LIRYVBm5YtihYRQkjqmNCq1e3SD4kWkWEzmmiUizIZikiwvOdr4cwwIzrjDPSuzvnec5773u9wDvwnSSFzwp/bb3WtG6ENpVWFGmAHwrIoMyr6zAQMd8eaP20LPOonTjjIJYUYYIqEC4BHEgpd6GlrWNoUPP480aRW7rIOzGgWdNioeY1jl9YsFaIcEJEuwAUq0uu+i+qpno7mySzY87xQyqm/gjIAVGaIqpx3O8J3too69mI6IkFoArQhXfqpQrvbHp4yQ0/fVaXMvgmUwVwogBjzuVAP3OORaSXoBH6lS7tE9YHneSFTVVnxBKQrbSwWAm0Kj7Z8ROR2TpwjKaf+tEGysAQqPaWCAQKjQ3kF5awhcAaAFYFx1ewvlaS+tkOzwEpOqcX0xhoXAzhc+du5UQ4UQEQU+JZTqjEA/dHwQmdn42q5YACFeM70S6hcUNyfuQZ6HbCIOWnQUat6EQBhqtitKpSxNj0wqrYuUPM3awX2XtmJN8qNNr4F5LG3UN0dO/ijIFjVdoy8mp7sPxZJAYz7ycsKu9Pu0ZwXwY37ySYAZfU98DDvrRjzZsJiNLGBbxWu2r3BLWfZ2c4BT/VGw63FerwKGCO6ZxvAPBVphfYJ5iuwsz8S+TPmJ88IWr3uyjkgml45BLwEEGSuKFiMY3vbm95k5m40PJIZx/1kawasiO9Gw/dz9+a1QhwdzI9sbxb6cCHlJ1Zq822p22qjIB8UnQexau18uQFK1j86/dLViN7vDQAAAABJRU5ErkJggg==\") no-repeat 6px 1px}#pp-config-btn1:hover{background-color:#ddeaf6;border-color:#ddeaf6}#pp-config-btn1.pp-active{position:relative;z-index:10001;background-color:#fff;height:27px;border-color:#becad8;border-bottom:none;border-radius:0px 5px 0px 0px}#pp-config-btn1-wrapper #pp-config{position:absolute;z-index:10000;top:27px;left:-400px;width:800px;background-color:#fff;border:3px solid #becad8;border-radius:10px}#pp-config-btn1-wrapper #pp-config .pp-config-tab:first-child:hover{margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;border-right:none;border-bottom:none}#pp-config-btn-fallback{position:fixed;right:0px;top:0px;opacity:0.2;padding:16px;cursor:pointer;background-repeat:no-repeat;background-position:center;background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAFMQAABTEBt+0oUgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJjSURBVEiJtZRPSFRRFMZ/585zdMrQBN0VmjMpVlAkhVCrpKJFixa2KIhW4phB+4ho0SpI1BkYkYJoG0EJZosWFoSm1MIEZxokI5MyNLA/Tu+922Km6b3n2Ewz9G0u5zvnft8553Ef/GdI3oqh1zWslR1DaAPZDdQCAWAJrRcQGQNrhHDz7L8ZROPtID3AccCfpw0NPEbsK3Q1TfzdIDp7GNQN4IBHYByYAr2IiA+kHk0b6CZHnQlcpyt4FRHtNrg5V0252Q+cdV0QfQ3LuMOFHW/X962FWKIdW4aA7Y5MhK5gDyI6bdCf3IPPHvYUAXwlHKpcvxEP+hK1GDIBuv4PKZ2Eg4PCQPIIyr4HVOW4WpgBQCR5CLGfOpgVbDOoUDriEH8CxAsS9KK78RnCmIOpRozTCmEgQ3zB5ATCalEGAMgDd8hJhVqJAdNohrkYWiteHMD2voUGRWfrT0xaqQ2eK00cEPnsYbYaAKV3nkFNaool/0tgX4b5aJQkGInvRWQc8IPM0hFsJpp46DB4rkoyQOrI/kb0tvQhqWxaq8HSJsgFI3ULy/8IdCXdjS/yGShuz1VwvuFHlhlI7kTpLZkWQ67a6Jv9WJnIZAYgn0GA7+Z7IokRfKqXxflXKHsaKMtRWwF6Mhv59H3gVCHfoAbhDLZ9kJY6tYF4LpQD5DNYA3qBmbRwiwV8Kkhe5APkX5FJOHQJgL5EOR1iAXXZbCRxFGE0E30jHNrsFXBPEJssQ6dHy+ZjC5uAoh+j28CqugzscjABzNW7xQj/hndF74BlFyMyt3F7ZhxtjIL40Hq+lEaKxi8x57FLc3TbGQAAAABJRU5ErkJggg==\")}#pp-config-btn-fallback:hover,#pp-config-btn-fallback.pp-active{opacity:1}#pp-config-btn-fallback-wrapper #pp-config{position:fixed;background-color:#fff;width:800px;border:3px solid #becad8;border-radius:10px}#pp-config-btn-fallback-wrapper #pp-config .pp-config-tab:first-child:hover{margin:-1px 0px 0px -1px;border-top-left-radius:8px;border:1px solid #becad8;border-right:none;border-bottom:none}#pp-config{line-height:1.2em}#pp-config:not(.pp-show){display:none}#pp-config ul{padding:0px;margin:0px;list-style-type:none}#pp-config li{display:block}#pp-config table{border-collapse:collapse;border-spacing:0px}#pp-config table td{padding:0px 0.2em}#pp-config label{cursor:pointer}#pp-config #pp-config-tabbar{border-bottom:2px solid #becad8}#pp-config #pp-config-tabbar label{cursor:pointer}#pp-config #pp-config-tabbar .pp-config-tab{display:inline-block;padding:0.4em 0.6em;font-weight:bold}#pp-config #pp-config-tabbar .pp-config-tab:hover{background-color:#d6dee5}#pp-config #pp-config-tabbar .pp-config-tab.pp-active{background-color:#becad8}#pp-config #pp-config-close-button{padding:0.4em}#pp-config #pp-config-content-wrapper{padding:0.4em;overflow-x:visible;overflow-y:auto}#pp-config .pp-config-content{display:none}#pp-config .pp-config-content.pp-active{display:block}#pp-config .pp-config-content tr:nth-child(even):not(.pp-config-subsection-title) td{background-color:#f2f4f6}#pp-config .pp-config-content dl{margin-top:1.2em}#pp-config .pp-config-content dl dt{margin-top:0.4em}#pp-config .pp-config-content dl dd{margin-left:1em}#pp-config .pp-config-content .pp-config-subsection-title div{font-weight:bold;border-bottom:1px solid #becad8;border-left:0.8em solid #becad8;margin-top:1.6em;margin-bottom:0.4em;padding:0.3em 0.2em}#pp-config .pp-config-content-header{border-bottom:1px solid #ccc;padding-bottom:0.1em;margin-bottom:0.2em}#pp-config #pp-config-bookmark-content textarea{width:100%;height:20em;box-sizing:border-box;margin-bottom:1em}#pp-config #pp-config-bookmark-tag-aliases{width:100%}#pp-config #pp-config-bookmark-tag-aliases td:last-child{width:100%}#pp-config #pp-config-bookmark-tag-aliases td:last-child input{width:100%;box-sizing:border-box}#pp-config #pp-config-importexport-toolbar{margin-bottom:0.2em}#pp-config #pp-config-importexport-toolbar button{margin-right:0.2em}#pp-config #pp-config-importexport-content textarea{width:100%;height:30em;box-sizing:border-box}#pp-config #pp-config-langbar{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}#pp-config #pp-config-langbar button{margin-right:0.2em;padding:0.2em 0.4em}#pp-config #pp-config-escaper{margin-bottom:0.2em;padding-bottom:0.2em;border-bottom:1px solid #aaa}#pp-config #pp-config-escaper input{display:block;width:100%;box-sizing:border-box}#pp-config #pp-config-debug-content td{border:1px solid #aaa;padding:0.1em 0.2em}#pp-config input.pp-active{background-color:#ffc}.pp-config-regexp-editor .pp-dialog-content{padding:0.2em}.pp-config-regexp-editor textarea{width:100%;height:10em;margin:0px;box-sizing:border-box}.pp-config-regexp-editor table{white-space:pre}.pp-config-regexp-editor-status{font-weight:bold}.pp-config-regexp-editor-status.pp-yes{color:green}.pp-config-regexp-editor-status.pp-no{color:red}.pp-config-key-editor ul{margin:0.2em}\n";
+_.conf.__schema=[{"items": [{"value": false, "key": "bookmark_hide"}, {"value": 1, "key": "float_tag_list"}, {"value": false, "key": "disable_effect"}, {"value": 0, "key": "fast_user_bookmark"}, {"value": 1, "key": "redirect_jump_page"}, {"value": false, "key": "disable_profile_popup"}, {"hide": true, "value": "", "key": "commform_default_tab"}, {"value": false, "key": "debug"}], "name": "general"}, {"items": [{"value": true, "key": "preload"}, {"value": false, "key": "big_image"}, {"value": true, "key": "rate_confirm"}, {"value": 0.4, "key": "caption_height"}, {"value": 160, "key": "caption_minheight"}, {"value": 0.9, "key": "caption_opacity"}, {"value": false, "key": "remove_pixpedia"}, {"value": false, "key": "remove_pixiv_comic"}, {"value": false, "key": "remove_booth"}, {"value": true, "key": "rate_key"}, {"value": "", "key": "font_size"}, {"value": 0, "key": "auto_manga"}, {"value": "^http://www\\.pixiv\\.net/(?:(?:bookmark_new_illust|member_illust|ranking|bookmark)\\.php|$)", "key": "auto_manga_regexp"}, {"value": true, "key": "manga_viewed_flags"}, {"value": 0, "key": "reverse"}, {"value": "^http://www\\.pixiv\\.net/(?:bookmark_new_illust|member_illust)\\.php", "key": "reverse_regexp"}, {"value": 0.3, "key": "overlay_control"}, {"value": 32, "key": "scroll_height"}, {"value": 0.8, "key": "scroll_height_page"}, {"value": true, "key": "author_status_icon"}, {"hide": true, "value": false, "key": "show_comment_form"}, {"value": false, "key": "hide_stamp_comments"}, {"value": 2, "key": "mouse_wheel"}, {"value": 1, "key": "mouse_wheel_delta"}, {"value": 4, "key": "fit_short_threshold"}, {"value": true, "key": "mark_visited"}, {"value": 2, "key": "manga_page_action"}, {"value": 0, "key": "minimum_size"}], "name": "popup"}, {"items": [{"value": "", "key": "layout_history"}], "name": "mypage"}, {"items": [{"value": "Backspace,a,k", "key": "popup_prev"}, {"value": "Left", "key": "popup_prev_direction"}, {"value": "Space,j", "key": "popup_next"}, {"value": "Right", "key": "popup_next_direction"}, {"value": "Home", "key": "popup_first"}, {"value": "End", "key": "popup_last"}, {"value": "Escape,q", "key": "popup_close"}, {"value": "Up", "key": "popup_caption_scroll_up"}, {"value": "Down", "key": "popup_caption_scroll_down"}, {"value": "c", "key": "popup_caption_toggle"}, {"value": "Shift+c", "key": "popup_comment_toggle"}, {"value": "Up", "key": "popup_illust_scroll_up"}, {"value": "Down", "key": "popup_illust_scroll_down"}, {"value": "Left", "key": "popup_illust_scroll_left"}, {"value": "Right", "key": "popup_illust_scroll_right"}, {"value": "Home", "key": "popup_illust_scroll_top"}, {"value": "End", "key": "popup_illust_scroll_bottom"}, {"value": "PageUp", "key": "popup_illust_page_up"}, {"value": "PageDown", "key": "popup_illust_page_down"}, {"value": "w", "key": "popup_switch_resize_mode"}, {"value": "Shift+f,Shift+o", "key": "popup_open"}, {"value": "f,o", "key": "popup_open_big"}, {"value": "e", "key": "popup_open_profile"}, {"value": "r", "key": "popup_open_illust"}, {"value": "t", "key": "popup_open_bookmark"}, {"value": "y", "key": "popup_open_staccfeed"}, {"value": "Shift+r", "key": "popup_open_response"}, {"value": "g", "key": "popup_reload"}, {"value": "Shift+b", "key": "popup_open_bookmark_detail"}, {"value": "Shift+v", "key": "popup_open_manga_thumbnail"}, {"value": "Shift+0,Shift+~", "key": "popup_rate01"}, {"value": "Shift+9,Shift+)", "key": "popup_rate02"}, {"value": "Shift+8,Shift+(", "key": "popup_rate03"}, {"value": "Shift+7,Shift+'", "key": "popup_rate04"}, {"value": "Shift+6,Shift+&", "key": "popup_rate05"}, {"value": "Shift+5,Shift+%", "key": "popup_rate06"}, {"value": "Shift+4,Shift+$", "key": "popup_rate07"}, {"value": "Shift+3,Shift+#", "key": "popup_rate08"}, {"value": "Shift+2,Shift+\"", "key": "popup_rate09"}, {"value": "Shift+1,Shift+!", "key": "popup_rate10"}, {"value": "m", "key": "popup_ugoira_play_pause"}, {"value": "comma", "key": "popup_ugoira_prev_frame"}, {"value": ".", "key": "popup_ugoira_next_frame"}, {"value": "b", "key": "popup_bookmark_start", "subsection": "bookmark"}, {"value": "Enter,Space", "key": "popup_bookmark_submit", "subsection": "bookmark"}, {"value": "Escape", "key": "popup_bookmark_end", "subsection": "bookmark"}, {"value": "v", "key": "popup_manga_start", "subsection": "manga"}, {"value": "Shift+f", "key": "popup_manga_open_page", "subsection": "manga"}, {"value": "v,Escape", "key": "popup_manga_end", "subsection": "manga"}, {"value": "d", "key": "popup_qrate_start", "subsection": "question"}, {"value": "Up", "key": "popup_qrate_select_prev", "subsection": "question"}, {"value": "Down", "key": "popup_qrate_select_next", "subsection": "question"}, {"value": "Enter,Space", "key": "popup_qrate_submit", "subsection": "question"}, {"value": "Escape,d", "key": "popup_qrate_end", "subsection": "question"}, {"value": "", "key": "popup_tag_edit_start", "subsection": "tagedit"}, {"value": "Escape", "key": "popup_tag_edit_end", "subsection": "tagedit"}], "name": "key"}, {"items": [{"value": "", "key": "tag_order"}, {"value": "", "key": "tag_aliases"}], "name": "bookmark"}];
+_.i18n={"en": {"ugoira_prev_frame": "Previous frame (#{key})", "mypage_layout_history_help": "Click list item to restore layout.", "delete_comment_confirm": "Delete comment?", "search_wlt": "Min width <=", "cancel": "Cancel", "conf": {"bookmark": {"tag_order": "Reorder tags. 1 tag per line.\n-: Separator\n*: Others", "tag_aliases": "Tag association. Used for auto input. Separate by space."}, "popup": {"rate_key": "Enable rate keys", "caption_minheight": "Caption minimum height (px)", "author_status_icon": "Show icon on profile image", "overlay_control": "Click area width (0:disable; x<1:ratio to popup width; x>1:pixel)", "scroll_height": "Scroll step (px)", "auto_manga_regexp": "Regular expression for \"Switch manga...\" setting.", "caption_opacity": "Caption opacity", "remove_pixpedia": "Remove pixiv encyclopedia icon", "mark_visited": "Mark link as visited", "big_image": "Use original size image", "show_comment_form": "Show comment form by default", "hide_stamp_comments": "Hide stamp comments", "scroll_height_page": "Scroll step for PageUp/PageDown", "fit_short_threshold": "Aspect ratio threshold for switch resize mode (0:Disable)", "remove_pixiv_comic": "Remove pixiv comic icon", "mouse_wheel": {"hint": ["Do nothing", "Move to prev/next illust", "Move to prev/next illust (respect \"reverse\" setting)"], "desc": "Mouse wheel operation"}, "preload": "Enable preloading", "manga_page_action": {"hint": ["Do nothing", "Open popup", "Open popup in manga mode"], "desc": "Open popup in manga page"}, "minimum_size": "Minimum image size (enlarge images which is smaller than this value; 0:disable; x<1:ratio to window size; x>1:pixel)", "mouse_wheel_delta": "Threshold for mouse wheel setting (if set negative value, invert direction)", "auto_manga": {"hint": ["Disable", "Enable", "Specify pages by regexp"], "desc": "Switch manga-mode automatically"}, "rate_confirm": "Show confirmation dialog when rating", "reverse_regexp": "Regular expression for \"Reverse...\" setting.", "manga_viewed_flags": "Do not start manga mode automatically if you have already read it", "font_size": "Font size (e.g. 10px)", "reverse": {"hint": ["Disable", "Enable", "Specify pages by regexp"], "desc": "Reverse move direction"}, "remove_booth": "Remove booth icon", "caption_height": "Caption height (ratio)"}, "key": {"popup_open_profile": "Open profile", "popup_caption_scroll_up": "Scroll caption up", "popup_prev_direction": "Move to previous illust (ignore \"reverse\" setting)", "popup_rate10": "Rate (10pt)", "popup_rate09": "Rate (9pt)", "popup_ugoira_next_frame": "[Ugoira] Show next frame", "popup_open_big": "Open image", "popup_bookmark_submit": "Send", "popup_tag_edit_start": "Start tag edit mode", "popup_manga_end": "End manga mode", "popup_switch_resize_mode": "Switch resize mode", "popup_illust_scroll_up": "Scroll illust up", "popup_illust_scroll_down": "Scroll illust down", "popup_illust_scroll_bottom": "Scroll illust to bottom", "popup_open_manga_thumbnail": "Open manga thumbnail page", "popup_rate06": "Rate (6pt)", "popup_qrate_select_next": "Select next item", "popup_ugoira_play_pause": "[Ugoira] Play/Pause", "popup_qrate_start": "Start questionnaire mode", "popup_manga_open_page": "Open manga page", "popup_qrate_submit": "Send", "popup_rate03": "Rate (3pt)", "popup_open": "Open illust page", "popup_illust_scroll_right": "Scroll illust right", "popup_qrate_select_prev": "Select previous item", "popup_next": "Move to next illust", "popup_illust_scroll_top": "Scroll illust to top", "popup_first": "Move to first illust", "popup_ugoira_prev_frame": "[Ugoira] Show previous frame", "popup_prev": "Move to previous illust", "popup_open_illust": "Open works", "popup_rate08": "Rate (8pt)", "popup_bookmark_start": "Start bookmark mode", "popup_tag_edit_end": "End tag edit mode", "popup_reload": "Reload", "popup_illust_page_up": "Scroll illust up (PageUp)", "popup_rate02": "Rate (2pt)", "popup_rate01": "Rate (1pt)", "popup_rate07": "Rate (7pt)", "popup_illust_page_down": "Scroll illust down (PageDown)", "popup_rate05": "Rate (5pt)", "popup_rate04": "Rate (4pt)", "popup_caption_toggle": "Toggle caption display", "popup_caption_scroll_down": "Scroll caption down", "popup_next_direction": "Move to next illust (ignore \"reverse\" setting)", "popup_bookmark_end": "End bookmark mode", "popup_comment_toggle": "Toggle comment", "popup_open_staccfeed": "Open feed", "popup_open_bookmark_detail": "Open bookmark information page", "popup_open_bookmark": "Open bookmark", "popup_last": "Move to last illust", "popup_qrate_end": "End questionnaire mode", "popup_close": "Close", "popup_illust_scroll_left": "Scroll illust left", "popup_manga_start": "Start manga mode", "popup_open_response": "Open image response"}, "general": {"disable_profile_popup": "Disable profile card popup", "commform_default_tab": {"hint": ["comment", "stamp"], "desc": "Default tab of comment form"}, "fast_user_bookmark": {"hint": ["Disable", "Enable (public)", "Enable (private)"], "desc": "Follow user by one-click"}, "redirect_jump_page": {"hint": ["Disable", "Open target", "Modify link"], "desc": "Redirect jump.php"}, "float_tag_list": {"hint": ["Disable", "Enable"], "desc": "Enable float view for tag list"}, "debug": "Debug mode", "bookmark_hide": "Make private bookmark by default", "disable_effect": "Disable UI animation"}}, "importing": "Importing", "ugoira_how_to_use": "How to use?", "search_hgt": "<= Max height", "associate_tags": "Associate tags", "pref": {"key_question": "Tag edit mode", "releasenote": "Release note", "general": "General", "export": "Export", "about_license": "License", "close": "Close", "key_manga": "Manga mode", "importexport": "Import/Export", "bookmark": "Bookmark tag", "regex_valid": "Valid", "add": "Add", "import": "Import", "popup": "Popup", "key_bookmark": "Bookmark mode", "about_web": "Web", "key": "Key", "about_email": "Mail", "about": "About", "changelog": "Changelog", "default": "Default", "debug": "Debug", "regex_invalid": "Invalid"}, "author_bookmarks": "Bookmarks", "search_wgt": "<= Max width", "commform": {"tab_stamp": "Stickers", "comment_placeholder": "Write a comment...", "tab_comment": "Comments", "btn_send": "Send", "btn_emoji": "Emoji"}, "ugoira_next_frame": "Next frame (#{key})", "search_hlt": "Min height <=", "mypage_layout_history": "Layout history", "ugoira_generate_apng": "Generate APNG", "ugoira_download_zip": "Download zip", "mypage_layout_history_empty": "Layout history is empty", "author_staccfeed": "Feed", "ugoira_play_pause": "Play/Pause (#{key})", "rate_confirm": "Rate it?\n$pointpt", "__name__": "en", "sending": "Sending", "apng": {"title": "APNG generator", "how2save": "To save image, right click and select \"Save Image As\".", "download": "Download", "warning": "WARNING: This may take a long time and uses much of memory.", "preparing": "Preparing...", "cancel": "Cancel", "close": "Close", "generate": "Generate"}, "ugoira_generate_timecode": "Generate timecode", "delete_tag_confirm": "Really remove?\nYour member id will be notified to the author.", "dialog": {"cancel": "Cancel", "close": "Close", "yes": "Yes", "add": "Add", "no": "No"}, "author_works": "Works"}, "ja": {"ugoira_prev_frame": "\u30b3\u30de\u623b\u3057 (#{key})", "mypage_layout_history_help": "\u30ea\u30b9\u30c8\u3092\u30af\u30ea\u30c3\u30af\u3059\u308b\u3068\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u5fa9\u5143\u3057\u307e\u3059\u3002", "delete_comment_confirm": "\u30b3\u30e1\u30f3\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f", "search_wlt": "\u5e45\u306e\u6700\u5c0f\u5024 <=", "cancel": "\u4e2d\u6b62", "conf": {"bookmark": {"tag_order": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3068\u30b0\u30eb\u30fc\u30d4\u30f3\u30b0\u30021\u884c1\u30bf\u30b0\u3002\n-: \u30bb\u30d1\u30ec\u30fc\u30bf\n*: \u6b8b\u308a\u5168\u90e8", "tag_aliases": "\u30bf\u30b0\u306e\u95a2\u9023\u4ed8\u3051\u3002\u81ea\u52d5\u5165\u529b\u306b\u4f7f\u7528\u3059\u308b\u3002\u30b9\u30da\u30fc\u30b9\u533a\u5207\u308a\u3002"}, "popup": {"rate_key": "\u8a55\u4fa1\u306e\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b", "caption_minheight": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u306e\u6700\u5c0f\u5024(px)", "author_status_icon": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3\u3092\u8868\u793a\u3059\u308b", "overlay_control": "\u79fb\u52d5\u77e2\u5370\u306e\u5e45(0:\u4f7f\u7528\u3057\u306a\u3044; x<1:\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u5e45\u306b\u5bfe\u3059\u308b\u5272\u5408; x>1:\u30d4\u30af\u30bb\u30eb)", "scroll_height": "\u30b9\u30af\u30ed\u30fc\u30eb\u5e45(px)", "auto_manga_regexp": "\"\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b\"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe", "caption_opacity": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u4e0d\u900f\u660e\u5ea6", "remove_pixpedia": "pixiv\u767e\u79d1\u4e8b\u5178\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "mark_visited": "\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b", "big_image": "\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b", "show_comment_form": "\u30b3\u30e1\u30f3\u30c8\u306e\u6295\u7a3f\u30d5\u30a9\u30fc\u30e0\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u3067\u8868\u793a\u3059\u308b", "hide_stamp_comments": "\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b", "scroll_height_page": "PageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45", "fit_short_threshold": "\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b\u7e26\u6a2a\u6bd4\u306e\u95be\u5024(0:\u7121\u52b9)", "remove_pixiv_comic": "pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "mouse_wheel": {"hint": ["\u4f55\u3082\u3057\u306a\u3044", "\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "\u524d/\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\u53cd\u8ee2\u306e\u8a2d\u5b9a\u306b\u5f93\u3046)"], "desc": "\u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c"}, "preload": "\u5148\u8aad\u307f\u3092\u4f7f\u7528\u3059\u308b", "manga_page_action": {"hint": ["\u4f55\u3082\u3057\u306a\u3044", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u958b\u304f"], "desc": "\u6f2b\u753b\u4f5c\u54c1\u306e\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f"}, "minimum_size": "\u6700\u5c0f\u30b5\u30a4\u30ba (\u3053\u306e\u5024\u3088\u308a\u5c0f\u3055\u3044\u753b\u50cf\u3092\u62e1\u5927\u3057\u3066\u8868\u793a; 0:\u7121\u52b9; x<1:\u753b\u9762\u30b5\u30a4\u30ba\u306b\u5bfe\u3059\u308b\u5272\u5408; x>1:\u30d4\u30af\u30bb\u30eb)", "mouse_wheel_delta": "\u30db\u30a4\u30fc\u30eb\u8a2d\u5b9a\u306e\u95be\u5024(\u8ca0\u6570\u306e\u5834\u5408\u306f\u65b9\u5411\u3092\u53cd\u8ee2)", "auto_manga": {"hint": ["\u7121\u52b9", "\u6709\u52b9", "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"], "desc": "\u81ea\u52d5\u7684\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3059\u308b"}, "rate_confirm": "\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b", "reverse_regexp": "\"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b\"\u3067\u4f7f\u7528\u3059\u308b\u6b63\u898f\u8868\u73fe", "manga_viewed_flags": "\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044", "font_size": "\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(\u4f8b: 10px)", "reverse": {"hint": ["\u7121\u52b9", "\u6709\u52b9", "\u30da\u30fc\u30b8\u3092\u6b63\u898f\u8868\u73fe\u3067\u6307\u5b9a"], "desc": "\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b"}, "remove_booth": "BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b", "caption_height": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055(\u7387)"}, "key": {"popup_open_profile": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u958b\u304f", "popup_caption_scroll_up": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_prev_direction": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\"\u53cd\u5bfe\u306b\u3059\u308b\"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)", "popup_rate10": "\u8a55\u4fa1\u3059\u308b (10\u70b9)", "popup_rate09": "\u8a55\u4fa1\u3059\u308b (9\u70b9)", "popup_ugoira_next_frame": "[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u9001\u308a", "popup_open_big": "\u30a4\u30e9\u30b9\u30c8\u753b\u50cf\u3092\u958b\u304f", "popup_bookmark_submit": "\u9001\u4fe1", "popup_tag_edit_start": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb", "popup_manga_end": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_switch_resize_mode": "\u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u3092\u5207\u308a\u66ff\u3048\u308b", "popup_illust_scroll_up": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_illust_scroll_down": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_illust_scroll_bottom": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_open_manga_thumbnail": "\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_rate06": "\u8a55\u4fa1\u3059\u308b (6\u70b9)", "popup_qrate_select_next": "\u6b21\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "popup_ugoira_play_pause": "[\u3046\u3054\u30a4\u30e9] \u518d\u751f/\u4e00\u6642\u505c\u6b62", "popup_qrate_start": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u958b\u59cb", "popup_manga_open_page": "\u8868\u793a\u3057\u3066\u3044\u308b\u30da\u30fc\u30b8\u3092\u958b\u304f\u3002", "popup_qrate_submit": "\u9001\u4fe1", "popup_rate03": "\u8a55\u4fa1\u3059\u308b (3\u70b9)", "popup_open": "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_illust_scroll_right": "\u30a4\u30e9\u30b9\u30c8\u3092\u53f3\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_qrate_select_prev": "\u524d\u306e\u9078\u629e\u80a2\u3092\u9078\u629e", "popup_next": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_illust_scroll_top": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u7aef\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_first": "\u6700\u521d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_ugoira_prev_frame": "[\u3046\u3054\u30a4\u30e9] \u30b3\u30de\u623b\u3057", "popup_prev": "\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_open_illust": "\u4f5c\u54c1\u4e00\u89a7\u3092\u958b\u304f", "popup_rate08": "\u8a55\u4fa1\u3059\u308b (8\u70b9)", "popup_bookmark_start": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u958b\u59cb", "popup_tag_edit_end": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_reload": "\u30ea\u30ed\u30fc\u30c9", "popup_illust_page_up": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageUp)", "popup_rate02": "\u8a55\u4fa1\u3059\u308b (2\u70b9)", "popup_rate01": "\u8a55\u4fa1\u3059\u308b (1\u70b9)", "popup_rate07": "\u8a55\u4fa1\u3059\u308b (7\u70b9)", "popup_illust_page_down": "\u30a4\u30e9\u30b9\u30c8\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b (PageDown)", "popup_rate05": "\u8a55\u4fa1\u3059\u308b (5\u70b9)", "popup_rate04": "\u8a55\u4fa1\u3059\u308b (4\u70b9)", "popup_caption_toggle": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u5e38\u6642\u8868\u793a/\u81ea\u52d5\u8868\u793a\u3092\u5207\u308a\u66ff\u3048\u308b", "popup_caption_scroll_down": "\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u4e0b\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_next_direction": "\u6b21\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5(\"\u53cd\u5bfe\u306b\u3059\u308b\"\u30aa\u30d7\u30b7\u30e7\u30f3\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044)", "popup_bookmark_end": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_comment_toggle": "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u3092\u5207\u308a\u66ff\u3048", "popup_open_staccfeed": "\u30d5\u30a3\u30fc\u30c9\u3092\u958b\u304f", "popup_open_bookmark_detail": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u8a73\u7d30\u30da\u30fc\u30b8\u3092\u958b\u304f", "popup_open_bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3092\u958b\u304f", "popup_last": "\u6700\u5f8c\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5", "popup_qrate_end": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9\u7d42\u4e86", "popup_close": "\u9589\u3058\u308b", "popup_illust_scroll_left": "\u30a4\u30e9\u30b9\u30c8\u3092\u5de6\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b", "popup_manga_start": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u958b\u59cb", "popup_open_response": "\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u3092\u958b\u304f"}, "general": {"disable_profile_popup": "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b", "commform_default_tab": {"hint": ["comment", "stamp"], "desc": "\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u30bf\u30d6"}, "fast_user_bookmark": {"hint": ["\u7121\u52b9", "\u6709\u52b9(\u516c\u958b)", "\u6709\u52b9(\u975e\u516c\u958b)"], "desc": "\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u30e6\u30fc\u30b6\u30fc\u3092\u30d5\u30a9\u30ed\u30fc\u3059\u308b"}, "redirect_jump_page": {"hint": ["\u7121\u52b9", "\u30da\u30fc\u30b8\u3092\u958b\u304f", "\u30ea\u30f3\u30af\u3092\u5909\u66f4"], "desc": "jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b"}, "float_tag_list": {"hint": ["\u7121\u52b9", "\u6709\u52b9"], "desc": "\u30bf\u30b0\u30ea\u30b9\u30c8\u3092\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u3059\u308b"}, "debug": "\u30c7\u30d0\u30c3\u30b0\u30e2\u30fc\u30c9", "bookmark_hide": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u975e\u516c\u958b\u3092\u30c7\u30d5\u30a9\u30eb\u30c8\u306b\u3059\u308b", "disable_effect": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u306a\u3069\u306e\u30a8\u30d5\u30a7\u30af\u30c8\u3092\u7121\u52b9\u5316\u3059\u308b"}}, "importing": "\u30a4\u30f3\u30dd\u30fc\u30c8\u4e2d", "ugoira_how_to_use": "\u4f7f\u3044\u65b9", "search_hgt": "<= \u9ad8\u3055\u306e\u6700\u5927\u5024", "associate_tags": "\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308b", "pref": {"key_question": "\u30a2\u30f3\u30b1\u30fc\u30c8\u30e2\u30fc\u30c9", "releasenote": "\u30ea\u30ea\u30fc\u30b9\u30ce\u30fc\u30c8", "general": "\u5168\u822c", "export": "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8", "about_license": "\u30e9\u30a4\u30bb\u30f3\u30b9", "close": "\u9589\u3058\u308b", "key_manga": "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9", "importexport": "\u30a4\u30f3\u30dd\u30fc\u30c8/\u30a8\u30af\u30b9\u30dd\u30fc\u30c8", "bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30bf\u30b0", "regex_valid": "\u6709\u52b9", "add": "\u8ffd\u52a0", "key_tagedit": "\u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9", "import": "\u30a4\u30f3\u30dd\u30fc\u30c8", "popup": "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7", "key_bookmark": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9", "about_web": "\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8", "key": "\u30ad\u30fc", "about_email": "\u30e1\u30fc\u30eb", "about": "\u60c5\u5831", "changelog": "\u66f4\u65b0\u5c65\u6b74", "default": "\u30c7\u30d5\u30a9\u30eb\u30c8", "debug": "\u30c7\u30d0\u30c3\u30b0", "regex_invalid": "\u4e0d\u6b63"}, "author_bookmarks": "\u30d6\u30c3\u30af\u30de\u30fc\u30af", "search_wgt": "<= \u5e45\u306e\u6700\u5927\u5024", "commform": {"tab_stamp": "\u30b9\u30bf\u30f3\u30d7", "comment_placeholder": "\u30b3\u30e1\u30f3\u30c8\u3059\u308b...", "tab_comment": "\u30b3\u30e1\u30f3\u30c8", "btn_send": "\u9001\u4fe1", "btn_emoji": "\u7d75\u6587\u5b57"}, "ugoira_next_frame": "\u30b3\u30de\u9001\u308a (#{key})", "search_hlt": "\u9ad8\u3055\u306e\u6700\u5c0f\u5024 <=", "mypage_layout_history": "\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74", "ugoira_generate_apng": "APNG\u3092\u751f\u6210", "ugoira_download_zip": "zip\u3092\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9", "mypage_layout_history_empty": "\u5c65\u6b74\u304c\u7a7a\u3067\u3059", "author_staccfeed": "\u30d5\u30a3\u30fc\u30c9", "ugoira_play_pause": "\u518d\u751f/\u4e00\u6642\u505c\u6b62 (#{key})", "rate_confirm": "\u8a55\u4fa1\u3057\u307e\u3059\u304b\uff1f\n$point\u70b9", "__name__": "ja", "sending": "\u9001\u4fe1\u4e2d", "apng": {"title": "APNG\u30b8\u30a7\u30cd\u30ec\u30fc\u30bf", "how2save": "\u753b\u50cf\u3092\u4fdd\u5b58\u3059\u308b\u306b\u306f\u53f3\u30af\u30ea\u30c3\u30af\u3057\u3066\u300c\u753b\u50cf\u3092\u4fdd\u5b58\u300d\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002", "download": "\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9", "warning": "\u6ce8\u610f: \u9577\u3044\u6642\u9593\u304c\u304b\u304b\u308a\u30e1\u30e2\u30ea\u3092\u305f\u304f\u3055\u3093\u6d88\u8cbb\u3059\u308b\u3053\u3068\u304c\u3042\u308a\u307e\u3059\u3002", "preparing": "\u6e96\u5099\u4e2d...", "cancel": "\u30ad\u30e3\u30f3\u30bb\u30eb", "close": "\u9589\u3058\u308b", "generate": "\u751f\u6210"}, "ugoira_generate_timecode": "\u30bf\u30a4\u30e0\u30b3\u30fc\u30c9\u3092\u751f\u6210", "delete_tag_confirm": "\u3053\u306e\u30bf\u30b0\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f\n*\u6295\u7a3f\u8005\u306b\u30e6\u30fc\u30b6\u30fcID\u304c\u901a\u77e5\u3055\u308c\u307e\u3059\u3002", "dialog": {"cancel": "\u30ad\u30e3\u30f3\u30bb\u30eb", "close": "\u9589\u3058\u308b", "yes": "\u306f\u3044", "add": "\u8ffd\u52a0", "no": "\u3044\u3044\u3048"}, "author_works": "\u4f5c\u54c1"}};
 _.extend(_.i18n, {
   setup: function() {
     var lng;
@@ -7384,7 +7837,7 @@ _.extend(_.i18n, {
     return msg.replace('#{key}', {'comma': ',', 'plus': '+'}[key] || key);
   }
 });
-_.changelog=[{"date": "2017/01/25", "changes_i18n": {"en": ["[Add] Add an option to specify minimum size of popup.", "[Add] Re-implement 'Disable profile card popup' option.", "[Fix] Fix an issue that thumbnail-menu opens popup.", "[Fix] Fix an issue that pixplus never stops loading when opening user's own works."], "ja": ["[\u8ffd\u52a0] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u6700\u5c0f\u30b5\u30a4\u30ba\u3092\u6307\u5b9a\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u518d\u5b9f\u88c5\u3002", "[\u4fee\u6b63] \u30b5\u30e0\u30cd\u30a4\u30eb\u30e1\u30cb\u30e5\u30fc\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u3082\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u3044\u3066\u3057\u307e\u3046\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30e6\u30fc\u30b6\u30fc\u81ea\u8eab\u306b\u3088\u308b\u4f5c\u54c1\u3092\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u958b\u3051\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.17.0", "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0"}, {"date": "2017/01/22", "changes_i18n": {"en": ["[Remove] Remove 'Disable profile card popup' option.", "[Remove] Remove posting comment feature.", "[Fix] Rating feature was not working.", "[Fix] Bookmark mode was not working.", "[Fix] Tag edit mode was not working.", "[Fix] Fix support of polling feature."], "ja": ["[\u524a\u9664] \u300c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u30b3\u30e1\u30f3\u30c8\u6295\u7a3f\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u8a55\u4fa1\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30f3\u30b1\u30fc\u30c8\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.16.0", "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0"}, {"date": "2016/09/17", "changes_i18n": {"en": ["[Fix][Opera12] Fix the behavior of arrow buttons on Opera12."], "ja": ["[\u4fee\u6b63][Opera12] Opera12\u3067\u77e2\u5370\u30dc\u30bf\u30f3\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "1.15.2", "releasenote": "http://crckyl.hatenablog.com/entry/2016/09/17/pixplus_1.15.2"}, {"date": "2016/08/26", "changes_i18n": {"en": ["[Fix] Preference dialog on manga page was broken.", "[Fix] 'Remove pixiv comic icon' option was broken."], "ja": ["[\u4fee\u6b63] \u30de\u30f3\u30ac\u30da\u30fc\u30b8\u5185\u3067\u8a2d\u5b9a\u30c0\u30a4\u30a2\u30ed\u30b0\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300cpixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.15.1", "releasenote": "http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1"}, {"date": "2015/08/02", "changes_i18n": {"en": ["[Add] Added an option to disable profile card popup (in the 'Genral' tab).", "[Fix] Author icon badges were broken.", "[Fix] Rarely manga mode ends unexpectedly.", "[Fix] Improve performance."], "ja": ["[\u8ffd\u52a0] \u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0(\u5168\u822c\u30bf\u30d6)\u3002", "[\u4fee\u6b63] \u4f5c\u8005\u30a2\u30a4\u30b3\u30f3\u306e\u30d0\u30c3\u30b8\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u7a00\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u304c\u52dd\u624b\u306b\u7d42\u4e86\u3059\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d1\u30d5\u30a9\u30fc\u30de\u30f3\u30b9\u3092\u6539\u5584\u3002"]}, "version": "1.15.0", "releasenote": "http://crckyl.hatenablog.com/entry/2015/08/02/pixplus_1.15.0"}, {"date": "2015/05/28", "changes_i18n": {"en": ["[Add] Add APNG generator.", "[Add] Support for pixiv spotlight.", "[Fix] Start using MutationObserver. (MutationEvents warnings disappeared on Firefox)", "[Change] Improve page layout of Book-format works.", "[Change] Improve comment area layout. (make white spaces narrow)", "[Change][Opera12] Improve Presto Opera support."], "ja": ["[\u8ffd\u52a0] APNG\u30b8\u30a7\u30cd\u30ec\u30fc\u30bf\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] pixiv\u30b9\u30dd\u30c3\u30c8\u30e9\u30a4\u30c8\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u53ef\u80fd\u306a\u3089MutationObserver\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002(Firefox\u3067\u8b66\u544a\u304c\u51fa\u306a\u304f\u306a\u3063\u305f)", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30b3\u30e1\u30f3\u30c8\u6b04\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002(\u4f59\u767d\u3092\u72ed\u304f)", "[\u5909\u66f4][Opera12] Presto Opera\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002"]}, "version": "1.14.0", "releasenote": "http://crckyl.hatenablog.com/entry/2015/05/28/pixplus_1.14.0"}, {"date": "2015/01/01", "changes_i18n": {"en": ["[Fix] The \"Use original size image\" option was not working for vertically/horizontally long illust works.", "[Fix] The \"Use original size image\" option was not working for single page manga works."], "ja": ["[\u4fee\u6b63] \u975e\u5e38\u306b\u7e26\u30fb\u6a2a\u306b\u9577\u3044\u30a4\u30e9\u30b9\u30c8\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u5358\u30da\u30fc\u30b8\u306e\u30de\u30f3\u30ac\u4f5c\u54c1\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.4", "releasenote": "http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4"}, {"date": "2014/12/20", "changes_i18n": {"en": ["[Fix] Popup window reports an error for old works.", "[Fix] \"Use original size image\" option was not working."], "ja": ["[\u4fee\u6b63] \u53e4\u3044\u4f5c\u54c1\u3067\u30a8\u30e9\u30fc\u306b\u306a\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.3", "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3"}, {"date": "2014/12/14", "changes_i18n": {"en": ["[Fix] Fix comment mode (Shift+c) was not working."], "ja": ["[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30e2\u30fc\u30c9(Shift+c)\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.2", "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2"}, {"date": "2014/10/19", "changes_i18n": {"en": ["[Fix] Fix popup was broken on Safari 5/6."], "ja": ["[\u4fee\u6b63] Safari 5/6\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.1", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1"}, {"date": "2014/10/10", "changes_i18n": {"en": ["[Change] Change design of frontpage of multi-page works.", "[Fix] Fix \"Use original size image\" setting is inverted for \"book\" type works.", "[Fix] Fix support for staccfeed, area-ranking and mypage (ranking pane).", "[Remove] Remove repost display."], "ja": ["[\u5909\u66f4] \u8907\u6570\u30da\u30fc\u30b8\u4f5c\u54c1\u306e\u6249\u30da\u30fc\u30b8\u3092\u8868\u793a\u3057\u305f\u969b\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u306e\u52d5\u4f5c\u304c\u300c\u30d6\u30c3\u30af\u300d\u306b\u5bfe\u3057\u3066\u9006\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3001\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0\u3001\u30de\u30a4\u30da\u30fc\u30b8(\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30a4\u30f3)\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u524a\u9664] \u300c\u518d\u6295\u7a3f\u300d\u8868\u793a\u3092\u524a\u9664\u3002"]}, "version": "1.13.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/10/pixplus_1.13.0"}, {"date": "2014/10/01", "changes_i18n": {"en": ["[Fix] Support for pixiv's new \"book\" feature."], "ja": ["[\u4fee\u6b63] \u30d6\u30c3\u30af\u5f62\u5f0f\u6a5f\u80fd\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.12.3", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3"}, {"date": "2014/09/27", "changes_i18n": {"en": ["[Fix] Follow pixiv's changes.", "[Fix] Fix bookmark mode was broken.", "[Fix] Fix GreaseMonkey auto update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u3046\u307e\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] GreaseMonkey \u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.12.1", "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/27/pixplus_1.12.1"}, {"date": "2014/09/04", "changes_i18n": {"en": ["[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.", "[Fix] Fix bookmark mode is not working properly.", "[Fix] Fix comment form was broken.", "[Remove] Remove mypage layout history manager."], "ja": ["[\u8ffd\u52a0] \u300c\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044\u300d\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u6b63\u3057\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u524a\u9664] \u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74\u3092\u7ba1\u7406\u3059\u308b\u6a5f\u80fd\u3092\u524a\u9664\u3002"]}, "version": "1.12.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0"}, {"date": "2014/06/28", "changes_i18n": {"en": ["[Add] Add setting to remove BOOTH icon.", "[Fix] Support for Ugoira."], "ja": ["[\u8ffd\u52a0] BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u3046\u3054\u30a4\u30e9\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.11.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0"}, {"date": "2014/05/06", "changes_i18n": {"en": ["[Add] Add \"Open popup in manga page\" option.", "[Fix] Fix key event handling.", "[Fix] Fix \"Hide stamp comments\" option.", "[Fix] Support emoji comment."], "ja": ["[\u8ffd\u52a0] \u300c\u6f2b\u753b\u4f5c\u54c1\u306e\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30ad\u30fc\u30a4\u30d9\u30f3\u30c8\u306e\u51e6\u7406\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u306e\u7d75\u6587\u5b57\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.10.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/05/06/203423"}, {"date": "2014/02/21", "changes_i18n": {"en": ["[Add] Add \"Hide stamp comments\" option.", "[Fix] Fix ranking page support.", "[Fix] Support new comment UI.", "[Fix] Configuration button doesn't appears."], "ja": ["[\u8ffd\u52a0] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002", "[\u4fee\u6b63] \u8a2d\u5b9a\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.9.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/02/21/130255"}, {"date": "2013/08/14", "changes_i18n": {"en": ["[Fix] Fix tag selection in bookmark mode.", "[Fix] Fix \"w\" key reloads illust when in manga mode."], "ja": ["[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\"w\"\u30ad\u30fc\u304c\u4e0a\u624b\u304f\u52d5\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.8.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/08/14/100851"}, {"date": "2013/08/07", "changes_i18n": {"en": ["[Add] Add \"Mark link as visited\" option.", "[Add] Add \"Scroll step for PageUp/PageDown\" option.", "[Add] Support \"Suggested Users\" page.", "[Change] Try to load big image by \"w\" key if \"original size image\" option is disabled.", "[Fix] ESC key is not working.", "[Fix] Shift+V key (open manga thumbnail page) is not working.", "[Fix] Image response support.", "[Fix] Can't view access restricted illust.", "[Fix][Firefox] Some keys are not working on Firefox23."], "ja": ["[\u8ffd\u52a0] \u300c\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300cPageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300c\u304a\u3059\u3059\u3081\u30e6\u30fc\u30b6\u30fc\u300d\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "[\u5909\u66f4] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u7121\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u304d\u3001\"w\"\u30ad\u30fc\u3067\u539f\u5bf8\u306e\u753b\u50cf\u306b\u5207\u308a\u66ff\u3048\u308b\u3088\u3046\u306b\u5909\u66f4\u3002", "[\u4fee\u6b63] ESC\u30ad\u30fc\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] Shift+V\u30ad\u30fc(\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f)\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u306e\u51e6\u7406\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u5236\u9650\u304c\u8a2d\u5b9a\u3055\u308c\u3066\u3044\u308b\u30a4\u30e9\u30b9\u30c8\u3092\u958b\u3051\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] Firefox23\u3067\u30ad\u30fc\u64cd\u4f5c\u3067\u304d\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.8.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/08/07/110857"}, {"date": "2013/06/26", "changes_i18n": {"en": ["[Fix][Chrome] Greasemonkey version(.user.js) is not working on Chrome."], "ja": ["[\u4fee\u6b63][Chrome] Greasemonkey\u7248\u304cChrome\u4e0a\u3067\u52d5\u4f5c\u3057\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.7.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/06/26/120605"}, {"date": "2013/06/25", "changes_i18n": {"en": ["Improve boot performance.", "[Add] Added some features that extends \"Advanced Search\" dialog.", "[Remove] Remove \"Change 'Stacc feed' link\" option.", "[Remove] Remove \"Separator style for tag list\" option.", "[Fix] Fix manga mode always reports error.", "[Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17"], "ja": ["\u8d77\u52d5\u3092\u9ad8\u901f\u5316\u3002", "[\u8ffd\u52a0] \u300c\u691c\u7d22\u30aa\u30d7\u30b7\u30e7\u30f3\u300d\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u3044\u304f\u3064\u304b\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u524a\u9664] \u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148\u3092\u5909\u66f4\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u300c\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] Firefox ESR 17\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.7.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/06/25/110601"}, {"date": "2013/05/26", "changes_i18n": {"en": ["[Fix] Support new bookmark page."], "ja": ["[\u4fee\u6b63] \u65b0\u3057\u3044\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.6.3", "releasenote": "http://crckyl.hatenablog.com/entry/2013/05/25/210523"}, {"date": "2013/05/18", "changes_i18n": {"en": ["[Fix] Fix author status icon.", "[Fix] Bookmark button is always inactive, even though it is bookmarked.", "[Fix] Fix loading error on Firefox21"], "ja": ["[\u4fee\u6b63] \u4f5c\u8005\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u30a2\u30a4\u30b3\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3066\u3082\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u306e\u8868\u793a\u304c\u5909\u5316\u3057\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] Firefox21\u3067\u8aad\u307f\u8fbc\u307f\u30a8\u30e9\u30fc\u304c\u767a\u751f\u3059\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.6.2", "releasenote": "http://crckyl.hatenablog.com/entry/2013/05/18/070549"}, {"date": "2013/03/13", "changes_i18n": {"en": ["[Change] Change \"Click area\" design.", "[Fix] Minor fix for pixiv's change."], "ja": ["[\u5909\u66f4] \u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "1.6.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/03/13/100325"}, {"date": "2013/02/23", "changes_i18n": {"en": ["[Add] Add resize mode settings and key bindings.", "[Fix] Fix author does not shown properly in popup."], "ja": ["[\u8ffd\u52a0] \u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u306e\u8a2d\u5b9a\u3068\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.6.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/23/100201"}, {"date": "2013/02/10", "changes_i18n": {"en": ["[Add] Add top-page layout history manager.", "[Fix][Extension] Fix can't save settings in General section."], "ja": ["[\u8ffd\u52a0] \u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5909\u66f4\u5c65\u6b74\u3092\u7ba1\u7406\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63][\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3] \u300c\u5168\u822c\u300d\u30bb\u30af\u30b7\u30e7\u30f3\u306e\u8a2d\u5b9a\u304c\u4fdd\u5b58\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.5.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/09/210216"}, {"date": "2013/02/02", "changes_i18n": {"en": ["[Add] Add tag association ui to bookmark mode.", "[Fix] Fix author does not shown properly in popup.", "[Fix] Fix comment view in popup.", "[Fix] Fix \"Add favorite user by one-click\" is not working."], "ja": ["[\u8ffd\u52a0] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306b\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308bUI\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30b3\u30e1\u30f3\u30c8\u304c\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046\u8a2d\u5b9a\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.4.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/02/120229"}, {"date": "2012/12/16", "changes_i18n": {"en": ["[Add] Add option to remove pixiv comic icon.", "[Change] Improve bookmark mode layout.", "[Change] Improve key navigation feature in bookmark mode.", "[Change] Improve tag edit mode layout.", "[Fix] Fix tag edit mode is not working.", "[Fix] Can not open preferences in UserJS/Greasemonkey version."], "ja": ["[\u8ffd\u52a0] pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] UserJS/Greasemonkey\u7248\u3067\u8a2d\u5b9a\u753b\u9762\u3092\u958b\u3051\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.3.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/12/16/041240"}, {"date": "2012/12/06", "changes_i18n": {"en": ["[Fix] Fix manga layout is broken.", "[Fix] Fix tag list layout.", "[Fix] Fix fail to load access-restricted illust.", "[Fix] Fix broken tag list with no tags."], "ja": ["[\u4fee\u6b63] \u30de\u30f3\u30ac\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5d29\u308c\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u304c\u5236\u9650\u3055\u308c\u305f\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u306b\u30bf\u30b0\u304c\u767b\u9332\u3055\u308c\u3066\u3044\u306a\u3044\u6642\u306b\u8868\u793a\u304c\u58ca\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.2.2", "releasenote": "http://crckyl.hatenablog.com/entry/2012/12/06/101212"}, {"date": "2012/09/29", "changes_i18n": {"en": ["[Fix] Minor fix for pixiv's update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "1.2.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/09/29/050955"}, {"date": "2012/08/27", "changes_i18n": {"en": ["[Add] Add \"Redirect jump.php\" setting.", "[Fix] Fix control key support for DOM3Events.", "[Fix] Improve auto-manga-mode feature.", "[Fix] Support \"new Staccfeed\" page."], "ja": ["[\u8ffd\u52a0] \"jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b\"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] DOM3Event\u306eControl\u30ad\u30fc\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u81ea\u52d5\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306e\u6319\u52d5\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u300c\u65b0\u3057\u3044\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.2.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/27/100841"}, {"date": "2012/08/14", "changes_i18n": {"en": ["[Fix] Header area hidden by click navigator.", "[Fix] \"Reverse\" setting applied in manga mode.", "[Fix] Can't read old manga if \"Use original size image\" is enabled.", "[Fix] Can't add or modify bookmark in staccfeed page.", "[Change] Change default value for some preferences.", "[Fix][WebKit] Status field layout is broken while loading."], "ja": ["[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b\"\u8a2d\u5b9a\u304c\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306b\u3082\u9069\u7528\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \"\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\"\u304c\u6709\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u53e4\u3044\u30de\u30f3\u30ac\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u8ffd\u52a0\u30fb\u7de8\u96c6\u304c\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63][WebKit] \u30ed\u30fc\u30c9\u4e2d\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u8868\u793a\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5909\u306b\u306a\u308b\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "1.1.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/14/070809"}, {"date": "2012/08/09", "changes_i18n": {"en": ["[Add] Open popup from illust link in caption(author comment).", "[Add] Add tag edit mode.", "[Fix] Don't open popup from image-response list in illust page.", "[Fix] Improve error handling.", "[Fix] Displaying html entity in title and author name.", "[Fix] Can' t move to another illust when in bookmark mode.", "[Fix] Various minor bug fixes.", "[Fix][Firefox] Can't send rating if \"Show confirmation dialog when rating\" option is on.", "[Fix][Firefox] Popup don't works on ranking page."], "ja": ["[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u30ea\u30f3\u30af\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u30bf\u30b0\u7de8\u96c6\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u5185\u306e\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u30bf\u30a4\u30c8\u30eb\u3068\u30e6\u30fc\u30b6\u30fc\u540d\u306bHTML\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u304c\u8868\u793a\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u6642\u306b\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u4ed6\u7d30\u304b\u306a\u30d0\u30b0\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] \u300c\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u6709\u52b9\u306b\u3057\u3066\u3044\u308b\u3068\u8a55\u4fa1\u3067\u304d\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.1.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/09/100814"}, {"date": "2012/08/08", "changes_i18n": {"en": ["Rewrite whole of source code.", "[Add] Add preference to specify minimum height of caption area.", "[Remove] Remove tag edit feature.", "[Remove] Remove some dead preferences.", "[Remove] Remove zoom feature.", "[Fix] Fix multilingual support."], "ja": ["\u5168\u4f53\u7684\u306b\u66f8\u304d\u76f4\u3057\u3002", "[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u306e\u6700\u5c0f\u5024\u3092\u6307\u5b9a\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u524a\u9664] \u30bf\u30b0\u7de8\u96c6\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u6a5f\u80fd\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u30ba\u30fc\u30e0\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u591a\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002"]}, "version": "1.0.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/08/140851"}, {"date": "2012/08/05", "changes_i18n": {"en": ["[Fix] Rating feature don't works."], "ja": ["[\u4fee\u6b63] \u8a55\u4fa1\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.4", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/05/010838"}, {"date": "2012/08/03", "changes_i18n": {"en": ["[Fix] Support pixiv's update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "0.9.3", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/03/120844"}, {"date": "2012/06/29", "changes_i18n": {"en": ["[Fix] If conf.popup.big_image=0, \"S\" key (conf.key.popup_open_big) opens medium image."], "ja": ["[\u4fee\u6b63] conf.popup.big_image=0\u306e\u6642\u3001\"S\"\u30ad\u30fc(conf.key.popup_open_big)\u3067medium\u306e\u753b\u50cf\u3092\u958b\u3044\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.2", "releasenote": "http://crckyl.hatenablog.com/entry/2012/06/29/100651"}, {"date": "2012/06/26", "changes_i18n": {"en": ["[Fix] Corresponds to pixiv's spec changes.", "[Fix] In reposted illust, pixplus shows first version."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u304c\u518d\u6295\u7a3f\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u306b\u53e4\u3044\u753b\u50cf\u3092\u8868\u793a\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/06/25/210620"}, {"date": "2012/02/17", "changes_i18n": {"en": ["[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)", "[Fix] External links in author comment were broken."], "ja": ["[\u8ffd\u52a0] \u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c\u3092\u5909\u66f4\u3059\u308b\u8a2d\u5b9a(conf.popup.mouse_wheel)\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u5916\u90e8\u30ea\u30f3\u30af\u304c\u58ca\u308c\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/02/17/100206"}, {"date": "2012/02/11", "changes": ["\u65b0\u7740\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u306e\u52d5\u4f5c\u3092\u4fee\u6b63\u3002"], "version": "0.8.3", "releasenote": "http://crckyl.hatenablog.com/entry/2012/02/11/150242"}, {"date": "2011/10/27", "changes": ["\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u56de\u7b54\u3059\u308b\u3068\u30a8\u30e9\u30fc\u30c0\u30a4\u30a2\u30ed\u30b0\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8(mypage.php)\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.8.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/10/27/111054"}, {"date": "2011/09/17", "changes": ["pixiv\u306e\u5909\u66f4\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306a\u3069\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "conf.key.popup_manga_open_page\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"], "version": "0.8.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/09/17/010931"}, {"date": "2011/09/03", "changes": ["\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u3067\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002", "AutoPatchWork\u7b49\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002"], "version": "0.8.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/09/03/010924"}, {"date": "2011/08/21", "changes": ["\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002", "\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0(/ranking_area.php)\u306e\u65b0\u30c7\u30b6\u30a4\u30f3\u306b\u5bfe\u5fdc\u3002"], "version": "0.7.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/08/21/110824"}, {"date": "2011/07/24", "changes": ["\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u300c\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9\u300d\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.3", "releasenote": "http://crckyl.hatenablog.com/entry/2011/07/24/100702"}, {"date": "2011/06/26", "changes": ["\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/06/26/010657"}, {"date": "2011/05/21", "changes": ["Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.popup_ranking_log\u3092\u524a\u9664\u3002", "\u65b0\u7740\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/05/21/030509"}, {"date": "2011/05/13", "changes": ["\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30e9\u30a4\u30bb\u30f3\u30b9\u3092Apache License 2.0\u306b\u5909\u66f4\u3002", "Webkit\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u8868\u793a\u304c\u5909\u3060\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0(\u5fa9\u6d3b)\u3002", "Chrome\u3067\u30bb\u30f3\u30bf\u30fc\u30af\u30ea\u30c3\u30af\u306b\u3082\u53cd\u5fdc\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "Webkit\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u691c\u7d22\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/05/13/120515"}, {"date": "2011/03/26", "changes": ["\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002", "pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4fee\u6b63\u3002", "Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f\u306e\u30a4\u30e9\u30b9\u30c8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.5.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/03/26/010347"}, {"date": "2011/02/15", "changes": ["conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002", "Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002", "\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.expand_novel\u3092\u524a\u9664\u3002", "\u4ed6\u30e6\u30fc\u30b6\u30fc\u306e\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u305f\u306e\u3092\u4fee\u6b63\u3002"], "version": "0.5.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/02/15/110202"}, {"date": "2011/02/04", "changes": ["pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002", "\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002", "OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002", "\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002", "\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002", "\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002"], "version": "0.4.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/02/04/130234"}, {"date": "2011/01/15", "changes": ["\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.3.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/01/14/150150"}, {"date": "2011/01/14", "changes": ["Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002", "OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002"], "version": "0.3.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/01/14/090139"}, {"date": "2010/12/26", "changes": ["conf.fast_user_bookmark\u8ffd\u52a0\u3002", "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002", "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002", "\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002", "conf.expand_novel\u8ffd\u52a0\u3002", "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002", "\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002", "\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.3.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/12/26/011246"}, {"date": "2010/12/01", "changes": ["Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002", "Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002", "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002", "\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002", "d\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002"], "version": "0.2.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/12/01/091212"}, {"date": "2010/11/14", "changes": ["\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002", "conf.popup.overlay_control\u8ffd\u52a0\u3002", "\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.1.2", "releasenote": "http://crckyl.hatenablog.com/entry/2010/11/14/141112"}, {"date": "2010/11/02", "changes": ["\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002", "conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002"], "version": "0.1.1", "releasenote": "http://crckyl.hatenablog.com/entry/2010/11/02/091131"}, {"date": "2010/10/27", "changes": ["Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002", "AutoPatchWork\u306b\u5bfe\u5fdc\u3002"], "version": "0.1.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/10/27/121045"}];
+_.changelog=[{"date": "2017/03/05", "changes_i18n": {"en": ["[Add] Re-implement comment posting feature."], "ja": ["[\u8ffd\u52a0] \u30b3\u30e1\u30f3\u30c8\u6295\u7a3f\u6a5f\u80fd\u3092\u518d\u5b9f\u88c5\u3002"]}, "version": "1.18.0", "releasenote": "http://crckyl.hatenablog.com/entry/2017/03/05/pixplus_1.18.0"}, {"date": "2017/01/25", "changes_i18n": {"en": ["[Add] Add an option to specify minimum size of popup.", "[Add] Re-implement 'Disable profile card popup' option.", "[Fix] Fix an issue that thumbnail-menu opens popup.", "[Fix] Fix an issue that pixplus never stops loading when opening user's own works."], "ja": ["[\u8ffd\u52a0] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u6700\u5c0f\u30b5\u30a4\u30ba\u3092\u6307\u5b9a\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u518d\u5b9f\u88c5\u3002", "[\u4fee\u6b63] \u30b5\u30e0\u30cd\u30a4\u30eb\u30e1\u30cb\u30e5\u30fc\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u3082\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u3044\u3066\u3057\u307e\u3046\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30e6\u30fc\u30b6\u30fc\u81ea\u8eab\u306b\u3088\u308b\u4f5c\u54c1\u3092\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u958b\u3051\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.17.0", "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/25/pixplus_1.17.0"}, {"date": "2017/01/22", "changes_i18n": {"en": ["[Remove] Remove 'Disable profile card popup' option.", "[Remove] Remove posting comment feature.", "[Fix] Rating feature was not working.", "[Fix] Bookmark mode was not working.", "[Fix] Tag edit mode was not working.", "[Fix] Fix support of polling feature."], "ja": ["[\u524a\u9664] \u300c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u30b3\u30e1\u30f3\u30c8\u6295\u7a3f\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u8a55\u4fa1\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30f3\u30b1\u30fc\u30c8\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.16.0", "releasenote": "http://crckyl.hatenablog.com/entry/2017/01/22/pixplus_1.16.0"}, {"date": "2016/09/17", "changes_i18n": {"en": ["[Fix][Opera12] Fix the behavior of arrow buttons on Opera12."], "ja": ["[\u4fee\u6b63][Opera12] Opera12\u3067\u77e2\u5370\u30dc\u30bf\u30f3\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "1.15.2", "releasenote": "http://crckyl.hatenablog.com/entry/2016/09/17/pixplus_1.15.2"}, {"date": "2016/08/26", "changes_i18n": {"en": ["[Fix] Preference dialog on manga page was broken.", "[Fix] 'Remove pixiv comic icon' option was broken."], "ja": ["[\u4fee\u6b63] \u30de\u30f3\u30ac\u30da\u30fc\u30b8\u5185\u3067\u8a2d\u5b9a\u30c0\u30a4\u30a2\u30ed\u30b0\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300cpixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.15.1", "releasenote": "http://crckyl.hatenablog.com/entry/2016/08/26/pixplus_1.15.1"}, {"date": "2015/08/02", "changes_i18n": {"en": ["[Add] Added an option to disable profile card popup (in the 'Genral' tab).", "[Fix] Author icon badges were broken.", "[Fix] Rarely manga mode ends unexpectedly.", "[Fix] Improve performance."], "ja": ["[\u8ffd\u52a0] \u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u30ab\u30fc\u30c9\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u7121\u52b9\u5316\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0(\u5168\u822c\u30bf\u30d6)\u3002", "[\u4fee\u6b63] \u4f5c\u8005\u30a2\u30a4\u30b3\u30f3\u306e\u30d0\u30c3\u30b8\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u7a00\u306b\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u304c\u52dd\u624b\u306b\u7d42\u4e86\u3059\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d1\u30d5\u30a9\u30fc\u30de\u30f3\u30b9\u3092\u6539\u5584\u3002"]}, "version": "1.15.0", "releasenote": "http://crckyl.hatenablog.com/entry/2015/08/02/pixplus_1.15.0"}, {"date": "2015/05/28", "changes_i18n": {"en": ["[Add] Add APNG generator.", "[Add] Support for pixiv spotlight.", "[Fix] Start using MutationObserver. (MutationEvents warnings disappeared on Firefox)", "[Change] Improve page layout of Book-format works.", "[Change] Improve comment area layout. (make white spaces narrow)", "[Change][Opera12] Improve Presto Opera support."], "ja": ["[\u8ffd\u52a0] APNG\u30b8\u30a7\u30cd\u30ec\u30fc\u30bf\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] pixiv\u30b9\u30dd\u30c3\u30c8\u30e9\u30a4\u30c8\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u53ef\u80fd\u306a\u3089MutationObserver\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002(Firefox\u3067\u8b66\u544a\u304c\u51fa\u306a\u304f\u306a\u3063\u305f)", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30b3\u30e1\u30f3\u30c8\u6b04\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002(\u4f59\u767d\u3092\u72ed\u304f)", "[\u5909\u66f4][Opera12] Presto Opera\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002"]}, "version": "1.14.0", "releasenote": "http://crckyl.hatenablog.com/entry/2015/05/28/pixplus_1.14.0"}, {"date": "2015/01/01", "changes_i18n": {"en": ["[Fix] The \"Use original size image\" option was not working for vertically/horizontally long illust works.", "[Fix] The \"Use original size image\" option was not working for single page manga works."], "ja": ["[\u4fee\u6b63] \u975e\u5e38\u306b\u7e26\u30fb\u6a2a\u306b\u9577\u3044\u30a4\u30e9\u30b9\u30c8\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u5358\u30da\u30fc\u30b8\u306e\u30de\u30f3\u30ac\u4f5c\u54c1\u306b\u5bfe\u3057\u3066\u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u6a5f\u80fd\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.4", "releasenote": "http://crckyl.hatenablog.com/entry/2015/01/01/pixplus_1.13.4"}, {"date": "2014/12/20", "changes_i18n": {"en": ["[Fix] Popup window reports an error for old works.", "[Fix] \"Use original size image\" option was not working."], "ja": ["[\u4fee\u6b63] \u53e4\u3044\u4f5c\u54c1\u3067\u30a8\u30e9\u30fc\u306b\u306a\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.3", "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/20/pixplus_1.13.3"}, {"date": "2014/12/14", "changes_i18n": {"en": ["[Fix] Fix comment mode (Shift+c) was not working."], "ja": ["[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30e2\u30fc\u30c9(Shift+c)\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.2", "releasenote": "http://crckyl.hatenablog.com/entry/2014/12/14/pixplus_1.13.2"}, {"date": "2014/10/19", "changes_i18n": {"en": ["[Fix] Fix popup was broken on Safari 5/6."], "ja": ["[\u4fee\u6b63] Safari 5/6\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.13.1", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/19/pixplus_1.13.1"}, {"date": "2014/10/10", "changes_i18n": {"en": ["[Change] Change design of frontpage of multi-page works.", "[Fix] Fix \"Use original size image\" setting is inverted for \"book\" type works.", "[Fix] Fix support for staccfeed, area-ranking and mypage (ranking pane).", "[Remove] Remove repost display."], "ja": ["[\u5909\u66f4] \u8907\u6570\u30da\u30fc\u30b8\u4f5c\u54c1\u306e\u6249\u30da\u30fc\u30b8\u3092\u8868\u793a\u3057\u305f\u969b\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u306e\u52d5\u4f5c\u304c\u300c\u30d6\u30c3\u30af\u300d\u306b\u5bfe\u3057\u3066\u9006\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3001\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0\u3001\u30de\u30a4\u30da\u30fc\u30b8(\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30a4\u30f3)\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u524a\u9664] \u300c\u518d\u6295\u7a3f\u300d\u8868\u793a\u3092\u524a\u9664\u3002"]}, "version": "1.13.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/10/pixplus_1.13.0"}, {"date": "2014/10/01", "changes_i18n": {"en": ["[Fix] Support for pixiv's new \"book\" feature."], "ja": ["[\u4fee\u6b63] \u30d6\u30c3\u30af\u5f62\u5f0f\u6a5f\u80fd\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.12.3", "releasenote": "http://crckyl.hatenablog.com/entry/2014/10/01/pixplus_1.12.3"}, {"date": "2014/09/27", "changes_i18n": {"en": ["[Fix] Follow pixiv's changes.", "[Fix] Fix bookmark mode was broken.", "[Fix] Fix GreaseMonkey auto update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u3046\u307e\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] GreaseMonkey \u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u304c\u58ca\u308c\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.12.1", "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/27/pixplus_1.12.1"}, {"date": "2014/09/04", "changes_i18n": {"en": ["[Add] Add \"Do not start manga mode automatically if you have already read it\" setting.", "[Fix] Fix bookmark mode is not working properly.", "[Fix] Fix comment form was broken.", "[Remove] Remove mypage layout history manager."], "ja": ["[\u8ffd\u52a0] \u300c\u65e2\u306b\u8aad\u3093\u3060\u30de\u30f3\u30ac\u306f\u81ea\u52d5\u3067\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3092\u958b\u59cb\u3057\u306a\u3044\u300d\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u6b63\u3057\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u524a\u9664] \u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5c65\u6b74\u3092\u7ba1\u7406\u3059\u308b\u6a5f\u80fd\u3092\u524a\u9664\u3002"]}, "version": "1.12.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/09/04/pixplus_1.12.0"}, {"date": "2014/06/28", "changes_i18n": {"en": ["[Add] Add setting to remove BOOTH icon.", "[Fix] Support for Ugoira."], "ja": ["[\u8ffd\u52a0] BOOTH\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u3046\u3054\u30a4\u30e9\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.11.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/06/28/pixplus_1.11.0"}, {"date": "2014/05/06", "changes_i18n": {"en": ["[Add] Add \"Open popup in manga page\" option.", "[Fix] Fix key event handling.", "[Fix] Fix \"Hide stamp comments\" option.", "[Fix] Support emoji comment."], "ja": ["[\u8ffd\u52a0] \u300c\u6f2b\u753b\u4f5c\u54c1\u306e\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30ad\u30fc\u30a4\u30d9\u30f3\u30c8\u306e\u51e6\u7406\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b3\u30e1\u30f3\u30c8\u306e\u7d75\u6587\u5b57\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.10.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/05/06/203423"}, {"date": "2014/02/21", "changes_i18n": {"en": ["[Add] Add \"Hide stamp comments\" option.", "[Fix] Fix ranking page support.", "[Fix] Support new comment UI.", "[Fix] Configuration button doesn't appears."], "ja": ["[\u8ffd\u52a0] \u300c\u30b9\u30bf\u30f3\u30d7\u306e\u30b3\u30e1\u30f3\u30c8\u3092\u975e\u8868\u793a\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u65b0\u3057\u3044\u30b3\u30e1\u30f3\u30c8UI\u3092\u30b5\u30dd\u30fc\u30c8\u3002", "[\u4fee\u6b63] \u8a2d\u5b9a\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.9.0", "releasenote": "http://crckyl.hatenablog.com/entry/2014/02/21/130255"}, {"date": "2013/08/14", "changes_i18n": {"en": ["[Fix] Fix tag selection in bookmark mode.", "[Fix] Fix \"w\" key reloads illust when in manga mode."], "ja": ["[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\"w\"\u30ad\u30fc\u304c\u4e0a\u624b\u304f\u52d5\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.8.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/08/14/100851"}, {"date": "2013/08/07", "changes_i18n": {"en": ["[Add] Add \"Mark link as visited\" option.", "[Add] Add \"Scroll step for PageUp/PageDown\" option.", "[Add] Support \"Suggested Users\" page.", "[Change] Try to load big image by \"w\" key if \"original size image\" option is disabled.", "[Fix] ESC key is not working.", "[Fix] Shift+V key (open manga thumbnail page) is not working.", "[Fix] Image response support.", "[Fix] Can't view access restricted illust.", "[Fix][Firefox] Some keys are not working on Firefox23."], "ja": ["[\u8ffd\u52a0] \u300c\u30ea\u30f3\u30af\u3092\u8a2a\u554f\u6e08\u307f\u306b\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300cPageUp/PageDown\u306e\u30b9\u30af\u30ed\u30fc\u30eb\u5e45\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u300c\u304a\u3059\u3059\u3081\u30e6\u30fc\u30b6\u30fc\u300d\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "[\u5909\u66f4] \u300c\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u304c\u7121\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u304d\u3001\"w\"\u30ad\u30fc\u3067\u539f\u5bf8\u306e\u753b\u50cf\u306b\u5207\u308a\u66ff\u3048\u308b\u3088\u3046\u306b\u5909\u66f4\u3002", "[\u4fee\u6b63] ESC\u30ad\u30fc\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] Shift+V\u30ad\u30fc(\u30de\u30f3\u30ac\u30b5\u30e0\u30cd\u30a4\u30eb\u30da\u30fc\u30b8\u3092\u958b\u304f)\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u306e\u51e6\u7406\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u5236\u9650\u304c\u8a2d\u5b9a\u3055\u308c\u3066\u3044\u308b\u30a4\u30e9\u30b9\u30c8\u3092\u958b\u3051\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] Firefox23\u3067\u30ad\u30fc\u64cd\u4f5c\u3067\u304d\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.8.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/08/07/110857"}, {"date": "2013/06/26", "changes_i18n": {"en": ["[Fix][Chrome] Greasemonkey version(.user.js) is not working on Chrome."], "ja": ["[\u4fee\u6b63][Chrome] Greasemonkey\u7248\u304cChrome\u4e0a\u3067\u52d5\u4f5c\u3057\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.7.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/06/26/120605"}, {"date": "2013/06/25", "changes_i18n": {"en": ["Improve boot performance.", "[Add] Added some features that extends \"Advanced Search\" dialog.", "[Remove] Remove \"Change 'Stacc feed' link\" option.", "[Remove] Remove \"Separator style for tag list\" option.", "[Fix] Fix manga mode always reports error.", "[Fix][Firefox] Fix bookmark mode is not working on Firefox ESR 17"], "ja": ["\u8d77\u52d5\u3092\u9ad8\u901f\u5316\u3002", "[\u8ffd\u52a0] \u300c\u691c\u7d22\u30aa\u30d7\u30b7\u30e7\u30f3\u300d\u30c0\u30a4\u30a2\u30ed\u30b0\u306b\u3044\u304f\u3064\u304b\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u524a\u9664] \u300c\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u306e\u30ea\u30f3\u30af\u5148\u3092\u5909\u66f4\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u300c\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30bb\u30d1\u30ec\u30fc\u30bf\u306e\u30b9\u30bf\u30a4\u30eb\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] Firefox ESR 17\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.7.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/06/25/110601"}, {"date": "2013/05/26", "changes_i18n": {"en": ["[Fix] Support new bookmark page."], "ja": ["[\u4fee\u6b63] \u65b0\u3057\u3044\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.6.3", "releasenote": "http://crckyl.hatenablog.com/entry/2013/05/25/210523"}, {"date": "2013/05/18", "changes_i18n": {"en": ["[Fix] Fix author status icon.", "[Fix] Bookmark button is always inactive, even though it is bookmarked.", "[Fix] Fix loading error on Firefox21"], "ja": ["[\u4fee\u6b63] \u4f5c\u8005\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u30a2\u30a4\u30b3\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3066\u3082\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u306e\u8868\u793a\u304c\u5909\u5316\u3057\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] Firefox21\u3067\u8aad\u307f\u8fbc\u307f\u30a8\u30e9\u30fc\u304c\u767a\u751f\u3059\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.6.2", "releasenote": "http://crckyl.hatenablog.com/entry/2013/05/18/070549"}, {"date": "2013/03/13", "changes_i18n": {"en": ["[Change] Change \"Click area\" design.", "[Fix] Minor fix for pixiv's change."], "ja": ["[\u5909\u66f4] \u79fb\u52d5\u7528\u30af\u30ea\u30c3\u30af\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30fc\u30b9\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "1.6.1", "releasenote": "http://crckyl.hatenablog.com/entry/2013/03/13/100325"}, {"date": "2013/02/23", "changes_i18n": {"en": ["[Add] Add resize mode settings and key bindings.", "[Fix] Fix author does not shown properly in popup."], "ja": ["[\u8ffd\u52a0] \u30ea\u30b5\u30a4\u30ba\u30e2\u30fc\u30c9\u306e\u8a2d\u5b9a\u3068\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.6.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/23/100201"}, {"date": "2013/02/10", "changes_i18n": {"en": ["[Add] Add top-page layout history manager.", "[Fix][Extension] Fix can't save settings in General section."], "ja": ["[\u8ffd\u52a0] \u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u5909\u66f4\u5c65\u6b74\u3092\u7ba1\u7406\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63][\u30a8\u30af\u30b9\u30c6\u30f3\u30b7\u30e7\u30f3] \u300c\u5168\u822c\u300d\u30bb\u30af\u30b7\u30e7\u30f3\u306e\u8a2d\u5b9a\u304c\u4fdd\u5b58\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.5.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/09/210216"}, {"date": "2013/02/02", "changes_i18n": {"en": ["[Add] Add tag association ui to bookmark mode.", "[Fix] Fix author does not shown properly in popup.", "[Fix] Fix comment view in popup.", "[Fix] Fix \"Add favorite user by one-click\" is not working."], "ja": ["[\u8ffd\u52a0] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306b\u30bf\u30b0\u3092\u95a2\u9023\u4ed8\u3051\u308bUI\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306b\u4f5c\u8005\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30b3\u30e1\u30f3\u30c8\u304c\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u304a\u6c17\u306b\u5165\u308a\u30e6\u30fc\u30b6\u30fc\u306e\u8ffd\u52a0\u3092\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u3067\u884c\u3046\u8a2d\u5b9a\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.4.0", "releasenote": "http://crckyl.hatenablog.com/entry/2013/02/02/120229"}, {"date": "2012/12/16", "changes_i18n": {"en": ["[Add] Add option to remove pixiv comic icon.", "[Change] Improve bookmark mode layout.", "[Change] Improve key navigation feature in bookmark mode.", "[Change] Improve tag edit mode layout.", "[Fix] Fix tag edit mode is not working.", "[Fix] Can not open preferences in UserJS/Greasemonkey version."], "ja": ["[\u8ffd\u52a0] pixiv\u30b3\u30df\u30c3\u30af\u30a2\u30a4\u30b3\u30f3\u3092\u9664\u53bb\u3059\u308b\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u8ffd\u52a0\u3002", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002", "[\u5909\u66f4] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u7de8\u96c6\u30e2\u30fc\u30c9\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] UserJS/Greasemonkey\u7248\u3067\u8a2d\u5b9a\u753b\u9762\u3092\u958b\u3051\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.3.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/12/16/041240"}, {"date": "2012/12/06", "changes_i18n": {"en": ["[Fix] Fix manga layout is broken.", "[Fix] Fix tag list layout.", "[Fix] Fix fail to load access-restricted illust.", "[Fix] Fix broken tag list with no tags."], "ja": ["[\u4fee\u6b63] \u30de\u30f3\u30ac\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5d29\u308c\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a2\u30af\u30bb\u30b9\u304c\u5236\u9650\u3055\u308c\u305f\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u306b\u30bf\u30b0\u304c\u767b\u9332\u3055\u308c\u3066\u3044\u306a\u3044\u6642\u306b\u8868\u793a\u304c\u58ca\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"]}, "version": "1.2.2", "releasenote": "http://crckyl.hatenablog.com/entry/2012/12/06/101212"}, {"date": "2012/09/29", "changes_i18n": {"en": ["[Fix] Minor fix for pixiv's update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "1.2.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/09/29/050955"}, {"date": "2012/08/27", "changes_i18n": {"en": ["[Add] Add \"Redirect jump.php\" setting.", "[Fix] Fix control key support for DOM3Events.", "[Fix] Improve auto-manga-mode feature.", "[Fix] Support \"new Staccfeed\" page."], "ja": ["[\u8ffd\u52a0] \"jump.php\u3092\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3059\u308b\"\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] DOM3Event\u306eControl\u30ad\u30fc\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u81ea\u52d5\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306e\u6319\u52d5\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u300c\u65b0\u3057\u3044\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u300d\u3092\u30b5\u30dd\u30fc\u30c8\u3002"]}, "version": "1.2.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/27/100841"}, {"date": "2012/08/14", "changes_i18n": {"en": ["[Fix] Header area hidden by click navigator.", "[Fix] \"Reverse\" setting applied in manga mode.", "[Fix] Can't read old manga if \"Use original size image\" is enabled.", "[Fix] Can't add or modify bookmark in staccfeed page.", "[Change] Change default value for some preferences.", "[Fix][WebKit] Status field layout is broken while loading."], "ja": ["[\u4fee\u6b63] \u30af\u30ea\u30c3\u30af\u30ca\u30d3\u30b2\u30fc\u30b7\u30e7\u30f3\u306eUI\u3067\u30d8\u30c3\u30c0\u9818\u57df\u304c\u96a0\u308c\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \"\u79fb\u52d5\u65b9\u5411\u3092\u53cd\u5bfe\u306b\u3059\u308b\"\u8a2d\u5b9a\u304c\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u306b\u3082\u9069\u7528\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \"\u539f\u5bf8\u306e\u753b\u50cf\u3092\u8868\u793a\u3059\u308b\"\u304c\u6709\u52b9\u306b\u306a\u3063\u3066\u3044\u308b\u3068\u53e4\u3044\u30de\u30f3\u30ac\u4f5c\u54c1\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u8ffd\u52a0\u30fb\u7de8\u96c6\u304c\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u5909\u66f4] \u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u3092\u5909\u66f4\u3002", "[\u4fee\u6b63][WebKit] \u30ed\u30fc\u30c9\u4e2d\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u8868\u793a\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u304c\u5909\u306b\u306a\u308b\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "1.1.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/14/070809"}, {"date": "2012/08/09", "changes_i18n": {"en": ["[Add] Open popup from illust link in caption(author comment).", "[Add] Add tag edit mode.", "[Fix] Don't open popup from image-response list in illust page.", "[Fix] Improve error handling.", "[Fix] Displaying html entity in title and author name.", "[Fix] Can' t move to another illust when in bookmark mode.", "[Fix] Various minor bug fixes.", "[Fix][Firefox] Can't send rating if \"Show confirmation dialog when rating\" option is on.", "[Fix][Firefox] Popup don't works on ranking page."], "ja": ["[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u30ea\u30f3\u30af\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u304f\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u8ffd\u52a0] \u30bf\u30b0\u7de8\u96c6\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u5185\u306e\u30a4\u30e1\u30fc\u30b8\u30ec\u30b9\u30dd\u30f3\u30b9\u4e00\u89a7\u304b\u3089\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30a8\u30e9\u30fc\u51e6\u7406\u3092\u6539\u5584\u3002", "[\u4fee\u6b63] \u30bf\u30a4\u30c8\u30eb\u3068\u30e6\u30fc\u30b6\u30fc\u540d\u306bHTML\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u304c\u8868\u793a\u3055\u308c\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u30d6\u30c3\u30af\u30de\u30fc\u30af\u30e2\u30fc\u30c9\u306e\u6642\u306b\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u51fa\u6765\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63] \u4ed6\u7d30\u304b\u306a\u30d0\u30b0\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] \u300c\u30a4\u30e9\u30b9\u30c8\u3092\u8a55\u4fa1\u3059\u308b\u6642\u306b\u78ba\u8a8d\u3092\u3068\u308b\u300d\u30aa\u30d7\u30b7\u30e7\u30f3\u3092\u6709\u52b9\u306b\u3057\u3066\u3044\u308b\u3068\u8a55\u4fa1\u3067\u304d\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "[\u4fee\u6b63][Firefox] \u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u958b\u304b\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "1.1.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/09/100814"}, {"date": "2012/08/08", "changes_i18n": {"en": ["Rewrite whole of source code.", "[Add] Add preference to specify minimum height of caption area.", "[Remove] Remove tag edit feature.", "[Remove] Remove some dead preferences.", "[Remove] Remove zoom feature.", "[Fix] Fix multilingual support."], "ja": ["\u5168\u4f53\u7684\u306b\u66f8\u304d\u76f4\u3057\u3002", "[\u8ffd\u52a0] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u306e\u9ad8\u3055\u306e\u6700\u5c0f\u5024\u3092\u6307\u5b9a\u3059\u308b\u8a2d\u5b9a\u3092\u8ffd\u52a0\u3002", "[\u524a\u9664] \u30bf\u30b0\u7de8\u96c6\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u6a5f\u80fd\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u3044\u304f\u3064\u304b\u306e\u8a2d\u5b9a\u9805\u76ee\u3092\u524a\u9664\u3002", "[\u524a\u9664] \u30ba\u30fc\u30e0\u6a5f\u80fd\u3092\u524a\u9664\u3002", "[\u4fee\u6b63] \u591a\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u4fee\u6b63\u3002"]}, "version": "1.0.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/08/140851"}, {"date": "2012/08/05", "changes_i18n": {"en": ["[Fix] Rating feature don't works."], "ja": ["[\u4fee\u6b63] \u8a55\u4fa1\u6a5f\u80fd\u304c\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.4", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/05/010838"}, {"date": "2012/08/03", "changes_i18n": {"en": ["[Fix] Support pixiv's update."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002"]}, "version": "0.9.3", "releasenote": "http://crckyl.hatenablog.com/entry/2012/08/03/120844"}, {"date": "2012/06/29", "changes_i18n": {"en": ["[Fix] If conf.popup.big_image=0, \"S\" key (conf.key.popup_open_big) opens medium image."], "ja": ["[\u4fee\u6b63] conf.popup.big_image=0\u306e\u6642\u3001\"S\"\u30ad\u30fc(conf.key.popup_open_big)\u3067medium\u306e\u753b\u50cf\u3092\u958b\u3044\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.2", "releasenote": "http://crckyl.hatenablog.com/entry/2012/06/29/100651"}, {"date": "2012/06/26", "changes_i18n": {"en": ["[Fix] Corresponds to pixiv's spec changes.", "[Fix] In reposted illust, pixplus shows first version."], "ja": ["[\u4fee\u6b63] pixiv\u306e\u4ed5\u69d8\u5909\u66f4\u306b\u5bfe\u5fdc\u3002", "[\u4fee\u6b63] \u30a4\u30e9\u30b9\u30c8\u304c\u518d\u6295\u7a3f\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u306b\u53e4\u3044\u753b\u50cf\u3092\u8868\u793a\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.1", "releasenote": "http://crckyl.hatenablog.com/entry/2012/06/25/210620"}, {"date": "2012/02/17", "changes_i18n": {"en": ["[New] Added a setting to change mouse wheel operation. (conf.popup.mouse_wheel)", "[Fix] External links in author comment were broken."], "ja": ["[\u8ffd\u52a0] \u30de\u30a6\u30b9\u30db\u30a4\u30fc\u30eb\u306e\u52d5\u4f5c\u3092\u5909\u66f4\u3059\u308b\u8a2d\u5b9a(conf.popup.mouse_wheel)\u3092\u8ffd\u52a0\u3002", "[\u4fee\u6b63] \u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u5185\u306e\u5916\u90e8\u30ea\u30f3\u30af\u304c\u58ca\u308c\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002"]}, "version": "0.9.0", "releasenote": "http://crckyl.hatenablog.com/entry/2012/02/17/100206"}, {"date": "2012/02/11", "changes": ["\u65b0\u7740\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30bf\u30b0\u30ea\u30b9\u30c8\u306e\u30d5\u30ed\u30fc\u30c8\u8868\u793a\u306e\u52d5\u4f5c\u3092\u4fee\u6b63\u3002"], "version": "0.8.3", "releasenote": "http://crckyl.hatenablog.com/entry/2012/02/11/150242"}, {"date": "2011/10/27", "changes": ["\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u56de\u7b54\u3059\u308b\u3068\u30a8\u30e9\u30fc\u30c0\u30a4\u30a2\u30ed\u30b0\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8(mypage.php)\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.8.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/10/27/111054"}, {"date": "2011/09/17", "changes": ["pixiv\u306e\u5909\u66f4\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306a\u3069\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "conf.key.popup_manga_open_page\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\u5024\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002"], "version": "0.8.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/09/17/010931"}, {"date": "2011/09/03", "changes": ["\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u3001\u95b2\u89a7\u51fa\u6765\u306a\u304f\u306a\u3063\u305f\u30a4\u30e9\u30b9\u30c8\u306b\u4e00\u62ec\u3067\u30c1\u30a7\u30c3\u30af\u3092\u5165\u308c\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30b3\u30e1\u30f3\u30c8\u3092\u6295\u7a3f\u3059\u308b\u3068\u30b3\u30e1\u30f3\u30c8\u30d5\u30a9\u30fc\u30e0\u304c\u6d88\u3048\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u3067\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u3088\u3046\u306b\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u8a00\u8a9e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002", "AutoPatchWork\u7b49\u306e\u30b5\u30dd\u30fc\u30c8\u3092\u6539\u5584\u3002"], "version": "0.8.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/09/03/010924"}, {"date": "2011/08/21", "changes": ["\u30e9\u30f3\u30ad\u30f3\u30b0\u30da\u30fc\u30b8\u306b\u304a\u3044\u3066AutoPatchWork\u306a\u3069\u3067\u7d99\u304e\u8db3\u3057\u305f\u4e8c\u30da\u30fc\u30b8\u76ee\u4ee5\u964d\u306e\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u306e\u3092\u662f\u6b63\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u3092\u30da\u30fc\u30b8\u306e\u53f3\u5074\u306b\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.locate_recommend_right)\u3092\u524a\u9664\u3002", "\u5730\u57df\u30e9\u30f3\u30ad\u30f3\u30b0(/ranking_area.php)\u306e\u65b0\u30c7\u30b6\u30a4\u30f3\u306b\u5bfe\u5fdc\u3002"], "version": "0.7.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/08/21/110824"}, {"date": "2011/07/24", "changes": ["\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u3057\u3088\u3046\u3068\u3059\u308b\u3068\u30a8\u30e9\u30fc\u304c\u51fa\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u300c\u30b9\u30e9\u30a4\u30c9\u30e2\u30fc\u30c9\u300d\u8a2d\u5b9a\u306e\u6642\u3001\u30de\u30f3\u30ac\u3092\u95b2\u89a7\u51fa\u6765\u306a\u3044\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30e9\u30f3\u30ad\u30f3\u30b0\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.3", "releasenote": "http://crckyl.hatenablog.com/entry/2011/07/24/100702"}, {"date": "2011/06/26", "changes": ["\u8a2d\u5b9a\u753b\u9762\u3078\u306e\u30ea\u30f3\u30af\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a4\u30d9\u30f3\u30c8\u306e\u7279\u8a2d\u30da\u30fc\u30b8(e.g. /event_starfestival2011.php)\u3067\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/06/26/010657"}, {"date": "2011/05/21", "changes": ["Opera10.1x\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30bf\u30b0\u691c\u7d22(ex. /tags.php?tag=pixiv)\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a8\u30e9\u30fc\u8868\u793a\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.popup_ranking_log\u3092\u524a\u9664\u3002", "\u65b0\u7740\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/05/21/030509"}, {"date": "2011/05/13", "changes": ["\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306e\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u306e\u51e6\u7406\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30e9\u30a4\u30bb\u30f3\u30b9\u3092Apache License 2.0\u306b\u5909\u66f4\u3002", "Webkit\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306e\u8868\u793a\u304c\u5909\u3060\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u3092\u8ffd\u52a0(\u5fa9\u6d3b)\u3002", "Chrome\u3067\u30bb\u30f3\u30bf\u30fc\u30af\u30ea\u30c3\u30af\u306b\u3082\u53cd\u5fdc\u3057\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "Webkit\u3067\u306e\u30ad\u30fc\u64cd\u4f5c\u3092\u6539\u5584\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30d5\u30a9\u30fc\u30e0\u306a\u3069\u306e\u52d5\u4f5c\u304c\u5909\u306b\u306a\u3063\u3066\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u691c\u7d22\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.6.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/05/13/120515"}, {"date": "2011/03/26", "changes": ["\u304a\u3059\u3059\u3081\u30a4\u30e9\u30b9\u30c8\u304c\u975e\u8868\u793a\u306e\u6642\u3082conf.locate_recommend_right\u304c\u52d5\u4f5c\u3057\u3066\u3057\u307e\u3046\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.extagedit\u3092\u5ec3\u6b62\u3057\u3066conf.bookmark_form\u306b\u5909\u66f4\u3002", "pixiv\u306e\u8a00\u8a9e\u8a2d\u5b9a\u304c\u65e5\u672c\u8a9e\u4ee5\u5916\u306e\u6642\u306b\u30de\u30f3\u30ac\u304c\u95b2\u89a7\u3067\u304d\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30de\u30f3\u30ac\u306e\u898b\u958b\u304d\u8868\u793a\u3092\u4fee\u6b63\u3002", "Firefox4\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u753b\u9762\u3067\u30bf\u30b0\u3092\u9078\u629e\u3067\u304d\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f\u306e\u30a4\u30e9\u30b9\u30c8\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30dc\u30bf\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.5.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/03/26/010347"}, {"date": "2011/02/15", "changes": ["conf.extension\u3092\u5ec3\u6b62\u3002Opera\u62e1\u5f35\u7248\u306e\u30c4\u30fc\u30eb\u30d0\u30fc\u30a2\u30a4\u30b3\u30f3\u3092\u524a\u9664\u3002", "Firefox\u3067\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "Firefox\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u30a2\u30ed\u30fc\u30ad\u30fc\u3067\u30bf\u30b0\u9078\u629e\u3092\u884c\u3046\u6642\u306b\u5165\u529b\u5c65\u6b74\u304c\u8868\u793a\u3055\u308c\u308b\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30bf\u30b0\u7de8\u96c6\u306eUI\u3092\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u3068\u540c\u3058\u306b\u5909\u66f4\u3002", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3067\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u30e2\u30fc\u30c9\u306e\u307e\u307e\u4ed6\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u79fb\u52d5\u3059\u308b\u3068\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u304c\u8868\u793a\u3055\u308c\u306a\u304f\u306a\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30de\u30f3\u30ac\u30e2\u30fc\u30c9\u3067\u3082\u53ef\u80fd\u306a\u3089\u539f\u5bf8\u306e\u753b\u50cf\u3092\u4f7f\u7528\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002", "\u30e1\u30f3\u30d0\u30fc\u30a4\u30e9\u30b9\u30c8\u30da\u30fc\u30b8\u306a\u3069\u3092\u958b\u3044\u305f\u6642\u306b\u8a55\u4fa1\u306a\u3069\u304c\u51fa\u6765\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u8a2d\u5b9a\u753b\u9762\u306e\u30c7\u30b6\u30a4\u30f3\u3092\u5909\u66f4\u3002", "Opera10.1x\u3067\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u958b\u3044\u305f\u6642\u306b\u753b\u50cf\u304c\u8868\u793a\u3055\u308c\u306a\u3044\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u5c0f\u8aac\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3067\u304d\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.expand_novel\u3092\u524a\u9664\u3002", "\u4ed6\u30e6\u30fc\u30b6\u30fc\u306e\u30d6\u30c3\u30af\u30de\u30fc\u30af\u30da\u30fc\u30b8\u3067\u52d5\u304b\u306a\u304f\u306a\u3063\u3066\u305f\u306e\u3092\u4fee\u6b63\u3002"], "version": "0.5.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/02/15/110202"}, {"date": "2011/02/04", "changes": ["pixivreader\u3068\u885d\u7a81\u3059\u308b\u3089\u3057\u3044\u306e\u3067\u3001exclude\u306b\u8ffd\u52a0\u3002", "\u8a2d\u5b9a\u307e\u308f\u308a\u3092\u4f5c\u308a\u76f4\u3057\u3002Chrome/Safari\u62e1\u5f35\u7248\u306b\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u8ffd\u52a0\u3002\u8a2d\u5b9a\u304c\u5f15\u304d\u7d99\u304c\u308c\u306a\u3044\u3002", "OperaExtension\u7248\u3067\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002", "\u95b2\u89a7\u3067\u304d\u306a\u3044\u30de\u30f3\u30ac\u304c\u3042\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30ba\u30fc\u30e0\u6a5f\u80fd\u3067Firefox\u3092\u30b5\u30dd\u30fc\u30c8\u3002", "\u4f01\u753b\u76ee\u9332\u95a2\u9023\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "\u30de\u30f3\u30ac\u30da\u30fc\u30b8\u306e\u5909\u66f4(\u898b\u958b\u304d\u8868\u793a\u306a\u3069)\u306b\u5bfe\u5fdc\u3002\u305d\u308c\u306b\u4f34\u3063\u3066conf.default_manga_type\u3068conf.popup_manga_tb\u3092\u524a\u9664\u3002", "\u4f5c\u54c1\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "Chrome/Safari\u3067AutoPatchWork\u306b\u5bfe\u5fdc\u3002"], "version": "0.4.0", "releasenote": "http://crckyl.hatenablog.com/entry/2011/02/04/130234"}, {"date": "2011/01/15", "changes": ["\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u3066\u3044\u306a\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.3.2", "releasenote": "http://crckyl.hatenablog.com/entry/2011/01/14/150150"}, {"date": "2011/01/14", "changes": ["Opera\u4ee5\u5916\u306e\u30d6\u30e9\u30a6\u30b6\u306b\u304a\u3044\u3066\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u8a55\u4fa1\u3084\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u306a\u3069\u306e\u6a5f\u80fd\u306e\u52d5\u4f5c\u304c\u5909\u3060\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "conf.popup.rate_key=true\u306e\u6642\u3001Shift\u30ad\u30fc\u306a\u3057\u3067\u8a55\u4fa1\u3067\u304d\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "ChromeExtension/SafariExtension\u7248\u3067\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002", "OperaExtension\u7248\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u30da\u30fc\u30b8\u3067\u6570\u5024\u304cNaN\u306b\u306a\u308b\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u305f\u3076\u3093\u4fee\u6b63\u3002"], "version": "0.3.1", "releasenote": "http://crckyl.hatenablog.com/entry/2011/01/14/090139"}, {"date": "2010/12/26", "changes": ["conf.fast_user_bookmark\u8ffd\u52a0\u3002", "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u753b\u50cf\u306e\u5de6\u4e0a\u306b\u30a2\u30a4\u30b3\u30f3(\u30c1\u30a7\u30c3\u30af:\u304a\u6c17\u306b\u5165\u308a/\u30cf\u30fc\u30c8:\u76f8\u4e92/\u65d7:\u30de\u30a4\u30d4\u30af)\u3092\u8868\u793a\u3059\u308b\u6a5f\u80fd(conf.popup.author_status_icon)\u8ffd\u52a0\u3002", "\u30b3\u30e1\u30f3\u30c8\u8868\u793a\u6a5f\u80fd\u3092\u8ffd\u52a0\u3002", "\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u306e\u8868\u793a\u3092\u5909\u66f4\u3002", "\u95b2\u89a7\u30fb\u8a55\u4fa1\u30fb\u30b3\u30e1\u30f3\u30c8\u5c65\u6b74\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u3092\u5909\u66f4\u3002Shift+c:\u30b3\u30e1\u30f3\u30c8\u8868\u793a/d:\u30a2\u30f3\u30b1\u30fc\u30c8/a:\u623b\u308b", "\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u306e\u30a4\u30d9\u30f3\u30c8API\u3092Popup.on*\u306e\u307f\u306b\u5909\u66f4\u3002", "conf.expand_novel\u8ffd\u52a0\u3002", "\u30e9\u30f3\u30ad\u30f3\u30b0\u30ab\u30ec\u30f3\u30c0\u30fc\u306b\u5bfe\u5fdc\u3002conf.popup_ranking_log\u8ffd\u52a0\u3002", "\u30a4\u30d9\u30f3\u30c8\u8a73\u7d30/\u53c2\u52a0\u8005\u30da\u30fc\u30b8\u306b\u5bfe\u5fdc\u3002", "Extension\u7248\u306b\u30c4\u30fc\u30eb\u30d0\u30fc\u30dc\u30bf\u30f3\u3068\u8a2d\u5b9a\u753b\u9762\u3092\u8ffd\u52a0\u3002conf.extension.*\u8ffd\u52a0\u3002", "\u30bf\u30b0\u306e\u4e26\u3079\u66ff\u3048\u3092\u8a2d\u5b9a\u3057\u3066\u3044\u306a\u3044\u6642\u3001\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7de8\u96c6\u306e\u52d5\u4f5c\u304c\u304a\u304b\u3057\u304b\u3063\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.3.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/12/26/011246"}, {"date": "2010/12/01", "changes": ["Extension\u7248\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u3089\u308c\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306e\u30ec\u30a4\u30a2\u30a6\u30c8\u3092\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u3059\u308b\u6a5f\u80fd\u8ffd\u52a0\u3002", "Extension\u7248\u306e\u81ea\u52d5\u30a2\u30c3\u30d7\u30c7\u30fc\u30c8\u306b\u5bfe\u5fdc\u3002", "\u4e0a\u4e0b\u30ad\u30fc\u3067\u30ad\u30e3\u30d7\u30b7\u30e7\u30f3\u3092\u30b9\u30af\u30ed\u30fc\u30eb\u3059\u308b\u3088\u3046\u306b\u5909\u66f4\u3002conf.popup.scroll_height\u8ffd\u52a0\u3002", "\u753b\u50cf\u3092\u62e1\u5927/\u7e2e\u5c0f\u3059\u308b\u30ad\u30fc\u3092o/i\u304b\u3089+/-\u306b\u5909\u66f4\u3002", "d\u30ad\u30fc(\u524d\u306e\u30a4\u30e9\u30b9\u30c8\u306b\u623b\u308b)\u3092\u30ad\u30fc\u30d0\u30a4\u30f3\u30c9\u306b\u8ffd\u52a0\u3002"], "version": "0.2.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/12/01/091212"}, {"date": "2010/11/14", "changes": ["\u4e00\u90e8\u306e\u30da\u30fc\u30b8\u3067\u30a2\u30f3\u30b1\u30fc\u30c8\u7d50\u679c\u3092\u8868\u793a\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u30a2\u30f3\u30b1\u30fc\u30c8\u306b\u7b54\u3048\u305f\u5f8c\u3001\u9078\u629e\u80a2\u304c\u8868\u793a\u3055\u308c\u305f\u307e\u307e\u306b\u306a\u3063\u3066\u3044\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30b9\u30bf\u30c3\u30af\u30d5\u30a3\u30fc\u30c9\u4e0a\u3067\u8a55\u4fa1\u3084\u30bf\u30b0\u7de8\u96c6\u304c\u51fa\u6765\u306a\u304b\u3063\u305f\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "\u30de\u30a6\u30b9\u64cd\u4f5c\u7528UI\u306e\u8868\u793a\u3092\u5909\u66f4\u3002", "conf.popup.overlay_control\u8ffd\u52a0\u3002", "\u30de\u30f3\u30ac\u30da\u30fc\u30b8(mode=manga)\u3067\u6539\u30da\u30fc\u30b8\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002", "\u8a55\u4fa1\u51fa\u6765\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u4e0d\u5177\u5408\u3092\u4fee\u6b63\u3002"], "version": "0.1.2", "releasenote": "http://crckyl.hatenablog.com/entry/2010/11/14/141112"}, {"date": "2010/11/02", "changes": ["\u30a4\u30d9\u30f3\u30c8\u30da\u30fc\u30b8(e.g. http://www.pixiv.net/event_halloween2010.php)\u7528\u306e\u6c4e\u7528\u30b3\u30fc\u30c9\u8ffd\u52a0\u3002", "conf.locate_recommend_right\u304c2\u306e\u6642\u3001\u4e0a\u624b\u304f\u52d5\u4f5c\u3057\u306a\u3044\u5834\u5408\u304c\u3042\u308b\u30d0\u30b0\u3092\u4fee\u6b63\u3002", "pixiv\u306e\u5909\u66f4(\u8a55\u4fa1\u3001\u30e9\u30f3\u30ad\u30f3\u30b0\u3001etc)\u306b\u5bfe\u5fdc\u3002"], "version": "0.1.1", "releasenote": "http://crckyl.hatenablog.com/entry/2010/11/02/091131"}, {"date": "2010/10/27", "changes": ["Opera11\u306eExtension\u306b\u5bfe\u5fdc\u3002", "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u7ba1\u7406\u30da\u30fc\u30b8\u3067\u30ec\u30b3\u30e1\u30f3\u30c9\u3092\u53f3\u5074\u306b\u4e26\u3079\u308b\u6a5f\u80fd\u304c\u52d5\u4f5c\u3057\u306a\u304f\u306a\u3063\u3066\u3044\u305f\u306e\u3092\u4fee\u6b63\u3002", "AutoPatchWork\u306b\u5bfe\u5fdc\u3002"], "version": "0.1.0", "releasenote": "http://crckyl.hatenablog.com/entry/2010/10/27/121045"}];
 _.svg={
 pencil:function(doc){ // src/data/pencil.svg
 var e0 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -7693,6 +8146,88 @@ e1.setAttribute("d", "M 10 50 l 45 -45 l 0 30 l 35 0 l 0 30 l -35 0 l 0 30 z");
 e1.setAttribute("fill", "#ddd");
 e0.appendChild(e1);
 e0.setAttribute("id", "pp-icon-olc-arrow");
+return e0;
+}
+,rating_error:function(doc){ // src/data/rating-error.svg
+var e0 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+e0.setAttribute("width", "260");
+e0.setAttribute("height", "26");
+var e1 = doc.createElementNS("http://www.w3.org/2000/svg", "line");
+e1.setAttribute("y1", "1");
+e1.setAttribute("x2", "260");
+e1.setAttribute("stroke", "#d8292c");
+e1.setAttribute("x1", "0");
+e1.setAttribute("y2", "26");
+e0.appendChild(e1);
+var e2 = doc.createElementNS("http://www.w3.org/2000/svg", "line");
+e2.setAttribute("y1", "26");
+e2.setAttribute("x2", "260");
+e2.setAttribute("stroke", "#d8292c");
+e2.setAttribute("x1", "0");
+e2.setAttribute("y2", "1");
+e0.appendChild(e2);
+e0.setAttribute("id", "pp-icon-rating-error");
+return e0;
+}
+,comment_loading:function(doc){ // src/data/comment-loading.svg
+var e0 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+e0.setAttribute("width", "50");
+e0.setAttribute("viewBox", "0 0 50 50");
+e0.setAttribute("height", "50");
+var e1 = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+e1.setAttribute("stroke", "#444");
+e1.setAttribute("stroke-width", "5");
+e1.setAttribute("d", "M 45,25 A 20,20 0 0 1 32.653669,43.477591 20,20 0 0 1 10.857864,39.142135 20,20 0 0 1 6.5224095,17.346331 20,20 0 0 1 25,5");
+e1.setAttribute("fill", "none");
+e0.appendChild(e1);
+var e2 = doc.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
+e2.setAttribute("to", "360 25 25");
+e2.setAttribute("from", "0 25 25");
+e2.setAttribute("attributeType", "xml");
+e2.setAttribute("type", "rotate");
+e2.setAttribute("repeatCount", "indefinite");
+e2.setAttribute("dur", "2s");
+e2.setAttribute("attributeName", "transform");
+e1.appendChild(e2);
+e0.setAttribute("id", "pp-icon-comment-loading");
+return e0;
+}
+,comment_error:function(doc){ // src/data/comment-error.svg
+var e0 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+e0.setAttribute("width", "50");
+e0.setAttribute("viewBox", "0 0 50 50");
+e0.setAttribute("height", "50");
+var e1 = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
+e1.setAttribute("cy", "25");
+e1.setAttribute("cx", "25");
+e1.setAttribute("r", "24");
+e1.setAttribute("stroke", "none");
+e1.setAttribute("fill", "#444");
+e0.appendChild(e1);
+var e2 = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+e2.setAttribute("stroke", "none");
+e2.setAttribute("d", "m 23,38 0,4 4,0 0,-4 z");
+e2.setAttribute("fill", "#fff");
+e0.appendChild(e2);
+var e3 = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+e3.setAttribute("stroke", "none");
+e3.setAttribute("d", "m 23,35 -1,-25 6,0 -1,25 z");
+e3.setAttribute("fill", "#fff");
+e0.appendChild(e3);
+e0.setAttribute("id", "pp-icon-comment-error");
+return e0;
+}
+,comment_reply_to:function(doc){ // src/data/comment-reply-to.svg
+var e0 = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+e0.setAttribute("width", "24");
+e0.setAttribute("viewBox", "0 0 24 24");
+e0.setAttribute("height", "24");
+var e1 = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+e1.setAttribute("stroke", "none");
+e1.setAttribute("d", "m 10.292969,1.1908482 2.18164,3.4472656 C 10.35287,6.0157873 5.4060663,9.5185409 4.2128906,13.257255 c -2.441942,7.6517 4.5585938,9.652344 4.5585938,9.652343 0,0 -0.6845863,-2.242734 0.7460937,-4.990234 1.3910079,-2.671159 5.3152499,-5.213399 7.3124999,-6.392578 L 19.095703,15.106864 21.652344,3.7474888 10.292969,1.1908482 Z");
+e1.setAttribute("fill", "#000");
+e0.appendChild(e1);
+e0.setAttribute("id", "pp-icon-comment-reply-to");
 return e0;
 }
 ,};
