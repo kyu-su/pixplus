@@ -44,12 +44,11 @@ _.setup_ready = function() {
   try {
     var req = w.pixiv.api.request;
     w.pixiv.api.request = function() {
-      var args = g.Array.prototype.slice.call(arguments);
-      _.debug('pixiv.api.request', args[1]);
-      if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(args[1])) {
-        args[1] = '/' + args[1];
+      _.debug('pixiv.api.request', arguments[1]);
+      if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(arguments[1])) {
+        arguments[1] = '/' + arguments[1];
       }
-      return req.apply(this, args);
+      return req.apply(this, arguments);
     };
   } catch(ex) {
     _.error('Failed to setup filter of pixiv.api.request', ex);
@@ -57,7 +56,14 @@ _.setup_ready = function() {
 
   if (_.conf.general.disable_profile_popup) {
     try {
-      w.colon.d.off('mouseenter','.ui-profile-popup');
+      var d_on = w.colon.d.on;
+      w.colon.d.on = function(evname, query) {
+        if (evname === 'mouseenter' && query === '.ui-profile-popup') {
+          return this;
+        }
+        return d_on.apply(this, arguments);
+      };
+      w.colon.d.off('mouseenter', '.ui-profile-popup');
     } catch(ex) {
       _.error('Failed to disable profile card', ex);
     }
