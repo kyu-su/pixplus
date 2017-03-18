@@ -79,7 +79,8 @@ _.popup.tagedit = {
         mode: 'first',
         i_id: illust.id,
         u_id: illust.author_id,
-        e_id: _.api.uid
+        e_id: _.api.uid,
+        tt: _.api.token
       },
       function(data) {
         that.onload(illust, data.html);
