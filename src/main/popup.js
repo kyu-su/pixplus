@@ -723,13 +723,13 @@ _.popup = {
     _.redirect_jump_page(dom.caption);
 
     dom.taglist.innerHTML = illust.taglist;
-    _.onclick(
-      _.e('a', {text: '[E]', href: '#', id: 'pp-popup-tagedit-button'}, dom.taglist),
-      function() {
-        that.tagedit.start();
-        return true;
-      }
-    );
+    var tag_edit_btn = _.svg.pencil(d);
+    tag_edit_btn.id = 'pp-popup-tagedit-button';
+    dom.taglist.appendChild(tag_edit_btn);
+    _.onclick(tag_edit_btn, function() {
+      that.tagedit.start();
+      return true;
+    });
 
     dom.rating.innerHTML = illust.rating + illust.question;
 

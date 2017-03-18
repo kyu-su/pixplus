@@ -1,6 +1,13 @@
 #pp-popup-tagedit-button {
-  color: #888;
-  font-size: 90%;
+  width: 1em;
+  height: 1em;
+  opacity: 0.6;
+  cursor: pointer;
+  vertical-alignment: bottom;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }
 
 #pp-popup-tagedit-wrapper {
