@@ -723,13 +723,17 @@ _.popup = {
     _.redirect_jump_page(dom.caption);
 
     dom.taglist.innerHTML = illust.taglist;
-    var tag_edit_btn = _.svg.pencil(d);
-    tag_edit_btn.id = 'pp-popup-tagedit-button';
-    dom.taglist.appendChild(tag_edit_btn);
-    _.onclick(tag_edit_btn, function() {
-      that.tagedit.start();
-      return true;
-    });
+    _.onclick(
+      _.e('span',
+          {text: _.icon_chars.pencil,
+           id: 'pp-popup-tagedit-button',
+           cls: 'pp-icons-font'},
+          dom.taglist),
+      function() {
+        that.tagedit.start();
+        return true;
+      }
+    );
 
     dom.rating.innerHTML = illust.rating + illust.question;
 

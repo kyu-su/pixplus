@@ -230,6 +230,15 @@
     &.pp-no-booth a[href^="https://booth.pm/"] {
       display: none;
     }
+
+    #pp-popup-tagedit-button {
+      opacity: 0.6;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
   }
 
   #pp-popup-rating {

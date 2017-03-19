@@ -75,6 +75,11 @@ SVG_GEN_NAMES                   = pencil pencil-off cogwheel following heart \
                                   rating-error comment-loading comment-error \
                                   comment-reply-to
 SVG_GEN_FILES                   = $(SVG_GEN_NAMES:%=src/data/%.svg)
+WOFF_ICONS                      = pencil
+WOFF_ICON_FILES                 = $(WOFF_ICONS:%=src/data/%.svg)
+WOFF_FILE                       = $(BUILD_DIR)/icons.woff
+WOFF_CHAR_MAP                   = $(BUILD_DIR)/icons.json
+WOFF_CSS                        = $(BUILD_DIR)/icon-font.css
 DIST_FILES                      = $(LICENSE) $(wildcard extension/*) $(LIB_JS) $(DATA_JS)
 
 OEX_USERJS                      = $(BUILD_DIR_OEX)/includes/$(notdir $(OPERA_USERJS))
@@ -176,7 +181,7 @@ changelog: $(CHANGELOG_MD) $(RELEASE_ATOM)
 clean-changelog:
 	@rm -f $(CHANGELOG_MD) $(RELEASE_ATOM)
 
-# ================  ================
+# ================ icons ================
 
 $(CSS_ICON_FILES_PNG): $(BUILD_DIR_ICON)/%.png: src/data/%.svg
 	@echo 'Generate: $@'
@@ -226,16 +231,34 @@ $(BUILD_DIR)/_main.js: $(shell sed 's|^|src/main/|' src/main/files.txt)
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
 	@cat $^ >> $@
 
+$(WOFF_FILE): tools/woff_generator.py $(WOFF_ICON_FILES)
+	@echo 'Generate: $@'
+	@$(PYTHON) tools/woff_generator.py $(WOFF_FILE) $(WOFF_CHAR_MAP) $(WOFF_ICONS)
+
+$(WOFF_CSS): $(WOFF_FILE)
+	@echo 'Generate: $@'
+	@( \
+           echo '@font-face {'; \
+           echo 'font-family: "PixplusIcons";'; \
+           echo -n 'src: url("data:application/x-font-woff;charset=utf-8;base64,'; \
+           base64 -w 0 $<; \
+           echo '") format("woff");' \
+         ) > $@
+
 $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js \
                        $(CHANGELOG_JSON) $(CSS_ICON_FILES_SCSS) \
-                       $(wildcard src/data/styles/*.scss) \
-                       $(SVG_GEN_FILES) $(SVG_GEN_GEN)
+                       $(wildcard src/data/styles/*.scss) $(WOFF_CSS) \
+                       $(SVG_GEN_FILES) $(SVG_GEN_GEN) \
+                       $(WOFF_CSS) $(WOFF_CHAR_MAP)
 	@echo 'Generate: $@'
 	@mkdir -p $(dir $@)
 	@echo '// generated from:' > $@
 	@echo $^ | xargs -n 1 echo '//  ' >> $@
 	@/bin/echo -n '_.css=' >> $@
-	@cat $(wildcard src/data/styles/*.scss) | $(SCSS) --style compressed -I $(BUILD_DIR_ICON) | $(STR2JSON) >> $@
+	@( \
+           cat $(wildcard src/data/styles/*.scss) | $(SCSS) --style compressed -I $(BUILD_DIR_ICON); \
+           cat $(WOFF_CSS) \
+         ) | $(STR2JSON) >> $@
 	@echo ';'>> $@
 	@/bin/echo -n '_.conf.__schema=' >> $@
 	@$(JSON2ASCII) < src/data/config.json >> $@
@@ -246,6 +269,9 @@ $(BUILD_DIR)/_data.js: src/data/config.json src/data/i18n.json src/data/i18n.js 
 	@cat src/data/i18n.js >> $@
 	@/bin/echo -n '_.changelog=' >> $@
 	@$(JSON2ASCII) < $(CHANGELOG_JSON) >> $@
+	@echo ';' >> $@
+	@/bin/echo -n '_.icon_chars=' >> $@
+	@$(JSON2ASCII) < $(WOFF_CHAR_MAP) >> $@
 	@echo ';' >> $@
 	@$(PYTHON) $(SVG_GEN_GEN) $(SVG_GEN_FILES) >> $@
 
