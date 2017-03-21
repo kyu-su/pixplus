@@ -54,15 +54,6 @@
     font-weight: bold;
   }
 
-  #pp-popup-status-message {
-    right: 0px;
-    top: 1.5em;
-  }
-
-  #pp-popup-status-text:not(:hover) + #pp-popup-status-message {
-    display: none;
-  }
-
   #pp-popup-ugoira-status {
     opacity: 0.4;
     margin: 0px .2em;

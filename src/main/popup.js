@@ -26,12 +26,21 @@ _.popup = {
     dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
     dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
-    dom.status_message    = _.e('span', {id: 'pp-popup-status-message', cls: 'pp-tooltip'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
     dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
-    dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'}, dom.rightbox);
-    dom.button_comment    = _.e('span', {id: 'pp-popup-button-comment', text: _.icon_chars.comment, cls: 'pp-icons-font'}, dom.rightbox);
+    dom.button_response   = _.e('a',
+                                {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'},
+                                dom.rightbox);
+    dom.button_comment    = _.e('span',
+                                {
+                                  id: 'pp-popup-button-comment',
+                                  text: _.icon_chars.comment,
+                                  cls: 'pp-icons-font',
+                                  key: _.conf.key.popup_comment_toggle,
+                                  tooltip: _.lng.tooltip.comments
+                                },
+                                dom.rightbox);
     dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', cls: 'pp-icons-font'}, dom.rightbox);
     dom.title_link        = _.e('a', null, dom.title);
     dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
@@ -40,8 +49,12 @@ _.popup = {
     dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
     dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
     dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
-    dom.comment_form_btn  = _.e('button', {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
-    dom.comment_conf_btn  = _.e('button', {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'}, dom.comment_toolbar);
+    dom.comment_form_btn  = _.e('button',
+                                {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'},
+                                dom.comment_toolbar);
+    dom.comment_conf_btn  = _.e('button',
+                                {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'},
+                                dom.comment_toolbar);
     dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
     dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
     dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
@@ -698,6 +711,9 @@ _.popup = {
 
     dom.button_bookmark.href = illust.url_bookmark;
     dom.button_bookmark.textContent = _.icon_chars[illust.bookmarked ? 'star_black' : 'star_white'];
+    _.ui.tooltip.set(dom.button_bookmark,
+                     _.lng.tooltip[illust.bookmarked ? 'bookmark_on' : 'bookmark_off'],
+                     _.conf.key.popup_bookmark_start);
 
     if (illust.has_image_response) {
       dom.button_response.classList.remove('pp-active');
@@ -830,7 +846,7 @@ _.popup = {
   },
 
   set_status_message: function(text) {
-    this.dom.status_message.textContent = text || '';
+    _.ui.tooltip.set(this.dom.status_text, text);
   },
 
   status_loading: function() {

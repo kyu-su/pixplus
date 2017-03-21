@@ -229,6 +229,12 @@
     "ugoira_generate_timecode": "Generate timecode",
     "ugoira_how_to_use": "How to use?",
 
+    "tooltip": {
+      "bookmark_off": "Add bookmark (#{key})",
+      "bookmark_on": "Edit bookmark (#{key})",
+      "comments": "Toggle comments (#{key})"
+    },
+
     "apng": {
       "title": "APNG generator",
       "warning": "WARNING: This may take a long time and uses much of memory.",
@@ -471,6 +477,12 @@
     "ugoira_generate_apng": "APNGを生成",
     "ugoira_generate_timecode": "タイムコードを生成",
     "ugoira_how_to_use": "使い方",
+
+    "tooltip": {
+      "bookmark_off": "ブックマークに追加 (#{key})",
+      "bookmark_on": "ブックマークを編集 (#{key})",
+      "comments": "コメントを表示 (#{key})"
+    },
 
     "apng": {
       "title": "APNGジェネレータ",

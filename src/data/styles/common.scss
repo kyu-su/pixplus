@@ -46,6 +46,20 @@ input.pp-flat-input {
   }
 }
 
+.pp-tooltip {
+  position: fixed;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  background-color: #333;
+  color: #fff;
+  white-space: nowrap;
+  z-index: 20002;
+
+  &:empty {
+    display: none;
+  }
+}
+
 .pp-slider {
   display: inline-block;
   vertical-align: middle;
@@ -146,20 +160,6 @@ input.pp-flat-input {
     .pp-dialog-action + .pp-dialog-action {
       margin-left: 0.2em;
     }
-  }
-}
-
-.pp-tooltip {
-  position: absolute;
-  padding: 0.1em 0.3em;
-  border-radius: 2px;
-  background-color: #333;
-  color: #fff;
-  white-space: nowrap;
-  z-index: 20002;
-
-  &:empty {
-    display: none;
   }
 }
 

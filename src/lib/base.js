@@ -226,14 +226,22 @@ var _ = w.pixplus = {
     }
 
     for(var key in options) {
+      var val = options[key];
+      if (key === 'tooltip') {
+        _.ui.tooltip.set(elem, val, options.key);
+        continue;
+      } else if (key === 'key') {
+        continue;
+      }
+
       if (key === 'text') {
-        elem.textContent = options[key];
+        elem.textContent = val;
       } else if (key === 'css') {
-        elem.style.cssText = options[key];
+        elem.style.cssText = val;
       } else if (key === 'cls') {
-        elem.className = options[key];
+        elem.className = val;
       } else {
-        elem.setAttribute(key, options[key]);
+        elem.setAttribute(key, val);
       }
     }
 

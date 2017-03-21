@@ -57,6 +57,73 @@ _.ui = {
       return true;
     });
     return slider;
+  },
+
+  tooltip: {
+    dom: {},
+
+    set: function(target, text, key) {
+      if (text) {
+        if (key) {
+          text = _.i18n.key_subst(text, key);
+        }
+        target.setAttribute('data-pp-tooltip', text);
+      } else {
+        target.removeAttribute('data-pp-tooltip');
+      }
+    },
+
+    show: function(text, target) {
+      var dom = this.dom;
+      if (!dom.root) {
+        dom.root = _.e('div', {cls: 'pp-tooltip'});
+      }
+      dom.root.textContent = text;
+      d.body.appendChild(dom.root);
+
+      var rect = target.getBoundingClientRect();
+
+      console.log(rect, dom.root.offsetHeight);
+      if (rect.top - dom.root.offsetHeight < 10) {
+        dom.root.style.top = (rect.bottom + 4) + 'px';
+      } else {
+        dom.root.style.top = (rect.top - dom.root.offsetHeight - 4) + 'px';
+      }
+
+      var maxleft = d.documentElement.clientWidth - dom.root.offsetWidth - 10,
+          left    = (rect.left + rect.right - dom.root.offsetWidth) / 2;
+      dom.root.style.left = (Math.min(Math.max(10, left), maxleft)) + 'px';
+    },
+
+    hide: function() {
+      var dom = this.dom;
+      if (dom.root && dom.root.parentNode) {
+        dom.root.parentNode.removeChild(dom.root);
+      }
+    },
+
+    init: function() {
+      var that = this;
+
+      _.listen(d.documentElement, 'mouseover', function(ev) {
+        var target = ev.target;
+        if (!target.hasAttribute('data-pp-tooltip')) {
+          return;
+        }
+
+        var text = target.getAttribute('data-pp-tooltip');
+        if (!text) {
+          return;
+        }
+
+        that.show(text, target);
+
+        var conn = _.listen(target, 'mouseleave', function(ev) {
+          that.hide();
+          conn.disconnect();
+        });
+      });
+    }
   }
 };
 
