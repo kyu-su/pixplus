@@ -27,7 +27,7 @@ _.popup = {
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
     dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
-    dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
+    dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-icons-font'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
     dom.button_response   = _.e('a',
                                 {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'},
@@ -320,11 +320,11 @@ _.popup = {
 
     // update resize mode indicator
 
-    dom.resize_mode.textContent = '[' + 'LSO'[resize_mode] + ']';
-    if (resize_mode === this.RM_FIT_LONG) {
-      dom.resize_mode.classList.add('pp-hide');
-    } else {
+    dom.resize_mode.textContent = _.icon_chars[['fit_long', 'fit_short', 'original'][resize_mode]];
+    if (update_scale) {
       dom.resize_mode.classList.remove('pp-hide');
+    } else {
+      dom.resize_mode.classList.add('pp-hide');
     }
 
     if (update_scale) {

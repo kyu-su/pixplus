@@ -75,7 +75,7 @@ SVG_GEN_NAMES                   = pencil pencil-off cogwheel following heart \
                                   rating-error comment-loading comment-error \
                                   comment-reply-to
 SVG_GEN_FILES                   = $(SVG_GEN_NAMES:%=src/data/%.svg)
-WOFF_ICONS                      = pencil star-white star-black comment
+WOFF_ICONS                      = pencil star-white star-black comment fit-long fit-short original
 WOFF_ICON_FILES                 = $(WOFF_ICONS:%=src/data/glyphs/%.svg)
 WOFF_FILE                       = $(BUILD_DIR)/icons.woff
 WOFF_CHAR_MAP                   = $(BUILD_DIR)/icons.json

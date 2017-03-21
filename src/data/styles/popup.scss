@@ -15,14 +15,8 @@
     float: right;
     font-size: 80%;
 
-    a {
+    > * {
       margin-left: 0.2em;
-      font-weight: bold;
-
-      &.pp-active{
-        color: #888;
-        font-weight: normal;
-      }
     }
 
     .pp-icons-font {
@@ -56,7 +50,6 @@
 
   #pp-popup-ugoira-status {
     opacity: 0.4;
-    margin: 0px .2em;
 
     svg {
       display: inline-block;

@@ -7,7 +7,7 @@ svgdir = os.path.join(rootdir, 'src', 'data', 'glyphs')
 
 
 def main(out_font, out_char_map, icons):
-  letters = 'abcde'[:len(icons)]
+  letters = 'abcdefghijklmnopqrstuvwxyz'[:len(icons)]
   font = fontforge.font()
 
   for icon, letter in zip(icons, letters):
