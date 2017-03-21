@@ -31,7 +31,8 @@ _.popup = {
     dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-hide'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
     dom.button_response   = _.e('a', {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'}, dom.rightbox);
-    dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', text: '[B]'}, dom.rightbox);
+    dom.button_comment    = _.e('span', {id: 'pp-popup-button-comment', text: _.icon_chars.comment, cls: 'pp-icons-font'}, dom.rightbox);
+    dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', cls: 'pp-icons-font'}, dom.rightbox);
     dom.title_link        = _.e('a', null, dom.title);
     dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
     dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.root);
@@ -696,11 +697,7 @@ _.popup = {
     dom.title_link.href = illust.url_medium;
 
     dom.button_bookmark.href = illust.url_bookmark;
-    if (illust.bookmarked) {
-      dom.button_bookmark.classList.add('pp-active');
-    } else {
-      dom.button_bookmark.classList.remove('pp-active');
-    }
+    dom.button_bookmark.textContent = _.icon_chars[illust.bookmarked ? 'star_black' : 'star_white'];
 
     if (illust.has_image_response) {
       dom.button_response.classList.remove('pp-active');

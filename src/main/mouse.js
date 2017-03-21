@@ -49,6 +49,11 @@ _.popup.mouse = {
       return true;
     });
 
+    _.onclick(dom.button_comment, function() {
+      _.popup.comment.toggle();
+      return true;
+    });
+
     _.onclick(dom.button_bookmark, function() {
       _.popup.bookmark.toggle();
       return true;

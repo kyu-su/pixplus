@@ -16,7 +16,9 @@ def main(out_font, out_char_map, icons):
 
   font.fontname = 'PixplusIcons'
   font.generate(out_font)
-  json.dump(dict(zip(icons, letters)), open(out_char_map, 'w'))
+  json.dump(dict(zip(map(lambda n: n.replace('-', '_'), icons),
+                     letters)),
+            open(out_char_map, 'w'))
 
 
 if __name__ == '__main__':
