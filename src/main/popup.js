@@ -27,7 +27,14 @@ _.popup = {
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
     dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
-    dom.resize_mode       = _.e('a', {id: 'pp-popup-button-resize-mode', cls: 'pp-icons-font'}, dom.rightbox);
+    dom.resize_mode       = _.e('a',
+                                {
+                                  id: 'pp-popup-button-resize-mode',
+                                  cls: 'pp-icons-font',
+                                  key: _.conf.key.popup_switch_resize_mode,
+                                  tooltip: _.lng.tooltip.resize_mode
+                                },
+                                dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
     dom.button_response   = _.e('a',
                                 {id: 'pp-popup-button-response', text: '[R]', cls: 'pp-hide'},

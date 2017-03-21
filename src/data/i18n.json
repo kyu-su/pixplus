@@ -232,7 +232,8 @@
     "tooltip": {
       "bookmark_off": "Add bookmark (#{key})",
       "bookmark_on": "Edit bookmark (#{key})",
-      "comments": "Toggle comments (#{key})"
+      "comments": "Toggle comments (#{key})",
+      "resize_mode": "Cycle resize mode (#{key})"
     },
 
     "apng": {
@@ -481,7 +482,8 @@
     "tooltip": {
       "bookmark_off": "ブックマークに追加 (#{key})",
       "bookmark_on": "ブックマークを編集 (#{key})",
-      "comments": "コメントを表示 (#{key})"
+      "comments": "コメントを表示 (#{key})",
+      "resize_mode": "リサイズモード切り替え (#{key})"
     },
 
     "apng": {
