@@ -28,7 +28,7 @@ _.popup = {
     dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
     dom.ugoira_status     = _.e('span', {id: 'pp-popup-ugoira-status'}, dom.rightbox);
     dom.button_manga      = _.e('a', {id: 'pp-popup-button-manga', cls: 'pp-hide'}, dom.rightbox);
-    dom.resize_mode       = _.e('a',
+    dom.resize_mode       = _.e('span',
                                 {
                                   id: 'pp-popup-button-resize-mode',
                                   cls: 'pp-icons-font',
