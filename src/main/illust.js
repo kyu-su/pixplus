@@ -477,6 +477,7 @@ _.illust = {
       if (illust.image_response_to) {
         return;
       }
+      // TODO: /novel/show.php?id=******&uarea=response_out
       re = /^\/member_illust\.php\?.*&(?:amp;)?illust_id=(\d+).*&(?:amp;)?uarea=response_out(?:&|$)/.exec(link.getAttribute('href'));
       if (re) {
         illust.image_response_to = g.parseInt(re[1]);
