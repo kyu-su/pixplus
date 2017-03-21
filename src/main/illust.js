@@ -172,7 +172,10 @@ _.illust = {
 
     illust.connection = _.onclick(illust.link, function(ev) {
       for(var p = ev.target; p; p = p.parentNode) {
-        if (p.classList && p.classList.contains('thumbnail-menu')) {
+        if (p instanceof Element &&
+            (p.classList.contains('thumbnail-menu') ||
+             p.classList.contains('_ab-test-one-click-bookmark') ||
+             p.hasAttribute('data-click-action'))) {
           return false;
         }
       }
