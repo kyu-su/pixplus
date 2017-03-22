@@ -72,6 +72,11 @@ _.popup.manga = {
     _.ui.indicator.set_number(svg, illust.manga.page_count - page);
     svg.style.width = svg.style.height = _.popup.dom.button_bookmark.offsetHeight + 'px';
     _.popup.dom.button_manga.classList[this.page >= 0 ? 'add' : 'remove']('pp-active');
+    _.ui.tooltip.set(
+      svg,
+      _.lng.tooltip[this.page >= 0 ? 'manga_mode_off' : 'manga_mode_on'],
+      _.conf.key[this.page >= 0 ? 'popup_manga_end' : 'popup_manga_start']
+    );
   },
 
   show: function(page) {

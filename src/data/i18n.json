@@ -234,7 +234,9 @@
       "bookmark_on": "Edit bookmark (#{key})",
       "comments": "Toggle comments (#{key})",
       "resize_mode": "Cycle resize mode (#{key})",
-      "image_response": "Image response (#{key})"
+      "image_response": "Image response (#{key})",
+      "manga_mode_on": "Start manga mode (#{key})",
+      "manga_mode_off": "End manga mode (#{key})"
     },
 
     "apng": {
@@ -485,7 +487,9 @@
       "bookmark_on": "ブックマークを編集 (#{key})",
       "comments": "コメントを表示 (#{key})",
       "resize_mode": "リサイズモード切り替え (#{key})",
-      "image_response": "イメージレスポンス (#{key})"
+      "image_response": "イメージレスポンス (#{key})",
+      "manga_mode_on": "マンガモード開始 (#{key})",
+      "manga_mode_off": "マンガモード終了 (#{key})"
     },
 
     "apng": {
