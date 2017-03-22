@@ -35,10 +35,10 @@
     &:not(.pp-loading):not(.pp-error) {
       display: none;
     }
-    &:not(.pp-loading) #pp-icon-comment-loading {
+    &:not(.pp-loading) .pp-icon-comment-loading {
       display: none;
     }
-    &:not(.pp-error) #pp-icon-comment-error {
+    &:not(.pp-error) .pp-icon-comment-error {
       display: none;
     }
   }
@@ -48,7 +48,7 @@
   .pp-commform-reply-to-wrap {
     position: relative;
 
-    #pp-icon-comment-reply-to {
+    .pp-icon-comment-reply-to {
       position: absolute;
       bottom: 0px;
       width: 2em;

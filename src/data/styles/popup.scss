@@ -61,10 +61,10 @@
   &:not(.pp-ugoira) #pp-popup-ugoira-status {
     display: none;
   }
-  &:not(.pp-ugoira-playing) #pp-icon-ugoira-playing {
+  &:not(.pp-ugoira-playing) .pp-icon-ugoira-playing {
     display: none;
   }
-  &:not(.pp-ugoira-paused) #pp-icon-ugoira-paused {
+  &:not(.pp-ugoira-paused) .pp-icon-ugoira-paused {
     display: none;
   }
 
@@ -132,11 +132,11 @@
     }
   }
 
-  &:not(.pp-show-comment-form) #pp-icon-pencil-off {
+  &:not(.pp-show-comment-form) .pp-icon-pencil-off {
     display: none;
   }
 
-  &.pp-show-comment-form #pp-icon-pencil {
+  &.pp-show-comment-form .pp-icon-pencil {
     display: none;
   }
 
@@ -246,7 +246,7 @@
       }
     }
 
-    #pp-icon-rating-error {
+    .pp-icon-rating-error {
       position: absolute;
       width: 260px;
       height: 26px;
@@ -254,7 +254,7 @@
       top: 0px;
     }
 
-    .rating:not(.pp-error) #pp-icon-rating-error {
+    .rating:not(.pp-error) .pp-icon-rating-error {
       display: none;
     }
 
@@ -312,19 +312,19 @@
     }
 
     &:not(.pp-fav), &.pp-fav-m, &.pp-mypix {
-      #pp-icon-following {
+      .pp-icon-following {
         display: none;
       }
     }
 
     &:not(.pp-fav-m), &.pp-mypix {
-      #pp-icon-heart {
+      .pp-icon-heart {
         display: none;
       }
     }
 
     &:not(.pp-mypix) {
-      #pp-icon-mypixiv {
+      .pp-icon-mypixiv {
         display: none;
       }
     }
@@ -396,13 +396,13 @@
     transform: matrix(-1,0,0,1,0,0);
   }
 
-  #pp-icon-multipage {
+  .pp-icon-multipage {
     position: absolute;
     opacity: 0.8;
     right: 0px;
     bottom: 0px;
   }
-  &:not(.pp-frontpage-new) #pp-icon-multipage {
+  &:not(.pp-frontpage-new) .pp-icon-multipage {
     display: none;
   }
 }

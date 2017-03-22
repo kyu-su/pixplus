@@ -1,6 +1,7 @@
 import sys
 import json
 import xml.etree.ElementTree as ET
+import re
 
 class Generator:
   ns = 'http://www.w3.org/2000/svg'
@@ -16,7 +17,15 @@ class Generator:
     self.out.write('var %s = doc.createElementNS("%s", "%s");\n' % (varname, self.ns, node.tag.split('}')[-1]))
 
     for name, value in node.attrib.items():
-      self.out.write('%s.setAttribute(%s, %s);\n' % (varname, json.dumps(name), json.dumps(value)))
+      if name == 'id':
+        value = json.dumps(value + '-')
+      else:
+        value = re.sub(r'url\(#([-\w]+)\)', r'url(#\1-" + idn + ")', json.dumps(value))
+
+      self.out.write('%s.setAttribute(%s, %s' % (varname, json.dumps(name), value))
+      if name == 'id':
+        self.out.write('+idn')
+      self.out.write(');\n')
 
     if parent:
       self.out.write('%s.appendChild(%s);\n' % (parent, varname))
@@ -27,14 +36,18 @@ class Generator:
     return varname
 
   def gen(self, filename, name):
+    root = ET.parse(filename).getroot()
     self.out.write('function(doc){ // %s\n' % filename)
-    varname = self.elem(ET.parse(filename).getroot())
-    self.out.write('%s.setAttribute("id", "pp-icon-%s");\n' % (varname, name))
+    self.out.write('var idn=this.id_suffix[%(n)s]=(++this.id_suffix[%(n)s]||1);\n' % {'n': json.dumps(name)})
+    varname = self.elem(root)
+    self.out.write('%s.setAttribute("id", "pp-icon-%s-" + idn);\n' % (varname, name))
+    self.out.write('%s.setAttribute("class", "pp-icon-%s");\n' % (varname, name))
     self.out.write('return %s;\n' % varname)
     self.out.write('}\n')
 
 def main(files, out):
   out.write('_.svg={\n')
+  out.write('id_suffix:{},\n')
   for fn in files:
     name = fn.split('/')[-1].split('.')[0]
     out.write('%s:' % name.replace('-', '_'))
