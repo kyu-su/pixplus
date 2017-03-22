@@ -101,7 +101,7 @@ _.popup = {
     dom.author_status.appendChild(_.svg.mypixiv(d));
 
     dom.ugoira_status.appendChild(dom.ugoira_progress_svg = _.svg.ugoira(d));
-    dom.ugoira_progress_clip = _.q('#pp-icon-ugoira-progress-clip path', dom.ugoira_progress_svg);
+    dom.button_manga.appendChild(dom.manga_progress_svg = _.svg.manga(d));
 
     dom.image_scroller.appendChild(_.svg.multipage(d));
 

@@ -67,7 +67,10 @@ _.popup.manga = {
       page = this.page + 1;
     }
 
-    _.popup.dom.button_manga.textContent = '[M:' + page + '/' + illust.manga.page_count + ']';
+    var svg  = _.popup.dom.manga_progress_svg;
+    _.ui.indicator.set_progress(svg, page / illust.manga.page_count);
+    _.ui.indicator.set_number(svg, illust.manga.page_count - page);
+    svg.style.width = svg.style.height = _.popup.dom.button_bookmark.offsetHeight + 'px';
     _.popup.dom.button_manga.classList[this.page >= 0 ? 'add' : 'remove']('pp-active');
   },
 

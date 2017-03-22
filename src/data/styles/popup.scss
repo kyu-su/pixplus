@@ -9,6 +9,7 @@
     font-size: 120%;
     font-weight: bold;
     line-height: 1em;
+    margin-bottom: 0.1em;
   }
 
   #pp-popup-rightbox {
@@ -47,9 +48,7 @@
     font-weight: bold;
   }
 
-  #pp-popup-ugoira-status {
-    opacity: 0.4;
-
+  #pp-popup-button-manga, #pp-popup-ugoira-status {
     svg {
       display: inline-block;
       vertical-align: middle;
@@ -57,6 +56,9 @@
       width: 1em;
       height: 1em;
     }
+  }
+  #pp-popup-ugoira-status {
+    opacity: 0.4;
   }
   &:not(.pp-ugoira) #pp-popup-ugoira-status {
     display: none;
