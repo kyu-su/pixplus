@@ -124,6 +124,34 @@ _.ui = {
         });
       });
     }
+  },
+
+  indicator: {
+    set_number: function(svg, number) {
+      
+    },
+
+    set_progress: function(svg, progress) {
+      var path = ['12,12', '12,-4', '28,-4'];
+      if (progress >= 0.25) {
+        path.push('28,28');
+      }
+      if (progress >= 0.5) {
+        path.push('-4,28');
+      }
+      if (progress >= 0.75) {
+        path.push('-4, -4');
+      }
+
+      var x, y, rad;
+      rad = g.Math.PI * 2 * (progress - 0.25);
+      x = g.Math.cos(rad) * 12 + 12;
+      y = g.Math.sin(rad) * 12 + 12;
+      path.push(x + ',' + y);
+
+      var clip_path = _.q('.pp-indicator-progress path', svg);
+      clip_path.setAttribute('d', 'M ' + path.join(' ') + ' z');
+    }
   }
 };
 

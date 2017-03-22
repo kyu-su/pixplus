@@ -579,29 +579,12 @@ _.popup = {
       return;
     }
 
-    var data, prog;
-    data = this.illust.ugoira;
-    prog = data.progress[frame_number] / data.duration;
+    var svg  = this.dom.ugoira_progress_svg,
+        data = this.illust.ugoira,
+        prog = data.progress[frame_number] / data.duration;
 
-    var path = ['12,12', '12,-4', '28,-4'];
-    if (prog >= 0.25) {
-      path.push('28,28');
-    }
-    if (prog >= 0.5) {
-      path.push('-4,28');
-    }
-    if (prog >= 0.75) {
-      path.push('-4, -4');
-    }
-
-    var x, y, rad;
-    rad = g.Math.PI * 2 * (prog - 0.25);
-    x = g.Math.cos(rad) * 12 + 12;
-    y = g.Math.sin(rad) * 12 + 12;
-    path.push(x + ',' + y);
-
-    this.dom.ugoira_progress_clip.setAttribute('d', 'M ' + path.join(' ') + ' z');
-    this.dom.ugoira_progress_svg.style.width = this.dom.ugoira_progress_svg.style.height =
+    _.ui.indicator.set_progress(svg, prog);
+    svg.style.width = svg.style.height =
       this.dom.button_bookmark.offsetHeight + 'px';
   },
 
