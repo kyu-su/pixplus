@@ -1,6 +1,24 @@
 pixplus version history
 =======================
 
+## [1.18.1 - 2017/03/23](http://crckyl.hatenablog.com/entry/2017/03/23/pixplus_1.18.1)
+
+### 変更点
+
+* [修正] 「プロフィールカードのポップアップを無効化する」オプションが動かないことがあるバグを修正。
+* [修正] 複数ページ作品で稀にエラーが出る不具合を修正。
+* [修正] タグ編集機能が動かなくなっていた不具合を修正。
+* [修正] pixivのワンクリックブックマーク機能に対応。
+* [変更] UIデザインを改善。
+
+### Changes
+
+* [Fix] Sometimes 'Disable profile card popup' option doesn't works.
+* [Fix] pixplus rarely reports errors with multi-page works.
+* [Fix] Tag editor was not working.
+* [Fix] Support for pixiv's one-click bookmark feature.
+* [Change] Improve UI design.
+
 ## [1.18.0 - 2017/03/05](http://crckyl.hatenablog.com/entry/2017/03/05/pixplus_1.18.0)
 
 ### 変更点

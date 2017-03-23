@@ -1,5 +1,5 @@
 <gupdate protocol="2.0" xmlns="http://www.google.com/update2/response">
   <app appid="lgfejkdjbohjhdpckgbpjjmnbnnikibg">
-    <updatecheck codebase="http://ccl4.info/cgit/pixplus.git/plain/releases/1.18.0/pixplus.crx" version="1.18.0"/>
+    <updatecheck codebase="http://ccl4.info/cgit/pixplus.git/plain/releases/1.18.1/pixplus.crx" version="1.18.1"/>
   </app>
 </gupdate>
