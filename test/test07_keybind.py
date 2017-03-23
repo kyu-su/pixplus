@@ -629,14 +629,13 @@ class Test_KeyBind(TestCase):
 
   def check_scrollbar(self, vertical, horizontal, strict):
     btn = self.q('#pp-popup-button-resize-mode')
-    if vertical or horizontal:
-      self.assertTrue(btn.is_displayed())
-      if vertical and horizontal:
-        self.assertEqual(btn.text, '[O]')
-      else:
-        self.assertEqual(btn.text, '[S]')
+    self.assertTrue(btn.is_displayed())
+    if vertical and horizontal:
+      self.assertEqual(btn.get_attribute('data-pp-resize-mode'), 'O')
+    elif vertical or horizontal:
+      self.assertEqual(btn.get_attribute('data-pp-resize-mode'), 'S')
     else:
-      self.assertFalse(btn.is_displayed())
+      self.assertEqual(btn.get_attribute('data-pp-resize-mode'), 'L')
 
     cw, ch, sw, sh, lw, lh = self.js('''
       return (function(s, l) {
@@ -752,10 +751,10 @@ class Test_KeyBind(TestCase):
     self.set_conf('popup.big_image', False)
 
     self.check_resize_mode(targets['vertical-small'],    'vertical',   False, True,  False)
-    self.check_resize_mode(targets['vertical-medium'],   'vertical',   False, False, False)
+    self.check_resize_mode(targets['vertical-medium'],   'vertical',   False, True, False)
     self.check_resize_mode(targets['vertical-large'],    'vertical',   True,  False, False)
     self.check_resize_mode(targets['horizontal-small'],  'horizontal', False, True,  False)
-    self.check_resize_mode(targets['horizontal-medium'], 'horizontal', False, False, False)
+    self.check_resize_mode(targets['horizontal-medium'], 'horizontal', False, True, False)
     self.check_resize_mode(targets['horizontal-large'],  'horizontal', True,  False, False)
 
     self.set_conf('popup.big_image', True)

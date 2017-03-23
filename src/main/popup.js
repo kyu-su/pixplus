@@ -334,6 +334,7 @@ _.popup = {
     // update resize mode indicator
 
     dom.resize_mode.textContent = _.icon_chars[['fit_long', 'fit_short', 'original'][resize_mode]];
+    dom.resize_mode.setAttribute('data-pp-resize-mode', 'LSO'[resize_mode]);
     if (update_scale) {
       dom.resize_mode.classList.remove('pp-hide');
     } else {
