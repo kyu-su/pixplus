@@ -60,7 +60,8 @@ _.popup.manga = {
 
       var img_cnt = pages[this.page].length;
       if (img_cnt > 1) {
-        page = page + '-' + (page + img_cnt - 1);
+        // page = page + '-' + (page + img_cnt - 1);
+        page = page + img_cnt - 1;
       }
 
     } else {
