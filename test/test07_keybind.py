@@ -760,10 +760,10 @@ class Test_KeyBind(TestCase):
     self.set_conf('popup.big_image', True)
 
     self.check_resize_mode(targets['vertical-small'],    'vertical',   False, True,  True)
-    self.check_resize_mode(targets['vertical-medium'],   'vertical',   False, False, True)
+    self.check_resize_mode(targets['vertical-medium'],   'vertical',   False, True, True)
     self.check_resize_mode(targets['vertical-large'],    'vertical',   True,  False, True)
     self.check_resize_mode(targets['horizontal-small'],  'horizontal', False, True,  True)
-    self.check_resize_mode(targets['horizontal-medium'], 'horizontal', False, False, True)
+    self.check_resize_mode(targets['horizontal-medium'], 'horizontal', False, True, True)
     self.check_resize_mode(targets['horizontal-large'],  'horizontal', True,  False, True)
 
   def check_resize_mode_manga(self, illust_id, orientation, both_scrollable, has_margin, big_image):
