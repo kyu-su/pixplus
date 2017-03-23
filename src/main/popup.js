@@ -706,6 +706,7 @@ _.popup = {
     dom.title_link.href = illust.url_medium;
 
     dom.button_bookmark.href = illust.url_bookmark;
+    dom.button_bookmark.classList[illust.bookmarked ? 'add' : 'remove']('pp-active');
     dom.button_bookmark.textContent = _.icon_chars[illust.bookmarked ? 'star_black' : 'star_white'];
     _.ui.tooltip.set(dom.button_bookmark,
                      _.lng.tooltip[illust.bookmarked ? 'bookmark_on' : 'bookmark_off'],
