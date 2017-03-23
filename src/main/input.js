@@ -197,17 +197,21 @@ _.popup.input = (function(mod) {
     _.popup.resize_mode = _.popup.resize_mode_next;
     _.popup.adjust();
 
+    var illust = _.popup.illust;
+
     if (_.popup.manga.active) {
-      var page_data = _.popup.illust.manga.pages[_.popup.manga.page];
+      var page_data = illust.manga.pages[_.popup.manga.page];
       if (page_data.filter(function(p){return !p.image_big;}).length >= 1) {
         if (_.popup.resize_mode === _.popup.RM_FIT_LONG) {
           _.popup.resize_mode = _.popup.RM_AUTO;
         }
         _.popup.status_loading();
-        _.illust.load_manga_page(_.popup.illust, _.popup.manga.page, true);
+        _.illust.load_manga_page(illust, _.popup.manga.page, true);
       }
+
     } else {
-      if (!_.popup.illust.image_big) {
+      if ((!illust.ugoira_player && !illust.image_big) ||
+          (illust.ugoira_player && illust.ugoira === illust.ugoira_small)) {
         if (_.popup.resize_mode === _.popup.RM_FIT_LONG) {
           _.popup.resize_mode = _.popup.RM_AUTO;
         }

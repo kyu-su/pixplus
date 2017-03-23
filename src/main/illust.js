@@ -639,6 +639,44 @@ _.illust = {
       load_images();
     }
 
+    var load_ugoira_player = function() {
+      if (illust.ugoira_player) {
+        illust.ugoira_player.stop();
+      }
+
+      illust.ugoira_player = new w.ZipImagePlayer({
+        canvas: illust.ugoira_canvas,
+        source: illust.ugoira.src,
+        metadata: illust.ugoira,
+        chunkSize: 3e5,
+        loop: true,
+        autoStart: false,
+        debug: false,
+        autosize: true
+      });
+
+      illust.ugoira_player._displayFrame = function() {
+        var ret;
+
+        ret = w.ZipImagePlayer.prototype._displayFrame.apply(this, arguments);
+
+        if (_.popup.running && _.popup.illust === illust) {
+          var canvas = illust.ugoira_canvas;
+
+          if (canvas.width !== canvas.naturalWidth ||
+              canvas.height !== canvas.naturalHeight) {
+            canvas.naturalWidth = canvas.width;
+            canvas.naturalHeight = canvas.height;
+            _.popup.adjust();
+          }
+
+          _.popup.update_ugoira_progress(this.getCurrentFrame());
+        }
+
+        return ret;
+      };
+    };
+
     if (!/^(?:loading|complete)$/.test(illust.load_statuses.html)) {
       _.debug('Start loading medium html...');
 
@@ -670,41 +708,8 @@ _.illust = {
 
           if (!illust.ugoira_player) {
             illust.ugoira_canvas = _.e('canvas');
-
             try {
-
-              illust.ugoira_player = new w.ZipImagePlayer({
-                canvas: illust.ugoira_canvas,
-                source: illust.ugoira.src,
-                metadata: illust.ugoira,
-                chunkSize: 3e5,
-                loop: true,
-                autoStart: false,
-                debug: false,
-                autosize: true
-              });
-
-              illust.ugoira_player._displayFrame = function() {
-                var ret;
-
-                ret = w.ZipImagePlayer.prototype._displayFrame.apply(this, arguments);
-
-                if (_.popup.running && _.popup.illust === illust) {
-                  var canvas = illust.ugoira_canvas;
-
-                  if (canvas.width !== canvas.naturalWidth ||
-                      canvas.height !== canvas.naturalHeight) {
-                    canvas.naturalWidth = canvas.width;
-                    canvas.naturalHeight = canvas.height;
-                    _.popup.adjust();
-                  }
-
-                  _.popup.update_ugoira_progress(this.getCurrentFrame());
-                }
-
-                return ret;
-              };
-
+              load_ugoira_player();
             } catch(ex) {
               send_error(g.String(ex));
               return;
@@ -733,6 +738,17 @@ _.illust = {
         --illust.loading_count;
         send_error('Failed to load medium html');
       });
+
+    } else if (load_big_image && illust.ugoira_player && illust.ugoira === illust.ugoira_small) {
+      illust.ugoira = illust.ugoira_big;
+      illust.load_statuses.big = 'complete';
+      try {
+        load_ugoira_player();
+      } catch(ex) {
+        send_error(String(ex));
+        return;
+      }
+      _.popup.onload(illust);
     }
   },
 
