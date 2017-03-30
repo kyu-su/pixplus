@@ -227,10 +227,15 @@ var _ = w.pixplus = {
 
     for(var key in options) {
       var val = options[key];
-      if (key === 'tooltip') {
-        _.ui.tooltip.set(elem, val, options.key);
+      if (key === 'tooltip' || key === 'key') {
         continue;
-      } else if (key === 'key') {
+      } else if (key === 'svg') {
+        if (typeof(val) === 'string') {
+          val = [val];
+        }
+        val.forEach(function(name) {
+          elem.appendChild(_.svg[name](d));
+        });
         continue;
       }
 
@@ -243,6 +248,10 @@ var _ = w.pixplus = {
       } else {
         elem.setAttribute(key, val);
       }
+    }
+
+    if (options.tooltip) {
+      _.ui.tooltip.set(elem, _.lng.tooltip[val], options.key);
     }
 
     if (parent) {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24" height="24" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+     >
+  <path
+      fill="#000"
+      stroke="#000"
+      stroke-width="1.6"
+      stroke-linejoin="round"
+      sodipodi:type="star"
+      sodipodi:sides="5"
+      sodipodi:cx="12"
+      sodipodi:cy="13.114592"
+      sodipodi:r1="10"
+      sodipodi:r2="4.1437802"
+      sodipodi:arg1="-1.5707963"
+      sodipodi:arg2="-0.9424778"
+      d="m 12,3.1145916 2.435653,6.6476114 7.074912,0.262219 -5.569596,4.370668 1.936883,6.809672 L 12,17.258372 6.1221473,21.204761 8.0590308,14.39509 2.4894349,10.024421 9.5643471,9.762203 Z"
+      />
+</svg>

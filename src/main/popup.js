@@ -23,6 +23,7 @@ _.popup = {
 
     dom.root              = _.e('div', {id: 'pp-popup'});
     dom.title             = _.e('div', {id: 'pp-popup-title'}, dom.root);
+    dom.title_link        = _.e('a', null, dom.title);
     dom.rightbox          = _.e('div', {id: 'pp-popup-rightbox'}, dom.title);
     dom.status            = _.e('span', {id: 'pp-popup-status'}, dom.rightbox);
     dom.status_text       = _.e('span', {id: 'pp-popup-status-text'}, dom.status);
@@ -31,49 +32,64 @@ _.popup = {
     dom.resize_mode       = _.e('span',
                                 {
                                   id: 'pp-popup-button-resize-mode',
-                                  cls: 'pp-icons-font',
+                                  svg: ['rm_fit_short', 'rm_fit_long', 'rm_original'],
                                   key: _.conf.key.popup_switch_resize_mode,
-                                  tooltip: _.lng.tooltip.resize_mode
+                                  tooltip: 'resize_mode'
                                 },
                                 dom.rightbox);
     dom.button_response   = _.e('a',
                                 {
                                   id: 'pp-popup-button-response',
-                                  text: _.icon_chars.response,
-                                  cls: 'pp-icons-font',
+                                  svg: 'response',
                                   key: _.conf.key.popup_open_response,
-                                  tooltip: _.lng.tooltip.image_response
+                                  tooltip: 'image_response'
                                 },
                                 dom.rightbox);
     dom.button_comment    = _.e('span',
                                 {
                                   id: 'pp-popup-button-comment',
-                                  text: _.icon_chars.comment,
-                                  cls: 'pp-icons-font',
+                                  svg: 'comments',
                                   key: _.conf.key.popup_comment_toggle,
-                                  tooltip: _.lng.tooltip.comments
+                                  tooltip: 'comments'
                                 },
                                 dom.rightbox);
-    dom.button_bookmark   = _.e('a', {id: 'pp-popup-button-bookmark', cls: 'pp-icons-font'}, dom.rightbox);
-    dom.title_link        = _.e('a', null, dom.title);
-    dom.title_clearfix    = _.e('div', {css: 'clear:both'}, dom.root);
+    dom.button_bookmark   = _.e('a',
+                                {
+                                  id: 'pp-popup-button-bookmark',
+                                  cls: 'pp-icons-font',
+                                  svg: ['star_white', 'star_black']
+                                },
+                                dom.rightbox);
     dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.root);
     dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
     dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
     dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
     dom.comment_toolbar   = _.e('div', {id: 'pp-popup-comment-toolbar'}, dom.comment_wrapper);
     dom.comment_form_btn  = _.e('button',
-                                {id: 'pp-popup-comment-form-btn', cls: 'pp-popup-comment-btn'},
+                                {
+                                  id: 'pp-popup-comment-form-btn',
+                                  cls: 'pp-popup-comment-btn',
+                                  svg: ['pencil', 'pencil_off']
+                                },
                                 dom.comment_toolbar);
     dom.comment_conf_btn  = _.e('button',
-                                {id: 'pp-popup-comment-config-btn', cls: 'pp-popup-comment-btn'},
+                                {
+                                  id: 'pp-popup-comment-config-btn',
+                                  cls: 'pp-popup-comment-btn',
+                                  svg: 'cogwheel'
+                                },
                                 dom.comment_toolbar);
     dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
     dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
     dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
     dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
     dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
-    dom.author_status     = _.e('div', {id: 'pp-popup-author-status'}, dom.info);
+    dom.author_status     = _.e('div',
+                                {
+                                  id: 'pp-popup-author-status',
+                                  svg: ['following', 'heart', 'mypixiv']
+                                },
+                                dom.info);
     dom.datetime          = _.e('div', {id: 'pp-popup-date'}, dom.info);
     dom.size_tools        = _.e('div', {id: 'pp-popup-size-tools'}, dom.info);
     dom.size              = _.e('span', {id: 'pp-popup-size'}, dom.info);
@@ -85,28 +101,19 @@ _.popup = {
     dom.author_staccfeed  = _.e('a', {id: 'pp-popup-author-staccfeed'}, dom.author_links);
     dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
     dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
-    dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller'}, dom.image_wrapper);
+    dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller', svg: 'multipage'}, dom.image_wrapper);
     dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
-    dom.olc_prev          = _.e('div', {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc'}, dom.image_scroller);
-    dom.olc_next          = _.e('div', {id: 'pp-popup-olc-next', cls: 'pp-popup-olc'}, dom.image_scroller);
+    dom.olc_prev          = _.e('div',
+                                {id: 'pp-popup-olc-prev', cls: 'pp-popup-olc', svg: 'olc_arrow'},
+                                dom.image_scroller);
+    dom.olc_next          = _.e('div',
+                                {id: 'pp-popup-olc-next', cls: 'pp-popup-olc', svg: 'olc_arrow'},
+                                dom.image_scroller);
     dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
     dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
 
-    dom.comment_form_btn.appendChild(_.svg.pencil(d));
-    dom.comment_form_btn.appendChild(_.svg.pencil_off(d));
-    dom.comment_conf_btn.appendChild(_.svg.cogwheel(d));
-
-    dom.author_status.appendChild(_.svg.following(d));
-    dom.author_status.appendChild(_.svg.heart(d));
-    dom.author_status.appendChild(_.svg.mypixiv(d));
-
     dom.ugoira_status.appendChild(dom.ugoira_progress_svg = _.svg.ugoira(d));
     dom.button_manga.appendChild(dom.manga_progress_svg = _.svg.manga(d));
-
-    dom.image_scroller.appendChild(_.svg.multipage(d));
-
-    dom.olc_prev.appendChild(dom.olc_prev_icon = _.svg.olc_arrow(d));
-    dom.olc_next.appendChild(dom.olc_next_icon = _.svg.olc_arrow(d));
 
 
     this.comment_conf_menu = new _.PopupMenu(dom.comment_conf_btn, this.dom.root);
@@ -333,7 +340,6 @@ _.popup = {
 
     // update resize mode indicator
 
-    dom.resize_mode.textContent = _.icon_chars[['fit_long', 'fit_short', 'original'][resize_mode]];
     dom.resize_mode.setAttribute('data-pp-resize-mode', 'LSO'[resize_mode]);
     if (update_scale) {
       dom.resize_mode.classList.remove('pp-hide');
@@ -519,8 +525,8 @@ _.popup = {
 
         dom.olc_next.style.right = this.scrollbar_width + 'px';
 
-        this.adjust_olc_icon(dom.olc_prev_icon, width, height);
-        this.adjust_olc_icon(dom.olc_next_icon, width, height, true);
+        this.adjust_olc_icon(_.q('svg', dom.olc_prev), width, height);
+        this.adjust_olc_icon(_.q('svg', dom.olc_next), width, height, true);
 
         dom.olc_prev.classList.add('pp-active');
         dom.olc_next.classList.add('pp-active');
@@ -708,7 +714,6 @@ _.popup = {
 
     dom.button_bookmark.href = illust.url_bookmark;
     dom.button_bookmark.classList[illust.bookmarked ? 'add' : 'remove']('pp-active');
-    dom.button_bookmark.textContent = _.icon_chars[illust.bookmarked ? 'star_black' : 'star_white'];
     _.ui.tooltip.set(dom.button_bookmark,
                      _.lng.tooltip[illust.bookmarked ? 'bookmark_on' : 'bookmark_off'],
                      _.conf.key.popup_bookmark_start);
@@ -736,9 +741,12 @@ _.popup = {
     dom.taglist.innerHTML = illust.taglist;
     _.onclick(
       _.e('span',
-          {text: _.icon_chars.pencil,
-           id: 'pp-popup-tagedit-button',
-           cls: 'pp-icons-font'},
+          {
+            id: 'pp-popup-tagedit-button',
+            cls: 'pp-icons-font',
+            svg: 'pencil',
+            tooltip: 'tagedit'
+          },
           dom.taglist),
       function() {
         that.tagedit.start();

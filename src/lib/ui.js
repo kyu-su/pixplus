@@ -63,14 +63,16 @@ _.ui = {
     dom: {},
 
     set: function(target, text, key) {
-      if (text) {
-        if (key) {
-          text = _.i18n.key_subst(text, key);
+      [target].concat(_.qa('svg', target)).forEach(function(target) {
+        if (text) {
+          if (key) {
+            text = _.i18n.key_subst(text, key);
+          }
+          target.setAttribute('data-pp-tooltip', text);
+        } else {
+          target.removeAttribute('data-pp-tooltip');
         }
-        target.setAttribute('data-pp-tooltip', text);
-      } else {
-        target.removeAttribute('data-pp-tooltip');
-      }
+      });
     },
 
     show: function(text, target) {

@@ -17,6 +17,9 @@ class Generator:
     self.out.write('var %s = doc.createElementNS("%s", "%s");\n' % (varname, self.ns, node.tag.split('}')[-1]))
 
     for name, value in node.attrib.items():
+      if ':' in name:
+        continue
+
       if name == 'id':
         value = json.dumps(value + '-')
       else:
