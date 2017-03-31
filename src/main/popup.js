@@ -60,7 +60,8 @@ _.popup = {
                                   svg: ['star_white', 'star_black']
                                 },
                                 dom.rightbox);
-    dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.root);
+    dom.header_wrapper    = _.e('div', {id: 'pp-popup-header-wrapper'}, dom.root);
+    dom.header            = _.e('div', {id: 'pp-popup-header'}, dom.header_wrapper);
     dom.caption_wrapper   = _.e('div', {id: 'pp-popup-caption-wrapper'}, dom.header);
     dom.caption           = _.e('div', {id: 'pp-popup-caption'}, dom.caption_wrapper);
     dom.comment_wrapper   = _.e('div', {id: 'pp-popup-comment-wrapper'}, dom.caption_wrapper);
@@ -100,7 +101,7 @@ _.popup = {
     dom.author_bookmarks  = _.e('a', {id: 'pp-popup-author-bookmarks'}, dom.author_links);
     dom.author_staccfeed  = _.e('a', {id: 'pp-popup-author-staccfeed'}, dom.author_links);
     dom.info_clearfix     = _.e('div', {css: 'clear:both'}, dom.info);
-    dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper'}, dom.root);
+    dom.image_wrapper     = _.e('div', {id: 'pp-popup-image-wrapper', cls: 'pp-popup-content'}, dom.root);
     dom.image_scroller    = _.e('div', {id: 'pp-popup-image-scroller', svg: 'multipage'}, dom.image_wrapper);
     dom.image_layout      = _.e('a', {id: 'pp-popup-image-layout'}, dom.image_scroller);
     dom.olc_prev          = _.e('div',
@@ -109,8 +110,8 @@ _.popup = {
     dom.olc_next          = _.e('div',
                                 {id: 'pp-popup-olc-next', cls: 'pp-popup-olc', svg: 'olc_arrow'},
                                 dom.image_scroller);
-    dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper'}, dom.root);
-    dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper'}, dom.root);
+    dom.bookmark_wrapper  = _.e('div', {id: 'pp-popup-bookmark-wrapper', cls: 'pp-popup-content'}, dom.root);
+    dom.tagedit_wrapper   = _.e('div', {id: 'pp-popup-tagedit-wrapper', cls: 'pp-popup-content'}, dom.root);
 
     dom.ugoira_status.appendChild(dom.ugoira_progress_svg = _.svg.ugoira(d));
     dom.button_manga.appendChild(dom.manga_progress_svg = _.svg.manga(d));
