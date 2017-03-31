@@ -30,7 +30,6 @@
 
     svg {
       cursor: pointer;
-      width: 1em;
       height: 1em;
       display: inline-block;
       vertical-align: middle;
@@ -67,10 +66,10 @@
         }
       }
     }
-  }
 
-  #pp-popup-button-resize-mode {
-    cursor: pointer;
+    #pp-popup-button-manga svg {
+      opacity: 1;
+    }
   }
 
   #pp-popup-status {
@@ -88,9 +87,6 @@
     font-weight: bold;
   }
 
-  #pp-popup-ugoira-status {
-    opacity: 0.4;
-  }
   &:not(.pp-ugoira) #pp-popup-ugoira-status {
     display: none;
   }

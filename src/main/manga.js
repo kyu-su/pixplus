@@ -1,4 +1,48 @@
 _.popup.manga = {
+  indicator: {
+    set_text: function(svg, text, maxchars) {
+      var g = _.q('.pp-icon-indicator-text', svg);
+      if (g) {
+        _.clear(g);
+      } else {
+        g = _.e('g', {cls: 'pp-icon-indicator-text'}, svg);
+      }
+
+
+      var pad = 6, offset = 0;
+
+      if (maxchars) {
+        offset = (maxchars - text.length)*8 / 2;
+      }
+
+
+      text.split('').forEach(function(chr, idx) {
+        var glyph = _.q('*[data-pp-char="' + chr + '"]', svg);
+        if (!glyph) {
+          return;
+        }
+        glyph = glyph.cloneNode(true);
+        glyph.setAttribute('transform', 'translate(' + (idx * 8 + 4 + pad + offset) + ',16.5)');
+        g.appendChild(glyph);
+      });
+
+
+      var width = (maxchars || text.length) * 8 + (pad * 2);
+      svg.setAttribute('width', width);
+      svg.setAttribute('height', '24');
+      svg.setAttribute('viewBox', '0 0 ' + width + ' 24');
+      svg.style.width = 'calc(1em*' + (width/24) + ')';
+      svg.style.height = '1em';
+      _.q('.pp-icon-manga-frame', svg).setAttribute('width', width - 4);
+    },
+
+    set_progress: function(svg, progress) {
+      var box = _.q('.pp-icon-manga-progress', svg),
+          mw = parseInt(_.q('.pp-icon-manga-frame', svg).getAttribute('width')) - 2;
+      box.setAttribute('width', mw * progress);
+    }
+  },
+
   active: false,
   page: -1,
 
@@ -50,28 +94,38 @@ _.popup.manga = {
   update_button: function() {
     var illust = _.popup.illust,
         pages = illust.manga.pages,
-        page;
+        page_count = illust.manga.page_count,
+        label, prog, maxchars;
 
-    if (this.page >= 0 && pages) {
-      page = 1;
-      for(var i = 0; i < this.page; ++i) {
-        page += pages[i].length;
+    if (pages) {
+      if (!illust.manga.indicator_labels) {
+        illust.manga.indicator_labels = pages.reduce(function(v, pp) {
+          var l = v[1];
+          if (pp.length >= 2) {
+            l += '-' + (l + pp.length - 1);
+          }
+          l += '/' + page_count;
+          v[0].push([l, v[1] + pp.length - 1]);
+          return [v[0], v[1] + pp.length];
+        }, [[], 1])[0];
       }
 
-      var img_cnt = pages[this.page].length;
-      if (img_cnt > 1) {
-        // page = page + '-' + (page + img_cnt - 1);
-        page = page + img_cnt - 1;
+      if (this.page >= 0) {
+        var lp = illust.manga.indicator_labels[this.page];
+        label = lp[0];
+        prog = lp[1];
+      } else {
+        label = (prog = 0) + '/' + page_count;
       }
-
+      maxchars = Math.max.apply(Math, illust.manga.indicator_labels.map(function(l) { return l[0].length; }));
     } else {
-      page = this.page + 1;
+      label = String(prog = this.page + 1);
     }
 
     var svg  = _.popup.dom.manga_progress_svg;
-    _.ui.indicator.set_progress(svg, page / illust.manga.page_count);
-    _.ui.indicator.set_number(svg, illust.manga.page_count - page);
-    svg.style.width = svg.style.height = _.popup.dom.button_bookmark.offsetHeight + 'px';
+    this.indicator.set_text(svg, label, maxchars);
+    this.indicator.set_progress(svg, prog / page_count);
+
     _.popup.dom.button_manga.classList[this.page >= 0 ? 'add' : 'remove']('pp-active');
     _.ui.tooltip.set(
       svg,

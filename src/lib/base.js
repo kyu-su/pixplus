@@ -244,7 +244,7 @@ var _ = w.pixplus = {
       } else if (key === 'css') {
         elem.style.cssText = val;
       } else if (key === 'cls') {
-        elem.className = val;
+        elem.setAttribute('class', val);
       } else {
         elem.setAttribute(key, val);
       }

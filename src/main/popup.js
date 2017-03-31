@@ -586,13 +586,30 @@ _.popup = {
       return;
     }
 
-    var svg  = this.dom.ugoira_progress_svg,
+    var svg = this.dom.ugoira_progress_svg,
         data = this.illust.ugoira,
-        prog = data.progress[frame_number] / data.duration;
+        progress = data.progress[frame_number] / data.duration;
 
-    _.ui.indicator.set_progress(svg, prog);
-    svg.style.width = svg.style.height =
-      this.dom.button_bookmark.offsetHeight + 'px';
+
+    var path = ['12,12', '12,-4', '28,-4'];
+    if (progress >= 0.25) {
+      path.push('28,28');
+    }
+    if (progress >= 0.5) {
+      path.push('-4,28');
+    }
+    if (progress >= 0.75) {
+      path.push('-4, -4');
+    }
+
+    var x, y, rad;
+    rad = g.Math.PI * 2 * (progress - 0.25);
+    x = g.Math.cos(rad) * 12 + 12;
+    y = g.Math.sin(rad) * 12 + 12;
+    path.push(x + ',' + y);
+
+    var clip_path = _.q('.pp-indicator-progress path', svg);
+    clip_path.setAttribute('d', 'M ' + path.join(' ') + ' z');
   },
 
   clear: function() {

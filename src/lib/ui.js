@@ -126,66 +126,6 @@ _.ui = {
         });
       });
     }
-  },
-
-  indicator: {
-    set_number: function(svg, number) {
-      _.qa('.pp-indicator-num', svg).forEach(function(node) {
-        node.style.visibility = 'hidden';
-      });
-
-      if (number > 99) {
-        number = 99;
-      } else {
-        // ...
-      }
-
-      var d1 = _.q('.pp-indicator-num-' +           (number % 10) + '[data-digit="1"]', svg),
-          d2 = _.q('.pp-indicator-num-' + Math.floor(number / 10) + '[data-digit="2"]', svg);
-
-      d1.style.visibility = 'visible';
-
-      if (number < 10) {
-        d1.setAttribute('transform', 'translate(12, 16.5)');
-
-        if (d2) {
-          d2.style.visibility = 'hidden';
-        }
-      } else {
-        d1.setAttribute('transform', 'translate(16, 16.5)');
-
-        if (!d2) {
-          var d2_ = _.q('.pp-indicator-num-' + Math.floor(number / 10), svg);
-          d2 = d2_.cloneNode(true);
-          d2.setAttribute('data-digit', '2');
-          d2_.parentNode.appendChild(d2);
-        }
-        d2.style.visibility = 'visible';
-        d2.setAttribute('transform', 'translate(8, 16.5)');
-      }
-    },
-
-    set_progress: function(svg, progress) {
-      var path = ['12,12', '12,-4', '28,-4'];
-      if (progress >= 0.25) {
-        path.push('28,28');
-      }
-      if (progress >= 0.5) {
-        path.push('-4,28');
-      }
-      if (progress >= 0.75) {
-        path.push('-4, -4');
-      }
-
-      var x, y, rad;
-      rad = g.Math.PI * 2 * (progress - 0.25);
-      x = g.Math.cos(rad) * 12 + 12;
-      y = g.Math.sin(rad) * 12 + 12;
-      path.push(x + ',' + y);
-
-      var clip_path = _.q('.pp-indicator-progress path', svg);
-      clip_path.setAttribute('d', 'M ' + path.join(' ') + ' z');
-    }
   }
 };
 
