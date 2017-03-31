@@ -405,6 +405,9 @@ _.popup = {
       }
     }
 
+    image_scroller.style.minWidth  = Math.min(600, max_width)  + 'px';
+    image_scroller.style.minHeight = Math.min(600, max_height) + 'px';
+
 
 
 
