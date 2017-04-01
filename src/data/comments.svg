@@ -8,5 +8,5 @@
   </defs>
   <path fill="#000" d="M 8,18 5.9238281,19 C 5.4766652,22.163366 3,23 3,23 c 5.0108953,0 6.635146,-2.54389 7.166016,-4 z"/>
   <rect fill="#000" stroke="none" x="2" y="6" width="16" height="13" rx="4" ry="4" mask="url(#mask4218)"/>
-  <rect fill="#000" stroke="none" x="6" y="2" width="16" height="13" rx="4" ry="4"/>
+  <rect fill="#000" stroke="none" x="7" y="1" width="16" height="13" rx="4" ry="4"/>
 </svg>
