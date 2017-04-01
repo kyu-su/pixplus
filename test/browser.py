@@ -122,10 +122,14 @@ class Browser:
     return self.driver.execute_script(script, *args)
 
   def geom(self, element):
+    return self.geom2(element)[:4]
+
+  def geom2(self, element):
     return tuple(map(round, self.js('''
       var elem = arguments[0];
       var rect = elem.getBoundingClientRect();
-      return [rect.left, rect.top, rect.width, rect.height];
+      return [rect.left, rect.top, rect.width, rect.height,
+              rect.left + rect.width, rect.top + rect.height];
     ''', element)))
 
   def screen_size(self):

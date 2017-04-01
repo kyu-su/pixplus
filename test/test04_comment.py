@@ -200,13 +200,13 @@ class Test_Comment(TestCase):
     self.assertTrue(self.x(stamp_xpath).is_displayed())
 
     btn = self.q('#pp-popup-comment-config-btn')
-    x, y, w, h = self.geom(btn)
+    x, y, w, h, r, b = self.geom2(btn)
     self.click(btn)
     time.sleep(1)
 
     menu = self.q('.pp-popup-menu')
     self.assertTrue(menu.is_displayed())
-    self.assertEqual(self.geom(menu)[:2], (x, y + h))
+    self.assertEqual(self.geom(menu)[:2], (x, b))
 
     sel_show_comment_form = '.pp-popup-menu-item[data-name="popup_show_comment_form"] input[type="checkbox"]'
     sel_hide_stamp_comments = '.pp-popup-menu-item[data-name="popup_hide_stamp_comments"] input[type="checkbox"]'
