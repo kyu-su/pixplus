@@ -13,6 +13,4 @@ class Test_Format(TestCase):
       iid, url = self.config['test-targets']['format'][fmt]
       self.find_illust(lambda i: self.popup_get_illust_data('id') == iid)
       self.popup_wait_big_image()
-
-      url2 = self.q('#pp-popup-image-layout img').get_attribute('src')
-      self.assertEqual(re.sub(r'^https?:', ':', url2), url)
+      self.assertEqual(self.q('#pp-popup-image-layout img').get_attribute('src'), url)
