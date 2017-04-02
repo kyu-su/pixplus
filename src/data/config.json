@@ -41,11 +41,11 @@
     {"key": "minimum_size", "value": 0}
   ]},
 
-  {"name": "mypage", "items": [
+  {"name": "mypage", "hide": true, "items": [
     {"key": "layout_history", "value": ""}
   ]},
 
-  {"name": "key", "items": [
+  {"name": "key", "editor": "Key", "items": [
     {"key": "popup_prev", "value": "Backspace,a,k"},
     {"key": "popup_prev_direction", "value": "Left"},
     {"key": "popup_next", "value": "Space,j"},

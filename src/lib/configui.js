@@ -22,20 +22,17 @@ _.configui = {
         }
 
         if (item.subsection && item.subsection !== subsection) {
-          _.e('div', {text: lang.pref[section.name + '_' + item.subsection]},
+          _.e('div', {text: lang.pref[section.name + '_' + item.subsection] || item.subsection},
               _.e('td', {colspan: 3}, _.e('tr', {cls: 'pp-config-subsection-title'}, tbody)));
           subsection = item.subsection;
         }
 
         var type = typeof(item.value),
-            info = lang.conf[section.name][item.key] || '[Error]',
+            info = (lang.conf[section.name] || {})[item.key] || item.label || item.key,
             row  = _.e('tr', null, tbody),
             desc = _.e('td', null, row),
             input_id = 'pp-config-' + section.name + '-' + item.key.replace(/_/g, '-'),
             control, control_propname;
-        if (info === '[Error]') {
-          alert(item.key);
-        }
 
         if (type === 'boolean') {
           var label = _.e('label', null, desc);
@@ -222,70 +219,97 @@ _.configui = {
       });
     },
 
-    debug: function(root, section, lang) {
-      var langbar = _.e('div', {id: 'pp-config-langbar'}, root);
-      ['en', 'ja'].forEach(function(name) {
-        _.onclick(_.e('button', {text: name}, langbar), function() {
-          _.configui.lng = _.i18n[name];
-          _.configui.dom.root.parentNode.removeChild(_.configui.dom.root);
-          _.configui.dom = { };
-          _.configui.show();
-        });
+    debug: function(root, sections, lang) {
+      var that = this;
+      var make_section = function(name, label) {
+        var wrapper = _.e('div', {id: 'pp-config-debug-' + name, cls: 'pp-config-debug-section'}, root),
+            title   = _.e('div', {cls: 'pp-config-subsection-title'}, wrapper);
+        _.e('div', {text: label}, title);
+        return _.e('div', {cls: 'pp-config-debug-section-content'}, wrapper);
+      };
+
+      sections.forEach(function(section) {
+        that.__default(make_section(section.name, section.name), section, lang);
       });
 
-      var input_line = _.e('div', null, root);
-      var input      = _.e('input', null, input_line);
-      var cancel_l   = _.e('label', null, input_line);
-      var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
-      var console_l  = _.e('label', null, input_line);
-      var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
-      var logger     = _.e('table', {css: 'margin-top:4px;border:1px solid #aaa'}, root);
+      [
+        {
+          name: 'lang',
+          label: 'Switch UI language',
+          func: function(content) {
+            ['en', 'ja'].forEach(function(name) {
+              _.onclick(_.e('button', {text: name}, content), function() {
+                _.configui.lng = _.i18n[name];
+                _.configui.dom.root.parentNode.removeChild(_.configui.dom.root);
+                _.configui.dom = { };
+                _.configui.show();
+              });
+            });
+          }
+        },
 
-      cancel_l.appendChild(d.createTextNode('Cancel'));
-      console_l.appendChild(d.createTextNode('Console'));
+        {
+          name: 'key',
+          label: 'Key',
+          func: function(content) {
+            var input_line = _.e('div', null, content);
+            var input      = _.e('input', null, input_line);
+            var cancel_l   = _.e('label', null, input_line);
+            var cancel     = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, cancel_l);
+            var console_l  = _.e('label', null, input_line);
+            var console    = _.e('input', {type: 'checkbox', css: 'margin-left:4px;', checked: true}, console_l);
+            var logger     = _.e('table', {css: 'margin-top:4px;border:1px solid #aaa'}, content);
 
-      var log_attrs  = [
-        'type',
-        'keyCode',
-        'charCode',
-        'key',
-        'char',
-        'keyIdentifier',
-        'which',
-        'eventPhase',
-        'detail',
-        'timeStamp'
-      ];
+            cancel_l.appendChild(d.createTextNode('Cancel'));
+            console_l.appendChild(d.createTextNode('Console'));
 
-      function clear() {
-        input.value = '';
-        logger.innerHTML = '';
-        var row = logger.insertRow(0);
-        row.insertCell(-1).textContent = 'Key';
-        log_attrs.forEach(function(attr) {
-          row.insertCell(-1).textContent = attr;
-        });
-      }
+            var log_attrs  = [
+              'type',
+              'keyCode',
+              'charCode',
+              'key',
+              'char',
+              'keyIdentifier',
+              'which',
+              'eventPhase',
+              'detail',
+              'timeStamp'
+            ];
 
-      function log(ev) {
-        var row = logger.insertRow(1);
-        var key = _.key.parse_event(ev) || 'None';
-        row.insertCell(-1).textContent = key;
-        log_attrs.forEach(function(attr) {
-          row.insertCell(-1).textContent = ev[attr];
-        });
-        if (cancel.checked && key) {
-          ev.preventDefault();
+            function clear() {
+              input.value = '';
+              logger.innerHTML = '';
+              var row = logger.insertRow(0);
+              row.insertCell(-1).textContent = 'Key';
+              log_attrs.forEach(function(attr) {
+                row.insertCell(-1).textContent = attr;
+              });
+            }
+
+            function log(ev) {
+              var row = logger.insertRow(1);
+              var key = _.key.parse_event(ev) || 'None';
+              row.insertCell(-1).textContent = key;
+              log_attrs.forEach(function(attr) {
+                row.insertCell(-1).textContent = ev[attr];
+              });
+              if (cancel.checked && key) {
+                ev.preventDefault();
+              }
+              if (console.checked) {
+                _.debug(ev);
+              }
+            }
+
+            clear();
+            _.onclick(_.e('button', {text: 'Clear', css: 'margin-left:4px;'}, input_line), clear);
+            input.addEventListener('keydown', log, false);
+            input.addEventListener('keypress', log, false);
+          }
         }
-        if (console.checked) {
-          _.debug(ev);
-        }
-      }
-
-      clear();
-      _.onclick(_.e('button', {text: 'Clear', css: 'margin-left:4px;'}, input_line), clear);
-      input.addEventListener('keydown', log, false);
-      input.addEventListener('keypress', log, false);
+      ].forEach(function(section) {
+        section.func(make_section(section.name, section.label));
+      });
     }
   },
 
@@ -305,13 +329,9 @@ _.configui = {
   },
 
   create_tab: function(name, create_args) {
-    if (name === 'mypage') {
-      return;
-    }
-
     var that = this, dom = this.dom, label, content;
 
-    label = _.e('label', {text: this.lng.pref[name], cls: 'pp-config-tab',
+    label = _.e('label', {text: this.lng.pref[name] || name, cls: 'pp-config-tab',
                           id: 'pp-config-tab-' + name}, dom.tabbar);
     content = _.e('div', {id: 'pp-config-' + name + '-content', cls: 'pp-config-content'});
 
@@ -334,12 +354,17 @@ _.configui = {
     dom.tabbar  = _.e('div', {id: 'pp-config-tabbar'});
     dom.content = _.e('div', {id: 'pp-config-content-wrapper'});
 
+    var hidden_sections = [];
     _.conf.__schema.forEach(function(section) {
+      if (section.hide) {
+        hidden_sections.push(section);
+        return;
+      }
       that.create_tab(section.name, section);
     });
     ['importexport', 'about'].forEach(this.create_tab.bind(this));
     if (_.conf.general.debug) {
-      that.create_tab('debug');
+      that.create_tab('debug', hidden_sections);
     }
 
     dom.root.appendChild(dom.tabbar);
