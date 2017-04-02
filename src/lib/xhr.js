@@ -8,7 +8,9 @@ _.xhr = {
   request: function(method, url, headers, data, cb_success, cb_error) {
     var msg;
 
-    if (!/^(?:(?:http)?:\/\/www\.pixiv\.net)?\/(?:member_illust|bookmark_add|rpc_rating|rpc_tag_edit|rpc_delete_comment|rpc\/(?:post_comment|get_comment))\.php(?:\?|$)/.test(url)) {
+    var re   = url.match(/^(?:(?:https?:)?\/\/www\.pixiv\.net)?(\/[a-z/_]+\.php)(?:\?|$)/),
+        path = re ? re[1] : '';
+    if (_.conf.xhr.allow_urls.indexOf(path) < 0) {
       msg = 'URL not allowed - ' + url;
       _.error(msg);
       if (cb_error) {
@@ -41,15 +43,21 @@ _.xhr = {
       }
     };
 
-    xhr.open(method, url, true);
+    var send = function() {
+      xhr.open(method, url, true);
+      if (headers) {
+        headers.forEach(function(p) {
+          xhr.setRequestHeader(p[0], p[1]);
+        });
+      }
+      xhr.send(data);
+    };
 
-    if (headers) {
-      headers.forEach(function(p) {
-        xhr.setRequestHeader(p[0], p[1]);
-      });
+    if (_.conf.xhr.delay) {
+      w.setTimeout(send, _.conf.xhr.delay * 1000);
+    } else {
+      send();
     }
-
-    xhr.send(data);
   },
 
   get: function(url, cb_success, cb_error) {

@@ -582,7 +582,52 @@ _.configui = {
     }
   });
 
+  var Checklist = _.class.create(Base.prototype, {
+    init: function(src_input, lang, opts) {
+      this.valid_values = opts.valid_values;
+      Checklist.super.init.call(this, src_input, lang, 'checklist');
+    },
+
+    setup: function() {
+      var that = this, dom = this.dom;
+
+      this.checkboxes = [];
+      dom.list = _.e('ul', null, dom.content);
+      this.valid_values.forEach(function(url) {
+        var li    = _.e('li', null, dom.list),
+            label = _.e('label', null, li),
+            check = _.e('input', {type: 'checkbox'}, label),
+            text  = _.e('span', {text: url}, label);
+        _.listen(check, 'change', that.apply.bind(that));
+        that.checkboxes.push({
+          url: url,
+          checkbox: check
+        });
+      });
+    },
+
+    update: function(value) {
+      var urls = value.split(',');
+      this.checkboxes.forEach(function(item) {
+        item.checkbox.checked = urls.indexOf(item.url) >= 0;
+      });
+    },
+
+    apply: function() {
+      var active_values = this.checkboxes.filter(function(item) {
+        return item.checkbox.checked;
+      }).map(function(item) {
+        return item.url;
+      });
+
+      this.change(this.valid_values.filter(function(url) {
+        return active_values.indexOf(url) >= 0;
+      }).join(','));
+    }
+  });
+
   _.configui.editor.Base = Base;
   _.configui.editor.Key = Key;
   _.configui.editor.Regexp = Regexp;
+  _.configui.editor.Checklist = Checklist;
 })();

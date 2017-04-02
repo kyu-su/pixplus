@@ -210,20 +210,19 @@
     box-sizing: border-box;
   }
 
-  #pp-config-langbar {
-    margin-bottom: 0.2em;
-    padding-bottom: 0.2em;
-    border-bottom: 1px solid #aaa;
-
-    button {
-      margin-right: 0.2em;
-      padding: 0.2em 0.4em;
-    }
-  }
-
-  #pp-config-debug-content td {
+  #pp-config-debug-key td {
     border: 1px solid #aaa;
     padding: 0.1em 0.2em;
+  }
+
+  #pp-config-debug-content {
+    .pp-config-debug-section {
+      margin-top: 1.6em;
+    }
+
+    .pp-config-subsection-title div {
+      margin-top: 0px;
+    }
   }
 
   input.pp-active {
@@ -231,11 +230,11 @@
   }
 }
 
-.pp-config-regexp-editor {
-  .pp-dialog-content {
-    padding: 0.2em;
-  }
+.pp-config-editor .pp-dialog-content {
+  padding: 0.2em;
+}
 
+.pp-config-regexp-editor {
   textarea {
     width: 100%;
     height: 10em;
@@ -246,22 +245,16 @@
   table {
     white-space: pre;
   }
-}
 
-.pp-config-regexp-editor-status {
-  font-weight: bold;
+  .pp-config-regexp-editor-status {
+    font-weight: bold;
 
-  &.pp-yes {
-    color: green;
-  }
+    &.pp-yes {
+      color: green;
+    }
 
-  &.pp-no {
-    color: red;
-  }
-}
-
-.pp-config-key-editor {
-  ul {
-    margin: 0.2em;
+    &.pp-no {
+      color: red;
+    }
   }
 }

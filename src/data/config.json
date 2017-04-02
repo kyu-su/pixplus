@@ -107,5 +107,22 @@
   {"name": "bookmark", "items": [
     {"key": "tag_order", "value": ""},
     {"key": "tag_aliases", "value": ""}
+  ]},
+
+  {"name": "xhr", "hide": true, "items": [
+    {"key": "delay", "value": 0},
+    {"key": "allow_urls", "value": "/member_illust.php,/bookmark_add.php,/rpc_rating.php,/rpc_tag_edit.php,/rpc_delete_comment.php,/rpc/get_comment.php,/rpc/post_comment.php",
+     "editor": "Checklist",
+     "editor_opts": {
+       "valid_values": [
+         "/member_illust.php",
+         "/bookmark_add.php",
+         "/rpc_rating.php",
+         "/rpc_tag_edit.php",
+         "/rpc_delete_comment.php",
+         "/rpc/get_comment.php",
+         "/rpc/post_comment.php"
+       ]
+     }}
   ]}
 ]

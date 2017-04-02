@@ -76,6 +76,16 @@ _.conf = {
         }
         return str;
       }
+    },
+
+    debug_xhr_block_urls: {
+      parse: function(str) {
+        return str.split(',');
+      },
+
+      dump: function(urls) {
+        return urls.join(',');
+      }
     }
   },
 
