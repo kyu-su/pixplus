@@ -244,24 +244,6 @@ _.configui = {
         });
       });
 
-      var escaper = _.e('div', {id: 'pp-config-escaper'}, root), escaper_e;
-      _.listen(_.e('input', null, escaper), 'input', function(ev) {
-        escaper_e.value = ev.target.value.split('').map(function(c) {
-          var b = c.charCodeAt(0);
-
-          if (b >= 0x20 && b <= 0x7e) {
-            return c;
-          }
-
-          c = b.toString(16);
-          while(c.length < 4) {
-            c = '0' + c;
-          }
-          return '\\u' + c;
-        }).join('');
-      });
-      escaper_e = _.e('input', null, escaper);
-
       var input_line = _.e('div', null, root);
       var input      = _.e('input', null, input_line);
       var cancel_l   = _.e('label', null, input_line);
