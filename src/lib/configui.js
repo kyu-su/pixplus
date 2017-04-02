@@ -1,13 +1,13 @@
 _.configui = {
   editor: {
-    open: function(input, type, lang) {
-      (new this[type](input, lang)).open(_.configui.dom.root, {members: [input], top_left_of: input});
+    open: function(input, type, lang, opts) {
+      (new this[type](input, lang, opts)).open(_.configui.dom.root, {members: [input], top_left_of: input});
     },
 
-    register: function(input, type, lang) {
+    register: function(input, type, lang, opts) {
       var that = this;
       _.listen(input, 'focus', function(ev) {
-        that.open.call(that, input, type, lang);
+        that.open.call(that, input, type, lang, opts);
       });
     }
   },
@@ -74,22 +74,11 @@ _.configui = {
             control[control_propname] = item.value;
           }
         );
-      });
-    },
 
-    popup: function(root, section, lang) {
-      this.__default(root, section, lang);
-
-      _.qa('input[id$="-regexp"]', root).forEach(function(input) {
-        _.configui.editor.register(input, 'Regexp', lang);
-      });
-    },
-
-    key: function(root, section, lang) {
-      this.__default(root, section, lang);
-
-      _.qa('input', root).forEach(function(input) {
-        _.configui.editor.register(input, 'Key', lang);
+        var editor = item.editor || section.editor;
+        if (editor) {
+          _.configui.editor.register(control, editor, lang, item.editor_opts);
+        }
       });
     },
 
