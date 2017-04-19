@@ -347,6 +347,9 @@ _.config_button = {
     }
 
     var that = this;
+    if (w.location.hash === '#pp-config') {
+      that.button.show();
+    }
     _.listen(w, 'hashchange', function() {
       if (w.location.hash === '#pp-config') {
         that.button.show();
