@@ -574,7 +574,7 @@ _.configui = {
       dom.status.textContent = valid ? this.lang.pref.regex_valid : this.lang.pref.regex_invalid;
 
       _.qa('*[data-path]', dom.pagecheck_table).forEach(function(status) {
-        var yes = valid && (new g.RegExp(value)).test('http://www.pixiv.net' + status.dataset.path);
+        var yes = valid && (new g.RegExp(value)).test('https://www.pixiv.net' + status.dataset.path);
         status.classList[yes ? 'add' : 'remove']('pp-yes');
         status.classList[yes ? 'remove' : 'add']('pp-no');
         status.textContent = yes ? '\u25cb' : '\u2715';

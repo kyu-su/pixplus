@@ -8,7 +8,7 @@
 // @icon64      http://ccl4.info/pixplus/pixplus_64.png
 // @namespace   http://my.opera.com/crckyl/
 // @include     http://www.pixiv.net/*
-// @exclude     *pixivreader*
+// @include     https://www.pixiv.net/*
 // @run-at      document-start
 // @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
 // @grant       none

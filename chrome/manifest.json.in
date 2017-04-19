@@ -13,8 +13,7 @@
   "options_page": "options.html",
   "content_scripts": [
     {
-      "matches": ["http://www.pixiv.net/*"],
-      "exclude_globs": ["*pixivreader*"],
+      "matches": ["http://www.pixiv.net/*", "https://www.pixiv.net/*"],
       "js": ["pixplus.js"],
       "run_at": "document_start",
       "all_frames": true
