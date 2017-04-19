@@ -1,5 +1,21 @@
 [
   {
+    "date": "2017/04/19",
+    "version": "1.19.0",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2017/04/19/pixplus_1.19.0",
+    "changes_i18n": {
+      "en": [
+        "[Fix] Support for new pixiv's URL that starts with 'https:'.",
+        "[Remove] Temporary disable the rating feature."
+      ],
+      "ja": [
+        "[修正] 'https:'から始まるpixivの新しいURLに対応。",
+        "[削除] 一時的に評価機能を削除。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/03/23",
     "version": "1.18.1",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/03/23/pixplus_1.18.1",

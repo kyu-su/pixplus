@@ -1,6 +1,18 @@
 pixplus version history
 =======================
 
+## [1.19.0 - 2017/04/19](http://crckyl.hatenablog.com/entry/2017/04/19/pixplus_1.19.0)
+
+### 変更点
+
+* [修正] 'https:'から始まるpixivの新しいURLに対応。
+* [削除] 一時的に評価機能を削除。
+
+### Changes
+
+* [Fix] Support for new pixiv's URL that starts with 'https:'.
+* [Remove] Temporary disable the rating feature.
+
 ## [1.18.1 - 2017/03/23](http://crckyl.hatenablog.com/entry/2017/03/23/pixplus_1.18.1)
 
 ### 変更点
