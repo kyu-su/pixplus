@@ -7,7 +7,7 @@ _.setup_ready = function() {
   if (_.conf.general.bookmark_hide) {
     _.qa('a[href*="bookmark.php"]').forEach(function(link) {
       var re;
-      if ((re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/.exec(link.href))) {
+      if ((re = /^(?:(?:https?:\/\/www\.pixiv\.net)?\/)?bookmark\.php(\?.*)?$/.exec(link.href))) {
         if (re[1]) {
           var query = _.parse_query(re[1]);
           if (!query.id && !query.rest) {
