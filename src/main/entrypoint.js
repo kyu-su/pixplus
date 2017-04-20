@@ -1,4 +1,6 @@
 _.setup_ready = function() {
+  _.debug('pixplus.setup_ready()');
+
   _.redirect_jump_page();
   _.config_button.init();
 
@@ -90,8 +92,10 @@ _.run = function() {
         config_set_data.dispatchEvent(ev);
       }
     });
+    _.debug('Extension mode');
   } else {
     _.conf.__init(_.conf.__wrap_storage(g.localStorage));
+    _.debug('User script mode (using LocalStorage)');
   }
 
   if (_.conf.general.redirect_jump_page === 1 && w.location.pathname === '/jump.php') {
