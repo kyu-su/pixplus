@@ -380,9 +380,9 @@ _.illust = {
     }
 
     illust.taglist  = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
-    illust.question = question ? question.outerHTML : '';
 
     illust.rated = score ? !!_.q('._nice-button.rated, .js-nice-button.rated', score) : false;
+    illust.question = question ? question.outerHTML : '';
     illust.answered = null;
     if (question) {
       illust.answered = !_.q('.list', question);

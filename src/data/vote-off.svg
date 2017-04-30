@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="clipPath4207">
+      <rect
+         width="22"
+         height="20"
+         x="1.873877"
+         y="0.16044484"
+         transform="matrix(0.83388204,-0.55194271,0.55194271,0.83388204,0,0)"
+         />
+    </clipPath>
+  </defs>
+  <rect
+      fill="none"
+      stroke="#000"
+      stroke-width="3"
+      stroke-linejoin="round"
+      width="11.153802"
+      height="15.738512"
+      x="12.408394"
+      y="-4.4117341"
+      transform="matrix(0.83388204,0.55194271,-0.55194271,0.83388204,-0.87387708,-0.16044484)"
+      clip-path="url(#clipPath4207)"
+      />
+  <path
+      fill="none"
+      stroke="#000"
+      stroke-width="3"
+      stroke-linecap="round"
+      d="m 3,20 18,0"
+      />
+</svg>

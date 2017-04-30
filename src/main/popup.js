@@ -53,6 +53,12 @@ _.popup = {
                                   tooltip: 'comments'
                                 },
                                 dom.rightbox);
+    dom.button_vote       = _.e('span',
+                                {
+                                  id: 'pp-popup-button-vote',
+                                  svg: ['vote_off', 'vote_on']
+                                },
+                                dom.rightbox);
     dom.button_like       = _.e('span',
                                 {
                                   id: 'pp-popup-button-like',
@@ -707,7 +713,8 @@ _.popup = {
     dom.author_image.classList.add('pp-hide');
 
     dom.root.classList[illust.is_manga ? 'add' : 'remove']('pp-mangawork');
-    dom.root.classList[illust.ugoira ? 'add' : 'remove']('pp-ugoira');
+    dom.root.classList[illust.ugoira   ? 'add' : 'remove']('pp-ugoira');
+    dom.root.classList[illust.question ? 'add' : 'remove']('pp-vote');
 
     if (illust.manga.available) {
       dom.root.classList.add('pp-multipage');
@@ -735,6 +742,11 @@ _.popup = {
 
     dom.title_link.innerHTML = illust.title;
     dom.title_link.href = illust.url_medium;
+
+    dom.button_vote.classList[illust.answered ? 'add' : 'remove']('pp-active');
+    _.ui.tooltip.set(dom.button_vote,
+                     _.lng.tooltip[illust.answered ? 'vote_on' : 'vote_off'],
+                     _.conf.key.popup_qrate_start);
 
     dom.button_like.classList[illust.rated ? 'add' : 'remove']('pp-active');
     _.ui.tooltip.set(dom.button_like,
@@ -807,7 +819,10 @@ _.popup = {
       dom.author_image.classList.remove('pp-hide');
     }
 
-    dom.datetime.textContent = illust.datetime;
+    dom.datetime.textContent = illust.datetime +
+      ' ' + ['view', 'rated'].map(function(n) {
+        return _.lng['score_' + n] + ':' + illust.score[n];
+      }).join(' ');
 
     _.clear(dom.tools);
     illust.tools.forEach(function(tool) {

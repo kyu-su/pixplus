@@ -48,6 +48,18 @@
       }
     }
 
+    #pp-popup-button-vote {
+      .pp-icon-vote-on {
+        opacity: 1;
+      }
+      &:not(.pp-active) .pp-icon-vote-on {
+        display: none;
+      }
+      &.pp-active .pp-icon-vote-off {
+        display: none;
+      }
+    }
+
     #pp-popup-button-like {
       .pp-icon-like-on {
         opacity: 1;
@@ -117,6 +129,10 @@
     display: none;
   }
   &:not(.pp-ugoira-paused) .pp-icon-ugoira-paused {
+    display: none;
+  }
+
+  &:not(.pp-vote) #pp-popup-button-vote {
     display: none;
   }
 

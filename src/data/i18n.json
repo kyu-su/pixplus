@@ -228,6 +228,8 @@
     "ugoira_generate_apng": "Generate APNG",
     "ugoira_generate_timecode": "Generate timecode",
     "ugoira_how_to_use": "How to use?",
+    "score_view": "Views",
+    "score_rated": "Like",
 
     "tooltip": {
       "bookmark_off": "Add bookmark (#{key})",
@@ -239,7 +241,9 @@
       "manga_mode_off": "End manga mode (#{key})",
       "tagedit": "Start tag edit mode",
       "like_off": "Like (#{key})",
-      "like_on": ""
+      "like_on": "",
+      "vote_off": "Vote (#{key})",
+      "vote_on": "View poll result (#{key})"
     },
 
     "apng": {
@@ -484,6 +488,8 @@
     "ugoira_generate_apng": "APNGを生成",
     "ugoira_generate_timecode": "タイムコードを生成",
     "ugoira_how_to_use": "使い方",
+    "score_view": "閲覧数",
+    "score_rated": "いいね！",
 
     "tooltip": {
       "bookmark_off": "ブックマークに追加 (#{key})",
@@ -495,7 +501,9 @@
       "manga_mode_off": "マンガモード終了 (#{key})",
       "tagedit": "タグ編集モード開始",
       "like_off": "いいね！ (#{key})",
-      "like_on": ""
+      "like_on": "",
+      "vote_off": "アンケートに答える (#{key})",
+      "vote_on": "投票結果を見る (#{key})"
     },
 
     "apng": {
