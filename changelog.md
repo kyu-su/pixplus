@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.19.1 - 2017/04/30](http://crckyl.hatenablog.com/entry/2017/04/30/pixplus_1.19.1)
+
+### 変更点
+
+* [修正] 「いいね！」をサポート。
+
+### Changes
+
+* [Fix] Support 'Like'
+
 ## [1.19.0 - 2017/04/19](http://crckyl.hatenablog.com/entry/2017/04/19/pixplus_1.19.0)
 
 ### 変更点
