@@ -237,7 +237,9 @@
       "image_response": "Image response (#{key})",
       "manga_mode_on": "Start manga mode (#{key})",
       "manga_mode_off": "End manga mode (#{key})",
-      "tagedit": "Start tag edit mode"
+      "tagedit": "Start tag edit mode",
+      "like_off": "Like (#{key})",
+      "like_on": ""
     },
 
     "apng": {
@@ -491,7 +493,9 @@
       "image_response": "イメージレスポンス (#{key})",
       "manga_mode_on": "マンガモード開始 (#{key})",
       "manga_mode_off": "マンガモード終了 (#{key})",
-      "tagedit": "タグ編集モード開始"
+      "tagedit": "タグ編集モード開始",
+      "like_off": "いいね！ (#{key})",
+      "like_on": ""
     },
 
     "apng": {

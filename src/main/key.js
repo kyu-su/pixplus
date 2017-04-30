@@ -43,15 +43,6 @@ _.popup.key = {
     'caption_scroll_down',
     'switch_resize_mode',
 
-    'rate01',
-    'rate02',
-    'rate03',
-    'rate04',
-    'rate05',
-    'rate06',
-    'rate07',
-    'rate08',
-    'rate09',
     'rate10',
 
     'open',

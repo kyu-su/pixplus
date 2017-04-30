@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+     >
+  <circle
+      fill="#000"
+      stroke="none"
+      cy="8"
+      cx="19"
+      r="3"
+      />
+  <circle
+      fill="#000"
+      stroke="none"
+      cx="5"
+      cy="8"
+      r="3"
+      />
+  <path
+      fill="none"
+      stroke="#000"
+      stroke-width="3"
+      stroke-linecap="round"
+      d="m 19.564232,15.780594 a 14,14 0 0 1 -15.1284648,-1e-6"
+      sodipodi:type="arc"
+      sodipodi:cx="12"
+      sodipodi:cy="4"
+      sodipodi:rx="14"
+      sodipodi:ry="14"
+      sodipodi:start="1"
+      sodipodi:end="2.1415927"
+      sodipodi:open="true"
+      />
+</svg>

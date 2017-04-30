@@ -4,18 +4,18 @@
      xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
      >
   <path
-      fill="#000"
-      stroke="#000"
-      stroke-width="2"
+      fill="#fc0"
+      stroke="#888"
+      stroke-width="1.8"
       stroke-linejoin="round"
       sodipodi:type="star"
       sodipodi:sides="5"
       sodipodi:cx="12"
-      sodipodi:cy="13.114592"
+      sodipodi:cy="12.5"
       sodipodi:r1="10"
       sodipodi:r2="4.1437802"
       sodipodi:arg1="-1.5707963"
       sodipodi:arg2="-0.9424778"
-      d="m 12,3.1145916 2.435653,6.6476114 7.074912,0.262219 -5.569596,4.370668 1.936883,6.809672 L 12,17.258372 6.1221473,21.204761 8.0590308,14.39509 2.4894349,10.024421 9.5643471,9.762203 Z"
+      d="m 12,2.5 2.435653,6.6476114 7.074912,0.2622189 -5.569596,4.3706677 1.936883,6.809672 L 12,16.64378 6.1221473,20.59017 8.0590308,13.780499 2.4894349,9.4098298 9.5643471,9.1476114 Z"
       />
 </svg>

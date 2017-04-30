@@ -371,7 +371,7 @@ _.illust = {
     }
     illust.score = {};
     if (score) {
-      ['view', 'rated', 'score'].forEach(function(name) {
+      ['view', 'rated'].forEach(function(name) {
         var node = _.q('.' + name + '-count', score);
         if (node) {
           illust.score[name] = g.parseInt(_.strip(node.textContent));
@@ -380,10 +380,9 @@ _.illust = {
     }
 
     illust.taglist  = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
-    illust.rating   = score ? score.outerHTML : '';
     illust.question = question ? question.outerHTML : '';
 
-    illust.rated = score ? !!_.q('.rating.rated', score) : false;
+    illust.rated = score ? !!_.q('._nice-button.rated, .js-nice-button.rated', score) : false;
     illust.answered = null;
     if (question) {
       illust.answered = !_.q('.list', question);

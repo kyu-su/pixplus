@@ -1,5 +1,6 @@
 _.popup.question = {
   is_active: function() {
+    return false;
     return !!_.q('.questionnaire .list.visible,.questionnaire .stats.visible', _.popup.dom.rating);
   },
 
@@ -88,6 +89,7 @@ _.popup.question = {
   },
 
   setup: function() {
+    return;
     var root = _.q('.questionnaire', _.popup.dom.rating);
 
     this.dom = {

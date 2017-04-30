@@ -53,10 +53,15 @@ _.popup = {
                                   tooltip: 'comments'
                                 },
                                 dom.rightbox);
+    dom.button_like       = _.e('span',
+                                {
+                                  id: 'pp-popup-button-like',
+                                  svg: ['like_off', 'like_on']
+                                },
+                                dom.rightbox);
     dom.button_bookmark   = _.e('a',
                                 {
                                   id: 'pp-popup-button-bookmark',
-                                  cls: 'pp-icons-font',
                                   svg: ['star_white', 'star_black']
                                 },
                                 dom.rightbox);
@@ -82,7 +87,6 @@ _.popup = {
                                 dom.comment_toolbar);
     dom.comment           = _.e('div', {id: 'pp-popup-comment'}, dom.comment_wrapper);
     dom.taglist           = _.e('div', {id: 'pp-popup-taglist'}, dom.header);
-    dom.rating            = _.e('div', {id: 'pp-popup-rating', cls: 'pp-popup-separator'}, dom.header);
     dom.info              = _.e('div', {id: 'pp-popup-info', cls: 'pp-popup-separator'}, dom.header);
     dom.author_image      = _.e('img', {id: 'pp-popup-author-image'}, dom.info);
     dom.author_status     = _.e('div',
@@ -629,7 +633,6 @@ _.popup = {
       dom.title_link,
       dom.caption,
       dom.taglist,
-      dom.rating,
       dom.datetime,
       dom.tools,
       dom.author_profile,
@@ -733,6 +736,11 @@ _.popup = {
     dom.title_link.innerHTML = illust.title;
     dom.title_link.href = illust.url_medium;
 
+    dom.button_like.classList[illust.rated ? 'add' : 'remove']('pp-active');
+    _.ui.tooltip.set(dom.button_like,
+                     _.lng.tooltip[illust.rated ? 'like_on' : 'like_off'],
+                     _.conf.key.popup_rate10);
+
     dom.button_bookmark.href = illust.url_bookmark;
     dom.button_bookmark.classList[illust.bookmarked ? 'add' : 'remove']('pp-active');
     _.ui.tooltip.set(dom.button_bookmark,
@@ -764,7 +772,6 @@ _.popup = {
       _.e('span',
           {
             id: 'pp-popup-tagedit-button',
-            cls: 'pp-icons-font',
             svg: 'pencil',
             tooltip: 'tagedit'
           },
@@ -774,8 +781,6 @@ _.popup = {
         return true;
       }
     );
-
-    dom.rating.innerHTML = illust.rating + illust.question;
 
     ['pixpedia', 'pixiv_comic', 'booth'].forEach(function(name) {
       var f = _.conf.popup['remove_' + name];
@@ -834,10 +839,6 @@ _.popup = {
     }
 
     _.popup.comment.setup(illust.comment);
-
-    if (illust.rating && !illust.rated) {
-      _.popup.rating.setup();
-    }
 
     if (illust.question) {
       this.question.setup();
@@ -1130,5 +1131,28 @@ _.popup = {
     );
 
     dialog.open(this.dom.root, {centerize: 'both'});
+  },
+
+  send_like: function() {
+    var that = this;
+    this.status_loading();
+    _.popup.api.post(
+      '/rpc_rating.php',
+      {
+        mode: 'save',
+        i_id: this.illust.id,
+        u_id: _.api.uid,
+        qr: 0,
+        score: '10',
+        tt: _.api.token
+      },
+      function(data) {
+        that.reload();
+      },
+      function(message) {
+        that.status_error(message);
+      }
+    );
+    this.reload();
   }
 };

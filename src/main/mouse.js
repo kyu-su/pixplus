@@ -54,6 +54,11 @@ _.popup.mouse = {
       return true;
     });
 
+    _.onclick(dom.button_like, function() {
+      _.popup.send_like();
+      return true;
+    });
+
     _.onclick(dom.button_bookmark, function() {
       _.popup.bookmark.toggle();
       return true;

@@ -48,7 +48,22 @@
       }
     }
 
+    #pp-popup-button-like {
+      .pp-icon-like-on {
+        opacity: 1;
+      }
+      &:not(.pp-active) .pp-icon-like-on {
+        display: none;
+      }
+      &.pp-active .pp-icon-like-off {
+        display: none;
+      }
+    }
+
     #pp-popup-button-bookmark {
+      .pp-icon-star-black {
+        opacity: 1;
+      }
       &:not(.pp-active) .pp-icon-star-black {
         display: none;
       }

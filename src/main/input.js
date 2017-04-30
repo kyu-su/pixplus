@@ -1,19 +1,4 @@
-_.popup.input = (function(mod) {
-
-  for(var i = 1; i <= 10; ++i) {
-    mod['rate' + (i <= 9 ? '0' : '') + i] = (function(i) {
-      return function() {
-        if (_.conf.popup.rate_key) {
-          _.popup.rating.rate(i);
-          return true;
-        }
-        return false;
-      };
-    })(i);
-  }
-
-  return mod;
-})({
+_.popup.input = {
   wheel_delta: 0,
 
   init: function() {
@@ -426,5 +411,11 @@ _.popup.input = (function(mod) {
 
   ugoira_next_frame: function() {
     return _.popup.ugoira_next_frame();
+  },
+
+  // like
+
+  rate10: function() {
+    _.popup.send_like();
   }
-});
+};
