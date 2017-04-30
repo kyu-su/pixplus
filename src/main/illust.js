@@ -382,10 +382,21 @@ _.illust = {
     illust.taglist  = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
 
     illust.rated = score ? !!_.q('._nice-button.rated, .js-nice-button.rated', score) : false;
-    illust.question = question ? question.outerHTML : '';
-    illust.answered = null;
+
+    illust.vote = {available: !!question};
     if (question) {
-      illust.answered = !_.q('.list', question);
+      illust.vote.answered = !_.q('.list', question);
+
+      illust.vote.items = _.qa('.list input[data-key]', question).map(function(item) {
+        return [item.value, item.dataset.key];
+      });
+
+      var stats = _.q('.stats table', question);
+      if (stats) {
+        illust.vote.stats = Array.prototype.map.call(stats.rows, function(row) {
+          return [row.cells[0].textContent, parseInt(_.q('*[class^="answer-"]', row).textContent)];
+        });
+      }
     }
 
     var profile_area   = _.q('.profile-unit', doc),

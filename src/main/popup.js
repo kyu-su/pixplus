@@ -713,8 +713,8 @@ _.popup = {
     dom.author_image.classList.add('pp-hide');
 
     dom.root.classList[illust.is_manga ? 'add' : 'remove']('pp-mangawork');
-    dom.root.classList[illust.ugoira   ? 'add' : 'remove']('pp-ugoira');
-    dom.root.classList[illust.question ? 'add' : 'remove']('pp-vote');
+    dom.root.classList[illust.ugoira ? 'add' : 'remove']('pp-ugoira');
+    dom.root.classList[illust.vote.available ? 'add' : 'remove']('pp-vote');
 
     if (illust.manga.available) {
       dom.root.classList.add('pp-multipage');
@@ -743,9 +743,9 @@ _.popup = {
     dom.title_link.innerHTML = illust.title;
     dom.title_link.href = illust.url_medium;
 
-    dom.button_vote.classList[illust.answered ? 'add' : 'remove']('pp-active');
+    dom.button_vote.classList[illust.vote.answered ? 'add' : 'remove']('pp-active');
     _.ui.tooltip.set(dom.button_vote,
-                     _.lng.tooltip[illust.answered ? 'vote_on' : 'vote_off'],
+                     _.lng.tooltip[illust.vote.answered ? 'vote_on' : 'vote_off'],
                      _.conf.key.popup_qrate_start);
 
     dom.button_like.classList[illust.rated ? 'add' : 'remove']('pp-active');
