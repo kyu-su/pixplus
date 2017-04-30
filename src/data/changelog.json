@@ -1,5 +1,19 @@
 [
   {
+    "date": "",
+    "version": "1.19.1",
+    "releasenote": "",
+    "changes_i18n": {
+      "en": [
+        "[Fix] Support 'Like'"
+      ],
+      "ja": [
+        "[修正] 「いいね！」をサポート。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/04/19",
     "version": "1.19.0",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/04/19/pixplus_1.19.0",
