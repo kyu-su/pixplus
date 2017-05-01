@@ -507,10 +507,12 @@ _.Dialog = _.class.create({
   onclose: function() {
     if (this.dom.root.parentNode) {
       this.dom.root.parentNode.removeChild(this.dom.root);
+      this.running = false;
     }
   },
 
   open: function(parent, options) {
+    this.running = true;
     d.body.appendChild(this.dom.root);
     _.modal.begin(this.dom.root, _.extend({
       onclose: this.onclose.bind(this),
@@ -519,6 +521,8 @@ _.Dialog = _.class.create({
   },
 
   close: function() {
-    _.modal.end(this.dom.root);
+    if (this.running) {
+      _.modal.end(this.dom.root);
+    }
   }
 });

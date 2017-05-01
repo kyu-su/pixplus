@@ -54,6 +54,11 @@ _.popup.mouse = {
       return true;
     });
 
+    _.onclick(dom.button_vote, function() {
+      _.vote.run(_.popup.illust, _.popup.dom.root);
+      return true;
+    });
+
     _.onclick(dom.button_like, function() {
       _.popup.send_like();
       return true;

@@ -1,0 +1,23 @@
+.pp-vote-dialog {
+  ul li {
+    margin: 2px;
+
+    button {
+      cursor: pointer;
+      font-size: 200%;
+      text-align: center;
+      padding: 0.4em;
+      margin: 0px;
+      background-color: #eee;
+      box-sizing: border-box;
+      width: 100%;
+
+      &:hover {
+        background-color: #ddd;
+      }
+      &:active {
+        background-color: #aaa;
+      }
+    }
+  }
+}

@@ -255,6 +255,10 @@
       "cancel": "Cancel",
       "download": "Download",
       "close": "Close"
+    },
+
+    "vote": {
+      "title": "Poll"
     }
   },
 
@@ -515,6 +519,10 @@
       "cancel": "キャンセル",
       "download": "ダウンロード",
       "close": "閉じる"
+    },
+
+    "vote": {
+      "title": "アンケート"
     }
   }
 }

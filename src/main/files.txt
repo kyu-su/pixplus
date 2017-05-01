@@ -16,3 +16,4 @@ floater.js
 pages.js
 entrypoint.js
 apng.js
+vote.js
