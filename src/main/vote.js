@@ -45,6 +45,7 @@
           }
         });
         exp[1].appendChild(chart);
+        exp[0].classList.add('pp-vote-result-expander');
         this.dom.content.appendChild(exp[0]);
       }
     },

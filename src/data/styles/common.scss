@@ -97,8 +97,7 @@ input.pp-flat-input {
 }
 
 .pp-expander {
-  margin: 0.2em;
-  border: 1px solid #ddd;
+  @extend .pp-control;
 
   .pp-expander-header {
     display: flex;
