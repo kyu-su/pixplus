@@ -96,6 +96,33 @@ input.pp-flat-input {
   }
 }
 
+.pp-expander {
+  margin: 0.2em;
+  border: 1px solid #ddd;
+
+  .pp-expander-header {
+    display: flex;
+    cursor: pointer;
+
+    .pp-icon-triangle {
+      height: 1em;
+      margin: 0px 0.4em;
+      align-self: center;
+      transition: transform .1s linear;
+    }
+  }
+
+  &:not(.pp-active) .pp-expander-content {
+    display: none;
+  }
+
+  &.pp-active {
+    .pp-expander-header .pp-icon-triangle {
+      transform: rotate(90deg);
+    }
+  }
+}
+
 .pp-popup-menu {
   position: fixed;
   background-color: #fff;

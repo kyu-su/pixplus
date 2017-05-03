@@ -32,6 +32,23 @@
       });
     },
 
+    setup_chart: function() {
+      var chart = this.create_chart();
+      if (this.data.answered) {
+        this.dom.content.appendChild(chart);
+      } else {
+        var exp = _.ui.expander(_.lng.vote.view_result, {
+          ontoggle: function(active) {
+            if (active) {
+              _.modal.centerize();
+            }
+          }
+        });
+        exp[1].appendChild(chart);
+        this.dom.content.appendChild(exp[0]);
+      }
+    },
+
     point: function(rad, r) {
       return [Math.cos(rad)*(r||300)+350, Math.sin(rad)*(r||300)+200];
     },
@@ -40,10 +57,10 @@
       return this.point(rad, r).join(',');
     },
 
-    setup_chart: function() {
+    create_chart: function() {
       var that = this;
 
-      var svg = _.e('svg', {}, _.e('div', {cls: 'pp-vote-chart'}, this.dom.content)),
+      var svg = _.e('svg', {}, _.e('div', {cls: 'pp-vote-chart'})),
           defs = _.e('defs', {}, svg),
           maskid = 'pp-vote-chart-mask-' + (++svgid),
           mask = _.e('mask', {id: maskid}, defs);
@@ -107,6 +124,8 @@
 
         ps += votes;
       });
+
+      return svg;
     }
   });
 

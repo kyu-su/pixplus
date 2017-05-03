@@ -250,7 +250,8 @@
 
     "vote": {
       "title_vote": "Vote",
-      "title_result": "Poll result"
+      "title_result": "Poll result",
+      "view_result": "View result"
     }
   },
 
@@ -506,7 +507,8 @@
 
     "vote": {
       "title_vote": "アンケートに答える",
-      "title_result": "アンケート結果"
+      "title_result": "アンケート結果",
+      "view_result": "結果を見る"
     }
   }
 }

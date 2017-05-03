@@ -1,4 +1,24 @@
 _.ui = {
+  expander: function(title, options) {
+    var expander = _.e('div', {cls: 'pp-expander'}),
+        header   = _.e('div', {cls: 'pp-expander-header'}, expander),
+        content  = _.e('div', {cls: 'pp-expander-content'}, expander);
+    header.appendChild(_.svg.triangle(d));
+    _.e('span', {text: title, cls: 'pp-expander-title'}, header);
+    _.onclick(header, function() {
+      expander.classList.toggle('pp-active');
+
+      var open = expander.classList.contains('pp-active');
+      if (options.ontoggle) {
+        options.ontoggle(open);
+      }
+      if (open) {
+        header.style.minWidth = header.offsetWidth + 'px';
+      }
+    });
+    return [expander, content];
+  },
+
   slider: function(min, max, step, attrs) {
     var slider;
 
