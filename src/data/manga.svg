@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <rect x="2" y="2" width="20" height="20"
+  <rect x="1" y="1" width="22" height="22"
         stroke="#000" stroke-width="2" fill="none"
         opacity="0.4" class="pp-icon-manga-frame"/>
-  <rect x="3" y="3" width="18" height="18"
+  <rect x="2" y="2" width="20" height="20"
         stroke="none" fill="#000"
         opacity="0.1" class="pp-icon-manga-progress"/>
   <g style="display:none">

@@ -9,10 +9,10 @@ _.popup.manga = {
       }
 
 
-      var pad = 6, offset = 0;
+      var pad = 10, offset = 0;
 
       if (maxchars) {
-        offset = (maxchars - text.length)*8 / 2;
+        offset = (maxchars - text.length)*10 / 2;
       }
 
 
@@ -22,18 +22,20 @@ _.popup.manga = {
           return;
         }
         glyph = glyph.cloneNode(true);
-        glyph.setAttribute('transform', 'translate(' + (idx * 8 + 4 + pad + offset) + ',16.5)');
+
+        var xoff = idx * 10 + 5 + pad + offset;
+        glyph.setAttribute('transform', 'matrix(1.8,0,0,1.8,'+xoff+',20)');
         g.appendChild(glyph);
       });
 
 
-      var width = (maxchars || text.length) * 8 + (pad * 2);
+      var width = (maxchars || text.length) * 10 + (pad * 2);
       svg.setAttribute('width', width);
       svg.setAttribute('height', '24');
       svg.setAttribute('viewBox', '0 0 ' + width + ' 24');
       svg.style.width = 'calc(1em*' + (width/24) + ')';
       svg.style.height = '1em';
-      _.q('.pp-icon-manga-frame', svg).setAttribute('width', width - 4);
+      _.q('.pp-icon-manga-frame', svg).setAttribute('width', width - 2);
     },
 
     set_progress: function(svg, progress) {
