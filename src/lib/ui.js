@@ -461,6 +461,8 @@ _.PopupMenu = _.class.create({
 
 _.Dialog = _.class.create({
   init: function(options) {
+    this.options = options;
+
     if (!options) {
       options = {};
     }
@@ -542,7 +544,8 @@ _.Dialog = _.class.create({
     d.body.appendChild(this.dom.root);
     _.modal.begin(this.dom.root, _.extend({
       onclose: this.onclose.bind(this),
-      parent: parent
+      parent: parent,
+      onkey: this.onkey.bind(this)
     }, options));
   },
 
@@ -550,5 +553,25 @@ _.Dialog = _.class.create({
     if (this.running) {
       _.modal.end(this.dom.root);
     }
+  },
+
+  onkey_close: function() {
+    this.close();
+    return true;
+  },
+
+  onkey: function(key, ev) {
+    if (this.options.keys) {
+      for(var i = 0; i < this.options.keys.length; ++i) {
+        var item = this.options.keys[i],
+            keys = item[0].split(','),
+            name = item[1];
+        if (keys.indexOf(key) >= 0) {
+          return this['onkey_' + name]();
+        }
+      }
+    }
+
+    return false;
   }
 });

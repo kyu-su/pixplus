@@ -6,7 +6,16 @@
 
     init: function(illust, get_frames) {
       var title = _.lng.vote[illust.vote.answered ? 'title_result' : 'title_vote'];
-      VoteDialog.super.init.call(this, {title: title, cls: 'pp-vote-dialog'});
+      VoteDialog.super.init.call(this, {
+        title: title,
+        cls: 'pp-vote-dialog',
+        keys: [
+          [_.conf.key.popup_qrate_end,         'close'],
+          [_.conf.key.popup_qrate_submit,      'send_selected'],
+          [_.conf.key.popup_qrate_select_prev, 'select_prev'],
+          [_.conf.key.popup_qrate_select_next, 'select_next']
+        ]
+      });
 
       this.data = illust.vote;
 
@@ -24,11 +33,14 @@
 
       var that = this;
       var list = _.e('ul', {}, this.dom.content);
-      this.data.items.forEach(function(item) {
+      this.buttons = [];
+      this.data.items.forEach(function(item, idx) {
         var label = item[0], key = item[1];
-        _.onclick(_.e('button', {text: label, 'data-pp-key': key}, _.e('li', {}, list)), function() {
-          alert(label);
+        var btn = _.e('button', {text: label, 'data-pp-key': key}, _.e('li', {}, list));
+        _.onclick(btn, function() {
+          that.vote(idx);
         });
+        that.buttons.push(btn);
       });
     },
 
@@ -127,6 +139,63 @@
       });
 
       return svg;
+    },
+
+    vote: function(idx) {
+      if (this.sent) {
+        return;
+      }
+
+      var btn = this.buttons[idx],
+          label = btn.textContent,
+          key   = btn.getAttribute('data-pp-key');
+
+      this.buttons.forEach(function(btn) {
+        btn.setAttribute('disabled', '1');
+        btn.blur();
+      });
+
+      this.sent = true;
+
+      alert([label, key]);
+    },
+
+    select_btn: function(off) {
+      var curr = this.buttons.indexOf(d.activeElement);
+      off %= this.buttons.length;
+
+      if (curr < 0) {
+        curr = (off < 0 ? this.buttons.length : -1) + off;
+      } else {
+        curr += off;
+      }
+
+      if (curr < 0) {
+        curr += this.buttons.length;
+      } else if (curr >= this.buttons.length) {
+        curr -= this.buttons.length;
+      }
+
+      this.buttons[curr].focus();
+    },
+
+    onkey_select_prev: function() {
+      this.select_btn(-1);
+      return true;
+    },
+
+    onkey_select_next: function() {
+      this.select_btn(1);
+      return true;
+    },
+
+    onkey_send_selected: function() {
+      var idx = this.buttons.indexOf(d.activeElement);
+      if (idx >= 0) {
+        this.vote(idx);
+        return true;
+      }
+      return false;
     }
   });
 
@@ -134,7 +203,6 @@
     VoteDialog: VoteDialog,
 
     run: function(illust, parent) {
-
       if (this.dialog) {
         this.dialog.close();
       }

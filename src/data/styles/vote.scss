@@ -8,7 +8,7 @@
   }
 
   ul li {
-    margin: .2em;
+    margin: .6em;
 
     button {
       cursor: pointer;
@@ -20,6 +20,9 @@
       box-sizing: border-box;
       width: 100%;
 
+      &:focus {
+        background-color: #ffc;
+      }
       &:hover {
         background-color: #ddd;
       }

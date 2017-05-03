@@ -1169,5 +1169,9 @@ _.popup = {
       }
     );
     this.reload();
+  },
+
+  open_vote_dialog: function() {
+    _.vote.run(this.illust, this.dom.root);
   }
 };

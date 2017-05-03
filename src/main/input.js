@@ -319,11 +319,8 @@ _.popup.input = {
 
   // question mode
   qrate_start: function() {
-    if (!_.popup.question.is_active()) {
-      _.popup.question.start();
-      return true;
-    }
-    return false;
+    _.popup.open_vote_dialog();
+    return true;
   },
 
   qrate_end: function() {

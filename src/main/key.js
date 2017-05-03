@@ -8,10 +8,6 @@ _.popup.key = {
     },
 
     'qrate_start',
-    'qrate_end',
-    'qrate_submit',
-    'qrate_select_prev',
-    'qrate_select_next',
 
     'manga_start',
     'manga_end',

@@ -55,7 +55,7 @@ _.popup.mouse = {
     });
 
     _.onclick(dom.button_vote, function() {
-      _.vote.run(_.popup.illust, _.popup.dom.root);
+      _.popup.open_vote_dialog();
       return true;
     });
 
