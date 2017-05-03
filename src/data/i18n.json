@@ -249,7 +249,8 @@
     },
 
     "vote": {
-      "title": "Poll"
+      "title_vote": "Vote",
+      "title_result": "Poll result"
     }
   },
 
@@ -489,7 +490,7 @@
       "like_off": "いいね！ (#{key})",
       "like_on": "",
       "vote_off": "アンケートに答える (#{key})",
-      "vote_on": "投票結果を見る (#{key})"
+      "vote_on": "アンケート結果を見る (#{key})"
     },
 
     "apng": {
@@ -504,7 +505,8 @@
     },
 
     "vote": {
-      "title": "アンケート"
+      "title_vote": "アンケートに答える",
+      "title_result": "アンケート結果"
     }
   }
 }

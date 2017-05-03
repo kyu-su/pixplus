@@ -1,6 +1,12 @@
 .pp-vote-dialog {
+  .pp-vote-question {
+    font-size: 120%;
+    text-align: center;
+    margin: .4em;
+  }
+
   ul li {
-    margin: 2px;
+    margin: .2em;
 
     button {
       cursor: pointer;

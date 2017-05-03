@@ -5,8 +5,14 @@
     colors: ['#3465a4', '#73d216', '#cc0000', '#f57900', '#75507b', '#555753'],
 
     init: function(illust, get_frames) {
-      VoteDialog.super.init.call(this, {title: _.lng.vote.title, cls: 'pp-vote-dialog'});
+      var title = _.lng.vote[illust.vote.answered ? 'title_result' : 'title_vote'];
+      VoteDialog.super.init.call(this, {title: title, cls: 'pp-vote-dialog'});
+
       this.data = illust.vote;
+
+      var q = 'Q: ' + (illust.vote.question || 'Error');
+      _.e('h2', {cls: 'pp-vote-question', text: q}, this.dom.content);
+
       this.setup_list();
       this.setup_chart();
     },
@@ -38,9 +44,12 @@
       var that = this;
 
       var svg = _.e('svg', {}, _.e('div', {cls: 'pp-vote-chart'}, this.dom.content)),
-          defs = _.e('defs', {}, svg);
+          defs = _.e('defs', {}, svg),
+          maskid = 'pp-vote-chart-mask-' + (++svgid),
+          mask = _.e('mask', {id: maskid}, defs);
       svg.setAttribute('width', '700');
       svg.setAttribute('height', '400');
+      _.e('rect', {x: 0, y: 0, width: 700, height: 400, fill: '#fff'}, mask);
 
       var tot = this.data.stats.reduce(function(a, b) { return a + b[1]; }, 0),
           ps = 0;
@@ -50,10 +59,9 @@
         var color    = that.colors[i % that.colors.length],
             clipid   = 'pp-vote-pie-clip-' + (++svgid),
             clippath = _.e('path', {}, _.e('clipPath', {id: clipid}, defs)),
-            pie      = _.e('circle', {ns: 'svg', cx: 350, cy: 200, r: 170,
-                                      fill: color, 'clip-path': 'url(#'+clipid+')'});
-
-        svg.insertBefore(pie, defs.nextSibling);
+            pie      = _.e('circle', {cx: 350, cy: 200, r: 170, fill: color,
+                                      'clip-path': 'url(#'+clipid+')',
+                                      mask: 'url(#'+maskid+')'}, svg);
 
         var p0 =             ps/tot * 2*Math.PI - Math.PI/2,
             pz = (ps + votes)/tot * 2*Math.PI - Math.PI/2,
@@ -75,8 +83,8 @@
 
         // _.e('path', {d: d, fill: color}, svg);
         clippath.setAttribute('d', d);
-        _.e('path', {d: 'M350,200 L' + that.pointstr(pz), stroke: '#fff',
-                     'stroke-width': '3', 'stroke-linecap': 'round'}, svg);
+        _.e('path', {d: 'M350,200 L' + that.pointstr(pz), stroke: '#000',
+                     'stroke-width': '3', 'stroke-linecap': 'round'}, mask);
 
         var pc = (ps + votes/2)/tot * 2*Math.PI - Math.PI/2,
             l1 = that.point(pc, 160),

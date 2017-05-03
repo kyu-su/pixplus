@@ -397,6 +397,11 @@ _.illust = {
           return [row.cells[0].textContent, parseInt(_.q('*[class^="answer-"]', row).textContent)];
         });
       }
+
+      var vote_q = _.q('.list h1, .stats h1', question);
+      if (vote_q) {
+        illust.vote.question = vote_q.textContent;
+      }
     }
 
     var profile_area   = _.q('.profile-unit', doc),
