@@ -173,10 +173,28 @@ input.pp-flat-input {
   padding: 2px;
 
   .pp-dialog-title {
-    text-align: center;
-    font-weight: bold;
+    display: flex;
     margin-bottom: 2px;
-    padding: 0px 4em;
+
+    .pp-dialog-title-text {
+      display: block;
+      text-align: center;
+      font-weight: bold;
+      flex-grow: 1;
+    }
+
+    .pp-dialog-title-rightbox {
+      display: block;
+      height: 1em;
+      align-self: center;
+      margin-right: 0.2em;
+
+      svg {
+        display: block;
+        height: 1em;
+        cursor: pointer;
+      }
+    }
   }
 
   .pp-dialog-content {

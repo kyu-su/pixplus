@@ -470,7 +470,13 @@ _.Dialog = _.class.create({
     dom.root = _.e('div', {cls: 'pp-toplevel pp-dialog ' + (options.cls || '')});
 
     if (options.title) {
-      _.e('div', {cls: 'pp-dialog-title', text: options.title}, dom.root);
+      var title = _.e('div', {cls: 'pp-dialog-title'}, dom.root);
+      _.e('span', {cls: 'pp-dialog-title-text', text: options.title}, title);
+
+      var rightbox = _.e('span', {cls: 'pp-dialog-title-rightbox'}, title),
+          btn_close = _.svg.cross(d);
+      rightbox.appendChild(btn_close);
+      _.onclick(btn_close, this.close.bind(this));
     }
 
     dom.content = _.e('div', {cls: 'pp-dialog-content'}, dom.root);

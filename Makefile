@@ -75,7 +75,8 @@ SVG_GEN_NAMES                   = pencil pencil-off cogwheel following heart \
                                   rating-error comment-loading comment-error \
                                   comment-reply-to comments star-white star-black \
                                   response rm-fit-long rm-fit-short rm-original \
-                                  like-off like-on vote-off vote-on triangle
+                                  like-off like-on vote-off vote-on \
+                                  triangle cross
 SVG_GEN_FILES                   = $(SVG_GEN_NAMES:%=src/data/%.svg)
 DIST_FILES                      = $(LICENSE) $(wildcard extension/*) $(LIB_JS) $(DATA_JS)
 
