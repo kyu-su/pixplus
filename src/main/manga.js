@@ -35,12 +35,14 @@ _.popup.manga = {
       svg.setAttribute('viewBox', '0 0 ' + width + ' 24');
       svg.style.width = 'calc(1em*' + (width/24) + ')';
       svg.style.height = '1em';
-      _.q('.pp-icon-manga-frame', svg).setAttribute('width', width - 2);
+      _.q('.pp-icon-manga-frame', svg).setAttribute('width', width);
+      _.q('.pp-icon-manga-frame-mask-1', svg).setAttribute('width', width);
+      _.q('.pp-icon-manga-frame-mask-2', svg).setAttribute('width', width-4);
     },
 
     set_progress: function(svg, progress) {
       var box = _.q('.pp-icon-manga-progress', svg),
-          mw = parseInt(_.q('.pp-icon-manga-frame', svg).getAttribute('width')) - 2;
+          mw = parseInt(_.q('.pp-icon-manga-frame-mask-2', svg).getAttribute('width'));
       box.setAttribute('width', mw * progress);
     }
   },
