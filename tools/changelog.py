@@ -25,7 +25,6 @@ def atom_changes(changes):
   out = ['<ul>']
   for line in changes:
     out.append('  <li>%s</li>' % line)
-    pass
   out.append('</ul>')
   return out
 
@@ -58,8 +57,6 @@ def out_atom(changelog):
     for lng in 'ja', 'en':
       if lng in changes_i18n:
         changes += atom_changes(changes_i18n[lng])
-        pass
-      pass
 
     entry = '''
   <entry>
@@ -86,7 +83,6 @@ def out_atom(changelog):
       }
 
     out.append(entry)
-    pass
 
   out.append('</feed>')
   return out
@@ -113,24 +109,18 @@ pixplus version history
         if len(changes_i18n) > 1:
           out.append('### %s' % i18n['changes'][lng])
           out.append('')
-          pass
         out += map(lambda l: '* %s' % markdown_escape(l), changes_i18n[lng])
         out.append('')
-        pass
-      pass
-    pass
 
   return out
 
 if __name__ == '__main__':
-  changelog = json.loads(sys.stdin.read().decode('utf-8'))
+  changelog = json.load(sys.stdin)
   for version in changelog:
     if 'changes_i18n' not in version:
       version['changes_i18n'] = {
         'ja': version['changes']
         }
-      pass
-    pass
 
   out = locals()['out_%s' % sys.argv[1]](changelog)
 
@@ -139,5 +129,3 @@ if __name__ == '__main__':
     print(out)
   except UnicodeEncodeError:
     print(out.encode('utf-8'))
-    pass
-  pass
