@@ -404,21 +404,24 @@ _.illust = {
       }
     }
 
-    var profile_area   = _.q('.profile-unit', doc),
-        avatar         = profile_area ? _.q('img.user-image', profile_area) : null,
-        author_link    = profile_area ? _.q('a.user-link', profile_area) : null,
-        author_name    = author_link ? _.q('h1.user', author_link) : null,
+    var profile_area   = _.q('.profile', doc),
+        author_icon    = profile_area ? _.q('._user-icon', profile_area) : null,
+        author_link    = profile_area ? _.q('.user-name', profile_area) : null,
         staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function(link) {
           return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
         })[0];
 
     illust.author_id              = null;
-    illust.author_name            = author_name ? author_name.textContent : null;
+    illust.author_name            = author_link ? author_link.textContent : null;
     illust.author_favorite        = !!(profile_area && _.q('#favorite-button.following', profile_area));
     illust.author_mutual_favorite = !!(profile_area && _.q('.user-relation .sprites-heart', profile_area));
     illust.author_mypixiv         = !!(profile_area && _.q('#mypixiv-button.mypixiv', profile_area));
-    illust.author_image_url       = avatar ? avatar.getAttribute('src') : null;
+    illust.author_image_url       = null;
     illust.author_is_me           = null;
+
+    if (author_icon && (re = /background-image:\s*url\(([\'\"]?)(.*)\1\)/.exec(author_icon.style.cssText))) {
+      illust.author_image_url = re[2];
+    }
 
     if (author_link && (re = /\/member\.php\?id=(\d+)/.exec(author_link.getAttribute('href')))) {
       illust.author_id = g.parseInt(re[1], 10);
