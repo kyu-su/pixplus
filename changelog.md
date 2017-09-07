@@ -1,6 +1,20 @@
 pixplus version history
 =======================
 
+## [1.19.2 - 2017/09/07](http://crckyl.hatenablog.com/entry/2017/09/07/pixplus_1.19.2)
+
+### 変更点
+
+* [修正] アンケート機能を再実装。
+* [修正] 作者欄が壊れていたのを修正。
+* [修正] 設定ボタンを修正。
+
+### Changes
+
+* [Fix] New implementation for pixiv's voting feature.
+* [Fix] Fix author informations area.
+* [Fix] Fix preferences button.
+
 ## [1.19.1 - 2017/04/30](http://crckyl.hatenablog.com/entry/2017/04/30/pixplus_1.19.1)
 
 ### 変更点

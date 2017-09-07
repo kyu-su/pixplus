@@ -1,5 +1,23 @@
 [
   {
+    "date": "2017/09/07",
+    "version": "1.19.2",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2017/09/07/pixplus_1.19.2",
+    "changes_i18n": {
+      "en": [
+        "[Fix] New implementation for pixiv's voting feature.",
+        "[Fix] Fix author informations area.",
+        "[Fix] Fix preferences button."
+      ],
+      "ja": [
+        "[修正] アンケート機能を再実装。",
+        "[修正] 作者欄が壊れていたのを修正。",
+        "[修正] 設定ボタンを修正。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/04/30",
     "version": "1.19.1",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/04/30/pixplus_1.19.1",
