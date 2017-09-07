@@ -25,22 +25,26 @@
   }
 }
 
-#pp-config-btn1-wrapper #pp-config {
-  position: absolute;
-  z-index: 10000;
-  top: 27px;
-  left: -400px;
-  width: 800px;
-  background-color: #fff;
-  border: 3px solid #becad8;
-  border-radius: 10px;
+#pp-config-btn1-wrapper {
+  position: relative;
 
-  .pp-config-tab:first-child:hover {
-    margin: -1px 0px 0px -1px;
-    border-top-left-radius: 8px;
-    border: 1px solid #becad8;
-    border-right: none;
-    border-bottom: none
+  #pp-config {
+    position: absolute;
+    z-index: 10000;
+    top: 27px;
+    left: -400px;
+    width: 800px;
+    background-color: #fff;
+    border: 3px solid #becad8;
+    border-radius: 10px;
+
+    .pp-config-tab:first-child:hover {
+      margin: -1px 0px 0px -1px;
+      border-top-left-radius: 8px;
+      border: 1px solid #becad8;
+      border-right: none;
+      border-bottom: none
+    }
   }
 }
 
@@ -227,6 +231,12 @@
 
   input.pp-active {
     background-color: #ffc;
+  }
+
+  #pp-config-about-content {
+    ul {
+      display: block;
+    }
   }
 }
 

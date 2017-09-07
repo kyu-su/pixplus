@@ -360,7 +360,7 @@ _.config_button = {
   buttons: [
 
     {
-      container: 'body>header .layout-wrapper>.notifications',
+      container: 'body>header .layout-wrapper .notifications',
       func: function(container) {
         var li  = _.e('li', {id: 'pp-config-btn1-wrapper'}, container),
             btn = _.e('a', {id: 'pp-config-btn1', cls: 'notification-button'}, li);
