@@ -17,6 +17,7 @@
         ]
       });
 
+      this.illust = illust;
       this.data = illust.vote;
 
       var q = 'Q: ' + (illust.vote.question || 'Error');
@@ -157,7 +158,27 @@
 
       this.sent = true;
 
-      alert([label, key]);
+      var that = this;
+      _.popup.status_loading();
+      btn.textContent = 'Sending...';
+      _.popup.api.post(
+        '/rpc_rating.php',
+        {
+          mode: 'save2',
+          i_id: that.illust.id,
+          u_id: _.api.uid,
+          qr: 1,
+          num: btn.getAttribute('data-pp-key'),
+          tt: _.api.token
+        },
+        function(res) {
+          that.close();
+          _.popup.reload();
+        },
+        function() {
+          btn.textContent = 'Error!';
+        }
+      );
     },
 
     select_btn: function(off) {
