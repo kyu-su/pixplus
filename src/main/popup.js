@@ -191,7 +191,7 @@ _.popup = {
 
 
 
-    _.observe_domnodeinserted(dom.comment, this.comment.update.bind(this.comment));
+    // _.observe_domnodeinserted(dom.comment, this.comment.update.bind(this.comment));
 
     this.input.init();
 
@@ -852,8 +852,6 @@ _.popup = {
     } else {
       dom.image_layout.href = illust.image_url_big;
     }
-
-    _.popup.comment.setup(illust.comment);
 
     if (illust.question) {
       this.question.setup();

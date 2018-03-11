@@ -78,5 +78,11 @@ _.popup.api = {
       _.popup.status_error.apply(_.popup, arguments);
       onerror.call(w, arguments);
     });
+  },
+  get: function(url, data, onsuccess, onerror) {
+    _.api.get(url, _.popup.illust, data, onsuccess, function() {
+      _.popup.status_error.apply(_.popup, arguments);
+      onerror.call(w, arguments);
+    });
   }
 };

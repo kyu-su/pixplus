@@ -221,6 +221,9 @@
     "ugoira_how_to_use": "How to use?",
     "score_view": "Views",
     "score_rated": "Like",
+    "display_replies": "Display Replies",
+    "delete_comment": "Delete",
+    "reply_comment": "Reply",
 
     "tooltip": {
       "bookmark_off": "Add bookmark (#{key})",
@@ -478,6 +481,9 @@
     "ugoira_how_to_use": "使い方",
     "score_view": "閲覧数",
     "score_rated": "いいね！",
+    "display_replies": "返信を見る",
+    "delete_comment": "削除",
+    "reply_comment": "返信",
 
     "tooltip": {
       "bookmark_off": "ブックマークに追加 (#{key})",

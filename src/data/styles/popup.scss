@@ -220,43 +220,85 @@
       margin: 0 20px;
     }
 
-    .comment.header {
-      form {
-        background-color: #fff;
-        margin-bottom: 1em;
-        width: 100%;
-      }
-
-      &::before,
-      &::after {
-        display: none;
+    #pp-popup-comment-comments ul {
+      margin: 0.8em;
+      li + li {
+        margin-top: 0.8em;
       }
     }
 
-    ._comment-items ._no-item {
-      margin: 0px 0px 0px 1em;
-      color: inherit;
-      background-color: transparent;
-      text-align: left;
-    }
+    .pp-popup-comment-item {
+      display: flex;
 
-    ._comment-item {
-      padding: 0.2em 0px;
-      &:not(.host-user) .comment {
-        padding-left: 48px;
-        padding-right: 0px;
+      .pp-popup-comment-user-image {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        background-size: cover;
+
+        &[style*="/common/images/no_profile"] {
+          background-position: 50%;
+          background-size: 110%;
+        }
       }
-      &.host-user .comment {
-        padding-left: 0px;
-        padding-right: 48px;
+
+      .pp-popup-comment-body {
+        padding-left: 0.6em;
+        * + * {
+          margin-top: 0.2em;
+        }
+      }
+
+      .pp-popup-comment-user-name {
+        display: block;
+        color: #333;
+        font-weight: bold;
+      }
+
+      .pp-popup-comment-text {
+        display: block;
+        color: #666;
+      }
+
+      .pp-popup-comment-stamp {
+        display: block;
+        width: 96px;
+        height: 96px;
+      }
+
+      .pp-popup-comment-info {
+        display: block;
+        color: #999;
+
+        span {
+          margin-left: 0.6em;
+          color: #009cff;
+          cursor: pointer;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .pp-popup-comment-display-replies {
+        display: inline-block;
+        padding: 0.4em 1em;
+        background-color: #eee;
+        border-radius: 0.8em;
+        /* margin: 0px 0.8em 0px 0px; */
+        cursor: pointer;
+        box-sizing: border-box;
+
+        &:hover {
+          background-color: #e4e4e4;
+        }
       }
     }
   }
 
-  &.pp-hide-stamp-comments .pp-stamp-comment {
-    display: none;
-  }
-  &.pp-hide-stamp-comments .sticker-container {
+  &.pp-hide-stamp-comments #pp-popup-comment .pp-popup-comment-item-stamp {
     display: none;
   }
 

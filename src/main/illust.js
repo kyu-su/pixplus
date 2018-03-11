@@ -175,7 +175,8 @@ _.illust = {
         if (p instanceof Element &&
             (p.classList.contains('thumbnail-menu') ||
              p.classList.contains('_ab-test-one-click-bookmark') ||
-             p.hasAttribute('data-click-action'))) {
+             (p.hasAttribute('data-click-action') &&
+              p.getAttribute('data-click-action') !== 'ClickToIllust'))) {
           return false;
         }
       }
@@ -184,7 +185,7 @@ _.illust = {
         cb_onshow();
       }
       return true;
-    });
+    }, {capture: true});
     return illust;
   },
 
@@ -359,7 +360,8 @@ _.illust = {
         score     = work_info ? _.q('.score', work_info) : null,
         question  = work_info ? _.q('.questionnaire', work_info) : null,
         tags_tmpl = _.q('#template-work-tags', doc),
-        tags      = _.q('.work-tags .tags-container', doc);
+        tags      = _.q('.work-tags .tags-container', doc),
+        prof_img  = _.q('#js-mount-point-comment-module[data-profile-image]', doc);
 
     illust.title = title ? _.strip(title.textContent) : '';
     illust.caption = caption ? caption.innerHTML : '';
@@ -402,6 +404,10 @@ _.illust = {
       if (vote_q) {
         illust.vote.question = vote_q.textContent;
       }
+    }
+
+    if (prof_img) {
+      illust.my_prof_img = prof_img.dataset.profileImage;
     }
 
     var profile_area   = _.q('.profile', doc),

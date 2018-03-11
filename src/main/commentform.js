@@ -11,7 +11,7 @@ _.CommentForm = _.class.create({
     dom.overlay         = _.e('div', {cls: 'pp-commform-overlay'}, dom.root);
     dom.overlay_message = _.e('div', {cls: 'pp-commform-overlay-message'}, dom.overlay);
     dom.reply_to_wrap   = _.e('div', {cls: 'pp-commform-reply-to-wrap pp-hide'}, dom.root);
-    dom.reply_to        = _.e('div', {cls: 'pp-commform-reply-to'}, dom.reply_to_wrap);
+    dom.reply_to        = _.e('ul', {cls: 'pp-commform-reply-to'}, dom.reply_to_wrap);
     dom.form            = _.e('div', {cls: 'pp-commform-form'}, dom.root);
     dom.tabbar          = _.e('div', {cls: 'pp-commform-tabbar pp-commform-tabbar-top'}, dom.form);
 
@@ -52,31 +52,52 @@ _.CommentForm = _.class.create({
 
     var that = this;
     this.set_loading();
+    _.clear(this.dom.reply_to);
+    this.get_comment(id, function(item) {
+      _.popup.comment.add_comments([item], that.dom.reply_to);
+      that.dom.reply_to_wrap.classList.remove('pp-hide');
+      that.set_complete();
+    }, function(msg) {
+      that.set_error(msg);
+    });
+  },
+
+  get_comment: function(id, onload, onerror) {
     _.api.get(
       '/rpc/get_comment.php',
       this.illust,
       {
         comment_id: id,
+        format: 'json',
         tt: _.api.token
       },
       function(data) {
         if (data.error) {
-          that.set_error(data.message || 'Unknown error');
+          onerror(data.message || 'Unknown API error');
         } else {
-          that.dom.reply_to.innerHTML = data.body.html;
-          that.dom.reply_to_wrap.classList.remove('pp-hide');
-          that.set_complete();
+          var item = data.body.items[0];
+          item.id = item.one_comment_id;
+          item.comment = item.one_comment_comment;
+          item.commentDate = item.one_comment_date;
+          item.userId = item.user_id;
+          item.userName = item.user_name;
+          item.replyToUserName = item.reply_to_user_name;
+          item.replyToUserId = item.one_comment_reply_to_user_id;
+          item.commentParentId = item.one_comment_parent_id;
+          item.commentRootId = item.one_comment_root_id;
+          item.commentUserId = item.one_comment_user_id;
+          item.stampId = item.one_comment_stamp_id;
+          item.stampLink = item.one_comment_stamp_link;
+          onload(item);
         }
       },
-      function(msg) {
-        that.set_error(msg);
-      }
+      onerror
     );
   },
 
 
 
-  onsent: function(html) {
+  onsent: function(item) {
     // override this function
   },
 
@@ -123,10 +144,15 @@ _.CommentForm = _.class.create({
         if (data.error) {
           that.set_error(data.message || 'Unknown error');
         } else {
-          that.onsent(data.body.html);
-          that.comment_textarea.value = '';
-          that.set_reply_to();
-          that.set_complete();
+          _.debug('comment sent', data);
+          that.get_comment(data.body.id, function(item) {
+            that.onsent(data.body);
+            that.comment_textarea.value = '';
+            that.set_reply_to();
+            that.set_complete();
+          }, function(msg) {
+            that.set_error(msg);
+          });
         }
       },
       function(msg) {
@@ -141,6 +167,7 @@ _.CommentForm = _.class.create({
       illust_id: this.illust.id,
       author_user_id: this.illust.author_id,
       stamp_id: id,
+      format: 'json',
       tt: _.api.token
     });
   },
@@ -151,6 +178,7 @@ _.CommentForm = _.class.create({
       illust_id: this.illust.id,
       author_user_id: this.illust.author_id,
       comment: this.comment_textarea.value,
+      format: 'json',
       tt: _.api.token
     });
   },
