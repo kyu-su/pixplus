@@ -19,59 +19,28 @@ _.popup.comment = {
     _.popup.adjust();
   },
 
-  // update: function() {
-  //   if (_.emoji_series) {
-  //     if (!_.emoji_map) {
-  //       _.emoji_map = {};
-  //       _.emoji_series.forEach(function(item) {
-  //         _.emoji_map[item.name] = item;
-  //       });
-  //     }
-  //     if (!_.emoji_re) {
-  //       var pat = _.emoji_series.map(function(item) { return _.escape_regex(item.name); }).join('|');
-  //       _.emoji_re = new RegExp('\\((' + pat + ')\\)', 'g');
-  //     }
-  //   }
+  set_comment_text: function(node, text) {
+    if (_.emoji_series) {
+      if (!_.emoji_map) {
+        _.emoji_map = {};
+        _.emoji_series.forEach(function(item) {
+          _.emoji_map[item.name] = item;
+        });
+      }
+      if (!_.emoji_re) {
+        var pat = _.emoji_series.map(function(item) { return _.escape_regex(item.name); }).join('|');
+        _.emoji_re = new RegExp('\\((' + pat + ')\\)', 'g');
+      }
+    }
 
-  //   _.qa('._comment-item', _.popup.dom.comment).forEach(this.update_comment_item.bind(this));
-  //   _.qa('._comment-sticker-item', _.popup.dom.comment).forEach(this.update_comment_stamp_item.bind(this));
-  //   _.popup.adjust();
-  // },
-
-  // update_comment_item: function(item) {
-  //   if (_.q('.sticker-container', item)) {
-  //     item.classList.add('pp-stamp-comment');
-  //   }
-
-  //   _.qa('img[data-src]', item).forEach(function(img) {
-  //     img.src = img.dataset.src;
-  //     img.removeAttribute('data-src');
-  //   });
-
-  //   if (_.emoji_re) {
-  //     var body = _.q('.body p', item);
-  //     if (body) {
-  //       var html;
-  //       html = body.innerHTML.replace(_.emoji_re, function(all, name) {
-  //         var emoji = _.emoji_map[name];
-  //         if (!emoji) {
-  //           return all;
-  //         }
-  //         return '<img src="' + emoji.url + '" class="emoji-text" width="28" height="28">';
-  //       });
-  //       if (html !== body.innerHTML) {
-  //         body.innerHTML = html;
-  //       }
-  //     }
-  //   }
-  // },
-
-  // update_comment_stamp_item: function(item) {
-  //   _.qa('img[data-src]', item).forEach(function(img) {
-  //     img.src = img.dataset.src;
-  //     img.removeAttribute('data-src');
-  //   });
-  // },
+    text.split(_.emoji_re).forEach(function(fragment, idx) {
+      if (idx % 2) {
+        _.e('img', {src: _.emoji_map[fragment].url, cls: 'pp-popup-comment-emoji'}, node);
+      } else {
+        node.appendChild(document.createTextNode(fragment));
+      }
+    });
+  },
 
   scroll: function() {
     _.popup.dom.caption_wrapper.scrollTop = _.popup.dom.caption.offsetHeight;
@@ -118,15 +87,6 @@ _.popup.comment = {
     );
   },
 
-  // get_comment_item: function(target) {
-  //   for(var p = target.parentNode; p; p = p.parentNode) {
-  //     if (p.classList.contains('_comment-item') || p.classList.contains('sticker-item')) {
-  //       return p;
-  //     }
-  //   }
-  //   return null;
-  // },
-
   load: function(illust) {
     if (this.loaded) {
       return;
@@ -135,7 +95,7 @@ _.popup.comment = {
     _.clear(_.popup.dom.comment);
 
     this.form_cont = _.e('div', {id: 'pp-popup-comment-form-cont'}, _.popup.dom.comment);
-    this.form = new _.CommentForm2(this.form_cont, _.popup.illust);
+    this.form = new _.CommentForm(this.form_cont, _.popup.illust);
     this.form.onstatuschange = function(status, message) {
       _.popup['status_' + status](message);
     };
@@ -144,30 +104,6 @@ _.popup.comment = {
     this.form.onsent = function(item) {
       that.add_comments([item], that.body, true);
     };
-
-    // _.onclick(_.q('#pp-popup-comment-comments', dom.comment), function(ev) {
-    //   var t, p;
-
-    //   for(t = ev.target; t; t = t.parentNode) {
-    //     if (t.classList.contains('delete-comment')) {
-    //       if ((p = that.get_comment_item(t))) {
-    //         that.delete_comment(p);
-    //         return true;
-    //       }
-
-    //     } else if (t.classList.contains('reply')) {
-    //       if ((p = that.get_comment_item(t))) {
-    //         that.show_form();
-    //         that.form.set_reply_to(p.dataset.id);
-    //         return true;
-    //       }
-
-    //     } else if (t.classList.contains('reply-to')) {
-    //       that.show_form();
-    //       that.form.set_reply_to(t.dataset.id);
-    //       return true;
-    //     }
-    //   }
 
 
     var body = this.body = _.e('div', {id: 'pp-popup-comment-comments'}, _.popup.dom.comment);
@@ -238,7 +174,7 @@ _.popup.comment = {
 
       if (!item.stampId) {
         var text = _.e('div', {cls: 'pp-popup-comment-text'});
-        text.textContent = item.comment;
+        that.set_comment_text(text, item.comment);
         body.insertBefore(text, info);
       } else {
         var stamp = _.e('img', {cls: 'pp-popup-comment-stamp'});

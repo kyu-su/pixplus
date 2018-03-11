@@ -160,7 +160,7 @@
     }
   }
 
-  &:not(.pp-comment-mode) #pp-popup-comment-wrapper{
+  &:not(.pp-comment-mode) #pp-popup-comment-wrapper {
     display: none;
   }
 
@@ -259,6 +259,11 @@
       .pp-popup-comment-text {
         display: block;
         color: #666;
+      }
+
+      .pp-popup-comment-emoji {
+        width: 24px;
+        height: 24px;
       }
 
       .pp-popup-comment-stamp {
