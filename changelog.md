@@ -1,6 +1,16 @@
 pixplus version history
 =======================
 
+## [1.19.3 - 2018/03/11](http://crckyl.hatenablog.com/entry/2018/03/11/pixplus_1.19.3)
+
+### 変更点
+
+* [修正] 完全に動かなくなっていたのをとりあえず直した。
+
+### Changes
+
+* [Fix] Quick fix for the problem that pixplus was completely broken.
+
 ## [1.19.2 - 2017/09/07](http://crckyl.hatenablog.com/entry/2017/09/07/pixplus_1.19.2)
 
 ### 変更点

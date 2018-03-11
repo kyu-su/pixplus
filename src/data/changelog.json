@@ -1,5 +1,19 @@
 [
   {
+    "date": "2018/03/11",
+    "version": "1.19.3",
+    "releasenote": "http://crckyl.hatenablog.com/entry/2018/03/11/pixplus_1.19.3",
+    "changes_i18n": {
+      "en": [
+        "[Fix] Quick fix for the problem that pixplus was completely broken."
+      ],
+      "ja": [
+        "[修正] 完全に動かなくなっていたのをとりあえず直した。"
+      ]
+    }
+  },
+
+  {
     "date": "2017/09/07",
     "version": "1.19.2",
     "releasenote": "http://crckyl.hatenablog.com/entry/2017/09/07/pixplus_1.19.2",
