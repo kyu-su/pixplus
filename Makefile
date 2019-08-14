@@ -4,7 +4,7 @@ ZIP                             = zip
 CRXMAKE                         = RUBYLIB=$(CURDIR)/ext/rubyzip/lib $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
 PYTHON                          = python
-SCSS                            = RUBYLIB=$(CURDIR)/ext/sass/lib $(CURDIR)/ext/sass/bin/scss
+SCSS                            = RUBYLIB=$(CURDIR)/ext/sass/lib /usr/local/bin/sass
 
 ifeq ($(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no),no)
 $(error Could not find svg converter command)
