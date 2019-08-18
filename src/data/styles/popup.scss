@@ -52,9 +52,11 @@
       .pp-icon-vote-on {
         opacity: 1;
       }
+
       &:not(.pp-active) .pp-icon-vote-on {
         display: none;
       }
+
       &.pp-active .pp-icon-vote-off {
         display: none;
       }
@@ -64,9 +66,11 @@
       .pp-icon-like-on {
         opacity: 1;
       }
+
       &:not(.pp-active) .pp-icon-like-on {
         display: none;
       }
+
       &.pp-active .pp-icon-like-off {
         display: none;
       }
@@ -76,9 +80,11 @@
       .pp-icon-star-black {
         opacity: 1;
       }
+
       &:not(.pp-active) .pp-icon-star-black {
         display: none;
       }
+
       &.pp-active .pp-icon-star-white {
         display: none;
       }
@@ -90,11 +96,13 @@
           display: none;
         }
       }
+
       &[data-pp-resize-mode="S"] {
         .pp-icon-rm-fit-long, .pp-icon-rm-original {
           display: none;
         }
       }
+
       &[data-pp-resize-mode="O"] {
         .pp-icon-rm-fit-short, .pp-icon-rm-fit-long {
           display: none;
@@ -113,10 +121,12 @@
 
   #pp-popup-status-text {
     color: #888;
+
     &:empty {
       display: none;
     }
   }
+
   &.pp-error #pp-popup-status-text {
     color: #a00;
     font-weight: bold;
@@ -125,9 +135,11 @@
   &:not(.pp-ugoira) #pp-popup-ugoira-status {
     display: none;
   }
+
   &:not(.pp-ugoira-playing) .pp-icon-ugoira-playing {
     display: none;
   }
+
   &:not(.pp-ugoira-paused) .pp-icon-ugoira-paused {
     display: none;
   }
@@ -166,8 +178,10 @@
 
   #pp-popup-comment-toolbar {
     margin: 0.4em 1em 0.2em 1em;
+
     button {
       margin-right: 0.4em;
+
       svg {
         width: 2em;
         height: 2em;
@@ -211,6 +225,7 @@
   ._comment-form-container {
     display: none;
   }
+
   &:not(.pp-show-comment-form) #pp-popup-comment-form-cont {
     display: none;
   }
@@ -222,6 +237,7 @@
 
     #pp-popup-comment-comments ul {
       margin: 0.8em;
+
       li + li {
         margin-top: 0.8em;
       }
@@ -245,6 +261,7 @@
 
       .pp-popup-comment-body {
         padding-left: 0.6em;
+
         * + * {
           margin-top: 0.2em;
         }
@@ -385,9 +402,11 @@
       dl, dt, dd {
         display: inline;
       }
+
       dt {
         margin-right: 0.2em;
       }
+
       dd {
         margin-right: 0.6em;
       }
@@ -452,15 +471,18 @@
       }
     }
   }
-  #pp-popup-author-image:hover~#pp-popup-author-status {
+
+  #pp-popup-author-image:hover ~ #pp-popup-author-status {
     display: none;
   }
 
   #pp-popup-tools {
-    margin-left:0.6em;
+    margin-left: 0.6em;
+
     &:empty {
       display: none;
     }
+
     a + a {
       margin-left: 0.6em;
     }
@@ -469,6 +491,7 @@
   #pp-popup-ugoira-info {
     margin-left: 0.6em;
   }
+
   &:not(.pp-ugoira) #pp-popup-ugoira-info {
     display: none;
   }
@@ -484,12 +507,15 @@
     position: relative;
     overflow: hidden;
   }
+
   #pp-popup-image-scroller {
     width: 100%;
     height: 100%;
   }
+
   #pp-popup-image-layout {
     display: inline-block;
+
     img {
       display: inline-block;
     }
@@ -517,7 +543,7 @@
   }
 
   #pp-popup-olc-next svg {
-    transform: matrix(-1,0,0,1,0,0);
+    transform: matrix(-1, 0, 0, 1, 0, 0);
   }
 
   .pp-icon-multipage {
@@ -526,6 +552,7 @@
     right: 0px;
     bottom: 0px;
   }
+
   &:not(.pp-frontpage-new) .pp-icon-multipage {
     display: none;
   }

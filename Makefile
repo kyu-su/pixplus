@@ -34,7 +34,7 @@ BUILD_SAFARIEXTZ                = no
 
 VERSION_DEV                     = $(shell $(PYTHON) tools/changelog.py dev_version < $(CHANGELOG_JSON))
 VERSION_STABLE                  = $(shell $(PYTHON) tools/changelog.py stable_version < $(CHANGELOG_JSON))
-WEBSITE                         = http://ccl4.info/pixplus/
+WEBSITE                         = https://github.com/kyu-su/pixplusPlus
 
 BUILD_DIR                       = temp
 BUILD_DIR_ICON                  = $(BUILD_DIR)/icons
@@ -48,11 +48,11 @@ RELEASE_ATOM                    = release.atom
 DIST_DIR                        = dist
 RELEASE_DIR                     = releases/$(VERSION_STABLE)
 RELEASE_LATEST                  = releases/latest
-OPERA_USERJS                    = $(DIST_DIR)/pixplus.js
-GREASEMONKEY_JS                 = $(DIST_DIR)/pixplus.user.js
-OEX                             = $(DIST_DIR)/pixplus.oex
-CRX                             = $(DIST_DIR)/pixplus.crx
-SAFARIEXTZ                      = $(DIST_DIR)/pixplus.safariextz
+OPERA_USERJS                    = $(DIST_DIR)/pixplusPlus.js
+GREASEMONKEY_JS                 = $(DIST_DIR)/pixplusPlus.user.js
+OEX                             = $(DIST_DIR)/pixplusPlus.oex
+CRX                             = $(DIST_DIR)/pixplusPlus.crx
+SAFARIEXTZ                      = $(DIST_DIR)/pixplusPlus.safariextz
 
 LIB_JS                          = $(BUILD_DIR)/lib.js
 DATA_JS                         = $(BUILD_DIR)/data.js
@@ -111,7 +111,7 @@ SAFARIEXTZ_DIST_FILES           = $(addprefix $(BUILD_DIR_SAFARIEXTZ)/,$(notdir 
 
 AUTOUPDATE_TARGETS              = chrome.xml opera.xml
 AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/1/%)
-AUTOUPDATE_GM                   = autoupdate/1/pixplus.user.js
+AUTOUPDATE_GM                   = autoupdate/1/pixplusPlus.user.js
 
 RELEASE_TARGETS                 = $(OPERA_USERJS) $(GREASEMONKEY_JS)
 

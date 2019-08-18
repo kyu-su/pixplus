@@ -25,7 +25,6 @@
       "regex_valid": "Valid",
       "regex_invalid": "Invalid"
     },
-
     "conf": {
       "general": {
         "debug": "Debug mode",
@@ -63,7 +62,6 @@
           ]
         }
       },
-
       "popup": {
         "preload": "Enable preloading",
         "big_image": "Use original size image",
@@ -122,7 +120,6 @@
         },
         "minimum_size": "Minimum image size (enlarge images which is smaller than this value; 0:disable; x<1:ratio to window size; x>1:pixel)"
       },
-
       "key": {
         "popup_prev": "Move to previous illust",
         "popup_prev_direction": "Move to previous illust (ignore \"reverse\" setting)",
@@ -172,13 +169,11 @@
         "popup_tag_edit_start": "Start tag edit mode",
         "popup_tag_edit_end": "End tag edit mode"
       },
-
       "bookmark": {
         "tag_order": "Reorder tags. 1 tag per line.\n-: Separator\n*: Others",
         "tag_aliases": "Tag association. Used for auto input. Separate by space."
       }
     },
-
     "dialog": {
       "close": "Close",
       "cancel": "Cancel",
@@ -186,7 +181,6 @@
       "no": "No",
       "add": "Add"
     },
-
     "commform": {
       "tab_comment": "Comments",
       "tab_stamp": "Stickers",
@@ -194,7 +188,6 @@
       "btn_send": "Send",
       "comment_placeholder": "Write a comment..."
     },
-
     "cancel": "Cancel",
     "rate_confirm": "Rate it?\n$pointpt",
     "delete_tag_confirm": "Really remove?\nYour member id will be notified to the author.",
@@ -224,7 +217,6 @@
     "display_replies": "Display Replies",
     "delete_comment": "Delete",
     "reply_comment": "Reply",
-
     "tooltip": {
       "bookmark_off": "Add bookmark (#{key})",
       "bookmark_on": "Edit bookmark (#{key})",
@@ -239,7 +231,6 @@
       "vote_off": "Vote (#{key})",
       "vote_on": "View poll result (#{key})"
     },
-
     "apng": {
       "title": "APNG generator",
       "warning": "WARNING: This may take a long time and uses much of memory.",
@@ -250,14 +241,12 @@
       "download": "Download",
       "close": "Close"
     },
-
     "vote": {
       "title_vote": "Vote",
       "title_result": "Poll result",
       "view_result": "View result"
     }
   },
-
   "ja": {
     "__name__": "ja",
     "pref": {
@@ -285,7 +274,6 @@
       "regex_valid": "有効",
       "regex_invalid": "不正"
     },
-
     "conf": {
       "general": {
         "debug": "デバッグモード",
@@ -323,7 +311,6 @@
           ]
         }
       },
-
       "popup": {
         "preload": "先読みを使用する",
         "big_image": "原寸の画像を表示する",
@@ -382,7 +369,6 @@
         },
         "minimum_size": "最小サイズ (この値より小さい画像を拡大して表示; 0:無効; x<1:画面サイズに対する割合; x>1:ピクセル)"
       },
-
       "key": {
         "popup_prev": "前のイラストに移動",
         "popup_prev_direction": "前のイラストに移動(\"反対にする\"オプションに影響されない)",
@@ -432,13 +418,11 @@
         "popup_tag_edit_start": "タグ編集モード開始",
         "popup_tag_edit_end": "タグ編集モード終了"
       },
-
       "bookmark": {
         "tag_order": "ブックマークタグの並べ替えとグルーピング。1行1タグ。\n-: セパレータ\n*: 残り全部",
         "tag_aliases": "タグの関連付け。自動入力に使用する。スペース区切り。"
       }
     },
-
     "dialog": {
       "close": "閉じる",
       "cancel": "キャンセル",
@@ -446,7 +430,6 @@
       "no": "いいえ",
       "add": "追加"
     },
-
     "commform": {
       "tab_comment": "コメント",
       "tab_stamp": "スタンプ",
@@ -454,7 +437,6 @@
       "btn_send": "送信",
       "comment_placeholder": "コメントする..."
     },
-
     "cancel": "中止",
     "rate_confirm": "評価しますか？\n$point点",
     "delete_tag_confirm": "このタグを削除しますか？\n*投稿者にユーザーIDが通知されます。",
@@ -484,7 +466,6 @@
     "display_replies": "返信を見る",
     "delete_comment": "削除",
     "reply_comment": "返信",
-
     "tooltip": {
       "bookmark_off": "ブックマークに追加 (#{key})",
       "bookmark_on": "ブックマークを編集 (#{key})",
@@ -499,7 +480,6 @@
       "vote_off": "アンケートに答える (#{key})",
       "vote_on": "アンケート結果を見る (#{key})"
     },
-
     "apng": {
       "title": "APNGジェネレータ",
       "warning": "注意: 長い時間がかかりメモリをたくさん消費することがあります。",
@@ -510,7 +490,6 @@
       "download": "ダウンロード",
       "close": "閉じる"
     },
-
     "vote": {
       "title_vote": "アンケートに答える",
       "title_result": "アンケート結果",

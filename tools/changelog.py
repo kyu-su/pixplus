@@ -38,17 +38,17 @@ def out_atom(changelog):
   out.append('''
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title type="text">pixplus</title>
-  <id>http://ccl4.info/pixplus/release.atom</id>
+  <title type="text">pixplusPlus</title>
+  <id>https://github.com/kyu-su/pixplusPlus/release.atom</id>
   <updated>%(time)s</updated>
-  <link href="https://ccl4.info/pixplus/" />
-  <link href="https://ccl4.info/cgit/pixplus.git/plain/release.atom" rel="self" />
+  <link href="https://github.com/kyu-su/pixplusPlus/" />
+  <link href="https://github.com/kyu-su/pixplusPlus/release.atom" rel="self" />
   <author>
     <name>wowo</name>
     <uri>https://ccl4.info/</uri>
     <email>crckyl@gmail.com</email>
   </author>
-  <subtitle type="text">pixplus changelogs</subtitle>
+  <subtitle type="text">pixplusPlus changelogs</subtitle>
 '''.strip('\n') % {'time': make_atom_time(changelog[0])})
 
   for version in changelog:
@@ -60,7 +60,7 @@ def out_atom(changelog):
 
     entry = '''
   <entry>
-    <title type="text">pixplus %(ver)s</title>
+    <title type="text">pixplusPlus %(ver)s</title>
     <id>https://ccl4.info/pixplus/archive/%(ver)s</id>
     <updated>%(time)s</updated>
     <link href="https://ccl4.info/pixplus/archive/%(ver)s" />
@@ -70,7 +70,7 @@ def out_atom(changelog):
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus %(ver)s</h1>
+      <h1>pixplusPlus %(ver)s</h1>
       %(changes)s
     ]]></content>
   </entry>
@@ -95,7 +95,7 @@ def markdown_escape(text):
 @stable
 def out_markdown(changelog):
   out = ['''
-pixplus version history
+pixplusPlus version history
 =======================
 '''.lstrip()]
 

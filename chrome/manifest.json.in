@@ -1,9 +1,9 @@
 {
-  "name": "pixplus",
+  "name": "pixplusPlus",
   "version": "@VERSION@",
   "manifest_version": 2,
   "description": "hogehoge",
-  "update_url": "https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/chrome.xml",
+  "update_url": "https://github.com/kyu-su/pixplusPlus/blob/master/autoupdate/1/chrome.xml",
   "icons": {
     @ICONS@
   },
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["http://www.pixiv.net/*", "https://www.pixiv.net/*"],
-      "js": ["pixplus.js"],
+      "js": ["pixplusPlus.js"],
       "run_at": "document_start",
       "all_frames": true
     }

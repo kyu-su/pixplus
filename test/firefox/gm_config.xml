@@ -1,5 +1,5 @@
 <UserScriptConfig>
-  <Script enabled="true" filename="pixplus.user.js" name="pixplus.js" runAt="document-start">
+  <Script enabled="true" filename="pixplusPlus.user.js" name="pixplusPlus.js" runAt="document-start">
     <Grant>unsafeWindow</Grant>
     <Include>http://www.pixiv.net/*</Include>
   </Script>

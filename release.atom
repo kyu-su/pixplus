@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title type="text">pixplus</title>
-  <id>http://ccl4.info/pixplus/release.atom</id>
-  <updated>2018-03-11T00:00:00.000Z</updated>
-  <link href="https://ccl4.info/pixplus/" />
-  <link href="https://ccl4.info/cgit/pixplus.git/plain/release.atom" rel="self" />
+  <title type="text">pixplusPlus</title>
+  <id>https://github.com/kyu-su/pixplusPlus/release.atom</id>
+  <updated>2018-08-18T00:00:00.000Z</updated>
+  <link href="https://github.com/kyu-su/pixplusPlus/" />
+  <link href="https://github.com/kyu-su/pixplusPlus/release.atom" rel="self" />
   <author>
     <name>wowo</name>
     <uri>https://ccl4.info/</uri>
     <email>crckyl@gmail.com</email>
   </author>
-  <subtitle type="text">pixplus changelogs</subtitle>
+  <subtitle type="text">pixplusPlus changelogs</subtitle>
   <entry>
-    <title type="text">pixplus 1.19.3</title>
+    <title type="text">pixplusPlus 1.19.4</title>
+    <id>https://ccl4.info/pixplus/archive/1.19.4</id>
+    <updated>2018-08-18T00:00:00.000Z</updated>
+    <link href="https://ccl4.info/pixplus/archive/1.19.4" />
+    <author>
+      <name>wowo</name>
+      <uri>https://ccl4.info/</uri>
+      <email>crckyl@gmail.com</email>
+    </author>
+    <content type="html"><![CDATA[
+      <h1>pixplusPlus 1.19.4</h1>
+      <ul>
+        <li>[修正] コードフォーマット修正</li>
+      </ul>
+    ]]></content>
+  </entry>
+  <entry>
+    <title type="text">pixplusPlus 1.19.3</title>
     <id>https://ccl4.info/pixplus/archive/1.19.3</id>
     <updated>2018-03-11T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.19.3" />
@@ -22,7 +39,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.19.3</h1>
+      <h1>pixplusPlus 1.19.3</h1>
       <ul>
         <li>[修正] 完全に動かなくなっていたのをとりあえず直した。</li>
       </ul>
@@ -32,7 +49,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.19.2</title>
+    <title type="text">pixplusPlus 1.19.2</title>
     <id>https://ccl4.info/pixplus/archive/1.19.2</id>
     <updated>2017-09-07T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.19.2" />
@@ -42,7 +59,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.19.2</h1>
+      <h1>pixplusPlus 1.19.2</h1>
       <ul>
         <li>[修正] アンケート機能を再実装。</li>
         <li>[修正] 作者欄が壊れていたのを修正。</li>
@@ -56,7 +73,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.19.1</title>
+    <title type="text">pixplusPlus 1.19.1</title>
     <id>https://ccl4.info/pixplus/archive/1.19.1</id>
     <updated>2017-04-30T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.19.1" />
@@ -66,7 +83,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.19.1</h1>
+      <h1>pixplusPlus 1.19.1</h1>
       <ul>
         <li>[修正] 「いいね！」をサポート。</li>
       </ul>
@@ -76,7 +93,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.19.0</title>
+    <title type="text">pixplusPlus 1.19.0</title>
     <id>https://ccl4.info/pixplus/archive/1.19.0</id>
     <updated>2017-04-19T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.19.0" />
@@ -86,7 +103,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.19.0</h1>
+      <h1>pixplusPlus 1.19.0</h1>
       <ul>
         <li>[修正] 'https:'から始まるpixivの新しいURLに対応。</li>
         <li>[削除] 一時的に評価機能を削除。</li>
@@ -98,7 +115,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.18.1</title>
+    <title type="text">pixplusPlus 1.18.1</title>
     <id>https://ccl4.info/pixplus/archive/1.18.1</id>
     <updated>2017-03-23T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.18.1" />
@@ -108,7 +125,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.18.1</h1>
+      <h1>pixplusPlus 1.18.1</h1>
       <ul>
         <li>[修正] 「プロフィールカードのポップアップを無効化する」オプションが動かないことがあるバグを修正。</li>
         <li>[修正] 複数ページ作品で稀にエラーが出る不具合を修正。</li>
@@ -126,7 +143,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.18.0</title>
+    <title type="text">pixplusPlus 1.18.0</title>
     <id>https://ccl4.info/pixplus/archive/1.18.0</id>
     <updated>2017-03-05T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.18.0" />
@@ -136,7 +153,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.18.0</h1>
+      <h1>pixplusPlus 1.18.0</h1>
       <ul>
         <li>[追加] コメント投稿機能を再実装。</li>
       </ul>
@@ -146,7 +163,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.17.0</title>
+    <title type="text">pixplusPlus 1.17.0</title>
     <id>https://ccl4.info/pixplus/archive/1.17.0</id>
     <updated>2017-01-25T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.17.0" />
@@ -156,7 +173,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.17.0</h1>
+      <h1>pixplusPlus 1.17.0</h1>
       <ul>
         <li>[追加] ポップアップの最小サイズを指定するオプションを追加。</li>
         <li>[追加] 「プロフィールカードのポップアップを無効化する」オプションを再実装。</li>
@@ -172,7 +189,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.16.0</title>
+    <title type="text">pixplusPlus 1.16.0</title>
     <id>https://ccl4.info/pixplus/archive/1.16.0</id>
     <updated>2017-01-22T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.16.0" />
@@ -182,7 +199,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.16.0</h1>
+      <h1>pixplusPlus 1.16.0</h1>
       <ul>
         <li>[削除] 「プロフィールカードのポップアップを無効化する」オプションを削除。</li>
         <li>[削除] コメント投稿機能を削除。</li>
@@ -202,7 +219,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.15.2</title>
+    <title type="text">pixplusPlus 1.15.2</title>
     <id>https://ccl4.info/pixplus/archive/1.15.2</id>
     <updated>2016-09-17T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.15.2" />
@@ -212,7 +229,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.15.2</h1>
+      <h1>pixplusPlus 1.15.2</h1>
       <ul>
         <li>[修正][Opera12] Opera12で矢印ボタンの動作がおかしかったのを修正。</li>
       </ul>
@@ -222,7 +239,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.15.1</title>
+    <title type="text">pixplusPlus 1.15.1</title>
     <id>https://ccl4.info/pixplus/archive/1.15.1</id>
     <updated>2016-08-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.15.1" />
@@ -232,7 +249,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.15.1</h1>
+      <h1>pixplusPlus 1.15.1</h1>
       <ul>
         <li>[修正] マンガページ内で設定ダイアログのレイアウトが壊れていた不具合を修正。</li>
         <li>[修正] 「pixivコミックアイコンを除去する」オプションが機能しなくなっていた不具合を修正。</li>
@@ -244,7 +261,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.15.0</title>
+    <title type="text">pixplusPlus 1.15.0</title>
     <id>https://ccl4.info/pixplus/archive/1.15.0</id>
     <updated>2015-08-02T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.15.0" />
@@ -254,7 +271,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.15.0</h1>
+      <h1>pixplusPlus 1.15.0</h1>
       <ul>
         <li>[追加] プロフィールカードのポップアップを無効化するオプションを追加(全般タブ)。</li>
         <li>[修正] 作者アイコンのバッジが表示されなくなっていた不具合を修正。</li>
@@ -270,7 +287,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.14.0</title>
+    <title type="text">pixplusPlus 1.14.0</title>
     <id>https://ccl4.info/pixplus/archive/1.14.0</id>
     <updated>2015-05-28T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.14.0" />
@@ -280,7 +297,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.14.0</h1>
+      <h1>pixplusPlus 1.14.0</h1>
       <ul>
         <li>[追加] APNGジェネレータを追加。</li>
         <li>[追加] pixivスポットライトページに対応。</li>
@@ -300,7 +317,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.13.4</title>
+    <title type="text">pixplusPlus 1.13.4</title>
     <id>https://ccl4.info/pixplus/archive/1.13.4</id>
     <updated>2015-01-01T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.13.4" />
@@ -310,7 +327,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.13.4</h1>
+      <h1>pixplusPlus 1.13.4</h1>
       <ul>
         <li>[修正] 非常に縦・横に長いイラストに対して「原寸の画像を表示する」オプションが機能していなかった不具合を修正。</li>
         <li>[修正] 単ページのマンガ作品に対して「原寸の画像を表示する」オプションが機能していなかった不具合を修正。</li>
@@ -322,7 +339,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.13.3</title>
+    <title type="text">pixplusPlus 1.13.3</title>
     <id>https://ccl4.info/pixplus/archive/1.13.3</id>
     <updated>2014-12-20T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.13.3" />
@@ -332,7 +349,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.13.3</h1>
+      <h1>pixplusPlus 1.13.3</h1>
       <ul>
         <li>[修正] 古い作品でエラーになる不具合を修正。</li>
         <li>[修正] 「原寸の画像を表示する」オプションが動かなくなっていた不具合を修正。</li>
@@ -344,7 +361,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.13.2</title>
+    <title type="text">pixplusPlus 1.13.2</title>
     <id>https://ccl4.info/pixplus/archive/1.13.2</id>
     <updated>2014-12-14T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.13.2" />
@@ -354,7 +371,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.13.2</h1>
+      <h1>pixplusPlus 1.13.2</h1>
       <ul>
         <li>[修正] コメントモード(Shift+c)が動かなくなっていた不具合を修正。</li>
       </ul>
@@ -364,7 +381,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.13.1</title>
+    <title type="text">pixplusPlus 1.13.1</title>
     <id>https://ccl4.info/pixplus/archive/1.13.1</id>
     <updated>2014-10-19T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.13.1" />
@@ -374,7 +391,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.13.1</h1>
+      <h1>pixplusPlus 1.13.1</h1>
       <ul>
         <li>[修正] Safari 5/6でポップアップが動作しなくなっていたバグを修正。</li>
       </ul>
@@ -384,7 +401,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.13.0</title>
+    <title type="text">pixplusPlus 1.13.0</title>
     <id>https://ccl4.info/pixplus/archive/1.13.0</id>
     <updated>2014-10-10T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.13.0" />
@@ -394,7 +411,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.13.0</h1>
+      <h1>pixplusPlus 1.13.0</h1>
       <ul>
         <li>[変更] 複数ページ作品の扉ページを表示した際のデザインを変更。</li>
         <li>[修正] 「原寸の画像を表示する」オプションの動作が「ブック」に対して逆になっていた不具合を修正。</li>
@@ -410,7 +427,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.12.3</title>
+    <title type="text">pixplusPlus 1.12.3</title>
     <id>https://ccl4.info/pixplus/archive/1.12.3</id>
     <updated>2014-10-01T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.12.3" />
@@ -420,7 +437,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.12.3</h1>
+      <h1>pixplusPlus 1.12.3</h1>
       <ul>
         <li>[修正] ブック形式機能をサポート。</li>
       </ul>
@@ -430,7 +447,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.12.1</title>
+    <title type="text">pixplusPlus 1.12.1</title>
     <id>https://ccl4.info/pixplus/archive/1.12.1</id>
     <updated>2014-09-27T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.12.1" />
@@ -440,7 +457,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.12.1</h1>
+      <h1>pixplusPlus 1.12.1</h1>
       <ul>
         <li>[修正] pixivの変更に対応。</li>
         <li>[修正] ブックマークモードがうまく動作しなくなっていた不具合を修正。</li>
@@ -454,7 +471,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.12.0</title>
+    <title type="text">pixplusPlus 1.12.0</title>
     <id>https://ccl4.info/pixplus/archive/1.12.0</id>
     <updated>2014-09-04T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.12.0" />
@@ -464,7 +481,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.12.0</h1>
+      <h1>pixplusPlus 1.12.0</h1>
       <ul>
         <li>[追加] 「既に読んだマンガは自動でマンガモードを開始しない」設定を追加。</li>
         <li>[修正] ブックマークモードが正しく動作しなくなっていた不具合を修正。</li>
@@ -480,7 +497,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.11.0</title>
+    <title type="text">pixplusPlus 1.11.0</title>
     <id>https://ccl4.info/pixplus/archive/1.11.0</id>
     <updated>2014-06-28T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.11.0" />
@@ -490,7 +507,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.11.0</h1>
+      <h1>pixplusPlus 1.11.0</h1>
       <ul>
         <li>[追加] BOOTHアイコンを除去する設定を追加。</li>
         <li>[修正] うごイラをサポート。</li>
@@ -502,7 +519,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.10.0</title>
+    <title type="text">pixplusPlus 1.10.0</title>
     <id>https://ccl4.info/pixplus/archive/1.10.0</id>
     <updated>2014-05-06T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.10.0" />
@@ -512,7 +529,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.10.0</h1>
+      <h1>pixplusPlus 1.10.0</h1>
       <ul>
         <li>[追加] 「漫画作品のページでポップアップを開く」オプションを追加。</li>
         <li>[修正] キーイベントの処理を修正。</li>
@@ -528,7 +545,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.9.0</title>
+    <title type="text">pixplusPlus 1.9.0</title>
     <id>https://ccl4.info/pixplus/archive/1.9.0</id>
     <updated>2014-02-21T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.9.0" />
@@ -538,7 +555,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.9.0</h1>
+      <h1>pixplusPlus 1.9.0</h1>
       <ul>
         <li>[追加] 「スタンプのコメントを非表示にする」オプションを追加。</li>
         <li>[修正] ランキングページのサポートを修正。</li>
@@ -554,7 +571,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.8.1</title>
+    <title type="text">pixplusPlus 1.8.1</title>
     <id>https://ccl4.info/pixplus/archive/1.8.1</id>
     <updated>2013-08-14T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.8.1" />
@@ -564,7 +581,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.8.1</h1>
+      <h1>pixplusPlus 1.8.1</h1>
       <ul>
         <li>[修正] ブックマークモードでタグを選択できない場合があるバグを修正。</li>
         <li>[修正] マンガモードで"w"キーが上手く動かないバグを修正。</li>
@@ -576,7 +593,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.8.0</title>
+    <title type="text">pixplusPlus 1.8.0</title>
     <id>https://ccl4.info/pixplus/archive/1.8.0</id>
     <updated>2013-08-07T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.8.0" />
@@ -586,7 +603,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.8.0</h1>
+      <h1>pixplusPlus 1.8.0</h1>
       <ul>
         <li>[追加] 「リンクを訪問済みにする」オプションを追加。</li>
         <li>[追加] 「PageUp/PageDownのスクロール幅」オプションを追加。</li>
@@ -612,7 +629,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.7.1</title>
+    <title type="text">pixplusPlus 1.7.1</title>
     <id>https://ccl4.info/pixplus/archive/1.7.1</id>
     <updated>2013-06-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.7.1" />
@@ -622,7 +639,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.7.1</h1>
+      <h1>pixplusPlus 1.7.1</h1>
       <ul>
         <li>[修正][Chrome] Greasemonkey版がChrome上で動作しないバグを修正。</li>
       </ul>
@@ -632,7 +649,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.7.0</title>
+    <title type="text">pixplusPlus 1.7.0</title>
     <id>https://ccl4.info/pixplus/archive/1.7.0</id>
     <updated>2013-06-25T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.7.0" />
@@ -642,7 +659,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.7.0</h1>
+      <h1>pixplusPlus 1.7.0</h1>
       <ul>
         <li>起動を高速化。</li>
         <li>[追加] 「検索オプション」ダイアログにいくつかのオプションを追加する機能を追加。</li>
@@ -662,7 +679,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.6.3</title>
+    <title type="text">pixplusPlus 1.6.3</title>
     <id>https://ccl4.info/pixplus/archive/1.6.3</id>
     <updated>2013-05-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.6.3" />
@@ -672,7 +689,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.6.3</h1>
+      <h1>pixplusPlus 1.6.3</h1>
       <ul>
         <li>[修正] 新しいブックマークページをサポート。</li>
       </ul>
@@ -682,7 +699,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.6.2</title>
+    <title type="text">pixplusPlus 1.6.2</title>
     <id>https://ccl4.info/pixplus/archive/1.6.2</id>
     <updated>2013-05-18T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.6.2" />
@@ -692,7 +709,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.6.2</h1>
+      <h1>pixplusPlus 1.6.2</h1>
       <ul>
         <li>[修正] 作者のステータスアイコンが表示されなくなっていた不具合を修正。</li>
         <li>[修正] ブックマークしてもブックマークボタンの表示が変化しない不具合を修正。</li>
@@ -706,7 +723,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.6.1</title>
+    <title type="text">pixplusPlus 1.6.1</title>
     <id>https://ccl4.info/pixplus/archive/1.6.1</id>
     <updated>2013-03-13T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.6.1" />
@@ -716,7 +733,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.6.1</h1>
+      <h1>pixplusPlus 1.6.1</h1>
       <ul>
         <li>[変更] 移動用クリックインターフェースのデザインを変更。</li>
         <li>[修正] pixivの変更に対応。</li>
@@ -728,7 +745,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.6.0</title>
+    <title type="text">pixplusPlus 1.6.0</title>
     <id>https://ccl4.info/pixplus/archive/1.6.0</id>
     <updated>2013-02-23T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.6.0" />
@@ -738,7 +755,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.6.0</h1>
+      <h1>pixplusPlus 1.6.0</h1>
       <ul>
         <li>[追加] リサイズモードの設定とキーバインドを追加。</li>
         <li>[修正] ポップアップに作者が表示されなくなっていた不具合を修正。</li>
@@ -750,7 +767,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.5.0</title>
+    <title type="text">pixplusPlus 1.5.0</title>
     <id>https://ccl4.info/pixplus/archive/1.5.0</id>
     <updated>2013-02-10T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.5.0" />
@@ -760,7 +777,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.5.0</h1>
+      <h1>pixplusPlus 1.5.0</h1>
       <ul>
         <li>[追加] トップページのレイアウトの変更履歴を管理する機能を追加。</li>
         <li>[修正][エクステンション] 「全般」セクションの設定が保存されないバグを修正。</li>
@@ -772,7 +789,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.4.0</title>
+    <title type="text">pixplusPlus 1.4.0</title>
     <id>https://ccl4.info/pixplus/archive/1.4.0</id>
     <updated>2013-02-02T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.4.0" />
@@ -782,7 +799,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.4.0</h1>
+      <h1>pixplusPlus 1.4.0</h1>
       <ul>
         <li>[追加] ブックマークモードにタグを関連付けるUIを追加。</li>
         <li>[修正] ポップアップに作者が表示されなくなっていた不具合を修正。</li>
@@ -798,7 +815,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.3.0</title>
+    <title type="text">pixplusPlus 1.3.0</title>
     <id>https://ccl4.info/pixplus/archive/1.3.0</id>
     <updated>2012-12-16T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.3.0" />
@@ -808,7 +825,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.3.0</h1>
+      <h1>pixplusPlus 1.3.0</h1>
       <ul>
         <li>[追加] pixivコミックアイコンを除去するオプションを追加。</li>
         <li>[変更] ブックマークモードのレイアウトを改善。</li>
@@ -828,7 +845,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.2.2</title>
+    <title type="text">pixplusPlus 1.2.2</title>
     <id>https://ccl4.info/pixplus/archive/1.2.2</id>
     <updated>2012-12-06T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.2.2" />
@@ -838,7 +855,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.2.2</h1>
+      <h1>pixplusPlus 1.2.2</h1>
       <ul>
         <li>[修正] マンガのレイアウトが崩れるバグを修正。</li>
         <li>[修正] タグリストのレイアウトを修正。</li>
@@ -854,7 +871,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.2.1</title>
+    <title type="text">pixplusPlus 1.2.1</title>
     <id>https://ccl4.info/pixplus/archive/1.2.1</id>
     <updated>2012-09-29T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.2.1" />
@@ -864,7 +881,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.2.1</h1>
+      <h1>pixplusPlus 1.2.1</h1>
       <ul>
         <li>[修正] pixivの変更に対応。</li>
       </ul>
@@ -874,7 +891,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.2.0</title>
+    <title type="text">pixplusPlus 1.2.0</title>
     <id>https://ccl4.info/pixplus/archive/1.2.0</id>
     <updated>2012-08-27T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.2.0" />
@@ -884,7 +901,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.2.0</h1>
+      <h1>pixplusPlus 1.2.0</h1>
       <ul>
         <li>[追加] "jump.phpをリダイレクトする"設定を追加。</li>
         <li>[修正] DOM3EventのControlキーサポートを修正。</li>
@@ -900,7 +917,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.1.1</title>
+    <title type="text">pixplusPlus 1.1.1</title>
     <id>https://ccl4.info/pixplus/archive/1.1.1</id>
     <updated>2012-08-14T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.1.1" />
@@ -910,7 +927,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.1.1</h1>
+      <h1>pixplusPlus 1.1.1</h1>
       <ul>
         <li>[修正] クリックナビゲーションのUIでヘッダ領域が隠れてしまうバグを修正。</li>
         <li>[修正] "移動方向を反対にする"設定がマンガモードにも適用されていたバグを修正。</li>
@@ -930,7 +947,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.1.0</title>
+    <title type="text">pixplusPlus 1.1.0</title>
     <id>https://ccl4.info/pixplus/archive/1.1.0</id>
     <updated>2012-08-09T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.1.0" />
@@ -940,7 +957,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.1.0</h1>
+      <h1>pixplusPlus 1.1.0</h1>
       <ul>
         <li>[追加] キャプション内のリンクからポップアップを開く機能を追加。</li>
         <li>[追加] タグ編集機能を追加。</li>
@@ -966,7 +983,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 1.0.0</title>
+    <title type="text">pixplusPlus 1.0.0</title>
     <id>https://ccl4.info/pixplus/archive/1.0.0</id>
     <updated>2012-08-08T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/1.0.0" />
@@ -976,7 +993,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 1.0.0</h1>
+      <h1>pixplusPlus 1.0.0</h1>
       <ul>
         <li>全体的に書き直し。</li>
         <li>[追加] キャプションの高さの最小値を指定する設定を追加。</li>
@@ -996,7 +1013,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.9.4</title>
+    <title type="text">pixplusPlus 0.9.4</title>
     <id>https://ccl4.info/pixplus/archive/0.9.4</id>
     <updated>2012-08-05T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.9.4" />
@@ -1006,7 +1023,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.9.4</h1>
+      <h1>pixplusPlus 0.9.4</h1>
       <ul>
         <li>[修正] 評価機能が動かなくなっていたのを修正。</li>
       </ul>
@@ -1016,7 +1033,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.9.3</title>
+    <title type="text">pixplusPlus 0.9.3</title>
     <id>https://ccl4.info/pixplus/archive/0.9.3</id>
     <updated>2012-08-03T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.9.3" />
@@ -1026,7 +1043,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.9.3</h1>
+      <h1>pixplusPlus 0.9.3</h1>
       <ul>
         <li>[修正] pixivの仕様変更に対応。</li>
       </ul>
@@ -1036,7 +1053,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.9.2</title>
+    <title type="text">pixplusPlus 0.9.2</title>
     <id>https://ccl4.info/pixplus/archive/0.9.2</id>
     <updated>2012-06-29T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.9.2" />
@@ -1046,7 +1063,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.9.2</h1>
+      <h1>pixplusPlus 0.9.2</h1>
       <ul>
         <li>[修正] conf.popup.big_image=0の時、"S"キー(conf.key.popup_open_big)でmediumの画像を開いていたバグを修正。</li>
       </ul>
@@ -1056,7 +1073,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.9.1</title>
+    <title type="text">pixplusPlus 0.9.1</title>
     <id>https://ccl4.info/pixplus/archive/0.9.1</id>
     <updated>2012-06-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.9.1" />
@@ -1066,7 +1083,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.9.1</h1>
+      <h1>pixplusPlus 0.9.1</h1>
       <ul>
         <li>[修正] pixivの仕様変更に対応。</li>
         <li>[修正] イラストが再投稿されている場合に古い画像を表示していたバグを修正。</li>
@@ -1078,7 +1095,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.9.0</title>
+    <title type="text">pixplusPlus 0.9.0</title>
     <id>https://ccl4.info/pixplus/archive/0.9.0</id>
     <updated>2012-02-17T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.9.0" />
@@ -1088,7 +1105,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.9.0</h1>
+      <h1>pixplusPlus 0.9.0</h1>
       <ul>
         <li>[追加] マウスホイールの動作を変更する設定(conf.popup.mouse_wheel)を追加。</li>
         <li>[修正] キャプション内の外部リンクが壊れていたのを修正。</li>
@@ -1100,7 +1117,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.8.3</title>
+    <title type="text">pixplusPlus 0.8.3</title>
     <id>https://ccl4.info/pixplus/archive/0.8.3</id>
     <updated>2012-02-11T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.8.3" />
@@ -1110,7 +1127,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.8.3</h1>
+      <h1>pixplusPlus 0.8.3</h1>
       <ul>
         <li>新着イラストページで上手く動作しなくなっていた不具合を修正。</li>
         <li>スタックフィードで上手く動作しなくなっていた不具合を修正。</li>
@@ -1119,7 +1136,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.8.2</title>
+    <title type="text">pixplusPlus 0.8.2</title>
     <id>https://ccl4.info/pixplus/archive/0.8.2</id>
     <updated>2011-10-27T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.8.2" />
@@ -1129,7 +1146,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.8.2</h1>
+      <h1>pixplusPlus 0.8.2</h1>
       <ul>
         <li>アンケートに回答するとエラーダイアログが出るようになっていた不具合を修正。</li>
         <li>トップページ(mypage.php)で上手く動作しなくなっていた不具合を修正。</li>
@@ -1137,7 +1154,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.8.1</title>
+    <title type="text">pixplusPlus 0.8.1</title>
     <id>https://ccl4.info/pixplus/archive/0.8.1</id>
     <updated>2011-09-17T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.8.1" />
@@ -1147,7 +1164,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.8.1</h1>
+      <h1>pixplusPlus 0.8.1</h1>
       <ul>
         <li>pixivの変更でアンケートなどの動作がおかしくなっていた不具合を修正。</li>
         <li>conf.key.popup_manga_open_pageのデフォルト値が変だったバグを修正。</li>
@@ -1155,7 +1172,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.8.0</title>
+    <title type="text">pixplusPlus 0.8.0</title>
     <id>https://ccl4.info/pixplus/archive/0.8.0</id>
     <updated>2011-09-03T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.8.0" />
@@ -1165,7 +1182,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.8.0</h1>
+      <h1>pixplusPlus 0.8.0</h1>
       <ul>
         <li>ブックマーク管理ページで、閲覧出来なくなったイラストに一括でチェックを入れる機能を追加。</li>
         <li>コメントを投稿するとコメントフォームが消えてしまうバグを修正。</li>
@@ -1176,7 +1193,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.7.0</title>
+    <title type="text">pixplusPlus 0.7.0</title>
     <id>https://ccl4.info/pixplus/archive/0.7.0</id>
     <updated>2011-08-21T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.7.0" />
@@ -1186,7 +1203,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.7.0</h1>
+      <h1>pixplusPlus 0.7.0</h1>
       <ul>
         <li>ランキングページにおいてAutoPatchWorkなどで継ぎ足した二ページ目以降の画像が表示されないのを是正する機能を追加。</li>
         <li>おすすめイラストをページの右側に表示する機能(conf.locate_recommend_right)を削除。</li>
@@ -1195,7 +1212,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.6.3</title>
+    <title type="text">pixplusPlus 0.6.3</title>
     <id>https://ccl4.info/pixplus/archive/0.6.3</id>
     <updated>2011-07-24T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.6.3" />
@@ -1205,7 +1222,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.6.3</h1>
+      <h1>pixplusPlus 0.6.3</h1>
       <ul>
         <li>スタックフィードでブックマークしようとするとエラーが出るバグを修正。</li>
         <li>「スライドモード」設定の時、マンガを閲覧出来ない不具合を修正。</li>
@@ -1214,7 +1231,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.6.2</title>
+    <title type="text">pixplusPlus 0.6.2</title>
     <id>https://ccl4.info/pixplus/archive/0.6.2</id>
     <updated>2011-06-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.6.2" />
@@ -1224,7 +1241,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.6.2</h1>
+      <h1>pixplusPlus 0.6.2</h1>
       <ul>
         <li>設定画面へのリンクが表示されなくなっていた不具合を修正。</li>
         <li>イベントの特設ページ(e.g. /event_starfestival2011.php)で動作していなかった不具合を修正。</li>
@@ -1232,7 +1249,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.6.1</title>
+    <title type="text">pixplusPlus 0.6.1</title>
     <id>https://ccl4.info/pixplus/archive/0.6.1</id>
     <updated>2011-05-21T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.6.1" />
@@ -1242,7 +1259,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.6.1</h1>
+      <h1>pixplusPlus 0.6.1</h1>
       <ul>
         <li>Opera10.1xで動作しなくなっていたバグを修正。</li>
         <li>タグ検索(ex. /tags.php?tag=pixiv)で動作しなくなっていた不具合を修正。</li>
@@ -1254,7 +1271,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.6.0</title>
+    <title type="text">pixplusPlus 0.6.0</title>
     <id>https://ccl4.info/pixplus/archive/0.6.0</id>
     <updated>2011-05-13T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.6.0" />
@@ -1264,7 +1281,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.6.0</h1>
+      <h1>pixplusPlus 0.6.0</h1>
       <ul>
         <li>キーバインドのカスタマイズ機能を追加。</li>
         <li>イラストページでブックマークの処理が動作していなかった不具合を修正。</li>
@@ -1279,7 +1296,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.5.1</title>
+    <title type="text">pixplusPlus 0.5.1</title>
     <id>https://ccl4.info/pixplus/archive/0.5.1</id>
     <updated>2011-03-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.5.1" />
@@ -1289,7 +1306,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.5.1</h1>
+      <h1>pixplusPlus 0.5.1</h1>
       <ul>
         <li>おすすめイラストが非表示の時もconf.locate_recommend_rightが動作してしまうバグを修正。</li>
         <li>conf.extageditを廃止してconf.bookmark_formに変更。</li>
@@ -1301,7 +1318,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.5.0</title>
+    <title type="text">pixplusPlus 0.5.0</title>
     <id>https://ccl4.info/pixplus/archive/0.5.0</id>
     <updated>2011-02-15T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.5.0" />
@@ -1311,7 +1328,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.5.0</h1>
+      <h1>pixplusPlus 0.5.0</h1>
       <ul>
         <li>conf.extensionを廃止。Opera拡張版のツールバーアイコンを削除。</li>
         <li>Firefoxでコメント表示機能が動作していなかったバグを修正。</li>
@@ -1329,7 +1346,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.4.0</title>
+    <title type="text">pixplusPlus 0.4.0</title>
     <id>https://ccl4.info/pixplus/archive/0.4.0</id>
     <updated>2011-02-04T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.4.0" />
@@ -1339,7 +1356,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.4.0</h1>
+      <h1>pixplusPlus 0.4.0</h1>
       <ul>
         <li>pixivreaderと衝突するらしいので、excludeに追加。</li>
         <li>設定まわりを作り直し。Chrome/Safari拡張版にオプションページ追加。設定が引き継がれない。</li>
@@ -1354,7 +1371,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.3.2</title>
+    <title type="text">pixplusPlus 0.3.2</title>
     <id>https://ccl4.info/pixplus/archive/0.3.2</id>
     <updated>2011-01-15T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.3.2" />
@@ -1364,14 +1381,14 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.3.2</h1>
+      <h1>pixplusPlus 0.3.2</h1>
       <ul>
         <li>ブックマーク管理ページで上手く動作していなかった不具合を修正。</li>
       </ul>
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.3.1</title>
+    <title type="text">pixplusPlus 0.3.1</title>
     <id>https://ccl4.info/pixplus/archive/0.3.1</id>
     <updated>2011-01-14T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.3.1" />
@@ -1381,7 +1398,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.3.1</h1>
+      <h1>pixplusPlus 0.3.1</h1>
       <ul>
         <li>Opera以外のブラウザにおいて一部のページで評価やコメント表示などの機能の動作が変だったバグを修正。</li>
         <li>conf.popup.rate_key=trueの時、Shiftキーなしで評価できていたバグを修正。</li>
@@ -1391,7 +1408,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.3.0</title>
+    <title type="text">pixplusPlus 0.3.0</title>
     <id>https://ccl4.info/pixplus/archive/0.3.0</id>
     <updated>2010-12-26T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.3.0" />
@@ -1401,7 +1418,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.3.0</h1>
+      <h1>pixplusPlus 0.3.0</h1>
       <ul>
         <li>conf.fast_user_bookmark追加。</li>
         <li>プロフィール画像の左上にアイコン(チェック:お気に入り/ハート:相互/旗:マイピク)を表示する機能(conf.popup.author_status_icon)追加。</li>
@@ -1419,7 +1436,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.2.0</title>
+    <title type="text">pixplusPlus 0.2.0</title>
     <id>https://ccl4.info/pixplus/archive/0.2.0</id>
     <updated>2010-12-01T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.2.0" />
@@ -1429,7 +1446,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.2.0</h1>
+      <h1>pixplusPlus 0.2.0</h1>
       <ul>
         <li>Extension版でアンケートに答えられなくなっていたバグを修正。</li>
         <li>トップページのレイアウトをバックアップする機能追加。</li>
@@ -1441,7 +1458,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.1.2</title>
+    <title type="text">pixplusPlus 0.1.2</title>
     <id>https://ccl4.info/pixplus/archive/0.1.2</id>
     <updated>2010-11-14T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.1.2" />
@@ -1451,7 +1468,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.1.2</h1>
+      <h1>pixplusPlus 0.1.2</h1>
       <ul>
         <li>一部のページでアンケート結果を表示出来なくなっていた不具合を修正。</li>
         <li>アンケートに答えた後、選択肢が表示されたままになっていたバグを修正。</li>
@@ -1464,7 +1481,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.1.1</title>
+    <title type="text">pixplusPlus 0.1.1</title>
     <id>https://ccl4.info/pixplus/archive/0.1.1</id>
     <updated>2010-11-02T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.1.1" />
@@ -1474,7 +1491,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.1.1</h1>
+      <h1>pixplusPlus 0.1.1</h1>
       <ul>
         <li>イベントページ(e.g. http://www.pixiv.net/event_halloween2010.php)用の汎用コード追加。</li>
         <li>conf.locate_recommend_rightが2の時、上手く動作しない場合があるバグを修正。</li>
@@ -1483,7 +1500,7 @@
     ]]></content>
   </entry>
   <entry>
-    <title type="text">pixplus 0.1.0</title>
+    <title type="text">pixplusPlus 0.1.0</title>
     <id>https://ccl4.info/pixplus/archive/0.1.0</id>
     <updated>2010-10-27T00:00:00.000Z</updated>
     <link href="https://ccl4.info/pixplus/archive/0.1.0" />
@@ -1493,7 +1510,7 @@
       <email>crckyl@gmail.com</email>
     </author>
     <content type="html"><![CDATA[
-      <h1>pixplus 0.1.0</h1>
+      <h1>pixplusPlus 0.1.0</h1>
       <ul>
         <li>Opera11のExtensionに対応。</li>
         <li>ブックマーク管理ページでレコメンドを右側に並べる機能が動作しなくなっていたのを修正。</li>

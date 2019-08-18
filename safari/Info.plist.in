@@ -5,9 +5,9 @@
     <key>Author</key>
     <string>wowo</string>
     <key>CFBundleDisplayName</key>
-    <string>pixplus</string>
+    <string>pixplusPlus</string>
     <key>CFBundleIdentifier</key>
-    <string>org.crckyl.pixplus</string>
+    <string>org.crckyl.pixplusPlus</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleShortVersionString</key>
@@ -25,7 +25,7 @@
       <dict>
         <key>Start</key>
         <array>
-          <string>pixplus.js</string>
+          <string>pixplusPlus.js</string>
         </array>
       </dict>
       <key>Whitelist</key>
@@ -51,7 +51,7 @@
       </dict>
     </dict>
     <key>Update Manifest URL</key>
-    <string>https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/safari.xml</string>
+    <string>https://github.com/kyu-su/pixplusPlus/blob/master/autoupdate/1/safari.xml</string>
     <key>Website</key>
     <string>@WEBSITE@</string>
   </dict>

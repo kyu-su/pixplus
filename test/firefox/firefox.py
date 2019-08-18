@@ -66,15 +66,15 @@ class Firefox(Browser):
     path_gm = os.path.join(self.profiledir, 'gm_scripts')
     os.mkdir(path_gm)
     util.copy_file(os.path.join(self.browserdir, 'gm_config.xml'), os.path.join(path_gm, 'config.xml'))
-    util.copy_file(os.path.join(self.distdir, 'pixplus.user.js'), path_gm)
+    util.copy_file(os.path.join(self.distdir, 'pixplusPlus.user.js'), path_gm)
     self.user_prefs['extensions.greasemonkey.stats.prompted'] = 'true'
 
   def setup_scriptish(self):
     path_st = os.path.join(self.profiledir, 'scriptish_scripts')
     os.mkdir(path_st)
     util.copy_file(os.path.join(self.browserdir, 'scriptish-config.json'), path_st)
-    util.copy_file(os.path.join(self.distdir, 'pixplus.user.js'), path_st)
-    os.utime(os.path.join(path_st, 'pixplus.user.js'), (2000000000, 2000000000))
+    util.copy_file(os.path.join(self.distdir, 'pixplusPlus.user.js'), path_st)
+    os.utime(os.path.join(path_st, 'pixplusPlus.user.js'), (2000000000, 2000000000))
 
   def b64(self):
     fp = util.BytesIO()

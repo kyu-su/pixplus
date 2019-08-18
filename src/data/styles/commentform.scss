@@ -2,14 +2,13 @@
   position: relative;
 
 
-
   .pp-commform-overlay {
     position: absolute;
     left: 0px;
     right: 0px;
     top: 0px;
     bottom: 0px;
-    background-color: rgba(255,255,255,0.8);
+    background-color: rgba(255, 255, 255, 0.8);
 
     svg {
       position: absolute;
@@ -35,14 +34,15 @@
     &:not(.pp-loading):not(.pp-error) {
       display: none;
     }
+
     &:not(.pp-loading) .pp-icon-comment-loading {
       display: none;
     }
+
     &:not(.pp-error) .pp-icon-comment-error {
       display: none;
     }
   }
-
 
 
   .pp-commform-reply-to-wrap {
@@ -75,14 +75,12 @@
   }
 
 
-
   .pp-commform-form {
     margin: 0.2em 0px;
     background-color: #e8f0f6;
     border: 1px solid #d6dee5;
     border-radius: 5px;
     overflow: hidden;
-
 
 
     .pp-commform-tabbar {
@@ -136,7 +134,6 @@
     }
 
 
-
     .pp-commform-toolbar {
       padding: 0.2em;
       background-color: #fff;
@@ -176,7 +173,6 @@
     }
 
 
-
     .pp-commform-cont-comment {
       textarea {
         border-width: 0px;
@@ -208,7 +204,6 @@
         }
       }
     }
-
 
 
     .pp-commform-cont-stamp {

@@ -1,117 +1,409 @@
 [
-  {"name": "general", "items": [
-    {"key": "bookmark_hide", "value": false},
-    {"key": "float_tag_list", "value": 1},
-    {"key": "disable_effect", "value": false},
-    {"key": "fast_user_bookmark", "value": 0},
-    {"key": "redirect_jump_page", "value": 1},
-    {"key": "disable_profile_popup", "value": false},
-    {"key": "commform_default_tab", "value": "", "hide": true},
-    {"key": "debug", "value": false}
-  ]},
-
-  {"name": "popup", "items": [
-    {"key": "preload", "value": true},
-    {"key": "big_image", "value": false},
-    {"key": "caption_height", "value": 0.4},
-    {"key": "caption_minheight", "value": 160},
-    {"key": "caption_opacity", "value": 0.9},
-    {"key": "remove_pixpedia", "value": false},
-    {"key": "remove_pixiv_comic", "value": false},
-    {"key": "remove_booth", "value": false},
-    {"key": "font_size", "value": ""},
-    {"key": "auto_manga", "value": 0},
-    {"key": "auto_manga_regexp", "value": "^http://www\\.pixiv\\.net/(?:(?:bookmark_new_illust|member_illust|ranking|bookmark)\\.php|$)", "editor": "Regexp"},
-    {"key": "manga_viewed_flags", "value": true},
-    {"key": "reverse", "value": 0},
-    {"key": "reverse_regexp", "value": "^http://www\\.pixiv\\.net/(?:bookmark_new_illust|member_illust)\\.php", "editor": "Regexp"},
-    {"key": "overlay_control", "value": 0.3},
-    {"key": "scroll_height", "value": 32},
-    {"key": "scroll_height_page", "value": 0.8},
-    {"key": "author_status_icon", "value": true},
-    {"key": "show_comment_form", "value": false, "hide": true},
-    {"key": "hide_stamp_comments", "value": false},
-    {"key": "mouse_wheel", "value": 2},
-    {"key": "mouse_wheel_delta", "value": 1},
-    {"key": "fit_short_threshold", "value": 4},
-    {"key": "mark_visited", "value": true},
-    {"key": "manga_page_action", "value": 2},
-    {"key": "minimum_size", "value": 0}
-  ]},
-
-  {"name": "mypage", "hide": true, "items": [
-    {"key": "layout_history", "value": ""}
-  ]},
-
-  {"name": "key", "editor": "Key", "items": [
-    {"key": "popup_prev", "value": "Backspace,a,k"},
-    {"key": "popup_prev_direction", "value": "Left"},
-    {"key": "popup_next", "value": "Space,j"},
-    {"key": "popup_next_direction", "value": "Right"},
-    {"key": "popup_first", "value": "Home"},
-    {"key": "popup_last", "value": "End"},
-    {"key": "popup_close", "value": "Escape,q"},
-    {"key": "popup_caption_scroll_up", "value": "Up"},
-    {"key": "popup_caption_scroll_down", "value": "Down"},
-    {"key": "popup_caption_toggle", "value": "c"},
-    {"key": "popup_comment_toggle", "value": "Shift+c"},
-    {"key": "popup_illust_scroll_up", "value": "Up"},
-    {"key": "popup_illust_scroll_down", "value": "Down"},
-    {"key": "popup_illust_scroll_left", "value": "Left"},
-    {"key": "popup_illust_scroll_right", "value": "Right"},
-    {"key": "popup_illust_scroll_top", "value": "Home"},
-    {"key": "popup_illust_scroll_bottom", "value": "End"},
-    {"key": "popup_illust_page_up", "value": "PageUp"},
-    {"key": "popup_illust_page_down", "value": "PageDown"},
-    {"key": "popup_switch_resize_mode", "value": "w"},
-    {"key": "popup_open", "value": "Shift+f,Shift+o"},
-    {"key": "popup_open_big", "value": "f,o"},
-    {"key": "popup_open_profile", "value": "e"},
-    {"key": "popup_open_illust", "value": "r"},
-    {"key": "popup_open_bookmark", "value": "t"},
-    {"key": "popup_open_staccfeed", "value": "y"},
-    {"key": "popup_open_response", "value": "Shift+r"},
-    {"key": "popup_reload", "value": "g"},
-    {"key": "popup_open_bookmark_detail", "value": "Shift+b"},
-    {"key": "popup_open_manga_thumbnail", "value": "Shift+v"},
-    {"key": "popup_rate10", "value": "Shift+1,Shift+!"},
-    {"key": "popup_ugoira_play_pause", "value": "m"},
-    {"key": "popup_ugoira_prev_frame", "value": "comma"},
-    {"key": "popup_ugoira_next_frame", "value": "."},
-    {"key": "popup_bookmark_start", "value": "b", "subsection": "bookmark"},
-    {"key": "popup_bookmark_submit", "value": "Enter,Space", "subsection": "bookmark"},
-    {"key": "popup_bookmark_end", "value": "Escape", "subsection": "bookmark"},
-    {"key": "popup_manga_start", "value": "v", "subsection": "manga"},
-    {"key": "popup_manga_open_page", "value": "Shift+f", "subsection": "manga"},
-    {"key": "popup_manga_end", "value": "v,Escape", "subsection": "manga"},
-    {"key": "popup_qrate_start", "value": "d", "subsection": "question"},
-    {"key": "popup_qrate_select_prev", "value": "Up,k", "subsection": "question"},
-    {"key": "popup_qrate_select_next", "value": "Down,j", "subsection": "question"},
-    {"key": "popup_qrate_submit", "value": "Enter,Space", "subsection": "question"},
-    {"key": "popup_qrate_end", "value": "Escape,d", "subsection": "question"},
-    {"key": "popup_tag_edit_start", "value": "", "subsection": "tagedit"},
-    {"key": "popup_tag_edit_end", "value": "Escape", "subsection": "tagedit"}
-  ]},
-
-  {"name": "bookmark", "items": [
-    {"key": "tag_order", "value": ""},
-    {"key": "tag_aliases", "value": ""}
-  ]},
-
-  {"name": "xhr", "hide": true, "items": [
-    {"key": "delay", "value": 0},
-    {"key": "allow_urls", "value": "/member_illust.php,/bookmark_add.php,/rpc_rating.php,/rpc_tag_edit.php,/rpc_delete_comment.php,/rpc/get_comment.php,/rpc/post_comment.php",
-     "editor": "Checklist",
-     "editor_opts": {
-       "valid_values": [
-         "/member_illust.php",
-         "/bookmark_add.php",
-         "/rpc_rating.php",
-         "/rpc_tag_edit.php",
-         "/rpc_delete_comment.php",
-         "/rpc/get_comment.php",
-         "/rpc/post_comment.php"
-       ]
-     }}
-  ]}
+  {
+    "name": "general",
+    "items": [
+      {
+        "key": "bookmark_hide",
+        "value": false
+      },
+      {
+        "key": "float_tag_list",
+        "value": 1
+      },
+      {
+        "key": "disable_effect",
+        "value": false
+      },
+      {
+        "key": "fast_user_bookmark",
+        "value": 0
+      },
+      {
+        "key": "redirect_jump_page",
+        "value": 1
+      },
+      {
+        "key": "disable_profile_popup",
+        "value": false
+      },
+      {
+        "key": "commform_default_tab",
+        "value": "",
+        "hide": true
+      },
+      {
+        "key": "debug",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "popup",
+    "items": [
+      {
+        "key": "preload",
+        "value": true
+      },
+      {
+        "key": "big_image",
+        "value": false
+      },
+      {
+        "key": "caption_height",
+        "value": 0.4
+      },
+      {
+        "key": "caption_minheight",
+        "value": 160
+      },
+      {
+        "key": "caption_opacity",
+        "value": 0.9
+      },
+      {
+        "key": "remove_pixpedia",
+        "value": false
+      },
+      {
+        "key": "remove_pixiv_comic",
+        "value": false
+      },
+      {
+        "key": "remove_booth",
+        "value": false
+      },
+      {
+        "key": "font_size",
+        "value": ""
+      },
+      {
+        "key": "auto_manga",
+        "value": 0
+      },
+      {
+        "key": "auto_manga_regexp",
+        "value": "^http://www\\.pixiv\\.net/(?:(?:bookmark_new_illust|member_illust|ranking|bookmark)\\.php|$)",
+        "editor": "Regexp"
+      },
+      {
+        "key": "manga_viewed_flags",
+        "value": true
+      },
+      {
+        "key": "reverse",
+        "value": 0
+      },
+      {
+        "key": "reverse_regexp",
+        "value": "^http://www\\.pixiv\\.net/(?:bookmark_new_illust|member_illust)\\.php",
+        "editor": "Regexp"
+      },
+      {
+        "key": "overlay_control",
+        "value": 0.3
+      },
+      {
+        "key": "scroll_height",
+        "value": 32
+      },
+      {
+        "key": "scroll_height_page",
+        "value": 0.8
+      },
+      {
+        "key": "author_status_icon",
+        "value": true
+      },
+      {
+        "key": "show_comment_form",
+        "value": false,
+        "hide": true
+      },
+      {
+        "key": "hide_stamp_comments",
+        "value": false
+      },
+      {
+        "key": "mouse_wheel",
+        "value": 2
+      },
+      {
+        "key": "mouse_wheel_delta",
+        "value": 1
+      },
+      {
+        "key": "fit_short_threshold",
+        "value": 4
+      },
+      {
+        "key": "mark_visited",
+        "value": true
+      },
+      {
+        "key": "manga_page_action",
+        "value": 2
+      },
+      {
+        "key": "minimum_size",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "mypage",
+    "hide": true,
+    "items": [
+      {
+        "key": "layout_history",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "key",
+    "editor": "Key",
+    "items": [
+      {
+        "key": "popup_prev",
+        "value": "Backspace,a,k"
+      },
+      {
+        "key": "popup_prev_direction",
+        "value": "Left"
+      },
+      {
+        "key": "popup_next",
+        "value": "Space,j"
+      },
+      {
+        "key": "popup_next_direction",
+        "value": "Right"
+      },
+      {
+        "key": "popup_first",
+        "value": "Home"
+      },
+      {
+        "key": "popup_last",
+        "value": "End"
+      },
+      {
+        "key": "popup_close",
+        "value": "Escape,q"
+      },
+      {
+        "key": "popup_caption_scroll_up",
+        "value": "Up"
+      },
+      {
+        "key": "popup_caption_scroll_down",
+        "value": "Down"
+      },
+      {
+        "key": "popup_caption_toggle",
+        "value": "c"
+      },
+      {
+        "key": "popup_comment_toggle",
+        "value": "Shift+c"
+      },
+      {
+        "key": "popup_illust_scroll_up",
+        "value": "Up"
+      },
+      {
+        "key": "popup_illust_scroll_down",
+        "value": "Down"
+      },
+      {
+        "key": "popup_illust_scroll_left",
+        "value": "Left"
+      },
+      {
+        "key": "popup_illust_scroll_right",
+        "value": "Right"
+      },
+      {
+        "key": "popup_illust_scroll_top",
+        "value": "Home"
+      },
+      {
+        "key": "popup_illust_scroll_bottom",
+        "value": "End"
+      },
+      {
+        "key": "popup_illust_page_up",
+        "value": "PageUp"
+      },
+      {
+        "key": "popup_illust_page_down",
+        "value": "PageDown"
+      },
+      {
+        "key": "popup_switch_resize_mode",
+        "value": "w"
+      },
+      {
+        "key": "popup_open",
+        "value": "Shift+f,Shift+o"
+      },
+      {
+        "key": "popup_open_big",
+        "value": "f,o"
+      },
+      {
+        "key": "popup_open_profile",
+        "value": "e"
+      },
+      {
+        "key": "popup_open_illust",
+        "value": "r"
+      },
+      {
+        "key": "popup_open_bookmark",
+        "value": "t"
+      },
+      {
+        "key": "popup_open_staccfeed",
+        "value": "y"
+      },
+      {
+        "key": "popup_open_response",
+        "value": "Shift+r"
+      },
+      {
+        "key": "popup_reload",
+        "value": "g"
+      },
+      {
+        "key": "popup_open_bookmark_detail",
+        "value": "Shift+b"
+      },
+      {
+        "key": "popup_open_manga_thumbnail",
+        "value": "Shift+v"
+      },
+      {
+        "key": "popup_rate10",
+        "value": "Shift+1,Shift+!"
+      },
+      {
+        "key": "popup_ugoira_play_pause",
+        "value": "m"
+      },
+      {
+        "key": "popup_ugoira_prev_frame",
+        "value": "comma"
+      },
+      {
+        "key": "popup_ugoira_next_frame",
+        "value": "."
+      },
+      {
+        "key": "popup_bookmark_start",
+        "value": "b",
+        "subsection": "bookmark"
+      },
+      {
+        "key": "popup_bookmark_submit",
+        "value": "Enter,Space",
+        "subsection": "bookmark"
+      },
+      {
+        "key": "popup_bookmark_end",
+        "value": "Escape",
+        "subsection": "bookmark"
+      },
+      {
+        "key": "popup_manga_start",
+        "value": "v",
+        "subsection": "manga"
+      },
+      {
+        "key": "popup_manga_open_page",
+        "value": "Shift+f",
+        "subsection": "manga"
+      },
+      {
+        "key": "popup_manga_end",
+        "value": "v,Escape",
+        "subsection": "manga"
+      },
+      {
+        "key": "popup_qrate_start",
+        "value": "d",
+        "subsection": "question"
+      },
+      {
+        "key": "popup_qrate_select_prev",
+        "value": "Up,k",
+        "subsection": "question"
+      },
+      {
+        "key": "popup_qrate_select_next",
+        "value": "Down,j",
+        "subsection": "question"
+      },
+      {
+        "key": "popup_qrate_submit",
+        "value": "Enter,Space",
+        "subsection": "question"
+      },
+      {
+        "key": "popup_qrate_end",
+        "value": "Escape,d",
+        "subsection": "question"
+      },
+      {
+        "key": "popup_tag_edit_start",
+        "value": "",
+        "subsection": "tagedit"
+      },
+      {
+        "key": "popup_tag_edit_end",
+        "value": "Escape",
+        "subsection": "tagedit"
+      }
+    ]
+  },
+  {
+    "name": "bookmark",
+    "items": [
+      {
+        "key": "tag_order",
+        "value": ""
+      },
+      {
+        "key": "tag_aliases",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "xhr",
+    "items": [
+      {
+        "key": "delay",
+        "value": 0
+      },
+      {
+        "key": "allow_urls",
+        "value": "/member_illust.php,/bookmark_add.php,/rpc_rating.php,/rpc_tag_edit.php,/rpc_delete_comment.php,/rpc/get_comment.php,/rpc/post_comment.php,/rpc/index.php",
+        "editor": "Checklist",
+        "editor_opts": {
+          "valid_values": [
+            "/member_illust.php",
+            "/bookmark_add.php",
+            "/rpc_rating.php",
+            "/rpc_tag_edit.php",
+            "/rpc_delete_comment.php",
+            "/rpc/get_comment.php",
+            "/rpc/post_comment.php",
+            "/rpc/index.php"
+          ]
+        }
+      }
+    ],
+    "hide": true
+  }
 ]

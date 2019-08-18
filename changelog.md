@@ -1,5 +1,9 @@
-pixplus version history
+pixplusPlus version history
 =======================
+
+## [1.19.4 - 2018/08/18]()
+
+* [修正] コードフォーマット修正
 
 ## [1.19.3 - 2018/03/11](http://crckyl.hatenablog.com/entry/2018/03/11/pixplus_1.19.3)
 

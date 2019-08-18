@@ -25,6 +25,7 @@
     &:hover {
       background-color: #ddeaf6;
     }
+
     &:active {
       background-color: #becad8;
     }
@@ -41,6 +42,7 @@
 
 input.pp-flat-input {
   border: none;
+
   &:not(:hover):not(:focus) {
     background: transparent;
   }
@@ -82,9 +84,9 @@ input.pp-flat-input {
   }
 
   &.pp-debug {
-    outline: 1px solid rgba(255,0,0,0.5);
+    outline: 1px solid rgba(255, 0, 0, 0.5);
 
-    .pp-slider-rail{
+    .pp-slider-rail {
       background-color: #0f0;
     }
 
@@ -136,7 +138,7 @@ input.pp-flat-input {
       background-color: #ddd;
     }
 
-    >label, >a {
+    > label, > a {
       display: block;
       padding: 0.3em 0.6em;
       color: inherit;
@@ -284,6 +286,7 @@ input[type="text"]:focus ~ #pp-search-ratio-custom-preview {
   &:not(.tagCloud) {
     border-top: 2px solid #dae1e7;
   }
+
   &.tagCloud {
     border-bottom: 2px solid #dae1e7;
   }
