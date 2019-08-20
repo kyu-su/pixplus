@@ -4,7 +4,7 @@ ZIP                             = zip
 CRXMAKE                         = RUBYLIB=$(CURDIR)/ext/rubyzip/lib $(CURDIR)/ext/crxmake/bin/crxmake
 XAR                             = $(CURDIR)/ext/xar/xar/src/xar
 PYTHON                          = python
-SCSS                            = RUBYLIB=$(CURDIR)/ext/sass/lib /usr/local/bin/sass
+SCSS                            = RUBYLIB=$(CURDIR)/ext/sass/lib $(CURDIR)/ext/sass/bin/scss
 
 ifeq ($(shell $(SVG_TO_PNG) >/dev/null && echo yes || echo no),no)
 $(error Could not find svg converter command)
@@ -40,7 +40,7 @@ BUILD_DIR                       = temp
 BUILD_DIR_ICON                  = $(BUILD_DIR)/icons
 BUILD_DIR_OEX                   = $(BUILD_DIR)/oex
 BUILD_DIR_CRX                   = $(BUILD_DIR)/crx
-BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplus.safariextension
+BUILD_DIR_SAFARIEXTZ            = $(BUILD_DIR)/pixplusPlus.safariextension
 
 CHANGELOG_MD                    = changelog.md
 RELEASE_ATOM                    = release.atom
