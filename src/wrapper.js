@@ -11,7 +11,7 @@
 // @include     https://www.pixiv.net/*
 // @run-at      document-start
 // @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
-// @grant       none
+// @grant       GM.xmlHttpRequest
 // ==/UserScript==
 
 (function (entrypoint) {

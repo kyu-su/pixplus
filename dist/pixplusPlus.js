@@ -11,7 +11,7 @@
 // @include     https://www.pixiv.net/*
 // @run-at      document-start
 // @downloadURL https://ccl4.info/cgit/pixplus.git/plain/autoupdate/1/pixplus.user.js
-// @grant       none
+// @grant       GM.xmlHttpRequest
 // ==/UserScript==
 
 (function (entrypoint) {
@@ -818,7 +818,7 @@ _.xhr = {
         this.cache[url] = null;
     },
 
-    request: function (method, url, headers, data, cb_success, cb_error) {
+        request: function (method, url, headers, data, cb_success, cb_error, is_async = true) {
         var msg;
 
         var re = url.match(/^(?:(?:https?:)?\/\/www\.pixiv\.net)?(\/[a-z/_]+\.php)(?:\?|$)/),
@@ -857,7 +857,7 @@ _.xhr = {
         };
 
         var send = function () {
-            xhr.open(method, url, true);
+                xhr.open(method, url, is_async);
             if (headers) {
                 headers.forEach(function (p) {
                     xhr.setRequestHeader(p[0], p[1]);
@@ -873,12 +873,12 @@ _.xhr = {
         }
     },
 
-    get: function (url, cb_success, cb_error) {
-        if (this.cache[url]) {
-            cb_success(this.cache[url]);
-            return;
-        }
-        this.request('GET', url, null, null, cb_success, cb_error);
+        get: function (url, cb_success, cb_error, is_sync) {
+	        if (this.cache[url]) {
+	            cb_success(this.cache[url]);
+	            return;
+	        }
+            this.request('GET', url, null, null, cb_success, cb_error, is_sync);
     },
 
     post_data: function (url, data, cb_success, cb_error) {
@@ -2524,31 +2524,27 @@ _.illust = {
     create: function (link, allow_types, cb_onshow) {
         var illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
 
-        for (var i = 0; i < images.length; ++i) {
-            var img = images[i], src;
-
-            if (/(?:^|\s)lazy-image(?:\s|$)/.test(img.dataset.filter)) {
-                src = img.dataset.src;
-            } else if (/^img$/i.test(img.tagName)) {
-                src = img.src;
-            } else {
-                continue;
+            if (link.children.length == 0) {
+                return;
             }
+
+            const params = new URLSearchParams(link.search)
+
+            var illust_id = params.get('illust_id');
+
+            var that = this;
+            var src;
+            _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_id, function (text) {
+                json = JSON.parse(text);
+
+                src = json.body[illust_id].url['240mw'];
+            }, function () {
+                _.debug('Failed to get_illust_detail_by_ids');
+            }, false);
 
             var p = this.parse_image_url(src, {allow_types: allow_types});
 
-            if (!p) {
-                continue;
-            }
-
-            // if multiple thumbails found...
-            if (illust) {
-                return null;
-            }
-
             illust = p;
-            illust.image_thumb = img;
-        }
 
         if (!illust) {
             return null;
@@ -2564,6 +2560,7 @@ _.illust = {
             illust.url_medium += '&uarea=' + query.uarea;
         }
 
+            _.debug(illust.link);
         illust.connection = _.onclick(illust.link, function (ev) {
             for (var p = ev.target; p; p = p.parentNode) {
                 if (p instanceof Element &&
@@ -2607,10 +2604,32 @@ _.illust = {
         };
 
         var new_list = [], last = null;
+
+            // illust_ids
+            var illust_ids = [];
+            links.forEach(function (link) {
+                const params = new URLSearchParams(link.search)
+
+                var illust_id = params.get('illust_id');
+                if (illust_id !== null) {
+                    illust_ids.push(illust_id);
+                }
+            });
+
+            var that = this;
+            var detail_by_ids;
+            _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','), function (text) {
+                json = JSON.parse(text);
+
+                detail_by_ids = json.body;
+            }, function () {
+                _.debug('Failed to get_illust_detail_by_ids');
+            }, false);
+
         links.forEach(function (link) {
             var illust = extract(link);
             if (!illust) {
-                illust = that.create(link);
+                    illust = that.create(link, detail_by_ids);
             }
             if (!illust) {
                 return;
@@ -2660,7 +2679,7 @@ _.illust = {
             return false;
         }
 
-        re = /pixiv\.context\.token *= *"([0-9a-f]{10,})";/.exec(html);
+            re = /token: *"([0-9a-f]{10,})"/.exec(html);
         if (re) {
             illust.token = re[1];
         } else {
@@ -2808,7 +2827,7 @@ _.illust = {
             author_icon = profile_area ? _.q('._user-icon', profile_area) : null,
             author_link = profile_area ? _.q('.user-name', profile_area) : null,
             staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function (link) {
-                return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
+                    return /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
             })[0];
 
         illust.author_id = null;
@@ -2842,7 +2861,7 @@ _.illust = {
         illust.url_author_staccfeed = null;
         if (staccfeed_link) {
             illust.url_author_staccfeed =
-                staccfeed_link.getAttribute('href').replace(/^http:\/\/www.pixiv.net(?=\/)/, '');
+                    staccfeed_link.getAttribute('href').replace(/^https:\/\/www.pixiv.net(?=\/)/, '');
         }
 
         var meta = work_info ? _.qa('.meta li', work_info) : [],
@@ -3364,7 +3383,7 @@ _.illust = {
 
     parse_illust_url: function (url) {
         var re;
-        if (!(re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
+            if (!(re = /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
             return null;
         }
         var query = _.parse_query(re[1]);
@@ -7579,18 +7598,18 @@ _.setup_ready = function () {
         }
     }
 
-    try {
-        var req = w.pixiv.api.request;
-        w.pixiv.api.request = function () {
-            _.debug('pixiv.api.request', arguments[1]);
-            if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(arguments[1])) {
-                arguments[1] = '/' + arguments[1];
-            }
-            return req.apply(this, arguments);
-        };
-    } catch (ex) {
-        _.error('Failed to setup filter of pixiv.api.request', ex);
-    }
+    // try {
+    //     var req = w.pixiv.api.request;
+    //     w.pixiv.api.request = function () {
+    //         _.debug('pixiv.api.request', arguments[1]);
+    //         if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(arguments[1])) {
+    //             arguments[1] = '/' + arguments[1];
+    //         }
+    //         return req.apply(this, arguments);
+    //     };
+    // } catch (ex) {
+    //     _.error('Failed to setup filter of pixiv.api.request', ex);
+    // }
 
     if (_.conf.general.disable_profile_popup) {
         try {
@@ -7676,7 +7695,10 @@ _.run = function () {
             dom.preview.id = 'pp-apng-generator-preview';
             dom.content.appendChild(dom.preview);
             dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
-            dom.preparing = _.e('div', {id: 'pp-apng-generator-preparing', text: _.lng.apng.preparing}, dom.content);
+                dom.preparing = _.e('div', {
+                    id: 'pp-apng-generator-preparing',
+                    text: _.lng.apng.preparing
+                }, dom.content);
             dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
 
             _.listen(dom.preview, 'load', function () {

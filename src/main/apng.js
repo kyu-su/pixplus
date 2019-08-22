@@ -18,7 +18,10 @@
             dom.preview.id = 'pp-apng-generator-preview';
             dom.content.appendChild(dom.preview);
             dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
-            dom.preparing = _.e('div', {id: 'pp-apng-generator-preparing', text: _.lng.apng.preparing}, dom.content);
+            dom.preparing = _.e('div', {
+                id: 'pp-apng-generator-preparing',
+                text: _.lng.apng.preparing
+            }, dom.content);
             dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
 
             _.listen(dom.preview, 'load', function () {

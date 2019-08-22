@@ -130,31 +130,27 @@ _.illust = {
     create: function (link, allow_types, cb_onshow) {
         var illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
 
-        for (var i = 0; i < images.length; ++i) {
-            var img = images[i], src;
-
-            if (/(?:^|\s)lazy-image(?:\s|$)/.test(img.dataset.filter)) {
-                src = img.dataset.src;
-            } else if (/^img$/i.test(img.tagName)) {
-                src = img.src;
-            } else {
-                continue;
-            }
-
-            var p = this.parse_image_url(src, {allow_types: allow_types});
-
-            if (!p) {
-                continue;
-            }
-
-            // if multiple thumbails found...
-            if (illust) {
-                return null;
-            }
-
-            illust = p;
-            illust.image_thumb = img;
+        if (link.children.length == 0) {
+            return;
         }
+
+        const params = new URLSearchParams(link.search)
+
+        var illust_id = params.get('illust_id');
+
+        var that = this;
+        var src;
+        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_id, function (text) {
+            json = JSON.parse(text);
+
+            src = json.body[illust_id].url['240mw'];
+        }, function () {
+            _.debug('Failed to get_illust_detail_by_ids');
+        }, false);
+
+        var p = this.parse_image_url(src, {allow_types: allow_types});
+
+        illust = p;
 
         if (!illust) {
             return null;
@@ -170,6 +166,7 @@ _.illust = {
             illust.url_medium += '&uarea=' + query.uarea;
         }
 
+        _.debug(illust.link);
         illust.connection = _.onclick(illust.link, function (ev) {
             for (var p = ev.target; p; p = p.parentNode) {
                 if (p instanceof Element &&
@@ -213,10 +210,32 @@ _.illust = {
         };
 
         var new_list = [], last = null;
+
+        // illust_ids
+        var illust_ids = [];
+        links.forEach(function (link) {
+            const params = new URLSearchParams(link.search)
+
+            var illust_id = params.get('illust_id');
+            if (illust_id !== null) {
+                illust_ids.push(illust_id);
+            }
+        });
+
+        var that = this;
+        var detail_by_ids;
+        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','), function (text) {
+            json = JSON.parse(text);
+
+            detail_by_ids = json.body;
+        }, function () {
+            _.debug('Failed to get_illust_detail_by_ids');
+        }, false);
+
         links.forEach(function (link) {
             var illust = extract(link);
             if (!illust) {
-                illust = that.create(link);
+                illust = that.create(link, detail_by_ids);
             }
             if (!illust) {
                 return;
@@ -266,7 +285,7 @@ _.illust = {
             return false;
         }
 
-        re = /pixiv\.context\.token *= *"([0-9a-f]{10,})";/.exec(html);
+        re = /token: *"([0-9a-f]{10,})"/.exec(html);
         if (re) {
             illust.token = re[1];
         } else {
@@ -414,7 +433,7 @@ _.illust = {
             author_icon = profile_area ? _.q('._user-icon', profile_area) : null,
             author_link = profile_area ? _.q('.user-name', profile_area) : null,
             staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function (link) {
-                return /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
+                return /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
             })[0];
 
         illust.author_id = null;
@@ -448,7 +467,7 @@ _.illust = {
         illust.url_author_staccfeed = null;
         if (staccfeed_link) {
             illust.url_author_staccfeed =
-                staccfeed_link.getAttribute('href').replace(/^http:\/\/www.pixiv.net(?=\/)/, '');
+                staccfeed_link.getAttribute('href').replace(/^https:\/\/www.pixiv.net(?=\/)/, '');
         }
 
         var meta = work_info ? _.qa('.meta li', work_info) : [],
@@ -970,7 +989,7 @@ _.illust = {
 
     parse_illust_url: function (url) {
         var re;
-        if (!(re = /^(?:(?:http:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
+        if (!(re = /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
             return null;
         }
         var query = _.parse_query(re[1]);

@@ -43,18 +43,18 @@ _.setup_ready = function () {
         }
     }
 
-    try {
-        var req = w.pixiv.api.request;
-        w.pixiv.api.request = function () {
-            _.debug('pixiv.api.request', arguments[1]);
-            if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(arguments[1])) {
-                arguments[1] = '/' + arguments[1];
-            }
-            return req.apply(this, arguments);
-        };
-    } catch (ex) {
-        _.error('Failed to setup filter of pixiv.api.request', ex);
-    }
+    // try {
+    //     var req = w.pixiv.api.request;
+    //     w.pixiv.api.request = function () {
+    //         _.debug('pixiv.api.request', arguments[1]);
+    //         if (/^(?:\.\/)?(?:rpc_tag_edit\.php|rpc_rating\.php)(?:\?|$)/.test(arguments[1])) {
+    //             arguments[1] = '/' + arguments[1];
+    //         }
+    //         return req.apply(this, arguments);
+    //     };
+    // } catch (ex) {
+    //     _.error('Failed to setup filter of pixiv.api.request', ex);
+    // }
 
     if (_.conf.general.disable_profile_popup) {
         try {
