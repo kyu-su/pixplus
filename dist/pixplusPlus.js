@@ -21,15 +21,14 @@
         return;
     }
 
-    var greasemonkey =
-         false;
+    var greasemonkey = true;
 
-    var inject = function (data) {
+    var inject = function () {
         var d = w.document;
         if (!(d.body || d.documentElement)) {
             // for scriptish
             window.setTimeout(function () {
-                inject(data);
+                inject();
             }, 100);
             return;
         }
@@ -37,72 +36,11 @@
         s.setAttribute('type', 'text/javascript');
         s.textContent
             = ('(' + entrypoint.toString() + ')'
-            + '(this || window,window,window.document,'
-            + g.JSON.stringify(data) + ')');
+            + '(this || window,window,window.document)');
         (d.body || d.documentElement).appendChild(s);
     };
 
-    var send_message;
-
-    if (g.opera) {
-        if (g.opera && g.opera.extension) {
-            g.opera.extension.onmessage = function (ev) {
-                var data = g.JSON.parse(ev.data);
-                if (data.command === 'config') {
-                    // entrypoint(g, w, w.document, {conf: data.data});
-                    inject({conf: data.data});
-                }
-            };
-            g.opera.extension.postMessage(g.JSON.stringify({command: 'config'}));
-            send_message = function (command, data) {
-                g.opera.extension.postMessage(g.JSON.stringify({command: command, data: data}));
-            };
-
-        } else {
-            entrypoint(g, w, w.document);
-        }
-
-    } else if (greasemonkey) {
-        inject(null);
-
-    } else if (g.chrome) {
-        var base_uri = g.chrome.extension.getURL('/');
-        g.chrome.extension.sendRequest({command: 'config'}, function (msg) {
-            if (msg.command === 'config') {
-                inject({base_uri: base_uri, conf: msg.data});
-            }
-        });
-        send_message = function (command, data) {
-            g.chrome.extension.sendRequest({command: command, data: data});
-        };
-
-    } else if (g.safari) {
-        g.safari.self.addEventListener('message', function (ev) {
-            if (ev.name === 'config') {
-                inject({
-                    base_uri: g.safari.extension.baseURI,
-                    conf: ev.message
-                });
-            }
-        }, false);
-        g.safari.self.tab.dispatchMessage('config', null);
-        send_message = function (command, data) {
-            g.safari.self.tab.dispatchMessage(command, data);
-        };
-
-    } else {
-        inject(null);
-    }
-
-    if (send_message) {
-        w.addEventListener('pixplusConfigSet', function (ev) {
-            var data = {};
-            ['section', 'item', 'value'].forEach(function (attr) {
-                data[attr] = ev.target.getAttribute('data-pp-' + attr);
-            });
-            send_message('config-set', data);
-        }, false);
-    }
+    inject();
 })(function (g, w, d, _extension_data) {
 
     if (w.pixplus || w !== w.top) {
@@ -448,6 +386,9 @@ var _ = w.pixplus = {
                 var args = g.Array.prototype.slice.call(arguments);
                 if (typeof (args[0]) === 'string') {
                     args[0] = 'pixplus: [' + name + '] ' + args[0];
+                }
+                if (name === 'debug') {
+                    name = '';
                 }
                 (g.console[name] || g.console.log).apply(g.console, args);
             }
@@ -818,7 +759,7 @@ _.xhr = {
         this.cache[url] = null;
     },
 
-        request: function (method, url, headers, data, cb_success, cb_error, is_async = true) {
+    request: function (method, url, headers, data, cb_success, cb_error, is_async = true) {
         var msg;
 
         var re = url.match(/^(?:(?:https?:)?\/\/www\.pixiv\.net)?(\/[a-z/_]+\.php)(?:\?|$)/),
@@ -857,7 +798,7 @@ _.xhr = {
         };
 
         var send = function () {
-                xhr.open(method, url, is_async);
+            xhr.open(method, url, is_async);
             if (headers) {
                 headers.forEach(function (p) {
                     xhr.setRequestHeader(p[0], p[1]);
@@ -873,12 +814,12 @@ _.xhr = {
         }
     },
 
-        get: function (url, cb_success, cb_error, is_sync) {
-	        if (this.cache[url]) {
-	            cb_success(this.cache[url]);
-	            return;
-	        }
-            this.request('GET', url, null, null, cb_success, cb_error, is_sync);
+    get: function (url, cb_success, cb_error, is_sync) {
+        if (this.cache[url]) {
+            cb_success(this.cache[url]);
+            return;
+        }
+        this.request('GET', url, null, null, cb_success, cb_error, is_sync);
     },
 
     post_data: function (url, data, cb_success, cb_error) {
@@ -2522,29 +2463,32 @@ _.illust = {
     },
 
     create: function (link, allow_types, cb_onshow) {
+        _.debug("create");
         var illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
 
-            if (link.children.length == 0) {
-                return;
-            }
+        if (link.children.length == 0) {
+            return;
+        }
 
-            const params = new URLSearchParams(link.search)
+        const params = new URLSearchParams(link.search)
 
-            var illust_id = params.get('illust_id');
+        var illust_id = params.get('illust_id');
 
-            var that = this;
-            var src;
-            _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_id, function (text) {
-                json = JSON.parse(text);
+        var that = this;
+        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_id, function (text) {
+            let illust_detail = JSON.parse(text);
 
-                src = json.body[illust_id].url['240mw'];
-            }, function () {
-                _.debug('Failed to get_illust_detail_by_ids');
-            }, false);
+            illust = {
+                id: illust_id,
+                image_url_medium : illust_detail.body[illust_id].url['240mw'],
+                image_url_big : illust_detail.body[illust_id].url['big'],
+                new_url_pattern: true
+            };
+        }, function () {
+            _.debug('Failed to get_illust_detail_by_ids');
+        }, false);
 
-            var p = this.parse_image_url(src, {allow_types: allow_types});
-
-            illust = p;
+        //var p = this.parse_image_url(src, {allow_types: allow_types});
 
         if (!illust) {
             return null;
@@ -2560,7 +2504,7 @@ _.illust = {
             illust.url_medium += '&uarea=' + query.uarea;
         }
 
-            _.debug(illust.link);
+        _.debug(illust.link);
         illust.connection = _.onclick(illust.link, function (ev) {
             for (var p = ev.target; p; p = p.parentNode) {
                 if (p instanceof Element &&
@@ -2581,6 +2525,7 @@ _.illust = {
     },
 
     update: function () {
+        console.log("update");
         var links = _.qa('a[href*="member_illust.php?mode=medium"]', this.root);
         if (links.length === this.last_link_count) {
             return;
@@ -2605,31 +2550,31 @@ _.illust = {
 
         var new_list = [], last = null;
 
-            // illust_ids
-            var illust_ids = [];
-            links.forEach(function (link) {
-                const params = new URLSearchParams(link.search)
+        // illust_ids
+        var illust_ids = [];
+        links.forEach(function (link) {
+            const params = new URLSearchParams(link.search)
 
-                var illust_id = params.get('illust_id');
-                if (illust_id !== null) {
-                    illust_ids.push(illust_id);
-                }
-            });
+            var illust_id = params.get('illust_id');
+            if (illust_id !== null) {
+                illust_ids.push(illust_id);
+            }
+        });
 
-            var that = this;
-            var detail_by_ids;
-            _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','), function (text) {
-                json = JSON.parse(text);
+        var that = this;
+        var detail_by_ids;
+        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','), function (text) {
+            json = JSON.parse(text);
 
-                detail_by_ids = json.body;
-            }, function () {
-                _.debug('Failed to get_illust_detail_by_ids');
-            }, false);
+            detail_by_ids = json.body;
+        }, function () {
+            _.debug('Failed to get_illust_detail_by_ids');
+        }, false);
 
         links.forEach(function (link) {
             var illust = extract(link);
             if (!illust) {
-                    illust = that.create(link, detail_by_ids);
+                illust = that.create(link, detail_by_ids);
             }
             if (!illust) {
                 return;
@@ -2679,7 +2624,7 @@ _.illust = {
             return false;
         }
 
-            re = /token: *"([0-9a-f]{10,})"/.exec(html);
+        re = /token: *"([0-9a-f]{10,})"/.exec(html);
         if (re) {
             illust.token = re[1];
         } else {
@@ -2827,7 +2772,7 @@ _.illust = {
             author_icon = profile_area ? _.q('._user-icon', profile_area) : null,
             author_link = profile_area ? _.q('.user-name', profile_area) : null,
             staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function (link) {
-                    return /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
+                return /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
             })[0];
 
         illust.author_id = null;
@@ -2861,7 +2806,7 @@ _.illust = {
         illust.url_author_staccfeed = null;
         if (staccfeed_link) {
             illust.url_author_staccfeed =
-                    staccfeed_link.getAttribute('href').replace(/^https:\/\/www.pixiv.net(?=\/)/, '');
+                staccfeed_link.getAttribute('href').replace(/^https:\/\/www.pixiv.net(?=\/)/, '');
         }
 
         var meta = work_info ? _.qa('.meta li', work_info) : [],
@@ -2930,37 +2875,37 @@ _.illust = {
         illust.comment = (comment ? comment.innerHTML : '') || 'Error';
 
 
-        if (!_.stamp_series) {
-            re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
-            if (re) {
-                try {
-                    _.stamp_series = JSON.parse(re[1]);
-                } catch (ex) {
-                    _.stamp_series = null;
-                    _.error('Failed to parse pixiv.context.stampSeries', ex);
-                }
-            } else {
-                _.error('pixiv.context.stampSeries not detected');
-            }
-        }
-
-
-        if (!_.emoji_series) {
-            re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
-            if (re) {
-                try {
-                    _.emoji_series = JSON.parse(re[1]);
-                    _.emoji_series.forEach(function (item) {
-                        item.url = '//source.pixiv.net/common/images/emoji/' + item.id + '.png';
-                    });
-                } catch (ex) {
-                    _.emoji_series = null;
-                    _.error('Failed to parse pixiv.context.emojiSeries', ex);
-                }
-            } else {
-                _.error('pixiv.context.emojiSeries not detected');
-            }
-        }
+        // if (!_.stamp_series) {
+        //     re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
+        //     if (re) {
+        //         try {
+        //             _.stamp_series = JSON.parse(re[1]);
+        //         } catch (ex) {
+        //             _.stamp_series = null;
+        //             _.error('Failed to parse pixiv.context.stampSeries', ex);
+        //         }
+        //     } else {
+        //         _.error('pixiv.context.stampSeries not detected');
+        //     }
+        // }
+        //
+        //
+        // if (!_.emoji_series) {
+        //     re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
+        //     if (re) {
+        //         try {
+        //             _.emoji_series = JSON.parse(re[1]);
+        //             _.emoji_series.forEach(function (item) {
+        //                 item.url = '//source.pixiv.net/common/images/emoji/' + item.id + '.png';
+        //             });
+        //         } catch (ex) {
+        //             _.emoji_series = null;
+        //             _.error('Failed to parse pixiv.context.emojiSeries', ex);
+        //         }
+        //     } else {
+        //         _.error('pixiv.context.emojiSeries not detected');
+        //     }
+        // }
 
 
         _.illust.update_urls(illust);
@@ -3383,7 +3328,7 @@ _.illust = {
 
     parse_illust_url: function (url) {
         var re;
-            if (!(re = /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
+        if (!(re = /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
             return null;
         }
         var query = _.parse_query(re[1]);
@@ -7695,10 +7640,10 @@ _.run = function () {
             dom.preview.id = 'pp-apng-generator-preview';
             dom.content.appendChild(dom.preview);
             dom.warning = _.e('div', {id: 'pp-apng-generator-warning', text: _.lng.apng.warning}, dom.content);
-                dom.preparing = _.e('div', {
-                    id: 'pp-apng-generator-preparing',
-                    text: _.lng.apng.preparing
-                }, dom.content);
+            dom.preparing = _.e('div', {
+                id: 'pp-apng-generator-preparing',
+                text: _.lng.apng.preparing
+            }, dom.content);
             dom.howtosave = _.e('div', {id: 'pp-apng-generator-howtosave', text: _.lng.apng.how2save}, dom.content);
 
             _.listen(dom.preview, 'load', function () {

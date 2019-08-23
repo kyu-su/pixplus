@@ -329,7 +329,11 @@ var _ = w.pixplus = {
                 if (typeof (args[0]) === 'string') {
                     args[0] = 'pixplus: [' + name + '] ' + args[0];
                 }
-                (g.console[name] || g.console.log).apply(g.console, args);
+                if (name === 'debug') {
+                    g.console.log.apply(g.console, args)
+                } else {
+                    (g.console[name] || g.console.log).apply(g.console, args);
+                }
             }
         };
     } else {

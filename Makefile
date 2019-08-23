@@ -27,9 +27,11 @@ ICON_SMALL_SVG                  = src/data/pixplus_small.svg
 CONFIG_JSON                     = src/data/config.json
 CHANGELOG_JSON                  = src/data/changelog.json
 
-BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
-BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
+# BUILD_OEX                       = $(shell which "$(ZIP)" >/dev/null 2>&1 && echo yes || echo no)
+# BUILD_CRX                       = $(shell $(CRXMAKE) >/dev/null 2>&1 && echo yes || echo no)
 # BUILD_SAFARIEXTZ                = $(shell test -x "$(XAR)" && $(XAR) --help 2>&1 | grep sign >/dev/null && echo yes || echo no)
+BUILD_OEX                       = no
+BUILD_CRX                       = no
 BUILD_SAFARIEXTZ                = no
 
 VERSION_DEV                     = $(shell $(PYTHON) tools/changelog.py dev_version < $(CHANGELOG_JSON))
@@ -113,7 +115,7 @@ AUTOUPDATE_TARGETS              = chrome.xml opera.xml
 AUTOUPDATE_FILES                = $(AUTOUPDATE_TARGETS:%=autoupdate/1/%)
 AUTOUPDATE_GM                   = autoupdate/1/pixplusPlus.user.js
 
-RELEASE_TARGETS                 = $(OPERA_USERJS) $(GREASEMONKEY_JS)
+RELEASE_TARGETS                 = $(GREASEMONKEY_JS)
 
 ifeq ($(BUILD_OEX),yes)
 RELEASE_TARGETS += $(OEX)
