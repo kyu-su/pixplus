@@ -819,16 +819,12 @@ _.popup = {
             dom.author_image.classList.remove('pp-hide');
         }
 
-        dom.datetime.textContent = illust.datetime +
-            ' ' + ['view', 'rated'].map(function (n) {
-                return _.lng['score_' + n] + ':' + illust.score[n];
-            }).join(' ');
+        // dom.datetime.textContent = illust.datetime +
+        //     ' ' + ['view', 'rated'].map(function (n) {
+        //         return _.lng['score_' + n] + ':' + illust.score[n];
+        //     }).join(' ');
 
         _.clear(dom.tools);
-        illust.tools.forEach(function (tool) {
-            var url = '/search.php?word=' + g.encodeURIComponent(tool) + '&s_mode=s_tag';
-            _.e('a', {href: url, text: tool}, dom.tools);
-        });
 
         if (illust.author_id) {
             dom.author_profile.href = illust.url_author_profile;

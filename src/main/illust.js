@@ -10,6 +10,7 @@ _.illust = {
         }
     },
 
+    // todo
     parse_image_url: function (url, opt) {
         if (!opt) {
             opt = {};
@@ -127,8 +128,8 @@ _.illust = {
         }
     },
 
-    create: function (link, allow_types, cb_onshow) {
-        var illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
+    create: function (link, illust_details, cb_onshow) {
+        let illust, images = _.qa('img,*[data-filter*="lazy-image"]', link).concat([link]);
 
         if (link.children.length == 0) {
             return;
@@ -136,21 +137,16 @@ _.illust = {
 
         const params = new URLSearchParams(link.search)
 
-        var illust_id = params.get('illust_id');
+        let illust_id = params.get('illust_id');
+        let illust_detail = illust_details[illust_id];
 
-        var that = this;
-        var src;
-        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_id, function (text) {
-            json = JSON.parse(text);
-
-            src = json.body[illust_id].url['240mw'];
-        }, function () {
-            _.debug('Failed to get_illust_detail_by_ids');
-        }, false);
-
-        var p = this.parse_image_url(src, {allow_types: allow_types});
-
-        illust = p;
+        illust = {
+            id: illust_id,
+            image_url_medium : illust_detail.url['240mw'],
+            image_url_big : illust_detail.url['big'],
+            new_url_pattern: true
+        };
+        illust.illust_detail = illust_detail;
 
         if (!illust) {
             return null;
@@ -166,7 +162,7 @@ _.illust = {
             illust.url_medium += '&uarea=' + query.uarea;
         }
 
-        _.debug(illust.link);
+        // _.debug(illust.link);
         illust.connection = _.onclick(illust.link, function (ev) {
             for (var p = ev.target; p; p = p.parentNode) {
                 if (p instanceof Element &&
@@ -186,7 +182,7 @@ _.illust = {
         return illust;
     },
 
-    update: function () {
+    update: async function () {
         var links = _.qa('a[href*="member_illust.php?mode=medium"]', this.root);
         if (links.length === this.last_link_count) {
             return;
@@ -223,14 +219,16 @@ _.illust = {
         });
 
         var that = this;
-        var detail_by_ids;
-        _.xhr.get("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','), function (text) {
-            json = JSON.parse(text);
 
-            detail_by_ids = json.body;
-        }, function () {
+        let json;
+        try {
+            let response = await _.xhr.getIllustDetailByIds("/rpc/index.php?mode=get_illust_detail_by_ids&illust_ids=" + illust_ids.join(','));
+            json = await response.json();
+        } catch (err) {
             _.debug('Failed to get_illust_detail_by_ids');
-        }, false);
+        }
+
+        let detail_by_ids = json.body;
 
         links.forEach(function (link) {
             var illust = extract(link);
@@ -278,16 +276,9 @@ _.illust = {
     parse_medium_html: function (illust, html) {
         var doc = _.parse_html(html), re, re2;
 
-        var error = _.q('.one_column_body .error', doc);
-        if (error) {
-            illust.error = error.textContent;
-            _.error('pixiv reported error: ' + illust.error);
-            return false;
-        }
-
         re = /token: *"([0-9a-f]{10,})"/.exec(html);
         if (re) {
-            illust.token = re[1];
+
         } else {
             _.error('Failed to detect pixiv.context.token');
         }
@@ -336,6 +327,7 @@ _.illust = {
             });
 
         } else {
+            // todo
             var med = _.q('.works_display img', doc);
             if (med) {
                 var p = this.parse_image_url(
@@ -372,147 +364,99 @@ _.illust = {
         }
 
         // error check end
+        // error check end
+        const script = doc.scripts[5].innerText.match(/}\)\(({.+,})\);/);
+        const obj = (new Function("return " + script[1]))();
+        const info = obj.preload.illust[illust.id];
 
         var work_info = _.q('.work-info', doc),
-            title = work_info ? _.q('.title', work_info) : null,
-            caption = work_info ? _.q('.caption', work_info) : null,
-            score = work_info ? _.q('.score', work_info) : null,
-            question = work_info ? _.q('.questionnaire', work_info) : null,
-            tags_tmpl = _.q('#template-work-tags', doc),
-            tags = _.q('.work-tags .tags-container', doc),
-            prof_img = _.q('#js-mount-point-comment-module[data-profile-image]', doc);
+            title = info.title,
+            caption = info.description,
+            // score = work_info ? _.q('.score', work_info) : null,
+            // question = work_info ? _.q('.questionnaire', work_info) : null,
+            // tags_tmpl = _.q('#template-work-tags', doc),
+            tags = info.tags.tags;
+        // prof_img = _.q('#js-mount-point-comment-module[data-profile-image]', doc);
 
-        illust.title = title ? _.strip(title.textContent) : '';
-        illust.caption = caption ? caption.innerHTML : '';
+        // illust.title = title ? _.strip(title.textContent) : '';
+        // illust.caption = caption ? caption.innerHTML : '';
         illust.tags = [];
         if (tags) {
-            illust.tags = _.qa('.tag .text', tags).map(function (tag) {
-                return _.strip(tag.textContent);
-            });
-        }
-        illust.score = {};
-        if (score) {
-            ['view', 'rated'].forEach(function (name) {
-                var node = _.q('.' + name + '-count', score);
-                if (node) {
-                    illust.score[name] = g.parseInt(_.strip(node.textContent));
-                }
-            });
-        }
-
-        illust.taglist = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
-
-        illust.rated = score ? !!_.q('._nice-button.rated, .js-nice-button.rated', score) : false;
-
-        illust.vote = {available: !!question};
-        if (question) {
-            illust.vote.answered = !_.q('.list', question);
-
-            illust.vote.items = _.qa('.list input[data-key]', question).map(function (item) {
-                return [item.value, item.dataset.key];
+            tags.forEach((tag) => {
+                illust.tags.push(tag.tag);
             });
 
-            var stats = _.q('.stats table', question);
-            if (stats) {
-                illust.vote.stats = Array.prototype.map.call(stats.rows, function (row) {
-                    return [row.cells[0].textContent, parseInt(_.q('*[class^="answer-"]', row).textContent)];
-                });
-            }
-
-            var vote_q = _.q('.list h1, .stats h1', question);
-            if (vote_q) {
-                illust.vote.question = vote_q.textContent;
-            }
+            illust.tags = tags
         }
 
-        if (prof_img) {
-            illust.my_prof_img = prof_img.dataset.profileImage;
-        }
+        // illust.score = {};
+        // if (score) {
+        //     ['view', 'rated'].forEach(function (name) {
+        //         var node = _.q('.' + name + '-count', score);
+        //         if (node) {
+        //             illust.score[name] = g.parseInt(_.strip(node.textContent));
+        //         }
+        //     });
+        // }
 
-        var profile_area = _.q('.profile', doc),
-            author_icon = profile_area ? _.q('._user-icon', profile_area) : null,
-            author_link = profile_area ? _.q('.user-name', profile_area) : null,
-            staccfeed_link = _.qa('.column-header .tabs a', doc).filter(function (link) {
-                return /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?stacc\//.test(link.getAttribute('href'));
-            })[0];
+        // illust.taglist = (tags_tmpl ? tags_tmpl.outerHTML : '') + (tags ? tags.outerHTML : '');
 
-        illust.author_id = null;
-        illust.author_name = author_link ? author_link.textContent : null;
-        illust.author_favorite = !!(profile_area && _.q('#favorite-button.following', profile_area));
-        illust.author_mutual_favorite = !!(profile_area && _.q('.user-relation .sprites-heart', profile_area));
-        illust.author_mypixiv = !!(profile_area && _.q('#mypixiv-button.mypixiv', profile_area));
-        illust.author_image_url = null;
+        // illust.rated = score ? !!_.q('._nice-button.rated, .js-nice-button.rated', score) : false;
+
+        illust.vote = {available: false};
+        // if (question) {
+        //     illust.vote.answered = !_.q('.list', question);
+        //
+        //     illust.vote.items = _.qa('.list input[data-key]', question).map(function (item) {
+        //         return [item.value, item.dataset.key];
+        //     });
+        //
+        //     var stats = _.q('.stats table', question);
+        //     if (stats) {
+        //         illust.vote.stats = Array.prototype.map.call(stats.rows, function (row) {
+        //             return [row.cells[0].textContent, parseInt(_.q('*[class^="answer-"]', row).textContent)];
+        //         });
+        //     }
+        //
+        //     var vote_q = _.q('.list h1, .stats h1', question);
+        //     if (vote_q) {
+        //         illust.vote.question = vote_q.textContent;
+        //     }
+        // }
+
+        // if (prof_img) {
+        //     illust.my_prof_img = prof_img.dataset.profileImage;
+        // }
+
+        illust.author_id = info.userId;
+        illust.author_name = info.userName;
+        // illust.author_favorite = !!(profile_area && _.q('#favorite-button.following', profile_area));
+        // illust.author_mutual_favorite = !!(profile_area && _.q('.user-relation .sprites-heart', profile_area));
+        // illust.author_mypixiv = !!(profile_area && _.q('#mypixiv-button.mypixiv', profile_area));
+        illust.author_image_url = illust.illust_detail.profile_img;
         illust.author_is_me = null;
 
-        if (author_icon && (re = /background-image:\s*url\(([\'\"]?)(.*)\1\)/.exec(author_icon.style.cssText))) {
-            illust.author_image_url = re[2];
-        }
+        illust.datetime = info.uploadDate;
 
-        if (author_link && (re = /\/member\.php\?id=(\d+)/.exec(author_link.getAttribute('href')))) {
-            illust.author_id = g.parseInt(re[1], 10);
-        }
+        illust.is_manga = info.pageCount > 1 ? true : false;
 
-        if (!illust.author_id) {
-            if ((re = /pixiv\.context\.userId\s*=\s*([\'\"])(\d+)\1;/.exec(html))) {
-                illust.author_id = g.parseInt(re[2]);
-            }
-        }
-
-        try {
-            illust.author_is_me = /pixiv\.context\.self\s*=\s*true/.test(html);
-        } catch (ex) {
-            _.error(ex);
-        }
-
-        illust.url_author_staccfeed = null;
-        if (staccfeed_link) {
-            illust.url_author_staccfeed =
-                staccfeed_link.getAttribute('href').replace(/^https:\/\/www.pixiv.net(?=\/)/, '');
-        }
-
-        var meta = work_info ? _.qa('.meta li', work_info) : [],
-            meta2 = meta[1] ? meta[1].textContent : '';
-
-        illust.datetime = meta[0] ? meta[0].textContent : '';
-
-        illust.is_manga = !!_.q('._work.manga', doc);
-
-        illust.size = null;
+        illust.size = {width: g.parseInt(info.width, 10), height: g.parseInt(info.height, 10)};
         illust.manga = {
-            available: false,
+            available: illust.is_manga,
             book_mode: null, // 'ltr' or 'rtl' or null
             viewed: illust.manga ? !!illust.manga.viewed : false,
-            page_count: 0
+            page_count: info.pageCount
         };
 
-        if (_.q('.works_display ._work.multiple', doc)) {
+        if (illust.is_manga) {
             illust.manga.available = true;
-        }
-
-        if (_.q('._work.rtl', doc)) {
-            illust.manga.book_mode = 'rtl';
-        } else if (_.q('._work.ltr', doc)) {
-            illust.manga.book_mode = 'ltr';
-        }
-
-        if ((re = /^(\d+)\u00d7(\d+)$/.exec(meta2))) {
-            illust.size = {width: g.parseInt(re[1], 10), height: g.parseInt(re[2], 10)};
-        } else if ((re = /^[^ ]{1,10} (\d+)P$/.exec(meta2))) {
-            illust.manga.available = true;
-            illust.manga.page_count = g.parseInt(re[1], 10);
         }
 
         if (illust.manga.available && illust.manga.page_count < 1) {
             _.debug('It seems manga but page count not detected');
         }
 
-        if (work_info) {
-            illust.tools = _.qa('.meta .tools li', work_info).map(function (node) {
-                return _.strip(node.textContent);
-            });
-        }
-
-        illust.bookmarked = !!_.q('.bookmark-container .bookmark-count', doc);
+        illust.bookmarked = illust.illust_detail.bookmarked;
 
         illust.has_image_response = !!_.q('.worksImageresponse .worksResponse', doc);
         illust.image_response_to = null;
@@ -534,39 +478,6 @@ _.illust = {
             });
         }
         illust.comment = (comment ? comment.innerHTML : '') || 'Error';
-
-
-        if (!_.stamp_series) {
-            re = /pixiv\.context\.stampSeries *= *(\[[^;]*?\]);/.exec(html);
-            if (re) {
-                try {
-                    _.stamp_series = JSON.parse(re[1]);
-                } catch (ex) {
-                    _.stamp_series = null;
-                    _.error('Failed to parse pixiv.context.stampSeries', ex);
-                }
-            } else {
-                _.error('pixiv.context.stampSeries not detected');
-            }
-        }
-
-
-        if (!_.emoji_series) {
-            re = /pixiv\.context\.emojiSeries *= *(\[[^;]*?\]);/.exec(html);
-            if (re) {
-                try {
-                    _.emoji_series = JSON.parse(re[1]);
-                    _.emoji_series.forEach(function (item) {
-                        item.url = '//source.pixiv.net/common/images/emoji/' + item.id + '.png';
-                    });
-                } catch (ex) {
-                    _.emoji_series = null;
-                    _.error('Failed to parse pixiv.context.emojiSeries', ex);
-                }
-            } else {
-                _.error('pixiv.context.emojiSeries not detected');
-            }
-        }
 
 
         _.illust.update_urls(illust);
@@ -988,14 +899,11 @@ _.illust = {
     },
 
     parse_illust_url: function (url) {
-        var re;
-        if (!(re = /^(?:(?:https:\/\/www\.pixiv\.net)?\/)?member_illust\.php(\?.*)?$/.exec(url))) {
-            return null;
+        let params = new URLSearchParams(url);
+        params.illust_id = params.get('illust_id');
+        if (params.illust_id) {
+            params.illust_id = g.parseInt(params.illust_id, 10);
         }
-        var query = _.parse_query(re[1]);
-        if (query.illust_id) {
-            query.illust_id = g.parseInt(query.illust_id, 10);
-        }
-        return query;
+        return params;
     }
 };

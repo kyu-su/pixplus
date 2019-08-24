@@ -98,7 +98,7 @@ _.popup.manga = {
     update_button: function () {
         var illust = _.popup.illust,
             pages = illust.manga.pages,
-            page_count = illust.manga.page_count,
+            page_count = illust.illust_detail.illust_page_count,
             label, prog, maxchars;
 
         if (pages) {

@@ -5,7 +5,7 @@ _.xhr = {
         this.cache[url] = null;
     },
 
-        request: function (method, url, headers, data, cb_success, cb_error, is_async = true) {
+    request: function (method, url, headers, data, cb_success, cb_error, is_async = true) {
         var msg;
 
         var re = url.match(/^(?:(?:https?:)?\/\/www\.pixiv\.net)?(\/[a-z/_]+\.php)(?:\?|$)/),
@@ -44,7 +44,7 @@ _.xhr = {
         };
 
         var send = function () {
-                xhr.open(method, url, is_async);
+            xhr.open(method, url, is_async);
             if (headers) {
                 headers.forEach(function (p) {
                     xhr.setRequestHeader(p[0], p[1]);
@@ -60,12 +60,12 @@ _.xhr = {
         }
     },
 
-        get: function (url, cb_success, cb_error, is_sync) {
-	        if (this.cache[url]) {
-	            cb_success(this.cache[url]);
-	            return;
-	        }
-            this.request('GET', url, null, null, cb_success, cb_error, is_sync);
+    get: function (url, cb_success, cb_error, is_sync) {
+        if (this.cache[url]) {
+            cb_success(this.cache[url]);
+            return;
+        }
+        this.request('GET', url, null, null, cb_success, cb_error, is_sync);
     },
 
     post_data: function (url, data, cb_success, cb_error) {
@@ -116,5 +116,11 @@ _.xhr = {
             data += g.encodeURIComponent(key) + '=' + g.encodeURIComponent(data_map[key]);
         }
         return data;
+    },
+
+    getIllustDetailByIds: (url) => {
+        const response = fetch(url);
+
+        return response;
     }
 };
