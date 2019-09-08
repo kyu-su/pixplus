@@ -2727,8 +2727,6 @@ _.illust = {
             tags.forEach((tag) => {
                 illust.tags.push(tag.tag);
             });
-
-            illust.tags = tags
         }
 
         // illust.score = {};
@@ -3144,23 +3142,16 @@ _.illust = {
         var that = this, page_pairs = [], cnt = 0;
         var doc = _.parse_html(html);
 
-        var containers = _.qa('.manga .item-container', doc);
-        for (var i = 0; i < containers.length; ++i) {
-
+        // var containers = _.qa('.manga .item-container', doc);
+        // for (var i = 0; i < containers.length; ++i) {
+        //
             var pages = [];
-            var images = _.qa('img', containers[i]);
+        //     var images = _.qa('img', containers[i]);
 
-            for (var j = 0; j < images.length; ++j) {
-                var img = images[j];
-
-                if (img.getAttribute('data-filter') !== 'manga-image') {
-                    continue;
-                }
-
-                var src = img.getAttribute('data-src') || img.getAttribute('src');
-                var p = _.illust.parse_image_url(src, {
-                    allow_types: [''],
-                    allow_sizes: ['1200x1200'],
+            for (var j = 0; j < illust.manga.page_count; ++j) {
+                var p = _.illust.parse_image_url(illust.image_url_medium, {
+                    allow_types: null,
+                    allow_sizes: null,
                     manga_page: true
                 });
 
@@ -3174,7 +3165,7 @@ _.illust = {
             }
 
             page_pairs.push(pages);
-        }
+        // }
 
         if (illust.manga.page_count === 0) {
             _.warn('illust.manga.page_count not declared');
